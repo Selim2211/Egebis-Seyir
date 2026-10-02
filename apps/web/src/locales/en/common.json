@@ -1,0 +1,97 @@
+{
+  "app": {
+    "name": "Scrum Manager",
+    "tagline": "From idea to delivery, with Scrum discipline."
+  },
+  "nav": {
+    "home": "Home",
+    "myWork": "My work",
+    "inbox": "Inbox",
+    "docs": "Docs",
+    "spaces": "Spaces",
+    "designSystem": "Design system",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "comingSoon": "Coming in Phase 1"
+  },
+  "spaces": {
+    "emptyTitle": "No spaces yet",
+    "emptyBody": "Start by creating a space for your team.",
+    "create": "Create space"
+  },
+  "topbar": {
+    "search": "Search…",
+    "theme": "Theme",
+    "language": "Language"
+  },
+  "theme": {
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "language": {
+    "tr": "Türkçe",
+    "en": "English"
+  },
+  "apiStatus": {
+    "up": "All systems running",
+    "degraded": "Database unreachable",
+    "down": "Server unreachable",
+    "checking": "Checking…"
+  },
+  "home": {
+    "title": "Welcome",
+    "subtitle": "The Phase 0 skeleton is ready. Authentication, workspaces and work items arrive in Phase 1.",
+    "nextTitle": "Next steps",
+    "next1": "Sign-up, sign-in and workspace invitations",
+    "next2": "Space / Folder / List hierarchy",
+    "next3": "Creating Epics, Stories, Tasks, Sub-tasks and Bugs",
+    "next4": "List and Table views, search and filters",
+    "designLink": "Explore the design system"
+  },
+  "design": {
+    "title": "Design system",
+    "subtitle": "The same visual language is used everywhere in the app (brief §11).",
+    "types": "Work item types",
+    "priorities": "Priorities",
+    "statuses": "Status categories",
+    "buttons": "Buttons",
+    "sample": "Sample row",
+    "sampleTitle": "As a user, I want to reset my password",
+    "primary": "Primary",
+    "secondary": "Secondary",
+    "outline": "Outline",
+    "ghost": "Ghost",
+    "destructive": "Destructive"
+  },
+  "workItemType": {
+    "EPIC": "Epic",
+    "STORY": "Story",
+    "TASK": "Task",
+    "SUBTASK": "Sub-task",
+    "BUG": "Bug"
+  },
+  "priority": {
+    "URGENT": "Urgent",
+    "HIGH": "High",
+    "NORMAL": "Normal",
+    "LOW": "Low"
+  },
+  "statusCategory": {
+    "NOT_STARTED": "Not started",
+    "ACTIVE": "In progress",
+    "DONE": "Done"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "back": "Back to home"
+  },
+  "errors": {
+    "VALIDATION_FAILED": "The submitted data is invalid.",
+    "UNAUTHENTICATED": "Your session has expired, please sign in again.",
+    "FORBIDDEN": "You don't have permission to do this.",
+    "NOT_FOUND": "The record you're looking for was not found.",
+    "INTERNAL": "An unexpected error occurred.",
+    "NETWORK": "Can't reach the server. Check your connection."
+  }
+}

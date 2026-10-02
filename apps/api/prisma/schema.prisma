@@ -1,0 +1,12 @@
+// Veri modeli (ADR-009). Faz 0'da model yok; tablolar Faz 1'de eklenecek.
+// Kural: workspace'e ait her model `workspaceId` taşır (ADR-012).
+
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}

@@ -1,0 +1,18 @@
+import 'dotenv/config';
+import { defineConfig } from 'vitest/config';
+import { nestTransform } from './vitest.config';
+
+// Entegrasyon testleri gerçek Postgres ister: `pnpm db:up` (kökte) çalışıyor olmalı.
+export default defineConfig({
+  ...nestTransform,
+  test: {
+    include: ['test/**/*.int-spec.ts'],
+    globalSetup: ['test/global-setup.ts'],
+    env: {
+      NODE_ENV: 'test',
+      LOG_LEVEL: 'warn',
+      DATABASE_URL: process.env.TEST_DATABASE_URL ?? '',
+    },
+    fileParallelism: false,
+  },
+});

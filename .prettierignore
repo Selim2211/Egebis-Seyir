@@ -1,0 +1,9 @@
+pnpm-lock.yaml
+dist/
+coverage/
+.turbo/
+apps/api/src/generated/
+apps/web/src/routeTree.gen.ts
+apps/api/prisma/migrations/
+playwright-report/
+test-results/

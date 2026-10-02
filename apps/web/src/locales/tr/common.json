@@ -1,0 +1,97 @@
+{
+  "app": {
+    "name": "Scrum Manager",
+    "tagline": "Fikirden teslime, Scrum disipliniyle."
+  },
+  "nav": {
+    "home": "Ana Sayfa",
+    "myWork": "Bana atananlar",
+    "inbox": "Bildirimler",
+    "docs": "Dokümanlar",
+    "spaces": "Space'ler",
+    "designSystem": "Tasarım sistemi",
+    "openMenu": "Menüyü aç",
+    "closeMenu": "Menüyü kapat",
+    "comingSoon": "Faz 1'de gelecek"
+  },
+  "spaces": {
+    "emptyTitle": "Henüz Space yok",
+    "emptyBody": "Takımın için bir Space oluşturarak başla.",
+    "create": "Space oluştur"
+  },
+  "topbar": {
+    "search": "Ara…",
+    "theme": "Tema",
+    "language": "Dil"
+  },
+  "theme": {
+    "light": "Açık",
+    "dark": "Koyu",
+    "system": "Sistem"
+  },
+  "language": {
+    "tr": "Türkçe",
+    "en": "English"
+  },
+  "apiStatus": {
+    "up": "Sistem çalışıyor",
+    "degraded": "Veritabanına ulaşılamıyor",
+    "down": "Sunucuya ulaşılamıyor",
+    "checking": "Kontrol ediliyor…"
+  },
+  "home": {
+    "title": "Hoş geldin",
+    "subtitle": "Faz 0 iskeleti hazır. Kimlik doğrulama, workspace ve iş öğeleri Faz 1'de gelecek.",
+    "nextTitle": "Sıradaki adımlar",
+    "next1": "Kayıt, giriş ve workspace daveti",
+    "next2": "Space / Folder / List hiyerarşisi",
+    "next3": "Epic, Story, Task, Sub-task ve Bug oluşturma",
+    "next4": "List ve Table görünümleri, arama ve filtre",
+    "designLink": "Tasarım sistemini incele"
+  },
+  "design": {
+    "title": "Tasarım sistemi",
+    "subtitle": "Uygulamanın her yerinde aynı görsel dil kullanılır (brief §11).",
+    "types": "İş öğesi tipleri",
+    "priorities": "Öncelikler",
+    "statuses": "Durum kategorileri",
+    "buttons": "Butonlar",
+    "sample": "Örnek satır",
+    "sampleTitle": "Kullanıcı olarak şifremi sıfırlayabilmek istiyorum",
+    "primary": "Birincil",
+    "secondary": "İkincil",
+    "outline": "Çerçeveli",
+    "ghost": "Sade",
+    "destructive": "Tehlikeli"
+  },
+  "workItemType": {
+    "EPIC": "Epic",
+    "STORY": "Story",
+    "TASK": "Task",
+    "SUBTASK": "Sub-task",
+    "BUG": "Bug"
+  },
+  "priority": {
+    "URGENT": "Acil",
+    "HIGH": "Yüksek",
+    "NORMAL": "Normal",
+    "LOW": "Düşük"
+  },
+  "statusCategory": {
+    "NOT_STARTED": "Başlanmadı",
+    "ACTIVE": "Devam ediyor",
+    "DONE": "Tamamlandı"
+  },
+  "notFound": {
+    "title": "Sayfa bulunamadı",
+    "back": "Ana sayfaya dön"
+  },
+  "errors": {
+    "VALIDATION_FAILED": "Girilen bilgiler geçersiz.",
+    "UNAUTHENTICATED": "Oturumun sona erdi, lütfen tekrar giriş yap.",
+    "FORBIDDEN": "Bu işlem için yetkin yok.",
+    "NOT_FOUND": "Aradığın kayıt bulunamadı.",
+    "INTERNAL": "Beklenmeyen bir hata oluştu.",
+    "NETWORK": "Sunucuya ulaşılamıyor. Bağlantını kontrol et."
+  }
+}
