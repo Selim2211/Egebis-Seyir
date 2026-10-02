@@ -57,7 +57,7 @@ describe('süzgeçler', () => {
   const a = item({
     title: 'Ödeme ekranı',
     priority: 'HIGH',
-    assignees: [{ id: U.ali, name: 'Ali' }],
+    assignees: [{ id: U.ali, name: 'Ali', avatarVersion: null }],
   });
   const b = item({ title: 'Rapor', statusId: S.doing, labelIds: ['l1'] });
   const c = item({ title: 'ÇAĞRI merkezi', type: 'BUG', dueDate: '2026-10-01' });
@@ -141,13 +141,17 @@ describe('sıralama', () => {
 });
 
 describe('gruplama', () => {
-  const a = item({ statusId: S.doing, priority: 'LOW', assignees: [{ id: U.veli, name: 'Veli' }] });
+  const a = item({
+    statusId: S.doing,
+    priority: 'LOW',
+    assignees: [{ id: U.veli, name: 'Veli', avatarVersion: null }],
+  });
   const b = item({
     statusId: S.todo,
     priority: 'URGENT',
     assignees: [
-      { id: U.ali, name: 'Ali' },
-      { id: U.veli, name: 'Veli' },
+      { id: U.ali, name: 'Ali', avatarVersion: null },
+      { id: U.veli, name: 'Veli', avatarVersion: null },
     ],
   });
   const c = item({ statusId: S.todo });

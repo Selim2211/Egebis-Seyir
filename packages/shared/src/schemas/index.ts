@@ -4,3 +4,5 @@ export * from './auth';
 export * from './workspace';
 export * from './space';
 export * from './work-item';
+export * from './collab';
+export * from './rich-text';

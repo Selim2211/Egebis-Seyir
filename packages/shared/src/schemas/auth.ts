@@ -25,6 +25,7 @@ export const UserSchema = z.object({
   locale: z.enum(LOCALES),
   theme: z.enum(THEMES),
   timezone: z.string(),
+  avatarVersion: z.string().nullable(),
 });
 export type User = z.infer<typeof UserSchema>;
 

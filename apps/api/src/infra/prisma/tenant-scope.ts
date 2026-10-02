@@ -23,6 +23,10 @@ export const TENANT_MODELS: ReadonlySet<string> = new Set([
   'ChecklistItem',
   'WorkItemLink',
   'WorkItemWatcher',
+  'Comment',
+  'CommentMention',
+  'CommentReaction',
+  'Attachment',
 ]);
 
 const WHERE_OPERATIONS = new Set([

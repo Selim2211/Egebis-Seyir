@@ -8,6 +8,7 @@ export const MemberSchema = z.object({
   name: z.string(),
   email: z.string(),
   title: z.string().nullable(),
+  avatarVersion: z.string().nullable(),
   role: z.enum(WORKSPACE_ROLES),
   joinedAt: z.iso.datetime(),
   lastSeenAt: z.iso.datetime().nullable(),

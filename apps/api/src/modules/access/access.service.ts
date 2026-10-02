@@ -81,6 +81,7 @@ export function toUserDto(u: {
   locale: string;
   theme: string;
   timezone: string;
+  avatarVersion: string | null;
 }): User {
   return {
     id: u.id,
@@ -90,5 +91,6 @@ export function toUserDto(u: {
     locale: u.locale === 'en' ? 'en' : 'tr',
     theme: u.theme === 'light' || u.theme === 'dark' ? u.theme : 'system',
     timezone: u.timezone,
+    avatarVersion: u.avatarVersion,
   };
 }

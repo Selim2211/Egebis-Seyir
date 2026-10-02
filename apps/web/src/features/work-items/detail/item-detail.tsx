@@ -32,7 +32,9 @@ import { useCurrentWorkspace } from '@/features/workspace/queries';
 import { useErrorMessage } from '@/lib/use-error-message';
 import { cn } from '@/lib/utils';
 import { itemByKeyQuery, useCopyItem, useItemLifecycle, useWatchItem } from '../queries';
+import { Attachments } from './attachments';
 import { Checklists } from './checklists';
+import { DetailTabs } from './detail-tabs';
 import { ItemOpenLink } from './item-nav';
 import { Links } from './links';
 import { Properties } from './properties';
@@ -287,6 +289,12 @@ function Content({
           <Checklists itemId={item.id} checklists={item.checklists} canWrite={canWrite} />
           <SubItems item={item} space={space} canWrite={canWrite} />
           <Links item={item} canWrite={canWrite} />
+          <Attachments itemId={item.id} attachments={item.attachments} canWrite={canWrite} />
+          <DetailTabs
+            itemId={item.id}
+            commentCount={item.commentCount}
+            canComment={space.permissions.includes(S.COMMENT_WRITE)}
+          />
         </div>
         <aside
           aria-label={t('detail.properties')}

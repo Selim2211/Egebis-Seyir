@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
+  extractMentionIds,
+  stripMentions,
   isRichTextEmpty,
   isValidRichText,
   RICH_TEXT_MAX_BYTES,
@@ -84,5 +86,53 @@ describe('düz metin çıkarımı', () => {
     expect(isRichTextEmpty(doc({ type: 'paragraph' }))).toBe(true);
     expect(isRichTextEmpty(doc(p('  ')))).toBe(true);
     expect(isRichTextEmpty(doc(p('x')))).toBe(false);
+  });
+});
+
+describe('mention (ADR-055)', () => {
+  const mention = (id: string, label = 'Ali'): RichTextNode => ({
+    type: 'mention',
+    attrs: { id, label },
+  });
+  const withMentions = doc({
+    type: 'paragraph',
+    content: [
+      { type: 'text', text: 'Selam ' },
+      mention('u1'),
+      { type: 'text', text: ' ve ' },
+      mention('u2', 'Veli'),
+      mention('u1'),
+    ],
+  });
+
+  it('geçerli mention kabul edilir; kimliksiz veya içerikli reddedilir', () => {
+    expect(isValidRichText(withMentions)).toBe(true);
+    expect(
+      isValidRichText(doc({ type: 'paragraph', content: [{ type: 'mention', attrs: {} }] })),
+    ).toBe(false);
+    expect(
+      isValidRichText(
+        doc({
+          type: 'paragraph',
+          content: [
+            { type: 'mention', attrs: { id: 'u1' }, content: [{ type: 'text', text: 'x' }] },
+          ],
+        }),
+      ),
+    ).toBe(false);
+  });
+
+  it('kimlikleri tekrarsız çıkarır', () => {
+    expect(extractMentionIds(withMentions)).toEqual(['u1', 'u2']);
+  });
+
+  it('düz metinde @ad görünür', () => {
+    expect(richTextToPlain(withMentions)).toBe('Selam @Ali ve @Veli@Ali');
+  });
+
+  it('yetkisiz mention düz metne iner, yetkili kalır', () => {
+    const stripped = stripMentions(withMentions, new Set(['u1']));
+    expect(extractMentionIds(stripped)).toEqual(['u1']);
+    expect(richTextToPlain(stripped)).toBe('Selam @Ali ve @Veli@Ali');
   });
 });

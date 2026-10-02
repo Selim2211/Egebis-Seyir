@@ -11,6 +11,7 @@ import {
 import { ClsService } from 'nestjs-cls';
 import type { AppClsStore } from '../../infra/cls/request-context';
 import { PrismaService } from '../../infra/prisma/prisma.service';
+import { StorageService } from '../../infra/storage/storage.service';
 import { TenantPrismaService } from '../../infra/prisma/tenant-prisma.service';
 import { QueueService } from '../../infra/queue/queue.service';
 import { SpaceAccessService } from '../access/space-access.service';
@@ -52,6 +53,7 @@ export class LifecycleService implements OnModuleInit {
     private readonly access: SpaceAccessService,
     private readonly activity: ActivityService,
     private readonly queue: QueueService,
+    private readonly storage: StorageService,
   ) {}
 
   async onModuleInit(): Promise<void> {
@@ -216,6 +218,20 @@ export class LifecycleService implements OnModuleInit {
   async purgeExpired(now = new Date()): Promise<number> {
     const cutoff = new Date(now.getTime() - TRASH_RETENTION_DAYS * DAY);
     const expired = { deletedAt: { lt: cutoff } };
+    // Öğe, List, Folder veya Space süresi dolduğu için silinecek öğelerin ek dosyaları (ADR-056).
+    const doomed = await this.prisma.attachment.findMany({
+      where: {
+        workItem: {
+          OR: [
+            { deletedAt: { lt: cutoff } },
+            { list: { deletedAt: { lt: cutoff } } },
+            { list: { folder: { deletedAt: { lt: cutoff } } } },
+            { space: { deletedAt: { lt: cutoff } } },
+          ],
+        },
+      },
+      select: { storageKey: true },
+    });
     const counts = await this.prisma.$transaction([
       this.prisma.workItem.deleteMany({ where: expired }),
       this.prisma.list.deleteMany({ where: expired }),
@@ -231,6 +247,7 @@ export class LifecycleService implements OnModuleInit {
     const total = counts
       .slice(0, 4)
       .reduce<number>((sum, c) => sum + (c as { count: number }).count, 0);
+    await Promise.all(doomed.map((a) => this.storage.remove(a.storageKey)));
     if (total > 0) this.logger.log(`Çöp kutusundan ${total} öğe kalıcı silindi`);
     return total;
   }

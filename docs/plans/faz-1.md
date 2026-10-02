@@ -12,7 +12,7 @@
 | 1.3 | İş öğeleri                             | Epic/Story/Task/Sub-task/Bug modeli, kalıcı okunabilir ID (ADR-033), hiyerarşi kuralları, tahmin (SP/saat), etiketler, atananlar, tarihler, rank, aktivite kaydı, çöp kutusu, kopyala/taşı, toplu düzenleme       | Kod tamam  |
 | 1.4 | Görev detayı                           | Yan panel + tam sayfa, satır içi alan düzenleme, açıklama (Tiptap), kabul kriterleri, checklist, alt öğeler, "Task'lara böl", bağlantılar/bağımlılıklar (blocked-by uyarısı), izleyiciler                         | Kod tamam  |
 | 1.5 | List ve Table görünümleri              | Gruplama, sıralama, filtre, liste içi arama, sanal kaydırma, satır içi oluşturma (`C`), Table sütun seçimi ve satır içi düzenleme, "Bana atananlar / Oluşturduklarım / İzlediklerim", global arama (FTS)          | Kod tamam  |
-| 1.6 | Yorum, ek, aktivite, ana sayfa         | Yorumlar (düzenle/sil/tepki, @mention kaydı), ekler (yerel disk, önizleme, limitler), aktivite akışları, Ana sayfa (bana atananlar, yaklaşan teslimler, favoriler, son aktivite)                                  | Sırada     |
+| 1.6 | Yorum, ek, aktivite, ana sayfa         | Yorumlar (düzenle/sil/tepki, @mention kaydı), ekler (yerel disk, önizleme, limitler), aktivite akışları, Ana sayfa (bana atananlar, yaklaşan teslimler, favoriler, son aktivite)                                  | Kod tamam  |
 
 Faz 2'ye kalanlar: bildirim merkezi ve e-posta bildirimleri (mention kaydı Faz 1'de tutulur), Board, sprint, backlog sıralaması.
 
@@ -104,12 +104,30 @@ Kararlar: ADR-052 (görünüm durumu adreste, süzme/gruplama istemcide, sanalla
 
 **Kalanlar**: Başka List/Space'e taşıma penceresi, kayıtlı filtreler (F2), 5.000'i aşan List'lerde sunucu tarafı sayfalama (F2, ADR-052), Ana sayfa özetleri (1.6).
 
+## 1.6 Ayrıntı
+
+Kararlar: ADR-055 (yorumlar, @mention kaydı, tepkiler), ADR-056 (dosya ekleri, güvenli sunum), ADR-057 (aktivite akışları), ADR-058 (Ana sayfa), ADR-059 (profil fotoğrafı).
+
+**API** (`/api/workspaces/:wid`, fotoğraf için `/api/users`)
+
+- Yorumlar: `GET|POST /items/:id/comments`, `PATCH|DELETE .../:commentId`, `PUT .../:commentId/reactions`, `GET /items/:id/mention-candidates?q=`
+- Ekler: `POST /items/:id/attachments` (çok parçalı, alan `file`), `GET|DELETE /items/:id/attachments/:attId` (`?preview=1` yalnızca resim/PDF'te satır içi)
+- Aktivite: `GET /items/:id/activity?before=` ve `GET /activity?limit=` (görülebilen Space'ler)
+- Fotoğraf: `POST|DELETE /users/me/avatar`, `GET /users/:id/avatar` (yalnızca ortak workspace)
+- Öğe detayı artık ekleri ve yorum sayısını da döndürür; atanan/üye/kullanıcı kayıtlarında `avatarVersion` vardır.
+- Yapılandırma: `UPLOAD_DIR` (Docker'da kalıcı volume), `MAX_UPLOAD_MB` (varsayılan 25). Gece işi çöp kutusundan silinen öğelerin ek dosyalarını diskten de siler.
+
+**Web**: Detayda Yorumlar ve Aktivite sekmeleri (zengin metin, `@` ile etiketleme, tepkiler, düzenle/sil), Ekler bölümü (sürükle-bırak, resim önizleme, indirme), Ana sayfa (bana atananlar, yaklaşan teslimler, favoriler, son aktivite), Profil'de fotoğraf (kare kırpma ve küçültme istemcide), fotoğraflar kullanıcı menüsü, üye listeleri, atananlar ve yorumlarda.
+
+**Faz 2'ye**: bildirim gönderimi (mention, izleyici kayıtları hazır), açıklamada görsel/tablo, Space/List düzeyi aktivite akışı.
+
 ## Bekleyen doğrulama (Docker açılınca)
 
 Kullanıcı kararıyla Docker proje sonunda ele alınacak. DB'siz kontroller (lint, typecheck, birim testler, build; 13/13) geçti; aşağıdakiler henüz çalıştırılmadı:
 
-- [ ] Migration'lar `20261002190000_spaces`, `20261002200000_work_items`, `20261002210000_work_item_details`, `20261002220000_search_indexes` dev ve test DB'ye uygulanır. `prisma migrate dev` şema farkı bildirmez (arama dizinleri ifade dizinidir; Prisma bunları görmezden gelmeli, gelmezse `schema.prisma`'ya yorum olarak not düşülür).
-- [ ] `pnpm test:int`: yeni `spaces`, `work-items`, `work-item-details`, `search` testleri. Arama testi `turkish` metin arama yapılandırmasının veritabanında var olduğunu varsayar (standart PostgreSQL'de vardır).
-- [ ] `pnpm test:e2e`: yeni `faz1-spaces`, `faz1-items`, `faz1-detail`, `faz1-views` ve güncellenen `faz1-auth` senaryoları.
+- [ ] Migration'lar `20261002190000_spaces`, `20261002200000_work_items`, `20261002210000_work_item_details`, `20261002220000_search_indexes`, `20261002230000_collaboration` dev ve test DB'ye uygulanır. `prisma migrate dev` şema farkı bildirmez (arama dizinleri ifade dizinidir; Prisma bunları görmezden gelmeli, gelmezse `schema.prisma`'ya yorum olarak not düşülür).
+- [ ] `pnpm test:int`: yeni `spaces`, `work-items`, `work-item-details`, `search`, `collab` testleri. Arama testi `turkish` metin arama yapılandırmasının var olduğunu varsayar. Dosya testleri `UPLOAD_DIR`'e (geçici klasör) yazar; multer sınırı testte 1 MB.
+- [ ] `pnpm test:e2e`: yeni `faz1-spaces`, `faz1-items`, `faz1-detail`, `faz1-views`, `faz1-collab` ve güncellenen `faz1-auth` senaryoları.
 - [ ] Arama sorgusunun dizinleri kullandığı: `EXPLAIN` ile bakılır (özellikle `to_tsvector('turkish', …)` ifadesi dizin ifadesiyle birebir aynı olmalı).
-- [ ] Tarayıcıda görsel kontrol: kenar çubuğu ağacı, sürükle-bırak, List/Table, süzgeç çubuğu (geniş ve mobil), 500+ öğeyle sanal kaydırma, yan panel, Tiptap editörü, global arama, koyu tema.
+- [ ] Tarayıcıda görsel ve elle kontrol: kenar çubuğu ağacı, sürükle-bırak, List/Table, 500+ öğeyle sanal kaydırma, yan panel, Tiptap editörleri, **@mention açılır listesi konumu (yan panel içinde)**, sürükle-bırak dosya yükleme, **PDF önizlemenin tarayıcıda açılması**, profil fotoğrafı kırpma, Ana sayfa, global arama, koyu tema, mobil genişlik.
+- [ ] Docker'da `UPLOAD_DIR` için kalıcı volume ve yedekleme kapsamı (docker/compose üretim dosyası yazılırken).

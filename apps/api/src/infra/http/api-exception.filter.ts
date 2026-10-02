@@ -16,6 +16,8 @@ const STATUS_TO_CODE: Partial<Record<number, string>> = {
   [HttpStatus.FORBIDDEN]: ERROR_CODES.FORBIDDEN,
   [HttpStatus.NOT_FOUND]: ERROR_CODES.NOT_FOUND,
   [HttpStatus.TOO_MANY_REQUESTS]: ERROR_CODES.RATE_LIMITED,
+  // Multer dosya sınırı aşıldığında 413 fırlatır (ADR-056).
+  [HttpStatus.PAYLOAD_TOO_LARGE]: ERROR_CODES.ATTACHMENT_TOO_LARGE,
 };
 
 /**

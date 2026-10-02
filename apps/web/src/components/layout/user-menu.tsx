@@ -42,7 +42,7 @@ export function UserMenu() {
         aria-label={`${t('topbar.accountMenu')}: ${user.name}`}
         className="focus-visible:ring-ring/50 rounded-full outline-none focus-visible:ring-[3px]"
       >
-        <UserAvatar id={user.id} name={user.name} size={28} />
+        <UserAvatar id={user.id} name={user.name} size={28} avatarVersion={user.avatarVersion} />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-60">
         <DropdownMenuLabel className="font-normal">

@@ -1,4 +1,6 @@
 import 'dotenv/config';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { defineConfig } from 'vitest/config';
 import { nestTransform } from './vitest.config';
 
@@ -17,6 +19,9 @@ export default defineConfig({
       SETUP_TOKEN: 'test-setup-token',
       AUTH_RATE_LIMIT: '1000',
       APP_URL: 'http://localhost:5173',
+      // Testlerin yüklediği dosyalar geçici klasöre yazılır.
+      UPLOAD_DIR: join(tmpdir(), 'scrum-manager-test-uploads'),
+      MAX_UPLOAD_MB: '1',
     },
     fileParallelism: false,
   },

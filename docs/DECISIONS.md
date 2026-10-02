@@ -418,3 +418,38 @@
 
 - **Tarih:** 2026-10-02 · **Durum:** Kabul (brief §5.8; ayrıntılar geliştirici varsayılanı)
 - **Karar:** `GET /my-work?scope=assigned|created|watching` kullanıcının görebildiği tüm Space'lerdeki öğeleri döner (en çok 500, silinmiş/arşivli hariç). Varsayılan olarak tamamlananlar (DONE) gizlidir; `includeDone=true` ile gelir. Sıra: bitiş tarihi yakın olan önce, tarihsizler sonda. Kenar çubuğundaki "Bana atananlar" bu sayfaya gider.
+
+## ADR-055 — Yorumlar: zengin metin, @mention kaydı, tepkiler (Faz 1.6)
+
+- **Tarih:** 2026-10-02 · **Durum:** Kabul (brief §5.13; ayrıntılar geliştirici varsayılanı)
+- **Karar:**
+  - Yorum gövdesi açıklamayla aynı Tiptap belge JSON'udur (ADR-048); izinli düğümlere `mention` (`attrs.id` = kullanıcı) eklenir. Yorumlarda başlık/kod bloğu da kullanılabilir.
+  - Sunucu belgedeki mention'ları çıkarıp `comment_mentions` tablosuna yazar; yalnızca öğeyi görebilen workspace üyeleri geçerlidir, diğerleri düz metne indirilir. Bildirim gönderimi Faz 2'dedir; kayıt şimdiden tutulur. Yorum yazan ve mention edilenler öğenin izleyicisi olur (ADR-051).
+  - Düzenleme yalnızca yazara aittir ("düzenlendi" işareti). Silme: yazar veya `space.settings` izni olan (PO, SM, Owner, Admin); silinen yorum soft-delete'tir ve gösterilmez.
+  - Tepkiler sabit emoji kümesinden (👍 ❤️ 🎉 👀 😄 ✅); kişi başına tepki türü başına bir kayıt, tıklayınca açılıp kapanır. Yorum yazma ve tepki `comment.write` ister (Stakeholder dahil).
+- **Alternatifler:** Yalnızca düz metin yorum (mention ve biçimlendirme olmaz).
+
+## ADR-056 — Dosya ekleri: yerel disk, güvenli sunum
+
+- **Tarih:** 2026-10-02 · **Durum:** Kabul (ADR-020'nin uygulaması; ayrıntılar geliştirici varsayılanı)
+- **Karar:**
+  - `StorageService` soyutlaması, varsayılan yerel disk (`UPLOAD_DIR`, Docker volume). Dosya adı diskte rastgele anahtardır; özgün ad yalnızca veritabanında. Anahtar `workspaceId/<uuid>` biçimindedir; istemci yolu hiçbir zaman dosya yoluna girmez.
+  - Sınırlar: dosya başına en çok 25 MB (`MAX_UPLOAD_MB`), öğe başına en çok 50 ek. Çalıştırılabilir/komut dosyası uzantıları (exe, bat, cmd, com, scr, msi, dll, ps1, vbs, jar, sh…) reddedilir.
+  - MIME türü istemciden değil uzantıdan türetilir; resim ve PDF için içerik imzası (magic bytes) doğrulanır. Önizleme (satır içi) yalnızca PNG, JPEG, GIF, WebP ve PDF içindir; diğer her şey (SVG ve HTML dahil) `Content-Disposition: attachment` ile iner. Tüm yanıtlarda `X-Content-Type-Options: nosniff`, satır içi sunumda `Content-Security-Policy: sandbox; default-src 'none'`.
+  - İndirme `space.view` ister; yükleme/silme `workItem.write`. Ek silinince dosya da silinir; çöp kutusundan kalıcı silinen öğenin ekleri gece işinde diskten temizlenir.
+- **Alternatifler:** MinIO/S3 (ek servis; kendi sunucuda gereksiz, adaptör arayüzü hazır).
+
+## ADR-057 — Aktivite akışları
+
+- **Tarih:** 2026-10-02 · **Durum:** Kabul (brief §5.13; ayrıntılar geliştirici varsayılanı)
+- **Karar:** Aktivite kaydı (ADR-015) iki yerde okunur: öğe detayında "Aktivite" sekmesi (`GET /items/:id/activity`) ve Ana sayfadaki "Son aktivite" (`GET /activity`, görülebilen Space'lerdeki öğe olayları). Sunucu kayıttaki kimlikleri (durum, atanan, etiket) okunur ada çevirir; istemci olayı cümleye döker. Sayfalama imleçle (`before`), sayfa boyutu 30. Yorum ve ek olayları gövde/dosya içeriği taşımaz. Space/List düzeyinde ayrı akış F2.
+
+## ADR-058 — Ana sayfa
+
+- **Tarih:** 2026-10-02 · **Durum:** Kabul (brief §10 madde 2; ayrıntılar geliştirici varsayılanı)
+- **Karar:** Bana atananlar (açık, en çok 8; "tümü" Benim işlerim'e gider), Yaklaşan teslimler (bana atanan, geçmiş ve önümüzdeki 14 gün), Favoriler, Son aktivite. Veri mevcut uçlardan gelir (`/my-work`, `/hierarchy`, `/activity`).
+
+## ADR-059 — Profil fotoğrafı
+
+- **Tarih:** 2026-10-02 · **Durum:** Kabul (brief §5.1)
+- **Karar:** En çok 2 MB, PNG/JPEG/WebP (içerik imzası doğrulanır), istemcide kare kırpılıp 256 px'e küçültülür. Dosya depolamada `avatars/<userId>` anahtarıyla durur; kullanıcıda yalnızca `avatarVersion` (önbellek anahtarı) saklanır. `GET /api/users/:id/avatar` yalnızca aynı workspace'te olan oturum sahiplerine açıktır. Fotoğraf yoksa baş harfler (mevcut davranış) gösterilir.

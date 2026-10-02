@@ -12,6 +12,7 @@ import { ApiExceptionFilter } from './infra/http/api-exception.filter';
 import { MailModule } from './infra/mail/mail.module';
 import { PrismaModule } from './infra/prisma/prisma.module';
 import { QueueModule } from './infra/queue/queue.module';
+import { StorageModule } from './infra/storage/storage.module';
 import { AccessModule } from './modules/access/access.module';
 import { ActivityModule } from './modules/activity/activity.module';
 import { AuthModule } from './modules/auth/auth.module';
@@ -24,6 +25,7 @@ import {
   WorkspaceAccessGuard,
 } from './modules/auth/guards';
 import { HealthModule } from './modules/health/health.module';
+import { CollabModule } from './modules/collab/collab.module';
 import { SetupModule } from './modules/setup/setup.module';
 import { SpacesModule } from './modules/spaces/spaces.module';
 import { UsersModule } from './modules/users/users.module';
@@ -76,6 +78,7 @@ const isAuthRateLimited = (ctx: ExecutionContext): boolean =>
     }),
     PrismaModule,
     QueueModule,
+    StorageModule,
     MailModule,
     ActivityModule,
     AccessModule,
@@ -85,6 +88,7 @@ const isAuthRateLimited = (ctx: ExecutionContext): boolean =>
     WorkspacesModule,
     SpacesModule,
     WorkItemsModule,
+    CollabModule,
     HealthModule,
   ],
   providers: [

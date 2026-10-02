@@ -303,7 +303,12 @@ export function Properties({
       <Row label={t('detail.reporter')}>
         {item.reporter ? (
           <span className="flex items-center gap-1.5 px-1.5 py-0.5">
-            <UserAvatar id={item.reporter.id} name={item.reporter.name} size={20} />
+            <UserAvatar
+              id={item.reporter.id}
+              name={item.reporter.name}
+              size={20}
+              avatarVersion={item.reporter.avatarVersion}
+            />
             {item.reporter.name}
           </span>
         ) : (
@@ -360,7 +365,7 @@ function Assignees({
     <span className="flex flex-wrap items-center gap-1.5">
       {item.assignees.map((a) => (
         <span key={a.id} className="flex items-center gap-1">
-          <UserAvatar id={a.id} name={a.name} size={20} />
+          <UserAvatar id={a.id} name={a.name} size={20} avatarVersion={a.avatarVersion} />
           <span>{a.name}</span>
         </span>
       ))}
@@ -393,7 +398,7 @@ function Assignees({
               })
             }
           >
-            <UserAvatar id={m.userId} name={m.name} size={20} />
+            <UserAvatar id={m.userId} name={m.name} size={20} avatarVersion={m.avatarVersion} />
             {m.name}
           </DropdownMenuCheckboxItem>
         ))}

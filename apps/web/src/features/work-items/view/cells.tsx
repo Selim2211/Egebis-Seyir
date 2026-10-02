@@ -106,7 +106,7 @@ export function AssigneeStack({ item, max = 3 }: { item: WorkItemSummary; max?: 
           key={a.id}
           className={cn('border-card inline-flex rounded-full border-2', i > 0 && '-ml-1.5')}
         >
-          <UserAvatar id={a.id} name={a.name} size={22} />
+          <UserAvatar id={a.id} name={a.name} size={22} avatarVersion={a.avatarVersion} />
         </span>
       ))}
       {item.assignees.length > shown.length && (

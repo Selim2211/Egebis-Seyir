@@ -28,7 +28,7 @@ export class SpaceMembersService {
       where: { spaceId },
       include: {
         role: { select: { key: true } },
-        user: { select: { id: true, name: true, title: true } },
+        user: { select: { id: true, name: true, title: true, avatarVersion: true } },
       },
       orderBy: { createdAt: 'asc' },
     });
@@ -41,6 +41,7 @@ export class SpaceMembersService {
       userId: m.user.id,
       name: m.user.name,
       title: m.user.title,
+      avatarVersion: m.user.avatarVersion,
       role: m.role.key as SpaceRole,
       workspaceRole: (workspaceRoles.get(m.userId) ?? 'GUEST') as WorkspaceRole,
     }));

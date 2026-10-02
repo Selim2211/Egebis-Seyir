@@ -47,7 +47,9 @@ export async function apiRequest<T extends z.ZodType>(
   { method = 'GET', body, acceptStatuses = [] }: RequestOptions = {},
 ): Promise<z.infer<T>> {
   const headers: Record<string, string> = { Accept: 'application/json' };
-  if (body !== undefined) headers['Content-Type'] = 'application/json';
+  // Dosya yüklemede (FormData) tarayıcı sınırlayıcıyı kendisi ekler.
+  const isForm = body instanceof FormData;
+  if (body !== undefined && !isForm) headers['Content-Type'] = 'application/json';
   if (method !== 'GET') headers['x-csrf-token'] = await csrfToken();
 
   let res: Response;
@@ -56,7 +58,7 @@ export async function apiRequest<T extends z.ZodType>(
       method,
       credentials: 'same-origin',
       headers,
-      body: body === undefined ? undefined : JSON.stringify(body),
+      body: body === undefined ? undefined : isForm ? body : JSON.stringify(body),
     });
   } catch {
     throw new ApiRequestError(0, 'NETWORK');

@@ -1,6 +1,8 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { PasswordSchema, PersonNameSchema } from '@scrum/shared';
 import { createFileRoute } from '@tanstack/react-router';
+import { Camera, Trash2 } from 'lucide-react';
+import { useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -9,7 +11,9 @@ import { Field, FormError } from '@/components/form';
 import { PageHeading } from '@/components/layout/page-heading';
 import { Button } from '@/components/ui/button';
 import { UserAvatar } from '@/components/user-avatar';
-import { useChangePassword, useMe, useUpdateProfile } from '@/features/auth/queries';
+import { useAvatar, useChangePassword, useMe, useUpdateProfile } from '@/features/auth/queries';
+import { squareAvatar } from '@/lib/avatar-image';
+import { useErrorMessage } from '@/lib/use-error-message';
 
 export const Route = createFileRoute('/_app/settings/profile')({
   component: ProfilePage,
@@ -46,11 +50,12 @@ function ProfilePage() {
         className="bg-card flex max-w-xl flex-col gap-4 rounded-lg border p-5"
       >
         <div className="flex items-center gap-3">
-          <UserAvatar id={user.id} name={user.name} size={48} />
-          <div className="min-w-0">
+          <UserAvatar id={user.id} name={user.name} size={64} avatarVersion={user.avatarVersion} />
+          <div className="min-w-0 flex-1">
             <p className="truncate font-medium">{user.name}</p>
             <p className="text-muted-foreground truncate text-sm">{user.email}</p>
           </div>
+          <AvatarControls hasPhoto={!!user.avatarVersion} />
         </div>
         <FormError error={update.error} />
         <Field
@@ -132,5 +137,64 @@ function PasswordForm() {
         </div>
       </form>
     </section>
+  );
+}
+
+/** Fotoğraf seç (kare kırpılıp küçültülür) veya kaldır (ADR-059). */
+function AvatarControls({ hasPhoto }: { hasPhoto: boolean }) {
+  const { t } = useTranslation();
+  const errorMessage = useErrorMessage();
+  const { upload, remove } = useAvatar();
+  const input = useRef<HTMLInputElement>(null);
+
+  const pick = async (file: File | undefined) => {
+    if (!file) return;
+    try {
+      const blob = await squareAvatar(file);
+      upload.mutate(blob, {
+        onSuccess: () => toast.success(t('profile.photoSaved')),
+        onError: (error) => toast.error(errorMessage(error)),
+      });
+    } catch {
+      toast.error(t('errors.AVATAR_INVALID'));
+    }
+  };
+
+  return (
+    <div className="flex shrink-0 gap-1.5">
+      <input
+        ref={input}
+        type="file"
+        accept="image/png,image/jpeg,image/webp"
+        hidden
+        onChange={(e) => {
+          void pick(e.target.files?.[0]);
+          e.target.value = '';
+        }}
+      />
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        disabled={upload.isPending}
+        onClick={() => input.current?.click()}
+      >
+        <Camera />
+        {t(hasPhoto ? 'profile.changePhoto' : 'profile.addPhoto')}
+      </Button>
+      {hasPhoto && (
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          className="size-8"
+          aria-label={t('profile.removePhoto')}
+          disabled={remove.isPending}
+          onClick={() => remove.mutate()}
+        >
+          <Trash2 />
+        </Button>
+      )}
+    </div>
   );
 }

@@ -1,4 +1,9 @@
 import {
+  ActivityResponseSchema,
+  CommentsResponseSchema,
+  MentionCandidatesSchema,
+  type ReactionEmoji,
+  type RichTextDoc,
   CreatedItemSchema,
   CreatedSchema,
   ItemSearchResponseSchema,
@@ -18,7 +23,12 @@ import {
   WorkItemsResponseSchema,
   type WorkItemsResponse,
 } from '@scrum/shared';
-import { queryOptions, useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+  infiniteQueryOptions,
+  queryOptions,
+  useMutation,
+  useQueryClient,
+} from '@tanstack/react-query';
 import { useCurrentWorkspace } from '@/features/workspace/queries';
 import { apiRequest, NoContent } from '@/lib/api';
 
@@ -277,3 +287,90 @@ export const useBulkUpdate = () =>
       body: input.body,
     }),
   );
+
+// ---------- Yorumlar, ekler, aktivite (Faz 1.6) ----------
+
+export const commentsQuery = (workspaceId: string, itemId: string) =>
+  queryOptions({
+    queryKey: ['workspaces', workspaceId, 'items', itemId, 'comments'],
+    queryFn: () =>
+      apiRequest(`${ws(workspaceId)}/items/${itemId}/comments`, CommentsResponseSchema),
+  });
+
+/** @mention önerisi (yazarken çağrılır; önbelleğe alınmaz). */
+export const fetchMentionCandidates = (workspaceId: string, itemId: string, q: string) =>
+  apiRequest(
+    `${ws(workspaceId)}/items/${itemId}/mention-candidates?q=${encodeURIComponent(q)}`,
+    MentionCandidatesSchema,
+  );
+
+export type CommentOp =
+  | { op: 'create'; body: RichTextDoc }
+  | { op: 'edit'; commentId: string; body: RichTextDoc }
+  | { op: 'delete'; commentId: string }
+  | { op: 'react'; commentId: string; emoji: ReactionEmoji };
+
+export const useComment = () =>
+  useWorkspaceMutation((id, input: { itemId: string } & CommentOp) => {
+    const base = `${ws(id)}/items/${input.itemId}/comments`;
+    switch (input.op) {
+      case 'create':
+        return apiRequest(base, CreatedSchema, { method: 'POST', body: { body: input.body } });
+      case 'edit':
+        return apiRequest(`${base}/${input.commentId}`, NoContent, {
+          method: 'PATCH',
+          body: { body: input.body },
+        });
+      case 'delete':
+        return apiRequest(`${base}/${input.commentId}`, NoContent, { method: 'DELETE' });
+      case 'react':
+        return apiRequest(`${base}/${input.commentId}/reactions`, NoContent, {
+          method: 'PUT',
+          body: { emoji: input.emoji },
+        });
+    }
+  });
+
+export const useUploadAttachment = () =>
+  useWorkspaceMutation((id, input: { itemId: string; file: File }) => {
+    const form = new FormData();
+    form.append('file', input.file);
+    return apiRequest(`${ws(id)}/items/${input.itemId}/attachments`, CreatedSchema, {
+      method: 'POST',
+      body: form,
+    });
+  });
+
+export const useDeleteAttachment = () =>
+  useWorkspaceMutation((id, input: { itemId: string; attachmentId: string }) =>
+    apiRequest(`${ws(id)}/items/${input.itemId}/attachments/${input.attachmentId}`, NoContent, {
+      method: 'DELETE',
+    }),
+  );
+
+/** Ek adresi: `preview` satır içi önizleme (yalnızca resim/PDF), aksi halde indirme. */
+export const attachmentUrl = (
+  workspaceId: string,
+  itemId: string,
+  attachmentId: string,
+  preview = false,
+) =>
+  `/api${ws(workspaceId)}/items/${itemId}/attachments/${attachmentId}${preview ? '?preview=1' : ''}`;
+
+export const itemActivityQuery = (workspaceId: string, itemId: string) =>
+  infiniteQueryOptions({
+    queryKey: ['workspaces', workspaceId, 'items', itemId, 'activity'],
+    initialPageParam: undefined as string | undefined,
+    queryFn: ({ pageParam }) =>
+      apiRequest(
+        `${ws(workspaceId)}/items/${itemId}/activity${pageParam ? `?before=${pageParam}` : ''}`,
+        ActivityResponseSchema,
+      ),
+    getNextPageParam: (last) => last.next ?? undefined,
+  });
+
+export const recentActivityQuery = (workspaceId: string) =>
+  queryOptions({
+    queryKey: ['workspaces', workspaceId, 'activity'],
+    queryFn: () => apiRequest(`${ws(workspaceId)}/activity?limit=15`, ActivityResponseSchema),
+  });

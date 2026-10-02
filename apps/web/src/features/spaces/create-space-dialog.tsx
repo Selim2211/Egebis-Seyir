@@ -133,7 +133,12 @@ function MemberPicker({
           const guest = person.role === 'GUEST';
           return (
             <li key={m.userId} className="flex items-center gap-2.5 py-1.5">
-              <UserAvatar id={person.userId} name={person.name} size={26} />
+              <UserAvatar
+                id={person.userId}
+                name={person.name}
+                size={26}
+                avatarVersion={person.avatarVersion}
+              />
               <span className="min-w-0 flex-1 truncate text-sm">{person.name}</span>
               <NativeSelect
                 aria-label={t('spaceForm.roleFor', { name: person.name })}

@@ -9,3 +9,4 @@ export * from './work-item-progress';
 export * from './work-item-fields';
 export * from './rich-text';
 export * from './work-item-links';
+export * from './attachments';

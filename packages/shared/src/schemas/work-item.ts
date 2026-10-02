@@ -6,7 +6,8 @@ import {
   TSHIRT_SIZES,
   WORK_ITEM_TYPES,
 } from '../constants/work-item';
-import { isValidRichText, type RichTextDoc } from '../domain/rich-text';
+import { AttachmentSchema } from './collab';
+import { RichTextSchema } from './rich-text';
 import { ColorSchema } from './space';
 
 const Title = z.string().trim().min(1).max(500);
@@ -16,11 +17,6 @@ export const DateOnlySchema = z.iso.date();
 
 export const WorkItemTypeSchema = z.enum(WORK_ITEM_TYPES);
 export const PrioritySchema = z.enum(PRIORITIES);
-
-/** Tiptap belge JSON'u (ADR-048): izinli yapı ve en çok 200 KB. */
-export const RichTextSchema = z.custom<RichTextDoc>((value) => isValidRichText(value), {
-  message: 'RICH_TEXT_INVALID',
-});
 
 // ---------- Etiketler ----------
 
@@ -45,7 +41,12 @@ export type UpdateLabelRequest = z.infer<typeof UpdateLabelRequestSchema>;
 export const LabelsResponseSchema = z.object({ labels: z.array(LabelSchema) });
 export type LabelsResponse = z.infer<typeof LabelsResponseSchema>;
 
-export const AssigneeSchema = z.object({ id: z.uuid(), name: z.string() });
+export const AssigneeSchema = z.object({
+  id: z.uuid(),
+  name: z.string(),
+  /** Profil fotoğrafı sürümü; yoksa null (ADR-059). */
+  avatarVersion: z.string().nullable(),
+});
 export type Assignee = z.infer<typeof AssigneeSchema>;
 
 // ---------- Oluşturma ve güncelleme ----------
@@ -209,6 +210,8 @@ export const WorkItemDetailSchema = WorkItemSummarySchema.extend({
   links: z.array(LinkSchema),
   watching: z.boolean(),
   watcherCount: z.int(),
+  attachments: z.array(AttachmentSchema),
+  commentCount: z.int(),
   /** Kökten ebeveyne kadar üst öğeler. */
   ancestors: z.array(crumb),
   children: z.array(WorkItemSummarySchema),

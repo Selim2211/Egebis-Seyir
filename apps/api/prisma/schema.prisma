@@ -75,29 +75,35 @@ enum FavoriteType {
 }
 
 model User {
-  id           String   @id @default(uuid(7)) @db.Uuid
+  id            String   @id @default(uuid(7)) @db.Uuid
   /// Küçük harfe çevrilmiş e-posta.
-  email        String   @unique
-  name         String
+  email         String   @unique
+  name          String
   /// argon2id, PHC biçimi (ADR-038).
-  passwordHash String
-  title        String?
-  locale       String   @default("tr")
-  theme        String   @default("system")
-  timezone     String   @default("Europe/Istanbul")
-  createdAt    DateTime @default(now()) @db.Timestamptz
-  updatedAt    DateTime @updatedAt @db.Timestamptz
+  passwordHash  String
+  title         String?
+  locale        String   @default("tr")
+  theme         String   @default("system")
+  timezone      String   @default("Europe/Istanbul")
+  /// Profil fotoğrafı sürümü (önbellek anahtarı); null = fotoğraf yok (ADR-059).
+  avatarVersion String?
+  createdAt     DateTime @default(now()) @db.Timestamptz
+  updatedAt     DateTime @updatedAt @db.Timestamptz
 
-  sessions        Session[]
-  memberships     Membership[]
-  passwordResets  PasswordResetToken[]
-  invitationsSent Invitation[]         @relation("InvitedBy")
-  activities      ActivityEvent[]
-  spaceMembers    SpaceMember[]
-  favorites       Favorite[]
-  reportedItems   WorkItem[]           @relation("Reporter")
-  assignedItems   WorkItemAssignee[]
-  watchedItems    WorkItemWatcher[]
+  sessions         Session[]
+  memberships      Membership[]
+  passwordResets   PasswordResetToken[]
+  invitationsSent  Invitation[]         @relation("InvitedBy")
+  activities       ActivityEvent[]
+  spaceMembers     SpaceMember[]
+  favorites        Favorite[]
+  reportedItems    WorkItem[]           @relation("Reporter")
+  assignedItems    WorkItemAssignee[]
+  watchedItems     WorkItemWatcher[]
+  comments         Comment[]
+  commentMentions  CommentMention[]
+  commentReactions CommentReaction[]
+  attachments      Attachment[]
 
   @@map("users")
 }
@@ -157,6 +163,10 @@ model Workspace {
   checklistItems    ChecklistItem[]
   workItemLinks     WorkItemLink[]
   workItemWatchers  WorkItemWatcher[]
+  comments          Comment[]
+  commentMentions   CommentMention[]
+  commentReactions  CommentReaction[]
+  attachments       Attachment[]
 
   @@map("workspaces")
 }
@@ -446,12 +456,14 @@ model WorkItem {
   createdAt        DateTime     @default(now()) @db.Timestamptz
   updatedAt        DateTime     @updatedAt @db.Timestamptz
 
-  assignees  WorkItemAssignee[]
-  labels     WorkItemLabel[]
-  checklists Checklist[]
-  linksFrom  WorkItemLink[]     @relation("LinkFrom")
-  linksTo    WorkItemLink[]     @relation("LinkTo")
-  watchers   WorkItemWatcher[]
+  assignees   WorkItemAssignee[]
+  labels      WorkItemLabel[]
+  checklists  Checklist[]
+  linksFrom   WorkItemLink[]     @relation("LinkFrom")
+  linksTo     WorkItemLink[]     @relation("LinkTo")
+  watchers    WorkItemWatcher[]
+  comments    Comment[]
+  attachments Attachment[]
 
   @@unique([workspaceId, keyPrefix, number])
   @@index([listId, rank])
@@ -571,4 +583,75 @@ model WorkItemWatcher {
   @@id([workItemId, userId])
   @@index([userId])
   @@map("work_item_watchers")
+}
+
+// ---------- Yorumlar ve ekler (Faz 1.6, ADR-055, ADR-056) ----------
+
+model Comment {
+  id          String    @id @default(uuid(7)) @db.Uuid
+  workspaceId String    @db.Uuid
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  workItemId  String    @db.Uuid
+  workItem    WorkItem  @relation(fields: [workItemId], references: [id], onDelete: Cascade)
+  authorId    String?   @db.Uuid
+  author      User?     @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  /// Tiptap belge JSON'u (mention düğümleri dahil).
+  body        Json
+  bodyText    String
+  editedAt    DateTime? @db.Timestamptz
+  deletedAt   DateTime? @db.Timestamptz
+  createdAt   DateTime  @default(now()) @db.Timestamptz
+
+  mentions  CommentMention[]
+  reactions CommentReaction[]
+
+  @@index([workItemId, createdAt])
+  @@map("comments")
+}
+
+/// Bildirimler Faz 2'de bu kayıttan beslenir.
+model CommentMention {
+  commentId   String    @db.Uuid
+  comment     Comment   @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  userId      String    @db.Uuid
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspaceId String    @db.Uuid
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@id([commentId, userId])
+  @@index([userId])
+  @@map("comment_mentions")
+}
+
+model CommentReaction {
+  commentId   String    @db.Uuid
+  comment     Comment   @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  userId      String    @db.Uuid
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  emoji       String
+  workspaceId String    @db.Uuid
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now()) @db.Timestamptz
+
+  @@id([commentId, userId, emoji])
+  @@map("comment_reactions")
+}
+
+model Attachment {
+  id          String    @id @default(uuid(7)) @db.Uuid
+  workspaceId String    @db.Uuid
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  workItemId  String    @db.Uuid
+  workItem    WorkItem  @relation(fields: [workItemId], references: [id], onDelete: Cascade)
+  uploaderId  String?   @db.Uuid
+  uploader    User?     @relation(fields: [uploaderId], references: [id], onDelete: SetNull)
+  /// Özgün dosya adı (yalnızca görüntüleme/indirme; diskte rastgele anahtar kullanılır).
+  fileName    String
+  mimeType    String
+  size        Int
+  storageKey  String    @unique
+  createdAt   DateTime  @default(now()) @db.Timestamptz
+
+  @@index([workItemId])
+  @@map("attachments")
 }

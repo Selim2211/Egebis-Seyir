@@ -48,6 +48,7 @@ Yerel geliştirme veritabanındaki test hesapları (yalnızca `scrum_dev`): `zey
 - **İş öğeleri:** Okunabilir ID `keyPrefix-number` öğede kalıcıdır, sayaç `spaces.itemCounter` (ADR-033/044). Yeni iş öğesi alanı: shared şema + saf kural (tahmin, tip alanları, hiyerarşi) → servis. Tipe uymayan alan sessizce yok sayılmaz, reddedilir. Arşiv/silme alt ağaca aynı zaman damgasıyla uygulanır (ADR-046).
 - **Zengin metin:** Açıklama Tiptap JSON; doğrulama ve düz metin çıkarımı yalnızca shared `domain/rich-text.ts` (izinli düğüm/işaret listesi, web editörü de aynı listeye uyar, ADR-048). Ham HTML hiçbir yerde saklanmaz veya basılmaz.
 - **Görünümler:** List/Table süzme, sıralama ve gruplama saf fonksiyonlardır (`apps/web/src/features/work-items/view/view-state.ts`, birim testli); durum adreste (`ViewSearchSchema`). Yeni süzgeç = şema + fonksiyon + test (ADR-052).
+- **Dosyalar:** Yükleme yalnızca `StorageService` (`UPLOAD_DIR`) üzerinden; anahtarlar sunucuda üretilir, istemci adı yola girmez. Doğrulama shared `domain/attachments.ts` (uzantı, boyut, içerik imzası); önizleme yalnızca resim/PDF, diğerleri indirme (ADR-056). Yeni dosya türü eklerken önce bu dosyadaki listeleri ve testleri güncelle.
 - **Durum:** Kurallar durum adına değil kategoriye bakar (`NOT_STARTED/ACTIVE/DONE`, ADR-013).
 - **Değişiklik kaydı:** Anlamlı her değişiklik aynı transaction içinde `activity_events`'e (ADR-015).
 - **Görsel dil:** Tip/öncelik/durum ikon ve renkleri yalnızca `apps/web/src/components/work-item/work-item-visuals.tsx`; renk token'ları `apps/web/src/styles/globals.css`.

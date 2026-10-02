@@ -29,6 +29,7 @@ import type { AppClsStore } from '../../infra/cls/request-context';
 import { TenantPrismaService } from '../../infra/prisma/tenant-prisma.service';
 import { SpaceAccessService } from '../access/space-access.service';
 import { ActivityService } from '../activity/activity.service';
+import { toAttachmentDto } from '../collab/attachments.service';
 import { archivedParent, forbidden, notFound } from '../spaces/space-errors';
 import {
   asJson,
@@ -119,7 +120,7 @@ export class WorkItemsService {
       where: { id: itemId },
       include: {
         ...summaryInclude,
-        reporter: { select: { id: true, name: true } },
+        reporter: { select: { id: true, name: true, avatarVersion: true } },
         space: { select: { id: true } },
         labels: {
           select: { labelId: true, label: { select: { id: true, name: true, color: true } } },
@@ -145,13 +146,19 @@ export class WorkItemsService {
       parentId = parent.parentId;
     }
 
-    const [checklists, links, watchers] = await Promise.all([
+    const [checklists, links, watchers, attachments, commentCount] = await Promise.all([
       db.checklist.findMany({
         where: { workItemId: itemId },
         include: { items: { orderBy: { rank: 'asc' } } },
       }),
       this.visibleLinks(itemId),
       db.workItemWatcher.findMany({ where: { workItemId: itemId }, select: { userId: true } }),
+      db.attachment.findMany({
+        where: { workItemId: itemId },
+        include: { uploader: { select: { id: true, name: true } } },
+        orderBy: { createdAt: 'asc' },
+      }),
+      db.comment.count({ where: { workItemId: itemId, deletedAt: null } }),
     ]);
     // Kabul kriterleri önce, sonra adlı checklist'ler kendi sırasıyla.
     checklists.sort(
@@ -173,6 +180,8 @@ export class WorkItemsService {
       links,
       watching: watchers.some((w) => w.userId === this.ctx.actorId),
       watcherCount: watchers.length,
+      attachments: attachments.map(toAttachmentDto),
+      commentCount,
       ancestors,
       children: children.map(toSummary),
       labels: row.labels.map((l) => l.label),

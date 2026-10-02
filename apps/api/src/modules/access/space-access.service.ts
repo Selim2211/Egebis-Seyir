@@ -62,6 +62,45 @@ export class SpaceAccessService {
     return null;
   }
 
+  /**
+   * Verilen kullanıcılardan Space'i görebilenler (mention önerisi ve doğrulaması, ADR-055).
+   * Kural kullanıcı başına shared `spacePermissions` ile aynıdır (ADR-039).
+   */
+  async viewers(spaceId: string, userIds: string[]): Promise<Set<string>> {
+    if (userIds.length === 0) return new Set();
+    const db = this.tenant.db;
+    const [space, stakeholder, memberships, spaceMembers] = await Promise.all([
+      db.space.findFirst({ where: { id: spaceId }, select: { isPrivate: true } }),
+      db.role.findFirstOrThrow({
+        where: { scope: RoleScope.SPACE, key: 'STAKEHOLDER' },
+        select: { permissions: true },
+      }),
+      db.membership.findMany({
+        where: { userId: { in: userIds } },
+        select: { userId: true, role: { select: { key: true } } },
+      }),
+      db.spaceMember.findMany({
+        where: { spaceId, userId: { in: userIds } },
+        select: { userId: true, role: { select: { permissions: true } } },
+      }),
+    ]);
+    if (!space) return new Set();
+    const memberPerms = new Map(spaceMembers.map((m) => [m.userId, m.role.permissions]));
+    return new Set(
+      memberships
+        .filter(
+          (m) =>
+            spacePermissions({
+              workspaceRole: m.role.key as WorkspaceRole,
+              isPrivate: space.isPrivate,
+              memberPermissions: memberPerms.get(m.userId) ?? null,
+              stakeholderPermissions: stakeholder.permissions,
+            }) !== null,
+        )
+        .map((m) => m.userId),
+    );
+  }
+
   /** İstekteki kullanıcının Space'teki izinleri; null = görünmez. */
   async permissionsIn(spaceId: string): Promise<readonly string[] | null> {
     const map = await this.permissionMap({ id: spaceId });

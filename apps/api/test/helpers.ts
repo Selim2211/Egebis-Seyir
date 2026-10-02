@@ -62,6 +62,21 @@ export class Client {
   put(path: string, body?: object) {
     return this.agent.put(path).set('x-csrf-token', this.csrf).send(body);
   }
+  /** Çok parçalı dosya yükleme (alan adı `file`). */
+  upload(path: string, buffer: Buffer, fileName: string) {
+    return this.agent.post(path).set('x-csrf-token', this.csrf).attach('file', buffer, fileName);
+  }
+  /** İkili yanıtı Buffer olarak okur. */
+  download(path: string) {
+    return this.agent
+      .get(path)
+      .buffer(true)
+      .parse((res, callback) => {
+        const chunks: Buffer[] = [];
+        res.on('data', (chunk: Buffer) => chunks.push(chunk));
+        res.on('end', () => callback(null, Buffer.concat(chunks)));
+      });
+  }
   delete(path: string) {
     return this.agent.delete(path).set('x-csrf-token', this.csrf);
   }

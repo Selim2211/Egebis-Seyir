@@ -114,3 +114,22 @@ export function useRevokeSession() {
     onSuccess: () => qc.invalidateQueries({ queryKey: sessionsQuery.queryKey }),
   });
 }
+
+/** Profil fotoğrafı yükleme ve silme (ADR-059); yanıt güncel kullanıcıdır. */
+export function useAvatar() {
+  const qc = useQueryClient();
+  const onSuccess = (me: MeResponse) => qc.setQueryData(meQuery.queryKey, me);
+  const upload = useMutation({
+    mutationFn: (file: Blob) => {
+      const form = new FormData();
+      form.append('file', file, 'avatar');
+      return apiRequest('/users/me/avatar', MeResponseSchema, { method: 'POST', body: form });
+    },
+    onSuccess,
+  });
+  const remove = useMutation({
+    mutationFn: () => apiRequest('/users/me/avatar', MeResponseSchema, { method: 'DELETE' }),
+    onSuccess,
+  });
+  return { upload, remove };
+}

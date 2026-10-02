@@ -186,6 +186,7 @@ export const SpaceMemberSchema = z.object({
   userId: z.uuid(),
   name: z.string(),
   title: z.string().nullable(),
+  avatarVersion: z.string().nullable(),
   role: z.enum(SPACE_ROLES),
   workspaceRole: z.enum(WORKSPACE_ROLES),
 });

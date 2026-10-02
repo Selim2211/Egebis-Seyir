@@ -14,3 +14,7 @@ playwright-report/
 test-results/
 .DS_Store
 Thumbs.db
+
+# Yüklenen dosyalar (ADR-056)
+data/
+apps/api/data/

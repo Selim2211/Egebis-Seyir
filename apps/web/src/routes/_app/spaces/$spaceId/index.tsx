@@ -150,7 +150,12 @@ function SpacePage() {
             <ul className="flex flex-col gap-2">
               {members.map((m) => (
                 <li key={m.userId} className="flex items-center gap-2 text-sm">
-                  <UserAvatar id={m.userId} name={m.name} size={24} />
+                  <UserAvatar
+                    id={m.userId}
+                    name={m.name}
+                    size={24}
+                    avatarVersion={m.avatarVersion}
+                  />
                   <span className="min-w-0 flex-1 truncate">{m.name}</span>
                   <span className="text-muted-foreground text-xs">{t(`spaceRoles.${m.role}`)}</span>
                 </li>

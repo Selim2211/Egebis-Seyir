@@ -14,7 +14,7 @@ export const fail = (code: ErrorCode, status = HttpStatus.UNPROCESSABLE_ENTITY, 
 
 /** Liste satırı için gereken ilişkiler. */
 export const summaryInclude = {
-  assignees: { select: { user: { select: { id: true, name: true } } } },
+  assignees: { select: { user: { select: { id: true, name: true, avatarVersion: true } } } },
   labels: { select: { labelId: true } },
   _count: { select: { children: { where: { deletedAt: null, archivedAt: null } } } },
 } satisfies Prisma.WorkItemInclude;
@@ -83,7 +83,17 @@ export const TYPE_FIELDS = [
 /** Tenant kapsamlı transaction istemcisinde kullanılan modeller. */
 export type TenantTx = Pick<
   TenantClient,
-  'workItem' | 'status' | 'label' | 'workItemLabel' | 'workItemAssignee' | 'space' | 'activityEvent'
+  | 'workItem'
+  | 'status'
+  | 'label'
+  | 'workItemLabel'
+  | 'workItemAssignee'
+  | 'space'
+  | 'activityEvent'
+  | 'comment'
+  | 'commentMention'
+  | 'workItemWatcher'
+  | 'attachment'
 >;
 
 /** Birden çok List'ten gelen satırlar için ek ilişkiler (benim işlerim, arama). */

@@ -30,6 +30,11 @@ export const EnvSchema = z.object({
 
   /** Arka plan kuyruğu (pg-boss). Kapalıysa işler istek içinde çalışır (testler). */
   QUEUE_ENABLED: z.stringbool().default(true),
+
+  /** Dosya ekleri ve profil fotoğrafları (ADR-056); Docker'da kalıcı volume olmalı. */
+  UPLOAD_DIR: z.string().default('./data/uploads'),
+  /** Dosya başına en çok MB (ADR-056). */
+  MAX_UPLOAD_MB: z.coerce.number().positive().default(25),
 });
 export type Env = z.infer<typeof EnvSchema>;
 

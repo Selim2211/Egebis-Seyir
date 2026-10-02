@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { cn } from '@/lib/utils';
 
 /** Açık zemin + koyu yazı çiftleri (yazı kontrastı ≥ 4.5:1). */
@@ -31,12 +32,32 @@ export function UserAvatar({
   name,
   size = 24,
   className,
+  avatarVersion,
 }: {
   id: string;
   name: string;
   size?: number;
   className?: string;
+  /** Profil fotoğrafı sürümü; verilirse fotoğraf gösterilir, yüklenemezse baş harfler (ADR-059). */
+  avatarVersion?: string | null;
 }) {
+  const [failed, setFailed] = useState(false);
+  if (avatarVersion && !failed) {
+    return (
+      <img
+        src={`/api/users/${id}/avatar?v=${avatarVersion}`}
+        alt=""
+        title={name}
+        aria-hidden
+        width={size}
+        height={size}
+        loading="lazy"
+        onError={() => setFailed(true)}
+        className={cn('inline-block shrink-0 rounded-full object-cover', className)}
+        style={{ width: size, height: size }}
+      />
+    );
+  }
   return (
     <span
       title={name}

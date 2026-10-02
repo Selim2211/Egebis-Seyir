@@ -29,6 +29,8 @@ export const RICH_TEXT_NODES = [
   'blockquote',
   'horizontalRule',
   'hardBreak',
+  /** Yalnızca yorumlarda üretilir; `attrs.id` kullanıcı kimliğidir (ADR-055). */
+  'mention',
 ] as const;
 
 export const RICH_TEXT_MARKS = ['bold', 'italic', 'strike', 'underline', 'code', 'link'] as const;
@@ -36,6 +38,9 @@ export const RICH_TEXT_MARKS = ['bold', 'italic', 'strike', 'underline', 'code',
 /** Belge boyutu üst sınırı (JSON bayt). */
 export const RICH_TEXT_MAX_BYTES = 200_000;
 const MAX_DEPTH = 20;
+/** Mention etiketi; metin değilse boş. */
+const labelOf = (node: RichTextNode): string =>
+  typeof node.attrs?.label === 'string' ? node.attrs.label : '';
 const MAX_PLAIN_TEXT = 50_000;
 const SAFE_LINK = /^(https?:\/\/|mailto:)/i;
 const BLOCK_NODES = new Set([
@@ -59,6 +64,12 @@ function validNode(node: unknown, depth: number): node is RichTextNode {
   if (text !== undefined && (typeof text !== 'string' || type !== 'text')) return false;
   if (type === 'text' && typeof text !== 'string') return false;
   if (attrs !== undefined && !isRecord(attrs)) return false;
+  if (type === 'mention') {
+    const id = attrs?.id;
+    if (typeof id !== 'string' || id.length === 0 || id.length > 64) return false;
+    if (attrs?.label !== undefined && typeof attrs.label !== 'string') return false;
+    if (content !== undefined) return false;
+  }
   if (type === 'heading') {
     const level = attrs?.level;
     if (typeof level !== 'number' || ![1, 2, 3].includes(level)) return false;
@@ -94,6 +105,7 @@ export function richTextToPlain(doc: RichTextNode): string {
   const parts: string[] = [];
   const walk = (node: RichTextNode) => {
     if (node.type === 'text') parts.push(node.text ?? '');
+    if (node.type === 'mention') parts.push(`@${labelOf(node)}`);
     if (node.type === 'hardBreak') parts.push('\n');
     for (const child of node.content ?? []) walk(child);
     if (BLOCK_NODES.has(node.type)) parts.push('\n');
@@ -108,3 +120,25 @@ export function richTextToPlain(doc: RichTextNode): string {
 
 /** Boş belge (yalnızca boş paragraf/boşluk) mu? Boşsa saklamak yerine `null` yazılır. */
 export const isRichTextEmpty = (doc: RichTextNode): boolean => richTextToPlain(doc) === '';
+
+/** Belgedeki mention'ların kullanıcı kimlikleri (tekrarsız, sıralı). */
+export function extractMentionIds(doc: RichTextNode): string[] {
+  const ids = new Set<string>();
+  const walk = (node: RichTextNode) => {
+    if (node.type === 'mention' && typeof node.attrs?.id === 'string') ids.add(node.attrs.id);
+    for (const child of node.content ?? []) walk(child);
+  };
+  walk(doc);
+  return [...ids];
+}
+
+/** Geçersiz (yetkisiz/bilinmeyen) mention'ları düz metne indirir; kalanlar korunur. */
+export function stripMentions(doc: RichTextNode, allowed: ReadonlySet<string>): RichTextNode {
+  const visit = (node: RichTextNode): RichTextNode => {
+    if (node.type === 'mention' && !allowed.has(String(node.attrs?.id))) {
+      return { type: 'text', text: `@${labelOf(node)}` };
+    }
+    return node.content ? { ...node, content: node.content.map(visit) } : node;
+  };
+  return visit(doc);
+}
