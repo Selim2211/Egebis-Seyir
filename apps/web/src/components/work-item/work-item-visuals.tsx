@@ -66,18 +66,30 @@ const STATUS_VISUALS: Record<StatusCategory, { icon: LucideIcon; className: stri
   DONE: { icon: CircleCheck, className: 'text-status-done bg-status-done/10' },
 };
 
-/** Durum rozeti. `label` verilmezse kategori adı gösterilir (Space'e özel durum adları Faz 1'de). */
-export function StatusBadge({ category, label }: { category: StatusCategory; label?: string }) {
+/**
+ * Durum rozeti. `label` verilmezse kategori adı gösterilir. `color` Space durumunun kendi rengidir
+ * (ADR-036); verilmezse kategori rengi kullanılır.
+ */
+export function StatusBadge({
+  category,
+  label,
+  color,
+}: {
+  category: StatusCategory;
+  label?: string;
+  color?: string;
+}) {
   const { t } = useTranslation();
   const { icon: Icon, className } = STATUS_VISUALS[category];
   return (
     <span
       className={cn(
         'inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-xs font-medium',
-        className,
+        color ? 'text-foreground' : className,
       )}
+      style={color ? { backgroundColor: `${color}26` } : undefined}
     >
-      <Icon className="size-3.5" aria-hidden />
+      <Icon className="size-3.5" aria-hidden style={color ? { color } : undefined} />
       {label ?? t(`statusCategory.${category}`)}
     </span>
   );

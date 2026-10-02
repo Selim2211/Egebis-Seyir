@@ -16,6 +16,64 @@ enum RoleScope {
   SPACE
 }
 
+enum EstimationScale {
+  FIBONACCI
+  TSHIRT
+  NUMBER
+}
+
+enum StatusCategory {
+  NOT_STARTED
+  ACTIVE
+  DONE
+}
+
+enum WorkItemType {
+  EPIC
+  STORY
+  TASK
+  SUBTASK
+  BUG
+}
+
+enum Priority {
+  URGENT
+  HIGH
+  NORMAL
+  LOW
+}
+
+enum BugSeverity {
+  CRITICAL
+  MAJOR
+  MINOR
+  TRIVIAL
+}
+
+enum TshirtSize {
+  S
+  M
+  L
+  XL
+}
+
+enum ChecklistKind {
+  ACCEPTANCE
+  CHECKLIST
+}
+
+enum LinkType {
+  BLOCKS
+  RELATES_TO
+  DUPLICATES
+}
+
+enum FavoriteType {
+  SPACE
+  FOLDER
+  LIST
+}
+
 model User {
   id           String   @id @default(uuid(7)) @db.Uuid
   /// Küçük harfe çevrilmiş e-posta.
@@ -35,6 +93,11 @@ model User {
   passwordResets  PasswordResetToken[]
   invitationsSent Invitation[]         @relation("InvitedBy")
   activities      ActivityEvent[]
+  spaceMembers    SpaceMember[]
+  favorites       Favorite[]
+  reportedItems   WorkItem[]           @relation("Reporter")
+  assignedItems   WorkItemAssignee[]
+  watchedItems    WorkItemWatcher[]
 
   @@map("users")
 }
@@ -75,10 +138,25 @@ model Workspace {
   createdAt DateTime @default(now()) @db.Timestamptz
   updatedAt DateTime @updatedAt @db.Timestamptz
 
-  roles       Role[]
-  memberships Membership[]
-  invitations Invitation[]
-  activities  ActivityEvent[]
+  roles             Role[]
+  memberships       Membership[]
+  invitations       Invitation[]
+  activities        ActivityEvent[]
+  spaces            Space[]
+  spaceKeys         SpaceKey[]
+  spaceMembers      SpaceMember[]
+  statuses          Status[]
+  folders           Folder[]
+  lists             List[]
+  favorites         Favorite[]
+  workItems         WorkItem[]
+  workItemAssignees WorkItemAssignee[]
+  labels            Label[]
+  workItemLabels    WorkItemLabel[]
+  checklists        Checklist[]
+  checklistItems    ChecklistItem[]
+  workItemLinks     WorkItemLink[]
+  workItemWatchers  WorkItemWatcher[]
 
   @@map("workspaces")
 }
@@ -97,8 +175,9 @@ model Role {
   isSystem    Boolean   @default(true)
   createdAt   DateTime  @default(now()) @db.Timestamptz
 
-  memberships Membership[]
-  invitations Invitation[]
+  memberships  Membership[]
+  invitations  Invitation[]
+  spaceMembers SpaceMember[]
 
   @@unique([workspaceId, scope, key])
   @@map("roles")
@@ -126,7 +205,7 @@ model Invitation {
   email       String
   roleId      String    @db.Uuid
   role        Role      @relation(fields: [roleId], references: [id])
-  /// Guest daveti için paylaşılan Space'ler (ADR-035; Faz 1.2'de kullanılır).
+  /// Guest daveti için paylaşılan Space'ler (ADR-035, ADR-043).
   spaceIds    String[]  @db.Uuid
   tokenHash   String    @unique
   invitedById String    @db.Uuid
@@ -158,4 +237,338 @@ model ActivityEvent {
   @@index([workspaceId, entityType, entityId, createdAt])
   @@index([workspaceId, createdAt])
   @@map("activity_events")
+}
+
+// ---------- Space / Folder / List (Faz 1.2) ----------
+// rank: kesirli sıralama anahtarı (ADR-014), migration'da COLLATE "C" (bayt sırası).
+// archivedAt: arşiv; deletedAt: çöp kutusu, 30 gün sonra kalıcı silinir (ADR-041).
+
+model Space {
+  id                String          @id @default(uuid(7)) @db.Uuid
+  workspaceId       String          @db.Uuid
+  workspace         Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  name              String
+  /// Güncel anahtar; kullanılmış tüm anahtarlar space_keys'te rezerve (ADR-033, ADR-043).
+  key               String
+  color             String
+  icon              String?
+  description       String?
+  isPrivate         Boolean         @default(false)
+  scrumEnabled      Boolean         @default(true)
+  sprintLengthWeeks Int             @default(2)
+  estimationScale   EstimationScale @default(FIBONACCI)
+  rank              String
+  /// Okunabilir ID sayacı (ADR-044); öğe oluşturulurken atomik artırılır.
+  itemCounter       Int             @default(0)
+  archivedAt        DateTime?       @db.Timestamptz
+  deletedAt         DateTime?       @db.Timestamptz
+  deletedById       String?         @db.Uuid
+  createdById       String?         @db.Uuid
+  createdAt         DateTime        @default(now()) @db.Timestamptz
+  updatedAt         DateTime        @updatedAt @db.Timestamptz
+
+  keys     SpaceKey[]
+  members  SpaceMember[]
+  statuses Status[]
+  folders  Folder[]
+  lists    List[]
+  items    WorkItem[]
+  labels   Label[]
+
+  @@index([workspaceId])
+  @@map("spaces")
+}
+
+/// Workspace içinde kullanılmış her Space anahtarı; Space silinse de rezerve kalır.
+model SpaceKey {
+  id          String    @id @default(uuid(7)) @db.Uuid
+  workspaceId String    @db.Uuid
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  spaceId     String?   @db.Uuid
+  space       Space?    @relation(fields: [spaceId], references: [id], onDelete: SetNull)
+  key         String
+  createdAt   DateTime  @default(now()) @db.Timestamptz
+
+  @@unique([workspaceId, key])
+  @@map("space_keys")
+}
+
+/// Space üyeliği + Scrum rolü (Role.scope = SPACE).
+model SpaceMember {
+  id          String    @id @default(uuid(7)) @db.Uuid
+  workspaceId String    @db.Uuid
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  spaceId     String    @db.Uuid
+  space       Space     @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  userId      String    @db.Uuid
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  roleId      String    @db.Uuid
+  role        Role      @relation(fields: [roleId], references: [id])
+  createdAt   DateTime  @default(now()) @db.Timestamptz
+
+  @@unique([spaceId, userId])
+  @@index([userId])
+  @@map("space_members")
+}
+
+/// Space durumları (ADR-013, ADR-036). Kurallar kategoriye bakar.
+model Status {
+  id          String         @id @default(uuid(7)) @db.Uuid
+  workspaceId String         @db.Uuid
+  workspace   Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  spaceId     String         @db.Uuid
+  space       Space          @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  name        String
+  color       String
+  category    StatusCategory
+  rank        String
+  createdAt   DateTime       @default(now()) @db.Timestamptz
+
+  items WorkItem[]
+
+  @@index([spaceId])
+  @@map("statuses")
+}
+
+model Folder {
+  id          String    @id @default(uuid(7)) @db.Uuid
+  workspaceId String    @db.Uuid
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  spaceId     String    @db.Uuid
+  space       Space     @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  name        String
+  rank        String
+  archivedAt  DateTime? @db.Timestamptz
+  deletedAt   DateTime? @db.Timestamptz
+  deletedById String?   @db.Uuid
+  createdAt   DateTime  @default(now()) @db.Timestamptz
+  updatedAt   DateTime  @updatedAt @db.Timestamptz
+
+  lists List[]
+
+  @@index([spaceId])
+  @@map("folders")
+}
+
+model List {
+  id          String    @id @default(uuid(7)) @db.Uuid
+  workspaceId String    @db.Uuid
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  spaceId     String    @db.Uuid
+  space       Space     @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  /// null = Space kökünde (klasörsüz).
+  folderId    String?   @db.Uuid
+  folder      Folder?   @relation(fields: [folderId], references: [id], onDelete: Cascade)
+  name        String
+  rank        String
+  archivedAt  DateTime? @db.Timestamptz
+  deletedAt   DateTime? @db.Timestamptz
+  deletedById String?   @db.Uuid
+  createdAt   DateTime  @default(now()) @db.Timestamptz
+  updatedAt   DateTime  @updatedAt @db.Timestamptz
+
+  items WorkItem[]
+
+  @@index([spaceId])
+  @@index([folderId])
+  @@map("lists")
+}
+
+/// Kişisel favoriler (Space/Folder/List). entityId türüne göre ilgili tabloya işaret eder.
+model Favorite {
+  id          String       @id @default(uuid(7)) @db.Uuid
+  workspaceId String       @db.Uuid
+  workspace   Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  userId      String       @db.Uuid
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type        FavoriteType
+  entityId    String       @db.Uuid
+  createdAt   DateTime     @default(now()) @db.Timestamptz
+
+  @@unique([userId, type, entityId])
+  @@index([workspaceId, userId])
+  @@map("favorites")
+}
+
+// ---------- İş öğeleri (Faz 1.3, ADR-044) ----------
+
+model WorkItem {
+  id               String       @id @default(uuid(7)) @db.Uuid
+  workspaceId      String       @db.Uuid
+  workspace        Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  spaceId          String       @db.Uuid
+  space            Space        @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  listId           String       @db.Uuid
+  list             List         @relation(fields: [listId], references: [id], onDelete: Cascade)
+  /// Üst öğe aynı Space'tedir; alt ağaç birlikte silinir.
+  parentId         String?      @db.Uuid
+  parent           WorkItem?    @relation("Tree", fields: [parentId], references: [id], onDelete: Cascade)
+  children         WorkItem[]   @relation("Tree")
+  type             WorkItemType
+  /// Okunabilir ID = keyPrefix-number; ömür boyu sabit (ADR-033).
+  keyPrefix        String
+  number           Int
+  title            String
+  /// Tiptap belge JSON'u (ADR-048); düz metin karşılığı arama içindir.
+  description      Json?
+  descriptionText  String?
+  statusId         String       @db.Uuid
+  status           Status       @relation(fields: [statusId], references: [id])
+  priority         Priority     @default(NORMAL)
+  reporterId       String?      @db.Uuid
+  reporter         User?        @relation("Reporter", fields: [reporterId], references: [id], onDelete: SetNull)
+  startDate        DateTime?    @db.Date
+  dueDate          DateTime?    @db.Date
+  /// Story Point (Epic/Story/Bug); T-shirt ölçeği sayıya eşlenir (ADR-045).
+  points           Float?
+  /// Saat tahmini (Task/Sub-task).
+  estimateHours    Float?
+  completedAt      DateTime?    @db.Timestamptz
+  /// List içinde kesirli sıralama anahtarı (ADR-014); migration'da COLLATE "C".
+  rank             String
+  // Bug alanları
+  severity         BugSeverity?
+  stepsToReproduce String?
+  expectedResult   String?
+  actualResult     String?
+  environment      String?
+  foundInVersion   String?
+  // Epic alanları
+  goal             String?
+  tshirtSize       TshirtSize?
+  color            String?
+  /// ClickUp içe aktarma (Faz 5).
+  externalSource   String?
+  externalId       String?
+  archivedAt       DateTime?    @db.Timestamptz
+  deletedAt        DateTime?    @db.Timestamptz
+  deletedById      String?      @db.Uuid
+  createdAt        DateTime     @default(now()) @db.Timestamptz
+  updatedAt        DateTime     @updatedAt @db.Timestamptz
+
+  assignees  WorkItemAssignee[]
+  labels     WorkItemLabel[]
+  checklists Checklist[]
+  linksFrom  WorkItemLink[]     @relation("LinkFrom")
+  linksTo    WorkItemLink[]     @relation("LinkTo")
+  watchers   WorkItemWatcher[]
+
+  @@unique([workspaceId, keyPrefix, number])
+  @@index([listId, rank])
+  @@index([spaceId])
+  @@index([parentId])
+  @@index([statusId])
+  @@index([workspaceId, externalSource, externalId])
+  @@map("work_items")
+}
+
+model WorkItemAssignee {
+  workItemId  String    @db.Uuid
+  workItem    WorkItem  @relation(fields: [workItemId], references: [id], onDelete: Cascade)
+  userId      String    @db.Uuid
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspaceId String    @db.Uuid
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now()) @db.Timestamptz
+
+  @@id([workItemId, userId])
+  @@index([userId])
+  @@map("work_item_assignees")
+}
+
+/// Space'e ait etiket.
+model Label {
+  id          String    @id @default(uuid(7)) @db.Uuid
+  workspaceId String    @db.Uuid
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  spaceId     String    @db.Uuid
+  space       Space     @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  name        String
+  color       String
+  createdAt   DateTime  @default(now()) @db.Timestamptz
+
+  items WorkItemLabel[]
+
+  @@unique([spaceId, name])
+  @@map("labels")
+}
+
+model WorkItemLabel {
+  workItemId  String    @db.Uuid
+  workItem    WorkItem  @relation(fields: [workItemId], references: [id], onDelete: Cascade)
+  labelId     String    @db.Uuid
+  label       Label     @relation(fields: [labelId], references: [id], onDelete: Cascade)
+  workspaceId String    @db.Uuid
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@id([workItemId, labelId])
+  @@index([labelId])
+  @@map("work_item_labels")
+}
+
+// ---------- Görev detayı (Faz 1.4, ADR-049..051) ----------
+
+/// Kabul kriterleri (ACCEPTANCE, öğe başına bir tane) ve adlı checklist'ler.
+model Checklist {
+  id          String        @id @default(uuid(7)) @db.Uuid
+  workspaceId String        @db.Uuid
+  workspace   Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  workItemId  String        @db.Uuid
+  workItem    WorkItem      @relation(fields: [workItemId], references: [id], onDelete: Cascade)
+  kind        ChecklistKind
+  title       String
+  rank        String
+  createdAt   DateTime      @default(now()) @db.Timestamptz
+
+  items ChecklistItem[]
+
+  @@index([workItemId])
+  @@map("checklists")
+}
+
+model ChecklistItem {
+  id          String    @id @default(uuid(7)) @db.Uuid
+  workspaceId String    @db.Uuid
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  checklistId String    @db.Uuid
+  checklist   Checklist @relation(fields: [checklistId], references: [id], onDelete: Cascade)
+  text        String
+  done        Boolean   @default(false)
+  rank        String
+  createdAt   DateTime  @default(now()) @db.Timestamptz
+
+  @@index([checklistId])
+  @@map("checklist_items")
+}
+
+/// Bağlantı yönü from → to: "from BLOCKS to", "from DUPLICATES to" (ADR-050).
+model WorkItemLink {
+  id          String    @id @default(uuid(7)) @db.Uuid
+  workspaceId String    @db.Uuid
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  fromId      String    @db.Uuid
+  from        WorkItem  @relation("LinkFrom", fields: [fromId], references: [id], onDelete: Cascade)
+  toId        String    @db.Uuid
+  to          WorkItem  @relation("LinkTo", fields: [toId], references: [id], onDelete: Cascade)
+  type        LinkType
+  createdById String?   @db.Uuid
+  createdAt   DateTime  @default(now()) @db.Timestamptz
+
+  @@unique([fromId, toId, type])
+  @@index([toId])
+  @@map("work_item_links")
+}
+
+model WorkItemWatcher {
+  workItemId  String    @db.Uuid
+  workItem    WorkItem  @relation(fields: [workItemId], references: [id], onDelete: Cascade)
+  userId      String    @db.Uuid
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspaceId String    @db.Uuid
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now()) @db.Timestamptz
+
+  @@id([workItemId, userId])
+  @@index([userId])
+  @@map("work_item_watchers")
 }

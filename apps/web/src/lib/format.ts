@@ -29,3 +29,21 @@ export function relativeTime(iso: string, now: Date = new Date()): string {
   }
   return rtf.format(0, 'minute');
 }
+
+/** 14 Eki (yıl bu yıl değilse 14 Eki 2027). `YYYY-MM-DD` girdisi gün bazlıdır, saat dilimine kaymaz. */
+export function formatShortDate(day: string): string {
+  const date = new Date(`${day}T12:00:00`);
+  const sameYear = date.getFullYear() === new Date().getFullYear();
+  return new Intl.DateTimeFormat(locale(), {
+    day: 'numeric',
+    month: 'short',
+    ...(sameYear ? {} : { year: 'numeric' }),
+  }).format(date);
+}
+
+/** Bugünün YYYY-MM-DD karşılığı (yerel saat). */
+export function todayDay(): string {
+  const now = new Date();
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+}

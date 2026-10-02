@@ -9,13 +9,19 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { ERROR_CODES, type Permission, type WorkspaceRole } from '@scrum/shared';
+import {
+  ERROR_CODES,
+  type Permission,
+  type SpacePermission,
+  type WorkspaceRole,
+} from '@scrum/shared';
 import { ClsService } from 'nestjs-cls';
 import type { AppClsStore } from '../../infra/cls/request-context';
 import { PrismaService } from '../../infra/prisma/prisma.service';
 import { safeEqual } from '../../infra/security/tokens';
 import { type AuthedRequest, CSRF_COOKIE, CSRF_HEADER, SESSION_COOKIE } from './auth.constants';
-import { IS_PUBLIC, REQUIRED_PERMISSION } from './decorators';
+import { SpaceAccessService } from '../access/space-access.service';
+import { IS_PUBLIC, REQUIRED_PERMISSION, REQUIRED_SPACE_PERMISSION } from './decorators';
 import { SessionService } from './session.service';
 
 const cookie = (req: AuthedRequest, name: string): string | undefined => {
@@ -121,6 +127,42 @@ export class PermissionGuard implements CanActivate {
     }
     if (!permissions.includes(required))
       throw new ForbiddenException({ code: ERROR_CODES.FORBIDDEN });
+    return true;
+  }
+}
+
+/**
+ * 5) Space izni (ADR-039): @RequireSpacePermission ile işaretli uçlarda Space rota
+ * parametresinden çözülür. Görünmeyen Space için 404, izin yoksa 403.
+ */
+@Injectable()
+export class SpacePermissionGuard implements CanActivate {
+  constructor(
+    private readonly reflector: Reflector,
+    private readonly cls: ClsService<AppClsStore>,
+    private readonly spaces: SpaceAccessService,
+  ) {}
+
+  async canActivate(ctx: ExecutionContext): Promise<boolean> {
+    const required = this.reflector.getAllAndOverride<SpacePermission | undefined>(
+      REQUIRED_SPACE_PERMISSION,
+      [ctx.getHandler(), ctx.getClass()],
+    );
+    if (!required) return true;
+    if (!this.cls.get('workspaceId')) {
+      throw new HttpException({ code: ERROR_CODES.INTERNAL }, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    const req = ctx.switchToHttp().getRequest<AuthedRequest>();
+    const spaceId = await this.spaces.resolveSpaceId(req.params);
+    const permissions = spaceId ? await this.spaces.permissionsIn(spaceId) : null;
+    if (!spaceId || !permissions) throw new NotFoundException({ code: ERROR_CODES.NOT_FOUND });
+
+    this.cls.set('spaceId', spaceId);
+    this.cls.set('spacePermissions', permissions);
+    if (!permissions.includes(required)) {
+      throw new ForbiddenException({ code: ERROR_CODES.FORBIDDEN });
+    }
     return true;
   }
 }

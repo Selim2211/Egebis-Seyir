@@ -75,7 +75,8 @@ HTTP isteği
  → requestId + pino log
  → AuthGuard        (cookie → session → user)
  → CLS              (userId, workspaceId isteğe bağlanır)
- → PermissionGuard  (@RequirePermission('sprint.start') → rol izin seti)
+ → PermissionGuard  (@RequirePermission('space.create') → workspace rolü izin seti)
+ → SpacePermissionGuard (@RequireSpacePermission('sprint.start') → Space çözülür; açık/özel + Space rolü, ADR-039)
  → Zod doğrulama    (shared şeması)
  → Service          (prisma.$transaction)
      → domain kuralı (ör. "tek aktif sprint")

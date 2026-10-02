@@ -34,6 +34,17 @@ export class QueueService implements OnModuleDestroy {
     });
   }
 
+  /**
+   * Zamanlanmış iş (cron, Europe/Istanbul). QUEUE_ENABLED=false iken zamanlanmaz;
+   * testler işleyiciyi doğrudan çağırır.
+   */
+  async schedule(name: string, cron: string, handler: () => Promise<void>): Promise<void> {
+    await this.register(name, handler);
+    if (!this.enabled) return;
+    const boss = await this.start();
+    await boss.schedule(name, cron, {}, { tz: 'Europe/Istanbul' });
+  }
+
   async enqueue<T extends object>(name: string, data: T): Promise<void> {
     if (!this.enabled) {
       const handler = this.handlers.get(name);

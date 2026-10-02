@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { ERROR_CODES } from '../errors/codes';
 import { WORKSPACE_ROLES } from '../permissions/roles';
 import { EmailSchema, LOCALES, PasswordSchema, PersonNameSchema } from './auth';
 
@@ -35,12 +36,21 @@ export type Invitation = z.infer<typeof InvitationSchema>;
 export const InvitationsResponseSchema = z.object({ invitations: z.array(InvitationSchema) });
 export type InvitationsResponse = z.infer<typeof InvitationsResponseSchema>;
 
-/** POST /api/workspaces/:workspaceId/invitations */
-export const CreateInvitationsRequestSchema = z.object({
-  emails: z.array(EmailSchema).min(1).max(20),
-  role: z.enum(WORKSPACE_ROLES).exclude(['OWNER']),
-});
-export type CreateInvitationsRequest = z.infer<typeof CreateInvitationsRequestSchema>;
+/**
+ * POST /api/workspaces/:workspaceId/invitations
+ * Guest daveti en az bir Space ile yapılır; Guest bu Space'lere Stakeholder olarak eklenir (ADR-043).
+ */
+export const CreateInvitationsRequestSchema = z
+  .object({
+    emails: z.array(EmailSchema).min(1).max(20),
+    role: z.enum(WORKSPACE_ROLES).exclude(['OWNER']),
+    spaceIds: z.array(z.uuid()).max(50).default([]),
+  })
+  .refine((v) => v.role !== 'GUEST' || v.spaceIds.length > 0, {
+    path: ['spaceIds'],
+    message: ERROR_CODES.GUEST_SPACES_REQUIRED,
+  });
+export type CreateInvitationsRequest = z.input<typeof CreateInvitationsRequestSchema>;
 
 /** GET /api/invitations/:token — kabul ekranı için özet. */
 export const InvitationPreviewSchema = z.object({

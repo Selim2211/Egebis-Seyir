@@ -42,9 +42,9 @@ export const invitationsQuery = (workspaceId: string) =>
     queryFn: () => apiRequest(`${ws(workspaceId)}/invitations`, InvitationsResponseSchema),
   });
 
-export function useMembers() {
+export function useMembers(enabled = true) {
   const { id } = useCurrentWorkspace();
-  return useQuery(membersQuery(id));
+  return useQuery({ ...membersQuery(id), enabled });
 }
 
 export function useInvitations(enabled: boolean) {

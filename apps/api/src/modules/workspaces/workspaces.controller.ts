@@ -20,11 +20,14 @@ import {
   InvitationsResponseSchema,
   MembersResponseSchema,
   UpdateMemberRequestSchema,
+  UpdateWorkspaceSettingsRequestSchema,
+  WorkspaceSettingsSchema,
   WORKSPACE_PERMISSIONS as W,
   type AcceptInvitationResponse,
   type InvitationPreview,
   type InvitationsResponse,
   type MembersResponse,
+  type WorkspaceSettings,
 } from '@scrum/shared';
 import type { Request, Response } from 'express';
 import { createZodDto, ZodResponse } from 'nestjs-zod';
@@ -33,6 +36,7 @@ import { AuthRateLimit, OptionalUser, Public, RequirePermission } from '../auth/
 import { SessionService } from '../auth/session.service';
 import { InvitationsService } from './invitations.service';
 import { MembersService } from './members.service';
+import { WorkspaceSettingsService } from './settings.service';
 
 class MembersDto extends createZodDto(MembersResponseSchema) {}
 class UpdateMemberDto extends createZodDto(UpdateMemberRequestSchema) {}
@@ -41,6 +45,8 @@ class CreateInvitationsDto extends createZodDto(CreateInvitationsRequestSchema) 
 class InvitationPreviewDto extends createZodDto(InvitationPreviewSchema) {}
 class AcceptInvitationDto extends createZodDto(AcceptInvitationRequestSchema) {}
 class AcceptInvitationResponseDto extends createZodDto(AcceptInvitationResponseSchema) {}
+class WorkspaceSettingsDto extends createZodDto(WorkspaceSettingsSchema) {}
+class UpdateWorkspaceSettingsDto extends createZodDto(UpdateWorkspaceSettingsRequestSchema) {}
 
 @Controller('workspaces/:workspaceId/members')
 export class MembersController {
@@ -86,7 +92,7 @@ export class InvitationsController {
   @RequirePermission(W.MEMBERS_MANAGE)
   @HttpCode(HttpStatus.NO_CONTENT)
   async create(@Body() body: CreateInvitationsDto): Promise<void> {
-    await this.invitations.create(body.emails, body.role);
+    await this.invitations.create(body.emails, body.role, body.spaceIds);
   }
 
   @Post(':id/resend')
@@ -101,6 +107,26 @@ export class InvitationsController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async revoke(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
     await this.invitations.revoke(id);
+  }
+}
+
+/** Workspace genel ayarları (ADR-042). */
+@Controller('workspaces/:workspaceId/settings')
+export class WorkspaceSettingsController {
+  constructor(private readonly settings: WorkspaceSettingsService) {}
+
+  @Get()
+  @RequirePermission(W.WORKSPACE_SETTINGS)
+  @ZodResponse({ type: WorkspaceSettingsDto })
+  get(): Promise<WorkspaceSettings> {
+    return this.settings.get();
+  }
+
+  @Patch()
+  @RequirePermission(W.WORKSPACE_SETTINGS)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async update(@Body() body: UpdateWorkspaceSettingsDto): Promise<void> {
+    await this.settings.update(body);
   }
 }
 

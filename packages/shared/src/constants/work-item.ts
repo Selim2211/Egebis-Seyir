@@ -24,3 +24,6 @@ export type TshirtSize = (typeof TSHIRT_SIZES)[number];
 /** İş öğeleri arası bağlantı tipleri (brief §5.4). */
 export const LINK_TYPES = ['BLOCKS', 'RELATES_TO', 'DUPLICATES'] as const;
 export type LinkType = (typeof LINK_TYPES)[number];
+
+/** Basit liste modundaki (Scrum kapalı) Space'lerde kullanılabilen tipler (ADR-044). */
+export const SIMPLE_MODE_TYPES: readonly WorkItemType[] = ['TASK', 'SUBTASK', 'BUG'];

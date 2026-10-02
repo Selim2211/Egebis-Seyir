@@ -4,10 +4,8 @@ import {
   FileText,
   House,
   Inbox,
-  Layers,
   ListTodo,
   Palette,
-  Plus,
   Settings2,
   UserPlus,
   X,
@@ -16,6 +14,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { SidebarTree } from '@/features/spaces/sidebar-tree';
 import { useCan, useCurrentWorkspace } from '@/features/workspace/queries';
 import { useUiStore } from '@/lib/ui-store';
 import { cn } from '@/lib/utils';
@@ -120,31 +119,11 @@ export function Sidebar() {
 
         <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto p-2">
           <NavLink to="/" icon={House} label={t('nav.home')} />
-          <PlannedItem icon={ListTodo} label={t('nav.myWork')} />
+          <NavLink to="/my-work" icon={ListTodo} label={t('nav.myWork')} />
           <PlannedItem icon={Inbox} label={t('nav.inbox')} phase="F2" />
           <PlannedItem icon={FileText} label={t('nav.docs')} phase="F3" />
 
-          <div className="mt-4 mb-1 px-2">
-            <span className="text-muted-foreground text-[11px] font-semibold tracking-wide uppercase">
-              {t('nav.spaces')}
-            </span>
-          </div>
-          <div className="border-sidebar-border mx-1 rounded-md border border-dashed p-3 text-center">
-            <Layers className="text-muted-foreground mx-auto mb-1.5 size-5" aria-hidden />
-            <p className="text-xs font-medium">{t('spaces.emptyTitle')}</p>
-            <p className="text-muted-foreground mt-0.5 text-xs">{t('spaces.emptyBody')}</p>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span className="mt-2 inline-block">
-                  <Button size="sm" variant="secondary" disabled>
-                    <Plus />
-                    {t('spaces.create')}
-                  </Button>
-                </span>
-              </TooltipTrigger>
-              <TooltipContent side="right">{t('nav.comingSoon')}</TooltipContent>
-            </Tooltip>
-          </div>
+          <SidebarTree />
         </nav>
 
         <div className="border-sidebar-border flex flex-col gap-0.5 border-t p-2">

@@ -284,3 +284,137 @@
   - Oran sınırlama: giriş, kurulum, şifre sıfırlama ve davet kabul uçlarında (@nestjs/throttler, bellek içi; tek instance).
   - Workspace Owner/Admin, tüm Space'lerde Space izinlerinin tamamına sahiptir (brief §6.1.6 "PO ve Admin").
   - E-posta şablonları Faz 1'de basit TS fonksiyonları (TR/EN, HTML + düz metin); React Email (ADR-021) gerçekten gerekirse eklenir.
+
+## ADR-039 — Space görünürlüğü: açık / özel (ClickUp davranışı)
+
+- **Tarih:** 2026-10-02 · **Durum:** Kabul (kullanıcı kararı)
+- **Karar:** Her Space'in "özel" ayarı vardır (varsayılan: açık).
+  - **Açık Space:** Workspace'in tüm Member'ları görür; üye değilse Stakeholder izinleriyle (görüntüleme, yorum, rapor, doküman görüntüleme). İş yapmak için Space üyesi olmak gerekir.
+  - **Özel Space:** Yalnızca Space üyeleri görür; üye olmayana Space yokmuş gibi 404 döner.
+  - **Owner/Admin:** Tüm Space'leri görür ve tüm Space izinlerine sahiptir (ADR-038).
+  - **Guest:** Açık olsa bile yalnızca üyesi olduğu (paylaşılan) Space'leri görür; orada yalnızca Stakeholder rolü alabilir (ADR-035).
+- **Uygulama:** Etkin Space izinleri saf bir fonksiyonla hesaplanır (`spacePermissions`, shared). API'de `@RequireSpacePermission` + `SpaceAccessGuard`; Space, rota parametresinden (`spaceId`, `folderId`, `listId`) çözülür.
+- **Alternatifler:** Yalnızca üyeler görür (Jira): yöneticiler dışında takımlar arası şeffaflık kalmaz.
+
+## ADR-040 — Space yapısı yetkileri
+
+- **Tarih:** 2026-10-02 · **Durum:** Kabul (kullanıcı kararı)
+- **Karar:**
+  - Yeni Space izni `space.lists.manage`: Folder/List oluşturma, yeniden adlandırma, sıralama, taşıma, arşivleme, silme. Varsayılan: Product Owner, Scrum Master, Developer (silinenler geri alınabildiği için risk düşük).
+  - `space.settings` (PO, SM): Space adı/anahtarı/rengi/görünürlüğü, çalışma modu, üyeler ve Scrum rolleri, Space'i arşivleme/silme.
+  - Space'lerin kenar çubuğundaki sırası herkes için ortaktır; yalnızca `workspace.settings` (Owner/Admin) değiştirir.
+  - Space'i oluşturan kişi varsayılan olarak Product Owner eklenir (oluşturma penceresinde değiştirilebilir).
+  - Mevcut DB rollerine yeni izin migration ile eklenir.
+
+## ADR-041 — Arşiv ve çöp kutusu
+
+- **Tarih:** 2026-10-02 · **Durum:** Kabul (kullanıcı kararı: 30 gün)
+- **Karar:**
+  - **Arşiv:** Space/Folder/List kenar çubuğundan gizlenir; bağlantıyla açılır, "Arşivden çıkar" ile geri gelir. Süre sınırı yok.
+  - **Silme = çöp kutusu:** `deletedAt` işaretlenir; 30 gün içinde geri alınabilir, sonra her gece çalışan iş (pg-boss) kalıcı olarak siler.
+  - Alt öğeler ebeveynle birlikte gizlenir, ayrıca işaretlenmez; ebeveyn geri gelince alt öğeler de geri gelir.
+  - Arşivleme ve silme sonrası bildirimde "Geri al" vardır (brief §11 Undo).
+  - Ayarlar › Arşiv ve çöp kutusu sayfası, kullanıcının yönetebildiği öğeleri listeler (brief §10 madde 20).
+- **Alternatifler:** Süresiz saklama (veritabanı büyür; kullanıcı 30 günü seçti).
+
+## ADR-042 — Member'ların Space oluşturması bir workspace ayarıdır
+
+- **Tarih:** 2026-10-02 · **Durum:** Kabul (kullanıcı kararı)
+- **Karar:** Varsayılan açık. Owner/Admin, Ayarlar › Genel'den kapatabilir. Ayar ayrı bir alan olarak değil, MEMBER rolünün izin setinde `space.create` bulunup bulunmamasıyla saklanır (tek doğruluk kaynağı: rol verisi, ADR-011).
+
+## ADR-043 — Space ayrıntıları (Faz 1.2)
+
+- **Tarih:** 2026-10-02 · **Durum:** Kabul
+- **Karar:**
+  - **Anahtar:** 2–10 karakter, harfle başlar, yalnızca A–Z ve 0–9 (`MOB`). Addan öneri üretilir (Türkçe harfler sadeleştirilir). Workspace içinde kullanılmış her anahtar `space_keys` tablosunda rezerve kalır; Space silinse bile (ADR-033).
+  - **Durumlar** Space düzeyindedir (ADR-013). Faz 1'de Space ayarlarında salt okunur gösterilir; düzenleme F2 (custom workflow).
+  - **Tahmin ölçeği:** Fibonacci (varsayılan), T-shirt (XS–XL), Sayı (serbest). Özel ölçek F2.
+  - **Çalışma modu:** Scrum (Sprint/Epic/Backlog açık) veya Basit liste. Sprint süresi 1–4 hafta (varsayılan 2).
+  - **Yeni Space** boş bir "Görevler" / "Tasks" listesiyle açılır (iş öğeleri her zaman bir List'te durur).
+  - **Sıralama:** Kesirli sıralama anahtarı (ADR-014, `fractional-indexing`). Space kökünde önce Folder'lar, sonra klasörsüz List'ler.
+  - **Taşıma:** List, aynı Space içinde Folder'lar ve kök arasında taşınabilir. Space'ler arası taşıma iş öğesi taşımasıyla birlikte ele alınacak (1.3).
+  - **Guest daveti** en az bir Space seçilerek yapılır; davet kabulünde Guest bu Space'lere Stakeholder olarak eklenir. Bir üye Guest'e düşürülürse Space rolleri Stakeholder'a iner.
+  - **Favoriler** kişiseldir (Space/Folder/List); erişimi kalkan veya silinen öğe favorilerde görünmez.
+
+## ADR-044 — İş öğesi modeli ve okunabilir ID sayacı (Faz 1.3)
+
+- **Tarih:** 2026-10-02 · **Durum:** Kabul (ADR-033 ve brief §5.4'ün uygulaması; ayrıntılar geliştirici varsayılanı)
+- **Karar:**
+  - Tek `work_items` tablosu; tip alanıyla Epic/Story/Task/Sub-task/Bug. Bug'a (önem, tekrar adımları, beklenen/gerçek sonuç, ortam, bulunduğu sürüm) ve Epic'e (hedef, T-shirt boyutu, renk) özel alanlar nullable sütunlardır; tipe uymayan alan API'de reddedilir.
+  - ID: `keyPrefix` + `number` öğede kalıcı saklanır; `(workspaceId, keyPrefix, number)` benzersizdir. Sayaç Space başınadır (`spaces.itemCounter`), öğe oluşturulurken aynı transaction'da atomik artırılır; anahtar değişse de sayaç sürer.
+  - Her öğe bir List'te durur (`listId`) ve bir Space'e aittir. Üst öğe aynı Space içinde olmalıdır (List farklı olabilir).
+  - Atananlar çoklu (`work_item_assignees`); etiketler Space'e ait (`labels`, `work_item_labels`). Atanan, workspace üyesi olmalıdır.
+  - `externalSource/externalId` baştan vardır (ClickUp içe aktarma, Faz 5).
+  - Sıralama: List içinde kesirli `rank` (ADR-014).
+- **Alternatifler:** Tip başına ayrı tablolar (hiyerarşi ve ortak alanlar sorguları zorlaşır); tip özel alanları için JSONB (doğrulama ve sorgu zorlaşır).
+
+## ADR-045 — Tahmin alanları
+
+- **Tarih:** 2026-10-02 · **Durum:** Kabul (brief §6.2.4; ayrıntılar geliştirici varsayılanı)
+- **Karar:**
+  - Story Point (`points`) yalnızca Epic/Story/Bug'da, saat (`estimateHours`) yalnızca Task/Sub-task'ta tutulur; uymayan alan `WORK_ITEM_ESTIMATE_NOT_ALLOWED`.
+  - `points` sayıdır. Fibonacci ölçeğinde 1,2,3,5,8,13,21; Sayı ölçeğinde 0–1000; T-shirt ölçeğinde XS=1, S=2, M=3, L=5, XL=8 olarak saklanır (toplam ve velocity hesapları sayısal kalır, arayüz harfi gösterir).
+  - Üst öğe, alt öğelerin saatini toplayıp gösterebilir (rollup, saf fonksiyon). Epic ilerlemesi point ağırlıklıdır; point yoksa adet bazlıdır (brief §6.2.3).
+  - Tahmin girmek `estimate.write` izni ister; durum değişikliği `workItem.status.own` (kendine atanmış veya bildirdiği öğe) ya da `workItem.write` ile yapılır.
+- **Alternatifler:** Tahmini metin saklamak (toplanamaz).
+
+## ADR-046 — İş öğesi yaşam döngüsü: arşiv, çöp, tamamlanma
+
+- **Tarih:** 2026-10-02 · **Durum:** Kabul (brief §6.2.2, §6.2.5, §6.2.7)
+- **Karar:**
+  - Arşiv ve silme (çöp) işlemi öğe ve tüm alt öğelerine aynı zaman damgasıyla uygulanır; geri getirme aynı damgalı alt öğeleri de geri getirir. Çöp 30 gün (ADR-041); kalıcı silmeyi gece işi yapar.
+  - Durum kategorisi DONE'a geçince `completedAt` yazılır, DONE'dan çıkınca silinir; her ikisi de aktivite kaydına düşer.
+  - Açık alt öğesi olan öğe DONE'a çekilirken API `WORK_ITEM_OPEN_CHILDREN` (409, `details.count`) döner; istemci kullanıcıya sorar ve `force: true` ile yeniden gönderir (uyarı, engel değil; "engelle" ayarı F2).
+- **Alternatifler:** Alt öğeleri ayrı işaretlememek (geri getirmede tutarsızlık riski).
+
+## ADR-047 — Kopyalama ve taşıma
+
+- **Tarih:** 2026-10-02 · **Durum:** Kabul (ADR-033 ile uyumlu; ayrıntılar geliştirici varsayılanı)
+- **Karar:**
+  - **Taşıma** aynı veya başka Space'teki List'e yapılır; öğe ID'si değişmez. Alt öğeler öğeyle birlikte taşınır. Başka Space'e taşırken: durumlar kategori eşleşmesiyle (önce aynı ad, sonra aynı kategorinin ilk durumu), etiketler aynı ada sahip hedef etiketle eşlenir (yoksa düşer), üst öğe bağı (taşınan alt ağacın dışındaysa) kaldırılır; hedefte `workItem.write` izni gerekir.
+  - **Kopyalama** yeni ID ile oluşur (başlık sonuna "(kopya)" eklenmez; kopya aynı başlıkla gelir), durum başlangıç durumuna döner, tamamlanma/bağlantı/yorum kopyalanmaz; istenirse alt öğeler de kopyalanır.
+  - **Toplu düzenleme:** aynı Space içindeki en fazla 200 öğede durum, öncelik, atanan ekle/çıkar, etiket ekle/çıkar.
+
+## ADR-048 — Açıklama: Tiptap JSON, düz metin kopyası, XSS kuralı (Faz 1.4)
+
+- **Tarih:** 2026-10-02 · **Durum:** Kabul (ADR-022'nin uygulaması; ayrıntılar geliştirici varsayılanı)
+- **Karar:** Açıklama Tiptap belge JSON'u olarak `work_items.description` (jsonb) içinde saklanır; her kayıtta düz metin karşılığı `descriptionText`'e yazılır (Faz 1.5 arama için). Sunucu belgeyi doğrular: kök `doc`, izinli düğüm/işaret listesi (paragraf, başlık 1–3, kalın, italik, kod, bağlantı, madde/sıralı liste, kod bloğu, alıntı, yatay çizgi), en çok 200 KB, bağlantılar yalnızca `http(s)`/`mailto`. Hiçbir yerde ham HTML saklanmaz veya basılmaz.
+- **Kapsam dışı (sonraki adım):** görsel yapıştırma ve tablo (ek altyapısı 1.6), @mention (1.6'da yorumlarla).
+- **Alternatifler:** Markdown/HTML saklamak (XSS ve dönüştürme riski).
+
+## ADR-049 — Kabul kriterleri ve checklist'ler
+
+- **Tarih:** 2026-10-02 · **Durum:** Kabul (brief §5.4; ayrıntılar geliştirici varsayılanı)
+- **Karar:** Tek `checklists` tablosu, `kind` = `ACCEPTANCE` (öğe başına en çok bir tane, ilk madde eklenirken oluşur) veya `CHECKLIST` (adlı, öğe başına en çok 20). Maddeler `checklist_items` (metin ≤ 500, `done`, kesirli rank). Given-When-Then biçimi serbest metindir. Düzenleme `workItem.write` ister. Kopyalamada checklist'ler kopyalanır, maddeler işaretsiz gelir.
+- **Alternatifler:** Kabul kriterini açıklamanın içinde tutmak (işaretlenemez, raporlanamaz).
+
+## ADR-050 — Bağlantılar ve engelleyen uyarısı
+
+- **Tarih:** 2026-10-02 · **Durum:** Kabul (brief §5.4, §6.2.6)
+- **Karar:** `work_item_links(from, to, type)`; tipler `BLOCKS`, `RELATES_TO`, `DUPLICATES`. Arayüz ters yönü gösterir ("MOB-3 tarafından engelleniyor"). Kendine bağlanamaz; aynı çift ve tip tekrarlanamaz; `RELATES_TO` her iki yönde tek kayıt sayılır. İki öğe farklı Space'te olabilir; görüntüleyen kişi karşı Space'i göremiyorsa o bağlantı listede görünmez. Engelleyeni bitmemiş (DONE kategorisinde olmayan) bir öğe NOT_STARTED'dan ACTIVE'e çekilirken API `WORK_ITEM_BLOCKED` (409, `details.keys`) döner; istemci `force: true` ile yeniden gönderir (uyarı, engel değil; ADR-046 ile aynı kalıp).
+- **Alternatifler:** Engeli zorunlu yapmak (brief "uyarı" diyor).
+
+## ADR-051 — İzleyiciler ve "Task'lara böl"
+
+- **Tarih:** 2026-10-02 · **Durum:** Kabul (brief §5.4; ayrıntılar geliştirici varsayılanı)
+- **Karar:** İzleyiciler `work_item_watchers`; bildiren ve atananlar öğe oluşurken/atanırken otomatik izleyici olur, herkes kendini ekleyip çıkarabilir. Bildirim gönderimi Faz 2'dedir (bu adımda yalnızca kayıt). Bir Story, tek istekle birden çok Task'a bölünebilir (en çok 30 başlık; her biri Story'nin altına, aynı List'te ilk durumla açılır); Story'nin kendisi değişmez.
+
+## ADR-052 — Görünüm durumu adreste, süzme ve gruplama istemcide (Faz 1.5)
+
+- **Tarih:** 2026-10-02 · **Durum:** Kabul (ADR-003 "URL'de tip güvenli filtre state"; ayrıntılar geliştirici varsayılanı)
+- **Karar:** List sayfasının görünümü (List/Table), süzgeçler, sıralama, gruplama ve arama metni adres parametrelerinde tutulur (paylaşılabilir, geri tuşu çalışır). Bir List'in öğeleri (en çok 5.000) tek istekle gelir; süzme, sıralama ve gruplama istemcide saf fonksiyonlarla yapılır (anlık his, birim testli). 100'ü aşan satır listesi sanallaştırılır. Sütun seçimi cihaza özeldir (yerel tercih).
+- **Hiyerarşi:** Süzgeç, sıralama veya gruplama yokken satırlar ağaç olarak (üst → alt) gösterilir; biri açıkken düz liste gösterilir.
+- **Sınır:** 5.000'i aşan List'ler için sunucu tarafı süzme/sayfalama Faz 2'de (backlog çalışmasıyla).
+- **Alternatifler:** Süzmeyi sunucuda yapmak (her tuşta istek; bu ölçekte gereksiz).
+
+## ADR-053 — Global arama: PostgreSQL FTS (Türkçe) + trigram
+
+- **Tarih:** 2026-10-02 · **Durum:** Kabul (ADR-019'un uygulaması; ayrıntılar geliştirici varsayılanı)
+- **Karar:** `GET /search?q=` başlık ve açıklama düz metnini `to_tsvector('turkish', …)` ile (ön ek eşleşmeli), başlığı ayrıca `ILIKE` + `pg_trgm` GIN dizini ile, `MOB-12` biçimini kimlikle arar. Yalnızca görülebilen Space'lerdeki, silinmemiş ve arşivlenmemiş öğeler döner (ADR-035, ADR-039). Sonuçlar sıralı ve en çok 20'dir.
+- **İstisna:** Arama ham SQL kullanır; `workspaceId` ve görünür Space listesi sorguda açıkça verilir (tenant uzantısı ham SQL'e uygulanmaz). Sonuç satırları yine `TenantPrismaService` ile yüklenir.
+- **Alternatifler:** Meilisearch/OpenSearch (ADR-019: ölçek gerektirmiyor).
+
+## ADR-054 — "Bana atananlar / Oluşturduklarım / İzlediklerim"
+
+- **Tarih:** 2026-10-02 · **Durum:** Kabul (brief §5.8; ayrıntılar geliştirici varsayılanı)
+- **Karar:** `GET /my-work?scope=assigned|created|watching` kullanıcının görebildiği tüm Space'lerdeki öğeleri döner (en çok 500, silinmiş/arşivli hariç). Varsayılan olarak tamamlananlar (DONE) gizlidir; `includeDone=true` ile gelir. Sıra: bitiş tarihi yakın olan önce, tarihsizler sonda. Kenar çubuğundaki "Bana atananlar" bu sayfaya gider.

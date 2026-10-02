@@ -1,20 +1,12 @@
 import { expect, type Page, test } from '@playwright/test';
 import { E2E } from '../playwright.config';
+import { login, MEMBER, OWNER } from './accounts';
 import { waitForMail } from './mailpit';
-
-const OWNER = { name: 'Zeynep Kaya', email: 'owner@example.com', password: 'e2e-owner-pass' };
-const MEMBER = { name: 'Elif Demir', email: 'member@example.com', password: 'e2e-member-pass' };
 
 async function logout(page: Page) {
   await page.getByRole('button', { name: /Hesap menüsü/ }).click();
   await page.getByRole('menuitem', { name: 'Çıkış yap' }).click();
   await expect(page).toHaveURL(/\/login/);
-}
-
-async function login(page: Page, email: string, password: string) {
-  await page.getByLabel('E-posta').fill(email);
-  await page.getByLabel('Şifre').fill(password);
-  await page.getByRole('button', { name: 'Giriş yap' }).click();
 }
 
 /** Faz 1.1 akışı: kurulum → davet → e-postadan kayıt → giriş (taslak 1, 6, 9). */

@@ -727,14 +727,15 @@ Bir özellik **bitti** sayılması için:
 
 ## 17. Değişiklik Günlüğü (Claude Code Güncelleyecek)
 
-| Tarih       | Değişiklik                                                                                                                              | Onaylayan |
-| ----------- | --------------------------------------------------------------------------------------------------------------------------------------- | --------- |
-| (başlangıç) | İlk brief oluşturuldu                                                                                                                   | -         |
-| 2026-10-02  | Bölüm 18 soruları cevaplandı, cevaplar Bölüm 18.1'e işlendi                                                                             | Kullanıcı |
-| 2026-10-02  | Mimari ve teknoloji kararları alındı → `docs/DECISIONS.md` (ADR-001…032). Özet: React SPA + NestJS + PostgreSQL, TS monorepo            | Kullanıcı |
-| 2026-10-02  | Proje konumu `C:\dev\scrum-manager` (OneDrive dışı), yerel git                                                                          | Kullanıcı |
-| 2026-10-02  | ClickUp'tan olası veri taşıma notu eklendi: iş öğesi modelinde `externalSource/externalId` alanları baştan bulunacak; import Faz 5      | Kullanıcı |
-| 2026-10-02  | Faz 1 kararları: okunabilir ID asla değişmez (ADR-033), kayıt yalnızca davetle (ADR-034), Guest yalnızca paylaşılan Space'ler (ADR-035) | Kullanıcı |
+| Tarih       | Değişiklik                                                                                                                                                                            | Onaylayan |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
+| (başlangıç) | İlk brief oluşturuldu                                                                                                                                                                 | -         |
+| 2026-10-02  | Bölüm 18 soruları cevaplandı, cevaplar Bölüm 18.1'e işlendi                                                                                                                           | Kullanıcı |
+| 2026-10-02  | Mimari ve teknoloji kararları alındı → `docs/DECISIONS.md` (ADR-001…032). Özet: React SPA + NestJS + PostgreSQL, TS monorepo                                                          | Kullanıcı |
+| 2026-10-02  | Proje konumu `C:\dev\scrum-manager` (OneDrive dışı), yerel git                                                                                                                        | Kullanıcı |
+| 2026-10-02  | ClickUp'tan olası veri taşıma notu eklendi: iş öğesi modelinde `externalSource/externalId` alanları baştan bulunacak; import Faz 5                                                    | Kullanıcı |
+| 2026-10-02  | Faz 1 kararları: okunabilir ID asla değişmez (ADR-033), kayıt yalnızca davetle (ADR-034), Guest yalnızca paylaşılan Space'ler (ADR-035)                                               | Kullanıcı |
+| 2026-10-02  | Faz 1.2 kararları: Space açık/özel (ADR-039), Folder/List yönetimi PO+SM+Developer (ADR-040), çöp kutusu 30 gün (ADR-041), Member Space oluşturma ayarlı ve varsayılan açık (ADR-042) | Kullanıcı |
 
 ---
 

@@ -9,4 +9,7 @@ export interface AppClsStore extends ClsStore {
   workspaceId?: string;
   workspaceRole?: WorkspaceRole;
   permissions?: readonly string[];
+  /** Yalnızca @RequireSpacePermission uçlarında dolu (SpaceAccessGuard). */
+  spaceId?: string;
+  spacePermissions?: readonly string[];
 }

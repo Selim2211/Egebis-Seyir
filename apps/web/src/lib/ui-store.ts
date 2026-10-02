@@ -11,10 +11,16 @@ interface UiState {
   workspaceId: string | null;
   /** Mobilde kenar çubuğu açık mı (kalıcı değil). */
   sidebarOpen: boolean;
+  /** Kenar çubuğu ağacında açık Space/Folder'lar (cihaza özel). */
+  expanded: Record<string, boolean>;
+  /** Table görünümünde görünen sütunlar (cihaza özel). */
+  tableColumns: string[] | null;
   setTheme: (theme: Theme) => void;
   setLanguage: (language: Locale) => void;
   setWorkspaceId: (id: string | null) => void;
   setSidebarOpen: (open: boolean) => void;
+  setExpanded: (id: string, open: boolean) => void;
+  setTableColumns: (columns: string[] | null) => void;
 }
 
 /**
@@ -28,14 +34,24 @@ export const useUiStore = create<UiState>()(
       language: 'tr',
       workspaceId: null,
       sidebarOpen: false,
+      expanded: {},
+      tableColumns: null,
       setTheme: (theme) => set({ theme }),
       setLanguage: (language) => set({ language }),
       setWorkspaceId: (workspaceId) => set({ workspaceId }),
       setSidebarOpen: (sidebarOpen) => set({ sidebarOpen }),
+      setExpanded: (id, open) => set((s) => ({ expanded: { ...s.expanded, [id]: open } })),
+      setTableColumns: (tableColumns) => set({ tableColumns }),
     }),
     {
       name: 'scrum-ui',
-      partialize: ({ theme, language, workspaceId }) => ({ theme, language, workspaceId }),
+      partialize: ({ theme, language, workspaceId, expanded, tableColumns }) => ({
+        theme,
+        language,
+        workspaceId,
+        expanded,
+        tableColumns,
+      }),
     },
   ),
 );

@@ -64,11 +64,24 @@ export class MembersService {
 
       if (newRole === null) {
         await tx.membership.delete({ where: { id: target.id } });
+        await tx.spaceMember.deleteMany({ where: { userId: targetUserId } });
+        await tx.favorite.deleteMany({ where: { userId: targetUserId } });
+        await tx.workItemAssignee.deleteMany({ where: { userId: targetUserId } });
       } else {
         const role = await tx.role.findFirstOrThrow({
           where: { scope: RoleScope.WORKSPACE, key: newRole },
         });
         await tx.membership.update({ where: { id: target.id }, data: { roleId: role.id } });
+        if (newRole === 'GUEST') {
+          // Guest Space'lerde yalnızca Stakeholder olabilir (ADR-035, ADR-043).
+          const stakeholder = await tx.role.findFirstOrThrow({
+            where: { scope: RoleScope.SPACE, key: 'STAKEHOLDER' },
+          });
+          await tx.spaceMember.updateMany({
+            where: { userId: targetUserId },
+            data: { roleId: stakeholder.id },
+          });
+        }
       }
       await this.activity.record(tx, {
         workspaceId,

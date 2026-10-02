@@ -1,6 +1,14 @@
 import { WORKSPACE_PERMISSIONS } from '@scrum/shared';
 import { createFileRoute, Link, type LinkProps, Outlet } from '@tanstack/react-router';
-import { MonitorSmartphone, Settings2, UserRound, Users, type LucideIcon } from 'lucide-react';
+import {
+  Archive,
+  Building2,
+  MonitorSmartphone,
+  Settings2,
+  UserRound,
+  Users,
+  type LucideIcon,
+} from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useCan } from '@/features/workspace/queries';
 
@@ -41,6 +49,7 @@ function SectionLabel({ children }: { children: string }) {
 function SettingsLayout() {
   const { t } = useTranslation();
   const canViewMembers = useCan(WORKSPACE_PERMISSIONS.MEMBERS_VIEW);
+  const canEditWorkspace = useCan(WORKSPACE_PERMISSIONS.WORKSPACE_SETTINGS);
 
   return (
     <div className="flex min-h-full flex-col lg:flex-row">
@@ -48,12 +57,14 @@ function SettingsLayout() {
         aria-label={t('settings.title')}
         className="flex gap-1 overflow-x-auto border-b p-3 lg:w-56 lg:shrink-0 lg:flex-col lg:border-r lg:border-b-0 lg:p-4"
       >
-        {canViewMembers && (
-          <>
-            <SectionLabel>{t('settings.workspaceSection')}</SectionLabel>
-            <SubLink to="/settings/members" icon={Users} label={t('settings.members')} />
-          </>
+        <SectionLabel>{t('settings.workspaceSection')}</SectionLabel>
+        {canEditWorkspace && (
+          <SubLink to="/settings/general" icon={Building2} label={t('settings.general')} />
         )}
+        {canViewMembers && (
+          <SubLink to="/settings/members" icon={Users} label={t('settings.members')} />
+        )}
+        <SubLink to="/settings/archive" icon={Archive} label={t('settings.archive')} />
         <SectionLabel>{t('settings.accountSection')}</SectionLabel>
         <SubLink to="/settings/profile" icon={UserRound} label={t('settings.profile')} />
         <SubLink to="/settings/preferences" icon={Settings2} label={t('settings.preferences')} />

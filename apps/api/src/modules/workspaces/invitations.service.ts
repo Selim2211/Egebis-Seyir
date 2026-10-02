@@ -17,7 +17,7 @@ import {
   type WorkspaceRole,
 } from '@scrum/shared';
 import { ClsService } from 'nestjs-cls';
-import type { Prisma } from '../../generated/prisma/client';
+import { type Prisma, RoleScope } from '../../generated/prisma/client';
 import type { AppClsStore } from '../../infra/cls/request-context';
 import type { Env } from '../../infra/config/env';
 import { MailService } from '../../infra/mail/mail.service';
@@ -69,10 +69,24 @@ export class InvitationsService {
   }
 
   /** Davet gönderir. Aynı e-postaya bekleyen davet varsa yenisiyle değiştirilir. */
-  async create(emails: string[], role: Exclude<WorkspaceRole, 'OWNER'>): Promise<void> {
+  async create(
+    emails: string[],
+    role: Exclude<WorkspaceRole, 'OWNER'>,
+    spaceIds: string[] = [],
+  ): Promise<void> {
     const workspaceId = this.cls.get('workspaceId')!;
     const actorId = this.cls.get('userId')!;
     const unique = [...new Set(emails)];
+    // Space paylaşımı yalnızca Guest daveti içindir (ADR-043).
+    const sharedSpaceIds = role === 'GUEST' ? [...new Set(spaceIds)] : [];
+    if (sharedSpaceIds.length > 0) {
+      const found = await this.tenant.db.space.count({
+        where: { id: { in: sharedSpaceIds }, deletedAt: null },
+      });
+      if (found !== sharedSpaceIds.length) {
+        throw new NotFoundException({ code: ERROR_CODES.NOT_FOUND });
+      }
+    }
 
     const existing = await this.tenant.db.membership.findMany({
       where: { user: { email: { in: unique } } },
@@ -99,6 +113,7 @@ export class InvitationsService {
             workspaceId,
             email,
             roleId,
+            spaceIds: sharedSpaceIds,
             tokenHash: hashToken(token),
             invitedById: actorId,
             expiresAt: new Date(Date.now() + INVITATION_TTL_DAYS * DAY),
@@ -110,7 +125,7 @@ export class InvitationsService {
           entityType: 'invitation',
           entityId: invitation.id,
           action: 'invitation.created',
-          changes: { email, role },
+          changes: { email, role, spaceIds: sharedSpaceIds },
         });
         result.push({ email, token });
       }
@@ -218,6 +233,33 @@ export class InvitationsService {
         create: { workspaceId: inv.workspaceId, userId, roleId: inv.roleId },
         update: {},
       });
+      if (inv.spaceIds.length > 0) {
+        // Guest, paylaşılan Space'lere Stakeholder olarak eklenir (ADR-035, ADR-043).
+        const [stakeholder, spaces] = await Promise.all([
+          tx.role.findUniqueOrThrow({
+            where: {
+              workspaceId_scope_key: {
+                workspaceId: inv.workspaceId,
+                scope: RoleScope.SPACE,
+                key: 'STAKEHOLDER',
+              },
+            },
+          }),
+          tx.space.findMany({
+            where: { workspaceId: inv.workspaceId, id: { in: inv.spaceIds }, deletedAt: null },
+            select: { id: true },
+          }),
+        ]);
+        await tx.spaceMember.createMany({
+          data: spaces.map((s) => ({
+            workspaceId: inv.workspaceId,
+            spaceId: s.id,
+            userId,
+            roleId: stakeholder.id,
+          })),
+          skipDuplicates: true,
+        });
+      }
       await this.recordJoin(tx, inv.workspaceId, userId, inv.id);
       return existing ? undefined : userId;
     });

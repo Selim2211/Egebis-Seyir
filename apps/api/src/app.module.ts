@@ -16,10 +16,18 @@ import { AccessModule } from './modules/access/access.module';
 import { ActivityModule } from './modules/activity/activity.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { AUTH_RATE_LIMITED } from './modules/auth/decorators';
-import { AuthGuard, CsrfGuard, PermissionGuard, WorkspaceAccessGuard } from './modules/auth/guards';
+import {
+  AuthGuard,
+  CsrfGuard,
+  PermissionGuard,
+  SpacePermissionGuard,
+  WorkspaceAccessGuard,
+} from './modules/auth/guards';
 import { HealthModule } from './modules/health/health.module';
 import { SetupModule } from './modules/setup/setup.module';
+import { SpacesModule } from './modules/spaces/spaces.module';
 import { UsersModule } from './modules/users/users.module';
+import { WorkItemsModule } from './modules/work-items/work-items.module';
 import { WorkspacesModule } from './modules/workspaces/workspaces.module';
 
 const requestId = (req: Request): string => {
@@ -75,18 +83,21 @@ const isAuthRateLimited = (ctx: ExecutionContext): boolean =>
     SetupModule,
     UsersModule,
     WorkspacesModule,
+    SpacesModule,
+    WorkItemsModule,
     HealthModule,
   ],
   providers: [
     { provide: APP_PIPE, useClass: ZodValidationPipe },
     { provide: APP_INTERCEPTOR, useClass: ZodSerializerInterceptor },
     { provide: APP_FILTER, useClass: ApiExceptionFilter },
-    // Guard sırası önemli: oran sınırı → oturum → CSRF → workspace üyeliği → izin.
+    // Guard sırası önemli: oran sınırı → oturum → CSRF → workspace üyeliği → izin → Space izni.
     { provide: APP_GUARD, useClass: ThrottlerGuard },
     { provide: APP_GUARD, useClass: AuthGuard },
     { provide: APP_GUARD, useClass: CsrfGuard },
     { provide: APP_GUARD, useClass: WorkspaceAccessGuard },
     { provide: APP_GUARD, useClass: PermissionGuard },
+    { provide: APP_GUARD, useClass: SpacePermissionGuard },
   ],
 })
 export class AppModule {}

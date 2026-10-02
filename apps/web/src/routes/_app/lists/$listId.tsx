@@ -1,0 +1,121 @@
+import { SPACE_PERMISSIONS as S } from '@scrum/shared';
+import { useQuery } from '@tanstack/react-query';
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
+import { Kanban, List, Table } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { ContainerHeader, LoadingState, NotFoundState } from '@/features/spaces/container-header';
+import { listQuery, spaceQuery, useTreeSpace } from '@/features/spaces/queries';
+import { ItemPanel } from '@/features/work-items/detail/item-panel';
+import { ItemsView } from '@/features/work-items/items-view';
+import { itemsQuery } from '@/features/work-items/queries';
+import { ViewSearchSchema, type ViewSearch } from '@/features/work-items/view/view-state';
+import { useCurrentWorkspace } from '@/features/workspace/queries';
+import { cn } from '@/lib/utils';
+
+export const Route = createFileRoute('/_app/lists/$listId')({
+  validateSearch: ViewSearchSchema,
+  component: ListPage,
+});
+
+/** List sayfası (taslak 1): List ve Table görünümleri; Board Faz 2'de. */
+function ListPage() {
+  const { t } = useTranslation();
+  const { listId } = Route.useParams();
+  const search = Route.useSearch();
+  const navigate = useNavigate();
+  const { id: workspaceId } = useCurrentWorkspace();
+  const { data: list, isPending, isError } = useQuery(listQuery(workspaceId, listId));
+  const treeSpace = useTreeSpace(list?.space.id);
+  const { data: space } = useQuery({
+    ...spaceQuery(workspaceId, list?.space.id ?? ''),
+    enabled: !!list,
+  });
+  const { data: items } = useQuery({ ...itemsQuery(workspaceId, listId), enabled: !!list });
+
+  if (isPending) return <LoadingState />;
+  if (isError) return <NotFoundState />;
+
+  const view = search.view ?? 'list';
+
+  /** Görünüm ayarlarını günceller; `null` hepsini temizler (açık panel ve görünüm türü korunur). */
+  const onSearch = (patch: Partial<ViewSearch> | null) =>
+    void navigate({
+      to: '.',
+      replace: true,
+      search: (prev: ViewSearch) =>
+        patch === null
+          ? { item: prev.item, view: prev.view }
+          : Object.fromEntries(
+              Object.entries({ ...prev, ...patch }).filter(([, value]) => value !== undefined),
+            ),
+    });
+
+  return (
+    <>
+      <ContainerHeader
+        type="LIST"
+        id={list.id}
+        name={list.name}
+        crumb={{ space: list.space, folder: list.folder }}
+        archived={list.archived}
+        canUnarchive={!!treeSpace?.permissions.includes(S.LIST_MANAGE)}
+      >
+        <div role="tablist" aria-label={t('listPage.views')} className="-mb-px flex gap-1">
+          {(['list', 'table'] as const).map((key) => {
+            const Icon = key === 'list' ? List : Table;
+            const selected = view === key;
+            return (
+              <Link
+                key={key}
+                to="."
+                search={(prev: ViewSearch) => ({ ...prev, view: key === 'list' ? undefined : key })}
+                replace
+                role="tab"
+                aria-selected={selected}
+                className={cn(
+                  'flex h-9 items-center gap-1.5 border-b-2 px-2.5 text-sm',
+                  selected
+                    ? 'border-primary font-semibold'
+                    : 'text-muted-foreground hover:text-foreground border-transparent',
+                )}
+              >
+                <Icon className="size-4" aria-hidden />
+                {t(`listPage.view.${key}`)}
+              </Link>
+            );
+          })}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span
+                role="tab"
+                aria-selected={false}
+                aria-disabled
+                className="text-muted-foreground flex h-9 items-center gap-1.5 border-b-2 border-transparent px-2.5 text-sm"
+              >
+                <Kanban className="size-4" aria-hidden />
+                {t('listPage.view.board')}
+                <span className="rounded border px-1 text-[10px] leading-4 font-semibold">F2</span>
+              </span>
+            </TooltipTrigger>
+            <TooltipContent>{t('nav.comingSoon')}</TooltipContent>
+          </Tooltip>
+        </div>
+      </ContainerHeader>
+
+      {space && items ? (
+        <ItemsView
+          listId={list.id}
+          space={space}
+          data={items}
+          archived={list.archived}
+          search={search}
+          onSearch={onSearch}
+        />
+      ) : (
+        <LoadingState />
+      )}
+      <ItemPanel itemKey={search.item} />
+    </>
+  );
+}

@@ -22,8 +22,10 @@ export type WorkspacePermission =
 export const SPACE_PERMISSIONS = {
   /** Space ve içeriğini görüntüleme. */
   SPACE_VIEW: 'space.view',
-  /** Space ayarları, DoD/DoR, durum akışı. */
+  /** Space ayarları (ad, anahtar, görünürlük, üyeler), DoD/DoR, durum akışı; Space'i arşivleme/silme. */
   SPACE_SETTINGS: 'space.settings',
+  /** Folder/List oluşturma, yeniden adlandırma, sıralama, taşıma, arşivleme, silme (ADR-040). */
+  LIST_MANAGE: 'space.lists.manage',
   /** Product Backlog sıralama/önceliklendirme. */
   BACKLOG_RANK: 'backlog.rank',
   /** Epic/Story/Task/Sub-task/Bug oluşturma ve düzenleme. */

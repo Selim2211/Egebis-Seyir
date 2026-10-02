@@ -1,2 +1,3 @@
 export * from './work-item';
 export * from './estimation';
+export * from './space';

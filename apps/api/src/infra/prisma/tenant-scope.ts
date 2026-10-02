@@ -8,6 +8,21 @@ export const TENANT_MODELS: ReadonlySet<string> = new Set([
   'Membership',
   'Invitation',
   'ActivityEvent',
+  'Space',
+  'SpaceKey',
+  'SpaceMember',
+  'Status',
+  'Folder',
+  'List',
+  'Favorite',
+  'WorkItem',
+  'WorkItemAssignee',
+  'WorkItemLabel',
+  'Label',
+  'Checklist',
+  'ChecklistItem',
+  'WorkItemLink',
+  'WorkItemWatcher',
 ]);
 
 const WHERE_OPERATIONS = new Set([

@@ -39,6 +39,7 @@ const TEAM_WORK = [
   S.WORK_ITEM_STATUS_OWN,
   S.ESTIMATE_WRITE,
   S.DOC_WRITE,
+  S.LIST_MANAGE,
 ] as const;
 const SPRINT_LEAD = [S.SPRINT_PLAN, S.SPRINT_START, S.SPRINT_COMPLETE, S.SPACE_SETTINGS] as const;
 
@@ -52,3 +53,6 @@ export const DEFAULT_SPACE_ROLE_PERMISSIONS: Record<SpaceRole, readonly SpacePer
   DEVELOPER: [...TEAM_WORK],
   STAKEHOLDER: [...VIEW_AND_DISCUSS],
 };
+
+/** Workspace Owner/Admin her Space'te tüm Space izinlerine sahiptir (ADR-038). */
+export const ALL_SPACE_PERMISSIONS: readonly SpacePermission[] = Object.values(S);

@@ -11,7 +11,8 @@ interface Db {
 export interface ActivityInput {
   workspaceId: string;
   actorId: string | null;
-  entityType: 'workspace' | 'member' | 'invitation';
+  entityType:
+    'workspace' | 'member' | 'invitation' | 'space' | 'folder' | 'list' | 'item' | 'label';
   entityId: string;
   action: string;
   changes?: Prisma.InputJsonValue;

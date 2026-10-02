@@ -1,5 +1,5 @@
 import { createParamDecorator, type ExecutionContext, SetMetadata } from '@nestjs/common';
-import type { Permission } from '@scrum/shared';
+import type { Permission, SpacePermission } from '@scrum/shared';
 import type { AuthedRequest, AuthUser } from './auth.constants';
 
 export const IS_PUBLIC = 'auth:public';
@@ -14,6 +14,14 @@ export const REQUIRED_PERMISSION = 'access:permission';
 /** Workspace rotalarında gereken izin (ADR-011). */
 export const RequirePermission = (permission: Permission) =>
   SetMetadata(REQUIRED_PERMISSION, permission);
+
+export const REQUIRED_SPACE_PERMISSION = 'access:space-permission';
+/**
+ * Space kapsamındaki uçlarda gereken izin (ADR-039). Space, rota parametresinden
+ * (`spaceId`, `folderId` veya `listId`) çözülür; görünmeyen Space 404 döner.
+ */
+export const RequireSpacePermission = (permission: SpacePermission) =>
+  SetMetadata(REQUIRED_SPACE_PERMISSION, permission);
 
 /** Oturum açmış kullanıcı (yalnızca @Public olmayan uçlarda kesin dolu). */
 export const CurrentUser = createParamDecorator((_: unknown, ctx: ExecutionContext): AuthUser => {

@@ -17,6 +17,8 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { UserAvatar } from '@/components/user-avatar';
 import { useMe } from '@/features/auth/queries';
+import { useHierarchy } from '@/features/spaces/queries';
+import { SpaceAvatar } from '@/features/spaces/space-avatar';
 import {
   useCan,
   useChangeMemberRole,
@@ -56,6 +58,9 @@ function InviteForm() {
   const [emails, setEmails] = useState('');
   const [role, setRole] = useState<(typeof INVITABLE_ROLES)[number]>('MEMBER');
   const [invalid, setInvalid] = useState<string[]>([]);
+  const [spaceIds, setSpaceIds] = useState<string[]>([]);
+  const [spacesMissing, setSpacesMissing] = useState(false);
+  const guest = role === 'GUEST';
 
   const submit = (e: FormEvent) => {
     e.preventDefault();
@@ -63,14 +68,18 @@ function InviteForm() {
     const parsed = raw.map((r) => EmailSchema.safeParse(r));
     const bad = raw.filter((_, i) => !parsed[i]!.success);
     setInvalid(bad);
-    if (raw.length === 0 || bad.length > 0) return;
+    // Guest yalnızca seçilen Space'leri görür; en az bir Space gerekir (ADR-043).
+    const missing = guest && spaceIds.length === 0;
+    setSpacesMissing(missing);
+    if (raw.length === 0 || bad.length > 0 || missing) return;
     const list = parsed.map((p) => p.data!);
     invite.mutate(
-      { emails: list, role },
+      { emails: list, role, spaceIds: guest ? spaceIds : [] },
       {
         onSuccess: () => {
           toast.success(t('members.invited', { count: list.length }));
           setEmails('');
+          setSpaceIds([]);
         },
       },
     );
@@ -125,12 +134,77 @@ function InviteForm() {
           `${t('members.inviteHint')} ${t(`roleHelp.${role}`)}`
         )}
       </p>
+      {guest && (
+        <GuestSpaces
+          selected={spaceIds}
+          missing={spacesMissing}
+          onChange={(ids) => {
+            setSpaceIds(ids);
+            setSpacesMissing(false);
+          }}
+        />
+      )}
       {invite.error && (
         <div className="mt-3">
           <FormError error={invite.error} />
         </div>
       )}
     </form>
+  );
+}
+
+/** Guest davetinde paylaşılacak Space'ler (ADR-035). */
+function GuestSpaces({
+  selected,
+  missing,
+  onChange,
+}: {
+  selected: string[];
+  missing: boolean;
+  onChange: (ids: string[]) => void;
+}) {
+  const { t } = useTranslation();
+  const spaces = useHierarchy().data?.spaces ?? [];
+  return (
+    <fieldset className="mt-4 border-t pt-3" aria-describedby="guest-spaces-hint">
+      <legend className="text-sm font-medium">{t('members.guestSpaces')}</legend>
+      <p
+        id="guest-spaces-hint"
+        className={
+          missing ? 'text-destructive mt-0.5 text-xs' : 'text-muted-foreground mt-0.5 text-xs'
+        }
+      >
+        {missing ? t('members.guestSpacesRequired') : t('members.guestSpacesHint')}
+      </p>
+      {spaces.length === 0 ? (
+        <p className="text-muted-foreground mt-2 text-sm">{t('members.noSpacesToShare')}</p>
+      ) : (
+        <div className="mt-2 flex flex-wrap gap-2">
+          {spaces.map((space) => {
+            const checked = selected.includes(space.id);
+            return (
+              <label
+                key={space.id}
+                className="has-checked:border-primary has-checked:bg-primary/5 flex cursor-pointer items-center gap-2 rounded-md border px-2.5 py-1.5 text-sm"
+              >
+                <input
+                  type="checkbox"
+                  className="accent-primary"
+                  checked={checked}
+                  onChange={() =>
+                    onChange(
+                      checked ? selected.filter((id) => id !== space.id) : [...selected, space.id],
+                    )
+                  }
+                />
+                <SpaceAvatar space={space} size={16} />
+                {space.name}
+              </label>
+            );
+          })}
+        </div>
+      )}
+    </fieldset>
   );
 }
 

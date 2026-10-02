@@ -42,8 +42,12 @@ Yerel geliştirme veritabanındaki test hesapları (yalnızca `scrum_dev`): `zey
 - **Hatalar:** API `{ code, details? }` döner (`ApiExceptionFilter`). İş kuralı hatası: `new HttpException({ code: 'X' }, status)`; kod `packages/shared/src/errors/codes.ts`'e, metni `apps/web/src/locales/{tr,en}/common.json` → `errors.X`'e eklenir.
 - **Yetki:** İzin anahtarları yalnızca `packages/shared/src/permissions`. Yeni izin → varsayılan rol matrisi + `roles.spec.ts` güncellenir.
 - **Tenant:** Workspace'e ait her model `workspaceId` taşır ve `apps/api/src/infra/prisma/tenant-scope.ts` → `TENANT_MODELS`'a eklenir (ADR-012). Özellik servisleri `TenantPrismaService.db` kullanır; ham `PrismaService` yalnızca auth/erişim/kurulum altyapısında.
-- **Rotalar (API):** Workspace'e ait uçlar `/workspaces/:workspaceId/...` altında; guard'lar üyeliği ve `@RequirePermission(...)` iznini kontrol eder. Oturumsuz uçlar `@Public()`, kaba kuvvete açık uçlar `@AuthRateLimit()`.
+- **Rotalar (API):** Workspace'e ait uçlar `/workspaces/:workspaceId/...` altında; guard'lar üyeliği ve `@RequirePermission(...)` iznini kontrol eder. Space kapsamlı uçlar `@RequireSpacePermission(...)` kullanır; Space rota parametresinden (`spaceId`/`folderId`/`listId`) çözülür, görünmeyen Space 404 (ADR-039). Yeni Space kapsamlı kaynakta `SpaceAccessService.resolveSpaceId` genişletilir. Oturumsuz uçlar `@Public()`, kaba kuvvete açık uçlar `@AuthRateLimit()`.
 - **Rotalar (web):** Giriş gerektiren sayfalar `src/routes/_app/`, oturumsuz sayfalar `src/routes/_auth/`. Route dosyaları yalnızca `Route` dışa aktarır; paylaşılan bileşenler `src/components/` altında.
+- **Sıralama ve yaşam döngüsü:** `rank` sütunları kesirli anahtar (shared `rankBetween` / `rankForPlacement`), migration'da `COLLATE "C"` (ADR-014). Arşiv `archivedAt`, çöp kutusu `deletedAt`; alt öğeler ebeveynle gizlenir (ADR-041).
+- **İş öğeleri:** Okunabilir ID `keyPrefix-number` öğede kalıcıdır, sayaç `spaces.itemCounter` (ADR-033/044). Yeni iş öğesi alanı: shared şema + saf kural (tahmin, tip alanları, hiyerarşi) → servis. Tipe uymayan alan sessizce yok sayılmaz, reddedilir. Arşiv/silme alt ağaca aynı zaman damgasıyla uygulanır (ADR-046).
+- **Zengin metin:** Açıklama Tiptap JSON; doğrulama ve düz metin çıkarımı yalnızca shared `domain/rich-text.ts` (izinli düğüm/işaret listesi, web editörü de aynı listeye uyar, ADR-048). Ham HTML hiçbir yerde saklanmaz veya basılmaz.
+- **Görünümler:** List/Table süzme, sıralama ve gruplama saf fonksiyonlardır (`apps/web/src/features/work-items/view/view-state.ts`, birim testli); durum adreste (`ViewSearchSchema`). Yeni süzgeç = şema + fonksiyon + test (ADR-052).
 - **Durum:** Kurallar durum adına değil kategoriye bakar (`NOT_STARTED/ACTIVE/DONE`, ADR-013).
 - **Değişiklik kaydı:** Anlamlı her değişiklik aynı transaction içinde `activity_events`'e (ADR-015).
 - **Görsel dil:** Tip/öncelik/durum ikon ve renkleri yalnızca `apps/web/src/components/work-item/work-item-visuals.tsx`; renk token'ları `apps/web/src/styles/globals.css`.
@@ -57,3 +61,4 @@ Yerel geliştirme veritabanındaki test hesapları (yalnızca `scrum_dev`): `zey
 - pnpm 12 build script izinleri: `pnpm-workspace.yaml` → `allowBuilds`.
 - `shadcn add` sonrası importları kontrol et: CLI `@/lib/utils` yerine `"cn"` paketi import edebiliyor; düzelt ve `cn` paketini kaldır.
 - Docker Postgres host portu 5433 (5432 makinede dolu).
+- **Docker şimdilik başlatılmaz** (kullanıcı kararı; proje sonunda ele alınacak). Migration DB'siz üretilir: eski şemayı `git show :apps/api/prisma/schema.prisma` ile al, `prisma migrate diff --from-schema <eski> --to-schema prisma/schema.prisma --script`. DB gerektiren testler `docs/plans/faz-1.md` → "Bekleyen doğrulama" listesinde.

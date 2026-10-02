@@ -2,3 +2,5 @@ export * from './health';
 export * from './error';
 export * from './auth';
 export * from './workspace';
+export * from './space';
+export * from './work-item';
