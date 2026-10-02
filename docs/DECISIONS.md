@@ -122,7 +122,7 @@
 - **Tarih:** 2026-10-02 · **Durum:** Kabul
 - **Karar:** Space anahtarı (ör. `MOB`) + Space bazlı sayaç → `MOB-142`. Sayaç transaction içinde kilitli artırılır. Birincil anahtar ayrıca UUID.
 - **Gerekçe:** Brief §5.4 okunabilir ve paylaşılabilir ID istiyor; F3 GitHub entegrasyonu bu ID ile eşleşecek.
-- **Açık nokta:** Öğe başka Space'e taşınınca ID davranışı Faz 1'de kararlaştırılacak.
+- **Açık nokta:** ~~Öğe başka Space'e taşınınca ID davranışı Faz 1'de kararlaştırılacak.~~ Çözüldü → ADR-033.
 
 ## ADR-017 — Arka plan işleri: pg-boss
 
@@ -231,3 +231,56 @@
 - **Karar:** API Vitest testleri NestJS decorator metadata'sını Vite 8'in yerleşik Oxc dönüştürücüsüyle üretir (`decorator.legacy + emitDecoratorMetadata`). Derleme (`nest build`) tsc ile.
 - **Gerekçe:** `@swc/core` native modülü bu ortamda önbellek klasörü izin denetimi nedeniyle yüklenemiyor; Oxc ek bağımlılık gerektirmiyor.
 - **Alternatifler:** unplugin-swc (yüklenemedi), ts-jest/Jest (yavaş).
+
+## ADR-033 — Okunabilir ID asla değişmez (ClickUp davranışı)
+
+- **Tarih:** 2026-10-02 · **Durum:** Kabul (kullanıcı kararı)
+- **Karar:** Bir iş öğesine verilen okunabilir ID (`MOB-142`) ömür boyu sabittir. Öğe başka Space'e taşınsa da, Space anahtarı sonradan değişse de ID aynı kalır.
+- **Sonuçları:**
+  - ID, öğe üzerinde kalıcı olarak saklanır (`keyPrefix` + `number`); o anki Space'ten türetilmez.
+  - Benzersizlik workspace genelindedir: aynı workspace'te iki öğe aynı ID'yi taşıyamaz.
+  - Space anahtarları workspace içinde benzersizdir; bir anahtar değiştirilirse eskisi rezerve kalır, başka Space'e verilemez (eski ID'lerle çakışmasın).
+  - Anahtar değişikliği yalnızca yeni öğeleri etkiler; sayaç kaldığı yerden devam eder.
+  - ID ile arama ve paylaşılan bağlantılar (`/MOB-142`) Space'ten bağımsız, workspace içinde çözülür.
+- **Gerekçe:** Paylaşılmış bağlantılar, commit mesajları (F3 GitHub entegrasyonu) ve dokümanlardaki ID referansları taşımadan sonra kırılmaz.
+- **Alternatifler:** Jira davranışı (taşınınca yeni ID verilir, eskisi yönlendirilir): yönlendirme tablosu gerektirir, dış referanslarda karışıklık yaratır.
+
+## ADR-034 — Kayıt yalnızca davetle
+
+- **Tarih:** 2026-10-02 · **Durum:** Kabul (kullanıcı kararı)
+- **Karar:** Açık kayıt yok. Kullanıcılar yalnızca davet bağlantısıyla hesap oluşturur (davet = kayıt). Giriş ekranında "Kayıt ol" bulunmaz.
+  - Davet: e-posta + workspace rolü (+ Guest için Space listesi). Token DB'de hash'li, süreli (varsayılan 7 gün), tek kullanımlık; yeniden gönderilebilir ve iptal edilebilir.
+  - Davet kabulünde: ad, şifre, dil tercihi; e-posta davetten gelir, değiştirilemez (e-posta doğrulaması davetle sağlanmış olur).
+  - **İlk kurulum (onaylandı):** Veritabanında hiç kullanıcı yokken tek seferlik kurulum ekranı ilk workspace'i ve Owner'ı oluşturur. Ekran, sunucu açılışında loglara yazılan tek kullanımlık kurulum anahtarı olmadan çalışmaz; kurulum bitince kalıcı olarak kapanır.
+- **Gerekçe:** Kurum içi uygulama; ClickUp'taki "workspace'e davetle katılım" davranışı. Yetkisiz hesap açılmasını baştan engeller.
+- **Açık nokta:** Şifre politikası (uzunluk/karmaşıklık) geliştirme aşamasında uygulanmaz (kullanıcı kararı); yalnızca boş olamaz ve en fazla 256 karakterdir. Production öncesi belirlenecek.
+- **Alternatifler:** Kurum e-posta uzantısıyla açık kayıt; herkese açık kayıt + davetle workspace'e katılım.
+
+## ADR-035 — Guest kapsamı: yalnızca paylaşılan Space'ler
+
+- **Tarih:** 2026-10-02 · **Durum:** Kabul (kullanıcı kararı)
+- **Karar:** Guest workspace rolündeki kullanıcı yalnızca davet edildiği/paylaşılan Space'leri görür ve orada Stakeholder izinleriyle çalışır (görüntüleme, yorum, rapor, doküman görüntüleme). Diğer Space'ler, workspace üye listesi ve ayarlar görünmez. Global arama da yalnızca erişilebilir Space'lerde arar.
+- **Gerekçe:** ClickUp davranışı; brief §2 "sınırlı, çoğunlukla salt okunur erişim, yorum yapabilme".
+- **Alternatifler:** Öğe bazlı paylaşım (görev/liste/doküman tek tek) — daha ince ama yetki modeli karmaşıklaşır; ileride eklenebilir.
+
+## ADR-036 — Varsayılan durumlar: Türkçe adlar ve duruma özel renk
+
+- **Tarih:** 2026-10-02 · **Durum:** Kabul (kullanıcı kararı)
+- **Karar:** Yeni Space'in durumları oluşturanın diline göre seed edilir. Türkçe: Backlog, Yapılacak, Devam ediyor, İncelemede, Tamamlandı. İngilizce: Backlog, To Do, In Progress, In Review, Done. Her durumun kendi rengi vardır (`Status.color`); ikon ve iş kuralları kategoriden gelir (ADR-013).
+- **Gerekçe:** Arayüz varsayılan dili Türkçe; durum adları veri olduğu için kullanıcı sonradan değiştirebilir (F2 custom workflow).
+
+## ADR-037 — Kişisel tercihler kullanıcı menüsünde ve sunucuda
+
+- **Tarih:** 2026-10-02 · **Durum:** Kabul (kullanıcı kararı)
+- **Karar:** Dil ve tema seçimi üst çubuktan kullanıcı menüsüne (avatar) ve Profil › Tercihler sayfasına taşınır. Tercihler kullanıcı kaydında saklanır (cihazlar arası aynı); girişten önce tarayıcıdaki son seçim kullanılır.
+
+## ADR-038 — Faz 1 kimlik doğrulama ayrıntıları
+
+- **Tarih:** 2026-10-02 · **Durum:** Kabul
+- **Karar:**
+  - Şifre özeti: Node'un yerleşik `crypto.argon2` (argon2id, m=19456 KiB, t=2, p=1), PHC biçiminde saklanır; native paket gerekmez.
+  - Oturum: 32 bayt rastgele token `sm_session` cookie'sinde (httpOnly, SameSite=Lax, production'da Secure); DB'de yalnızca SHA-256 özeti. "Beni hatırla" → 30 gün, aksi halde 1 gün.
+  - CSRF: double-submit — okunabilir `sm_csrf` cookie'si ve durum değiştiren her istekte aynı değerli `x-csrf-token` başlığı.
+  - Oran sınırlama: giriş, kurulum, şifre sıfırlama ve davet kabul uçlarında (@nestjs/throttler, bellek içi; tek instance).
+  - Workspace Owner/Admin, tüm Space'lerde Space izinlerinin tamamına sahiptir (brief §6.1.6 "PO ve Admin").
+  - E-posta şablonları Faz 1'de basit TS fonksiyonları (TR/EN, HTML + düz metin); React Email (ADR-021) gerçekten gerekirse eklenir.

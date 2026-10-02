@@ -1,5 +1,6 @@
 pnpm-lock.yaml
 dist/
+dist-e2e/
 coverage/
 .turbo/
 apps/api/src/generated/

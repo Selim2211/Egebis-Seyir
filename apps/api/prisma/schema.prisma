@@ -1,5 +1,5 @@
-// Veri modeli (ADR-009). Faz 0'da model yok; tablolar Faz 1'de eklenecek.
-// Kural: workspace'e ait her model `workspaceId` taşır (ADR-012).
+// Veri modeli (ADR-009). Kural: workspace'e ait her model `workspaceId` taşır (ADR-012)
+// ve TENANT_MODELS listesine eklenir (src/infra/prisma/tenant-scope.ts).
 
 generator client {
   provider     = "prisma-client"
@@ -9,4 +9,153 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+}
+
+enum RoleScope {
+  WORKSPACE
+  SPACE
+}
+
+model User {
+  id           String   @id @default(uuid(7)) @db.Uuid
+  /// Küçük harfe çevrilmiş e-posta.
+  email        String   @unique
+  name         String
+  /// argon2id, PHC biçimi (ADR-038).
+  passwordHash String
+  title        String?
+  locale       String   @default("tr")
+  theme        String   @default("system")
+  timezone     String   @default("Europe/Istanbul")
+  createdAt    DateTime @default(now()) @db.Timestamptz
+  updatedAt    DateTime @updatedAt @db.Timestamptz
+
+  sessions        Session[]
+  memberships     Membership[]
+  passwordResets  PasswordResetToken[]
+  invitationsSent Invitation[]         @relation("InvitedBy")
+  activities      ActivityEvent[]
+
+  @@map("users")
+}
+
+model Session {
+  id         String    @id @default(uuid(7)) @db.Uuid
+  /// SHA-256(token); token yalnızca cookie'de.
+  tokenHash  String    @unique
+  userId     String    @db.Uuid
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userAgent  String?
+  ip         String?
+  createdAt  DateTime  @default(now()) @db.Timestamptz
+  lastSeenAt DateTime  @default(now()) @db.Timestamptz
+  expiresAt  DateTime  @db.Timestamptz
+  revokedAt  DateTime? @db.Timestamptz
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+model PasswordResetToken {
+  id        String    @id @default(uuid(7)) @db.Uuid
+  tokenHash String    @unique
+  userId    String    @db.Uuid
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime  @db.Timestamptz
+  usedAt    DateTime? @db.Timestamptz
+  createdAt DateTime  @default(now()) @db.Timestamptz
+
+  @@index([userId])
+  @@map("password_reset_tokens")
+}
+
+model Workspace {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  name      String
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+
+  roles       Role[]
+  memberships Membership[]
+  invitations Invitation[]
+  activities  ActivityEvent[]
+
+  @@map("workspaces")
+}
+
+/// Rol = izin seti (ADR-011). Sistem rolleri workspace oluşturulurken shared varsayılanlarından kopyalanır.
+model Role {
+  id          String    @id @default(uuid(7)) @db.Uuid
+  workspaceId String    @db.Uuid
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  scope       RoleScope
+  /// Sistem rolleri için WORKSPACE_ROLES / SPACE_ROLES anahtarı.
+  key         String
+  /// Özel roller (F2) için görünen ad; sistem rollerinin adı arayüzde çevrilir.
+  name        String?
+  permissions String[]
+  isSystem    Boolean   @default(true)
+  createdAt   DateTime  @default(now()) @db.Timestamptz
+
+  memberships Membership[]
+  invitations Invitation[]
+
+  @@unique([workspaceId, scope, key])
+  @@map("roles")
+}
+
+model Membership {
+  id          String    @id @default(uuid(7)) @db.Uuid
+  workspaceId String    @db.Uuid
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  userId      String    @db.Uuid
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  roleId      String    @db.Uuid
+  role        Role      @relation(fields: [roleId], references: [id])
+  createdAt   DateTime  @default(now()) @db.Timestamptz
+
+  @@unique([workspaceId, userId])
+  @@index([userId])
+  @@map("memberships")
+}
+
+model Invitation {
+  id          String    @id @default(uuid(7)) @db.Uuid
+  workspaceId String    @db.Uuid
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  email       String
+  roleId      String    @db.Uuid
+  role        Role      @relation(fields: [roleId], references: [id])
+  /// Guest daveti için paylaşılan Space'ler (ADR-035; Faz 1.2'de kullanılır).
+  spaceIds    String[]  @db.Uuid
+  tokenHash   String    @unique
+  invitedById String    @db.Uuid
+  invitedBy   User      @relation("InvitedBy", fields: [invitedById], references: [id])
+  expiresAt   DateTime  @db.Timestamptz
+  acceptedAt  DateTime? @db.Timestamptz
+  revokedAt   DateTime? @db.Timestamptz
+  createdAt   DateTime  @default(now()) @db.Timestamptz
+
+  @@index([workspaceId, email])
+  @@map("invitations")
+}
+
+/// Append-only değişiklik kaydı (ADR-015): aktivite akışı, denetim, raporlar.
+model ActivityEvent {
+  id          String    @id @default(uuid(7)) @db.Uuid
+  workspaceId String    @db.Uuid
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  /// null = sistem işlemi.
+  actorId     String?   @db.Uuid
+  actor       User?     @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  entityType  String
+  entityId    String    @db.Uuid
+  action      String
+  /// Alan bazlı değişiklikler: { alan: { from, to } } veya işleme özel veri.
+  changes     Json?
+  createdAt   DateTime  @default(now()) @db.Timestamptz
+
+  @@index([workspaceId, entityType, entityId, createdAt])
+  @@index([workspaceId, createdAt])
+  @@map("activity_events")
 }

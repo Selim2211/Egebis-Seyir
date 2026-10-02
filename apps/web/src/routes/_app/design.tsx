@@ -9,7 +9,7 @@ import {
   WorkItemTypeIcon,
 } from '@/components/work-item/work-item-visuals';
 
-export const Route = createFileRoute('/design')({
+export const Route = createFileRoute('/_app/design')({
   component: DesignSystemPage,
 });
 

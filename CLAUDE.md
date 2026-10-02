@@ -21,11 +21,15 @@ pnpm db:up          # Postgres (5433) + Mailpit (8025) — Docker Desktop açık
 pnpm dev            # shared watch + api :3000 + web :5173
 pnpm lint | typecheck | test | build
 pnpm test:int       # API entegrasyon testleri (gerçek Postgres: scrum_test)
-pnpm test:e2e       # Playwright (api + web'i kendisi başlatır)
+pnpm test:e2e       # Playwright: ayrı DB (scrum_e2e) ve portlarla (API 3100, web 5174) kendi sunucularını başlatır
 pnpm --filter @scrum/api db:migrate   # Prisma migration oluştur/uygula
 ```
 
 API dokümanı: http://localhost:3000/api/docs · Mailpit: http://localhost:8025
+
+İlk kurulum: kullanıcı yokken web `/setup`'a yönlendirir; kurulum anahtarı API açılış logunda (`Kurulum anahtarı: …`) veya `.env` → `SETUP_TOKEN`.
+
+Yerel geliştirme veritabanındaki test hesapları (yalnızca `scrum_dev`): `zeynep@example.com` / `dev-owner-pass` (Owner), `elif@example.com` / `dev-member-pass` (Member). Sıfırlamak için: `pnpm --filter @scrum/api exec prisma migrate reset`.
 
 ## Yapı
 
@@ -37,7 +41,9 @@ API dokümanı: http://localhost:3000/api/docs · Mailpit: http://localhost:8025
 
 - **Hatalar:** API `{ code, details? }` döner (`ApiExceptionFilter`). İş kuralı hatası: `new HttpException({ code: 'X' }, status)`; kod `packages/shared/src/errors/codes.ts`'e, metni `apps/web/src/locales/{tr,en}/common.json` → `errors.X`'e eklenir.
 - **Yetki:** İzin anahtarları yalnızca `packages/shared/src/permissions`. Yeni izin → varsayılan rol matrisi + `roles.spec.ts` güncellenir.
-- **Tenant:** Workspace'e ait her model `workspaceId` taşır (ADR-012).
+- **Tenant:** Workspace'e ait her model `workspaceId` taşır ve `apps/api/src/infra/prisma/tenant-scope.ts` → `TENANT_MODELS`'a eklenir (ADR-012). Özellik servisleri `TenantPrismaService.db` kullanır; ham `PrismaService` yalnızca auth/erişim/kurulum altyapısında.
+- **Rotalar (API):** Workspace'e ait uçlar `/workspaces/:workspaceId/...` altında; guard'lar üyeliği ve `@RequirePermission(...)` iznini kontrol eder. Oturumsuz uçlar `@Public()`, kaba kuvvete açık uçlar `@AuthRateLimit()`.
+- **Rotalar (web):** Giriş gerektiren sayfalar `src/routes/_app/`, oturumsuz sayfalar `src/routes/_auth/`. Route dosyaları yalnızca `Route` dışa aktarır; paylaşılan bileşenler `src/components/` altında.
 - **Durum:** Kurallar durum adına değil kategoriye bakar (`NOT_STARTED/ACTIVE/DONE`, ADR-013).
 - **Değişiklik kaydı:** Anlamlı her değişiklik aynı transaction içinde `activity_events`'e (ADR-015).
 - **Görsel dil:** Tip/öncelik/durum ikon ve renkleri yalnızca `apps/web/src/components/work-item/work-item-visuals.tsx`; renk token'ları `apps/web/src/styles/globals.css`.

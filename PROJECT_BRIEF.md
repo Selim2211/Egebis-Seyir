@@ -727,13 +727,14 @@ Bir özellik **bitti** sayılması için:
 
 ## 17. Değişiklik Günlüğü (Claude Code Güncelleyecek)
 
-| Tarih       | Değişiklik                                                                                                                         | Onaylayan |
-| ----------- | ---------------------------------------------------------------------------------------------------------------------------------- | --------- |
-| (başlangıç) | İlk brief oluşturuldu                                                                                                              | -         |
-| 2026-10-02  | Bölüm 18 soruları cevaplandı, cevaplar Bölüm 18.1'e işlendi                                                                        | Kullanıcı |
-| 2026-10-02  | Mimari ve teknoloji kararları alındı → `docs/DECISIONS.md` (ADR-001…032). Özet: React SPA + NestJS + PostgreSQL, TS monorepo       | Kullanıcı |
-| 2026-10-02  | Proje konumu `C:\dev\scrum-manager` (OneDrive dışı), yerel git                                                                     | Kullanıcı |
-| 2026-10-02  | ClickUp'tan olası veri taşıma notu eklendi: iş öğesi modelinde `externalSource/externalId` alanları baştan bulunacak; import Faz 5 | Kullanıcı |
+| Tarih       | Değişiklik                                                                                                                              | Onaylayan |
+| ----------- | --------------------------------------------------------------------------------------------------------------------------------------- | --------- |
+| (başlangıç) | İlk brief oluşturuldu                                                                                                                   | -         |
+| 2026-10-02  | Bölüm 18 soruları cevaplandı, cevaplar Bölüm 18.1'e işlendi                                                                             | Kullanıcı |
+| 2026-10-02  | Mimari ve teknoloji kararları alındı → `docs/DECISIONS.md` (ADR-001…032). Özet: React SPA + NestJS + PostgreSQL, TS monorepo            | Kullanıcı |
+| 2026-10-02  | Proje konumu `C:\dev\scrum-manager` (OneDrive dışı), yerel git                                                                          | Kullanıcı |
+| 2026-10-02  | ClickUp'tan olası veri taşıma notu eklendi: iş öğesi modelinde `externalSource/externalId` alanları baştan bulunacak; import Faz 5      | Kullanıcı |
+| 2026-10-02  | Faz 1 kararları: okunabilir ID asla değişmez (ADR-033), kayıt yalnızca davetle (ADR-034), Guest yalnızca paylaşılan Space'ler (ADR-035) | Kullanıcı |
 
 ---
 
@@ -764,8 +765,8 @@ Claude Code, işe başlarken bu soruları bana **madde madde sormalı** ve cevap
 | 3     | Kesin tarih yok, esnek; kaliteye odak.                                                                                                   |
 | 4     | Gantt/Waterfall Faz 2'de (brief'teki gibi).                                                                                              |
 | 5     | Belki ClickUp'tan veri taşınacak → import Faz 5; veri modeli buna hazır kurulacak.                                                       |
-| 6     | MVP'de e-posta/şifre. SSO sonra (F3), mimari buna açık.                                                                                  |
-| 7     | Brief'teki Guest rolü geçerli (sınırlı erişim). Kesin MVP kapsamı Faz 1'de netleşecek.                                                   |
+| 6     | MVP'de e-posta/şifre; **kayıt yalnızca davetle** (açık kayıt yok, ADR-034). SSO sonra (F3), mimari buna açık.                            |
+| 7     | Guest yalnızca paylaşılan Space'leri görür, orada Stakeholder yetkisiyle çalışır (ADR-035).                                              |
 | 8     | Arayüz Türkçe (varsayılan) + İngilizce.                                                                                                  |
 | 9     | Şirketin kendi sunucusu. Docker ile taşınabilir kurulum.                                                                                 |
 | 10    | Kodu tamamen Claude yazar ve günceller. Teknoloji seçiminde ölçüt: geliştirmesi/güncellemesi kolay.                                      |

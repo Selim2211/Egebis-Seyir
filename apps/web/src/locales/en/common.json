@@ -3,16 +3,36 @@
     "name": "Scrum Manager",
     "tagline": "From idea to delivery, with Scrum discipline."
   },
+  "common": {
+    "save": "Save",
+    "saving": "Saving…",
+    "cancel": "Cancel",
+    "loading": "Loading…",
+    "retry": "Try again",
+    "optional": "optional",
+    "you": "you",
+    "never": "Never"
+  },
+  "validation": {
+    "required": "This field is required.",
+    "email": "Enter a valid email address.",
+    "tooLong": "Too long.",
+    "invalid": "Invalid value."
+  },
   "nav": {
     "home": "Home",
     "myWork": "My work",
     "inbox": "Inbox",
     "docs": "Docs",
+    "favorites": "Favorites",
     "spaces": "Spaces",
     "designSystem": "Design system",
+    "inviteMembers": "Invite members",
+    "settings": "Settings",
     "openMenu": "Open menu",
     "closeMenu": "Close menu",
-    "comingSoon": "Coming in Phase 1"
+    "comingSoon": "Coming in the next step",
+    "workspace": "Workspace"
   },
   "spaces": {
     "emptyTitle": "No spaces yet",
@@ -20,9 +40,10 @@
     "create": "Create space"
   },
   "topbar": {
-    "search": "Search…",
-    "theme": "Theme",
-    "language": "Language"
+    "search": "Search tasks, docs or people…",
+    "quickCreate": "Quick create (C)",
+    "notifications": "Notifications",
+    "accountMenu": "Account menu"
   },
   "theme": {
     "light": "Light",
@@ -39,15 +60,157 @@
     "down": "Server unreachable",
     "checking": "Checking…"
   },
+  "userMenu": {
+    "profile": "Profile",
+    "preferences": "Preferences",
+    "language": "Language",
+    "theme": "Theme",
+    "logout": "Sign out"
+  },
+  "roles": {
+    "OWNER": "Owner",
+    "ADMIN": "Admin",
+    "MEMBER": "Member",
+    "GUEST": "Guest"
+  },
+  "roleHelp": {
+    "OWNER": "Manages everything; can delete the workspace.",
+    "ADMIN": "Manages members and settings.",
+    "MEMBER": "Creates spaces and works in the spaces they belong to.",
+    "GUEST": "Sees only shared spaces and can comment."
+  },
+  "auth": {
+    "email": "Email",
+    "emailPlaceholder": "name@example.com",
+    "password": "Password",
+    "name": "Full name",
+    "namePlaceholder": "Your first and last name",
+    "uiLanguage": "Interface language",
+    "backToLogin": "Back to sign in",
+    "login": {
+      "title": "Sign in to Scrum Manager",
+      "subtitle": "Continue to your workspace.",
+      "forgot": "Forgot password",
+      "remember": "Remember me on this device",
+      "submit": "Sign in",
+      "noAccount": "No account? Ask a workspace admin for an invitation; you'll create your account from the link in the invitation email."
+    },
+    "setup": {
+      "title": "Set up Scrum Manager",
+      "subtitle": "Create the first workspace and its Owner account. This screen appears only once.",
+      "token": "Setup key",
+      "tokenHint": "Printed to the server logs when the API first starts.",
+      "workspaceName": "Organization / workspace name",
+      "workspacePlaceholder": "e.g. your company's name",
+      "ownerSection": "Owner account",
+      "submit": "Finish setup"
+    },
+    "forgot": {
+      "title": "Forgot your password?",
+      "subtitle": "Enter your account email and we'll send you a reset link.",
+      "submit": "Send link",
+      "sentTitle": "Check your email",
+      "sentBody": "If {{email}} is registered, a reset link will arrive in a few minutes. The link is valid for 60 minutes."
+    },
+    "reset": {
+      "title": "Set a new password",
+      "subtitle": "Changing your password signs you out on every device.",
+      "password": "New password",
+      "submit": "Change password",
+      "doneTitle": "Password changed",
+      "doneBody": "You can now sign in with your new password.",
+      "missingToken": "The link is incomplete. Open the link from the email again."
+    },
+    "invite": {
+      "title": "Join the {{workspace}} workspace",
+      "invitedBy": "<0>{{name}}</0> invited you as <0>{{role}}</0>.",
+      "emailHint": "The address the invitation was sent to; it can't be changed.",
+      "submit": "Create account and join",
+      "expires": "This invitation is valid until {{date}} and can be used once.",
+      "existingAccount": "An account already exists for {{email}}. Sign in with it to accept the invitation.",
+      "loginToAccept": "Sign in and join",
+      "acceptAs": "Join as {{email}}",
+      "wrongAccount": "You're signed in as {{current}}. Sign in as {{email}} to accept this invitation.",
+      "invalidTitle": "Invitation not valid",
+      "invalidBody": "The link may have been used, revoked or expired. Ask a workspace admin for a new invitation."
+    }
+  },
   "home": {
-    "title": "Welcome",
-    "subtitle": "The Phase 0 skeleton is ready. Authentication, workspaces and work items arrive in Phase 1.",
+    "greeting": "Welcome, {{name}}",
+    "subtitle": "Authentication and membership are ready. Spaces and work items arrive in the next steps.",
     "nextTitle": "Next steps",
-    "next1": "Sign-up, sign-in and workspace invitations",
-    "next2": "Space / Folder / List hierarchy",
-    "next3": "Creating Epics, Stories, Tasks, Sub-tasks and Bugs",
-    "next4": "List and Table views, search and filters",
+    "next1": "Space / Folder / List hierarchy",
+    "next2": "Creating Epics, Stories, Tasks, Sub-tasks and Bugs",
+    "next3": "Task detail, List and Table views",
+    "next4": "Comments, attachments and activity feed",
+    "inviteCta": "Invite your team",
     "designLink": "Explore the design system"
+  },
+  "settings": {
+    "title": "Settings",
+    "workspaceSection": "Workspace",
+    "accountSection": "My account",
+    "members": "Members",
+    "profile": "Profile",
+    "preferences": "Preferences",
+    "sessions": "Sessions"
+  },
+  "members": {
+    "title": "Members",
+    "subtitle": "Manage who can access the workspace and their roles.",
+    "inviteLabel": "Invite by email",
+    "invitePlaceholder": "name@example.com, name2@example.com",
+    "inviteHint": "Separate multiple addresses with commas.",
+    "role": "Role",
+    "inviteSubmit": "Send invite",
+    "invited_one": "Invitation sent.",
+    "invited_other": "{{count}} invitations sent.",
+    "pendingTitle": "Pending invitations",
+    "pendingRow": "{{role}} · invited by {{invitedBy}} · valid until {{date}}",
+    "resend": "Resend",
+    "resent": "Invitation resent.",
+    "revoke": "Revoke",
+    "revoked": "Invitation revoked.",
+    "count_one": "{{count}} member",
+    "count_other": "{{count}} members",
+    "colPerson": "Person",
+    "colRole": "Workspace role",
+    "colLastSeen": "Last active",
+    "colActions": "Actions",
+    "roleFor": "Role for {{name}}",
+    "remove": "Remove from workspace",
+    "removeConfirm": "Remove {{name}} from the workspace? They will lose all access.",
+    "removed": "Member removed.",
+    "roleChanged": "Role updated.",
+    "invalidEmails": "Invalid email: {{emails}}"
+  },
+  "profile": {
+    "title": "Profile",
+    "subtitle": "How other members see you.",
+    "jobTitle": "Title",
+    "jobTitlePlaceholder": "e.g. Product Owner",
+    "saved": "Profile saved.",
+    "passwordTitle": "Password",
+    "currentPassword": "Current password",
+    "newPassword": "New password",
+    "changePassword": "Change password",
+    "passwordChanged": "Password changed; sessions on other devices were signed out."
+  },
+  "preferences": {
+    "title": "Preferences",
+    "subtitle": "Language, theme and time zone apply on all your devices.",
+    "timezone": "Time zone",
+    "saved": "Preferences saved."
+  },
+  "sessions": {
+    "title": "Sessions",
+    "subtitle": "Devices where your account is signed in. End any session you don't recognize.",
+    "current": "This device",
+    "lastSeen": "Last active {{time}}",
+    "started": "Signed in {{time}}",
+    "revoke": "End session",
+    "revoked": "Session ended.",
+    "unknownDevice": "Unknown device"
   },
   "design": {
     "title": "Design system",
@@ -91,7 +254,21 @@
     "UNAUTHENTICATED": "Your session has expired, please sign in again.",
     "FORBIDDEN": "You don't have permission to do this.",
     "NOT_FOUND": "The record you're looking for was not found.",
+    "RATE_LIMITED": "Too many attempts. Try again in a minute.",
     "INTERNAL": "An unexpected error occurred.",
-    "NETWORK": "Can't reach the server. Check your connection."
+    "NETWORK": "Can't reach the server. Check your connection.",
+    "CSRF_INVALID": "Security check failed. Reload the page and try again.",
+    "INVALID_CREDENTIALS": "Incorrect email or password.",
+    "CURRENT_PASSWORD_INVALID": "Current password is incorrect.",
+    "TOKEN_INVALID": "The link is invalid or has expired.",
+    "SETUP_ALREADY_DONE": "Setup has already been completed.",
+    "SETUP_TOKEN_INVALID": "Incorrect setup key.",
+    "ALREADY_MEMBER": "This person is already a workspace member.",
+    "INVITE_REQUIRES_LOGIN": "Sign in to accept the invitation.",
+    "INVITE_EMAIL_MISMATCH": "This invitation was sent to a different email address.",
+    "LAST_OWNER": "The workspace must keep at least one Owner.",
+    "OWNER_ONLY": "Only an Owner can do this.",
+    "WORK_ITEM_PARENT_REQUIRED": "A sub-task must have a parent item.",
+    "WORK_ITEM_PARENT_NOT_ALLOWED": "This item can't be placed under the selected parent."
   }
 }

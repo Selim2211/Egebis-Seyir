@@ -2,9 +2,11 @@ import { Controller, Get, HttpStatus, Res } from '@nestjs/common';
 import type { HealthResponse } from '@scrum/shared';
 import type { Response } from 'express';
 import { ZodResponse } from 'nestjs-zod';
+import { Public } from '../auth/decorators';
 import { HealthResponseDto } from './health.dto';
 import { HealthService } from './health.service';
 
+@Public()
 @Controller('health')
 export class HealthController {
   constructor(private readonly health: HealthService) {}

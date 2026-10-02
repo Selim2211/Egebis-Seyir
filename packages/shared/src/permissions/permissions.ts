@@ -5,6 +5,8 @@
 export const WORKSPACE_PERMISSIONS = {
   /** Workspace'i silme (brief §7.1; faturalama kapsam dışı). */
   WORKSPACE_DELETE: 'workspace.delete',
+  /** Üye listesini görme (Guest göremez, ADR-035). */
+  MEMBERS_VIEW: 'workspace.members.view',
   /** Kullanıcı davet/çıkarma, rol atama. */
   MEMBERS_MANAGE: 'workspace.members.manage',
   /** Workspace ayarları. */

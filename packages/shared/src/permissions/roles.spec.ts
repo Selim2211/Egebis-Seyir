@@ -54,6 +54,7 @@ describe('Varsayılan Space rol matrisi (brief §7.2)', () => {
 describe('Varsayılan workspace rol matrisi (brief §7.1)', () => {
   const expected: Array<[WorkspacePermission, WorkspaceRole[]]> = [
     [W.WORKSPACE_DELETE, ['OWNER']],
+    [W.MEMBERS_VIEW, ['OWNER', 'ADMIN', 'MEMBER']],
     [W.MEMBERS_MANAGE, ['OWNER', 'ADMIN']],
     [W.WORKSPACE_SETTINGS, ['OWNER', 'ADMIN']],
     [W.AUDIT_VIEW, ['OWNER', 'ADMIN']],

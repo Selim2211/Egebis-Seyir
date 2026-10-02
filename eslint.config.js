@@ -10,6 +10,7 @@ export default tseslint.config(
   {
     ignores: [
       '**/dist/**',
+      '**/dist-e2e/**',
       '**/coverage/**',
       '**/.turbo/**',
       '**/node_modules/**',
@@ -57,12 +58,21 @@ export default tseslint.config(
     rules: {
       ...reactHooks.configs.recommended.rules,
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
+      // react-hook-form: onSubmit={form.handleSubmit(...)} bir Promise döndürür.
+      '@typescript-eslint/no-misused-promises': [
+        'error',
+        { checksVoidReturn: { attributes: false } },
+      ],
     },
   },
   {
     // TanStack Router dosya tabanlı rotalar `Route` sabitini dışa aktarır.
     files: ['apps/web/src/routes/**/*.tsx'],
-    rules: { 'react-refresh/only-export-components': 'off' },
+    rules: {
+      'react-refresh/only-export-components': 'off',
+      // TanStack Router yönlendirmeleri `throw redirect(...)` ile yapılır.
+      '@typescript-eslint/only-throw-error': 'off',
+    },
   },
   prettier,
 );

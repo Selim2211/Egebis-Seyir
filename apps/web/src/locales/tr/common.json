@@ -3,16 +3,36 @@
     "name": "Scrum Manager",
     "tagline": "Fikirden teslime, Scrum disipliniyle."
   },
+  "common": {
+    "save": "Kaydet",
+    "saving": "Kaydediliyor…",
+    "cancel": "İptal",
+    "loading": "Yükleniyor…",
+    "retry": "Tekrar dene",
+    "optional": "isteğe bağlı",
+    "you": "sen",
+    "never": "Hiç"
+  },
+  "validation": {
+    "required": "Bu alan zorunlu.",
+    "email": "Geçerli bir e-posta adresi gir.",
+    "tooLong": "Çok uzun.",
+    "invalid": "Geçersiz değer."
+  },
   "nav": {
     "home": "Ana Sayfa",
     "myWork": "Bana atananlar",
     "inbox": "Bildirimler",
     "docs": "Dokümanlar",
+    "favorites": "Favoriler",
     "spaces": "Space'ler",
     "designSystem": "Tasarım sistemi",
+    "inviteMembers": "Üye davet et",
+    "settings": "Ayarlar",
     "openMenu": "Menüyü aç",
     "closeMenu": "Menüyü kapat",
-    "comingSoon": "Faz 1'de gelecek"
+    "comingSoon": "Sonraki adımda gelecek",
+    "workspace": "Workspace"
   },
   "spaces": {
     "emptyTitle": "Henüz Space yok",
@@ -20,9 +40,10 @@
     "create": "Space oluştur"
   },
   "topbar": {
-    "search": "Ara…",
-    "theme": "Tema",
-    "language": "Dil"
+    "search": "Görev, doküman veya kişi ara…",
+    "quickCreate": "Hızlı oluştur (C)",
+    "notifications": "Bildirimler",
+    "accountMenu": "Hesap menüsü"
   },
   "theme": {
     "light": "Açık",
@@ -39,15 +60,157 @@
     "down": "Sunucuya ulaşılamıyor",
     "checking": "Kontrol ediliyor…"
   },
+  "userMenu": {
+    "profile": "Profil",
+    "preferences": "Tercihler",
+    "language": "Dil",
+    "theme": "Tema",
+    "logout": "Çıkış yap"
+  },
+  "roles": {
+    "OWNER": "Owner",
+    "ADMIN": "Admin",
+    "MEMBER": "Member",
+    "GUEST": "Guest"
+  },
+  "roleHelp": {
+    "OWNER": "Her şeyi yönetir; workspace'i silebilir.",
+    "ADMIN": "Üyeleri ve ayarları yönetir.",
+    "MEMBER": "Space oluşturur ve atandığı Space'lerde çalışır.",
+    "GUEST": "Yalnızca paylaşılan Space'leri görür ve yorum yapar."
+  },
+  "auth": {
+    "email": "E-posta",
+    "emailPlaceholder": "ad@example.com",
+    "password": "Şifre",
+    "name": "Ad soyad",
+    "namePlaceholder": "Adın ve soyadın",
+    "uiLanguage": "Arayüz dili",
+    "backToLogin": "Girişe dön",
+    "login": {
+      "title": "Scrum Manager'a giriş yap",
+      "subtitle": "Çalışma alanına devam et.",
+      "forgot": "Şifremi unuttum",
+      "remember": "Beni bu cihazda hatırla",
+      "submit": "Giriş yap",
+      "noAccount": "Hesabın yok mu? Workspace yöneticinden davet iste; hesabını davet e-postasındaki bağlantıyla oluşturursun."
+    },
+    "setup": {
+      "title": "Scrum Manager'ı kur",
+      "subtitle": "İlk workspace'i ve yönetici (Owner) hesabını oluştur. Bu ekran yalnızca bir kez görünür.",
+      "token": "Kurulum anahtarı",
+      "tokenHint": "API ilk açıldığında sunucu loglarına yazılır.",
+      "workspaceName": "Kurum / workspace adı",
+      "workspacePlaceholder": "Örn. şirketinin adı",
+      "ownerSection": "Yönetici hesabı",
+      "submit": "Kurulumu tamamla"
+    },
+    "forgot": {
+      "title": "Şifreni mi unuttun?",
+      "subtitle": "Hesabının e-posta adresini gir; sıfırlama bağlantısı gönderelim.",
+      "submit": "Bağlantı gönder",
+      "sentTitle": "E-postanı kontrol et",
+      "sentBody": "{{email}} kayıtlıysa birkaç dakika içinde sıfırlama bağlantısı gelecek. Bağlantı 60 dakika geçerlidir."
+    },
+    "reset": {
+      "title": "Yeni şifre belirle",
+      "subtitle": "Şifren değişince tüm cihazlardaki oturumların kapanır.",
+      "password": "Yeni şifre",
+      "submit": "Şifreyi değiştir",
+      "doneTitle": "Şifren değişti",
+      "doneBody": "Yeni şifrenle giriş yapabilirsin.",
+      "missingToken": "Bağlantı eksik. E-postadaki bağlantıyı tekrar aç."
+    },
+    "invite": {
+      "title": "{{workspace}} workspace'ine katıl",
+      "invitedBy": "<0>{{name}}</0> seni <0>{{role}}</0> olarak davet etti.",
+      "emailHint": "Davetin gönderildiği adres; değiştirilemez.",
+      "submit": "Hesabı oluştur ve katıl",
+      "expires": "Bu davet {{date}} tarihine kadar geçerli ve yalnızca bir kez kullanılabilir.",
+      "existingAccount": "{{email}} için zaten bir hesap var. Daveti kabul etmek için bu hesapla giriş yap.",
+      "loginToAccept": "Giriş yap ve katıl",
+      "acceptAs": "{{email}} olarak katıl",
+      "wrongAccount": "Şu an {{current}} olarak giriş yapmışsın. Daveti kabul etmek için {{email}} hesabıyla giriş yap.",
+      "invalidTitle": "Davet geçersiz",
+      "invalidBody": "Bağlantı kullanılmış, iptal edilmiş veya süresi dolmuş olabilir. Workspace yöneticinden yeni davet iste."
+    }
+  },
   "home": {
-    "title": "Hoş geldin",
-    "subtitle": "Faz 0 iskeleti hazır. Kimlik doğrulama, workspace ve iş öğeleri Faz 1'de gelecek.",
+    "greeting": "Hoş geldin, {{name}}",
+    "subtitle": "Kimlik doğrulama ve üyelik hazır. Space'ler ve iş öğeleri sonraki adımlarda gelecek.",
     "nextTitle": "Sıradaki adımlar",
-    "next1": "Kayıt, giriş ve workspace daveti",
-    "next2": "Space / Folder / List hiyerarşisi",
-    "next3": "Epic, Story, Task, Sub-task ve Bug oluşturma",
-    "next4": "List ve Table görünümleri, arama ve filtre",
+    "next1": "Space / Folder / List hiyerarşisi",
+    "next2": "Epic, Story, Task, Sub-task ve Bug oluşturma",
+    "next3": "Görev detayı, List ve Table görünümleri",
+    "next4": "Yorum, ek ve aktivite akışı",
+    "inviteCta": "Takımını davet et",
     "designLink": "Tasarım sistemini incele"
+  },
+  "settings": {
+    "title": "Ayarlar",
+    "workspaceSection": "Workspace",
+    "accountSection": "Hesabım",
+    "members": "Üyeler",
+    "profile": "Profil",
+    "preferences": "Tercihler",
+    "sessions": "Oturumlar"
+  },
+  "members": {
+    "title": "Üyeler",
+    "subtitle": "Workspace'e kimlerin erişebileceğini ve rollerini yönet.",
+    "inviteLabel": "E-posta ile davet et",
+    "invitePlaceholder": "ad@example.com, ad2@example.com",
+    "inviteHint": "Birden fazla adresi virgülle ayırabilirsin.",
+    "role": "Rol",
+    "inviteSubmit": "Davet gönder",
+    "invited_one": "Davet gönderildi.",
+    "invited_other": "{{count}} davet gönderildi.",
+    "pendingTitle": "Bekleyen davetler",
+    "pendingRow": "{{role}} · {{invitedBy}} davet etti · {{date}} tarihine kadar geçerli",
+    "resend": "Yeniden gönder",
+    "resent": "Davet yeniden gönderildi.",
+    "revoke": "İptal et",
+    "revoked": "Davet iptal edildi.",
+    "count_one": "{{count}} üye",
+    "count_other": "{{count}} üye",
+    "colPerson": "Kişi",
+    "colRole": "Workspace rolü",
+    "colLastSeen": "Son etkinlik",
+    "colActions": "İşlemler",
+    "roleFor": "{{name}} için rol",
+    "remove": "Workspace'ten çıkar",
+    "removeConfirm": "{{name}} workspace'ten çıkarılsın mı? Tüm erişimini kaybeder.",
+    "removed": "Üye çıkarıldı.",
+    "roleChanged": "Rol güncellendi.",
+    "invalidEmails": "Geçersiz e-posta: {{emails}}"
+  },
+  "profile": {
+    "title": "Profil",
+    "subtitle": "Diğer üyelerin seni nasıl göreceği.",
+    "jobTitle": "Unvan",
+    "jobTitlePlaceholder": "Örn. Product Owner",
+    "saved": "Profil kaydedildi.",
+    "passwordTitle": "Şifre",
+    "currentPassword": "Mevcut şifre",
+    "newPassword": "Yeni şifre",
+    "changePassword": "Şifreyi değiştir",
+    "passwordChanged": "Şifre değişti; diğer cihazlardaki oturumlar kapatıldı."
+  },
+  "preferences": {
+    "title": "Tercihler",
+    "subtitle": "Dil, tema ve saat dilimi tüm cihazlarında geçerlidir.",
+    "timezone": "Saat dilimi",
+    "saved": "Tercihler kaydedildi."
+  },
+  "sessions": {
+    "title": "Oturumlar",
+    "subtitle": "Hesabının açık olduğu cihazlar. Tanımadığın bir oturumu sonlandır.",
+    "current": "Bu cihaz",
+    "lastSeen": "Son etkinlik {{time}}",
+    "started": "Açılış {{time}}",
+    "revoke": "Oturumu sonlandır",
+    "revoked": "Oturum sonlandırıldı.",
+    "unknownDevice": "Bilinmeyen cihaz"
   },
   "design": {
     "title": "Tasarım sistemi",
@@ -91,7 +254,21 @@
     "UNAUTHENTICATED": "Oturumun sona erdi, lütfen tekrar giriş yap.",
     "FORBIDDEN": "Bu işlem için yetkin yok.",
     "NOT_FOUND": "Aradığın kayıt bulunamadı.",
+    "RATE_LIMITED": "Çok fazla deneme yaptın. Bir dakika sonra tekrar dene.",
     "INTERNAL": "Beklenmeyen bir hata oluştu.",
-    "NETWORK": "Sunucuya ulaşılamıyor. Bağlantını kontrol et."
+    "NETWORK": "Sunucuya ulaşılamıyor. Bağlantını kontrol et.",
+    "CSRF_INVALID": "Güvenlik doğrulaması başarısız. Sayfayı yenileyip tekrar dene.",
+    "INVALID_CREDENTIALS": "E-posta veya şifre hatalı.",
+    "CURRENT_PASSWORD_INVALID": "Mevcut şifre hatalı.",
+    "TOKEN_INVALID": "Bağlantı geçersiz veya süresi dolmuş.",
+    "SETUP_ALREADY_DONE": "Kurulum zaten yapılmış.",
+    "SETUP_TOKEN_INVALID": "Kurulum anahtarı hatalı.",
+    "ALREADY_MEMBER": "Bu kişi zaten workspace üyesi.",
+    "INVITE_REQUIRES_LOGIN": "Daveti kabul etmek için giriş yapmalısın.",
+    "INVITE_EMAIL_MISMATCH": "Bu davet başka bir e-posta adresine gönderilmiş.",
+    "LAST_OWNER": "Workspace'te en az bir Owner kalmalı.",
+    "OWNER_ONLY": "Bu işlemi yalnızca bir Owner yapabilir.",
+    "WORK_ITEM_PARENT_REQUIRED": "Sub-task bir üst öğeye bağlı olmalı.",
+    "WORK_ITEM_PARENT_NOT_ALLOWED": "Bu öğe seçilen üst öğeye bağlanamaz."
   }
 }

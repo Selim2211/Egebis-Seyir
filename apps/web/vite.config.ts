@@ -18,6 +18,6 @@ export default defineConfig({
     port: 5173,
     strictPort: true,
     // Tarayıcı API'ye aynı origin üzerinden gider (cookie oturumu, CORS yok).
-    proxy: { '/api': 'http://localhost:3000' },
+    proxy: { '/api': process.env.API_PROXY_TARGET ?? 'http://localhost:3000' },
   },
 });
