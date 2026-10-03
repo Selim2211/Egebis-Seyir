@@ -1,6 +1,8 @@
 import { z } from 'zod';
 import { DOC_TITLE_MAX } from '../constants/doc';
+import { STATUS_CATEGORIES } from '../constants/work-item';
 import { RichTextSchema } from './rich-text';
+import { WorkItemTypeSchema } from './work-item';
 
 const DocTitle = z.string().trim().min(1).max(DOC_TITLE_MAX);
 
@@ -31,6 +33,16 @@ export const CreateDocRequestSchema = z.object({
 });
 export type CreateDocRequest = z.input<typeof CreateDocRequestSchema>;
 
+/** Dokümana bağlı iş öğesi (görüntüleyenin göremediği Space'tekiler listelenmez). */
+export const DocLinkedItemSchema = z.object({
+  id: z.uuid(),
+  key: z.string(),
+  type: WorkItemTypeSchema,
+  title: z.string(),
+  category: z.enum(STATUS_CATEGORIES),
+});
+export type DocLinkedItem = z.infer<typeof DocLinkedItemSchema>;
+
 const docCrumb = z.object({ id: z.uuid(), title: z.string() });
 
 /** GET /api/workspaces/:wid/docs/:docId */
@@ -47,6 +59,8 @@ export const DocDetailSchema = z.object({
   updatedBy: z.object({ id: z.uuid(), name: z.string() }).nullable(),
   /** Kökten ebeveyne kadar üst sayfalar. */
   ancestors: z.array(docCrumb),
+  /** Bağlı görevler ve Epic'ler. */
+  links: z.array(DocLinkedItemSchema),
   deleted: z.boolean(),
 });
 export type DocDetail = z.infer<typeof DocDetailSchema>;

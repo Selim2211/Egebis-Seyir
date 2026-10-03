@@ -32,6 +32,8 @@ export interface DispatchInput {
   spaceId: string;
   item?: { id: string; key: string; title: string };
   sprint?: { id: string; name: string };
+  /** Doküman sayfasıyla ilgili olay (yorumda etiketlenme). */
+  doc?: { id: string; title: string };
   /** Ek bilgi (durum değişikliğinde yeni durum adı). */
   detail?: string;
 }
@@ -41,6 +43,8 @@ interface StoredData {
   itemKey?: string;
   itemTitle?: string;
   sprintName?: string;
+  docId?: string;
+  docTitle?: string;
   detail?: string;
 }
 
@@ -100,6 +104,7 @@ export class NotificationsService {
       actorName: actor.name,
       ...(input.item && { itemKey: input.item.key, itemTitle: input.item.title }),
       ...(input.sprint && { sprintName: input.sprint.name }),
+      ...(input.doc && { docId: input.doc.id, docTitle: input.doc.title }),
       ...(input.detail && { detail: input.detail }),
     };
 
@@ -119,9 +124,11 @@ export class NotificationsService {
       });
     }
 
-    const url = input.item
-      ? `${this.appUrl}/items/${encodeURIComponent(input.item.key)}`
-      : `${this.appUrl}/spaces/${input.spaceId}/review/${input.sprint?.id ?? ''}`;
+    const url = input.doc
+      ? `${this.appUrl}/spaces/${input.spaceId}/docs?doc=${input.doc.id}`
+      : input.item
+        ? `${this.appUrl}/items/${encodeURIComponent(input.item.key)}`
+        : `${this.appUrl}/spaces/${input.spaceId}/review/${input.sprint?.id ?? ''}`;
     const emailing = users.filter((u) => channelEnabled(prefsOf(u.id), input.type, 'email'));
     await Promise.allSettled(
       emailing.map((user) =>
@@ -133,6 +140,7 @@ export class NotificationsService {
             actorName: actor.name,
             item: input.item,
             sprintName: input.sprint?.name,
+            docTitle: input.doc?.title,
             detail: input.detail,
             url,
           }),
@@ -197,6 +205,7 @@ export class NotificationsService {
       actor: row.actor,
       item: data.itemKey ? { key: data.itemKey, title: data.itemTitle ?? '' } : null,
       detail: data.detail ?? null,
+      doc: data.docId ? { id: data.docId, title: data.docTitle ?? '', spaceId: row.spaceId } : null,
       sprint: row.sprintId
         ? { id: row.sprintId, name: data.sprintName ?? '', spaceId: row.spaceId }
         : null,

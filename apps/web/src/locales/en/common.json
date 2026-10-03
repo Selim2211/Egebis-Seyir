@@ -583,7 +583,8 @@
     "panelHelp": "Work item details and editing fields.",
     "archivedBanner": "This item is archived and cannot be edited.",
     "updated": "Last updated: {{when}}",
-    "epicTotals": "Totals"
+    "epicTotals": "Totals",
+    "linkedDocs": "Docs"
   },
   "editor": {
     "toolbar": "Formatting",
@@ -975,7 +976,8 @@
       "COMMENTED": "{{actor}} commented on {{key}}.",
       "STATUS_CHANGED": "{{actor}} moved {{key}} to “{{detail}}”.",
       "SPRINT_STARTED": "{{actor}} started {{sprint}}.",
-      "SPRINT_COMPLETED": "{{actor}} completed {{sprint}}."
+      "SPRINT_COMPLETED": "{{actor}} completed {{sprint}}.",
+      "MENTIONED_DOC": "{{actor}} mentioned you in a comment on the page “{{doc}}”."
     },
     "settingsTitle": "Notifications",
     "settingsSubtitle": "Choose which events notify you and through which channel. Changes are saved immediately.",
@@ -1084,6 +1086,9 @@
     "preview": "Version preview",
     "emptyVersion": "This version is empty.",
     "restoreVersion": "Restore this version",
-    "versionRestored": "Version {{version}} restored."
+    "versionRestored": "Version {{version}} restored.",
+    "linkedItems": "Linked items",
+    "linkItem": "Link item",
+    "unlinkItem": "Remove link to {{key}}"
   }
 }

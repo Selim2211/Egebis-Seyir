@@ -102,6 +102,7 @@ export type TenantTx = Pick<
   | 'sprintSnapshot'
   | 'doc'
   | 'docVersion'
+  | 'docItemLink'
 >;
 
 /** Birden çok List'ten gelen satırlar için ek ilişkiler (benim işlerim, arama). */

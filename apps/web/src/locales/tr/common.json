@@ -583,7 +583,8 @@
     "panelHelp": "Görev ayrıntıları ve düzenleme alanları.",
     "archivedBanner": "Bu öğe arşivde; düzenlenemez.",
     "updated": "Son güncelleme: {{when}}",
-    "epicTotals": "Toplam"
+    "epicTotals": "Toplam",
+    "linkedDocs": "Dokümanlar"
   },
   "editor": {
     "toolbar": "Biçimlendirme",
@@ -975,7 +976,8 @@
       "COMMENTED": "{{actor}}, {{key}} görevine yorum yazdı.",
       "STATUS_CHANGED": "{{actor}}, {{key}} durumunu “{{detail}}” yaptı.",
       "SPRINT_STARTED": "{{actor}}, {{sprint}} sprint’ini başlattı.",
-      "SPRINT_COMPLETED": "{{actor}}, {{sprint}} sprint’ini tamamladı."
+      "SPRINT_COMPLETED": "{{actor}}, {{sprint}} sprint’ini tamamladı.",
+      "MENTIONED_DOC": "{{actor}} seni “{{doc}}” sayfasındaki bir yorumda etiketledi."
     },
     "settingsTitle": "Bildirimler",
     "settingsSubtitle": "Hangi olaylardan hangi kanaldan haber almak istediğini seç. Değişiklikler hemen kaydedilir.",
@@ -1084,6 +1086,9 @@
     "preview": "Sürüm önizlemesi",
     "emptyVersion": "Bu sürüm boş.",
     "restoreVersion": "Bu sürüme dön",
-    "versionRestored": "Sürüm {{version}} geri yüklendi."
+    "versionRestored": "Sürüm {{version}} geri yüklendi.",
+    "linkedItems": "Bağlı görevler",
+    "linkItem": "Görev bağla",
+    "unlinkItem": "{{key}} bağlantısını kaldır"
   }
 }

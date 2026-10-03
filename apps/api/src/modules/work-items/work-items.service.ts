@@ -182,6 +182,17 @@ export class WorkItemsService {
       dodEnforced: row.space.dodEnforced,
     };
 
+    // Bu öğeye bağlı doküman sayfaları (görülebilir Space'lerde, ADR-070).
+    const docRows = await db.docItemLink.findMany({
+      where: { workItemId: itemId, doc: { deletedAt: null } },
+      include: { doc: { select: { id: true, title: true, spaceId: true } } },
+      orderBy: { createdAt: 'asc' },
+    });
+    const docSpaces = await this.access.permissionMap({
+      id: { in: [...new Set(docRows.map((r) => r.doc.spaceId))] },
+      deletedAt: null,
+    });
+
     return {
       ...toSummary(row),
       readiness,
@@ -211,6 +222,7 @@ export class WorkItemsService {
               })),
             )
           : null,
+      docs: docRows.filter((r) => docSpaces.has(r.doc.spaceId)).map((r) => r.doc),
       epicStats:
         row.type === 'EPIC'
           ? epicStats(children.map((c) => ({ points: c.points, category: c.status.category })))

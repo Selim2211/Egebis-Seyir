@@ -13,6 +13,8 @@ export const NotificationSchema = z.object({
     .nullable(),
   /** Öğeyle ilgili bildirimlerde okunabilir kimlik ve başlık (anlık görüntü). */
   item: z.object({ key: z.string(), title: z.string() }).nullable(),
+  /** Doküman sayfası bildirimleri (yorumda etiketlenme). */
+  doc: z.object({ id: z.uuid(), title: z.string(), spaceId: z.uuid() }).nullable(),
   /** Ek bilgi: durum değişikliğinde yeni durum adı. */
   detail: z.string().nullable(),
   /** Sprint bildirimlerinde sprint ve Space. */

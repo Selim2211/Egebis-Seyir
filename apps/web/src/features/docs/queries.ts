@@ -121,3 +121,20 @@ export function useSaveDocRequest() {
   return (docId: string, body: UpdateDocRequest) =>
     apiRequest(`${ws(id)}/docs/${docId}`, UpdateDocResponseSchema, { method: 'PATCH', body });
 }
+
+/** Sayfa ↔ görev bağlantısı: ekler ya da kaldırır; açık sayfanın bağlantı listesi tazelenir. */
+export function useDocItemLink() {
+  const qc = useQueryClient();
+  const { id } = useCurrentWorkspace();
+  return useMutation({
+    mutationFn: ({ docId, itemId, on }: { docId: string; itemId: string; on: boolean }) =>
+      apiRequest(`${ws(id)}/docs/${docId}/links/${itemId}`, NoContent, {
+        method: on ? 'PUT' : 'DELETE',
+      }),
+    onSettled: (_data, _error, { docId, itemId }) =>
+      Promise.all([
+        qc.invalidateQueries({ queryKey: ['workspaces', id, 'docs', docId] }),
+        qc.invalidateQueries({ queryKey: ['workspaces', id, 'items', itemId] }),
+      ]),
+  });
+}

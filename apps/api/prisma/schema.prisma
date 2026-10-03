@@ -199,6 +199,7 @@ model Workspace {
   sprintSnapshots   SprintSnapshot[]
   docs              Doc[]
   docVersions       DocVersion[]
+  docItemLinks      DocItemLink[]
 
   notifications           Notification[]
   notificationPreferences NotificationPreference[]
@@ -517,6 +518,7 @@ model WorkItem {
   linksTo      WorkItemLink[]     @relation("LinkTo")
   watchers     WorkItemWatcher[]
   comments     Comment[]
+  docLinks     DocItemLink[]
   attachments  Attachment[]
   sprintEvents SprintItemEvent[]
 
@@ -650,8 +652,11 @@ model Comment {
   id          String    @id @default(uuid(7)) @db.Uuid
   workspaceId String    @db.Uuid
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  workItemId  String    @db.Uuid
-  workItem    WorkItem  @relation(fields: [workItemId], references: [id], onDelete: Cascade)
+  /// Yorum ya görevin ya da doküman sayfasının (CHECK: tam biri dolu).
+  workItemId  String?   @db.Uuid
+  workItem    WorkItem? @relation(fields: [workItemId], references: [id], onDelete: Cascade)
+  docId       String?   @db.Uuid
+  doc         Doc?      @relation(fields: [docId], references: [id], onDelete: Cascade)
   authorId    String?   @db.Uuid
   author      User?     @relation(fields: [authorId], references: [id], onDelete: SetNull)
   /// Tiptap belge JSON'u (mention düğümleri dahil).
@@ -665,6 +670,7 @@ model Comment {
   reactions CommentReaction[]
 
   @@index([workItemId, createdAt])
+  @@index([docId, createdAt])
   @@map("comments")
 }
 
@@ -877,6 +883,8 @@ model Doc {
   deletedAt   DateTime? @db.Timestamptz
 
   versions DocVersion[]
+  comments Comment[]
+  links    DocItemLink[]
 
   @@index([spaceId, parentId])
   @@index([spaceId, deletedAt])
@@ -900,4 +908,20 @@ model DocVersion {
 
   @@unique([docId, version])
   @@map("doc_versions")
+}
+
+/// Doküman sayfası ↔ iş öğesi bağlantısı (ADR-070).
+model DocItemLink {
+  workspaceId String    @db.Uuid
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  docId       String    @db.Uuid
+  doc         Doc       @relation(fields: [docId], references: [id], onDelete: Cascade)
+  workItemId  String    @db.Uuid
+  workItem    WorkItem  @relation(fields: [workItemId], references: [id], onDelete: Cascade)
+  createdById String?   @db.Uuid
+  createdAt   DateTime  @default(now()) @db.Timestamptz
+
+  @@id([docId, workItemId])
+  @@index([workItemId])
+  @@map("doc_item_links")
 }

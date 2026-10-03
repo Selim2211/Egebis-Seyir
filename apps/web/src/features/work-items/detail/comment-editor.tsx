@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { UserAvatar } from '@/components/user-avatar';
 import { useCurrentWorkspace } from '@/features/workspace/queries';
 import { cn } from '@/lib/utils';
-import { fetchMentionCandidates } from '../queries';
+import { type CommentScope, fetchMentionCandidates } from '../queries';
 
 type Candidate = MentionCandidates['users'][number];
 
@@ -28,6 +28,7 @@ interface Suggest {
  */
 export function CommentEditor({
   itemId,
+  scope = 'items',
   initial,
   submitLabel,
   placeholder,
@@ -37,6 +38,7 @@ export function CommentEditor({
   onCancel,
 }: {
   itemId: string;
+  scope?: CommentScope;
   initial?: RichTextDoc;
   submitLabel: string;
   placeholder: string;
@@ -87,7 +89,7 @@ export function CommentEditor({
         suggestion: {
           char: '@',
           items: async ({ query }) =>
-            (await fetchMentionCandidates(workspaceId, itemId, query)).users,
+            (await fetchMentionCandidates(workspaceId, itemId, query, scope)).users,
           render: () => ({
             onStart: (props) =>
               update({

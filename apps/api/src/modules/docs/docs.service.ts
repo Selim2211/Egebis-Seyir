@@ -30,6 +30,7 @@ import { TenantPrismaService } from '../../infra/prisma/tenant-prisma.service';
 import { ActivityService } from '../activity/activity.service';
 import { archivedParent, notFound } from '../spaces/space-errors';
 import { asJson, fail, type TenantTx } from '../work-items/item-support';
+import { DocLinksService } from './doc-links.service';
 
 const conflict = (code: ErrorCode) => new HttpException({ code }, HttpStatus.CONFLICT);
 
@@ -75,6 +76,7 @@ export class DocsService {
     private readonly tenant: TenantPrismaService,
     private readonly cls: ClsService<AppClsStore>,
     private readonly activity: ActivityService,
+    private readonly links: DocLinksService,
   ) {}
 
   private get ctx() {
@@ -158,6 +160,7 @@ export class DocsService {
       updatedAt: doc.updatedAt.toISOString(),
       updatedBy: doc.updatedBy,
       ancestors,
+      links: await this.links.itemsOfDoc(docId),
       deleted: doc.deletedAt !== null,
     };
   }

@@ -9,6 +9,8 @@ export interface NotificationMailInput {
   /** Öğeyle ilgili olaylar. */
   item?: { key: string; title: string };
   sprintName?: string;
+  /** Doküman sayfası olayları (yorumda etiketlenme). */
+  docTitle?: string;
   /** Durum değişikliğinde yeni durum adı. */
   detail?: string;
   url: string;
@@ -27,6 +29,19 @@ function copy(p: NotificationMailInput): Copy {
   const title = p.item?.title ?? '';
   const sprint = p.sprintName ?? '';
   const detail = p.detail ?? '';
+  if (p.docTitle !== undefined && p.type === 'MENTIONED') {
+    return p.locale === 'en'
+      ? {
+          subject: `${who} mentioned you in “${p.docTitle}”`,
+          line: `${who} mentioned you in a comment on the page “${p.docTitle}”.`,
+          action: 'Open page',
+        }
+      : {
+          subject: `${who} seni “${p.docTitle}” sayfasında etiketledi`,
+          line: `${who}, “${p.docTitle}” sayfasındaki yorumunda seni etiketledi.`,
+          action: 'Sayfayı aç',
+        };
+  }
   if (p.locale === 'en') {
     switch (p.type) {
       case 'ASSIGNED':

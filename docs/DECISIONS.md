@@ -566,3 +566,14 @@
   - **Arama:** düz metin (`plain_text`) saklanır; global aramaya katılması ve içindekiler/TOC sonraya.
 - **Alternatifler:** Her kaydı ayrı sürüm yapmak (geçmiş okunmaz olur); iyimser kilit yerine son yazan kazanır (sessiz veri kaybı); Yjs/CRDT ile ortak düzenleme (F2 kapsamı, bu adımda gereksiz karmaşıklık); sürümleri farklarla (diff) saklamak (geri yükleme ve önizleme karmaşıklaşır, sayfalar küçük).
 - **Bilinen sınırlar:** ortak düzenleme, şablonlar, gömülü görev listesi, dışa aktarma, sayfa düzeyi izin yok (brief [F2]); görsel ve ek yok; çöp kutusu yalnızca Space içinde görünür.
+
+## ADR-070 — Doküman bağlantıları ve yorumları
+
+- **Tarih:** 2026-10-03 · **Durum:** Kabul (brief §5.12, Akış G; ayrıntılar geliştirici varsayılanı, onay bekliyor)
+- **Karar:**
+  - **Bağlantı:** sayfa ↔ iş öğesi çoktan çoğa (`doc_item_links`, bileşik anahtar); her tipten öğe (Epic, Story, Task, Bug…) bağlanabilir. Bağlama `doc.write` ister ve öğeyi **göremeyen** kullanıcı için öğe yokmuş gibi 404 döner. Bağlantı listeleri okuyanın yetkisine göre süzülür: görmediği Space'teki öğe sayfada, görmediği Space'teki sayfa görevde listelenmez. Çift bağlama sessizce yok sayılır. Bağlama dokümandan yapılır; görev tarafı yalnızca "Dokümanlar" listesini gösterir.
+  - **Yorumlar:** görev yorumlarıyla **aynı `comments` tablosu** (yeni `docId` sütunu; `workItemId` boşaltıldı, CHECK ile ikisinden tam biri dolu). Böylece zengin metin, @mention kaydı ve tepkiler yeniden kullanılır; web'de aynı `Comments` bileşeni `scope="docs"` ile çalışır. Yazma `comment.write`, düzenleme yalnızca yazar, silme yazar veya `space.settings`. Silinmiş sayfaya ve arşivli Space'e yorum yazılamaz.
+  - **Bildirim:** yorumda etiketlenen kişi `MENTIONED` bildirimi alır (yeni tür yok; tercih anahtarı aynı). Bildirim kaydı sayfa kimliği ve başlığını `data` içinde anlık görüntü olarak taşır, tıklayınca sayfaya gider; e-posta dokümana özel metinle gider. Düzenlemede yalnızca yeni etiketlenenler bilgilendirilir. Sayfa izleyicisi/"COMMENTED" bildirimi bu adımda yok (sayfaların izleyicisi yok).
+  - **Aktivite:** bağlama, çözme, yorum ve yorum silme `doc` varlığına aktivite olarak yazılır.
+- **Alternatifler:** Ayrı `doc_comments` tablosu (mention ve tepki tablolarını çoğaltmak gerekirdi); bağlantıyı iş öğesi `links` tablosuna eklemek (farklı varlık türleri, farklı yaşam döngüsü); sayfa metnindeki @görev anmalarından otomatik bağlantı türetmek (editör uzantısı gerekir, sonraya).
+- **Bilinen sınırlar:** sayfa içine gömülü görev listesi/filtresi ve metinde `MOB-12` ile anma yok (brief [F2]); sayfa izleme/abonelik yok.

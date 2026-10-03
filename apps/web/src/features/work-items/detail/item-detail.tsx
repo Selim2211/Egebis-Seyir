@@ -37,6 +37,7 @@ import { Checklists } from './checklists';
 import { ReadinessSection } from './readiness-section';
 import { DetailTabs } from './detail-tabs';
 import { ItemOpenLink } from './item-nav';
+import { LinkedDocs } from './linked-docs';
 import { Links } from './links';
 import { Properties } from './properties';
 import { useSaveItem } from './use-save-item';
@@ -291,6 +292,7 @@ function Content({
           <Checklists itemId={item.id} checklists={item.checklists} canWrite={canWrite} />
           <SubItems item={item} space={space} canWrite={canWrite} />
           <Links item={item} canWrite={canWrite} />
+          <LinkedDocs item={item} />
           <Attachments itemId={item.id} attachments={item.attachments} canWrite={canWrite} />
           <DetailTabs
             itemId={item.id}

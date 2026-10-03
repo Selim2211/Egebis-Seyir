@@ -34,6 +34,7 @@ export const TENANT_MODELS: ReadonlySet<string> = new Set([
   'SprintSnapshot',
   'Doc',
   'DocVersion',
+  'DocItemLink',
 ]);
 
 const WHERE_OPERATIONS = new Set([

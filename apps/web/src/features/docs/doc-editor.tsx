@@ -11,6 +11,8 @@ import { useCurrentWorkspace } from '@/features/workspace/queries';
 import { relativeTime } from '@/lib/format';
 import { cn } from '@/lib/utils';
 import { useRestoreDoc } from './queries';
+import { Comments } from '@/features/work-items/detail/comments';
+import { DocLinks } from './doc-links';
 import { useDocSaver } from './use-doc-saver';
 
 const TITLE_DELAY_MS = 800;
@@ -23,6 +25,7 @@ export function DocEditor({
   doc,
   spaceId,
   canWrite,
+  canComment,
   onOpenVersions,
   onSelect,
   onReload,
@@ -30,6 +33,7 @@ export function DocEditor({
   doc: DocDetail;
   spaceId: string;
   canWrite: boolean;
+  canComment: boolean;
   onOpenVersions: () => void;
   onSelect: (id: string) => void;
   onReload: () => void;
@@ -176,6 +180,11 @@ export function DocEditor({
           saver.save({ content: next });
         }}
       />
+      <DocLinks doc={doc} canWrite={editable} />
+
+      <div className="px-2 pt-2">
+        <Comments itemId={doc.id} scope="docs" canComment={canComment && !doc.deleted} />
+      </div>
     </article>
   );
 }

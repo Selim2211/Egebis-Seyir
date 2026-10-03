@@ -10,9 +10,15 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  Put,
+  Query,
 } from '@nestjs/common';
 import {
+  CommentRequestSchema,
+  CommentsResponseSchema,
   CreatedSchema,
+  MentionCandidatesSchema,
+  ToggleReactionRequestSchema,
   CreateDocRequestSchema,
   DocDetailSchema,
   DocsResponseSchema,
@@ -22,7 +28,9 @@ import {
   SPACE_PERMISSIONS as S,
   UpdateDocRequestSchema,
   UpdateDocResponseSchema,
+  type CommentsResponse,
   type Created,
+  type MentionCandidates,
   type DocDetail,
   type DocsResponse,
   type DocVersionDetail,
@@ -31,8 +39,14 @@ import {
 } from '@scrum/shared';
 import { createZodDto, ZodResponse } from 'nestjs-zod';
 import { RequireSpacePermission } from '../auth/decorators';
+import { DocCommentsService } from './doc-comments.service';
+import { DocLinksService } from './doc-links.service';
 import { DocsService } from './docs.service';
 
+class CommentsDto extends createZodDto(CommentsResponseSchema) {}
+class CommentRequestDto extends createZodDto(CommentRequestSchema) {}
+class CandidatesDto extends createZodDto(MentionCandidatesSchema) {}
+class ReactionDto extends createZodDto(ToggleReactionRequestSchema) {}
 class DocsDto extends createZodDto(DocsResponseSchema) {}
 class DocDetailDto extends createZodDto(DocDetailSchema) {}
 class CreateDocDto extends createZodDto(CreateDocRequestSchema) {}
@@ -49,7 +63,11 @@ const NO_CONTENT = HttpStatus.NO_CONTENT;
 /** Doküman sayfaları (Faz 3.2, ADR-069). Okuma `doc.view`, yazma `doc.write`. */
 @Controller('workspaces/:workspaceId')
 export class DocsController {
-  constructor(private readonly docs: DocsService) {}
+  constructor(
+    private readonly docs: DocsService,
+    private readonly links: DocLinksService,
+    private readonly comments: DocCommentsService,
+  ) {}
 
   @Get('spaces/:spaceId/docs')
   @RequireSpacePermission(S.DOC_VIEW)
@@ -132,5 +150,73 @@ export class DocsController {
     @Param('version', ParseIntPipe) version: number,
   ): Promise<UpdateDocResponse> {
     return this.docs.restoreVersion(docId, version);
+  }
+
+  // ---------- Bağlantılar (ADR-070) ----------
+
+  @Put('docs/:docId/links/:itemId')
+  @RequireSpacePermission(S.DOC_WRITE)
+  @HttpCode(NO_CONTENT)
+  link(@Uuid('docId') docId: string, @Uuid('itemId') itemId: string): Promise<void> {
+    return this.links.link(docId, itemId);
+  }
+
+  @Delete('docs/:docId/links/:itemId')
+  @RequireSpacePermission(S.DOC_WRITE)
+  @HttpCode(NO_CONTENT)
+  unlink(@Uuid('docId') docId: string, @Uuid('itemId') itemId: string): Promise<void> {
+    return this.links.unlink(docId, itemId);
+  }
+
+  // ---------- Yorumlar ----------
+
+  @Get('docs/:docId/comments')
+  @RequireSpacePermission(S.DOC_VIEW)
+  @ZodResponse({ type: CommentsDto })
+  async listComments(@Uuid('docId') docId: string): Promise<CommentsResponse> {
+    return { comments: await this.comments.list(docId) };
+  }
+
+  @Get('docs/:docId/mention-candidates')
+  @RequireSpacePermission(S.COMMENT_WRITE)
+  @ZodResponse({ type: CandidatesDto })
+  mentionCandidates(@Uuid('docId') docId: string, @Query('q') q = ''): Promise<MentionCandidates> {
+    return this.comments.candidates(docId, q);
+  }
+
+  @Post('docs/:docId/comments')
+  @RequireSpacePermission(S.COMMENT_WRITE)
+  @ZodResponse({ type: CreatedDto, status: HttpStatus.CREATED })
+  createComment(@Uuid('docId') docId: string, @Body() body: CommentRequestDto): Promise<Created> {
+    return this.comments.create(docId, body);
+  }
+
+  @Patch('docs/:docId/comments/:commentId')
+  @RequireSpacePermission(S.COMMENT_WRITE)
+  @HttpCode(NO_CONTENT)
+  editComment(
+    @Uuid('docId') docId: string,
+    @Uuid('commentId') commentId: string,
+    @Body() body: CommentRequestDto,
+  ): Promise<void> {
+    return this.comments.update(docId, commentId, body);
+  }
+
+  @Delete('docs/:docId/comments/:commentId')
+  @RequireSpacePermission(S.COMMENT_WRITE)
+  @HttpCode(NO_CONTENT)
+  deleteComment(@Uuid('docId') docId: string, @Uuid('commentId') commentId: string): Promise<void> {
+    return this.comments.remove(docId, commentId);
+  }
+
+  @Put('docs/:docId/comments/:commentId/reactions')
+  @RequireSpacePermission(S.COMMENT_WRITE)
+  @HttpCode(NO_CONTENT)
+  toggleReaction(
+    @Uuid('docId') docId: string,
+    @Uuid('commentId') commentId: string,
+    @Body() body: ReactionDto,
+  ): Promise<void> {
+    return this.comments.toggleReaction(docId, commentId, body.emoji);
   }
 }

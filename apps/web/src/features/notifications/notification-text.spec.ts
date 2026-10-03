@@ -14,6 +14,7 @@ const base: Notification = {
   read: false,
   actor: { id: '00000000-0000-7000-8000-000000000002', name: 'Zeynep', avatarVersion: null },
   item: { key: 'MOB-1', title: 'Ödeme' },
+  doc: null,
   detail: null,
   sprint: null,
 };
@@ -21,7 +22,7 @@ const base: Notification = {
 describe('describeNotification', () => {
   it('türe özgü anahtarı ve olay bilgilerini kullanır', () => {
     expect(describeNotification(base, t)).toBe(
-      'notifications.text.ASSIGNED{"actor":"Zeynep","key":"MOB-1","title":"Ödeme","sprint":"","detail":""}',
+      'notifications.text.ASSIGNED{"actor":"Zeynep","key":"MOB-1","title":"Ödeme","sprint":"","doc":"","detail":""}',
     );
   });
 

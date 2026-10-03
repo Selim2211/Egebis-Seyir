@@ -261,6 +261,8 @@ export const WorkItemDetailSchema = WorkItemSummarySchema.extend({
   labels: z.array(LabelSchema),
   /** Epic: point ağırlıklı ilerleme (0–100); diğer tipler null (ADR-045). */
   progress: z.int().nullable(),
+  /** Bu öğeye bağlı doküman sayfaları (ADR-070). */
+  docs: z.array(z.object({ id: z.uuid(), title: z.string(), spaceId: z.uuid() })),
   /** Epic: alt öğe puan/adet özeti; diğer tipler null (ADR-068). */
   epicStats: EpicStatsSchema.nullable(),
   /** Alt öğelerin saat toplamı (rollup); alt öğede saat yoksa null. */

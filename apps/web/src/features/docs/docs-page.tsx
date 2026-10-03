@@ -37,6 +37,7 @@ export function DocsPage({ spaceId, docId }: { spaceId: string; docId: string | 
   if (space.isError || docs.isError) return <NotFoundState />;
 
   const canWrite = space.data.permissions.includes(S.DOC_WRITE) && !space.data.archived;
+  const canComment = space.data.permissions.includes(S.COMMENT_WRITE) && !space.data.archived;
   const select = (id: string | null) =>
     void navigate({
       to: '/spaces/$spaceId/docs',
@@ -118,6 +119,7 @@ export function DocsPage({ spaceId, docId }: { spaceId: string; docId: string | 
               docId={docId}
               spaceId={spaceId}
               canWrite={canWrite}
+              canComment={canComment}
               onSelect={select}
               onReload={reload}
               onOpenVersions={() => setShowVersions(true)}
@@ -193,6 +195,7 @@ function OpenDoc({
   docId,
   spaceId,
   canWrite,
+  canComment,
   onSelect,
   onReload,
   onOpenVersions,
@@ -200,6 +203,7 @@ function OpenDoc({
   docId: string;
   spaceId: string;
   canWrite: boolean;
+  canComment: boolean;
   onSelect: (id: string) => void;
   onReload: () => void;
   onOpenVersions: () => void;
@@ -214,6 +218,7 @@ function OpenDoc({
       doc={doc.data}
       spaceId={spaceId}
       canWrite={canWrite}
+      canComment={canComment}
       onOpenVersions={onOpenVersions}
       onSelect={onSelect}
       onReload={onReload}

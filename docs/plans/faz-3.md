@@ -8,8 +8,8 @@
 | --- | --------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ---------- |
 | 3.1 | Epic detayı ve Epic listesi | Epic puan/adet özeti, Space "Epic'ler" sekmesi (hedef, ilerleme çubuğu, tahminsiz uyarısı)                                       | Tamamlandı |
 | 3.2 | Doküman modülü çekirdeği    | Space içinde doküman sayfaları, sayfa ağacı (üst-alt), Tiptap editörü, otomatik kayıt, sürüm geçmişi ve geri yükleme, çöp kutusu | Tamamlandı |
-| 3.3 | Doküman ↔ görev bağlama     | Dokümana görev/Epic bağlama, görevden dokümanlara bağlantı, yorum ve @mention, bildirim                                          | Sırada     |
-| 3.4 | Retrospektif                | Sprint'e bağlı retrospektif sayfası (iyi gitti / gelişmeli / aksiyon), aksiyonları göreve çevirme                                | Bekliyor   |
+| 3.3 | Doküman ↔ görev bağlama     | Dokümana görev/Epic bağlama, görevden dokümanlara bağlantı, yorum ve @mention, bildirim                                          | Tamamlandı |
+| 3.4 | Retrospektif                | Sprint'e bağlı retrospektif sayfası (iyi gitti / gelişmeli / aksiyon), aksiyonları göreve çevirme                                | Sırada     |
 
 ## 3.1 Ayrıntı
 
@@ -30,3 +30,13 @@ Karar: ADR-069.
 **Web**: `/spaces/:id/docs?doc=` (`features/docs`): `DocTree`, `DocEditor` (`useDocSaver` kayıt kuyruğu, revision), `VersionsDialog`, `TrashDialog`, `MoveDocDialog`. `RichTextEditor` `variant="page"` (tablo, H1–H3, ayırıcı); `RichTextView` tabloyu çizer.
 
 **Doğrulama (2026-10-03):** shared `docs` 9 test; `docs.int-spec` 17 (ağaç ve detay, doğrulama, kayıt ve revision, 409 çakışma, boş belge, tablo, sürüm birleştirme/geri yükleme, taşıma ve döngü, çöp kutusu ve süre dolumu, yetki, özel Space, arşivli Space); Playwright `faz3-docs` 4/4 (oluştur ve otomatik kaydet, tablo ve alt sayfa, sürüm önizleme, sil ve geri getir). Tüm paket: int 196, E2E 57 yeşil (yalnızca Mailpit isteyen `faz1-auth` bekliyor).
+
+## 3.3 Ayrıntı
+
+Karar: ADR-070.
+
+**API** (`/api/workspaces/:wid`): `PUT|DELETE docs/:docId/links/:itemId`; `GET|POST docs/:docId/comments`, `PATCH|DELETE docs/:docId/comments/:commentId`, `PUT .../reactions`, `GET docs/:docId/mention-candidates`. `DocDetail.links` ve `WorkItemDetail.docs`. Veri: `doc_item_links`, `comments.docId` (CHECK). Bildirim: `NotificationsService.dispatch({ doc })`, `Notification.doc`.
+
+**Web**: Sayfada "Bağlı görevler" (arama kutulu seçici) ve altında Yorumlar (`Comments scope="docs"`); görev detayında "Dokümanlar"; bildirim merkezi doküman etiketlenmesini sayfaya götürür.
+
+**Doğrulama (2026-10-03):** `doc-collab.int-spec` 9 (iki yönlü bağlantı ve kaldırma, silinen öğe, görünmeyen Space sızıntısı, Stakeholder 403, yorum yaşam döngüsü ve tepki, yetkisiz düzenleme, mention bildirimi ve e-postası, düzenlemede çift bildirim yok, görünmeyen kişi etiketlenemez, arşivli Space); Playwright `faz3-doc-links` 2/2.

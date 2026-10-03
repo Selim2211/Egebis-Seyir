@@ -16,16 +16,24 @@ import { useCurrentWorkspace } from '@/features/workspace/queries';
 import { relativeTime } from '@/lib/format';
 import { useErrorMessage } from '@/lib/use-error-message';
 import { cn } from '@/lib/utils';
-import { commentsQuery, useComment } from '../queries';
+import { type CommentScope, commentsQuery, useComment } from '../queries';
 import { CommentEditor } from './comment-editor';
 import { RichTextView } from './rich-text-view';
 
 /** Yorumlar (brief §5.13, ADR-055): yaz, düzenle, sil, tepki ver, @mention. */
-export function Comments({ itemId, canComment }: { itemId: string; canComment: boolean }) {
+export function Comments({
+  itemId,
+  canComment,
+  scope = 'items',
+}: {
+  itemId: string;
+  canComment: boolean;
+  scope?: CommentScope;
+}) {
   const { t } = useTranslation();
   const errorMessage = useErrorMessage();
   const { id: workspaceId } = useCurrentWorkspace();
-  const { data } = useQuery(commentsQuery(workspaceId, itemId));
+  const { data } = useQuery(commentsQuery(workspaceId, itemId, scope));
   const mutation = useComment();
   const [editing, setEditing] = useState<string | null>(null);
   const comments = data?.comments ?? [];
@@ -89,7 +97,7 @@ export function Comments({ itemId, canComment }: { itemId: string; canComment: b
                           variant="destructive"
                           onSelect={() =>
                             mutation.mutate(
-                              { itemId, op: 'delete', commentId: comment.id },
+                              { itemId, scope, op: 'delete', commentId: comment.id },
                               { onError },
                             )
                           }
@@ -107,6 +115,7 @@ export function Comments({ itemId, canComment }: { itemId: string; canComment: b
                 <div className="mt-1">
                   <CommentEditor
                     itemId={itemId}
+                    scope={scope}
                     initial={comment.body}
                     autoFocus
                     submitLabel={t('common.save')}
@@ -115,7 +124,7 @@ export function Comments({ itemId, canComment }: { itemId: string; canComment: b
                     onCancel={() => setEditing(null)}
                     onSubmit={(body) =>
                       mutation.mutate(
-                        { itemId, op: 'edit', commentId: comment.id, body },
+                        { itemId, scope, op: 'edit', commentId: comment.id, body },
                         { onSuccess: () => setEditing(null), onError },
                       )
                     }
@@ -130,7 +139,7 @@ export function Comments({ itemId, canComment }: { itemId: string; canComment: b
                 canReact={canComment}
                 onReact={(emoji) =>
                   mutation.mutate(
-                    { itemId, op: 'react', commentId: comment.id, emoji },
+                    { itemId, scope, op: 'react', commentId: comment.id, emoji },
                     { onError },
                   )
                 }
@@ -143,10 +152,11 @@ export function Comments({ itemId, canComment }: { itemId: string; canComment: b
       {canComment ? (
         <CommentEditor
           itemId={itemId}
+          scope={scope}
           submitLabel={t('comments.submit')}
           placeholder={t('comments.placeholder')}
           pending={mutation.isPending}
-          onSubmit={(body) => mutation.mutate({ itemId, op: 'create', body }, { onError })}
+          onSubmit={(body) => mutation.mutate({ itemId, scope, op: 'create', body }, { onError })}
         />
       ) : (
         <p className="text-muted-foreground text-sm">{t('comments.readOnly')}</p>

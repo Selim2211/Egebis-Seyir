@@ -290,17 +290,25 @@ export const useBulkUpdate = () =>
 
 // ---------- Yorumlar, ekler, aktivite (Faz 1.6) ----------
 
-export const commentsQuery = (workspaceId: string, itemId: string) =>
+/** Yorum hedefi: görev (`items`) ya da doküman sayfası (`docs`, ADR-070). */
+export type CommentScope = 'items' | 'docs';
+
+export const commentsQuery = (workspaceId: string, itemId: string, scope: CommentScope = 'items') =>
   queryOptions({
-    queryKey: ['workspaces', workspaceId, 'items', itemId, 'comments'],
+    queryKey: ['workspaces', workspaceId, scope, itemId, 'comments'],
     queryFn: () =>
-      apiRequest(`${ws(workspaceId)}/items/${itemId}/comments`, CommentsResponseSchema),
+      apiRequest(`${ws(workspaceId)}/${scope}/${itemId}/comments`, CommentsResponseSchema),
   });
 
 /** @mention önerisi (yazarken çağrılır; önbelleğe alınmaz). */
-export const fetchMentionCandidates = (workspaceId: string, itemId: string, q: string) =>
+export const fetchMentionCandidates = (
+  workspaceId: string,
+  itemId: string,
+  q: string,
+  scope: CommentScope = 'items',
+) =>
   apiRequest(
-    `${ws(workspaceId)}/items/${itemId}/mention-candidates?q=${encodeURIComponent(q)}`,
+    `${ws(workspaceId)}/${scope}/${itemId}/mention-candidates?q=${encodeURIComponent(q)}`,
     MentionCandidatesSchema,
   );
 
@@ -311,8 +319,8 @@ export type CommentOp =
   | { op: 'react'; commentId: string; emoji: ReactionEmoji };
 
 export const useComment = () =>
-  useWorkspaceMutation((id, input: { itemId: string } & CommentOp) => {
-    const base = `${ws(id)}/items/${input.itemId}/comments`;
+  useWorkspaceMutation((id, input: { itemId: string; scope?: CommentScope } & CommentOp) => {
+    const base = `${ws(id)}/${input.scope ?? 'items'}/${input.itemId}/comments`;
     switch (input.op) {
       case 'create':
         return apiRequest(base, CreatedSchema, { method: 'POST', body: { body: input.body } });
