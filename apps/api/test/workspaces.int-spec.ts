@@ -151,12 +151,16 @@ describe('Workspace üyeleri ve davetler (gerçek veritabanı)', () => {
     });
 
     it('Guest üye listesini göremez (ADR-035)', async () => {
+      const space = await owner
+        .post(`/api/workspaces/${ws}/spaces`, { name: 'Müşteri', key: 'MUS', color: '#7C3AED' })
+        .expect(201);
       const guest = await inviteAndAccept(
         ctx,
         owner,
         ws,
         { ...ELIF, email: 'ece@musteri.example' },
         'GUEST',
+        [(space.body as { id: string }).id],
       );
       await guest.get(`/api/workspaces/${ws}/members`).expect(403);
     });

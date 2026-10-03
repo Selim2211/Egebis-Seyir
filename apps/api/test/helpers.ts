@@ -124,9 +124,10 @@ export async function inviteAndAccept(
   workspaceId: string,
   person: { email: string; name: string; password: string },
   role: 'ADMIN' | 'MEMBER' | 'GUEST' = 'MEMBER',
+  spaceIds?: string[],
 ): Promise<Client> {
   await owner
-    .post(`/api/workspaces/${workspaceId}/invitations`, { emails: [person.email], role })
+    .post(`/api/workspaces/${workspaceId}/invitations`, { emails: [person.email], role, spaceIds })
     .expect(204);
   const token = tokenFromMail(ctx, INVITE_LINK);
   const client = await Client.create(ctx.app);

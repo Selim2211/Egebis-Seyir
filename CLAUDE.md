@@ -61,5 +61,5 @@ Yerel geliştirme veritabanındaki test hesapları (yalnızca `scrum_dev`): `zey
 - SWC bu makinede yüklenemiyor (sandbox ACL); Vitest decorator metadata için Vite/Oxc kullanır (`apps/api/vitest.config.ts`). SWC'ye geri dönme.
 - pnpm 12 build script izinleri: `pnpm-workspace.yaml` → `allowBuilds`.
 - `shadcn add` sonrası importları kontrol et: CLI `@/lib/utils` yerine `"cn"` paketi import edebiliyor; düzelt ve `cn` paketini kaldır.
-- Docker Postgres host portu 5433 (5432 makinede dolu).
+- Geliştirme DB: makinedeki yerel PostgreSQL 18 (5432), kullanıcı/şifre `scrum`/`scrum`, veritabanları `scrum_dev` ve `scrum_test`. **Veritabanı `LOCALE 'en-US'` ile (template0) oluşturulmalı**: C locale'de `turkish` metin arama ve ILIKE Türkçe harfleri (ö, ş, ğ…) tanımaz, arama boş döner. Docker imajı varsayılanı (en_US.utf8) doğrudur. `compose.dev.yml` Postgres host portu 5433'tür; Docker kullanılırsa `.env` portu buna göre değişir.
 - **Docker şimdilik başlatılmaz** (kullanıcı kararı; proje sonunda ele alınacak). Migration DB'siz üretilir: eski şemayı `git show :apps/api/prisma/schema.prisma` ile al, `prisma migrate diff --from-schema <eski> --to-schema prisma/schema.prisma --script`. DB gerektiren testler `docs/plans/faz-1.md` → "Bekleyen doğrulama" listesinde.

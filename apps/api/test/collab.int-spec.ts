@@ -273,7 +273,7 @@ describe('Yorum, ek, aktivite ve profil fotoğrafı (gerçek veritabanı)', () =
         .download(api(`/items/${itemId}/attachments/${detail.attachments[1]!.id}?preview=1`))
         .expect(200);
       expect(pdf.headers['content-disposition']).toContain('inline');
-      expect(pdf.headers['content-security-policy']).toBeUndefined();
+      expect(pdf.headers['content-security-policy'] ?? '').not.toContain('sandbox');
       expect((inline.body as Buffer).equals(PNG)).toBe(true);
 
       const download = await owner.download(api(`/items/${itemId}/attachments/${id}`)).expect(200);
@@ -342,7 +342,7 @@ describe('Yorum, ek, aktivite ve profil fotoğrafı (gerçek veritabanı)', () =
       ).id;
       const row = await ctx.prisma.attachment.findUniqueOrThrow({ where: { id } });
       expect(row.storageKey).toMatch(/^[0-9a-f-]{36}\/[0-9a-f-]{36}$/);
-      expect(row.fileName).toBe('../../etc/passwd.pdf');
+      expect(row.fileName).toBe('passwd.pdf'); // yol bileşenleri atılır
 
       const elif = await inviteAndAccept(ctx, owner, ws, ELIF);
       await elif.download(api(`/items/${itemId}/attachments/${id}`)).expect(404);
@@ -411,7 +411,7 @@ describe('Yorum, ek, aktivite ve profil fotoğrafı (gerçek veritabanı)', () =
       const elif = await inviteAndAccept(ctx, owner, ws, ELIF);
       const ownerId = await userId('zeynep@example.com');
 
-      const res = await owner.upload('/api/users/me/avatar', PNG, 'ben.png').expect(201);
+      const res = await owner.upload('/api/users/me/avatar', PNG, 'ben.png').expect(200);
       const me = res.body as MeResponse;
       expect(me.user.avatarVersion).toMatch(/^[0-9a-f]{12}$/);
 

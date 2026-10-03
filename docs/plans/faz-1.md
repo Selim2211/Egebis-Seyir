@@ -121,9 +121,11 @@ Kararlar: ADR-055 (yorumlar, @mention kaydı, tepkiler), ADR-056 (dosya ekleri, 
 
 **Faz 2'ye**: bildirim gönderimi (mention, izleyici kayıtları hazır), açıklamada görsel/tablo, Space/List düzeyi aktivite akışı.
 
-## Bekleyen doğrulama (Docker açılınca)
+## Doğrulama durumu
 
-Kullanıcı kararıyla Docker proje sonunda ele alınacak. DB'siz kontroller (lint, typecheck, birim testler, build; 13/13) geçti; aşağıdakiler henüz çalıştırılmadı:
+**2026-10-03:** Yerel PostgreSQL 18 ile (Docker'sız) 7 migration dev ve test DB'ye uygulandı; `pnpm test:int` 9 dosya / 104 test yeşil. Bulgular: DB C locale ile oluşturulunca Türkçe arama çalışmıyor (`LOCALE 'en-US'` şart, bkz. CLAUDE.md); test düzeltmeleri (Guest daveti Space ister, dosya adından yol bileşenleri atılır, avatar POST 200, PDF yanıtında helmet CSP bulunur ama `sandbox` yok). Hâlâ açık: E2E, EXPLAIN, elle/görsel kontroller, UPLOAD_DIR volume.
+
+Aşağıdaki liste Docker kararından kalma; işaretsiz maddelerden migration ve test:int tamamlandı. DB'siz kontroller (lint, typecheck, birim testler, build; 13/13) geçti; aşağıdakiler henüz çalıştırılmadı:
 
 - [ ] Migration'lar `20261002190000_spaces`, `20261002200000_work_items`, `20261002210000_work_item_details`, `20261002220000_search_indexes`, `20261002230000_collaboration` dev ve test DB'ye uygulanır. `prisma migrate dev` şema farkı bildirmez (arama dizinleri ifade dizinidir; Prisma bunları görmezden gelmeli, gelmezse `schema.prisma`'ya yorum olarak not düşülür).
 - [ ] `pnpm test:int`: yeni `spaces`, `work-items`, `work-item-details`, `search`, `collab` testleri. Arama testi `turkish` metin arama yapılandırmasının var olduğunu varsayar. Dosya testleri `UPLOAD_DIR`'e (geçici klasör) yazar; multer sınırı testte 1 MB.
