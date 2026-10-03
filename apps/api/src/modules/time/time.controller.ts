@@ -1,0 +1,99 @@
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  ParseUUIDPipe,
+  Post,
+  Query,
+} from '@nestjs/common';
+import {
+  CreatedSchema,
+  DateOnlySchema,
+  ItemTimeSchema,
+  LogTimeRequestSchema,
+  MyTimerSchema,
+  SPACE_PERMISSIONS as S,
+  TimesheetSchema,
+  type Created,
+  type ItemTime,
+  type MyTimer,
+  type Timesheet,
+} from '@scrum/shared';
+import { createZodDto, ZodResponse } from 'nestjs-zod';
+import { z } from 'zod';
+import { RequireSpacePermission } from '../auth/decorators';
+import { TimeService } from './time.service';
+
+class ItemTimeDto extends createZodDto(ItemTimeSchema) {}
+class LogTimeDto extends createZodDto(LogTimeRequestSchema) {}
+class CreatedDto extends createZodDto(CreatedSchema) {}
+class MyTimerDto extends createZodDto(MyTimerSchema) {}
+class TimesheetDto extends createZodDto(TimesheetSchema) {}
+class StoppedDto extends createZodDto(z.object({ minutes: z.int() })) {}
+class TimesheetQueryDto extends createZodDto(
+  z.object({ from: DateOnlySchema.optional(), to: DateOnlySchema.optional() }),
+) {}
+
+const Uuid = (name: string) => Param(name, ParseUUIDPipe);
+const NO_CONTENT = HttpStatus.NO_CONTENT;
+
+/** Zaman takibi (Faz 4.3, ADR-075). Sayaç uçları kullanıcının kendi sayacını yönetir. */
+@Controller('workspaces/:workspaceId')
+export class TimeController {
+  constructor(private readonly time: TimeService) {}
+
+  @Get('items/:itemId/time')
+  @RequireSpacePermission(S.SPACE_VIEW)
+  @ZodResponse({ type: ItemTimeDto })
+  itemTime(@Uuid('itemId') itemId: string): Promise<ItemTime> {
+    return this.time.itemTime(itemId);
+  }
+
+  @Post('items/:itemId/time')
+  @RequireSpacePermission(S.WORK_ITEM_WRITE)
+  @ZodResponse({ type: CreatedDto, status: HttpStatus.CREATED })
+  log(@Uuid('itemId') itemId: string, @Body() body: LogTimeDto): Promise<Created> {
+    return this.time.log(itemId, body);
+  }
+
+  @Delete('items/:itemId/time/:entryId')
+  @RequireSpacePermission(S.WORK_ITEM_WRITE)
+  @HttpCode(NO_CONTENT)
+  remove(@Uuid('itemId') itemId: string, @Uuid('entryId') entryId: string): Promise<void> {
+    return this.time.remove(itemId, entryId);
+  }
+
+  @Post('items/:itemId/timer/start')
+  @RequireSpacePermission(S.WORK_ITEM_WRITE)
+  @HttpCode(NO_CONTENT)
+  start(@Uuid('itemId') itemId: string): Promise<void> {
+    return this.time.start(itemId);
+  }
+
+  @Get('timer')
+  @ZodResponse({ type: MyTimerDto })
+  myTimer(): Promise<MyTimer> {
+    return this.time.myTimer();
+  }
+
+  @Post('timer/stop')
+  @HttpCode(HttpStatus.OK)
+  @ZodResponse({ type: StoppedDto, status: HttpStatus.OK })
+  stop(): Promise<{ minutes: number }> {
+    return this.time.stop();
+  }
+
+  @Get('spaces/:spaceId/timesheet')
+  @RequireSpacePermission(S.REPORT_VIEW)
+  @ZodResponse({ type: TimesheetDto })
+  timesheet(
+    @Uuid('spaceId') spaceId: string,
+    @Query() query: TimesheetQueryDto,
+  ): Promise<Timesheet> {
+    return this.time.timesheet(spaceId, query.from, query.to);
+  }
+}

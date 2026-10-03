@@ -613,3 +613,16 @@
 - **Karar:** List sayfasına List/Table/Board'un yanında **Takvim** görünümü. Aylık ızgara, hafta Pazartesi başlar. Öğe başlangıç–bitiş günlerinin hepsinde görünür; yalnızca bir tarihi varsa o günde. Bir güne sürüklemek (fare/dokunma, 6 px eşik) öğenin tarihlerini **süreyi koruyarak** aynı gün sayısı kadar kaydırır; yalnızca bitiş tarihi varsa onu taşır. Yetki: tarih değişimi `workItem.write` (görev zaten yazma yetkisiyle düzenlenir; yalnızca-kendi-durumu yetkisi tarih taşıyamaz). Hesap saf ve birim testli (`calendarWeeks`, `daysCovered`, `moveItemDates`). Tarihsiz öğeler ızgaranın altında listelenir; bir hücrede 3'ten fazla öğe "+N daha" olur.
 - **Alternatifler:** Hafta/gün görünümü ve çok List'li Space takvimi (sonra; Workload ve Dashboard ile birlikte); tarih seçici penceresi (sürükleme tek adımda aynı işi yapar, detay sayfasından zaten düzenlenir).
 - **Bilinen sınırlar:** klavye ile sürükleme yok (tarih detay panelinden değiştirilir); aydan aya sürükleme için önce hedef ay açılmalıdır; saat dilimi dönüşümü yok (tarihler gün bazlıdır).
+
+## ADR-075 — Zaman takibi
+
+- **Tarih:** 2026-10-03 · **Durum:** Kabul (brief §5.15 [F2]; ayrıntılar geliştirici varsayılanı, onay bekliyor)
+- **Karar:**
+  - **Veri:** `time_entries` bir kişinin bir güne bir göreve girdiği süredir (dakika, 1–1440; CHECK). Gün, kaydın yapıldığı İstanbul günüdür (`REPORT_TIME_ZONE`); gelecek güne giriş yapılamaz. Sayaç `active_timers` tablosundadır ve **kullanıcı başına bir** satırdır (kullanıcı kimliği birincil anahtar); durdurulunca süre `TIMER` kaynaklı girişe dönüşür (tam dakikaya yukarı yuvarlanır, en az 1 dk, en çok 24 saat).
+  - **Tek sayaç:** başka göreve geçmek çalışan sayacı otomatik kaydedip durdurur; aynı görevde yeniden başlatmak etkisizdir. Sayacı bırakılan görev silinirse sayaç da silinir.
+  - **Giriş biçimi:** serbest metin süre (`90`, `1h 30m`, `1,5s`, `1:30`; birimsiz sayı dakika) saf bir çözücüyle (`parseDuration`) çözülür; hatalı girişte satır içi uyarı çıkar.
+  - **Yetki:** süre girmek, silmek ve sayaç `workItem.write` ister (Developer ve üstü); Stakeholder görür. Girişi yazarı siler, `space.settings` sahibi de silebilir. Arşivli Space'te giriş yapılamaz.
+  - **Tahmin karşılaştırması:** Task/Sub-task saat tahminiyle (ADR-045) harcanan süre çubuk olarak karşılaştırılır, aşılırsa kırmızı olur. Üst öğede alt öğeler dahil toplam ayrıca gösterilir; Story/Epic puanla tahmin ettiği için süre karşılaştırması yapılmaz (yalnızca harcanan).
+  - **Zaman çizelgesi:** Space için kişi × gün tablosu (haftalık gezinme, en çok 62 gün), gün ve kişi toplamları ve en çok zaman harcanan işler; `report.view` ister. Üst çubukta çalışan sayaç (görev bağlantısı, geçen süre, durdur) her sayfada görünür.
+- **Alternatifler:** Sayacı yalnızca tarayıcıda tutmak (sekme kapanınca kaybolur, cihazlar arası tutarsız); başlangıç/bitiş saatli girişler (saat dilimi ve çakışma karmaşıklığı, timesheet için günlük toplam yeterli); fatura/ücret alanları (kapsam dışı).
+- **Bilinen sınırlar:** CSV/PDF dışa aktarma (brief [F2]) ve proje bazlı çok Space'li rapor Dashboard adımında (4.6); onay akışı ve kilitli dönemler yok; Space saat dilimi ayarı yok.

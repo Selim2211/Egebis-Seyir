@@ -7,8 +7,8 @@
 | --- | ------------------------------ | -------------------------------------------------------------------------------------------------------------------- | ---------- |
 | 4.1 | Roadmap                        | Space'te Epic'lerin zaman ekseninde çubukları (ilerleme dolgulu), sprint bandı, bugün çizgisi, tarihsiz Epic listesi | Tamamlandı |
 | 4.2 | Takvim görünümü                | Görevlerin bitiş/başlangıç tarihine göre ay/hafta takvimi, sürükleyerek tarih değiştirme                             | Tamamlandı |
-| 4.3 | Zaman takibi                   | Görevde süre kaydı (zamanlayıcı ve elle giriş), kişi/gün özeti                                                       | Sırada     |
-| 4.4 | Workload                       | Kişi bazlı iş yükü (puan/saat, kapasiteye karşı)                                                                     | Bekliyor   |
+| 4.3 | Zaman takibi                   | Görevde süre kaydı (zamanlayıcı ve elle giriş), kişi/gün özeti                                                       | Tamamlandı |
+| 4.4 | Workload                       | Kişi bazlı iş yükü (puan/saat, kapasiteye karşı)                                                                     | Sırada     |
 | 4.5 | Gantt ve bağımlılık            | Görev çubukları, bağımlılık okları, kritik yol                                                                       | Bekliyor   |
 | 4.6 | Dashboard ve gelişmiş raporlar | Widget'lı pano, CFD, lead/cycle time, burn-up                                                                        | Bekliyor   |
 
@@ -29,3 +29,13 @@ Karar: ADR-074.
 **Web**: List sayfasında "Takvim" sekmesi (`?view=calendar`): aylık ızgara, ay gezinme ve "Bugün", sürükle-bırak ile tarih kaydırma, tarihsiz öğe listesi. API değişikliği yok (`PATCH items/:id` tarihleri yazar). Saf hesaplar `packages/shared/src/domain/calendar.ts`.
 
 **Doğrulama (2026-10-03):** shared `calendar` 7 test; Playwright `faz4-calendar` 1/1 (öğe günde görünür, fare ile başka güne sürüklenir, sayfa yenilenince kalıcı).
+
+## 4.3 Ayrıntı
+
+Karar: ADR-075.
+
+**API** (`/api/workspaces/:wid`): `GET|POST items/:itemId/time`, `DELETE items/:itemId/time/:entryId`, `POST items/:itemId/timer/start`, `GET timer`, `POST timer/stop`, `GET spaces/:spaceId/timesheet?from=&to=`. Veri: `time_entries` (CHECK 1–1440), `active_timers`. Saf hesaplar `packages/shared/src/domain/time.ts` (`parseDuration`, `formatMinutes`, `timerMinutes`, `buildTimesheet`).
+
+**Web**: Görev detayında "Zaman" bölümü (sayaç, elle giriş, tahmin çubuğu, giriş listesi); üst çubukta çalışan sayaç; Space ağacında "Zaman çizelgesi" (`/spaces/:id/timesheet`).
+
+**Doğrulama (2026-10-03):** shared `time` 24 test; `time.int-spec` 9 (elle giriş ve doğrulama, alt öğe toplamı, sayaç yaşam döngüsü ve tek sayaç, çizelge, yetki, özel/arşivli Space); Playwright `faz4-time` 3/3.

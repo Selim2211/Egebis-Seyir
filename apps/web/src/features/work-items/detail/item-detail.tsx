@@ -37,6 +37,7 @@ import { Checklists } from './checklists';
 import { ReadinessSection } from './readiness-section';
 import { DetailTabs } from './detail-tabs';
 import { ItemOpenLink } from './item-nav';
+import { TimeSection } from '@/features/time/time-section';
 import { LinkedDocs } from './linked-docs';
 import { Links } from './links';
 import { Properties } from './properties';
@@ -293,6 +294,7 @@ function Content({
           <SubItems item={item} space={space} canWrite={canWrite} />
           <Links item={item} canWrite={canWrite} />
           <LinkedDocs item={item} />
+          <TimeSection itemId={item.id} />
           <Attachments itemId={item.id} attachments={item.attachments} canWrite={canWrite} />
           <DetailTabs
             itemId={item.id}

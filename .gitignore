@@ -18,3 +18,4 @@ Thumbs.db
 # Yüklenen dosyalar (ADR-056)
 data/
 apps/api/data/
+.tanstack/

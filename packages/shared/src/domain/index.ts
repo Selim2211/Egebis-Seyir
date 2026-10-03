@@ -17,3 +17,4 @@ export * from './reports';
 export * from './docs';
 export * from './timeline';
 export * from './calendar';
+export * from './time';

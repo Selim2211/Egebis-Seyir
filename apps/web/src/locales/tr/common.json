@@ -325,7 +325,9 @@
     "RETRO_NOT_AVAILABLE": "Retrospektif yalnızca aktif ve tamamlanmış sprint’lerde yapılır.",
     "RETRO_NOT_ACTION": "Yalnızca aksiyon maddeleri göreve çevrilebilir.",
     "RETRO_ALREADY_CONVERTED": "Bu aksiyon zaten göreve çevrilmiş.",
-    "RETRO_NO_LIST": "Görevin oluşturulacağı bir List yok."
+    "RETRO_NO_LIST": "Görevin oluşturulacağı bir List yok.",
+    "TIMER_NOT_RUNNING": "Çalışan bir sayaç yok.",
+    "TIME_RANGE_INVALID": "Tarih aralığı geçersiz (gelecek gün ya da en çok 62 gün)."
   },
   "spaceRoles": {
     "PRODUCT_OWNER": "Product Owner",
@@ -1128,5 +1130,35 @@
     "hint": "Bir öğeyi başka güne sürükleyerek tarihini değiştir.",
     "more": "+{{count}} daha",
     "unscheduled": "Tarihsiz öğeler ({{count}})"
+  },
+  "time": {
+    "link": "Zaman çizelgesi",
+    "title": "Zaman",
+    "logged": "Harcanan: {{value}}",
+    "estimate": "Tahmin: {{value}}",
+    "withChildren": "Alt öğelerle: {{value}}",
+    "vsEstimate": "Harcanan süre / tahmin",
+    "start": "Sayacı başlat",
+    "stop": "Durdur",
+    "duration": "Süre",
+    "durationPlaceholder": "Süre: 1h 30m, 90, 1:30",
+    "invalid": "Geçerli bir süre gir (ör. 1h 30m, 90, 1:30).",
+    "day": "Gün",
+    "note": "Not",
+    "notePlaceholder": "Not (isteğe bağlı)",
+    "add": "Süre ekle",
+    "fromTimer": "sayaçtan",
+    "remove": "{{value}} süre kaydını sil",
+    "runningTimer": "Çalışan sayaç",
+    "stopTimer": "Sayacı durdur",
+    "saved": "{{minutes}} dk kaydedildi.",
+    "timesheet": "Zaman çizelgesi",
+    "person": "Kişi",
+    "total": "Toplam",
+    "prevWeek": "Önceki hafta",
+    "nextWeek": "Sonraki hafta",
+    "thisWeek": "Bu hafta",
+    "emptyWeek": "Bu hafta için süre girişi yok.",
+    "topItems": "En çok zaman harcanan işler"
   }
 }

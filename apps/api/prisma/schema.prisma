@@ -130,6 +130,8 @@ model User {
   notificationPreferences NotificationPreference[]
   retroItems              RetroItem[]
   retroVotes              RetroVote[]
+  timeEntries             TimeEntry[]
+  activeTimer             ActiveTimer?
   docsCreated             Doc[]                    @relation("DocCreator")
   docsUpdated             Doc[]                    @relation("DocUpdater")
   docVersions             DocVersion[]             @relation("DocVersionAuthor")
@@ -203,6 +205,8 @@ model Workspace {
   docVersions       DocVersion[]
   retroItems        RetroItem[]
   retroVotes        RetroVote[]
+  timeEntries       TimeEntry[]
+  activeTimers      ActiveTimer[]
   docItemLinks      DocItemLink[]
 
   notifications           Notification[]
@@ -524,6 +528,8 @@ model WorkItem {
   comments     Comment[]
   docLinks     DocItemLink[]
   retroTasks   RetroItem[]
+  timeEntries  TimeEntry[]
+  activeTimers ActiveTimer[]
   attachments  Attachment[]
   sprintEvents SprintItemEvent[]
 
@@ -972,4 +978,44 @@ model RetroVote {
 
   @@id([retroItemId, userId])
   @@map("retro_votes")
+}
+
+// ---------- Zaman takibi (Faz 4.3, ADR-075) ----------
+
+enum TimeSource {
+  MANUAL
+  TIMER
+}
+
+/// Bir kişinin bir güne girdiği süre (dakika). Gün, kayıt anındaki İstanbul gününe göre.
+model TimeEntry {
+  id          String     @id @default(uuid(7)) @db.Uuid
+  workspaceId String     @db.Uuid
+  workspace   Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  workItemId  String     @db.Uuid
+  workItem    WorkItem   @relation(fields: [workItemId], references: [id], onDelete: Cascade)
+  userId      String?    @db.Uuid
+  user        User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
+  day         DateTime   @db.Date
+  minutes     Int
+  note        String?
+  source      TimeSource
+  createdAt   DateTime   @default(now()) @db.Timestamptz
+
+  @@index([workItemId])
+  @@index([userId, day])
+  @@map("time_entries")
+}
+
+/// Çalışan sayaç: kullanıcı başına en çok bir tane (userId birincil anahtar).
+model ActiveTimer {
+  userId      String    @id @db.Uuid
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspaceId String    @db.Uuid
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  workItemId  String    @db.Uuid
+  workItem    WorkItem  @relation(fields: [workItemId], references: [id], onDelete: Cascade)
+  startedAt   DateTime  @default(now()) @db.Timestamptz
+
+  @@map("active_timers")
 }

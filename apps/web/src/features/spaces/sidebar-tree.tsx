@@ -12,6 +12,7 @@ import { Link, useRouterState } from '@tanstack/react-router';
 import {
   Archive,
   ChevronRight,
+  Clock,
   Folder,
   FolderInput,
   FolderPlus,
@@ -313,6 +314,7 @@ function SpaceNode({
         <div role="group" aria-label={space.name}>
           {space.scrumEnabled && <ScrumLinks spaceId={space.id} />}
           <DocsLink spaceId={space.id} />
+          <TimesheetLink spaceId={space.id} />
           <SortableGroup
             items={space.folders}
             enabled={canManage}
@@ -377,6 +379,22 @@ function ScrumLinks({ spaceId }: { spaceId: string }) {
   );
 }
 
+/** Space zaman çizelgesi (Faz 4.3). */
+function TimesheetLink({ spaceId }: { spaceId: string }) {
+  const { t } = useTranslation();
+  const closeSidebar = useUiStore((s) => s.setSidebarOpen);
+  return (
+    <ScrumLink
+      to="/spaces/$spaceId/timesheet"
+      spaceId={spaceId}
+      onNavigate={() => closeSidebar(false)}
+    >
+      <Clock className="text-muted-foreground size-4 shrink-0" aria-hidden />
+      <span className="truncate">{t('time.link')}</span>
+    </ScrumLink>
+  );
+}
+
 /** Space'in doküman sayfaları (Faz 3.2). */
 function DocsLink({ spaceId }: { spaceId: string }) {
   const { t } = useTranslation();
@@ -395,7 +413,11 @@ function ScrumLink({
   onNavigate,
   children,
 }: {
-  to: '/spaces/$spaceId/backlog' | '/spaces/$spaceId/board' | '/spaces/$spaceId/docs';
+  to:
+    | '/spaces/$spaceId/backlog'
+    | '/spaces/$spaceId/board'
+    | '/spaces/$spaceId/docs'
+    | '/spaces/$spaceId/timesheet';
   spaceId: string;
   onNavigate: () => void;
   children: ReactNode;

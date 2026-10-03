@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { useUnreadCount } from '@/features/notifications/queries';
+import { TimerIndicator } from '@/features/time/timer-indicator';
 import { SearchDialog } from '@/features/search/search-dialog';
 import { useUiStore } from '@/lib/ui-store';
 import { ApiStatus } from './api-status';
@@ -58,6 +59,7 @@ export function Topbar() {
       <SearchDialog open={searchOpen} onOpenChange={setSearchOpen} />
 
       <div className="ml-auto flex items-center gap-1.5">
+        <TimerIndicator />
         {import.meta.env.DEV && <ApiStatus />}
         <Link
           to="/notifications"

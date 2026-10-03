@@ -325,7 +325,9 @@
     "RETRO_NOT_AVAILABLE": "Retrospectives are only held for active and completed sprints.",
     "RETRO_NOT_ACTION": "Only action items can be turned into tasks.",
     "RETRO_ALREADY_CONVERTED": "This action already became a task.",
-    "RETRO_NO_LIST": "There is no List to create the task in."
+    "RETRO_NO_LIST": "There is no List to create the task in.",
+    "TIMER_NOT_RUNNING": "No timer is running.",
+    "TIME_RANGE_INVALID": "Invalid date range (future day, or more than 62 days)."
   },
   "spaceRoles": {
     "PRODUCT_OWNER": "Product Owner",
@@ -1128,5 +1130,35 @@
     "hint": "Drag an item to another day to change its dates.",
     "more": "+{{count}} more",
     "unscheduled": "Unscheduled items ({{count}})"
+  },
+  "time": {
+    "link": "Timesheet",
+    "title": "Time",
+    "logged": "Logged: {{value}}",
+    "estimate": "Estimate: {{value}}",
+    "withChildren": "With sub-items: {{value}}",
+    "vsEstimate": "Logged time vs estimate",
+    "start": "Start timer",
+    "stop": "Stop",
+    "duration": "Duration",
+    "durationPlaceholder": "Duration: 1h 30m, 90, 1:30",
+    "invalid": "Enter a valid duration (e.g. 1h 30m, 90, 1:30).",
+    "day": "Day",
+    "note": "Note",
+    "notePlaceholder": "Note (optional)",
+    "add": "Add time",
+    "fromTimer": "from timer",
+    "remove": "Delete the {{value}} time entry",
+    "runningTimer": "Running timer",
+    "stopTimer": "Stop timer",
+    "saved": "{{minutes}} min saved.",
+    "timesheet": "Timesheet",
+    "person": "Person",
+    "total": "Total",
+    "prevWeek": "Previous week",
+    "nextWeek": "Next week",
+    "thisWeek": "This week",
+    "emptyWeek": "No time entries this week.",
+    "topItems": "Most time spent"
   }
 }
