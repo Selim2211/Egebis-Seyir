@@ -277,6 +277,21 @@ describe('Sprint ve Product Backlog (gerçek veritabanı)', () => {
       ]);
     });
 
+    it('Board için ağaç istenince alt öğeler üstlerinin hemen arkasında gelir', async () => {
+      const s = await space();
+      const a = await item(s.listId, { type: 'STORY', title: 'A' });
+      const b = await item(s.listId, { type: 'STORY', title: 'B' });
+      const task = await item(s.listId, { type: 'TASK', title: 'A-task', parentId: a.id });
+      const sub = await item(s.listId, { type: 'SUBTASK', title: 'A-sub', parentId: task.id });
+      const { id } = await sprint(s.id);
+      await move(s.id, { itemIds: [a.id, b.id], sprintId: id }).expect(204);
+
+      expect((await detail(id)).items.map((i) => i.key)).toEqual([a.key, b.key]);
+      const tree = (await owner.get(api(`/sprints/${id}?tree=true`)).expect(200))
+        .body as SprintDetail;
+      expect(tree.items.map((i) => i.key)).toEqual([a.key, task.key, sub.key, b.key]);
+    });
+
     it("sprint silinince öğeleri Backlog'a döner", async () => {
       const s = await space();
       const a = await item(s.listId, { type: 'STORY', title: 'A' });

@@ -9,6 +9,7 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import {
   BacklogResponseSchema,
@@ -65,8 +66,8 @@ export class SprintsController {
   @Get('sprints/:sprintId')
   @RequireSpacePermission(S.SPACE_VIEW)
   @ZodResponse({ type: SprintDetailDto })
-  detail(@Uuid('sprintId') sprintId: string): Promise<SprintDetail> {
-    return this.sprints.detail(sprintId);
+  detail(@Uuid('sprintId') sprintId: string, @Query('tree') tree?: string): Promise<SprintDetail> {
+    return this.sprints.detail(sprintId, tree === 'true');
   }
 
   @Patch('sprints/:sprintId')

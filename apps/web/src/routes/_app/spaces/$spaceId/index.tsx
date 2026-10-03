@@ -134,6 +134,11 @@ function SpacePage() {
                 <p className="text-muted-foreground">{t('spacePage.backlogBody')}</p>
               </div>
               <Button size="sm" variant="outline" asChild>
+                <Link to="/spaces/$spaceId/board" params={{ spaceId }}>
+                  {t('board.open')}
+                </Link>
+              </Button>
+              <Button size="sm" variant="outline" asChild>
                 <Link to="/spaces/$spaceId/backlog" params={{ spaceId }}>
                   {t('spacePage.openBacklog')}
                 </Link>

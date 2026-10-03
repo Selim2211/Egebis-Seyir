@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import { Kanban, List, Table } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { ListBoard } from '@/features/board/list-board';
 import { ContainerHeader, LoadingState, NotFoundState } from '@/features/spaces/container-header';
 import { listQuery, spaceQuery, useTreeSpace } from '@/features/spaces/queries';
 import { ItemNavContext } from '@/features/work-items/detail/item-nav-context';
@@ -64,8 +64,8 @@ function ListPage() {
         canUnarchive={!!treeSpace?.permissions.includes(S.LIST_MANAGE)}
       >
         <div role="tablist" aria-label={t('listPage.views')} className="-mb-px flex gap-1">
-          {(['list', 'table'] as const).map((key) => {
-            const Icon = key === 'list' ? List : Table;
+          {(['list', 'table', 'board'] as const).map((key) => {
+            const Icon = key === 'list' ? List : key === 'table' ? Table : Kanban;
             const selected = view === key;
             return (
               <Link
@@ -87,25 +87,19 @@ function ListPage() {
               </Link>
             );
           })}
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <span
-                role="tab"
-                aria-selected={false}
-                aria-disabled
-                className="text-muted-foreground flex h-9 items-center gap-1.5 border-b-2 border-transparent px-2.5 text-sm"
-              >
-                <Kanban className="size-4" aria-hidden />
-                {t('listPage.view.board')}
-                <span className="rounded border px-1 text-[10px] leading-4 font-semibold">F2</span>
-              </span>
-            </TooltipTrigger>
-            <TooltipContent>{t('nav.comingSoon')}</TooltipContent>
-          </Tooltip>
         </div>
       </ContainerHeader>
 
-      {space && items ? (
+      {space && items && view === 'board' ? (
+        <ListBoard
+          listId={list.id}
+          space={space}
+          data={items}
+          archived={list.archived}
+          lane={search.lane ?? 'none'}
+          onLane={(lane) => onSearch({ lane })}
+        />
+      ) : space && items ? (
         <ItemsView
           listId={list.id}
           space={space}

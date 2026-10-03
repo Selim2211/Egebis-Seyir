@@ -4,14 +4,14 @@
 > Kararlar: ADR-060 (kullanıcı onaylı), ADR-061, ADR-062 (geliştirici varsayılanı).
 > Veritabanı: yerel PostgreSQL 18 (`LOCALE 'en-US'`), `pnpm db:migrate` ve `pnpm test:int` çalışır.
 
-| #   | Adım                            | İçerik                                                                                                                                                    | Durum    |
-| --- | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
-| 2.1 | Sprint modeli + Product Backlog | Sprint CRUD (planlı), sprint↔öğe atama ve geçmiş, `backlogRank`, Backlog sayfası (sürükle-sırala, Epic filtresi, tahminsiz vurgu, sprint'e taşı)          | Sırada   |
-| 2.2 | Board                           | Durum sütunları, kart sürükle-bırak ile durum değişimi, swimlane (atanan/epic/öncelik), aktif sprint ve List kaynakları                                   | Bekliyor |
-| 2.3 | Sprint yaşam döngüsü + Planning | Başlat/tamamla/iptal kuralları, Planning ekranı (Backlog ↔ Sprint, puan/kapasite), scope change uyarısı, devir akışı, geçmiş sprintler, Sprint Goal ayarı | Bekliyor |
-| 2.4 | DoD/DoR + Sprint Review         | Space DoD/DoR maddeleri, Done'da DoD checklist, sprint'e alırken DoR işareti, Sprint Review özeti                                                         | Bekliyor |
-| 2.5 | Bildirimler                     | Bildirim merkezi, atama/mention/durum/yorum/sprint olayları, anında e-posta, tür bazında tercih                                                           | Bekliyor |
-| 2.6 | Burndown ve Velocity            | Günlük snapshot işi, Sprint Burndown, Velocity grafiği, rapor ekranı                                                                                      | Bekliyor |
+| #   | Adım                            | İçerik                                                                                                                                                    | Durum      |
+| --- | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| 2.1 | Sprint modeli + Product Backlog | Sprint CRUD (planlı), sprint↔öğe atama ve geçmiş, `backlogRank`, Backlog sayfası (sürükle-sırala, Epic filtresi, tahminsiz vurgu, sprint'e taşı)          | Sırada     |
+| 2.2 | Board                           | Durum sütunları, kart sürükle-bırak ile durum değişimi, swimlane (atanan/epic/öncelik), aktif sprint ve List kaynakları                                   | Tamamlandı |
+| 2.3 | Sprint yaşam döngüsü + Planning | Başlat/tamamla/iptal kuralları, Planning ekranı (Backlog ↔ Sprint, puan/kapasite), scope change uyarısı, devir akışı, geçmiş sprintler, Sprint Goal ayarı | Bekliyor   |
+| 2.4 | DoD/DoR + Sprint Review         | Space DoD/DoR maddeleri, Done'da DoD checklist, sprint'e alırken DoR işareti, Sprint Review özeti                                                         | Bekliyor   |
+| 2.5 | Bildirimler                     | Bildirim merkezi, atama/mention/durum/yorum/sprint olayları, anında e-posta, tür bazında tercih                                                           | Bekliyor   |
+| 2.6 | Burndown ve Velocity            | Günlük snapshot işi, Sprint Burndown, Velocity grafiği, rapor ekranı                                                                                      | Bekliyor   |
 
 Faz 2 [F2] etiketli işlerden brief'te sonraya bırakılanlar (Planning Poker, retrospektif, WIP limiti, CFD…) bu fazın adımlarında değildir; Faz 2 yol haritası maddeleri (brief §14) yukarıdaki altı adımla kapsanır.
 
@@ -28,3 +28,13 @@ Kararlar: ADR-061 (sprint modeli), ADR-062 (Backlog ve öncelik sırası).
 **Web**: kenar çubuğunda "Backlog ve sprint'ler" (Scrum açık Space'lerde), `/spaces/$spaceId/backlog`: sprint bölümleri, Backlog (sürükleyerek sırala, arama, Epic süzgeci, tahminsiz vurgusu, çoklu seçim → sprint'e taşı), sprint oluştur/düzenle/sil.
 
 **Doğrulama (2026-10-03):** `test:int` 11 dosya / 123 test yeşil (`sprints.int-spec.ts` 18); web birim 45; Playwright `faz2-backlog` 4/4. Açık: sürükle-bırak ile sıralamanın tarayıcıda elle denenmesi (E2E yalnızca menü ve toplu seçimi kapsar); sprint'ler arası sürükleme 2.3'te.
+
+## 2.2 Ayrıntı
+
+Karar: ADR-063.
+
+**API**: `GET sprints/:sprintId?tree=true` sprint öğelerini ve tüm alt öğelerini üstlerinin arkasında döner (Board). Durum değişikliği mevcut `PATCH items/:id` ile yapılır.
+
+**Web**: `features/board/*` (saf `board-model`: sütun × satır dağılımı, Epic bulma, toplamlar; `board-view`: dnd-kit ile sürükle-bırak; `board-card`; sprint panosu sayfası ve List Board'u). Rotalar: `/spaces/$spaceId/board` (adres: `sprint`, `lane`, `item`), List sayfasında `view=board&lane=`. Kenar çubuğunda ve Space sayfasında "Sprint panosu" bağlantısı.
+
+**Doğrulama (2026-10-03):** test:int 11 dosya / 124 test; web birim 53; Playwright `faz2-board` 4/4 (menüyle ve gerçek fare sürüklemesiyle durum değişimi, yenileyince kalıcılık, satırlar, yan panel, List Board'u); tüm paket 33 senaryo yeşil, yalnızca Mailpit gerektiren `faz1-auth` bekliyor. Dokunmatik cihazda sürükleme elle denenmedi (menü yolu var).

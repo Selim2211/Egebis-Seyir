@@ -24,6 +24,9 @@ import {
 } from '../work-items/item-support';
 import { assertOpen, conflict, countedItems, loadScrumSpace, summarize } from './sprint-support';
 
+/** Epic > Story > Task > Sub-task en fazla bu kadar iner. */
+const MAX_TREE_DEPTH = 4;
+
 /** Sprint oluşturma, düzenleme, silme ve okuma (Faz 2.1, ADR-061). Başlat/tamamla: 2.3. */
 @Injectable()
 export class SprintsService {
@@ -47,7 +50,11 @@ export class SprintsService {
     return { sprints: await summarize(db, sprints) };
   }
 
-  async detail(sprintId: string): Promise<SprintDetail> {
+  /**
+   * Sprint ve öğeleri. `tree` açıksa (Board) üst düzey öğelerin tüm alt öğeleri de, her üstün
+   * hemen arkasında (derinlik önce) gelir; böylece Board kartları üstleriyle yan yana sıralanır.
+   */
+  async detail(sprintId: string, tree = false): Promise<SprintDetail> {
     const db = this.tenant.db;
     const sprint = await db.sprint.findFirst({ where: { id: sprintId } });
     if (!sprint) throw notFound();
@@ -58,7 +65,30 @@ export class SprintsService {
       include: rowInclude,
       orderBy: [{ backlogRank: 'asc' }, { createdAt: 'asc' }],
     });
-    return { sprint: summary!, items: items.map(toRow) };
+    if (!tree) return { sprint: summary!, items: items.map(toRow) };
+
+    const children = new Map<string, typeof items>();
+    let level = items.map((i) => i.id);
+    for (let depth = 0; depth < MAX_TREE_DEPTH && level.length > 0; depth += 1) {
+      const next = await db.workItem.findMany({
+        where: { parentId: { in: level }, ...countedItems },
+        include: rowInclude,
+        orderBy: { rank: 'asc' },
+      });
+      for (const child of next) {
+        const siblings = children.get(child.parentId!) ?? [];
+        siblings.push(child);
+        children.set(child.parentId!, siblings);
+      }
+      level = next.map((i) => i.id);
+    }
+    const flat: typeof items = [];
+    const walk = (item: (typeof items)[number]) => {
+      flat.push(item);
+      for (const child of children.get(item.id) ?? []) walk(child);
+    };
+    items.forEach(walk);
+    return { sprint: summary!, items: flat.map(toRow) };
   }
 
   async create(spaceId: string, input: CreateSprintRequest): Promise<Created> {

@@ -481,3 +481,15 @@
   - Backlog Space'e aittir, List'e değil: Space'teki sprint'e atanmamış, Done kategorisinde olmayan, silinmemiş/arşivlenmemiş üst düzey Story, Bug ve Task'lardır. Epic'ler gruplama/filtre içindir, sırada görünmez.
   - Sıra tek bir `work_items.backlogRank` (kesirli anahtar, `COLLATE "C"`) ile tutulur; Backlog ve sprint içi sıra aynı anahtarı kullanır, böylece sprint'e taşınan öğe önceliğini korur. List içi `rank` ayrıdır.
   - Sıralamayı değiştirmek `backlog.rank` izni ister (PO). Sprint'e taşıma `sprint.plan` ister. Tahminsiz (puansız) Story/Bug vurgulanır.
+
+## ADR-063 — Board: sütunlar, kartlar ve satırlar
+
+- **Tarih:** 2026-10-03 · **Durum:** Kabul (brief §5.8, §5.9; ayrıntılar geliştirici varsayılanı)
+- **Karar:**
+  - Sütunlar Space durumlarıdır (Space'in sırasıyla); kart sürüklenince `PATCH /items/:id { statusId }` çağrılır, yani liste, detay ve Board aynı kuralları paylaşır (açık alt öğe ve engelleyen uyarıları onay penceresine döner, ADR-046/050). Kart hemen yeni sütuna geçer, hata olursa geri döner.
+  - Sürükleyebilme `workItem.write` veya kendine atanmış öğede `workItem.status.own` ister (liste ile aynı). Yetkisiz kullanıcı kartı görür, taşıyamaz.
+  - Klavye ve dokunmatik için her kartta "Durumu değiştir" menüsü vardır; sürükleme yalnızca fare/işaretçi içindir.
+  - İki Board vardır: **Sprint panosu** (`/spaces/:id/board`, aktif sprint; planlı sprint seçilebilir; öğeler ve tüm alt öğeleri) ve **List Board'u** (List sayfasında üçüncü sekme, listedeki tüm öğeler).
+  - Satırlar (swimlane): yok, atanan (birden çok atanan varsa ilki), Epic (en yakın Epic atası), öncelik. Satır seçimi adreste tutulur (`lane`); satıra bırakmak yalnızca sütunu belirler.
+  - Sütundaki sıra Board'da elle değiştirilemez (Backlog önceliği/List sırası kullanılır). WIP limiti ve kart alanı seçimi sonraya (brief §5.9 [F2]).
+- **Alternatifler:** Sütun içi elle sıralama (Backlog önceliğiyle çelişir); KeyboardSensor ile klavye sürükleme (sütunlar arası erişilebilir hareket zor, menü daha güvenilir).

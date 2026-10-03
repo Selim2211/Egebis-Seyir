@@ -16,6 +16,7 @@ import {
   FolderInput,
   FolderPlus,
   GripVertical,
+  Kanban,
   Layers,
   List,
   ListOrdered,
@@ -309,7 +310,7 @@ function SpaceNode({
       />
       {open && (
         <div role="group" aria-label={space.name}>
-          {space.scrumEnabled && <BacklogLink spaceId={space.id} />}
+          {space.scrumEnabled && <ScrumLinks spaceId={space.id} />}
           <SortableGroup
             items={space.folders}
             enabled={canManage}
@@ -348,10 +349,43 @@ function SpaceNode({
   );
 }
 
-/** Space altındaki "Backlog ve sprint'ler" bağlantısı (yalnızca Scrum açık Space'lerde). */
-function BacklogLink({ spaceId }: { spaceId: string }) {
+/** Space altındaki Scrum bağlantıları: Backlog ve sprint panosu (yalnızca Scrum açık Space'lerde). */
+function ScrumLinks({ spaceId }: { spaceId: string }) {
   const { t } = useTranslation();
   const closeSidebar = useUiStore((s) => s.setSidebarOpen);
+  return (
+    <>
+      <ScrumLink
+        to="/spaces/$spaceId/backlog"
+        spaceId={spaceId}
+        onNavigate={() => closeSidebar(false)}
+      >
+        <ListOrdered className="text-muted-foreground size-4 shrink-0" aria-hidden />
+        <span className="truncate">{t('backlog.link')}</span>
+      </ScrumLink>
+      <ScrumLink
+        to="/spaces/$spaceId/board"
+        spaceId={spaceId}
+        onNavigate={() => closeSidebar(false)}
+      >
+        <Kanban className="text-muted-foreground size-4 shrink-0" aria-hidden />
+        <span className="truncate">{t('board.link')}</span>
+      </ScrumLink>
+    </>
+  );
+}
+
+function ScrumLink({
+  to,
+  spaceId,
+  onNavigate,
+  children,
+}: {
+  to: '/spaces/$spaceId/backlog' | '/spaces/$spaceId/board';
+  spaceId: string;
+  onNavigate: () => void;
+  children: ReactNode;
+}) {
   return (
     <div
       className="text-sidebar-foreground hover:bg-sidebar-accent has-[[data-status=active]]:bg-sidebar-accent has-[[data-status=active]]:font-medium flex h-7.5 items-center gap-1 rounded-md pr-1 text-sm"
@@ -359,13 +393,12 @@ function BacklogLink({ spaceId }: { spaceId: string }) {
     >
       <span className="w-5 shrink-0" aria-hidden />
       <Link
-        to="/spaces/$spaceId/backlog"
+        to={to}
         params={{ spaceId }}
-        onClick={() => closeSidebar(false)}
+        onClick={onNavigate}
         className="flex min-w-0 flex-1 items-center gap-1.5 self-stretch outline-none focus-visible:underline"
       >
-        <ListOrdered className="text-muted-foreground size-4 shrink-0" aria-hidden />
-        <span className="truncate">{t('backlog.link')}</span>
+        {children}
       </Link>
     </div>
   );

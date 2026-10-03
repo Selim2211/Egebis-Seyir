@@ -825,5 +825,25 @@
       "END_BEFORE_START": "The end cannot be before the start.",
       "TOO_LONG": "A sprint can last at most 8 weeks."
     }
+  },
+  "board": {
+    "title": "Sprint board",
+    "link": "Sprint board",
+    "open": "Open sprint board",
+    "sprint": "Sprint",
+    "progress": "{{done}} / {{total}} points done",
+    "points": "{{points}} pts",
+    "swimlane": "Rows",
+    "lanes": {
+      "none": "No rows",
+      "assignee": "Assignee",
+      "epic": "Epic",
+      "priority": "Priority"
+    },
+    "unassigned": "Unassigned",
+    "noEpic": "No Epic",
+    "hint": "Drag a card to another column to change its status.",
+    "noSprintTitle": "No planned or active sprint",
+    "noSprintBody": "The board appears here once you create a sprint and move items into it."
   }
 }

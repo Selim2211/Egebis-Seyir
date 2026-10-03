@@ -7,9 +7,10 @@ import {
   type WorkItemType,
 } from '@scrum/shared';
 import { z } from 'zod';
+import { SWIMLANES } from '@/features/board/board-model';
 
 /** Görünüm durumu adreste tutulur (ADR-052); şema router'ın `validateSearch`'ünde kullanılır. */
-export const VIEW_KINDS = ['list', 'table'] as const;
+export const VIEW_KINDS = ['list', 'table', 'board'] as const;
 export const SORT_KEYS = [
   'manual',
   'title',
@@ -43,6 +44,8 @@ export const ViewSearchSchema = z.object({
   sort: z.enum(SORT_KEYS).optional(),
   dir: z.enum(['asc', 'desc']).optional(),
   group: z.enum(GROUP_KEYS).optional(),
+  /** Board satır gruplaması. */
+  lane: z.enum(SWIMLANES).optional(),
 });
 export type ViewSearch = z.infer<typeof ViewSearchSchema>;
 

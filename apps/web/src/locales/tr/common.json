@@ -825,5 +825,25 @@
       "END_BEFORE_START": "Bitiş, başlangıçtan önce olamaz.",
       "TOO_LONG": "Sprint en çok 8 hafta sürebilir."
     }
+  },
+  "board": {
+    "title": "Sprint panosu",
+    "link": "Sprint panosu",
+    "open": "Sprint panosunu aç",
+    "sprint": "Sprint",
+    "progress": "{{done}} / {{total}} puan tamamlandı",
+    "points": "{{points}} puan",
+    "swimlane": "Satırlar",
+    "lanes": {
+      "none": "Satır yok",
+      "assignee": "Atanan",
+      "epic": "Epic",
+      "priority": "Öncelik"
+    },
+    "unassigned": "Atanmamış",
+    "noEpic": "Epic'siz",
+    "hint": "Kartı başka sütuna sürükleyerek durumunu değiştir.",
+    "noSprintTitle": "Planlı veya aktif sprint yok",
+    "noSprintBody": "Sprint oluşturup Backlog'tan öğe taşıdığında pano burada görünür."
   }
 }
