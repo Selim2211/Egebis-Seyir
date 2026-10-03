@@ -1,5 +1,6 @@
 import type { RichTextDoc } from '@scrum/shared';
 import Placeholder from '@tiptap/extension-placeholder';
+import { TableKit } from '@tiptap/extension-table';
 import { EditorContent, useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import {
@@ -11,8 +12,10 @@ import {
   List,
   ListOrdered,
   Quote,
+  Minus,
   Redo2,
   Strikethrough,
+  Table as TableIcon,
   Undo2,
 } from 'lucide-react';
 import { type ReactNode, useEffect, useRef } from 'react';
@@ -28,6 +31,10 @@ type ToolName =
   | 'code'
   | 'link'
   | 'heading'
+  | 'heading1'
+  | 'heading3'
+  | 'table'
+  | 'rule'
   | 'bulletList'
   | 'orderedList'
   | 'blockquote'
@@ -39,6 +46,7 @@ type ToolName =
  * Açıklama editörü (ADR-048): yalnızca sunucunun izin verdiği düğüm ve işaretler üretilir.
  * Yazarken 1,5 sn sonra veya odak çıkınca `onSave` çağrılır; boş belge `null` döner.
  * `editable=false` salt okunur görünüm verir (Stakeholder, arşivdeki öğe).
+ * `variant="page"` doküman sayfası içindir: tablo, ayırıcı, H1–H3 ve geniş yazı alanı (ADR-069).
  */
 export function RichTextEditor({
   value,
@@ -46,12 +54,14 @@ export function RichTextEditor({
   placeholder,
   onSave,
   label,
+  variant = 'compact',
 }: {
   value: RichTextDoc | null;
   editable: boolean;
   placeholder: string;
   onSave: (doc: RichTextDoc | null) => void;
   label: string;
+  variant?: 'compact' | 'page';
 }) {
   const { t } = useTranslation();
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
@@ -75,13 +85,17 @@ export function RichTextEditor({
         },
       }),
       Placeholder.configure({ placeholder }),
+      ...(variant === 'page' ? [TableKit.configure({ table: { resizable: false } })] : []),
     ],
     editorProps: {
       attributes: {
         'aria-label': label,
         'aria-multiline': 'true',
         role: 'textbox',
-        class: 'rich-text min-h-24 px-3 py-2 text-sm outline-none',
+        class: cn(
+          'rich-text px-3 py-2 text-sm outline-none',
+          variant === 'page' ? 'min-h-[24rem]' : 'min-h-24',
+        ),
       },
     },
     onUpdate: () => {
@@ -110,6 +124,19 @@ export function RichTextEditor({
   useEffect(() => {
     editor?.setEditable(editable);
   }, [editor, editable]);
+
+  // Sekme gizlenirken (kapatma, başka sekmeye geçme) bekleyen değişiklik hemen gönderilsin.
+  const flushRef = useRef(flush);
+  useEffect(() => {
+    flushRef.current = flush;
+  });
+  useEffect(() => {
+    const onHide = () => {
+      if (document.visibilityState === 'hidden') flushRef.current();
+    };
+    document.addEventListener('visibilitychange', onHide);
+    return () => document.removeEventListener('visibilitychange', onHide);
+  }, []);
 
   // Sayfadan çıkarken bekleyen değişiklik kaybolmasın.
   useEffect(
@@ -200,12 +227,26 @@ export function RichTextEditor({
           )}
           {tool('link', <LinkIcon className="size-4" />, setLink, editor.isActive('link'))}
           <span className="bg-border mx-1 h-4 w-px" aria-hidden />
+          {variant === 'page' &&
+            tool(
+              'heading1',
+              <span className="text-xs font-bold">H1</span>,
+              () => chain().toggleHeading({ level: 1 }).run(),
+              editor.isActive('heading', { level: 1 }),
+            )}
           {tool(
             'heading',
             <span className="text-xs font-bold">H2</span>,
             () => chain().toggleHeading({ level: 2 }).run(),
             editor.isActive('heading', { level: 2 }),
           )}
+          {variant === 'page' &&
+            tool(
+              'heading3',
+              <span className="text-xs font-bold">H3</span>,
+              () => chain().toggleHeading({ level: 3 }).run(),
+              editor.isActive('heading', { level: 3 }),
+            )}
           {tool(
             'bulletList',
             <List className="size-4" />,
@@ -229,6 +270,20 @@ export function RichTextEditor({
             <Code2 className="size-4" />,
             () => chain().toggleCodeBlock().run(),
             editor.isActive('codeBlock'),
+          )}
+          {variant === 'page' && (
+            <>
+              {tool(
+                'table',
+                <TableIcon className="size-4" />,
+                () => {
+                  if (editor.isActive('table')) chain().deleteTable().run();
+                  else chain().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
+                },
+                editor.isActive('table'),
+              )}
+              {tool('rule', <Minus className="size-4" />, () => chain().setHorizontalRule().run())}
+            </>
           )}
           <span className="bg-border mx-1 h-4 w-px" aria-hidden />
           {tool(

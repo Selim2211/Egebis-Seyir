@@ -237,6 +237,8 @@ export class LifecycleService implements OnModuleInit {
       this.prisma.list.deleteMany({ where: expired }),
       this.prisma.folder.deleteMany({ where: expired }),
       this.prisma.space.deleteMany({ where: expired }),
+      // Süresi dolan doküman sayfaları (ADR-069); alt sayfalar zincirleme silinir.
+      this.prisma.doc.deleteMany({ where: expired }),
       // Silinen kayıtlara işaret eden favoriler.
       this.prisma.$executeRaw`
         DELETE FROM favorites f WHERE

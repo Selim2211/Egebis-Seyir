@@ -551,3 +551,18 @@
   - **Ekranlar:** Space'te "Epic'ler" sekmesi (liste, ilerleme çubuğu, özet) ve Epic detayında "Toplam" satırı. Epic'e göre filtreleme/gruplama Backlog ve List'te zaten vardı (Faz 1/2). Epic'in sprint dağılımı ve zaman çizelgesi (Roadmap) Faz 4'tedir.
   - **Salt okunur özet:** Epic listesi `space.view` izniyle okunur; ek izin yok.
 - **Alternatifler:** Epic özetini detay yanıtına gömüp ayrı liste ucu açmamak (liste ekranı her Epic için detay çekmek zorunda kalır); özeti veritabanında saklamak (alt öğe değişince tutarsız kalma riski, hesap ucuz).
+
+## ADR-069 — Doküman sayfaları
+
+- **Tarih:** 2026-10-03 · **Durum:** Kabul (brief §5.12; ayrıntılar geliştirici varsayılanı, onay bekliyor)
+- **Karar:**
+  - **Kapsam:** sayfalar bir **Space'e** aittir (Workspace düzeyinde doküman sonra); sayfa ağacı `parentId` ile kurulur, en çok 6 seviye, kardeş sırası kesirli anahtarla (ADR-014). Yetki Space rolünden gelir: okuma `doc.view`, yazma `doc.write` (Stakeholder okur, Developer ve üstü yazar); özel Space sayfaları üye olmayana 404. Arşivli Space salt-okunurdur.
+  - **İçerik:** Tiptap JSON (ADR-048) ve aynı sunucu doğrulaması; doküman editöründe H1–H3, tablo ve ayırıcı eklenir (izinli düğümlere `table`, `tableRow`, `tableHeader`, `tableCell` girdi). Görsel yükleme ve emoji seçici bu adımda yok (Unicode emoji yazılabilir); görsel, ek altyapısı (ADR-056) dokümana bağlanınca eklenecek.
+  - **Eşzamanlılık:** eşzamanlı ortak düzenleme yok (brief [F2]). Her sayfada `revision` sayacı vardır; kayıt isteği son bildiği revision'ı taşır ve eşleşmezse **409 `DOC_CONFLICT`** ile reddedilir, üzerine yazılmaz. Arayüz bu durumda uyarı gösterip sayfayı yenilettirir. Tarayıcıda kayıtlar tek sıraya girer (başlık ve içerik aynı anda uçmaz); sekme gizlenirken bekleyen değişiklik hemen gönderilir.
+  - **Otomatik kayıt:** yazarken 1,5 sn (başlıkta 0,8 sn) sonra ve odak çıkınca; ayrı "Kaydet" düğmesi yok.
+  - **Sürümler:** aynı yazarın art arda kayıtları **10 dakika içinde tek sürümde birleşir**; yazar değişirse ya da süre dolarsa yeni sürüm açılır; sayfa başına en çok 100 sürüm (en eskiler silinir). Sürüme dönmek içeriği ve başlığı geri getirir ve **yeni bir sürüm** olarak kaydedilir (geçmiş silinmez). Her kayıt ayrı sürüm olsaydı otomatik kayıt geçmişi şişirirdi.
+  - **Silme:** sayfa ve tüm alt sayfaları aynı zaman damgasıyla çöp kutusuna gider, birlikte geri gelir; üst sayfa hâlâ çöpteyse sayfa köke döner. 30 gün sonra kalıcı silinir (ADR-041'deki temizlik işi). Taşıma döngü ve derinlik kuralıyla denetlenir (`checkDocMove`, saf ve birim testli).
+  - **Ekran:** Space ağacında "Dokümanlar" bağlantısı (`/spaces/:id/docs?doc=<id>`), solda sayfa ağacı (alt sayfa ekle, yukarı/aşağı, taşı, sil), sağda editör, üst sayfalar, kayıt durumu, sürüm geçmişi ve çöp kutusu pencereleri. Kenar çubuğundaki genel "Dokümanlar F3" yer tutucusu kaldırıldı.
+  - **Arama:** düz metin (`plain_text`) saklanır; global aramaya katılması ve içindekiler/TOC sonraya.
+- **Alternatifler:** Her kaydı ayrı sürüm yapmak (geçmiş okunmaz olur); iyimser kilit yerine son yazan kazanır (sessiz veri kaybı); Yjs/CRDT ile ortak düzenleme (F2 kapsamı, bu adımda gereksiz karmaşıklık); sürümleri farklarla (diff) saklamak (geri yükleme ve önizleme karmaşıklaşır, sayfalar küçük).
+- **Bilinen sınırlar:** ortak düzenleme, şablonlar, gömülü görev listesi, dışa aktarma, sayfa düzeyi izin yok (brief [F2]); görsel ve ek yok; çöp kutusu yalnızca Space içinde görünür.

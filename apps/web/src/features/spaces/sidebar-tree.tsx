@@ -17,6 +17,7 @@ import {
   FolderPlus,
   GripVertical,
   Kanban,
+  FileText,
   Layers,
   List,
   ListOrdered,
@@ -311,6 +312,7 @@ function SpaceNode({
       {open && (
         <div role="group" aria-label={space.name}>
           {space.scrumEnabled && <ScrumLinks spaceId={space.id} />}
+          <DocsLink spaceId={space.id} />
           <SortableGroup
             items={space.folders}
             enabled={canManage}
@@ -375,13 +377,25 @@ function ScrumLinks({ spaceId }: { spaceId: string }) {
   );
 }
 
+/** Space'in doküman sayfaları (Faz 3.2). */
+function DocsLink({ spaceId }: { spaceId: string }) {
+  const { t } = useTranslation();
+  const closeSidebar = useUiStore((s) => s.setSidebarOpen);
+  return (
+    <ScrumLink to="/spaces/$spaceId/docs" spaceId={spaceId} onNavigate={() => closeSidebar(false)}>
+      <FileText className="text-muted-foreground size-4 shrink-0" aria-hidden />
+      <span className="truncate">{t('docs.link')}</span>
+    </ScrumLink>
+  );
+}
+
 function ScrumLink({
   to,
   spaceId,
   onNavigate,
   children,
 }: {
-  to: '/spaces/$spaceId/backlog' | '/spaces/$spaceId/board';
+  to: '/spaces/$spaceId/backlog' | '/spaces/$spaceId/board' | '/spaces/$spaceId/docs';
   spaceId: string;
   onNavigate: () => void;
   children: ReactNode;

@@ -14,3 +14,4 @@ export * from './sprint';
 export * from './readiness';
 export * from './notifications';
 export * from './reports';
+export * from './docs';

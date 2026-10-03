@@ -61,6 +61,20 @@ function renderNode(node: RichTextNode, key: number): ReactNode {
           <code>{children}</code>
         </pre>
       );
+    case 'table':
+      return (
+        <div key={key} className="overflow-x-auto">
+          <table>
+            <tbody>{children}</tbody>
+          </table>
+        </div>
+      );
+    case 'tableRow':
+      return <tr key={key}>{children}</tr>;
+    case 'tableHeader':
+      return <th key={key}>{children}</th>;
+    case 'tableCell':
+      return <td key={key}>{children}</td>;
     case 'horizontalRule':
       return <hr key={key} />;
     case 'hardBreak':

@@ -9,3 +9,4 @@ export * from './rich-text';
 export * from './sprint';
 export * from './notification';
 export * from './reports';
+export * from './doc';

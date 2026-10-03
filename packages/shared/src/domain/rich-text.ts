@@ -29,6 +29,11 @@ export const RICH_TEXT_NODES = [
   'blockquote',
   'horizontalRule',
   'hardBreak',
+  /** Doküman tabloları (ADR-069). */
+  'table',
+  'tableRow',
+  'tableHeader',
+  'tableCell',
   /** Yalnızca yorumlarda üretilir; `attrs.id` kullanıcı kimliğidir (ADR-055). */
   'mention',
 ] as const;
@@ -50,6 +55,7 @@ const BLOCK_NODES = new Set([
   'codeBlock',
   'blockquote',
   'horizontalRule',
+  'tableRow',
 ]);
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>

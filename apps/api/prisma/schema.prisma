@@ -128,6 +128,9 @@ model User {
   notifications           Notification[]           @relation("NotificationRecipient")
   notificationsCaused     Notification[]           @relation("NotificationActor")
   notificationPreferences NotificationPreference[]
+  docsCreated             Doc[]                    @relation("DocCreator")
+  docsUpdated             Doc[]                    @relation("DocUpdater")
+  docVersions             DocVersion[]             @relation("DocVersionAuthor")
 
   @@map("users")
 }
@@ -194,6 +197,8 @@ model Workspace {
   sprints           Sprint[]
   sprintItemEvents  SprintItemEvent[]
   sprintSnapshots   SprintSnapshot[]
+  docs              Doc[]
+  docVersions       DocVersion[]
 
   notifications           Notification[]
   notificationPreferences NotificationPreference[]
@@ -322,6 +327,7 @@ model Space {
   items    WorkItem[]
   labels   Label[]
   sprints  Sprint[]
+  docs     Doc[]
 
   notifications Notification[]
 
@@ -737,7 +743,7 @@ model Sprint {
   createdAt       DateTime     @default(now()) @db.Timestamptz
   updatedAt       DateTime     @updatedAt @db.Timestamptz
 
-  items  WorkItem[]
+  items     WorkItem[]
   events    SprintItemEvent[]
   snapshots SprintSnapshot[]
 
@@ -839,4 +845,59 @@ model NotificationPreference {
 
   @@unique([userId, type])
   @@map("notification_preferences")
+}
+
+// ---------- Dokümanlar (Faz 3.2, ADR-069) ----------
+
+/// Space içi doküman sayfası; sayfa ağacı `parentId` ile kurulur. Silme çöp kutusuna taşır (deletedAt).
+model Doc {
+  id          String    @id @default(uuid(7)) @db.Uuid
+  workspaceId String    @db.Uuid
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  spaceId     String    @db.Uuid
+  space       Space     @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  parentId    String?   @db.Uuid
+  parent      Doc?      @relation("DocTree", fields: [parentId], references: [id], onDelete: Cascade)
+  children    Doc[]     @relation("DocTree")
+  title       String
+  /// Tiptap belge JSON'u (ADR-048); boş sayfa null.
+  content     Json?
+  /// Aramada kullanılacak düz metin (`richTextToPlain`).
+  plainText   String    @default("")
+  /// Kardeşler arası sıra (COLLATE "C", migration'da).
+  rank        String
+  /// Her kayıtta artar; eşzamanlılık denetimi (ADR-069).
+  revision    Int       @default(1)
+  createdById String?   @db.Uuid
+  createdBy   User?     @relation("DocCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedById String?   @db.Uuid
+  updatedBy   User?     @relation("DocUpdater", fields: [updatedById], references: [id], onDelete: SetNull)
+  createdAt   DateTime  @default(now()) @db.Timestamptz
+  updatedAt   DateTime  @updatedAt @db.Timestamptz
+  deletedAt   DateTime? @db.Timestamptz
+
+  versions DocVersion[]
+
+  @@index([spaceId, parentId])
+  @@index([spaceId, deletedAt])
+  @@map("docs")
+}
+
+/// Sayfa sürümü: aynı yazarın art arda kayıtları tek sürümde birleşir (ADR-069).
+model DocVersion {
+  id          String    @id @default(uuid(7)) @db.Uuid
+  workspaceId String    @db.Uuid
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  docId       String    @db.Uuid
+  doc         Doc       @relation(fields: [docId], references: [id], onDelete: Cascade)
+  version     Int
+  title       String
+  content     Json?
+  authorId    String?   @db.Uuid
+  author      User?     @relation("DocVersionAuthor", fields: [authorId], references: [id], onDelete: SetNull)
+  createdAt   DateTime  @default(now()) @db.Timestamptz
+  updatedAt   DateTime  @default(now()) @updatedAt @db.Timestamptz
+
+  @@unique([docId, version])
+  @@map("doc_versions")
 }

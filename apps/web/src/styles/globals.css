@@ -207,6 +207,23 @@
   color: var(--primary);
   text-decoration: underline;
 }
+.rich-text table {
+  border-collapse: collapse;
+  width: 100%;
+  table-layout: fixed;
+}
+.rich-text th,
+.rich-text td {
+  border: 1px solid var(--border);
+  padding: 0.25rem 0.5rem;
+  vertical-align: top;
+  min-width: 3rem;
+}
+.rich-text th {
+  background: var(--muted);
+  font-weight: 600;
+  text-align: left;
+}
 .rich-text hr {
   border-color: var(--border);
 }

@@ -7,8 +7,8 @@
 | #   | Adım                        | İçerik                                                                                                                           | Durum      |
 | --- | --------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ---------- |
 | 3.1 | Epic detayı ve Epic listesi | Epic puan/adet özeti, Space "Epic'ler" sekmesi (hedef, ilerleme çubuğu, tahminsiz uyarısı)                                       | Tamamlandı |
-| 3.2 | Doküman modülü çekirdeği    | Space içinde doküman sayfaları, sayfa ağacı (üst-alt), Tiptap editörü, otomatik kayıt, sürüm geçmişi ve geri yükleme, çöp kutusu | Sırada     |
-| 3.3 | Doküman ↔ görev bağlama     | Dokümana görev/Epic bağlama, görevden dokümanlara bağlantı, yorum ve @mention, bildirim                                          | Bekliyor   |
+| 3.2 | Doküman modülü çekirdeği    | Space içinde doküman sayfaları, sayfa ağacı (üst-alt), Tiptap editörü, otomatik kayıt, sürüm geçmişi ve geri yükleme, çöp kutusu | Tamamlandı |
+| 3.3 | Doküman ↔ görev bağlama     | Dokümana görev/Epic bağlama, görevden dokümanlara bağlantı, yorum ve @mention, bildirim                                          | Sırada     |
 | 3.4 | Retrospektif                | Sprint'e bağlı retrospektif sayfası (iyi gitti / gelişmeli / aksiyon), aksiyonları göreve çevirme                                | Bekliyor   |
 
 ## 3.1 Ayrıntı
@@ -20,3 +20,13 @@ Karar: ADR-068.
 **Web**: Scrum sekmelerine "Epic'ler" (`/spaces/:id/epics`): her Epic için renk noktası, anahtar, başlık, durum, hedef, ilerleme çubuğu, `%`, puan ve adet özeti, tahminsiz uyarısı. Epic detayında ilerleme satırının altında "Toplam" satırı.
 
 **Doğrulama (2026-10-03):** shared `epicStats` 2 test; `epics.int-spec` 4 (detay özeti, Epic dışı null, liste ve silinen alt öğe, Space yalıtımı/404); Playwright `faz3-epics` 2/2.
+
+## 3.2 Ayrıntı
+
+Karar: ADR-069.
+
+**API** (`/api/workspaces/:wid`): `GET|POST spaces/:spaceId/docs` (ağaç sırasıyla düz liste / oluştur), `GET spaces/:spaceId/docs/trash`, `GET|PATCH|DELETE docs/:docId`, `POST docs/:docId/move|restore`, `GET docs/:docId/versions[/:version]`, `POST docs/:docId/versions/:version/restore`. Veri: `docs`, `doc_versions` (rank sütunu `COLLATE "C"`). Saf kurallar `packages/shared/src/domain/docs.ts` (`isInSubtree`, `docDepth`, `checkDocMove`, `startsNewVersion`). Süresi dolan çöp `purgeExpired` içinde silinir.
+
+**Web**: `/spaces/:id/docs?doc=` (`features/docs`): `DocTree`, `DocEditor` (`useDocSaver` kayıt kuyruğu, revision), `VersionsDialog`, `TrashDialog`, `MoveDocDialog`. `RichTextEditor` `variant="page"` (tablo, H1–H3, ayırıcı); `RichTextView` tabloyu çizer.
+
+**Doğrulama (2026-10-03):** shared `docs` 9 test; `docs.int-spec` 17 (ağaç ve detay, doğrulama, kayıt ve revision, 409 çakışma, boş belge, tablo, sürüm birleştirme/geri yükleme, taşıma ve döngü, çöp kutusu ve süre dolumu, yetki, özel Space, arşivli Space); Playwright `faz3-docs` 4/4 (oluştur ve otomatik kaydet, tablo ve alt sayfa, sürüm önizleme, sil ve geri getir). Tüm paket: int 196, E2E 57 yeşil (yalnızca Mailpit isteyen `faz1-auth` bekliyor).

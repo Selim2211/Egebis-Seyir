@@ -32,6 +32,8 @@ export const TENANT_MODELS: ReadonlySet<string> = new Set([
   'NotificationPreference',
   'SprintItemEvent',
   'SprintSnapshot',
+  'Doc',
+  'DocVersion',
 ]);
 
 const WHERE_OPERATIONS = new Set([

@@ -1,7 +1,6 @@
 import { WORKSPACE_PERMISSIONS } from '@scrum/shared';
 import { Link, type LinkProps } from '@tanstack/react-router';
 import {
-  FileText,
   House,
   Inbox,
   ListTodo,
@@ -13,7 +12,6 @@ import {
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useUnreadCount } from '@/features/notifications/queries';
 import { SidebarTree } from '@/features/spaces/sidebar-tree';
 import { useCan, useCurrentWorkspace } from '@/features/workspace/queries';
@@ -57,35 +55,6 @@ function NavLink({
         </span>
       )}
     </Link>
-  );
-}
-
-/** Henüz hazır olmayan menü öğesi; hangi fazda geleceği etiketle görünür. */
-function PlannedItem({
-  icon: Icon,
-  label,
-  phase,
-}: {
-  icon: LucideIcon;
-  label: string;
-  phase?: string;
-}) {
-  const { t } = useTranslation();
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <span className={cn(navItemClass, 'cursor-not-allowed opacity-60 hover:bg-transparent')}>
-          <Icon className="size-4" aria-hidden />
-          <span className="flex-1">{label}</span>
-          {phase && (
-            <span className="text-muted-foreground rounded border px-1 text-[10px] leading-4 font-semibold">
-              {phase}
-            </span>
-          )}
-        </span>
-      </TooltipTrigger>
-      <TooltipContent side="right">{t('nav.comingSoon')}</TooltipContent>
-    </Tooltip>
   );
 }
 
@@ -134,7 +103,6 @@ export function Sidebar() {
           <NavLink to="/" icon={House} label={t('nav.home')} />
           <NavLink to="/my-work" icon={ListTodo} label={t('nav.myWork')} />
           <NavLink to="/notifications" icon={Inbox} label={t('nav.inbox')} badge={unread} />
-          <PlannedItem icon={FileText} label={t('nav.docs')} phase="F3" />
 
           <SidebarTree />
         </nav>

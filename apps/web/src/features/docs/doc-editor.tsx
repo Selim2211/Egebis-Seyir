@@ -1,0 +1,199 @@
+import type { DocDetail, RichTextDoc } from '@scrum/shared';
+import { useQueryClient } from '@tanstack/react-query';
+import { Link } from '@tanstack/react-router';
+import { AlertTriangle, History, RotateCcw } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { RichTextEditor } from '@/features/work-items/detail/rich-text-editor';
+import { useCurrentWorkspace } from '@/features/workspace/queries';
+import { relativeTime } from '@/lib/format';
+import { cn } from '@/lib/utils';
+import { useRestoreDoc } from './queries';
+import { useDocSaver } from './use-doc-saver';
+
+const TITLE_DELAY_MS = 800;
+
+/**
+ * Tek sayfa: başlık + zengin metin + kayıt durumu. Bileşen sayfa kimliği ve sunucu revision'ı ile
+ * `key`lenir; yerel durum yalnızca bu yaşam döngüsü içinde tutulur (ADR-069).
+ */
+export function DocEditor({
+  doc,
+  spaceId,
+  canWrite,
+  onOpenVersions,
+  onSelect,
+  onReload,
+}: {
+  doc: DocDetail;
+  spaceId: string;
+  canWrite: boolean;
+  onOpenVersions: () => void;
+  onSelect: (id: string) => void;
+  onReload: () => void;
+}) {
+  const { t } = useTranslation();
+  const qc = useQueryClient();
+  const { id: workspaceId } = useCurrentWorkspace();
+  const restore = useRestoreDoc(spaceId);
+  const saver = useDocSaver(doc.id, doc.revision);
+  const [title, setTitle] = useState(doc.title);
+  const [content, setContent] = useState<RichTextDoc | null>(doc.content);
+  const titleTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const titleDirty = useRef(false);
+  const editable = canWrite && !doc.deleted;
+
+  const flushTitle = () => {
+    clearTimeout(titleTimer.current);
+    if (!titleDirty.current) return;
+    titleDirty.current = false;
+    const next = title.trim();
+    if (next) saver.save({ title: next });
+  };
+  const flushTitleRef = useRef(flushTitle);
+  useEffect(() => {
+    flushTitleRef.current = flushTitle;
+  });
+  // Sayfadan çıkarken bekleyen başlık kaybolmasın.
+  useEffect(() => () => flushTitleRef.current(), []);
+
+  // Kayıt başarılı olunca ağaçtaki başlık güncellensin.
+  useEffect(() => {
+    if (saver.state === 'saved') {
+      void qc.invalidateQueries({
+        queryKey: ['workspaces', workspaceId, 'spaces', spaceId, 'docs'],
+      });
+    }
+  }, [saver.state, saver.savedAt, qc, workspaceId, spaceId]);
+
+  const onTitle = (value: string) => {
+    setTitle(value);
+    titleDirty.current = true;
+    clearTimeout(titleTimer.current);
+    titleTimer.current = setTimeout(() => {
+      titleDirty.current = false;
+      const next = value.trim();
+      if (next) saver.save({ title: next });
+    }, TITLE_DELAY_MS);
+  };
+
+  return (
+    <article className="flex min-w-0 flex-col gap-3">
+      {doc.ancestors.length > 0 && (
+        <nav
+          aria-label={t('docs.breadcrumb')}
+          className="text-muted-foreground flex flex-wrap gap-1 text-xs"
+        >
+          {doc.ancestors.map((a) => (
+            <span key={a.id} className="flex items-center gap-1">
+              <button type="button" className="hover:underline" onClick={() => onSelect(a.id)}>
+                {a.title}
+              </button>
+              <span aria-hidden>/</span>
+            </span>
+          ))}
+        </nav>
+      )}
+
+      {doc.deleted && (
+        <div
+          role="status"
+          className="bg-muted flex flex-wrap items-center gap-3 rounded-md border px-3 py-2 text-sm"
+        >
+          <span>{t('docs.deletedNotice')}</span>
+          {canWrite && (
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={restore.isPending}
+              onClick={() => void restore.mutateAsync(doc.id).then(onReload)}
+            >
+              <RotateCcw /> {t('docs.restore')}
+            </Button>
+          )}
+        </div>
+      )}
+
+      {saver.state === 'conflict' && (
+        <div
+          role="alert"
+          className="flex flex-wrap items-center gap-3 rounded-md border border-amber-500/50 bg-amber-500/10 px-3 py-2 text-sm"
+        >
+          <AlertTriangle className="size-4 shrink-0 text-amber-600" aria-hidden />
+          <span className="flex-1">{t('errors.DOC_CONFLICT')}</span>
+          <Button size="sm" variant="outline" onClick={onReload}>
+            {t('docs.reload')}
+          </Button>
+        </div>
+      )}
+
+      <div className="flex items-start gap-2">
+        {editable ? (
+          <Input
+            value={title}
+            onChange={(e) => onTitle(e.target.value)}
+            onBlur={flushTitle}
+            maxLength={200}
+            aria-label={t('docs.title')}
+            placeholder={t('docs.untitled')}
+            className="h-11 border-transparent px-2 text-2xl font-semibold shadow-none focus-visible:border-input"
+          />
+        ) : (
+          <h1 className="px-2 text-2xl font-semibold">{doc.title}</h1>
+        )}
+        <Button variant="outline" size="sm" onClick={onOpenVersions} className="mt-1.5 shrink-0">
+          <History /> {t('docs.versions')}
+        </Button>
+      </div>
+
+      <p className="text-muted-foreground flex flex-wrap items-center gap-x-3 px-2 text-xs">
+        {doc.updatedBy && (
+          <span>
+            {t('docs.updatedBy', { name: doc.updatedBy.name, when: relativeTime(doc.updatedAt) })}
+          </span>
+        )}
+        <span
+          role="status"
+          aria-live="polite"
+          className={cn(saver.state === 'error' && 'text-destructive')}
+        >
+          {saver.state === 'saving' && t('docs.saving')}
+          {saver.state === 'saved' && t('docs.saved')}
+          {saver.state === 'error' && t('docs.saveError')}
+        </span>
+      </p>
+
+      <RichTextEditor
+        variant="page"
+        value={content}
+        editable={editable}
+        label={t('docs.content')}
+        placeholder={t('docs.contentPlaceholder')}
+        onSave={(next) => {
+          setContent(next);
+          saver.save({ content: next });
+        }}
+      />
+    </article>
+  );
+}
+
+/** Sayfa yüklenemediyse (silinmiş/izinsiz) gösterilen boş durum. */
+export function DocMissing({ spaceId }: { spaceId: string }) {
+  const { t } = useTranslation();
+  return (
+    <div className="text-muted-foreground flex flex-col items-center gap-2 py-16 text-sm">
+      <p>{t('docs.missing')}</p>
+      <Link
+        to="/spaces/$spaceId/docs"
+        params={{ spaceId }}
+        search={{}}
+        className="text-primary hover:underline"
+      >
+        {t('docs.backToDocs')}
+      </Link>
+    </div>
+  );
+}
