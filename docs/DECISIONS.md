@@ -590,3 +590,13 @@
   - **Giriş:** Geçmiş listesindeki sprint satırı ve Review sayfası "Retrospektif" bağlantısı verir.
 - **Alternatifler:** Retro'yu doküman şablonu olarak kurmak (oylama ve görev çevirme zor); anonim madde (yazar bilgisi moderasyon için gerekli, takım içi güven varsayımı); aksiyonu doğrudan sonraki sprint'e koymak (planlama kararı PO/SM'in).
 - **Bilinen sınırlar:** gerçek zamanlı ortak ekran yok (sayfa yenilenince görünür; brief [F2] realtime); sürükle-bırak gruplama, zamanlayıcı ve şablonlar (Başla/Dur/Devam) yok.
+
+## ADR-072 — Roadmap görünümü
+
+- **Tarih:** 2026-10-03 · **Durum:** Kabul (brief §5.7 [F2]; ayrıntılar geliştirici varsayılanı, onay bekliyor)
+- **Karar:**
+  - **Kapsam:** Space düzeyinde Epic Roadmap'i. Veri mevcut Epic başlangıç/bitiş tarihleridir (Faz 1); yeni alan veya uç yok. Çubuk bitiş günü dahil çizilir; yalnızca bir tarihi olan Epic tek günlük işaret olur; hiç tarihi olmayan Epic ayrı "Tarihsiz" listesinde kalır.
+  - **Eksen:** aylar sütun, en az 4 ay (bugünün ayından), Epic ve sprint tarihlerini kapsayacak şekilde tam aya genişler. Konumlar eksenin yüzdesidir (`barPlacement`, saf ve birim testli); dar ekranda yatay kaydırılır. Bugün dikey çizgiyle gösterilir. Sprint'ler üst bantta (iptal edilenler hariç).
+  - **İlerleme:** çubuğun içi Epic ilerlemesiyle (ADR-045/068) dolar; çubuğa tıklamak Epic detayına gider.
+  - **Düzenleme:** tarihler Epic detayından değiştirilir. Sürükleyerek tarih değiştirme (brief [F2]) ve tema/inisiyatif gruplama sonraya; çok Space'li Roadmap Dashboard adımında (4.6).
+- **Alternatifler:** Epic'leri sprint sütunlarına yerleştirmek (Epic'ler sprint'e bağlı değildir); harici grafik kütüphanesi (basit konumlu `div`'ler erişilebilirlik ve boyut açısından yeterli); sürükle-bırak hemen eklemek (Gantt adımında 4.5 ile aynı etkileşim altyapısı kurulacak).

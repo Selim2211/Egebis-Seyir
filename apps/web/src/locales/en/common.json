@@ -1113,5 +1113,14 @@
     "toTask": "Make task",
     "toTaskNamed": "Turn the action “{{text}}” into a task",
     "taskCreated": "{{key}} created; it is in the Backlog."
+  },
+  "roadmap": {
+    "title": "Roadmap",
+    "empty": "No Epics in this Space yet. Create an Epic and give it start/due dates.",
+    "epic": "Epics",
+    "sprints": "Sprints",
+    "barLabel": "{{key}} {{title}}, {{progress}}% done",
+    "unscheduled": "Unscheduled Epics",
+    "unscheduledHint": "They appear on the timeline once they get a start or due date."
   }
 }

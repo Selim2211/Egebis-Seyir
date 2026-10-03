@@ -1113,5 +1113,14 @@
     "toTask": "Göreve çevir",
     "toTaskNamed": "“{{text}}” aksiyonunu göreve çevir",
     "taskCreated": "{{key}} oluşturuldu; Backlog’da."
+  },
+  "roadmap": {
+    "title": "Roadmap",
+    "empty": "Bu Space'te henüz Epic yok. Epic oluştur ve başlangıç/bitiş tarihi ver.",
+    "epic": "Epic'ler",
+    "sprints": "Sprint'ler",
+    "barLabel": "{{key}} {{title}}, %{{progress}} tamamlandı",
+    "unscheduled": "Tarihsiz Epic’ler",
+    "unscheduledHint": "Başlangıç veya bitiş tarihi verilince zaman çizelgesinde görünür."
   }
 }
