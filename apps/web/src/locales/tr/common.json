@@ -579,7 +579,8 @@
     "openFull": "Tam sayfada aç",
     "panelHelp": "Görev ayrıntıları ve düzenleme alanları.",
     "archivedBanner": "Bu öğe arşivde; düzenlenemez.",
-    "updated": "Son güncelleme: {{when}}"
+    "updated": "Son güncelleme: {{when}}",
+    "epicTotals": "Toplam"
   },
   "editor": {
     "toolbar": "Biçimlendirme",
@@ -1018,5 +1019,13 @@
       "chartLabel": "Sprint başına taahhüt edilen ve tamamlanan puan grafiği",
       "table": "Sprint başına taahhüt edilen ve tamamlanan puan"
     }
+  },
+  "epics": {
+    "title": "Epic'ler",
+    "empty": "Bu Space'te henüz Epic yok. Görevler listesinden bir Epic oluştur.",
+    "progressOf": "{{key}} ilerlemesi",
+    "points": "{{done}} / {{total}} puan",
+    "items": "{{done}} / {{total}} öğe",
+    "unestimated": "{{count}} öğenin tahmini yok"
   }
 }

@@ -579,7 +579,8 @@
     "openFull": "Open full page",
     "panelHelp": "Work item details and editing fields.",
     "archivedBanner": "This item is archived and cannot be edited.",
-    "updated": "Last updated: {{when}}"
+    "updated": "Last updated: {{when}}",
+    "epicTotals": "Totals"
   },
   "editor": {
     "toolbar": "Formatting",
@@ -1018,5 +1019,13 @@
       "chartLabel": "Chart of committed and completed points per sprint",
       "table": "Committed and completed points per sprint"
     }
+  },
+  "epics": {
+    "title": "Epics",
+    "empty": "No Epics in this Space yet. Create one from the Tasks list.",
+    "progressOf": "{{key}} progress",
+    "points": "{{done}} / {{total}} points",
+    "items": "{{done}} / {{total}} items",
+    "unestimated": "{{count}} items unestimated"
   }
 }

@@ -10,6 +10,7 @@ import {
   type ItemReadiness,
   ERROR_CODES,
   epicProgress,
+  epicStats,
   isRichTextEmpty,
   richTextToPlain,
   formatItemKey,
@@ -209,6 +210,10 @@ export class WorkItemsService {
                 category: c.status.category,
               })),
             )
+          : null,
+      epicStats:
+        row.type === 'EPIC'
+          ? epicStats(children.map((c) => ({ points: c.points, category: c.status.category })))
           : null,
       rolledUpHours: rollupHours(children),
       archived: row.archivedAt !== null,

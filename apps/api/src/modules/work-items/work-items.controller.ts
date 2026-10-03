@@ -28,6 +28,7 @@ import {
   CopyItemRequestSchema,
   CreatedItemSchema,
   CreatedSchema,
+  EpicsResponseSchema,
   CreateLabelRequestSchema,
   CreateWorkItemRequestSchema,
   LabelsResponseSchema,
@@ -40,6 +41,7 @@ import {
   WorkItemsResponseSchema,
   type Created,
   type CreatedItem,
+  type EpicsResponse,
   type ItemSearchResponse,
   type MyWorkResponse,
   type MyWorkScope,
@@ -52,12 +54,14 @@ import {
 import { createZodDto, ZodResponse, ZodValidationPipe } from 'nestjs-zod';
 import { z } from 'zod';
 import { RequireSpacePermission } from '../auth/decorators';
+import { EpicsService } from './epics.service';
 import { ItemDetailsService } from './item-details.service';
 import { ItemQueriesService } from './item-queries.service';
 import { ItemTreeService } from './item-tree.service';
 import { LabelsService } from './labels.service';
 import { WorkItemsService } from './work-items.service';
 
+class EpicsDto extends createZodDto(EpicsResponseSchema) {}
 class WorkItemsDto extends createZodDto(WorkItemsResponseSchema) {}
 class WorkItemDetailDto extends createZodDto(WorkItemDetailSchema) {}
 class CreateWorkItemDto extends createZodDto(CreateWorkItemRequestSchema) {}
@@ -96,6 +100,7 @@ export class WorkItemsController {
     private readonly labels: LabelsService,
     private readonly details: ItemDetailsService,
     private readonly queries: ItemQueriesService,
+    private readonly epics: EpicsService,
   ) {}
 
   /** Görülebilen Space'lerde başlık, açıklama ve kimlik araması (ADR-053). */
@@ -113,6 +118,14 @@ export class WorkItemsController {
     @Query('includeDone') includeDone?: string,
   ): Promise<MyWorkResponse> {
     return this.queries.myWork(scope, includeDone === 'true');
+  }
+
+  /** Space'in Epic'leri: ilerleme ve puan özeti (brief §5.7). */
+  @Get('spaces/:spaceId/epics')
+  @RequireSpacePermission(S.SPACE_VIEW)
+  @ZodResponse({ type: EpicsDto })
+  epicList(@Uuid('spaceId') spaceId: string): Promise<EpicsResponse> {
+    return this.epics.list(spaceId);
   }
 
   @Get('lists/:listId/items')

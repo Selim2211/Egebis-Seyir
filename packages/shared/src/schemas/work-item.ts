@@ -154,6 +154,30 @@ export const WorkItemsResponseSchema = z.object({
 });
 export type WorkItemsResponse = z.infer<typeof WorkItemsResponseSchema>;
 
+/** Epic özeti: doğrudan alt öğelerin puan ve adet toplamları (brief §5.7). */
+export const EpicStatsSchema = z.object({
+  points: z.number(),
+  donePoints: z.number(),
+  itemCount: z.int(),
+  doneCount: z.int(),
+  activeCount: z.int(),
+  unestimatedCount: z.int(),
+});
+export type EpicStatsDto = z.infer<typeof EpicStatsSchema>;
+
+/** GET /api/workspaces/:wid/spaces/:spaceId/epics — Space'in Epic'leri ve ilerlemeleri. */
+export const EpicsResponseSchema = z.object({
+  epics: z.array(
+    WorkItemSummarySchema.extend({
+      goal: z.string().nullable(),
+      color: z.string().nullable(),
+      progress: z.int(),
+      stats: EpicStatsSchema,
+    }),
+  ),
+});
+export type EpicsResponse = z.infer<typeof EpicsResponseSchema>;
+
 const crumb = z.object({
   id: z.uuid(),
   key: z.string(),
@@ -237,6 +261,8 @@ export const WorkItemDetailSchema = WorkItemSummarySchema.extend({
   labels: z.array(LabelSchema),
   /** Epic: point ağırlıklı ilerleme (0–100); diğer tipler null (ADR-045). */
   progress: z.int().nullable(),
+  /** Epic: alt öğe puan/adet özeti; diğer tipler null (ADR-068). */
+  epicStats: EpicStatsSchema.nullable(),
   /** Alt öğelerin saat toplamı (rollup); alt öğede saat yoksa null. */
   rolledUpHours: z.number().nullable(),
   archived: z.boolean(),

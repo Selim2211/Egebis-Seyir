@@ -1,6 +1,7 @@
 import {
   BacklogResponseSchema,
   CreatedSchema,
+  EpicsResponseSchema,
   SprintBurndownSchema,
   SprintDetailSchema,
   SprintReviewSchema,
@@ -36,6 +37,12 @@ export const sprintQuery = (workspaceId: string, sprintId: string) =>
   queryOptions({
     queryKey: ['workspaces', workspaceId, 'sprints', sprintId],
     queryFn: () => apiRequest(`${ws(workspaceId)}/sprints/${sprintId}`, SprintDetailSchema),
+  });
+
+export const epicsQuery = (workspaceId: string, spaceId: string) =>
+  queryOptions({
+    queryKey: ['workspaces', workspaceId, 'spaces', spaceId, 'epics'],
+    queryFn: () => apiRequest(`${ws(workspaceId)}/spaces/${spaceId}/epics`, EpicsResponseSchema),
   });
 
 export const burndownQuery = (workspaceId: string, sprintId: string) =>

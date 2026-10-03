@@ -623,6 +623,20 @@ function EpicFields({
           <span className="text-muted-foreground text-xs">%{item.progress ?? 0}</span>
         </div>
       </Row>
+      {item.epicStats && item.epicStats.itemCount > 0 && (
+        <Row label={t('detail.epicTotals')}>
+          <span className="text-muted-foreground text-xs tabular-nums">
+            {t('epics.points', {
+              done: item.epicStats.donePoints,
+              total: item.epicStats.points,
+            })}
+            {' · '}
+            {t('epics.items', { done: item.epicStats.doneCount, total: item.epicStats.itemCount })}
+            {item.epicStats.unestimatedCount > 0 &&
+              ` · ${t('epics.unestimated', { count: item.epicStats.unestimatedCount })}`}
+          </span>
+        </Row>
+      )}
       <Row label={t('detail.tshirtSize')}>
         <NativeSelect
           aria-label={t('detail.tshirtSize')}

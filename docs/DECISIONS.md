@@ -541,3 +541,13 @@
   - **Hata yalıtımı:** görüntü yazılamazsa loglanır, sprint başlatma/tamamlama bozulmaz; gece işi sonraki turda dener.
 - **Alternatifler:** Burndown'ı yalnızca olay geçmişinden (`activity_events`, `sprint_item_events`) yeniden hesaplamak (durum geçmişi puan değişimleriyle birlikte tutulmadığı için güvenilmez, her istekte pahalı); görüntüyü yalnızca gece yazmak (başlangıç/bitiş günü ve sunucu kapalı günler eksik kalır); taahhüdü ilk görüntüden türetmek (aynı gün yeniden yazılınca bozuluyor — testte yakalandı).
 - **Bilinen sınırlar:** Burn-up, CFD, lead/cycle time ve dışa aktarma Faz 4'te (brief §5.11 [F2] satırları). Puan sonradan değişirse (tahmin düzeltme) geçmiş günler değişmez, yalnızca sonraki görüntüler yeni değeri taşır.
+
+## ADR-068 — Epic özeti ve Epic listesi
+
+- **Tarih:** 2026-10-03 · **Durum:** Kabul (brief §5.7, §6.2.3; ayrıntılar geliştirici varsayılanı)
+- **Karar:**
+  - **İlerleme kuralı değişmez** (ADR-045): doğrudan alt öğelerin point ağırlıklı tamamlanma oranı; hiçbirinde puan yoksa adet bazlı. Üstüne **özet** eklenir: toplam/biten puan, toplam/biten/devam eden adet ve puanı girilmemiş alt öğe sayısı (ilerlemenin neden adet bazına düştüğü görünür olsun).
+  - **Kapsam:** yalnızca Epic'in doğrudan alt öğeleri (Story/Bug); Story altındaki Task'lar Epic ilerlemesine ayrıca girmez (Story'nin kendisi sayılır). Silinen ve arşivlenen öğeler sayılmaz.
+  - **Ekranlar:** Space'te "Epic'ler" sekmesi (liste, ilerleme çubuğu, özet) ve Epic detayında "Toplam" satırı. Epic'e göre filtreleme/gruplama Backlog ve List'te zaten vardı (Faz 1/2). Epic'in sprint dağılımı ve zaman çizelgesi (Roadmap) Faz 4'tedir.
+  - **Salt okunur özet:** Epic listesi `space.view` izniyle okunur; ek izin yok.
+- **Alternatifler:** Epic özetini detay yanıtına gömüp ayrı liste ucu açmamak (liste ekranı her Epic için detay çekmek zorunda kalır); özeti veritabanında saklamak (alt öğe değişince tutarsız kalma riski, hesap ucuz).

@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { EpicsService } from './epics.service';
 import { ItemDetailsService } from './item-details.service';
 import { ItemQueriesService } from './item-queries.service';
 import { ItemTreeService } from './item-tree.service';
@@ -11,6 +12,7 @@ import { WorkItemsService } from './work-items.service';
   controllers: [WorkItemsController],
   providers: [
     WorkItemsService,
+    EpicsService,
     ItemTreeService,
     ItemDetailsService,
     ItemQueriesService,
