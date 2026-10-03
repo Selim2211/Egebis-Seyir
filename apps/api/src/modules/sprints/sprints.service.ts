@@ -4,6 +4,9 @@ import {
   ERROR_CODES,
   type Created,
   type CreateSprintRequest,
+  formatItemKey,
+  type SetReviewNotesRequest,
+  type SprintReview,
   type SprintDetail,
   type SprintsResponse,
   type UpdateSprintRequest,
@@ -172,6 +175,96 @@ export class SprintsService {
         entityId: sprintId,
         action: 'sprint.updated',
         changes: asJson(changes),
+      });
+    });
+  }
+
+  /**
+   * Sprint Review özeti (brief §5.6): tamamlananlar, tamamlanmayanlar, kapsam değişiklikleri ve
+   * demo notları. Kapanmış sprint'in bitmeyenleri çıkış olaylarından, açık sprint'in güncel durumdan gelir.
+   */
+  async review(sprintId: string): Promise<SprintReview> {
+    const db = this.tenant.db;
+    const sprint = await db.sprint.findFirst({ where: { id: sprintId } });
+    if (!sprint) throw notFound();
+    await loadScrumSpace(db, sprint.spaceId, false);
+    const [summary] = await summarize(db, [sprint]);
+    const order = [{ backlogRank: 'asc' as const }, { createdAt: 'asc' as const }];
+
+    const open = sprint.status === 'ACTIVE' || sprint.status === 'PLANNED';
+    const [completed, unfinishedRows, events] = await Promise.all([
+      db.workItem.findMany({
+        where: { sprintId, ...countedItems, status: { category: 'DONE' } },
+        include: rowInclude,
+        orderBy: order,
+      }),
+      open
+        ? db.workItem.findMany({
+            where: { sprintId, ...countedItems, status: { category: { not: 'DONE' } } },
+            include: rowInclude,
+            orderBy: order,
+          })
+        : this.leftUnfinished(sprintId),
+      db.sprintItemEvent.findMany({
+        where: { sprintId, reason: 'SCOPE_CHANGE' },
+        include: { workItem: { select: { id: true, keyPrefix: true, number: true, title: true } } },
+        orderBy: { createdAt: 'asc' },
+      }),
+    ]);
+
+    return {
+      sprint: summary!,
+      completed: completed.map(toRow),
+      unfinished: unfinishedRows.map(toRow),
+      scopeChanges: events.map((e) => ({
+        action: e.action,
+        at: e.createdAt.toISOString(),
+        points: e.points,
+        item: {
+          id: e.workItem.id,
+          key: formatItemKey(e.workItem.keyPrefix, e.workItem.number),
+          title: e.workItem.title,
+        },
+      })),
+      notes: sprint.reviewNotes,
+    };
+  }
+
+  /** Kapanırken bitmemiş olarak çıkan öğelerin güncel satırları (artık başka yerde olabilir). */
+  private async leftUnfinished(sprintId: string) {
+    const db = this.tenant.db;
+    const left = await db.sprintItemEvent.findMany({
+      where: { sprintId, action: 'REMOVED', reason: 'UNFINISHED' },
+      select: { workItemId: true },
+    });
+    if (left.length === 0) return [];
+    return db.workItem.findMany({
+      where: { id: { in: left.map((e) => e.workItemId) }, deletedAt: null },
+      include: rowInclude,
+      orderBy: [{ backlogRank: 'asc' }, { createdAt: 'asc' }],
+    });
+  }
+
+  /** Demo notları: tamamlanmış sprint'te de yazılabilir (değişiklik aktiviteye düşer). */
+  async setReviewNotes(sprintId: string, input: SetReviewNotesRequest): Promise<void> {
+    const { workspaceId, actorId } = this.ctx;
+    const db = this.tenant.db;
+    const sprint = await db.sprint.findFirst({ where: { id: sprintId } });
+    if (!sprint) throw notFound();
+    await loadScrumSpace(db, sprint.spaceId, true);
+    const next = input.notes || null;
+    if (next === sprint.reviewNotes) return;
+    await db.$transaction(async (tx) => {
+      await tx.sprint.update({ where: { id: sprintId }, data: { reviewNotes: next } });
+      await this.activity.record(tx, {
+        workspaceId,
+        actorId,
+        entityType: 'sprint',
+        entityId: sprintId,
+        action: 'sprint.updated',
+        changes: asJson({
+          reviewNotes: { from: sprint.reviewNotes ? 'edited' : null, to: next ? 'edited' : null },
+        }),
       });
     });
   }

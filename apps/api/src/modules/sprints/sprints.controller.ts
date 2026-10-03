@@ -9,6 +9,7 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  Put,
   Query,
 } from '@nestjs/common';
 import {
@@ -18,12 +19,15 @@ import {
   CreateSprintRequestSchema,
   MoveBacklogItemsRequestSchema,
   SPACE_PERMISSIONS as S,
+  SetReviewNotesRequestSchema,
   SprintDetailSchema,
+  SprintReviewSchema,
   SprintsResponseSchema,
   UpdateSprintRequestSchema,
   type BacklogResponse,
   type Created,
   type SprintDetail,
+  type SprintReview,
   type SprintsResponse,
 } from '@scrum/shared';
 import { createZodDto, ZodResponse } from 'nestjs-zod';
@@ -39,6 +43,8 @@ class UpdateSprintDto extends createZodDto(UpdateSprintRequestSchema) {}
 class CreatedDto extends createZodDto(CreatedSchema) {}
 class BacklogDto extends createZodDto(BacklogResponseSchema) {}
 class CompleteSprintDto extends createZodDto(CompleteSprintRequestSchema) {}
+class SprintReviewDto extends createZodDto(SprintReviewSchema) {}
+class ReviewNotesDto extends createZodDto(SetReviewNotesRequestSchema) {}
 class MoveBacklogDto extends createZodDto(MoveBacklogItemsRequestSchema) {}
 
 const Uuid = (name: string) => Param(name, ParseUUIDPipe);
@@ -72,6 +78,20 @@ export class SprintsController {
   @ZodResponse({ type: SprintDetailDto })
   detail(@Uuid('sprintId') sprintId: string, @Query('tree') tree?: string): Promise<SprintDetail> {
     return this.sprints.detail(sprintId, tree === 'true');
+  }
+
+  @Get('sprints/:sprintId/review')
+  @RequireSpacePermission(S.SPACE_VIEW)
+  @ZodResponse({ type: SprintReviewDto })
+  review(@Uuid('sprintId') sprintId: string): Promise<SprintReview> {
+    return this.sprints.review(sprintId);
+  }
+
+  @Put('sprints/:sprintId/review-notes')
+  @RequireSpacePermission(S.SPRINT_COMPLETE)
+  @HttpCode(NO_CONTENT)
+  reviewNotes(@Uuid('sprintId') sprintId: string, @Body() body: ReviewNotesDto): Promise<void> {
+    return this.sprints.setReviewNotes(sprintId, body);
   }
 
   @Patch('sprints/:sprintId')

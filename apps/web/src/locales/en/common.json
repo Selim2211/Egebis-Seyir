@@ -317,7 +317,10 @@
     "SPRINT_GOAL_REQUIRED": "A sprint goal is required to start the sprint.",
     "SPRINT_NOT_ACTIVE": "Only an active sprint can be completed.",
     "SPRINT_CANCEL_NOT_ALLOWED": "A completed or cancelled sprint cannot be cancelled.",
-    "SPRINT_NEXT_INVALID": "The carry-over sprint must be planned and in the same Space."
+    "SPRINT_NEXT_INVALID": "The carry-over sprint must be planned and in the same Space.",
+    "DOD_INCOMPLETE": "The Definition of Done is incomplete.",
+    "DOD_ENFORCED": "The Definition of Done is required in this Space; check every item before moving to Done.",
+    "READINESS_NOT_APPLICABLE": "Definition of Ready/Done only applies to Stories and Bugs."
   },
   "spaceRoles": {
     "PRODUCT_OWNER": "Product Owner",
@@ -502,7 +505,9 @@
     "blockedTitle": "This item is blocked",
     "blockedBody": "Unfinished blocking item(s): {{keys}}. Start anyway?",
     "startAnyway": "Start anyway",
-    "childTitle": "Sub-item title"
+    "childTitle": "Sub-item title",
+    "dodTitle": "Definition of Done incomplete",
+    "dodBody": "{{count}} DoD items are not checked. Mark it Done anyway?"
   },
   "detail": {
     "properties": "Properties",
@@ -770,7 +775,9 @@
       "listId": "List",
       "spaceId": "Space",
       "bulk": "Bulk",
-      "sprintId": "Sprint"
+      "sprintId": "Sprint",
+      "dodChecked": "DoD items",
+      "dorChecked": "DoR items"
     }
   },
   "backlog": {
@@ -857,7 +864,8 @@
     "scopeChangeTitle": "Sprint scope is changing",
     "scopeChangeAdd": "{{name}} is active; adding {{count}} items counts as a scope change and shows in reports.",
     "scopeChangeRemove": "{{name}} is active; removing {{count}} items counts as a scope change and shows in reports.",
-    "scopeChangeConfirm": "Continue"
+    "scopeChangeConfirm": "Continue",
+    "notReadyWarn": "{{count}} items do not meet the Definition of Ready."
   },
   "board": {
     "title": "Sprint board",
@@ -901,5 +909,43 @@
     "average": "Average velocity of recent sprints: {{velocity}} points.",
     "completedPoints": "{{points}} points completed",
     "progress": "{{done}} / {{total}} items done"
+  },
+  "readiness": {
+    "dor": "Definition of Ready",
+    "dod": "Definition of Done",
+    "complete": "Complete",
+    "enforced": "Required for Done",
+    "notReady": "Definition of Ready is incomplete",
+    "dorBadge": "DoR {{checked}}/{{total}}",
+    "dorSetting": "Definition of Ready items",
+    "dodSetting": "Definition of Done items",
+    "dorPlaceholder": "Acceptance criteria written\nEstimated\nDependencies resolved",
+    "dodPlaceholder": "Code reviewed\nTests passing\nDocumentation updated",
+    "help": "One item per line, at most {{max}}. Editing an item resets its checkmarks.",
+    "dodEnforced": "Required for Done",
+    "dodEnforcedHelp": "When on, a Story/Bug cannot move to Done until all DoD items are checked; when off you only get a warning."
+  },
+  "review": {
+    "title": "{{name}} · Review",
+    "link": "Review",
+    "openBoard": "Open board",
+    "completedOn": "Completed on {{date}}",
+    "preview": "The sprint is still open; this summary shows the state so far.",
+    "points": "Points completed",
+    "doneItems": "Items done",
+    "unfinishedItems": "Items unfinished",
+    "scopeChanges": "Scope changes",
+    "completed": "Completed",
+    "completedEmpty": "No completed items.",
+    "unfinished": "Not completed",
+    "unfinishedEmpty": "No unfinished items.",
+    "action": {
+      "ADDED": "Added",
+      "REMOVED": "Removed"
+    },
+    "notes": "Demo notes",
+    "notesPlaceholder": "What was shown and what feedback did stakeholders give?",
+    "notesSaved": "Notes saved.",
+    "noNotes": "No demo notes yet."
   }
 }

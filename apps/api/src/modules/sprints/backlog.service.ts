@@ -101,6 +101,8 @@ export class BacklogService {
     const { workspaceId, actorId } = this.ctx;
     const db = this.tenant.db;
     await loadScrumSpace(db, spaceId, true);
+    // Sırası boş öğeler, aşağıda okunmadan önce sıralanmalı; yoksa mevcut sıra yanlışlıkla boş yazılır.
+    await this.ensureRanks(db, spaceId);
 
     const ids = [...new Set(input.itemIds)];
     const items = await db.workItem.findMany({

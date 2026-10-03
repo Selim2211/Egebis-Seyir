@@ -133,6 +133,11 @@ function StartDialog({
           {blocked && <Notice tone="error">{t('sprints.goalRequired')}</Notice>}
           {noGoal && !goalRequired && <Notice tone="warn">{t('sprints.goalMissingWarn')}</Notice>}
           {sprint.itemCount === 0 && <Notice tone="warn">{t('sprints.emptyWarn')}</Notice>}
+          {sprint.notReadyCount > 0 && (
+            <Notice tone="warn">
+              {t('sprints.notReadyWarn', { count: sprint.notReadyCount })}
+            </Notice>
+          )}
           {sprint.unestimatedCount > 0 && (
             <Notice tone="warn">
               {t('sprints.unestimatedWarn', { count: sprint.unestimatedCount })}
@@ -180,22 +185,21 @@ function CompleteDialog({
   const [target, setTarget] = useState<string>(plannedOthers[0]?.id ?? 'BACKLOG');
   const chosen = plannedOthers.some((s) => s.id === target) ? target : 'BACKLOG';
 
+  // mutateAsync: tamamlanan sprint listeden düşünce bu bileşen kaldırılır; bildirim yine de gösterilmeli.
   const submit = () =>
-    complete.mutate(
-      {
+    void complete
+      .mutateAsync({
         sprintId: sprint.id,
         body:
           chosen === 'BACKLOG'
             ? { unfinished: 'BACKLOG' }
             : { unfinished: 'NEXT_SPRINT', nextSprintId: chosen },
-      },
-      {
-        onSuccess: () => {
-          toast.success(t('sprints.completed', { name: sprint.name }));
-          onClose();
-        },
-      },
-    );
+      })
+      .then(() => {
+        toast.success(t('sprints.completed', { name: sprint.name }));
+        onClose();
+      })
+      .catch(() => undefined);
 
   return (
     <Dialog open={open} onOpenChange={(next) => !next && onClose()}>
@@ -297,16 +301,11 @@ function CancelDialog({
       confirmLabel={t('sprints.cancel')}
       pending={cancel.isPending}
       onConfirm={() =>
-        cancel.mutate(sprint.id, {
-          onSuccess: () => {
-            toast.success(t('sprints.cancelled', { name: sprint.name }));
-            onClose();
-          },
-          onError: (error) => {
-            toast.error(errorMessage(error));
-            onClose();
-          },
-        })
+        void cancel
+          .mutateAsync(sprint.id)
+          .then(() => toast.success(t('sprints.cancelled', { name: sprint.name })))
+          .catch((error: unknown) => toast.error(errorMessage(error)))
+          .finally(onClose)
       }
     />
   );

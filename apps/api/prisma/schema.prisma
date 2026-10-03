@@ -290,6 +290,11 @@ model Space {
   sprintLengthWeeks  Int             @default(2)
   /// Sprint başlatmak için hedef zorunlu mu (ADR-060); kapalıysa yalnızca uyarı.
   sprintGoalRequired Boolean         @default(true)
+  /// Definition of Done / Ready maddeleri (brief §6.3, ADR-065).
+  dodItems           String[]        @default([])
+  dorItems           String[]        @default([])
+  /// Açıkken eksik DoD ile Done'a geçilemez; kapalıyken yalnızca uyarı.
+  dodEnforced        Boolean         @default(false)
   estimationScale    EstimationScale @default(FIBONACCI)
   rank               String
   /// Okunabilir ID sayacı (ADR-044); öğe oluşturulurken atomik artırılır.
@@ -466,6 +471,9 @@ model WorkItem {
   sprint           Sprint?      @relation(fields: [sprintId], references: [id], onDelete: SetNull)
   /// Space genelinde öncelik sırası (ADR-062); boşsa ilk okumada atanır, migration'da COLLATE "C".
   backlogRank      String?
+  /// İşaretli DoD/DoR madde metinleri (Story/Bug); Space maddesi değişirse işaret kendiliğinden düşer.
+  dodChecked       String[]     @default([])
+  dorChecked       String[]     @default([])
   // Bug alanları
   severity         BugSeverity?
   stepsToReproduce String?
@@ -709,6 +717,8 @@ model Sprint {
   cancelledAt     DateTime?    @db.Timestamptz
   /// Tamamlanırken donmuş velocity: Done kategorisindeki puan toplamı (brief §6.1.7).
   completedPoints Float?
+  /// Sprint Review demo notları (ADR-065); tamamlanmış sprint'te de düzenlenebilir.
+  reviewNotes     String?
   createdById     String?      @db.Uuid
   createdAt       DateTime     @default(now()) @db.Timestamptz
   updatedAt       DateTime     @updatedAt @db.Timestamptz

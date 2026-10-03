@@ -76,6 +76,13 @@ export function HistoryPage({ spaceId }: { spaceId: string }) {
                     {sprint.goal && ` · ${sprint.goal}`}
                   </p>
                 </div>
+                <Link
+                  to="/spaces/$spaceId/review/$sprintId"
+                  params={{ spaceId, sprintId: sprint.id }}
+                  className="text-primary text-sm hover:underline"
+                >
+                  {t('review.link')}
+                </Link>
                 <span className="text-muted-foreground text-sm tabular-nums">
                   {sprint.status === 'COMPLETED'
                     ? t('history.completedPoints', {

@@ -32,6 +32,7 @@ import {
   CreateWorkItemRequestSchema,
   LabelsResponseSchema,
   MoveItemRequestSchema,
+  SetReadinessRequestSchema,
   SPACE_PERMISSIONS as S,
   UpdateLabelRequestSchema,
   UpdateWorkItemRequestSchema,
@@ -65,6 +66,7 @@ class CreatedItemDto extends createZodDto(CreatedItemSchema) {}
 class MoveItemDto extends createZodDto(MoveItemRequestSchema) {}
 class CopyItemDto extends createZodDto(CopyItemRequestSchema) {}
 class BulkUpdateDto extends createZodDto(BulkUpdateRequestSchema) {}
+class SetReadinessDto extends createZodDto(SetReadinessRequestSchema) {}
 class LabelsDto extends createZodDto(LabelsResponseSchema) {}
 class CreateLabelDto extends createZodDto(CreateLabelRequestSchema) {}
 class UpdateLabelDto extends createZodDto(UpdateLabelRequestSchema) {}
@@ -125,6 +127,22 @@ export class WorkItemsController {
   @ZodResponse({ type: CreatedItemDto, status: HttpStatus.CREATED })
   create(@Uuid('listId') listId: string, @Body() body: CreateWorkItemDto): Promise<CreatedItem> {
     return this.items.create(listId, body);
+  }
+
+  /** DoR işaretleri (Story/Bug). */
+  @Put('items/:itemId/dor')
+  @RequireSpacePermission(S.WORK_ITEM_WRITE)
+  @HttpCode(NO_CONTENT)
+  setDor(@Uuid('itemId') itemId: string, @Body() body: SetReadinessDto): Promise<void> {
+    return this.items.setReadiness(itemId, 'dor', body.checked);
+  }
+
+  /** DoD işaretleri (Story/Bug). */
+  @Put('items/:itemId/dod')
+  @RequireSpacePermission(S.WORK_ITEM_WRITE)
+  @HttpCode(NO_CONTENT)
+  setDod(@Uuid('itemId') itemId: string, @Body() body: SetReadinessDto): Promise<void> {
+    return this.items.setReadiness(itemId, 'dod', body.checked);
   }
 
   /** Bağlantı eklerken öğe arama; `items/:itemId`'den önce tanımlanmalı. */

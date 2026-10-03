@@ -11,6 +11,12 @@ export const SpaceKeySchema = z.string().trim().toUpperCase().regex(SPACE_KEY_PA
 
 export const ColorSchema = z.string().regex(/^#[0-9A-Fa-f]{6}$/);
 
+/** DoD/DoR maddeleri: en çok 20, her biri 1–200 karakter, tekrarsız. */
+export const ReadinessItemsSchema = z
+  .array(z.string().trim().min(1).max(200))
+  .max(20)
+  .refine((items) => new Set(items).size === items.length, { message: 'DUPLICATE_ITEMS' });
+
 const spaceFields = {
   name: ContainerNameSchema,
   key: SpaceKeySchema,
@@ -21,6 +27,9 @@ const spaceFields = {
   scrumEnabled: z.boolean(),
   sprintLengthWeeks: z.int().min(SPRINT_LENGTH_WEEKS.min).max(SPRINT_LENGTH_WEEKS.max),
   sprintGoalRequired: z.boolean(),
+  dodItems: ReadinessItemsSchema,
+  dorItems: ReadinessItemsSchema,
+  dodEnforced: z.boolean(),
   estimationScale: z.enum(ESTIMATION_SCALES),
 };
 
@@ -39,6 +48,9 @@ export const CreateSpaceRequestSchema = z.object({
   scrumEnabled: spaceFields.scrumEnabled.default(true),
   sprintLengthWeeks: spaceFields.sprintLengthWeeks.default(SPRINT_LENGTH_WEEKS.default),
   sprintGoalRequired: spaceFields.sprintGoalRequired.default(true),
+  dodItems: spaceFields.dodItems.default([]),
+  dorItems: spaceFields.dorItems.default([]),
+  dodEnforced: spaceFields.dodEnforced.default(false),
   estimationScale: spaceFields.estimationScale.default('FIBONACCI'),
   members: z.array(SpaceMemberInputSchema).max(500).default([]),
 });
@@ -76,6 +88,9 @@ export const SpaceDetailSchema = z.object({
   description: z.string().nullable(),
   sprintLengthWeeks: z.int(),
   sprintGoalRequired: z.boolean(),
+  dodItems: z.array(z.string()),
+  dorItems: z.array(z.string()),
+  dodEnforced: z.boolean(),
   estimationScale: z.enum(ESTIMATION_SCALES),
   archived: z.boolean(),
   myRole: z.enum(SPACE_ROLES).nullable(),

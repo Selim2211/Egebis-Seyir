@@ -23,6 +23,7 @@ import {
   useUpdateSpace,
 } from '@/features/spaces/queries';
 import { SpaceAvatar } from '@/features/spaces/space-avatar';
+import { ReadinessFields } from '@/features/spaces/readiness-fields';
 import { SpaceFields } from '@/features/spaces/space-form';
 import {
   type SpaceFormErrors,
@@ -109,6 +110,9 @@ function GeneralForm({ space }: { space: SpaceDetail }) {
     scrumEnabled: space.scrumEnabled,
     sprintLengthWeeks: space.sprintLengthWeeks,
     sprintGoalRequired: space.sprintGoalRequired,
+    dodItems: space.dodItems,
+    dorItems: space.dorItems,
+    dodEnforced: space.dodEnforced,
     estimationScale: space.estimationScale,
   };
   const [values, setValues] = useState(initial);
@@ -134,6 +138,12 @@ function GeneralForm({ space }: { space: SpaceDetail }) {
           errors={errors}
           onChange={(patch) => setValues((v) => ({ ...v, ...patch }))}
         />
+        {values.scrumEnabled && (
+          <ReadinessFields
+            values={values}
+            onChange={(patch) => setValues((v) => ({ ...v, ...patch }))}
+          />
+        )}
         {values.key !== space.key && !errors.key && (
           <p className="text-muted-foreground text-xs">{t('spaceSettings.keyChangeNote')}</p>
         )}

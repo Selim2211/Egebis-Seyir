@@ -77,6 +77,8 @@ export const SprintSummarySchema = z.object({
   doneItemCount: z.int(),
   donePoints: z.number(),
   unestimatedCount: z.int(),
+  /** Definition of Ready'ye uymayan Story/Bug sayısı (Space'te DoR maddesi varsa), ADR-065. */
+  notReadyCount: z.int(),
   /** Tamamlanırken donmuş velocity (Done puanı); tamamlanmamış sprint'te null. */
   completedPoints: z.number().nullable(),
 });
@@ -126,3 +128,32 @@ export const MoveBacklogItemsRequestSchema = z.object({
   afterId: z.uuid().nullable().optional(),
 });
 export type MoveBacklogItemsRequest = z.infer<typeof MoveBacklogItemsRequestSchema>;
+
+// ---------- Sprint Review (Faz 2.4, ADR-065) ----------
+
+export const SprintScopeChangeSchema = z.object({
+  action: z.enum(['ADDED', 'REMOVED']),
+  at: z.iso.datetime(),
+  points: z.number().nullable(),
+  item: z.object({ id: z.uuid(), key: z.string(), title: z.string() }),
+});
+export type SprintScopeChange = z.infer<typeof SprintScopeChangeSchema>;
+
+/** GET /api/workspaces/:wid/sprints/:sprintId/review */
+export const SprintReviewSchema = z.object({
+  sprint: SprintSummarySchema,
+  /** Done kategorisindeki öğeler. */
+  completed: z.array(WorkItemRowSchema),
+  /** Bitmeyenler; kapanmış sprint'te çıkış olaylarından, aktifte güncel durumdan. */
+  unfinished: z.array(WorkItemRowSchema),
+  /** Sprint başladıktan sonra eklenen/çıkarılan öğeler. */
+  scopeChanges: z.array(SprintScopeChangeSchema),
+  notes: z.string().nullable(),
+});
+export type SprintReview = z.infer<typeof SprintReviewSchema>;
+
+/** PUT /api/workspaces/:wid/sprints/:sprintId/review-notes */
+export const SetReviewNotesRequestSchema = z.object({
+  notes: z.string().trim().max(5000).nullable(),
+});
+export type SetReviewNotesRequest = z.infer<typeof SetReviewNotesRequestSchema>;

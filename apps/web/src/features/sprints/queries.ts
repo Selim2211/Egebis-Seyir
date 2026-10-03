@@ -2,6 +2,7 @@ import {
   BacklogResponseSchema,
   CreatedSchema,
   SprintDetailSchema,
+  SprintReviewSchema,
   SprintsResponseSchema,
   type BacklogResponse,
   type CompleteSprintRequest,
@@ -33,6 +34,12 @@ export const sprintQuery = (workspaceId: string, sprintId: string) =>
   queryOptions({
     queryKey: ['workspaces', workspaceId, 'sprints', sprintId],
     queryFn: () => apiRequest(`${ws(workspaceId)}/sprints/${sprintId}`, SprintDetailSchema),
+  });
+
+export const sprintReviewQuery = (workspaceId: string, sprintId: string) =>
+  queryOptions({
+    queryKey: ['workspaces', workspaceId, 'sprints', sprintId, 'review'],
+    queryFn: () => apiRequest(`${ws(workspaceId)}/sprints/${sprintId}/review`, SprintReviewSchema),
   });
 
 /** Workspace kapsamlı değişiklik; bitince workspace'e ait tüm sorgular tazelenir. */
@@ -117,4 +124,12 @@ export const useCompleteSprint = () =>
 export const useCancelSprint = () =>
   useWorkspaceMutation((id, sprintId: string) =>
     apiRequest(`${ws(id)}/sprints/${sprintId}/cancel`, NoContent, { method: 'POST' }),
+  );
+
+export const useSetReviewNotes = () =>
+  useWorkspaceMutation((id, input: { sprintId: string; notes: string | null }) =>
+    apiRequest(`${ws(id)}/sprints/${input.sprintId}/review-notes`, NoContent, {
+      method: 'PUT',
+      body: { notes: input.notes },
+    }),
   );

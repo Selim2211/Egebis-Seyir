@@ -505,3 +505,14 @@
   - **Planlama sayfası:** solda Backlog, sağda seçili (planlı/aktif) sprint; öğeler iki bölme arasında sürüklenir, aynı hareketle konum belirlenir. Kapasite göstergesi, toplam puanın tamamlanmış son 3 sprint'in ortalama velocity'sine oranıdır (%90 ve üstü sarı, üstü kırmızı); referans yoksa gösterge yoktur. Kapasite notu serbest metin olarak yanında görünür.
   - **Gezinme:** Backlog · Planlama · Sprint panosu · Geçmiş sekmeleri. Geçmiş sayfası tüm sprint'leri listeler; kapanan sprint'in panosu salt-okunur açılır.
 - **Alternatifler:** Tamamlarken bitmeyenleri sormadan devretmek (brief "seçenek sunulur" der); velocity'yi her seferinde Done öğelerden yeniden hesaplamak (geçmiş sprint değişebilir); planlamada sürüklemeyi yalnızca tutamaçla sınırlamak (kullanıcı satırın her yerini bekler).
+
+## ADR-065 — DoD, DoR ve Sprint Review
+
+- **Tarih:** 2026-10-03 · **Durum:** Kabul (brief §5.6, §6.3; DoD zorunluluğu kullanıcı kararı ADR-060; ayrıntılar geliştirici varsayılanı)
+- **Karar:**
+  - **Maddeler Space'e aittir:** `dodItems` ve `dorItems` düz metin listeleri (en çok 20 madde, her biri 1–200 karakter, tekrarsız). Space ayarlarında (`space.settings`: Product Owner, Scrum Master) satır satır düzenlenir. Yalnızca Scrum açık Space'lerde görünür.
+  - **İşaretler öğeye aittir:** `dodChecked` / `dorChecked` işaretli madde **metinlerini** tutar. Space'te artık olmayan veya yeniden yazılmış madde otomatik olarak işaretsiz sayılır (eski işaret yeni anlamı taşımaz). Yalnızca **Story ve Bug** için geçerlidir; Task/Sub-task/Epic'te bölüm görünmez ve işaret konamaz (422). İşaretleme `workItem.write` ister.
+  - **DoD ve Done:** Story/Bug Done'a geçerken eksik DoD maddesi varsa varsayılan **uyarıdır** (409 `DOD_INCOMPLETE`, `force` ile geçilir; arayüzde onay penceresi). Space ayarı `dodEnforced` açıksa **engeldir** (409 `DOD_ENFORCED`, `force` geçmez).
+  - **DoR ve planlama:** Backlog/sprint satırlarında eksik DoR "DoR 1/3" rozetiyle işaretlenir; sprint başlatma penceresi hazır olmayan öğe sayısını uyarır. Engel değil, işarettir (brief §6.3 "işaretlenir").
+  - **Sprint Review** (`GET sprints/:id/review`): tamamlananlar, tamamlanmayanlar (kapanmış sprint'te çıkış olaylarından, açıkta güncel durumdan), sprint başladıktan sonra eklenen/çıkarılan öğeler (kapsam değişiklikleri) ve **demo notları** (en çok 5000 karakter). Notlar `sprint.complete` yetkisiyle, **tamamlanmış sprint'te de** yazılabilir; öğe kümesi kilitli kalır, not bir ek açıklamadır (değişiklik aktiviteye düşer). Açık sprint için de önizleme gösterilir.
+- **Alternatifler:** DoD'yi öğe başına kopyalanan checklist yapmak (Space maddesi değişince eski öğeler eskir, toplu güncelleme gerekir); işaretleri madde dizinleriyle tutmak (madde araya eklenince kayar); DoR'u sprint'e almada engel yapmak (brief yalnızca işaretlemeyi ister).

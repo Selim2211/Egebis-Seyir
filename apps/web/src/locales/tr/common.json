@@ -317,7 +317,10 @@
     "SPRINT_GOAL_REQUIRED": "Sprint'i başlatmak için sprint hedefi gerekli.",
     "SPRINT_NOT_ACTIVE": "Yalnızca aktif sprint tamamlanabilir.",
     "SPRINT_CANCEL_NOT_ALLOWED": "Tamamlanmış veya iptal edilmiş sprint iptal edilemez.",
-    "SPRINT_NEXT_INVALID": "Devredilecek sprint planlı ve aynı Space'te olmalı."
+    "SPRINT_NEXT_INVALID": "Devredilecek sprint planlı ve aynı Space'te olmalı.",
+    "DOD_INCOMPLETE": "Definition of Done maddeleri tamamlanmamış.",
+    "DOD_ENFORCED": "Bu Space'te Definition of Done zorunlu; tüm maddeleri işaretlemeden Done'a geçilemez.",
+    "READINESS_NOT_APPLICABLE": "Definition of Ready/Done yalnızca Story ve Bug için geçerli."
   },
   "spaceRoles": {
     "PRODUCT_OWNER": "Product Owner",
@@ -502,7 +505,9 @@
     "blockedTitle": "Bu öğe engelleniyor",
     "blockedBody": "Henüz bitmemiş engelleyen öğe(ler): {{keys}}. Yine de başlansın mı?",
     "startAnyway": "Yine de başla",
-    "childTitle": "Alt öğe başlığı"
+    "childTitle": "Alt öğe başlığı",
+    "dodTitle": "Definition of Done eksik",
+    "dodBody": "{{count}} DoD maddesi tamamlanmamış. Yine de Done yapılsın mı?"
   },
   "detail": {
     "properties": "Özellikler",
@@ -770,7 +775,9 @@
       "listId": "Liste",
       "spaceId": "Space",
       "bulk": "Toplu",
-      "sprintId": "Sprint"
+      "sprintId": "Sprint",
+      "dodChecked": "DoD maddeleri",
+      "dorChecked": "DoR maddeleri"
     }
   },
   "backlog": {
@@ -857,7 +864,8 @@
     "scopeChangeTitle": "Sprint kapsamı değişiyor",
     "scopeChangeAdd": "{{name}} aktif; {{count}} öğe eklemek kapsam değişikliği sayılır ve raporlarda görünür.",
     "scopeChangeRemove": "{{name}} aktif; {{count}} öğeyi çıkarmak kapsam değişikliği sayılır ve raporlarda görünür.",
-    "scopeChangeConfirm": "Devam et"
+    "scopeChangeConfirm": "Devam et",
+    "notReadyWarn": "{{count}} öğe Definition of Ready'ye uymuyor."
   },
   "board": {
     "title": "Sprint panosu",
@@ -901,5 +909,43 @@
     "average": "Son sprint'lerin ortalama velocity'si: {{velocity}} puan.",
     "completedPoints": "{{points}} puan tamamlandı",
     "progress": "{{done}} / {{total}} öğe bitti"
+  },
+  "readiness": {
+    "dor": "Definition of Ready",
+    "dod": "Definition of Done",
+    "complete": "Tamamlandı",
+    "enforced": "Done için zorunlu",
+    "notReady": "Definition of Ready tamamlanmamış",
+    "dorBadge": "DoR {{checked}}/{{total}}",
+    "dorSetting": "Definition of Ready maddeleri",
+    "dodSetting": "Definition of Done maddeleri",
+    "dorPlaceholder": "Kabul kriteri yazıldı\nTahmin yapıldı\nBağımlılık çözüldü",
+    "dodPlaceholder": "Kod gözden geçirildi\nTestler geçti\nDokümantasyon güncellendi",
+    "help": "Her satır bir madde, en çok {{max}}. Maddeyi değiştirirsen işaretleri sıfırlanır.",
+    "dodEnforced": "Done için zorunlu",
+    "dodEnforcedHelp": "Açıkken DoD maddeleri tamamlanmadan Story/Bug Done'a geçemez; kapalıyken yalnızca uyarı çıkar."
+  },
+  "review": {
+    "title": "{{name}} · Review",
+    "link": "Review",
+    "openBoard": "Panoyu aç",
+    "completedOn": "{{date}} tarihinde tamamlandı",
+    "preview": "Sprint hâlâ açık; bu özet o ana kadarki durumu gösteriyor.",
+    "points": "Tamamlanan puan",
+    "doneItems": "Biten öğe",
+    "unfinishedItems": "Bitmeyen öğe",
+    "scopeChanges": "Kapsam değişiklikleri",
+    "completed": "Tamamlananlar",
+    "completedEmpty": "Tamamlanan öğe yok.",
+    "unfinished": "Tamamlanmayanlar",
+    "unfinishedEmpty": "Tamamlanmayan öğe yok.",
+    "action": {
+      "ADDED": "Eklendi",
+      "REMOVED": "Çıkarıldı"
+    },
+    "notes": "Demo notları",
+    "notesPlaceholder": "Neler gösterildi, paydaşlardan hangi geri bildirimler geldi?",
+    "notesSaved": "Notlar kaydedildi.",
+    "noNotes": "Henüz demo notu yok."
   }
 }

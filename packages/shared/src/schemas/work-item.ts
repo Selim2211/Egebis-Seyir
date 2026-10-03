@@ -202,7 +202,24 @@ export const LinkSchema = z.object({
 export type ItemLink = z.infer<typeof LinkSchema>;
 
 /** GET /api/workspaces/:wid/items/:itemId ve /items/key/:key */
+const ReadinessEntrySchema = z.object({ text: z.string(), checked: z.boolean() });
+
+/** DoD/DoR maddeleri ve işaret durumu (Story/Bug); diğer tiplerde boş listeler (ADR-065). */
+export const ReadinessSchema = z.object({
+  dor: z.array(ReadinessEntrySchema),
+  dod: z.array(ReadinessEntrySchema),
+  dodEnforced: z.boolean(),
+});
+export type ItemReadiness = z.infer<typeof ReadinessSchema>;
+
+/** PUT /api/workspaces/:wid/items/:itemId/dor | dod — işaretli madde metinlerinin tamamı. */
+export const SetReadinessRequestSchema = z.object({
+  checked: z.array(z.string().max(200)).max(20),
+});
+export type SetReadinessRequest = z.infer<typeof SetReadinessRequestSchema>;
+
 export const WorkItemDetailSchema = WorkItemSummarySchema.extend({
+  readiness: ReadinessSchema,
   spaceId: z.uuid(),
   reporter: AssigneeSchema.nullable(),
   description: RichTextSchema.nullable(),
@@ -353,7 +370,11 @@ const rowContext = {
 };
 
 /** Birden çok List'ten gelen öğe satırı: özet + bulunduğu yer ve durum bilgisi. */
-export const WorkItemRowSchema = WorkItemSummarySchema.extend(rowContext);
+export const WorkItemRowSchema = WorkItemSummarySchema.extend({
+  ...rowContext,
+  /** Definition of Ready durumu (Story/Bug ve Space'te DoR maddesi varsa), aksi halde null (ADR-065). */
+  dor: z.object({ checked: z.int(), total: z.int() }).nullable(),
+});
 export type WorkItemRow = z.infer<typeof WorkItemRowSchema>;
 
 export const MY_WORK_SCOPES = ['assigned', 'created', 'watching'] as const;

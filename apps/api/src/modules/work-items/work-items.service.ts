@@ -3,7 +3,11 @@ import {
   checkEstimate,
   checkParent,
   checkTypeFields,
+  appliesToReadiness,
   checkTypeInSpace,
+  normalizeChecked,
+  readinessOf,
+  type ItemReadiness,
   ERROR_CODES,
   epicProgress,
   isRichTextEmpty,
@@ -121,7 +125,7 @@ export class WorkItemsService {
       include: {
         ...summaryInclude,
         reporter: { select: { id: true, name: true, avatarVersion: true } },
-        space: { select: { id: true } },
+        space: { select: { id: true, dodItems: true, dorItems: true, dodEnforced: true } },
         labels: {
           select: { labelId: true, label: { select: { id: true, name: true, color: true } } },
         },
@@ -166,8 +170,18 @@ export class WorkItemsService {
         Number(b.kind === 'ACCEPTANCE') - Number(a.kind === 'ACCEPTANCE') || compareRank(a, b),
     );
 
+    const applies = appliesToReadiness(row.type);
+    const entries = (items: string[], checked: string[]) =>
+      applies ? items.map((text) => ({ text, checked: checked.includes(text) })) : [];
+    const readiness: ItemReadiness = {
+      dor: entries(row.space.dorItems, row.dorChecked),
+      dod: entries(row.space.dodItems, row.dodChecked),
+      dodEnforced: row.space.dodEnforced,
+    };
+
     return {
       ...toSummary(row),
+      readiness,
       spaceId: row.spaceId,
       reporter: row.reporter,
       description: (row.description as WorkItemDetail['description']) ?? null,
@@ -352,7 +366,14 @@ export class WorkItemsService {
         status: { select: { category: true } },
         assignees: { select: { userId: true } },
         labels: { select: { labelId: true } },
-        space: { select: { scrumEnabled: true, estimationScale: true } },
+        space: {
+          select: {
+            scrumEnabled: true,
+            estimationScale: true,
+            dodItems: true,
+            dodEnforced: true,
+          },
+        },
       },
     });
     if (!item) throw notFound();
@@ -391,6 +412,7 @@ export class WorkItemsService {
       if (!next) throw notFound();
       const from = item.status.category;
       const to = next.category;
+      if (to === 'DONE' && from !== 'DONE') this.assertDefinitionOfDone(item, force === true);
       if (to === 'DONE' && from !== 'DONE' && !force) await this.assertNoOpenChildren(item.id);
       if (to === 'ACTIVE' && from === 'NOT_STARTED' && !force) await this.assertNotBlocked(item.id);
       completedAt = nextCompletedAt(from, to, item.completedAt, new Date());
@@ -580,6 +602,63 @@ export class WorkItemsService {
         keys: blockers.map((b) => formatItemKey(b.from.keyPrefix, b.from.number)),
       });
     }
+  }
+
+  /**
+   * Done'a çekilirken eksik DoD maddesi varsa: Space ayarı açıksa engel, kapalıysa `force` ile
+   * geçilebilen uyarı (brief §6.3, ADR-065). Yalnızca Story/Bug için geçerli.
+   */
+  private assertDefinitionOfDone(
+    item: {
+      type: WorkItemType;
+      dodChecked: string[];
+      space: { dodItems: string[]; dodEnforced: boolean };
+    },
+    force: boolean,
+  ): void {
+    if (!appliesToReadiness(item.type) || item.space.dodItems.length === 0) return;
+    const { missing } = readinessOf(item.space.dodItems, item.dodChecked);
+    if (missing.length === 0) return;
+    if (item.space.dodEnforced) {
+      throw fail(ERROR_CODES.DOD_ENFORCED, HttpStatus.CONFLICT, { count: missing.length });
+    }
+    if (!force)
+      throw fail(ERROR_CODES.DOD_INCOMPLETE, HttpStatus.CONFLICT, { count: missing.length });
+  }
+
+  /** DoD/DoR işaretlerini yazar (ADR-065): yalnızca Space maddeleri geçerli, kalan atılır. */
+  async setReadiness(itemId: string, kind: 'dor' | 'dod', checked: string[]): Promise<void> {
+    const { workspaceId, actorId } = this.ctx;
+    const db = this.tenant.db;
+    const item = await db.workItem.findFirst({
+      where: { id: itemId, deletedAt: null, list: { deletedAt: null }, space: { deletedAt: null } },
+      include: { space: { select: { dodItems: true, dorItems: true } } },
+    });
+    if (!item) throw notFound();
+    if (!appliesToReadiness(item.type)) throw fail(ERROR_CODES.READINESS_NOT_APPLICABLE);
+
+    const items = kind === 'dod' ? item.space.dodItems : item.space.dorItems;
+    const current = kind === 'dod' ? item.dodChecked : item.dorChecked;
+    const next = normalizeChecked(items, checked);
+    const before = readinessOf(items, current).checked;
+    if (JSON.stringify(normalizeChecked(items, current)) === JSON.stringify(next)) return;
+
+    await db.$transaction(async (tx) => {
+      await tx.workItem.update({
+        where: { id: itemId },
+        data: kind === 'dod' ? { dodChecked: next } : { dorChecked: next },
+      });
+      await this.activity.record(tx, {
+        workspaceId,
+        actorId,
+        entityType: 'item',
+        entityId: itemId,
+        action: 'item.updated',
+        changes: asJson({
+          [kind === 'dod' ? 'dodChecked' : 'dorChecked']: { from: before, to: next.length },
+        }),
+      });
+    });
   }
 
   /** Done'a çekilirken açık alt öğe varsa uyarı (ADR-046). */

@@ -1,7 +1,9 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
 import {
+  appliesToReadiness,
   type ErrorCode,
   formatItemKey,
+  readinessOf,
   type WorkItemRow,
   type WorkItemSummary,
 } from '@scrum/shared';
@@ -102,7 +104,9 @@ export type TenantTx = Pick<
 /** Birden çok List'ten gelen satırlar için ek ilişkiler (benim işlerim, arama). */
 export const rowInclude = {
   ...summaryInclude,
-  space: { select: { id: true, name: true, key: true, color: true, icon: true } },
+  space: {
+    select: { id: true, name: true, key: true, color: true, icon: true, dorItems: true },
+  },
   list: { select: { id: true, name: true } },
   status: { select: { id: true, name: true, color: true, category: true } },
 } satisfies Prisma.WorkItemInclude;
@@ -110,5 +114,16 @@ export const rowInclude = {
 export type RowRow = Prisma.WorkItemGetPayload<{ include: typeof rowInclude }>;
 
 export function toRow(row: RowRow): WorkItemRow {
-  return { ...toSummary(row), space: row.space, list: row.list, status: row.status };
+  const { dorItems, ...space } = row.space;
+  const ready =
+    appliesToReadiness(row.type) && dorItems.length > 0
+      ? readinessOf(dorItems, row.dorChecked)
+      : null;
+  return {
+    ...toSummary(row),
+    space,
+    list: row.list,
+    status: row.status,
+    dor: ready ? { checked: ready.checked, total: ready.total } : null,
+  };
 }

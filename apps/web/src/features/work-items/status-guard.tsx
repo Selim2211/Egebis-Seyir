@@ -8,7 +8,7 @@ import { useErrorMessage } from '@/lib/use-error-message';
 interface Pending {
   itemId: string;
   statusId: string;
-  reason: 'children' | 'blocked';
+  reason: 'children' | 'blocked' | 'dod';
   /** Açık alt öğe sayısı veya engelleyen kimlikleri. */
   detail: number | string[];
 }
@@ -44,6 +44,8 @@ export function useStatusGuard(
           : undefined;
         if (isApiError(error, 'WORK_ITEM_OPEN_CHILDREN')) {
           setPending({ itemId, statusId, reason: 'children', detail: Number(details?.count ?? 0) });
+        } else if (isApiError(error, 'DOD_INCOMPLETE')) {
+          setPending({ itemId, statusId, reason: 'dod', detail: Number(details?.count ?? 0) });
         } else if (isApiError(error, 'WORK_ITEM_BLOCKED')) {
           setPending({
             itemId,
@@ -61,11 +63,19 @@ export function useStatusGuard(
     <ConfirmDialog
       open={pending !== null}
       onOpenChange={(open) => !open && setPending(null)}
-      title={t(pending?.reason === 'blocked' ? 'items.blockedTitle' : 'items.openChildrenTitle')}
+      title={t(
+        pending?.reason === 'blocked'
+          ? 'items.blockedTitle'
+          : pending?.reason === 'dod'
+            ? 'items.dodTitle'
+            : 'items.openChildrenTitle',
+      )}
       description={
         pending?.reason === 'blocked'
           ? t('items.blockedBody', { keys: (pending.detail as string[]).join(', ') })
-          : t('items.openChildrenBody', { count: Number(pending?.detail ?? 0) })
+          : pending?.reason === 'dod'
+            ? t('items.dodBody', { count: Number(pending.detail) })
+            : t('items.openChildrenBody', { count: Number(pending?.detail ?? 0) })
       }
       confirmLabel={t(pending?.reason === 'blocked' ? 'items.startAnyway' : 'items.completeAnyway')}
       pending={pendingNow}

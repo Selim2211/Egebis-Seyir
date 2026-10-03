@@ -374,3 +374,12 @@ export const recentActivityQuery = (workspaceId: string) =>
     queryKey: ['workspaces', workspaceId, 'activity'],
     queryFn: () => apiRequest(`${ws(workspaceId)}/activity?limit=15`, ActivityResponseSchema),
   });
+
+/** DoD/DoR işaretleri (ADR-065): işaretli madde metinlerinin tamamı gönderilir. */
+export const useSetReadiness = () =>
+  useWorkspaceMutation((id, input: { itemId: string; kind: 'dor' | 'dod'; checked: string[] }) =>
+    apiRequest(`${ws(id)}/items/${input.itemId}/${input.kind}`, NoContent, {
+      method: 'PUT',
+      body: { checked: input.checked },
+    }),
+  );

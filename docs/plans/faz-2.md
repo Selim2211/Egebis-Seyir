@@ -9,7 +9,7 @@
 | 2.1 | Sprint modeli + Product Backlog | Sprint CRUD (planlı), sprint↔öğe atama ve geçmiş, `backlogRank`, Backlog sayfası (sürükle-sırala, Epic filtresi, tahminsiz vurgu, sprint'e taşı)          | Sırada     |
 | 2.2 | Board                           | Durum sütunları, kart sürükle-bırak ile durum değişimi, swimlane (atanan/epic/öncelik), aktif sprint ve List kaynakları                                   | Tamamlandı |
 | 2.3 | Sprint yaşam döngüsü + Planning | Başlat/tamamla/iptal kuralları, Planning ekranı (Backlog ↔ Sprint, puan/kapasite), scope change uyarısı, devir akışı, geçmiş sprintler, Sprint Goal ayarı | Tamamlandı |
-| 2.4 | DoD/DoR + Sprint Review         | Space DoD/DoR maddeleri, Done'da DoD checklist, sprint'e alırken DoR işareti, Sprint Review özeti                                                         | Bekliyor   |
+| 2.4 | DoD/DoR + Sprint Review         | Space DoD/DoR maddeleri, Done'da DoD checklist, sprint'e alırken DoR işareti, Sprint Review özeti                                                         | Tamamlandı |
 | 2.5 | Bildirimler                     | Bildirim merkezi, atama/mention/durum/yorum/sprint olayları, anında e-posta, tür bazında tercih                                                           | Bekliyor   |
 | 2.6 | Burndown ve Velocity            | Günlük snapshot işi, Sprint Burndown, Velocity grafiği, rapor ekranı                                                                                      | Bekliyor   |
 
@@ -48,3 +48,15 @@ Karar: ADR-064 (ve kullanıcı kararı ADR-060).
 **Web**: `SprintActions` (başlat/tamamla/iptal pencereleri; Backlog, Planlama ve Sprint panosunda), Planlama sayfası (`/spaces/$spaceId/planning`, iki bölme + kapasite göstergesi), Geçmiş sayfası (`/spaces/$spaceId/sprints`), `ScrumTabs`, Space ayarlarında "Sprint hedefi zorunlu" anahtarı, kapanan sprint için salt-okunur pano, kapsam değişikliği onayı.
 
 **Doğrulama (2026-10-03):** test:int 12 dosya / 137 test (`sprint-lifecycle` 13); shared 134, web birim 59; Playwright `faz2-lifecycle` 7/7 (başlat → kapsam değişikliği → tamamla/devret → geçmiş → planlamada gerçek fare sürüklemesi → iptal → hedef zorunluluğu ve ayarı); tüm paket 39 yeşil, yalnızca Mailpit gerektiren `faz1-auth` bekliyor. Not: bu çalışma sırasında Space formunda ayar anahtarının eklenmediği (sessiz kalmış bir metin değişimi) lint ile yakalandı ve düzeltildi.
+
+## 2.4 Ayrıntı
+
+Karar: ADR-065 (DoD zorunluluğu için ADR-060).
+
+**API** (`/api/workspaces/:wid`): `PUT items/:id/dor | dod` `{ checked: string[] }`; `GET sprints/:id/review`; `PUT sprints/:id/review-notes`. Space alanları `dodItems`, `dorItems`, `dodEnforced` (PATCH `spaces/:id`). Öğe detayında `readiness`, satırlarda `dor`, sprint özetinde `notReadyCount`. Yeni hata kodları `DOD_INCOMPLETE`, `DOD_ENFORCED`, `READINESS_NOT_APPLICABLE`. Veri: `spaces.dodItems/dorItems/dodEnforced`, `work_items.dodChecked/dorChecked`, `sprints.reviewNotes`.
+
+**Web**: Space ayarlarında DoR/DoD madde düzenleyici ve zorunluluk anahtarı; öğe detayında DoR/DoD bölümü (işaretler anında yansır); Done geçişinde DoD onay penceresi; Backlog satırlarında DoR rozeti; sprint başlatma uyarısı; Review sayfası (`/spaces/$spaceId/review/$sprintId`, Geçmiş ve Pano'dan bağlantı).
+
+**Düzeltilen hatalar (bu adımda bulundu):** (1) `backlog/move` sırası boş öğeleri okuduktan sonra sıralıyordu; ilk taşımada öncelik sırası boş yazılıp bozuluyordu, okumadan önce sıralanıyor. (2) Sprint tamamlama/iptal bildirimi, sprint listeden düştüğü için bileşen kaldırılınca hiç gösterilmiyordu (`mutateAsync` ile düzeltildi).
+
+**Doğrulama (2026-10-03):** test:int 13 dosya / 151 test (`readiness-review` 15); shared 138; Playwright `faz2-readiness` 5/5; tüm paket 45 senaryo yeşil, yalnızca Mailpit gerektiren `faz1-auth` bekliyor.

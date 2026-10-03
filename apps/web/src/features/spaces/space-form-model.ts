@@ -1,5 +1,6 @@
 import {
   type EstimationScale,
+  MAX_READINESS_ITEMS,
   SPACE_COLORS,
   type SpaceIcon,
   SPRINT_LENGTH_WEEKS,
@@ -17,6 +18,9 @@ export interface SpaceFormValues {
   scrumEnabled: boolean;
   sprintLengthWeeks: number;
   sprintGoalRequired: boolean;
+  dodItems: string[];
+  dorItems: string[];
+  dodEnforced: boolean;
   estimationScale: EstimationScale;
 }
 
@@ -30,6 +34,9 @@ export const EMPTY_SPACE: SpaceFormValues = {
   scrumEnabled: true,
   sprintLengthWeeks: SPRINT_LENGTH_WEEKS.default,
   sprintGoalRequired: true,
+  dodItems: [],
+  dorItems: [],
+  dodEnforced: false,
   estimationScale: 'FIBONACCI',
 };
 
@@ -57,4 +64,18 @@ export function toSpaceBody(values: SpaceFormValues) {
     key: values.key.trim().toUpperCase(),
     description: values.description.trim() || null,
   };
+}
+
+/** Satırlardan madde listesi: boşlar atılır, tekrarlar teke iner (ilk görülen kalır), en çok 20. */
+export function parseItems(text: string): string[] {
+  const seen = new Set<string>();
+  const items: string[] = [];
+  for (const line of text.split('\n')) {
+    const item = line.trim();
+    if (item && !seen.has(item)) {
+      seen.add(item);
+      items.push(item);
+    }
+  }
+  return items.slice(0, MAX_READINESS_ITEMS);
 }

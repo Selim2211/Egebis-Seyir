@@ -34,6 +34,7 @@ import { cn } from '@/lib/utils';
 import { itemByKeyQuery, useCopyItem, useItemLifecycle, useWatchItem } from '../queries';
 import { Attachments } from './attachments';
 import { Checklists } from './checklists';
+import { ReadinessSection } from './readiness-section';
 import { DetailTabs } from './detail-tabs';
 import { ItemOpenLink } from './item-nav';
 import { Links } from './links';
@@ -286,6 +287,7 @@ function Content({
               onSave={(description) => save({ description })}
             />
           </section>
+          <ReadinessSection itemId={item.id} readiness={item.readiness} canWrite={canWrite} />
           <Checklists itemId={item.id} checklists={item.checklists} canWrite={canWrite} />
           <SubItems item={item} space={space} canWrite={canWrite} />
           <Links item={item} canWrite={canWrite} />

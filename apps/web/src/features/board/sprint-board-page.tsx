@@ -139,6 +139,14 @@ export function SprintBoardPage({
             </span>
             <SwimlanePicker value={lane} onChange={(next) => onSearch({ lane: next })} />
             <span className="ml-auto flex items-center gap-1">
+              <Button asChild size="sm" variant="ghost">
+                <Link
+                  to="/spaces/$spaceId/review/$sprintId"
+                  params={{ spaceId, sprintId: selected.id }}
+                >
+                  {t('review.link')}
+                </Link>
+              </Button>
               <SprintActions
                 sprint={selected}
                 permissions={space.data.permissions}
