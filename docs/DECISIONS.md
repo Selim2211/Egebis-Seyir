@@ -606,3 +606,10 @@
 - **Tarih:** 2026-10-03 · **Durum:** Kabul (kullanıcı kararı)
 - **Karar:** ADR-034'teki ilk kurulum anahtarı (`SETUP_TOKEN` / açılış logu) kaldırıldı. `/setup` yalnızca hiç kullanıcı yokken açıktır; ilk kullanıcı oluşunca kapanır (aynı anda iki kurulum advisory lock ile engellenir).
 - **Gerekçe:** Yerel geliştirme ve deneme sürtünmesi. **Bilinen risk:** sunucu, kurulumdan önce ağa açılırsa ilk erişen kişi yönetici olur. Canlıya çıkarken kurulumu sunucu açılır açılmaz kendiniz yapın ya da bu korumayı geri alın (Faz 6 dağıtım adımında yeniden değerlendirilecek).
+
+## ADR-074 — Takvim görünümü
+
+- **Tarih:** 2026-10-03 · **Durum:** Kabul (brief §5.8; ayrıntılar geliştirici varsayılanı, onay bekliyor)
+- **Karar:** List sayfasına List/Table/Board'un yanında **Takvim** görünümü. Aylık ızgara, hafta Pazartesi başlar. Öğe başlangıç–bitiş günlerinin hepsinde görünür; yalnızca bir tarihi varsa o günde. Bir güne sürüklemek (fare/dokunma, 6 px eşik) öğenin tarihlerini **süreyi koruyarak** aynı gün sayısı kadar kaydırır; yalnızca bitiş tarihi varsa onu taşır. Yetki: tarih değişimi `workItem.write` (görev zaten yazma yetkisiyle düzenlenir; yalnızca-kendi-durumu yetkisi tarih taşıyamaz). Hesap saf ve birim testli (`calendarWeeks`, `daysCovered`, `moveItemDates`). Tarihsiz öğeler ızgaranın altında listelenir; bir hücrede 3'ten fazla öğe "+N daha" olur.
+- **Alternatifler:** Hafta/gün görünümü ve çok List'li Space takvimi (sonra; Workload ve Dashboard ile birlikte); tarih seçici penceresi (sürükleme tek adımda aynı işi yapar, detay sayfasından zaten düzenlenir).
+- **Bilinen sınırlar:** klavye ile sürükleme yok (tarih detay panelinden değiştirilir); aydan aya sürükleme için önce hedef ay açılmalıdır; saat dilimi dönüşümü yok (tarihler gün bazlıdır).

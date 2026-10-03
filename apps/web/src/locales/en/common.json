@@ -429,7 +429,8 @@
     "view": {
       "list": "List",
       "table": "Table",
-      "board": "Board"
+      "board": "Board",
+      "calendar": "Calendar"
     },
     "emptyTitle": "No work items in this list yet",
     "emptyBody": "Creating Epics, Stories, Tasks, Sub-tasks and Bugs comes in the next step (1.3).",
@@ -1119,5 +1120,13 @@
     "barLabel": "{{key}} {{title}}, {{progress}}% done",
     "unscheduled": "Unscheduled Epics",
     "unscheduledHint": "They appear on the timeline once they get a start or due date."
+  },
+  "calendar": {
+    "prev": "Previous month",
+    "next": "Next month",
+    "today": "Today",
+    "hint": "Drag an item to another day to change its dates.",
+    "more": "+{{count}} more",
+    "unscheduled": "Unscheduled items ({{count}})"
   }
 }

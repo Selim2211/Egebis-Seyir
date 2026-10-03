@@ -16,3 +16,4 @@ export * from './notifications';
 export * from './reports';
 export * from './docs';
 export * from './timeline';
+export * from './calendar';

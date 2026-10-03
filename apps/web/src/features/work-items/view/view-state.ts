@@ -10,7 +10,7 @@ import { z } from 'zod';
 import { SWIMLANES } from '@/features/board/board-model';
 
 /** Görünüm durumu adreste tutulur (ADR-052); şema router'ın `validateSearch`'ünde kullanılır. */
-export const VIEW_KINDS = ['list', 'table', 'board'] as const;
+export const VIEW_KINDS = ['list', 'table', 'board', 'calendar'] as const;
 export const SORT_KEYS = [
   'manual',
   'title',

@@ -429,7 +429,8 @@
     "view": {
       "list": "List",
       "table": "Table",
-      "board": "Board"
+      "board": "Board",
+      "calendar": "Takvim"
     },
     "emptyTitle": "Bu listede henüz iş öğesi yok",
     "emptyBody": "Epic, Story, Task, Sub-task ve Bug oluşturma bir sonraki adımda (1.3) gelecek.",
@@ -1119,5 +1120,13 @@
     "barLabel": "{{key}} {{title}}, %{{progress}} tamamlandı",
     "unscheduled": "Tarihsiz Epic’ler",
     "unscheduledHint": "Başlangıç veya bitiş tarihi verilince zaman çizelgesinde görünür."
+  },
+  "calendar": {
+    "prev": "Önceki ay",
+    "next": "Sonraki ay",
+    "today": "Bugün",
+    "hint": "Bir öğeyi başka güne sürükleyerek tarihini değiştir.",
+    "more": "+{{count}} daha",
+    "unscheduled": "Tarihsiz öğeler ({{count}})"
   }
 }
