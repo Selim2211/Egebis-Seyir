@@ -992,5 +992,31 @@
       "SPRINT_STARTED": "When a sprint starts in a Space you belong to.",
       "SPRINT_COMPLETED": "When a sprint is completed in a Space you belong to."
     }
+  },
+  "reports": {
+    "title": "Reports",
+    "burndown": {
+      "title": "Sprint Burndown",
+      "sprint": "Select sprint",
+      "noSprint": "Burndown needs a sprint that has been started.",
+      "baseline": "Starting points",
+      "remaining": "Remaining points",
+      "scope": "Scope change",
+      "ideal": "Ideal",
+      "actual": "Remaining",
+      "chartLabel": "{{name}} sprint burndown chart",
+      "planned": "Burndown appears once the sprint starts.",
+      "scopeHint": "Red lines show points added (+) or removed (−) after the sprint started."
+    },
+    "velocity": {
+      "title": "Velocity",
+      "empty": "No completed sprints yet; velocity appears after the first sprint closes.",
+      "average": "Average of the last 3 sprints: {{velocity}} points.",
+      "committed": "Committed",
+      "completed": "Completed",
+      "sprint": "Sprint",
+      "chartLabel": "Chart of committed and completed points per sprint",
+      "table": "Committed and completed points per sprint"
+    }
   }
 }

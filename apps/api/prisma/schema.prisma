@@ -193,6 +193,7 @@ model Workspace {
   attachments       Attachment[]
   sprints           Sprint[]
   sprintItemEvents  SprintItemEvent[]
+  sprintSnapshots   SprintSnapshot[]
 
   notifications           Notification[]
   notificationPreferences NotificationPreference[]
@@ -728,6 +729,8 @@ model Sprint {
   cancelledAt     DateTime?    @db.Timestamptz
   /// Tamamlanırken donmuş velocity: Done kategorisindeki puan toplamı (brief §6.1.7).
   completedPoints Float?
+  /// Başlatılırken taahhüt edilen toplam puan (burndown başlangıcı, velocity karşılaştırması; ADR-067).
+  committedPoints Float?
   /// Sprint Review demo notları (ADR-065); tamamlanmış sprint'te de düzenlenebilir.
   reviewNotes     String?
   createdById     String?      @db.Uuid
@@ -735,12 +738,35 @@ model Sprint {
   updatedAt       DateTime     @updatedAt @db.Timestamptz
 
   items  WorkItem[]
-  events SprintItemEvent[]
+  events    SprintItemEvent[]
+  snapshots SprintSnapshot[]
 
   notifications Notification[]
 
   @@index([spaceId, status])
   @@map("sprints")
+}
+
+/// Günlük sprint görüntüsü (ADR-067): burndown ve velocity'nin kalıcı kaynağı.
+/// Gün başına tek satır; aynı gün yeniden yazılırsa güncellenir.
+model SprintSnapshot {
+  id              String    @id @default(uuid(7)) @db.Uuid
+  workspaceId     String    @db.Uuid
+  workspace       Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  sprintId        String    @db.Uuid
+  sprint          Sprint    @relation(fields: [sprintId], references: [id], onDelete: Cascade)
+  /// Space saat diliminde yerel gün (date-only).
+  date            DateTime  @db.Date
+  totalPoints     Float
+  donePoints      Float
+  remainingPoints Float
+  totalItems      Int
+  doneItems       Int
+  createdAt       DateTime  @default(now()) @db.Timestamptz
+  updatedAt       DateTime  @updatedAt @db.Timestamptz
+
+  @@unique([sprintId, date])
+  @@map("sprint_snapshots")
 }
 
 /// Sprint üyeliği geçmişi (ADR-061): burndown ve scope change raporlarını besler.

@@ -7,11 +7,12 @@ const TABS = [
   { key: 'planning', to: '/spaces/$spaceId/planning', label: 'planning.title' },
   { key: 'board', to: '/spaces/$spaceId/board', label: 'board.title' },
   { key: 'history', to: '/spaces/$spaceId/sprints', label: 'history.title' },
+  { key: 'reports', to: '/spaces/$spaceId/reports', label: 'reports.title' },
 ] as const;
 
 export type ScrumTab = (typeof TABS)[number]['key'];
 
-/** Scrum sayfaları arasında gezinme: Backlog, Planlama, Sprint panosu, Geçmiş. */
+/** Scrum sayfaları arasında gezinme: Backlog, Planlama, Sprint panosu, Geçmiş, Raporlar. */
 export function ScrumTabs({ spaceId, current }: { spaceId: string; current: ScrumTab }) {
   const { t } = useTranslation();
   return (

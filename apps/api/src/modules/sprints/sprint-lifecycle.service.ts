@@ -7,6 +7,7 @@ import { ActivityService } from '../activity/activity.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { isUniqueViolation, notFound } from '../spaces/space-errors';
 import { asJson, fail, type TenantTx } from '../work-items/item-support';
+import { SprintReportsService } from './sprint-reports.service';
 import { conflict, countedItems, loadScrumSpace } from './sprint-support';
 
 /** Sprint başlatma, tamamlama ve iptal (Faz 2.3, brief §6.1, ADR-064). */
@@ -17,6 +18,7 @@ export class SprintLifecycleService {
     private readonly cls: ClsService<AppClsStore>,
     private readonly activity: ActivityService,
     private readonly notifications: NotificationsService,
+    private readonly reports: SprintReportsService,
   ) {}
 
   private get ctx() {
@@ -51,11 +53,12 @@ export class SprintLifecycleService {
       throw fail(ERROR_CODES.SPRINT_GOAL_REQUIRED);
     }
 
+    const committed = await this.reports.liveTotals(sprintId);
     try {
       await db.$transaction(async (tx) => {
         await tx.sprint.update({
           where: { id: sprintId },
-          data: { status: 'ACTIVE', startedAt: new Date() },
+          data: { status: 'ACTIVE', startedAt: new Date(), committedPoints: committed.points },
         });
         await this.activity.record(tx, {
           workspaceId,
@@ -71,6 +74,7 @@ export class SprintLifecycleService {
       if (isUniqueViolation(error)) throw conflict(ERROR_CODES.SPRINT_ACTIVE_EXISTS);
       throw error;
     }
+    await this.reports.capture({ id: sprintId, workspaceId });
     await this.notifySprint('SPRINT_STARTED', sprint);
   }
 
@@ -107,6 +111,9 @@ export class SprintLifecycleService {
       items.map((i) => ({ type: i.type, points: i.points, category: i.status.category })),
     );
     const unfinished = items.filter((i) => i.status.category !== 'DONE');
+
+    // Son görüntü, bitmeyen işler sprint'ten çıkmadan alınır: burndown kalan işi gösterir.
+    await this.reports.capture({ id: sprintId, workspaceId });
 
     await db.$transaction(async (tx) => {
       for (const item of unfinished) {

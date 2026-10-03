@@ -992,5 +992,31 @@
       "SPRINT_STARTED": "Üyesi olduğun Space’te sprint başladığında.",
       "SPRINT_COMPLETED": "Üyesi olduğun Space’te sprint tamamlandığında."
     }
+  },
+  "reports": {
+    "title": "Raporlar",
+    "burndown": {
+      "title": "Sprint Burndown",
+      "sprint": "Sprint seç",
+      "noSprint": "Burndown için başlatılmış bir sprint gerekir.",
+      "baseline": "Başlangıç puanı",
+      "remaining": "Kalan puan",
+      "scope": "Kapsam değişikliği",
+      "ideal": "İdeal",
+      "actual": "Kalan",
+      "chartLabel": "{{name}} sprint burndown grafiği",
+      "planned": "Sprint başlayınca burndown görünür.",
+      "scopeHint": "Kırmızı çizgiler sprint başladıktan sonra eklenen (+) ya da çıkarılan (−) puanı gösterir."
+    },
+    "velocity": {
+      "title": "Velocity",
+      "empty": "Henüz tamamlanmış sprint yok; ilk sprint kapanınca velocity görünür.",
+      "average": "Son 3 sprint ortalaması: {{velocity}} puan.",
+      "committed": "Taahhüt",
+      "completed": "Tamamlanan",
+      "sprint": "Sprint",
+      "chartLabel": "Sprint başına taahhüt edilen ve tamamlanan puan grafiği",
+      "table": "Sprint başına taahhüt edilen ve tamamlanan puan"
+    }
   }
 }

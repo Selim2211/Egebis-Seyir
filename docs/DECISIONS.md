@@ -528,3 +528,16 @@
   - **Arayüz:** Kenar çubuğu ve üst çubukta rozetli zil, `/notifications` sayfası, Ayarlar › Bildirimler tercih tablosu (anahtarlar anında kaydedilir).
   - **Kapsam dışı (şimdilik):** toplu düzenleme (bulk) ve ClickUp içe aktarma bildirim üretmez; eski bildirimlerin temizlenmesi (ör. 90 gün) henüz yok.
 - **Alternatifler:** Bildirimleri işlemin içinde yazmak (hata asıl işlemi bozar, e-posta kuyruğu işlem dışı kalmalı); olay veri yolundan (activity_events) bildirim türetmek (alıcı hesabı ve tercih süzmesi yine gerekir, kutuya okundu durumu eklenemez).
+
+## ADR-067 — Burndown ve Velocity raporları
+
+- **Tarih:** 2026-10-03 · **Durum:** Kabul (brief §5.11, §6.1.7; ayrıntılar geliştirici varsayılanı)
+- **Karar:**
+  - **Veri kaynağı:** `sprint_snapshots` tablosu, sprint başına **gün başına tek satır** (`sprintId + date` benzersiz, aynı gün yeniden yazılırsa güncellenir): toplam, biten ve kalan puan ile öğe sayıları. Yazılma anları: sprint başlarken, her gün 23:55'te (pg-boss, `sprint.snapshot`, Europe/İstanbul), sprint tamamlanırken (bitmeyen işler devredilmeden **önce**, böylece son nokta kalan işi gösterir). Başlangıç taahhüdü `sprints.committed_points` olarak başlatma anında dondurulur; ilk gün görüntüsünün sonradan ezilmesi taahhüdü bozmaz.
+  - **Burndown:** kalan puan (Done kategorisi dışındaki toplam), ideal çizgi (taahhütten bitiş gününde sıfıra, takvim günü bazında) ve **scope change** (aktif sprint'e eklenen/çıkarılan puan; `sprint_item_events` içindeki `SCOPE_CHANGE` kayıtları, gün bazında net). Gün atlanırsa (sunucu kapalıydı) son görüntü taşınır. Aktif sprint'te **bugünün noktası canlı** hesaplanır, gece işi beklenmez. Süre aşılırsa eksen bugüne uzar. Planlı sprint'in burndown'ı yoktur; iptal edilen sprint iptal gününe kadar gösterilir. Hesap saf bir fonksiyondur (`buildBurndown`, shared) ve birim testlidir.
+  - **Velocity:** son 10 tamamlanmış sprint için taahhüt edilen ve tamamlanan puan; tamamlanan, sprint kapanırken dondurulan `completed_points`'tir (brief §6.1.7). Ortalama, planlama kapasite göstergesiyle aynı kuraldır (son 3 sprint, `averageVelocity`). Taahhüdü olmayan eski kayıtlarda taahhüt boş gösterilir.
+  - **Saat dilimi:** gün sınırları `Europe/Istanbul` (sabit `REPORT_TIME_ZONE`); Space başına saat dilimi ayarı sonraya.
+  - **İzin ve ekran:** `report.view` (tüm Scrum rolleri). Space'te yeni "Raporlar" sekmesi: sprint seçicili Burndown (başlangıç/kalan/kapsam değişikliği kartları ve grafik), altında Velocity grafiği ve erişilebilir tablo. Grafikler Recharts ile (ADR-005), rota ayrı pakete bölünür.
+  - **Hata yalıtımı:** görüntü yazılamazsa loglanır, sprint başlatma/tamamlama bozulmaz; gece işi sonraki turda dener.
+- **Alternatifler:** Burndown'ı yalnızca olay geçmişinden (`activity_events`, `sprint_item_events`) yeniden hesaplamak (durum geçmişi puan değişimleriyle birlikte tutulmadığı için güvenilmez, her istekte pahalı); görüntüyü yalnızca gece yazmak (başlangıç/bitiş günü ve sunucu kapalı günler eksik kalır); taahhüdü ilk görüntüden türetmek (aynı gün yeniden yazılınca bozuluyor — testte yakalandı).
+- **Bilinen sınırlar:** Burn-up, CFD, lead/cycle time ve dışa aktarma Faz 4'te (brief §5.11 [F2] satırları). Puan sonradan değişirse (tahmin düzeltme) geçmiş günler değişmez, yalnızca sonraki görüntüler yeni değeri taşır.

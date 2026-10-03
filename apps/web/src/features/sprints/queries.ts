@@ -1,9 +1,11 @@
 import {
   BacklogResponseSchema,
   CreatedSchema,
+  SprintBurndownSchema,
   SprintDetailSchema,
   SprintReviewSchema,
   SprintsResponseSchema,
+  VelocityResponseSchema,
   type BacklogResponse,
   type CompleteSprintRequest,
   type CreateSprintRequest,
@@ -34,6 +36,20 @@ export const sprintQuery = (workspaceId: string, sprintId: string) =>
   queryOptions({
     queryKey: ['workspaces', workspaceId, 'sprints', sprintId],
     queryFn: () => apiRequest(`${ws(workspaceId)}/sprints/${sprintId}`, SprintDetailSchema),
+  });
+
+export const burndownQuery = (workspaceId: string, sprintId: string) =>
+  queryOptions({
+    queryKey: ['workspaces', workspaceId, 'sprints', sprintId, 'burndown'],
+    queryFn: () =>
+      apiRequest(`${ws(workspaceId)}/sprints/${sprintId}/burndown`, SprintBurndownSchema),
+  });
+
+export const velocityQuery = (workspaceId: string, spaceId: string) =>
+  queryOptions({
+    queryKey: ['workspaces', workspaceId, 'spaces', spaceId, 'velocity'],
+    queryFn: () =>
+      apiRequest(`${ws(workspaceId)}/spaces/${spaceId}/velocity`, VelocityResponseSchema),
   });
 
 export const sprintReviewQuery = (workspaceId: string, sprintId: string) =>

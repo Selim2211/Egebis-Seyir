@@ -6,12 +6,12 @@
 
 | #   | Adım                            | İçerik                                                                                                                                                    | Durum      |
 | --- | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
-| 2.1 | Sprint modeli + Product Backlog | Sprint CRUD (planlı), sprint↔öğe atama ve geçmiş, `backlogRank`, Backlog sayfası (sürükle-sırala, Epic filtresi, tahminsiz vurgu, sprint'e taşı)          | Sırada     |
+| 2.1 | Sprint modeli + Product Backlog | Sprint CRUD (planlı), sprint↔öğe atama ve geçmiş, `backlogRank`, Backlog sayfası (sürükle-sırala, Epic filtresi, tahminsiz vurgu, sprint'e taşı)          | Tamamlandı |
 | 2.2 | Board                           | Durum sütunları, kart sürükle-bırak ile durum değişimi, swimlane (atanan/epic/öncelik), aktif sprint ve List kaynakları                                   | Tamamlandı |
 | 2.3 | Sprint yaşam döngüsü + Planning | Başlat/tamamla/iptal kuralları, Planning ekranı (Backlog ↔ Sprint, puan/kapasite), scope change uyarısı, devir akışı, geçmiş sprintler, Sprint Goal ayarı | Tamamlandı |
 | 2.4 | DoD/DoR + Sprint Review         | Space DoD/DoR maddeleri, Done'da DoD checklist, sprint'e alırken DoR işareti, Sprint Review özeti                                                         | Tamamlandı |
 | 2.5 | Bildirimler                     | Bildirim merkezi, atama/mention/durum/yorum/sprint olayları, anında e-posta, tür bazında tercih                                                           | Tamamlandı |
-| 2.6 | Burndown ve Velocity            | Günlük snapshot işi, Sprint Burndown, Velocity grafiği, rapor ekranı                                                                                      | Bekliyor   |
+| 2.6 | Burndown ve Velocity            | Günlük snapshot işi, Sprint Burndown, Velocity grafiği, rapor ekranı                                                                                      | Tamamlandı |
 
 Faz 2 [F2] etiketli işlerden brief'te sonraya bırakılanlar (Planning Poker, retrospektif, WIP limiti, CFD…) bu fazın adımlarında değildir; Faz 2 yol haritası maddeleri (brief §14) yukarıdaki altı adımla kapsanır.
 
@@ -70,3 +70,13 @@ Karar: ADR-066 (e-posta modu için ADR-060).
 **Web**: `/notifications` (Tümü/Okunmamış, tıklayınca okundu + hedefe git, tümünü okundu yap, daha eski), kenar çubuğunda rozetli "Bildirimler", üst çubukta zil, Ayarlar › Bildirimler (tür × kanal anahtarları).
 
 **Doğrulama (2026-10-03):** test:int 14 dosya / 167 test (`notifications` 16: kime/ne zaman, kendine bildirim yok, çift bildirim yok, düzenlemede yalnızca yeni etiket, görünürlük, kutu, sayfalama, tercih kanalları, e-posta); shared 143, web birim 61; Playwright `faz2-notifications` 3/3 (bildirim satırları test için veritabanına eklenir, çünkü ikinci kullanıcı davet e-postası ister); tüm paket 48 senaryo yeşil, yalnızca Mailpit gerektiren `faz1-auth` bekliyor. Gerçek iki kullanıcılı tarayıcı akışı (biri atar, diğeri rozeti görür) Mailpit gelince eklenecek.
+
+## 2.6 Ayrıntı
+
+Karar: ADR-067.
+
+**API** (`/api/workspaces/:wid`): `GET sprints/:sprintId/burndown`, `GET spaces/:spaceId/velocity` (`report.view`). Veri: `sprint_snapshots`, `sprints.committed_points`. Günlük iş `sprint.snapshot` (23:55 İstanbul, pg-boss); sprint başlarken ve tamamlanırken de görüntü yazılır. Hesaplar `packages/shared/src/domain/reports.ts` (saf, birim testli).
+
+**Web**: Space'te "Raporlar" sekmesi (`/spaces/:id/reports`): sprint seçicili Burndown (kartlar, kalan/ideal çizgi, kapsam değişikliği işaretleri), Velocity grafiği ve tablo (Recharts).
+
+**Doğrulama (2026-10-03):** shared birim testleri (`reports` 10); `sprint-reports.int-spec` 8 (boş planlı sprint, başlangıç görüntüsü, canlı bugün noktası, scope change ekleme/geri alma, gece işi tek satır, tamamlamada dondurulan velocity ve kalan iş, 404); Playwright `faz2-reports` 3/3 (boş durum, aktif sprint kalan puan, tamamlanınca velocity tablosu). Ekran görüntüsünden yakalanan hata düzeltildi: tamamlama anındaki görüntü, bitmeyenler devredilmeden önce alınır.

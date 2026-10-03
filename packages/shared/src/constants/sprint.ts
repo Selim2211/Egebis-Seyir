@@ -19,3 +19,9 @@ export const MAX_SPRINT_DAYS = 56;
 
 /** Tek istekte taşınabilecek öğe sayısı. */
 export const MAX_SPRINT_MOVE_ITEMS = 200;
+
+/** Rapor günleri bu saat dilimine göre hesaplanır (ADR-067); Space başına saat dilimi ayarı sonraya. */
+export const REPORT_TIME_ZONE = 'Europe/Istanbul';
+
+/** Velocity grafiğinde gösterilen en çok sprint sayısı. */
+export const VELOCITY_CHART_SPRINTS = 10;

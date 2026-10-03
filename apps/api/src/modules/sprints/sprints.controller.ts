@@ -20,22 +20,29 @@ import {
   MoveBacklogItemsRequestSchema,
   SPACE_PERMISSIONS as S,
   SetReviewNotesRequestSchema,
+  SprintBurndownSchema,
   SprintDetailSchema,
   SprintReviewSchema,
   SprintsResponseSchema,
+  VelocityResponseSchema,
   UpdateSprintRequestSchema,
   type BacklogResponse,
   type Created,
+  type SprintBurndown,
   type SprintDetail,
   type SprintReview,
   type SprintsResponse,
+  type VelocityResponse,
 } from '@scrum/shared';
 import { createZodDto, ZodResponse } from 'nestjs-zod';
 import { RequireSpacePermission } from '../auth/decorators';
 import { BacklogService } from './backlog.service';
 import { SprintLifecycleService } from './sprint-lifecycle.service';
+import { SprintReportsService } from './sprint-reports.service';
 import { SprintsService } from './sprints.service';
 
+class BurndownDto extends createZodDto(SprintBurndownSchema) {}
+class VelocityDto extends createZodDto(VelocityResponseSchema) {}
 class SprintsDto extends createZodDto(SprintsResponseSchema) {}
 class SprintDetailDto extends createZodDto(SprintDetailSchema) {}
 class CreateSprintDto extends createZodDto(CreateSprintRequestSchema) {}
@@ -57,6 +64,7 @@ export class SprintsController {
     private readonly sprints: SprintsService,
     private readonly backlog: BacklogService,
     private readonly lifecycle: SprintLifecycleService,
+    private readonly reports: SprintReportsService,
   ) {}
 
   @Get('spaces/:spaceId/sprints')
@@ -143,5 +151,19 @@ export class SprintsController {
   @HttpCode(NO_CONTENT)
   move(@Uuid('spaceId') spaceId: string, @Body() body: MoveBacklogDto): Promise<void> {
     return this.backlog.move(spaceId, body);
+  }
+
+  @Get('sprints/:sprintId/burndown')
+  @RequireSpacePermission(S.REPORT_VIEW)
+  @ZodResponse({ type: BurndownDto })
+  burndown(@Uuid('sprintId') sprintId: string): Promise<SprintBurndown> {
+    return this.reports.burndown(sprintId);
+  }
+
+  @Get('spaces/:spaceId/velocity')
+  @RequireSpacePermission(S.REPORT_VIEW)
+  @ZodResponse({ type: VelocityDto })
+  velocity(@Uuid('spaceId') spaceId: string): Promise<VelocityResponse> {
+    return this.reports.velocity(spaceId);
   }
 }

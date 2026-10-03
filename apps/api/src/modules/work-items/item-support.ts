@@ -99,6 +99,7 @@ export type TenantTx = Pick<
   | 'attachment'
   | 'sprint'
   | 'sprintItemEvent'
+  | 'sprintSnapshot'
 >;
 
 /** Birden çok List'ten gelen satırlar için ek ilişkiler (benim işlerim, arama). */
