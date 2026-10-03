@@ -50,7 +50,6 @@ export type SetupStatus = z.infer<typeof SetupStatusSchema>;
 
 /** POST /api/setup — ilk Owner ve workspace (ADR-034). */
 export const SetupRequestSchema = z.object({
-  setupToken: z.string().min(1).max(200),
   workspaceName: z.string().trim().min(1).max(80),
   name: PersonNameSchema,
   email: EmailSchema,

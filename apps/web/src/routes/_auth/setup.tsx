@@ -26,7 +26,6 @@ function SetupPage() {
   const form = useForm<SetupRequest>({
     resolver: zodResolver(SetupRequestSchema),
     defaultValues: {
-      setupToken: '',
       workspaceName: '',
       name: '',
       email: '',
@@ -45,15 +44,6 @@ function SetupPage() {
       <AuthHeading title={t('auth.setup.title')} subtitle={t('auth.setup.subtitle')} />
       <form onSubmit={onSubmit} noValidate className="mt-7 flex flex-col gap-4">
         <FormError error={setup.error} />
-        <Field
-          label={t('auth.setup.token')}
-          hint={t('auth.setup.tokenHint')}
-          autoComplete="off"
-          spellCheck={false}
-          className="[&_input]:font-mono"
-          error={errors.setupToken}
-          {...form.register('setupToken')}
-        />
         <Field
           label={t('auth.setup.workspaceName')}
           placeholder={t('auth.setup.workspacePlaceholder')}

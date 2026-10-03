@@ -20,7 +20,7 @@ Faz 2'ye kalanlar: bildirim merkezi ve e-posta bildirimleri (mention kaydı Faz 
 
 **API** (`/api`)
 
-- `GET /setup/status`, `POST /setup` — yalnızca hiç kullanıcı yokken; kurulum anahtarı (açılış logu veya `SETUP_TOKEN`).
+- `GET /setup/status`, `POST /setup` — yalnızca hiç kullanıcı yokken; kurulum anahtarı yok (ADR-073).
 - `POST /auth/login`, `POST /auth/logout`, `GET /auth/me`, `GET /auth/sessions`, `DELETE /auth/sessions/:id`
 - `POST /auth/password/forgot`, `POST /auth/password/reset`, `PATCH /users/me`, `POST /users/me/password`
 - `GET /invitations/:token`, `POST /invitations/:token/accept`

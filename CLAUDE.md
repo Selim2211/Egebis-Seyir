@@ -27,7 +27,7 @@ pnpm --filter @scrum/api db:migrate   # Prisma migration oluştur/uygula
 
 API dokümanı: http://localhost:3000/api/docs · Mailpit: http://localhost:8025
 
-İlk kurulum: kullanıcı yokken web `/setup`'a yönlendirir; kurulum anahtarı API açılış logunda (`Kurulum anahtarı: …`) veya `.env` → `SETUP_TOKEN`.
+İlk kurulum: kullanıcı yokken web `/setup`'a yönlendirir; kurulum anahtarı yoktur (ADR-073).
 
 Yerel geliştirme veritabanındaki test hesapları (yalnızca `scrum_dev`): `zeynep@example.com` / `dev-owner-pass` (Owner), `elif@example.com` / `dev-member-pass` (Member). Sıfırlamak için: `pnpm --filter @scrum/api exec prisma migrate reset`.
 

@@ -1,16 +1,7 @@
-import {
-  ConflictException,
-  ForbiddenException,
-  Injectable,
-  Logger,
-  type OnApplicationBootstrap,
-} from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { ConflictException, Injectable, Logger } from '@nestjs/common';
 import { ERROR_CODES, type SetupRequest } from '@scrum/shared';
-import type { Env } from '../../infra/config/env';
 import { PrismaService } from '../../infra/prisma/prisma.service';
 import { hashPassword } from '../../infra/security/password';
-import { generateToken, safeEqual } from '../../infra/security/tokens';
 import { AccessService } from '../access/access.service';
 import { ActivityService } from '../activity/activity.service';
 
@@ -19,31 +10,16 @@ const SETUP_LOCK = 724_001;
 
 /**
  * İlk kurulum (ADR-034): hiç kullanıcı yokken ilk workspace ve Owner oluşturulur.
- * Kurulum anahtarı olmadan çalışmaz; anahtar SETUP_TOKEN'dan gelir ya da açılışta loglanır.
+ * Kurulum anahtarı yoktur (ADR-073): ekran yalnızca hiç kullanıcı yokken açıktır ve ilk kullanıcıyla kapanır.
  */
 @Injectable()
-export class SetupService implements OnApplicationBootstrap {
+export class SetupService {
   private readonly logger = new Logger(SetupService.name);
-  /** SETUP_TOKEN ile verilen anahtar kalıcıdır; verilmemişse tek seferlik anahtar üretilir. */
-  private readonly configuredToken?: string;
-  private generatedToken?: string;
-
   constructor(
     private readonly prisma: PrismaService,
     private readonly access: AccessService,
     private readonly activity: ActivityService,
-    config: ConfigService<Env, true>,
-  ) {
-    this.configuredToken = config.get('SETUP_TOKEN', { infer: true });
-  }
-
-  async onApplicationBootstrap(): Promise<void> {
-    try {
-      if (await this.needsSetup()) this.announceToken();
-    } catch {
-      // Veritabanı henüz hazır değilse açılış engellenmez; durum ucu tekrar dener.
-    }
-  }
+  ) {}
 
   async needsSetup(): Promise<boolean> {
     return (await this.prisma.user.count()) === 0;
@@ -51,10 +27,6 @@ export class SetupService implements OnApplicationBootstrap {
 
   /** Kurulumu yapar ve Owner'ın kullanıcı id'sini döndürür. */
   async run(input: SetupRequest): Promise<string> {
-    const expected = this.announceToken();
-    if (!safeEqual(input.setupToken, expected)) {
-      throw new ForbiddenException({ code: ERROR_CODES.SETUP_TOKEN_INVALID });
-    }
     const passwordHash = await hashPassword(input.password);
 
     const userId = await this.prisma.$transaction(async (tx) => {
@@ -81,17 +53,7 @@ export class SetupService implements OnApplicationBootstrap {
       return user.id;
     });
 
-    this.generatedToken = undefined;
     this.logger.log('İlk kurulum tamamlandı; kurulum ekranı kapandı');
     return userId;
-  }
-
-  private announceToken(): string {
-    if (this.configuredToken) return this.configuredToken;
-    if (!this.generatedToken) {
-      this.generatedToken = generateToken();
-      this.logger.warn(`İlk kurulum gerekiyor. Kurulum anahtarı: ${this.generatedToken}`);
-    }
-    return this.generatedToken;
   }
 }

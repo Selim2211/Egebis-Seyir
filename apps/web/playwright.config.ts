@@ -6,7 +6,6 @@ const isCI = !!process.env.CI;
 export const E2E = {
   apiPort: 3100,
   webPort: 5174,
-  setupToken: 'e2e-setup-token',
   // Docker yerine yerel Postgres kullanılacaksa E2E_DATABASE_URL ile değiştirilir.
   databaseUrl: process.env.E2E_DATABASE_URL ?? 'postgresql://scrum:scrum@localhost:5433/scrum_e2e',
   mailpitUrl: 'http://localhost:8025',
@@ -39,7 +38,6 @@ export default defineConfig({
         PORT: String(E2E.apiPort),
         DATABASE_URL: E2E.databaseUrl,
         APP_URL: `http://localhost:${E2E.webPort}`,
-        SETUP_TOKEN: E2E.setupToken,
         AUTH_RATE_LIMIT: '1000',
         MAIL_TRANSPORT: 'smtp',
         QUEUE_ENABLED: 'true',

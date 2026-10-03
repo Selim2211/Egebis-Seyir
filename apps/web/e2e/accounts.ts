@@ -1,5 +1,4 @@
 import { expect, type APIRequestContext, type Page } from '@playwright/test';
-import { E2E } from '../playwright.config';
 
 /** E2E hesapları (yalnızca scrum_e2e veritabanında). */
 export const OWNER = {
@@ -26,7 +25,6 @@ export async function ensureOwner(request: APIRequestContext): Promise<void> {
   const res = await request.post('/api/setup', {
     headers: { 'x-csrf-token': csrf },
     data: {
-      setupToken: E2E.setupToken,
       workspaceName: 'E2E Kurumu',
       name: OWNER.name,
       email: OWNER.email,

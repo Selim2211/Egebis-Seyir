@@ -9,7 +9,6 @@ import { configureApp } from '../src/app.setup';
 import { MailService } from '../src/infra/mail/mail.service';
 import { PrismaService } from '../src/infra/prisma/prisma.service';
 
-export const SETUP_TOKEN = 'test-setup-token';
 export const OWNER = { email: 'zeynep@example.com', password: 'owner-pass', name: 'Zeynep Kaya' };
 
 export interface TestContext {
@@ -93,7 +92,6 @@ export async function setupOwner(
   const owner = await Client.create(ctx.app);
   const res = await owner
     .post('/api/setup', {
-      setupToken: SETUP_TOKEN,
       workspaceName: 'Test Kurumu',
       name: OWNER.name,
       email: OWNER.email,

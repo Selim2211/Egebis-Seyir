@@ -100,8 +100,6 @@
     "setup": {
       "title": "Set up Scrum Manager",
       "subtitle": "Create the first workspace and its Owner account. This screen appears only once.",
-      "token": "Setup key",
-      "tokenHint": "Printed to the server logs when the API first starts.",
       "workspaceName": "Organization / workspace name",
       "workspacePlaceholder": "e.g. your company's name",
       "ownerSection": "Owner account",
@@ -277,7 +275,6 @@
     "CURRENT_PASSWORD_INVALID": "Current password is incorrect.",
     "TOKEN_INVALID": "The link is invalid or has expired.",
     "SETUP_ALREADY_DONE": "Setup has already been completed.",
-    "SETUP_TOKEN_INVALID": "Incorrect setup key.",
     "ALREADY_MEMBER": "This person is already a workspace member.",
     "INVITE_REQUIRES_LOGIN": "Sign in to accept the invitation.",
     "INVITE_EMAIL_MISMATCH": "This invitation was sent to a different email address.",

@@ -1,5 +1,4 @@
 import { expect, type Page, test } from '@playwright/test';
-import { E2E } from '../playwright.config';
 import { login, MEMBER, OWNER } from './accounts';
 import { waitForMail } from './mailpit';
 
@@ -15,7 +14,6 @@ test.describe.serial('Kimlik, workspace ve davet', () => {
     await page.goto('/');
     await expect(page).toHaveURL(/\/setup$/);
 
-    await page.getByLabel('Kurulum anahtarı').fill(E2E.setupToken);
     await page.getByLabel('Kurum / workspace adı').fill('E2E Kurumu');
     await page.getByLabel('Ad soyad').fill(OWNER.name);
     await page.getByLabel('E-posta').fill(OWNER.email);

@@ -600,3 +600,9 @@
   - **İlerleme:** çubuğun içi Epic ilerlemesiyle (ADR-045/068) dolar; çubuğa tıklamak Epic detayına gider.
   - **Düzenleme:** tarihler Epic detayından değiştirilir. Sürükleyerek tarih değiştirme (brief [F2]) ve tema/inisiyatif gruplama sonraya; çok Space'li Roadmap Dashboard adımında (4.6).
 - **Alternatifler:** Epic'leri sprint sütunlarına yerleştirmek (Epic'ler sprint'e bağlı değildir); harici grafik kütüphanesi (basit konumlu `div`'ler erişilebilirlik ve boyut açısından yeterli); sürükle-bırak hemen eklemek (Gantt adımında 4.5 ile aynı etkileşim altyapısı kurulacak).
+
+## ADR-073 — Kurulum anahtarı kaldırıldı
+
+- **Tarih:** 2026-10-03 · **Durum:** Kabul (kullanıcı kararı)
+- **Karar:** ADR-034'teki ilk kurulum anahtarı (`SETUP_TOKEN` / açılış logu) kaldırıldı. `/setup` yalnızca hiç kullanıcı yokken açıktır; ilk kullanıcı oluşunca kapanır (aynı anda iki kurulum advisory lock ile engellenir).
+- **Gerekçe:** Yerel geliştirme ve deneme sürtünmesi. **Bilinen risk:** sunucu, kurulumdan önce ağa açılırsa ilk erişen kişi yönetici olur. Canlıya çıkarken kurulumu sunucu açılır açılmaz kendiniz yapın ya da bu korumayı geri alın (Faz 6 dağıtım adımında yeniden değerlendirilecek).

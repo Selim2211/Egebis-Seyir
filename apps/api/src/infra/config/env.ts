@@ -15,7 +15,6 @@ export const EnvSchema = z.object({
   TRUST_PROXY: z.stringbool().default(false),
 
   /** İlk kurulum anahtarı (ADR-034). Boşsa açılışta üretilip loglanır. */
-  SETUP_TOKEN: z.string().min(8).optional(),
   /** Giriş/kurulum/sıfırlama uçlarında dakika başına istek sınırı (IP başına). */
   AUTH_RATE_LIMIT: z.coerce.number().int().positive().default(10),
 

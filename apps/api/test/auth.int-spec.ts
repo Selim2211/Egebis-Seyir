@@ -6,7 +6,6 @@ import {
   OWNER,
   RESET_LINK,
   resetState,
-  SETUP_TOKEN,
   setupOwner,
   type TestContext,
   tokenFromMail,
@@ -27,7 +26,6 @@ describe('Kimlik doğrulama (gerçek veritabanı)', () => {
 
   describe('ilk kurulum', () => {
     const body = {
-      setupToken: SETUP_TOKEN,
       workspaceName: 'Test Kurumu',
       name: OWNER.name,
       email: OWNER.email,
@@ -41,11 +39,6 @@ describe('Kimlik doğrulama (gerçek veritabanı)', () => {
 
       const noCsrf = await client.postWithoutCsrf('/api/setup', body).expect(403);
       expect(noCsrf.body).toEqual({ code: 'CSRF_INVALID' });
-
-      const wrong = await client
-        .post('/api/setup', { ...body, setupToken: 'yanlis-anahtar' })
-        .expect(403);
-      expect(wrong.body).toEqual({ code: 'SETUP_TOKEN_INVALID' });
     });
 
     it('Owner ve workspace oluşturur, oturum açar ve bir daha çalışmaz', async () => {
