@@ -58,6 +58,7 @@ export async function summarize(db: TenantClient, sprints: Sprint[]): Promise<Sp
       startedAt: sprint.startedAt?.toISOString() ?? null,
       completedAt: sprint.completedAt?.toISOString() ?? null,
       cancelledAt: sprint.cancelledAt?.toISOString() ?? null,
+      completedPoints: sprint.completedPoints,
       ...sprintTotals(own),
     };
   });

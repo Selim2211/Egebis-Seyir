@@ -1,4 +1,5 @@
 import type { SprintSummary, WorkItemRow } from '@scrum/shared';
+import type { ReactNode } from 'react';
 import { ChevronRight, MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Badge } from '@/components/ui/badge';
@@ -27,6 +28,7 @@ export function SprintSection({
   onMove,
   onEdit,
   onDelete,
+  actions,
 }: {
   sprint: SprintSummary;
   items: WorkItemRow[];
@@ -39,6 +41,8 @@ export function SprintSection({
   onMove: (itemId: string, sprintId: string | null) => void;
   onEdit: () => void;
   onDelete: () => void;
+  /** Başlat / Tamamla / İptal düğmeleri (SprintActions). */
+  actions?: ReactNode;
 }) {
   const { t } = useTranslation();
   const active = sprint.status === 'ACTIVE';
@@ -74,6 +78,7 @@ export function SprintSection({
             </span>
           )}
         </span>
+        {actions}
         {canPlan && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

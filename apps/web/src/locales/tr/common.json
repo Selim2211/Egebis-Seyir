@@ -312,7 +312,12 @@
     "SPRINT_READONLY": "Tamamlanmış veya iptal edilmiş sprint değiştirilemez.",
     "SPRINT_NOT_PLANNED": "Yalnızca planlanmış sprint silinebilir.",
     "SPRINT_DATES_LOCKED": "Aktif sprint'in tarihleri değiştirilemez.",
-    "SPRINT_ITEM_NOT_ELIGIBLE": "Yalnızca üst düzey Story, Bug ve Task'lar sprint'e alınabilir; tamamlananlar alınamaz."
+    "SPRINT_ITEM_NOT_ELIGIBLE": "Yalnızca üst düzey Story, Bug ve Task'lar sprint'e alınabilir; tamamlananlar alınamaz.",
+    "SPRINT_ACTIVE_EXISTS": "Bu Space'te zaten aktif bir sprint var; önce onu tamamla.",
+    "SPRINT_GOAL_REQUIRED": "Sprint'i başlatmak için sprint hedefi gerekli.",
+    "SPRINT_NOT_ACTIVE": "Yalnızca aktif sprint tamamlanabilir.",
+    "SPRINT_CANCEL_NOT_ALLOWED": "Tamamlanmış veya iptal edilmiş sprint iptal edilemez.",
+    "SPRINT_NEXT_INVALID": "Devredilecek sprint planlı ve aynı Space'te olmalı."
   },
   "spaceRoles": {
     "PRODUCT_OWNER": "Product Owner",
@@ -357,7 +362,9 @@
     "chooseMember": "Üye seç…",
     "roleFor": "{{name}} için Scrum rolü",
     "removeMember": "{{name}} adlı kişiyi çıkar",
-    "noOtherMembers": "Workspace'te eklenebilecek başka üye yok."
+    "noOtherMembers": "Workspace'te eklenebilecek başka üye yok.",
+    "goalRequired": "Sprint hedefi zorunlu",
+    "goalRequiredHelp": "Açıkken hedefi olmayan sprint başlatılamaz; kapalıyken yalnızca uyarı çıkar."
   },
   "structure": {
     "newList": "Liste oluştur",
@@ -824,7 +831,33 @@
       "required": "Bu alan zorunlu.",
       "END_BEFORE_START": "Bitiş, başlangıçtan önce olamaz.",
       "TOO_LONG": "Sprint en çok 8 hafta sürebilir."
-    }
+    },
+    "start": "Başlat",
+    "complete": "Tamamla",
+    "cancel": "İptal et",
+    "cancelAction": "{{name}} sprint'ini iptal et",
+    "startTitle": "{{name}} başlatılsın mı?",
+    "goalRequired": "Bu Space'te sprint hedefi zorunlu. Sprint'i düzenleyip hedef yaz.",
+    "goalMissingWarn": "Sprint hedefi girilmemiş.",
+    "emptyWarn": "Sprint'te henüz öğe yok.",
+    "unestimatedWarn": "{{count}} öğenin tahmini yok.",
+    "started": "{{name}} başladı.",
+    "completeTitle": "{{name}} tamamlansın mı?",
+    "completeSummary": "{{done}} / {{total}} öğe bitti · {{points}} puan tamamlandı",
+    "allDone": "Tüm öğeler bitti. Sprint tamamlanıp velocity kaydedilecek.",
+    "unfinishedQuestion": "{{count}} öğe bitmedi. Ne yapılsın?",
+    "carryOver": "Sonraki sprint'e devret",
+    "nextSprint": "Sonraki sprint",
+    "noNextSprint": "Devredilecek planlı sprint yok; önce yeni bir sprint oluştur.",
+    "toBacklog": "Backlog'a gönder",
+    "completed": "{{name}} tamamlandı.",
+    "cancelTitle": "{{name}} iptal edilsin mi?",
+    "cancelBody": "Sprint iptal edilir ve içindeki {{count}} öğe Backlog'a döner. Bu geri alınamaz.",
+    "cancelled": "{{name}} iptal edildi.",
+    "scopeChangeTitle": "Sprint kapsamı değişiyor",
+    "scopeChangeAdd": "{{name}} aktif; {{count}} öğe eklemek kapsam değişikliği sayılır ve raporlarda görünür.",
+    "scopeChangeRemove": "{{name}} aktif; {{count}} öğeyi çıkarmak kapsam değişikliği sayılır ve raporlarda görünür.",
+    "scopeChangeConfirm": "Devam et"
   },
   "board": {
     "title": "Sprint panosu",
@@ -844,6 +877,29 @@
     "noEpic": "Epic'siz",
     "hint": "Kartı başka sütuna sürükleyerek durumunu değiştir.",
     "noSprintTitle": "Planlı veya aktif sprint yok",
-    "noSprintBody": "Sprint oluşturup Backlog'tan öğe taşıdığında pano burada görünür."
+    "noSprintBody": "Sprint oluşturup Backlog'tan öğe taşıdığında pano burada görünür.",
+    "readOnlyCompleted": "Bu sprint tamamlandı; pano salt-okunur.",
+    "readOnlyCancelled": "Bu sprint iptal edildi; pano salt-okunur."
+  },
+  "scrumTabs": {
+    "label": "Scrum"
+  },
+  "planning": {
+    "title": "Planlama",
+    "noSprint": "Planlanacak sprint yok. Backlog sayfasından bir sprint oluştur.",
+    "backlogSummary": "{{count}} öğe",
+    "backlogEmpty": "Backlog boş; her şey sprint'e alınmış.",
+    "sprintEmpty": "Öğeleri soldaki Backlog'dan buraya sürükle.",
+    "capacity": "Kapasite",
+    "capacityText": "{{planned}} puan · son sprint'lerin ortalaması {{velocity}} (%{{percent}})",
+    "overCapacity": "ortalamanın üstünde",
+    "noVelocity": "Henüz tamamlanmış sprint yok; kapasite göstergesi ilk sprint'ten sonra görünür."
+  },
+  "history": {
+    "title": "Geçmiş",
+    "empty": "Henüz sprint yok.",
+    "average": "Son sprint'lerin ortalama velocity'si: {{velocity}} puan.",
+    "completedPoints": "{{points}} puan tamamlandı",
+    "progress": "{{done}} / {{total}} öğe bitti"
   }
 }

@@ -10,6 +10,7 @@ import { useId } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Field, SelectField } from '@/components/form';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { SpaceAvatar } from './space-avatar';
@@ -196,6 +197,26 @@ export function SpaceFields({
               </option>
             ))}
           </SelectField>
+          <div className="flex items-start gap-3 sm:col-span-2">
+            <Switch
+              id={`${descriptionId}-goal-required`}
+              checked={values.sprintGoalRequired}
+              onCheckedChange={(checked) => onChange({ sprintGoalRequired: checked })}
+              aria-describedby={`${descriptionId}-goal-required-help`}
+              className="mt-0.5"
+            />
+            <div>
+              <Label htmlFor={`${descriptionId}-goal-required`}>
+                {t('spaceForm.goalRequired')}
+              </Label>
+              <p
+                id={`${descriptionId}-goal-required-help`}
+                className="text-muted-foreground mt-0.5 text-xs"
+              >
+                {t('spaceForm.goalRequiredHelp')}
+              </p>
+            </div>
+          </div>
         </div>
       )}
     </>

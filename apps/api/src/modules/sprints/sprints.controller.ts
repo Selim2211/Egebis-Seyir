@@ -13,6 +13,7 @@ import {
 } from '@nestjs/common';
 import {
   BacklogResponseSchema,
+  CompleteSprintRequestSchema,
   CreatedSchema,
   CreateSprintRequestSchema,
   MoveBacklogItemsRequestSchema,
@@ -28,6 +29,7 @@ import {
 import { createZodDto, ZodResponse } from 'nestjs-zod';
 import { RequireSpacePermission } from '../auth/decorators';
 import { BacklogService } from './backlog.service';
+import { SprintLifecycleService } from './sprint-lifecycle.service';
 import { SprintsService } from './sprints.service';
 
 class SprintsDto extends createZodDto(SprintsResponseSchema) {}
@@ -36,6 +38,7 @@ class CreateSprintDto extends createZodDto(CreateSprintRequestSchema) {}
 class UpdateSprintDto extends createZodDto(UpdateSprintRequestSchema) {}
 class CreatedDto extends createZodDto(CreatedSchema) {}
 class BacklogDto extends createZodDto(BacklogResponseSchema) {}
+class CompleteSprintDto extends createZodDto(CompleteSprintRequestSchema) {}
 class MoveBacklogDto extends createZodDto(MoveBacklogItemsRequestSchema) {}
 
 const Uuid = (name: string) => Param(name, ParseUUIDPipe);
@@ -47,6 +50,7 @@ export class SprintsController {
   constructor(
     private readonly sprints: SprintsService,
     private readonly backlog: BacklogService,
+    private readonly lifecycle: SprintLifecycleService,
   ) {}
 
   @Get('spaces/:spaceId/sprints')
@@ -82,6 +86,28 @@ export class SprintsController {
   @HttpCode(NO_CONTENT)
   remove(@Uuid('sprintId') sprintId: string): Promise<void> {
     return this.sprints.remove(sprintId);
+  }
+
+  @Post('sprints/:sprintId/start')
+  @RequireSpacePermission(S.SPRINT_START)
+  @HttpCode(NO_CONTENT)
+  start(@Uuid('sprintId') sprintId: string): Promise<void> {
+    return this.lifecycle.start(sprintId);
+  }
+
+  @Post('sprints/:sprintId/complete')
+  @RequireSpacePermission(S.SPRINT_COMPLETE)
+  @HttpCode(NO_CONTENT)
+  complete(@Uuid('sprintId') sprintId: string, @Body() body: CompleteSprintDto): Promise<void> {
+    return this.lifecycle.complete(sprintId, body);
+  }
+
+  /** Yalnızca Product Owner ve yöneticiler (brief §6.1.6). */
+  @Post('sprints/:sprintId/cancel')
+  @RequireSpacePermission(S.SPRINT_CANCEL)
+  @HttpCode(NO_CONTENT)
+  cancel(@Uuid('sprintId') sprintId: string): Promise<void> {
+    return this.lifecycle.cancel(sprintId);
   }
 
   @Get('spaces/:spaceId/backlog')

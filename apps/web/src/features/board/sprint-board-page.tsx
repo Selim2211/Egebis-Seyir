@@ -5,11 +5,12 @@ import { Kanban } from 'lucide-react';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NativeSelect } from '@/components/form';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ContainerHeader, LoadingState, NotFoundState } from '@/features/spaces/container-header';
 import { spaceQuery } from '@/features/spaces/queries';
-import { backlogQuery } from '@/features/sprints/queries';
+import { backlogQuery, sprintsQuery } from '@/features/sprints/queries';
+import { SprintActions } from '@/features/sprints/sprint-actions';
+import { ScrumTabs } from '@/features/sprints/scrum-tabs';
 import { ItemPanel } from '@/features/work-items/detail/item-panel';
 import { ItemNavContext } from '@/features/work-items/detail/item-nav-context';
 import { useStatusGuard } from '@/features/work-items/status-guard';
@@ -42,11 +43,21 @@ export function SprintBoardPage({
   const space = useQuery(spaceQuery(workspaceId, spaceId));
   const backlog = useQuery(backlogQuery(workspaceId, spaceId));
 
-  const sprints = useMemo(() => backlog.data?.sprints ?? [], [backlog.data]);
-  const selected =
-    sprints.find((s) => s.id === search.sprint) ??
-    sprints.find((s) => s.status === 'ACTIVE') ??
-    sprints[0];
+  const all = useQuery(sprintsQuery(workspaceId, spaceId));
+  // Açık sprint'ler önce (aktif, sonra başlangıç sırasıyla planlılar), ardından geçmiş.
+  const sprints = useMemo(() => {
+    const rank = { ACTIVE: 0, PLANNED: 1, COMPLETED: 2, CANCELLED: 3 } as const;
+    return [...(all.data?.sprints ?? [])].sort(
+      (a, b) =>
+        rank[a.status] - rank[b.status] ||
+        (a.status === 'PLANNED'
+          ? a.startDate.localeCompare(b.startDate)
+          : b.startDate.localeCompare(a.startDate)),
+    );
+  }, [all.data]);
+  const selected = sprints.find((s) => s.id === search.sprint) ?? sprints[0];
+  const readOnly =
+    selected !== undefined && selected.status !== 'ACTIVE' && selected.status !== 'PLANNED';
   const board = useQuery({
     ...sprintBoardQuery(workspaceId, selected?.id ?? ''),
     enabled: !!selected,
@@ -71,10 +82,13 @@ export function SprintBoardPage({
     [items],
   );
 
-  const canMoveItem = useCanMove(space.data?.permissions ?? [], space.data?.archived ?? true);
+  const canMoveItem = useCanMove(
+    space.data?.permissions ?? [],
+    (space.data?.archived ?? true) || readOnly,
+  );
 
-  if (space.isPending || backlog.isPending) return <LoadingState />;
-  if (space.isError || backlog.isError) return <NotFoundState />;
+  if (space.isPending || backlog.isPending || all.isPending) return <LoadingState />;
+  if (space.isError || backlog.isError || all.isError) return <NotFoundState />;
 
   const lane = search.lane ?? 'none';
 
@@ -87,8 +101,9 @@ export function SprintBoardPage({
         name={space.data.name}
         archived={space.data.archived}
         canUnarchive={space.data.permissions.includes(S.SPACE_SETTINGS)}
-        meta={<Badge variant="secondary">{t('board.title')}</Badge>}
-      />
+      >
+        <ScrumTabs spaceId={spaceId} current="board" />
+      </ContainerHeader>
 
       {!selected ? (
         <div className="mx-auto flex max-w-md flex-col items-center gap-3 px-4 py-16 text-center">
@@ -123,7 +138,30 @@ export function SprintBoardPage({
               {t('board.progress', { done: totals.donePoints, total: totals.points })}
             </span>
             <SwimlanePicker value={lane} onChange={(next) => onSearch({ lane: next })} />
+            <span className="ml-auto flex items-center gap-1">
+              <SprintActions
+                sprint={selected}
+                permissions={space.data.permissions}
+                goalRequired={space.data.sprintGoalRequired}
+                plannedOthers={sprints.filter(
+                  (s) => s.status === 'PLANNED' && s.id !== selected.id,
+                )}
+                archived={space.data.archived}
+              />
+            </span>
           </div>
+          {readOnly && (
+            <p
+              role="status"
+              className="text-muted-foreground mx-4 mb-2 rounded-md border border-dashed px-3 py-2 text-sm sm:mx-6"
+            >
+              {t(
+                selected.status === 'COMPLETED'
+                  ? 'board.readOnlyCompleted'
+                  : 'board.readOnlyCancelled',
+              )}
+            </p>
+          )}
           {selected.goal && (
             <p className="text-muted-foreground px-4 pb-2 text-sm sm:px-6">
               <span className="font-medium">{t('sprints.goal')}:</span> {selected.goal}

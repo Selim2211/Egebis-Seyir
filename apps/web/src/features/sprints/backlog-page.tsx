@@ -7,7 +7,6 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { NativeSelect } from '@/components/form';
 import { ConfirmDialog } from '@/components/confirm-dialog';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ContainerHeader, LoadingState, NotFoundState } from '@/features/spaces/container-header';
@@ -19,7 +18,9 @@ import { useErrorMessage } from '@/lib/use-error-message';
 import { BacklogRow } from './backlog-row';
 import { filterBacklog, isFiltered, NO_FILTER, type BacklogFilter } from './backlog-filter';
 import { backlogQuery, sprintQuery, useDeleteSprint, useMoveBacklogItems } from './queries';
+import { SprintActions } from './sprint-actions';
 import { SprintDialog } from './sprint-dialog';
+import { ScrumTabs } from './scrum-tabs';
 import { SprintSection } from './sprint-section';
 
 type DialogState = { kind: 'create' } | { kind: 'edit'; sprint: SprintSummary } | null;
@@ -45,6 +46,12 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
   const [collapsed, setCollapsed] = useState<ReadonlySet<string>>(new Set());
   const [dialog, setDialog] = useState<DialogState>(null);
   const [deleting, setDeleting] = useState<SprintSummary | null>(null);
+  // Aktif sprint'e ekleme/çıkarma kapsam değişikliğidir; onay istenir (brief §6.1.4).
+  const [scopeChange, setScopeChange] = useState<{
+    itemIds: string[];
+    sprint: SprintSummary;
+    adding: boolean;
+  } | null>(null);
 
   const items = useMemo(() => backlog.data?.items ?? [], [backlog.data]);
   const visible = useMemo(() => filterBacklog(items, filter), [items, filter]);
@@ -70,7 +77,7 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
   const canRank = perms.includes(S.BACKLOG_RANK) && !space.data.archived;
   const reorderable = canRank && !isFiltered(filter);
 
-  const moveItems = (itemIds: string[], sprintId: string | null) =>
+  const performMove = (itemIds: string[], sprintId: string | null) =>
     move.mutate(
       { itemIds, sprintId },
       {
@@ -87,6 +94,29 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
       },
     );
 
+  /** Öğelerin şu an bulunduğu aktif sprint (varsa): oradan çıkarmak kapsamı küçültür. */
+  const activeSourceOf = (itemIds: string[]) =>
+    sprints.find(
+      (sprint, index) =>
+        sprint.status === 'ACTIVE' &&
+        itemIds.every((id) => sprintDetails[index]?.data?.items.some((i) => i.id === id)),
+    );
+
+  /** Aktif sprint söz konusuysa önce onay alır (brief §6.1.4). */
+  const moveItems = (itemIds: string[], sprintId: string | null) => {
+    const target = sprints.find((s) => s.id === sprintId);
+    if (target?.status === 'ACTIVE') {
+      setScopeChange({ itemIds, sprint: target, adding: true });
+      return;
+    }
+    const source = sprintId === null ? activeSourceOf(itemIds) : undefined;
+    if (source) {
+      setScopeChange({ itemIds, sprint: source, adding: false });
+      return;
+    }
+    performMove(itemIds, sprintId);
+  };
+
   const toggle = (set: ReadonlySet<string>, id: string, on: boolean) => {
     const next = new Set(set);
     if (on) next.add(id);
@@ -102,7 +132,6 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
         name={space.data.name}
         archived={space.data.archived}
         canUnarchive={perms.includes(S.SPACE_SETTINGS)}
-        meta={<Badge variant="secondary">{t('backlog.title')}</Badge>}
         actions={
           canPlan && (
             <Button size="sm" onClick={() => setDialog({ kind: 'create' })}>
@@ -111,7 +140,9 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
             </Button>
           )
         }
-      />
+      >
+        <ScrumTabs spaceId={spaceId} current="backlog" />
+      </ContainerHeader>
 
       <div className="mx-auto flex max-w-5xl flex-col gap-4 px-4 py-6 sm:px-6">
         {sprints.map((sprint, index) => {
@@ -130,6 +161,17 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
               onMove={(itemId, target) => moveItems([itemId], target)}
               onEdit={() => setDialog({ kind: 'edit', sprint })}
               onDelete={() => setDeleting(sprint)}
+              actions={
+                <SprintActions
+                  sprint={sprint}
+                  permissions={perms}
+                  goalRequired={space.data.sprintGoalRequired}
+                  plannedOthers={sprints.filter(
+                    (s) => s.status === 'PLANNED' && s.id !== sprint.id,
+                  )}
+                  archived={space.data.archived}
+                />
+              }
             />
           );
         })}
@@ -276,6 +318,25 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
         weeks={space.data.sprintLengthWeeks}
         existing={sprints}
         editing={dialog?.kind === 'edit' ? dialog.sprint : undefined}
+      />
+      <ConfirmDialog
+        open={scopeChange !== null}
+        onOpenChange={(open) => !open && setScopeChange(null)}
+        title={t('sprints.scopeChangeTitle')}
+        description={t(
+          scopeChange?.adding ? 'sprints.scopeChangeAdd' : 'sprints.scopeChangeRemove',
+          {
+            name: scopeChange?.sprint.name,
+            count: scopeChange?.itemIds.length,
+          },
+        )}
+        confirmLabel={t('sprints.scopeChangeConfirm')}
+        pending={move.isPending}
+        onConfirm={() => {
+          if (!scopeChange) return;
+          performMove(scopeChange.itemIds, scopeChange.adding ? scopeChange.sprint.id : null);
+          setScopeChange(null);
+        }}
       />
       <ConfirmDialog
         open={deleting !== null}

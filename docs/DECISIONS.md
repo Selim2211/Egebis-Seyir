@@ -493,3 +493,15 @@
   - Satırlar (swimlane): yok, atanan (birden çok atanan varsa ilki), Epic (en yakın Epic atası), öncelik. Satır seçimi adreste tutulur (`lane`); satıra bırakmak yalnızca sütunu belirler.
   - Sütundaki sıra Board'da elle değiştirilemez (Backlog önceliği/List sırası kullanılır). WIP limiti ve kart alanı seçimi sonraya (brief §5.9 [F2]).
 - **Alternatifler:** Sütun içi elle sıralama (Backlog önceliğiyle çelişir); KeyboardSensor ile klavye sürükleme (sütunlar arası erişilebilir hareket zor, menü daha güvenilir).
+
+## ADR-064 — Sprint yaşam döngüsü ve Planlama
+
+- **Tarih:** 2026-10-03 · **Durum:** Kabul (brief §5.6, §6.1; kullanıcı kararı ADR-060; ayrıntılar geliştirici varsayılanı)
+- **Karar:**
+  - **Başlat** (`sprint.start`): yalnızca planlı sprint; Space'te aktif sprint varsa 409. Sprint Goal Space ayarıyla (`sprintGoalRequired`, varsayılan açık) zorunlu; kapalıysa başlatma penceresi yalnızca uyarır. Boş sprint ve tahminsiz öğe de uyarıdır, engel değildir.
+  - **Tamamla** (`sprint.complete`): yalnızca aktif sprint. Bitmeyen işler için seçim zorunludur: sonraki **planlı** sprint'e devret (aynı Space) veya Backlog'a gönder; Done kategorisindeki öğeler sprint'te kalır. Çıkan her öğe için `REMOVED/UNFINISHED` olayı (devirde ayrıca devralan sprint'te `ADDED/CARRIED_OVER`) ve öğe aktivitesi yazılır. **Velocity tamamlama anında dondurulur** (`sprints.completedPoints` = Done puanı); sonradan öğe yeniden açılsa değişmez (brief §6.1.7, §6.1.8).
+  - **İptal** (`sprint.cancel`: Product Owner ve yöneticiler): planlı veya aktif sprint; tüm öğeleri Backlog'a döner. Tamamlanmış/iptal sprint tekrar iptal edilemez.
+  - **Kapsam değişikliği:** aktif sprint'e ekleme veya çıkarma önce onay penceresi gösterir (brief §6.1.4); sunucu olayı `SCOPE_CHANGE` işaretler (ADR-061).
+  - **Planlama sayfası:** solda Backlog, sağda seçili (planlı/aktif) sprint; öğeler iki bölme arasında sürüklenir, aynı hareketle konum belirlenir. Kapasite göstergesi, toplam puanın tamamlanmış son 3 sprint'in ortalama velocity'sine oranıdır (%90 ve üstü sarı, üstü kırmızı); referans yoksa gösterge yoktur. Kapasite notu serbest metin olarak yanında görünür.
+  - **Gezinme:** Backlog · Planlama · Sprint panosu · Geçmiş sekmeleri. Geçmiş sayfası tüm sprint'leri listeler; kapanan sprint'in panosu salt-okunur açılır.
+- **Alternatifler:** Tamamlarken bitmeyenleri sormadan devretmek (brief "seçenek sunulur" der); velocity'yi her seferinde Done öğelerden yeniden hesaplamak (geçmiş sprint değişebilir); planlamada sürüklemeyi yalnızca tutamaçla sınırlamak (kullanıcı satırın her yerini bekler).

@@ -4,6 +4,7 @@ import {
   SprintDetailSchema,
   SprintsResponseSchema,
   type BacklogResponse,
+  type CompleteSprintRequest,
   type CreateSprintRequest,
   type MoveBacklogItemsRequest,
   type UpdateSprintRequest,
@@ -97,3 +98,23 @@ export function useMoveBacklogItems(spaceId: string) {
     onSettled: () => qc.invalidateQueries({ queryKey: ['workspaces', workspaceId] }),
   });
 }
+
+// ---------- Yaşam döngüsü (Faz 2.3) ----------
+
+export const useStartSprint = () =>
+  useWorkspaceMutation((id, sprintId: string) =>
+    apiRequest(`${ws(id)}/sprints/${sprintId}/start`, NoContent, { method: 'POST' }),
+  );
+
+export const useCompleteSprint = () =>
+  useWorkspaceMutation((id, input: { sprintId: string; body: CompleteSprintRequest }) =>
+    apiRequest(`${ws(id)}/sprints/${input.sprintId}/complete`, NoContent, {
+      method: 'POST',
+      body: input.body,
+    }),
+  );
+
+export const useCancelSprint = () =>
+  useWorkspaceMutation((id, sprintId: string) =>
+    apiRequest(`${ws(id)}/sprints/${sprintId}/cancel`, NoContent, { method: 'POST' }),
+  );

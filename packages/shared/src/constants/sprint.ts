@@ -3,7 +3,12 @@ export const SPRINT_STATUSES = ['PLANNED', 'ACTIVE', 'COMPLETED', 'CANCELLED'] a
 export type SprintStatus = (typeof SPRINT_STATUSES)[number];
 
 /** Sprint'e eklenme nedeni (ADR-061): aktif sprint'e sonradan ekleme/çıkarma scope change sayılır. */
-export const SPRINT_ITEM_REASONS = ['PLANNED', 'SCOPE_CHANGE', 'CARRIED_OVER'] as const;
+export const SPRINT_ITEM_REASONS = [
+  'PLANNED',
+  'SCOPE_CHANGE',
+  'CARRIED_OVER',
+  'UNFINISHED',
+] as const;
 export type SprintItemReason = (typeof SPRINT_ITEM_REASONS)[number];
 
 /** Sprint'e doğrudan girebilen tipler; Epic girmez, Sub-task üstünü izler (ADR-061). */

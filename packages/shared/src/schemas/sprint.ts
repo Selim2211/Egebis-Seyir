@@ -44,6 +44,20 @@ export const UpdateSprintRequestSchema = z
   });
 export type UpdateSprintRequest = z.infer<typeof UpdateSprintRequestSchema>;
 
+// ---------- Yaşam döngüsü ----------
+
+/** POST /api/workspaces/:wid/sprints/:sprintId/complete — bitmeyen işlerin akıbeti zorunlu seçimdir. */
+export const CompleteSprintRequestSchema = z
+  .object({
+    unfinished: z.enum(['BACKLOG', 'NEXT_SPRINT']),
+    nextSprintId: z.uuid().optional(),
+  })
+  .refine((v) => v.unfinished !== 'NEXT_SPRINT' || v.nextSprintId !== undefined, {
+    path: ['nextSprintId'],
+    message: 'NEXT_SPRINT_REQUIRED',
+  });
+export type CompleteSprintRequest = z.infer<typeof CompleteSprintRequestSchema>;
+
 // ---------- Okuma ----------
 
 export const SprintSummarySchema = z.object({
@@ -63,6 +77,8 @@ export const SprintSummarySchema = z.object({
   doneItemCount: z.int(),
   donePoints: z.number(),
   unestimatedCount: z.int(),
+  /** Tamamlanırken donmuş velocity (Done puanı); tamamlanmamış sprint'te null. */
+  completedPoints: z.number().nullable(),
 });
 export type SprintSummary = z.infer<typeof SprintSummarySchema>;
 

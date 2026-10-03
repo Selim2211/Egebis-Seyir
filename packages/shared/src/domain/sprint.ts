@@ -82,3 +82,26 @@ export function sprintTotals(
   }
   return totals;
 }
+
+export const VELOCITY_WINDOW = 3;
+
+/**
+ * Planlama referansı: tamamlanmış son `window` sprint'in ortalama velocity'si (donmuş puan).
+ * Hiç tamamlanmış sprint yoksa null; ortalama bir sayıya yuvarlanır (bir ondalık).
+ */
+export function averageVelocity(
+  sprints: ReadonlyArray<{
+    status: SprintStatus;
+    endDate: string;
+    completedPoints: number | null;
+  }>,
+  window: number = VELOCITY_WINDOW,
+): number | null {
+  const recent = sprints
+    .filter((s) => s.status === 'COMPLETED' && s.completedPoints !== null)
+    .sort((a, b) => (a.endDate < b.endDate ? 1 : a.endDate > b.endDate ? -1 : 0))
+    .slice(0, window);
+  if (recent.length === 0) return null;
+  const total = recent.reduce((sum, s) => sum + (s.completedPoints ?? 0), 0);
+  return Math.round((total / recent.length) * 10) / 10;
+}

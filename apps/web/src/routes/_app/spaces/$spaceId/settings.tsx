@@ -108,6 +108,7 @@ function GeneralForm({ space }: { space: SpaceDetail }) {
     isPrivate: space.isPrivate,
     scrumEnabled: space.scrumEnabled,
     sprintLengthWeeks: space.sprintLengthWeeks,
+    sprintGoalRequired: space.sprintGoalRequired,
     estimationScale: space.estimationScale,
   };
   const [values, setValues] = useState(initial);

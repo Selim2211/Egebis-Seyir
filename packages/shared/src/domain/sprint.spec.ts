@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  averageVelocity,
   checkSprintDates,
   sprintDays,
   sprintEligibility,
@@ -74,5 +75,38 @@ describe('sprintTotals', () => {
 
   it('boş liste sıfır döner', () => {
     expect(sprintTotals([]).points).toBe(0);
+  });
+});
+
+describe('averageVelocity', () => {
+  const done = (endDate: string, completedPoints: number | null) => ({
+    status: 'COMPLETED' as const,
+    endDate,
+    completedPoints,
+  });
+
+  it("son üç tamamlanmış sprint'in ortalaması", () => {
+    const sprints = [
+      done('2026-07-01', 100), // pencere dışı
+      done('2026-08-01', 20),
+      done('2026-09-01', 25),
+      done('2026-10-01', 30),
+    ];
+    expect(averageVelocity(sprints)).toBe(25);
+  });
+
+  it("tamamlanmamış ve puansız sprint'ler sayılmaz; hiç yoksa null", () => {
+    expect(averageVelocity([])).toBeNull();
+    expect(
+      averageVelocity([
+        { status: 'ACTIVE', endDate: '2026-10-01', completedPoints: null },
+        { status: 'CANCELLED', endDate: '2026-09-01', completedPoints: 4 },
+        done('2026-08-01', null),
+      ]),
+    ).toBeNull();
+  });
+
+  it('bir ondalığa yuvarlar', () => {
+    expect(averageVelocity([done('2026-09-01', 7), done('2026-10-01', 8)])).toBe(7.5);
   });
 });

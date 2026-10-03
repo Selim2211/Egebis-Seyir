@@ -20,6 +20,7 @@ const spaceFields = {
   isPrivate: z.boolean(),
   scrumEnabled: z.boolean(),
   sprintLengthWeeks: z.int().min(SPRINT_LENGTH_WEEKS.min).max(SPRINT_LENGTH_WEEKS.max),
+  sprintGoalRequired: z.boolean(),
   estimationScale: z.enum(ESTIMATION_SCALES),
 };
 
@@ -37,6 +38,7 @@ export const CreateSpaceRequestSchema = z.object({
   isPrivate: spaceFields.isPrivate.default(false),
   scrumEnabled: spaceFields.scrumEnabled.default(true),
   sprintLengthWeeks: spaceFields.sprintLengthWeeks.default(SPRINT_LENGTH_WEEKS.default),
+  sprintGoalRequired: spaceFields.sprintGoalRequired.default(true),
   estimationScale: spaceFields.estimationScale.default('FIBONACCI'),
   members: z.array(SpaceMemberInputSchema).max(500).default([]),
 });
@@ -73,6 +75,7 @@ export const SpaceDetailSchema = z.object({
   ...spaceSummary,
   description: z.string().nullable(),
   sprintLengthWeeks: z.int(),
+  sprintGoalRequired: z.boolean(),
   estimationScale: z.enum(ESTIMATION_SCALES),
   archived: z.boolean(),
   myRole: z.enum(SPACE_ROLES).nullable(),

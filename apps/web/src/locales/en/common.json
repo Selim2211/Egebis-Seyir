@@ -312,7 +312,12 @@
     "SPRINT_READONLY": "A completed or cancelled sprint cannot be changed.",
     "SPRINT_NOT_PLANNED": "Only planned sprints can be deleted.",
     "SPRINT_DATES_LOCKED": "The dates of an active sprint cannot be changed.",
-    "SPRINT_ITEM_NOT_ELIGIBLE": "Only top-level Stories, Bugs and Tasks can join a sprint; completed items cannot."
+    "SPRINT_ITEM_NOT_ELIGIBLE": "Only top-level Stories, Bugs and Tasks can join a sprint; completed items cannot.",
+    "SPRINT_ACTIVE_EXISTS": "This Space already has an active sprint; complete it first.",
+    "SPRINT_GOAL_REQUIRED": "A sprint goal is required to start the sprint.",
+    "SPRINT_NOT_ACTIVE": "Only an active sprint can be completed.",
+    "SPRINT_CANCEL_NOT_ALLOWED": "A completed or cancelled sprint cannot be cancelled.",
+    "SPRINT_NEXT_INVALID": "The carry-over sprint must be planned and in the same Space."
   },
   "spaceRoles": {
     "PRODUCT_OWNER": "Product Owner",
@@ -357,7 +362,9 @@
     "chooseMember": "Choose a member…",
     "roleFor": "Scrum role for {{name}}",
     "removeMember": "Remove {{name}}",
-    "noOtherMembers": "No other workspace members to add."
+    "noOtherMembers": "No other workspace members to add.",
+    "goalRequired": "Sprint goal required",
+    "goalRequiredHelp": "When on, a sprint without a goal cannot start; when off you only get a warning."
   },
   "structure": {
     "newList": "Create list",
@@ -824,7 +831,33 @@
       "required": "This field is required.",
       "END_BEFORE_START": "The end cannot be before the start.",
       "TOO_LONG": "A sprint can last at most 8 weeks."
-    }
+    },
+    "start": "Start",
+    "complete": "Complete",
+    "cancel": "Cancel sprint",
+    "cancelAction": "Cancel sprint {{name}}",
+    "startTitle": "Start {{name}}?",
+    "goalRequired": "A sprint goal is required in this Space. Edit the sprint and write one.",
+    "goalMissingWarn": "No sprint goal has been entered.",
+    "emptyWarn": "The sprint has no items yet.",
+    "unestimatedWarn": "{{count}} items have no estimate.",
+    "started": "{{name}} started.",
+    "completeTitle": "Complete {{name}}?",
+    "completeSummary": "{{done}} / {{total}} items done · {{points}} points completed",
+    "allDone": "All items are done. The sprint will be completed and its velocity recorded.",
+    "unfinishedQuestion": "{{count}} items are not done. What should happen to them?",
+    "carryOver": "Carry over to the next sprint",
+    "nextSprint": "Next sprint",
+    "noNextSprint": "There is no planned sprint to carry over to; create one first.",
+    "toBacklog": "Send to the Backlog",
+    "completed": "{{name}} completed.",
+    "cancelTitle": "Cancel {{name}}?",
+    "cancelBody": "The sprint is cancelled and its {{count}} items return to the Backlog. This cannot be undone.",
+    "cancelled": "{{name}} cancelled.",
+    "scopeChangeTitle": "Sprint scope is changing",
+    "scopeChangeAdd": "{{name}} is active; adding {{count}} items counts as a scope change and shows in reports.",
+    "scopeChangeRemove": "{{name}} is active; removing {{count}} items counts as a scope change and shows in reports.",
+    "scopeChangeConfirm": "Continue"
   },
   "board": {
     "title": "Sprint board",
@@ -844,6 +877,29 @@
     "noEpic": "No Epic",
     "hint": "Drag a card to another column to change its status.",
     "noSprintTitle": "No planned or active sprint",
-    "noSprintBody": "The board appears here once you create a sprint and move items into it."
+    "noSprintBody": "The board appears here once you create a sprint and move items into it.",
+    "readOnlyCompleted": "This sprint is completed; the board is read-only.",
+    "readOnlyCancelled": "This sprint was cancelled; the board is read-only."
+  },
+  "scrumTabs": {
+    "label": "Scrum"
+  },
+  "planning": {
+    "title": "Planning",
+    "noSprint": "No sprint to plan. Create one on the Backlog page.",
+    "backlogSummary": "{{count}} items",
+    "backlogEmpty": "The Backlog is empty; everything is in a sprint.",
+    "sprintEmpty": "Drag items here from the Backlog on the left.",
+    "capacity": "Capacity",
+    "capacityText": "{{planned}} points · average of recent sprints {{velocity}} ({{percent}}%)",
+    "overCapacity": "above the average",
+    "noVelocity": "No completed sprint yet; the capacity indicator appears after the first one."
+  },
+  "history": {
+    "title": "History",
+    "empty": "No sprints yet.",
+    "average": "Average velocity of recent sprints: {{velocity}} points.",
+    "completedPoints": "{{points}} points completed",
+    "progress": "{{done}} / {{total}} items done"
   }
 }

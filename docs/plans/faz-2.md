@@ -8,7 +8,7 @@
 | --- | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
 | 2.1 | Sprint modeli + Product Backlog | Sprint CRUD (planlı), sprint↔öğe atama ve geçmiş, `backlogRank`, Backlog sayfası (sürükle-sırala, Epic filtresi, tahminsiz vurgu, sprint'e taşı)          | Sırada     |
 | 2.2 | Board                           | Durum sütunları, kart sürükle-bırak ile durum değişimi, swimlane (atanan/epic/öncelik), aktif sprint ve List kaynakları                                   | Tamamlandı |
-| 2.3 | Sprint yaşam döngüsü + Planning | Başlat/tamamla/iptal kuralları, Planning ekranı (Backlog ↔ Sprint, puan/kapasite), scope change uyarısı, devir akışı, geçmiş sprintler, Sprint Goal ayarı | Bekliyor   |
+| 2.3 | Sprint yaşam döngüsü + Planning | Başlat/tamamla/iptal kuralları, Planning ekranı (Backlog ↔ Sprint, puan/kapasite), scope change uyarısı, devir akışı, geçmiş sprintler, Sprint Goal ayarı | Tamamlandı |
 | 2.4 | DoD/DoR + Sprint Review         | Space DoD/DoR maddeleri, Done'da DoD checklist, sprint'e alırken DoR işareti, Sprint Review özeti                                                         | Bekliyor   |
 | 2.5 | Bildirimler                     | Bildirim merkezi, atama/mention/durum/yorum/sprint olayları, anında e-posta, tür bazında tercih                                                           | Bekliyor   |
 | 2.6 | Burndown ve Velocity            | Günlük snapshot işi, Sprint Burndown, Velocity grafiği, rapor ekranı                                                                                      | Bekliyor   |
@@ -38,3 +38,13 @@ Karar: ADR-063.
 **Web**: `features/board/*` (saf `board-model`: sütun × satır dağılımı, Epic bulma, toplamlar; `board-view`: dnd-kit ile sürükle-bırak; `board-card`; sprint panosu sayfası ve List Board'u). Rotalar: `/spaces/$spaceId/board` (adres: `sprint`, `lane`, `item`), List sayfasında `view=board&lane=`. Kenar çubuğunda ve Space sayfasında "Sprint panosu" bağlantısı.
 
 **Doğrulama (2026-10-03):** test:int 11 dosya / 124 test; web birim 53; Playwright `faz2-board` 4/4 (menüyle ve gerçek fare sürüklemesiyle durum değişimi, yenileyince kalıcılık, satırlar, yan panel, List Board'u); tüm paket 33 senaryo yeşil, yalnızca Mailpit gerektiren `faz1-auth` bekliyor. Dokunmatik cihazda sürükleme elle denenmedi (menü yolu var).
+
+## 2.3 Ayrıntı
+
+Karar: ADR-064 (ve kullanıcı kararı ADR-060).
+
+**API** (`/api/workspaces/:wid`): `POST sprints/:id/start | complete | cancel`. `complete` gövdesi `{ unfinished: 'BACKLOG' | 'NEXT_SPRINT', nextSprintId? }`. Yeni hata kodları: `SPRINT_ACTIVE_EXISTS`, `SPRINT_GOAL_REQUIRED`, `SPRINT_NOT_ACTIVE`, `SPRINT_CANCEL_NOT_ALLOWED`, `SPRINT_NEXT_INVALID`. Veri: `spaces.sprintGoalRequired`, `sprints.completedPoints`, `SprintItemReason.UNFINISHED`.
+
+**Web**: `SprintActions` (başlat/tamamla/iptal pencereleri; Backlog, Planlama ve Sprint panosunda), Planlama sayfası (`/spaces/$spaceId/planning`, iki bölme + kapasite göstergesi), Geçmiş sayfası (`/spaces/$spaceId/sprints`), `ScrumTabs`, Space ayarlarında "Sprint hedefi zorunlu" anahtarı, kapanan sprint için salt-okunur pano, kapsam değişikliği onayı.
+
+**Doğrulama (2026-10-03):** test:int 12 dosya / 137 test (`sprint-lifecycle` 13); shared 134, web birim 59; Playwright `faz2-lifecycle` 7/7 (başlat → kapsam değişikliği → tamamla/devret → geçmiş → planlamada gerçek fare sürüklemesi → iptal → hedef zorunluluğu ve ayarı); tüm paket 39 yeşil, yalnızca Mailpit gerektiren `faz1-auth` bekliyor. Not: bu çalışma sırasında Space formunda ayar anahtarının eklenmediği (sessiz kalmış bir metin değişimi) lint ile yakalandı ve düzeltildi.

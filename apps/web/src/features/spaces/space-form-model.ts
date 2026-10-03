@@ -16,6 +16,7 @@ export interface SpaceFormValues {
   isPrivate: boolean;
   scrumEnabled: boolean;
   sprintLengthWeeks: number;
+  sprintGoalRequired: boolean;
   estimationScale: EstimationScale;
 }
 
@@ -28,6 +29,7 @@ export const EMPTY_SPACE: SpaceFormValues = {
   isPrivate: false,
   scrumEnabled: true,
   sprintLengthWeeks: SPRINT_LENGTH_WEEKS.default,
+  sprintGoalRequired: true,
   estimationScale: 'FIBONACCI',
 };
 

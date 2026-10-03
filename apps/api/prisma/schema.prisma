@@ -73,6 +73,8 @@ enum SprintItemReason {
   PLANNED
   SCOPE_CHANGE
   CARRIED_OVER
+  /// Sprint tamamlanırken/iptal edilirken bitmemiş olarak çıkarıldı.
+  UNFINISHED
 }
 
 enum ChecklistKind {
@@ -274,28 +276,30 @@ model ActivityEvent {
 // archivedAt: arşiv; deletedAt: çöp kutusu, 30 gün sonra kalıcı silinir (ADR-041).
 
 model Space {
-  id                String          @id @default(uuid(7)) @db.Uuid
-  workspaceId       String          @db.Uuid
-  workspace         Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  name              String
+  id                 String          @id @default(uuid(7)) @db.Uuid
+  workspaceId        String          @db.Uuid
+  workspace          Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  name               String
   /// Güncel anahtar; kullanılmış tüm anahtarlar space_keys'te rezerve (ADR-033, ADR-043).
-  key               String
-  color             String
-  icon              String?
-  description       String?
-  isPrivate         Boolean         @default(false)
-  scrumEnabled      Boolean         @default(true)
-  sprintLengthWeeks Int             @default(2)
-  estimationScale   EstimationScale @default(FIBONACCI)
-  rank              String
+  key                String
+  color              String
+  icon               String?
+  description        String?
+  isPrivate          Boolean         @default(false)
+  scrumEnabled       Boolean         @default(true)
+  sprintLengthWeeks  Int             @default(2)
+  /// Sprint başlatmak için hedef zorunlu mu (ADR-060); kapalıysa yalnızca uyarı.
+  sprintGoalRequired Boolean         @default(true)
+  estimationScale    EstimationScale @default(FIBONACCI)
+  rank               String
   /// Okunabilir ID sayacı (ADR-044); öğe oluşturulurken atomik artırılır.
-  itemCounter       Int             @default(0)
-  archivedAt        DateTime?       @db.Timestamptz
-  deletedAt         DateTime?       @db.Timestamptz
-  deletedById       String?         @db.Uuid
-  createdById       String?         @db.Uuid
-  createdAt         DateTime        @default(now()) @db.Timestamptz
-  updatedAt         DateTime        @updatedAt @db.Timestamptz
+  itemCounter        Int             @default(0)
+  archivedAt         DateTime?       @db.Timestamptz
+  deletedAt          DateTime?       @db.Timestamptz
+  deletedById        String?         @db.Uuid
+  createdById        String?         @db.Uuid
+  createdAt          DateTime        @default(now()) @db.Timestamptz
+  updatedAt          DateTime        @updatedAt @db.Timestamptz
 
   keys     SpaceKey[]
   members  SpaceMember[]
@@ -689,23 +693,25 @@ model Attachment {
 // Space başına en çok bir ACTIVE sprint: migration'daki kısmi benzersiz dizin (brief §6.1.1).
 
 model Sprint {
-  id           String       @id @default(uuid(7)) @db.Uuid
-  workspaceId  String       @db.Uuid
-  workspace    Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  spaceId      String       @db.Uuid
-  space        Space        @relation(fields: [spaceId], references: [id], onDelete: Cascade)
-  name         String
-  goal         String?
-  startDate    DateTime     @db.Date
-  endDate      DateTime     @db.Date
-  capacityNote String?
-  status       SprintStatus @default(PLANNED)
-  startedAt    DateTime?    @db.Timestamptz
-  completedAt  DateTime?    @db.Timestamptz
-  cancelledAt  DateTime?    @db.Timestamptz
-  createdById  String?      @db.Uuid
-  createdAt    DateTime     @default(now()) @db.Timestamptz
-  updatedAt    DateTime     @updatedAt @db.Timestamptz
+  id              String       @id @default(uuid(7)) @db.Uuid
+  workspaceId     String       @db.Uuid
+  workspace       Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  spaceId         String       @db.Uuid
+  space           Space        @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  name            String
+  goal            String?
+  startDate       DateTime     @db.Date
+  endDate         DateTime     @db.Date
+  capacityNote    String?
+  status          SprintStatus @default(PLANNED)
+  startedAt       DateTime?    @db.Timestamptz
+  completedAt     DateTime?    @db.Timestamptz
+  cancelledAt     DateTime?    @db.Timestamptz
+  /// Tamamlanırken donmuş velocity: Done kategorisindeki puan toplamı (brief §6.1.7).
+  completedPoints Float?
+  createdById     String?      @db.Uuid
+  createdAt       DateTime     @default(now()) @db.Timestamptz
+  updatedAt       DateTime     @updatedAt @db.Timestamptz
 
   items  WorkItem[]
   events SprintItemEvent[]
