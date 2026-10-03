@@ -1020,7 +1020,14 @@
       "actual": "Kalan",
       "chartLabel": "{{name}} sprint burndown grafiği",
       "planned": "Sprint başlayınca burndown görünür.",
-      "scopeHint": "Kırmızı çizgiler sprint başladıktan sonra eklenen (+) ya da çıkarılan (−) puanı gösterir."
+      "scopeHint": "Kırmızı çizgiler sprint başladıktan sonra eklenen (+) ya da çıkarılan (−) puanı gösterir.",
+      "view": "Grafik türü",
+      "mode": {
+        "burndown": "Burndown",
+        "burnup": "Burn-up"
+      },
+      "scopeLine": "Toplam kapsam",
+      "doneLine": "Biten"
     },
     "velocity": {
       "title": "Velocity",
@@ -1191,5 +1198,55 @@
     "barLabel": "{{key}} {{title}}, {{start}} – {{due}} {{critical}}",
     "onCritical": "(kritik yolda)",
     "legend": "Kırmızı çerçeve ve ok kritik yolu, kesikli turuncu ok çakışan bağımlılığı gösterir."
+  },
+  "dashboard": {
+    "link": "Panel",
+    "title": "Panel",
+    "range": "Dönem",
+    "lastDays": "Son {{count}} gün",
+    "customize": "Özelleştir",
+    "exportCsv": "CSV indir",
+    "hiddenWidgets": "Gizli widget’lar",
+    "allHidden": "Tüm widget’lar gizli. Özelleştir’den geri ekleyebilirsin.",
+    "moveUp": "{{name}} widget’ını yukarı taşı",
+    "moveDown": "{{name}} widget’ını aşağı taşı",
+    "grow": "{{name}} widget’ını genişlet",
+    "shrink": "{{name}} widget’ını daralt",
+    "hide": "{{name}} widget’ını gizle",
+    "noScrum": "Bu Space’te Scrum kapalı.",
+    "noActiveSprint": "Aktif sprint yok.",
+    "noCompleted": "Bu dönemde tamamlanan iş yok.",
+    "cfdLabel": "Kümülatif akış grafiği",
+    "throughputLabel": "Haftalık tamamlanan iş grafiği",
+    "bugsLabel": "Haftalık açılan ve kapanan bug grafiği",
+    "completed": "Tamamlanan",
+    "opened": "Açılan",
+    "closed": "Kapanan",
+    "sample": "Tamamlanan iş",
+    "leadAvg": "Lead time ort.",
+    "leadMedian": "Lead time medyan",
+    "cycleAvg": "Cycle time ort.",
+    "cycleMedian": "Cycle time medyan",
+    "cycleP85": "Cycle time P85",
+    "days": "{{value}} gün",
+    "cat": {
+      "NOT_STARTED": "Başlamadı",
+      "ACTIVE": "Devam ediyor",
+      "DONE": "Tamamlandı"
+    },
+    "csv": {
+      "date": "Tarih",
+      "week": "Hafta başı"
+    },
+    "widget": {
+      "sprint": "Aktif sprint",
+      "velocity": "Velocity",
+      "cfd": "Kümülatif akış (CFD)",
+      "throughput": "Throughput",
+      "cycle": "Lead ve cycle time",
+      "bugs": "Bug trendi",
+      "workload": "İş yükü",
+      "epics": "Epic ilerlemesi"
+    }
   }
 }

@@ -9,6 +9,9 @@ export const BurndownPointSchema = z.object({
   ideal: z.number(),
   remaining: z.number().nullable(),
   scopeChange: z.number(),
+  /** Burn-up serileri: toplam kapsam ve biten puan. */
+  total: z.number().nullable(),
+  done: z.number().nullable(),
 });
 
 /** GET /api/workspaces/:wid/sprints/:sprintId/burndown */

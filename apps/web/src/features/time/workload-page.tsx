@@ -1,5 +1,5 @@
-import { formatMinutes, SPACE_PERMISSIONS as S, WorkloadSchema } from '@scrum/shared';
-import { queryOptions, useQuery } from '@tanstack/react-query';
+import { formatMinutes, SPACE_PERMISSIONS as S } from '@scrum/shared';
+import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NativeSelect } from '@/components/form';
@@ -7,18 +7,8 @@ import { ContainerHeader, LoadingState, NotFoundState } from '@/features/spaces/
 import { spaceQuery } from '@/features/spaces/queries';
 import { sprintsQuery } from '@/features/sprints/queries';
 import { useCurrentWorkspace } from '@/features/workspace/queries';
-import { apiRequest } from '@/lib/api';
 import { cn } from '@/lib/utils';
-
-const workloadQuery = (workspaceId: string, spaceId: string, sprintId: string) =>
-  queryOptions({
-    queryKey: ['workspaces', workspaceId, 'spaces', spaceId, 'workload', sprintId],
-    queryFn: () =>
-      apiRequest(
-        `/workspaces/${workspaceId}/spaces/${spaceId}/workload${sprintId ? `?sprintId=${sprintId}` : ''}`,
-        WorkloadSchema,
-      ),
-  });
+import { workloadQuery } from './queries';
 
 /** İş yükü (brief §14 Faz 4): kişi başına açık iş, puan, kalan süre, geciken ve yaklaşan işler (ADR-076). */
 export function WorkloadPage({ spaceId }: { spaceId: string }) {

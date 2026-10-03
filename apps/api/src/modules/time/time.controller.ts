@@ -8,10 +8,14 @@ import {
   Param,
   ParseUUIDPipe,
   Post,
+  Put,
   Query,
 } from '@nestjs/common';
 import {
   CreatedSchema,
+  DashboardSchema,
+  FlowSchema,
+  FLOW_DEFAULT_DAYS,
   DateOnlySchema,
   ItemTimeSchema,
   LogTimeRequestSchema,
@@ -20,6 +24,8 @@ import {
   TimesheetSchema,
   WorkloadSchema,
   type Created,
+  type Dashboard,
+  type Flow,
   type ItemTime,
   type MyTimer,
   type Timesheet,
@@ -28,6 +34,8 @@ import {
 import { createZodDto, ZodResponse } from 'nestjs-zod';
 import { z } from 'zod';
 import { RequireSpacePermission } from '../auth/decorators';
+import { DashboardService } from './dashboard.service';
+import { FlowService } from './flow.service';
 import { TimeService } from './time.service';
 import { WorkloadService } from './workload.service';
 
@@ -35,6 +43,9 @@ class ItemTimeDto extends createZodDto(ItemTimeSchema) {}
 class LogTimeDto extends createZodDto(LogTimeRequestSchema) {}
 class CreatedDto extends createZodDto(CreatedSchema) {}
 class MyTimerDto extends createZodDto(MyTimerSchema) {}
+class DashboardDto extends createZodDto(DashboardSchema) {}
+class FlowDto extends createZodDto(FlowSchema) {}
+class FlowQueryDto extends createZodDto(z.object({ days: z.coerce.number().int().optional() })) {}
 class WorkloadDto extends createZodDto(WorkloadSchema) {}
 class WorkloadQueryDto extends createZodDto(z.object({ sprintId: z.uuid().optional() })) {}
 class TimesheetDto extends createZodDto(TimesheetSchema) {}
@@ -52,6 +63,8 @@ export class TimeController {
   constructor(
     private readonly time: TimeService,
     private readonly workload: WorkloadService,
+    private readonly flow: FlowService,
+    private readonly dashboard: DashboardService,
   ) {}
 
   @Get('items/:itemId/time')
@@ -114,5 +127,28 @@ export class TimeController {
     @Query() query: WorkloadQueryDto,
   ): Promise<Workload> {
     return this.workload.workload(spaceId, query.sprintId);
+  }
+
+  /** Akış raporları: CFD, throughput, lead/cycle time, bug trendi (ADR-078). */
+  @Get('spaces/:spaceId/flow')
+  @RequireSpacePermission(S.REPORT_VIEW)
+  @ZodResponse({ type: FlowDto })
+  flowOf(@Uuid('spaceId') spaceId: string, @Query() query: FlowQueryDto): Promise<Flow> {
+    return this.flow.flow(spaceId, query.days ?? FLOW_DEFAULT_DAYS);
+  }
+
+  /** Kullanıcının bu Space için pano düzeni (ADR-078). */
+  @Get('spaces/:spaceId/dashboard')
+  @RequireSpacePermission(S.REPORT_VIEW)
+  @ZodResponse({ type: DashboardDto })
+  getDashboard(@Uuid('spaceId') spaceId: string): Promise<Dashboard> {
+    return this.dashboard.get(spaceId);
+  }
+
+  @Put('spaces/:spaceId/dashboard')
+  @RequireSpacePermission(S.REPORT_VIEW)
+  @ZodResponse({ type: DashboardDto })
+  setDashboard(@Uuid('spaceId') spaceId: string, @Body() body: DashboardDto): Promise<Dashboard> {
+    return this.dashboard.set(spaceId, body);
   }
 }

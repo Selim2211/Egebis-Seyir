@@ -10,7 +10,7 @@
 | 4.3 | Zaman takibi                   | Görevde süre kaydı (zamanlayıcı ve elle giriş), kişi/gün özeti                                                       | Tamamlandı |
 | 4.4 | Workload                       | Kişi bazlı iş yükü (puan/saat, kapasiteye karşı)                                                                     | Tamamlandı |
 | 4.5 | Gantt ve bağımlılık            | Görev çubukları, bağımlılık okları, kritik yol                                                                       | Tamamlandı |
-| 4.6 | Dashboard ve gelişmiş raporlar | Widget'lı pano, CFD, lead/cycle time, burn-up                                                                        | Sırada     |
+| 4.6 | Dashboard ve gelişmiş raporlar | Widget'lı pano, CFD, lead/cycle time, burn-up                                                                        | Tamamlandı |
 
 ## 4.1 Ayrıntı
 
@@ -59,3 +59,17 @@ Karar: ADR-077.
 **Web**: Space ağacında "Gantt" (`/spaces/:id/gantt`): hiyerarşik satırlar, ay ekseni, çubuklar, SVG bağımlılık okları, kritik yol vurgusu, çakışma ve döngü uyarıları; çubuğu sürükleyerek tarih kaydırma.
 
 **Doğrulama (2026-10-03):** shared `schedule` 8 test; `gantt.int-spec` 6 (tarihli/tarihsiz, kritik yol, çakışma, Epic ilerlemesi, silinen ve dış Space bağlantıları, yetki); Playwright `faz4-gantt` 2/2 (oklar, kritik yol, çakışma uyarısı, fare ile sürükleme kalıcı).
+
+## 4.6 Ayrıntı
+
+Karar: ADR-078.
+
+**API** (`/api/workspaces/:wid`): `GET spaces/:spaceId/flow?days=` (CFD, throughput, lead/cycle, bug trendi); `GET|PUT spaces/:spaceId/dashboard` (kullanıcıya özel düzen); burndown yanıtına burn-up serileri (`total`, `done`). Veri: `dashboard_layouts`. Saf hesaplar `domain/flow.ts`, `domain/dashboard.ts`, `domain/csv.ts`.
+
+**Web**: Space ağacında "Panel" (`/spaces/:id/dashboard`): 8 widget, özelleştirme (gizle/ekle, boyut, sıra), dönem seçici, "CSV indir"; Raporlar'da Burndown/Burn-up sekmesi; zaman çizelgesinde CSV.
+
+**Doğrulama (2026-10-03):** shared `flow` 6, `dashboard`/`csv` 7, `reports` 12; `flow.int-spec` 4 (geçmişten CFD, lead/cycle ve throughput, bug trendi ve Epic hariç, sınırlar ve özel Space), `dashboard.int-spec` 4; Playwright `faz4-dashboard` 4/4.
+
+## Faz 4 kapanışı
+
+4.1–4.6 tamamlandı. Brief §14 Faz 4 maddeleri karşılandı: Gantt/Timeline ve bağımlılıklar (kritik yol dahil), Takvim, Roadmap, Workload, zaman takibi, Dashboard ve gelişmiş raporlar (CFD, lead/cycle time, burn-up, throughput, bug trendi, CSV). Kapsam dışı bırakılanlar: kapasite planlaması (izin günleri), PDF dışa aktarma, çok Space'li pano.

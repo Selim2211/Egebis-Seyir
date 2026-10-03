@@ -116,9 +116,16 @@ export function ReportsPage({ spaceId }: { spaceId: string }) {
   );
 }
 
-function BurndownSection({ workspaceId, sprintId }: { workspaceId: string; sprintId: string }) {
+export function BurndownSection({
+  workspaceId,
+  sprintId,
+}: {
+  workspaceId: string;
+  sprintId: string;
+}) {
   const { t } = useTranslation();
   const query = useQuery(burndownQuery(workspaceId, sprintId));
+  const [mode, setMode] = useState<'burndown' | 'burnup'>('burndown');
   if (query.isPending) return <LoadingState />;
   if (query.isError) return <NotFoundState />;
   const data: SprintBurndown = query.data;
@@ -131,6 +138,24 @@ function BurndownSection({ workspaceId, sprintId }: { workspaceId: string; sprin
 
   return (
     <div className="mt-3">
+      <div role="tablist" aria-label={t('reports.burndown.view')} className="mb-3 flex gap-1">
+        {(['burndown', 'burnup'] as const).map((key) => (
+          <button
+            key={key}
+            type="button"
+            role="tab"
+            aria-selected={mode === key}
+            onClick={() => setMode(key)}
+            className={
+              mode === key
+                ? 'bg-accent rounded-md px-2.5 py-1 text-sm font-medium'
+                : 'text-muted-foreground hover:text-foreground rounded-md px-2.5 py-1 text-sm'
+            }
+          >
+            {t(`reports.burndown.mode.${key}`)}
+          </button>
+        ))}
+      </div>
       <dl className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         <Stat label={t('reports.burndown.baseline')} value={data.baseline} />
         <Stat label={t('reports.burndown.remaining')} value={remaining ?? 0} />
@@ -148,25 +173,52 @@ function BurndownSection({ workspaceId, sprintId }: { workspaceId: string; sprin
             <YAxis stroke={COLORS.axis} fontSize={12} tickLine={false} allowDecimals={false} />
             <Tooltip />
             <Legend />
-            <Line
-              type="linear"
-              dataKey="ideal"
-              name={t('reports.burndown.ideal')}
-              stroke={COLORS.ideal}
-              strokeDasharray="5 4"
-              dot={false}
-              isAnimationActive={false}
-            />
-            <Line
-              type="stepAfter"
-              dataKey="remaining"
-              name={t('reports.burndown.actual')}
-              stroke={COLORS.actual}
-              strokeWidth={2}
-              dot={{ r: 3 }}
-              connectNulls={false}
-              isAnimationActive={false}
-            />
+            {mode === 'burndown' ? (
+              <>
+                <Line
+                  type="linear"
+                  dataKey="ideal"
+                  name={t('reports.burndown.ideal')}
+                  stroke={COLORS.ideal}
+                  strokeDasharray="5 4"
+                  dot={false}
+                  isAnimationActive={false}
+                />
+                <Line
+                  type="stepAfter"
+                  dataKey="remaining"
+                  name={t('reports.burndown.actual')}
+                  stroke={COLORS.actual}
+                  strokeWidth={2}
+                  dot={{ r: 3 }}
+                  connectNulls={false}
+                  isAnimationActive={false}
+                />
+              </>
+            ) : (
+              <>
+                <Line
+                  type="stepAfter"
+                  dataKey="total"
+                  name={t('reports.burndown.scopeLine')}
+                  stroke={COLORS.ideal}
+                  strokeDasharray="5 4"
+                  dot={false}
+                  connectNulls={false}
+                  isAnimationActive={false}
+                />
+                <Line
+                  type="stepAfter"
+                  dataKey="done"
+                  name={t('reports.burndown.doneLine')}
+                  stroke={COLORS.actual}
+                  strokeWidth={2}
+                  dot={{ r: 3 }}
+                  connectNulls={false}
+                  isAnimationActive={false}
+                />
+              </>
+            )}
             {scopeDays.map((day) => (
               <ReferenceLine
                 key={day.date}
@@ -194,7 +246,7 @@ function BurndownSection({ workspaceId, sprintId }: { workspaceId: string; sprin
   );
 }
 
-function VelocitySection({ data }: { data: VelocityResponse }) {
+export function VelocitySection({ data }: { data: VelocityResponse }) {
   const { t } = useTranslation();
   if (data.sprints.length === 0) {
     return (

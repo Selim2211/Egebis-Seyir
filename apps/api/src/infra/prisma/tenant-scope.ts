@@ -39,6 +39,7 @@ export const TENANT_MODELS: ReadonlySet<string> = new Set([
   'RetroVote',
   'TimeEntry',
   'ActiveTimer',
+  'DashboardLayout',
 ]);
 
 const WHERE_OPERATIONS = new Set([

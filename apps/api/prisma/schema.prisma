@@ -132,6 +132,7 @@ model User {
   retroVotes              RetroVote[]
   timeEntries             TimeEntry[]
   activeTimer             ActiveTimer?
+  dashboardLayouts        DashboardLayout[]
   docsCreated             Doc[]                    @relation("DocCreator")
   docsUpdated             Doc[]                    @relation("DocUpdater")
   docVersions             DocVersion[]             @relation("DocVersionAuthor")
@@ -207,6 +208,7 @@ model Workspace {
   retroVotes        RetroVote[]
   timeEntries       TimeEntry[]
   activeTimers      ActiveTimer[]
+  dashboardLayouts  DashboardLayout[]
   docItemLinks      DocItemLink[]
 
   notifications           Notification[]
@@ -328,15 +330,16 @@ model Space {
   createdAt          DateTime        @default(now()) @db.Timestamptz
   updatedAt          DateTime        @updatedAt @db.Timestamptz
 
-  keys     SpaceKey[]
-  members  SpaceMember[]
-  statuses Status[]
-  folders  Folder[]
-  lists    List[]
-  items    WorkItem[]
-  labels   Label[]
-  sprints  Sprint[]
-  docs     Doc[]
+  keys             SpaceKey[]
+  members          SpaceMember[]
+  statuses         Status[]
+  folders          Folder[]
+  lists            List[]
+  items            WorkItem[]
+  labels           Label[]
+  sprints          Sprint[]
+  docs             Doc[]
+  dashboardLayouts DashboardLayout[]
 
   notifications Notification[]
 
@@ -1018,4 +1021,21 @@ model ActiveTimer {
   startedAt   DateTime  @default(now()) @db.Timestamptz
 
   @@map("active_timers")
+}
+
+// ---------- Pano (Faz 4.6, ADR-078) ----------
+
+/// Kullanıcının bir Space için pano düzeni (widget sırası, boyutu, görünürlüğü).
+model DashboardLayout {
+  userId      String    @db.Uuid
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  spaceId     String    @db.Uuid
+  space       Space     @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  workspaceId String    @db.Uuid
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  widgets     Json
+  updatedAt   DateTime  @updatedAt @db.Timestamptz
+
+  @@id([userId, spaceId])
+  @@map("dashboard_layouts")
 }

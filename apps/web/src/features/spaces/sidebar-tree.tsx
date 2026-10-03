@@ -21,6 +21,7 @@ import {
   FileText,
   ChartGantt as GanttChartIcon,
   Layers,
+  LayoutDashboard,
   List,
   ListOrdered,
   ListPlus,
@@ -317,6 +318,7 @@ function SpaceNode({
           {space.scrumEnabled && <ScrumLinks spaceId={space.id} />}
           <DocsLink spaceId={space.id} />
           <TimesheetLink spaceId={space.id} />
+          <DashboardLink spaceId={space.id} />
           <GanttLink spaceId={space.id} />
           <WorkloadLink spaceId={space.id} />
           <SortableGroup
@@ -380,6 +382,22 @@ function ScrumLinks({ spaceId }: { spaceId: string }) {
         <span className="truncate">{t('board.link')}</span>
       </ScrumLink>
     </>
+  );
+}
+
+/** Space panosu (Faz 4.6). */
+function DashboardLink({ spaceId }: { spaceId: string }) {
+  const { t } = useTranslation();
+  const closeSidebar = useUiStore((s) => s.setSidebarOpen);
+  return (
+    <ScrumLink
+      to="/spaces/$spaceId/dashboard"
+      spaceId={spaceId}
+      onNavigate={() => closeSidebar(false)}
+    >
+      <LayoutDashboard className="text-muted-foreground size-4 shrink-0" aria-hidden />
+      <span className="truncate">{t('dashboard.link')}</span>
+    </ScrumLink>
   );
 }
 
@@ -451,7 +469,8 @@ function ScrumLink({
     | '/spaces/$spaceId/docs'
     | '/spaces/$spaceId/timesheet'
     | '/spaces/$spaceId/workload'
-    | '/spaces/$spaceId/gantt';
+    | '/spaces/$spaceId/gantt'
+    | '/spaces/$spaceId/dashboard';
   spaceId: string;
   onNavigate: () => void;
   children: ReactNode;

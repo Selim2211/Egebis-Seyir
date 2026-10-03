@@ -34,6 +34,9 @@ export interface BurndownPoint {
   remaining: number | null;
   /** O gün kapsama giren net puan (scope change). */
   scopeChange: number;
+  /** Burn-up: o gün sonundaki toplam kapsam ve biten puan; yaşanmamış günlerde null. */
+  total: number | null;
+  done: number | null;
 }
 
 export interface Burndown {
@@ -72,16 +75,28 @@ export function buildBurndown(input: {
   ) {
     const ideal = index >= span ? 0 : round1(baseline * (1 - index / span));
     let remaining: number | null = null;
+    let total: number | null = null;
     if (date <= input.lastDay) {
       remaining = baseline;
+      total = baseline;
       for (const snapshot of snapshots) {
-        if (snapshot.date <= date) remaining = snapshot.remainingPoints;
+        if (snapshot.date <= date) {
+          remaining = snapshot.remainingPoints;
+          total = snapshot.totalPoints;
+        }
       }
     }
     const scopeChange = input.scopeChanges
       .filter((c) => c.date === date)
       .reduce((sum, c) => sum + c.delta, 0);
-    points.push({ date, ideal, remaining, scopeChange: round1(scopeChange) });
+    points.push({
+      date,
+      ideal,
+      remaining,
+      scopeChange: round1(scopeChange),
+      total,
+      done: total === null || remaining === null ? null : round1(total - remaining),
+    });
   }
   return { baseline, points };
 }

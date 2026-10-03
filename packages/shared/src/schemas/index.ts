@@ -14,3 +14,5 @@ export * from './retro';
 export * from './time';
 export * from './workload';
 export * from './gantt';
+export * from './flow';
+export * from './dashboard';

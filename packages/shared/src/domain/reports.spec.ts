@@ -88,6 +88,42 @@ describe('buildBurndown', () => {
   });
 });
 
+describe('burn-up serileri', () => {
+  it('toplam kapsam ve biten puan snapshot’tan gelir, gün atlanırsa taşınır', () => {
+    const b = buildBurndown({
+      startDate: '2026-10-05',
+      endDate: '2026-10-07',
+      lastDay: '2026-10-07',
+      baseline: 10,
+      scopeChanges: [],
+      snapshots: [
+        { date: '2026-10-05', remainingPoints: 10, totalPoints: 10 },
+        { date: '2026-10-06', remainingPoints: 7, totalPoints: 12 },
+      ],
+    });
+    expect(b.points.map((p) => [p.total, p.done])).toEqual([
+      [10, 0],
+      [12, 5],
+      [12, 5],
+    ]);
+  });
+
+  it('yaşanmamış günlerde null', () => {
+    const b = buildBurndown({
+      startDate: '2026-10-05',
+      endDate: '2026-10-06',
+      lastDay: '2026-10-05',
+      baseline: 4,
+      scopeChanges: [],
+      snapshots: [],
+    });
+    expect(b.points.map((p) => [p.total, p.done])).toEqual([
+      [4, 0],
+      [null, null],
+    ]);
+  });
+});
+
 describe('buildVelocity', () => {
   const sprint = (n: number, completed: number | null) => ({
     id: String(n),

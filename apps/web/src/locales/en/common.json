@@ -1020,7 +1020,14 @@
       "actual": "Remaining",
       "chartLabel": "{{name}} sprint burndown chart",
       "planned": "Burndown appears once the sprint starts.",
-      "scopeHint": "Red lines show points added (+) or removed (−) after the sprint started."
+      "scopeHint": "Red lines show points added (+) or removed (−) after the sprint started.",
+      "view": "Chart type",
+      "mode": {
+        "burndown": "Burndown",
+        "burnup": "Burn-up"
+      },
+      "scopeLine": "Total scope",
+      "doneLine": "Done"
     },
     "velocity": {
       "title": "Velocity",
@@ -1191,5 +1198,55 @@
     "barLabel": "{{key}} {{title}}, {{start}} – {{due}} {{critical}}",
     "onCritical": "(on the critical path)",
     "legend": "A red outline and arrow mark the critical path; a dashed orange arrow marks a conflicting dependency."
+  },
+  "dashboard": {
+    "link": "Dashboard",
+    "title": "Dashboard",
+    "range": "Period",
+    "lastDays": "Last {{count}} days",
+    "customize": "Customize",
+    "exportCsv": "Download CSV",
+    "hiddenWidgets": "Hidden widgets",
+    "allHidden": "All widgets are hidden. Add them back from Customize.",
+    "moveUp": "Move the {{name}} widget up",
+    "moveDown": "Move the {{name}} widget down",
+    "grow": "Widen the {{name}} widget",
+    "shrink": "Narrow the {{name}} widget",
+    "hide": "Hide the {{name}} widget",
+    "noScrum": "Scrum is off in this Space.",
+    "noActiveSprint": "No active sprint.",
+    "noCompleted": "No items completed in this period.",
+    "cfdLabel": "Cumulative flow chart",
+    "throughputLabel": "Weekly completed items chart",
+    "bugsLabel": "Weekly opened and closed bugs chart",
+    "completed": "Completed",
+    "opened": "Opened",
+    "closed": "Closed",
+    "sample": "Completed items",
+    "leadAvg": "Lead time avg.",
+    "leadMedian": "Lead time median",
+    "cycleAvg": "Cycle time avg.",
+    "cycleMedian": "Cycle time median",
+    "cycleP85": "Cycle time P85",
+    "days": "{{value}} days",
+    "cat": {
+      "NOT_STARTED": "Not started",
+      "ACTIVE": "In progress",
+      "DONE": "Done"
+    },
+    "csv": {
+      "date": "Date",
+      "week": "Week start"
+    },
+    "widget": {
+      "sprint": "Active sprint",
+      "velocity": "Velocity",
+      "cfd": "Cumulative flow (CFD)",
+      "throughput": "Throughput",
+      "cycle": "Lead and cycle time",
+      "bugs": "Bug trend",
+      "workload": "Workload",
+      "epics": "Epic progress"
+    }
   }
 }

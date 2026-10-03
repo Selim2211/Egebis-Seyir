@@ -3,6 +3,7 @@ import {
   ItemTimeSchema,
   MyTimerSchema,
   TimesheetSchema,
+  WorkloadSchema,
   type LogTimeRequest,
 } from '@scrum/shared';
 import { queryOptions, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -75,3 +76,14 @@ export const useStopTimer = () =>
   useTimeMutation((id, _input: void) =>
     apiRequest(`${ws(id)}/timer/stop`, z.object({ minutes: z.int() }), { method: 'POST' }),
   );
+
+/** Kişi bazlı iş yükü (ADR-076); `sprintId` boşsa tüm açık işler. */
+export const workloadQuery = (workspaceId: string, spaceId: string, sprintId: string) =>
+  queryOptions({
+    queryKey: ['workspaces', workspaceId, 'spaces', spaceId, 'workload', sprintId],
+    queryFn: () =>
+      apiRequest(
+        `${ws(workspaceId)}/spaces/${spaceId}/workload${sprintId ? `?sprintId=${sprintId}` : ''}`,
+        WorkloadSchema,
+      ),
+  });

@@ -1,9 +1,10 @@
 import { addDays, formatMinutes, SPACE_PERMISSIONS as S, weekdayIndex } from '@scrum/shared';
 import { useQuery } from '@tanstack/react-query';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Download } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
+import { downloadCsv } from '@/lib/download';
 import { ContainerHeader, LoadingState, NotFoundState } from '@/features/spaces/container-header';
 import { spaceQuery } from '@/features/spaces/queries';
 import { useCurrentWorkspace } from '@/features/workspace/queries';
@@ -47,8 +48,23 @@ export function TimesheetPage({ spaceId }: { spaceId: string }) {
           <h1 className="text-xl font-semibold">{t('time.timesheet')}</h1>
           <Button
             variant="outline"
+            size="sm"
+            className="ml-auto"
+            disabled={data.rows.length === 0}
+            onClick={() =>
+              downloadCsv(`zaman-${data.from}_${data.to}.csv`, [
+                [t('time.person'), ...data.days, t('time.total') + ' (dk)'],
+                ...data.rows.map((r) => [r.user.name, ...r.perDay, r.total]),
+                [t('time.total'), ...data.dayTotals, data.total],
+              ])
+            }
+          >
+            <Download /> {t('dashboard.exportCsv')}
+          </Button>
+          <Button
+            variant="outline"
             size="icon"
-            className="ml-auto size-8"
+            className="size-8"
             aria-label={t('time.prevWeek')}
             onClick={() => setFrom(addDays(from, -7))}
           >
