@@ -83,6 +83,15 @@ export function HistoryPage({ spaceId }: { spaceId: string }) {
                 >
                   {t('review.link')}
                 </Link>
+                {(sprint.status === 'ACTIVE' || sprint.status === 'COMPLETED') && (
+                  <Link
+                    to="/spaces/$spaceId/retro/$sprintId"
+                    params={{ spaceId, sprintId: sprint.id }}
+                    className="text-primary text-sm hover:underline"
+                  >
+                    {t('retro.link')}
+                  </Link>
+                )}
                 <span className="text-muted-foreground text-sm tabular-nums">
                   {sprint.status === 'COMPLETED'
                     ? t('history.completedPoints', {

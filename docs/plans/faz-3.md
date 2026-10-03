@@ -9,7 +9,7 @@
 | 3.1 | Epic detayı ve Epic listesi | Epic puan/adet özeti, Space "Epic'ler" sekmesi (hedef, ilerleme çubuğu, tahminsiz uyarısı)                                       | Tamamlandı |
 | 3.2 | Doküman modülü çekirdeği    | Space içinde doküman sayfaları, sayfa ağacı (üst-alt), Tiptap editörü, otomatik kayıt, sürüm geçmişi ve geri yükleme, çöp kutusu | Tamamlandı |
 | 3.3 | Doküman ↔ görev bağlama     | Dokümana görev/Epic bağlama, görevden dokümanlara bağlantı, yorum ve @mention, bildirim                                          | Tamamlandı |
-| 3.4 | Retrospektif                | Sprint'e bağlı retrospektif sayfası (iyi gitti / gelişmeli / aksiyon), aksiyonları göreve çevirme                                | Sırada     |
+| 3.4 | Retrospektif                | Sprint'e bağlı retrospektif sayfası (iyi gitti / gelişmeli / aksiyon), aksiyonları göreve çevirme                                | Tamamlandı |
 
 ## 3.1 Ayrıntı
 
@@ -40,3 +40,13 @@ Karar: ADR-070.
 **Web**: Sayfada "Bağlı görevler" (arama kutulu seçici) ve altında Yorumlar (`Comments scope="docs"`); görev detayında "Dokümanlar"; bildirim merkezi doküman etiketlenmesini sayfaya götürür.
 
 **Doğrulama (2026-10-03):** `doc-collab.int-spec` 9 (iki yönlü bağlantı ve kaldırma, silinen öğe, görünmeyen Space sızıntısı, Stakeholder 403, yorum yaşam döngüsü ve tepki, yetkisiz düzenleme, mention bildirimi ve e-postası, düzenlemede çift bildirim yok, görünmeyen kişi etiketlenemez, arşivli Space); Playwright `faz3-doc-links` 2/2.
+
+## 3.4 Ayrıntı
+
+Karar: ADR-071.
+
+**API** (`/api/workspaces/:wid`): `GET sprints/:sprintId/retro`, `POST sprints/:sprintId/retro/items`, `DELETE .../items/:retroItemId`, `PUT .../items/:retroItemId/vote`, `POST .../items/:retroItemId/task`. Veri: `retro_items`, `retro_votes`; görev oluşturma `WorkItemsService.create` (modül dışa aktarır).
+
+**Web**: `/spaces/:id/retro/:sprintId` (üç sütun, ekleme, oy, sil, göreve çevir); Geçmiş satırı ve Review sayfasından bağlantı.
+
+**Doğrulama (2026-10-03):** `retro.int-spec` 6 (sütunlar ve doğrulama, oy ve sıralama, göreve çevirme/tekrar/silinince yeniden, planlı sprint 409 ve tamamlanmışta düzenleme, yetki, özel Space); Playwright `faz3-retro` 2/2.

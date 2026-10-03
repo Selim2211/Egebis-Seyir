@@ -103,6 +103,8 @@ export type TenantTx = Pick<
   | 'doc'
   | 'docVersion'
   | 'docItemLink'
+  | 'retroItem'
+  | 'retroVote'
 >;
 
 /** Birden çok List'ten gelen satırlar için ek ilişkiler (benim işlerim, arama). */

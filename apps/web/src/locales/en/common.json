@@ -324,7 +324,11 @@
     "READINESS_NOT_APPLICABLE": "Definition of Ready/Done only applies to Stories and Bugs.",
     "DOC_CONFLICT": "This page was changed elsewhere. Your text was not overwritten; reload the page and continue.",
     "DOC_PARENT_INVALID": "The page cannot be moved under this parent (cycle or too deep).",
-    "DOC_DELETED": "The page is in the trash; restore it first."
+    "DOC_DELETED": "The page is in the trash; restore it first.",
+    "RETRO_NOT_AVAILABLE": "Retrospectives are only held for active and completed sprints.",
+    "RETRO_NOT_ACTION": "Only action items can be turned into tasks.",
+    "RETRO_ALREADY_CONVERTED": "This action already became a task.",
+    "RETRO_NO_LIST": "There is no List to create the task in."
   },
   "spaceRoles": {
     "PRODUCT_OWNER": "Product Owner",
@@ -1090,5 +1094,24 @@
     "linkedItems": "Linked items",
     "linkItem": "Link item",
     "unlinkItem": "Remove link to {{key}}"
+  },
+  "retro": {
+    "link": "Retrospective",
+    "title": "{{name}} retrospective",
+    "openReview": "Review summary",
+    "column": {
+      "WENT_WELL": "Went well",
+      "IMPROVE": "To improve",
+      "ACTION": "Actions"
+    },
+    "addPlaceholder": "Write an item…",
+    "addTo": "Add an item to {{column}}",
+    "add": "Add",
+    "empty": "No items yet.",
+    "vote": "Vote for “{{text}}”",
+    "remove": "Delete “{{text}}”",
+    "toTask": "Make task",
+    "toTaskNamed": "Turn the action “{{text}}” into a task",
+    "taskCreated": "{{key}} created; it is in the Backlog."
   }
 }

@@ -16,6 +16,9 @@ import {
   BacklogResponseSchema,
   CompleteSprintRequestSchema,
   CreatedSchema,
+  CreateRetroItemRequestSchema,
+  RetroResponseSchema,
+  RetroTaskCreatedSchema,
   CreateSprintRequestSchema,
   MoveBacklogItemsRequestSchema,
   SPACE_PERMISSIONS as S,
@@ -28,6 +31,8 @@ import {
   UpdateSprintRequestSchema,
   type BacklogResponse,
   type Created,
+  type RetroResponse,
+  type RetroTaskCreated,
   type SprintBurndown,
   type SprintDetail,
   type SprintReview,
@@ -37,10 +42,14 @@ import {
 import { createZodDto, ZodResponse } from 'nestjs-zod';
 import { RequireSpacePermission } from '../auth/decorators';
 import { BacklogService } from './backlog.service';
+import { RetroService } from './retro.service';
 import { SprintLifecycleService } from './sprint-lifecycle.service';
 import { SprintReportsService } from './sprint-reports.service';
 import { SprintsService } from './sprints.service';
 
+class RetroDto extends createZodDto(RetroResponseSchema) {}
+class CreateRetroItemDto extends createZodDto(CreateRetroItemRequestSchema) {}
+class RetroTaskDto extends createZodDto(RetroTaskCreatedSchema) {}
 class BurndownDto extends createZodDto(SprintBurndownSchema) {}
 class VelocityDto extends createZodDto(VelocityResponseSchema) {}
 class SprintsDto extends createZodDto(SprintsResponseSchema) {}
@@ -65,6 +74,7 @@ export class SprintsController {
     private readonly backlog: BacklogService,
     private readonly lifecycle: SprintLifecycleService,
     private readonly reports: SprintReportsService,
+    private readonly retro: RetroService,
   ) {}
 
   @Get('spaces/:spaceId/sprints')
@@ -165,5 +175,54 @@ export class SprintsController {
   @ZodResponse({ type: VelocityDto })
   velocity(@Uuid('spaceId') spaceId: string): Promise<VelocityResponse> {
     return this.reports.velocity(spaceId);
+  }
+
+  // ---------- Retrospektif (ADR-071) ----------
+
+  @Get('sprints/:sprintId/retro')
+  @RequireSpacePermission(S.SPACE_VIEW)
+  @ZodResponse({ type: RetroDto })
+  getRetro(@Uuid('sprintId') sprintId: string): Promise<RetroResponse> {
+    return this.retro.get(sprintId);
+  }
+
+  @Post('sprints/:sprintId/retro/items')
+  @RequireSpacePermission(S.WORK_ITEM_WRITE)
+  @ZodResponse({ type: CreatedDto, status: HttpStatus.CREATED })
+  addRetroItem(
+    @Uuid('sprintId') sprintId: string,
+    @Body() body: CreateRetroItemDto,
+  ): Promise<Created> {
+    return this.retro.add(sprintId, body);
+  }
+
+  @Delete('sprints/:sprintId/retro/items/:retroItemId')
+  @RequireSpacePermission(S.WORK_ITEM_WRITE)
+  @HttpCode(NO_CONTENT)
+  removeRetroItem(
+    @Uuid('sprintId') sprintId: string,
+    @Uuid('retroItemId') retroItemId: string,
+  ): Promise<void> {
+    return this.retro.remove(sprintId, retroItemId);
+  }
+
+  @Put('sprints/:sprintId/retro/items/:retroItemId/vote')
+  @RequireSpacePermission(S.WORK_ITEM_WRITE)
+  @HttpCode(NO_CONTENT)
+  voteRetroItem(
+    @Uuid('sprintId') sprintId: string,
+    @Uuid('retroItemId') retroItemId: string,
+  ): Promise<void> {
+    return this.retro.toggleVote(sprintId, retroItemId);
+  }
+
+  @Post('sprints/:sprintId/retro/items/:retroItemId/task')
+  @RequireSpacePermission(S.WORK_ITEM_WRITE)
+  @ZodResponse({ type: RetroTaskDto, status: HttpStatus.CREATED })
+  retroItemToTask(
+    @Uuid('sprintId') sprintId: string,
+    @Uuid('retroItemId') retroItemId: string,
+  ): Promise<RetroTaskCreated> {
+    return this.retro.toTask(sprintId, retroItemId);
   }
 }

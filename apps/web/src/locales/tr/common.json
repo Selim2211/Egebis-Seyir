@@ -324,7 +324,11 @@
     "READINESS_NOT_APPLICABLE": "Definition of Ready/Done yalnızca Story ve Bug için geçerli.",
     "DOC_CONFLICT": "Bu sayfa başka bir yerde değiştirildi. Yazdıkların üzerine yazılmadı; sayfayı yenileyip devam et.",
     "DOC_PARENT_INVALID": "Sayfa bu üst sayfanın altına taşınamaz (döngü ya da çok derin).",
-    "DOC_DELETED": "Sayfa çöp kutusunda; önce geri getir."
+    "DOC_DELETED": "Sayfa çöp kutusunda; önce geri getir.",
+    "RETRO_NOT_AVAILABLE": "Retrospektif yalnızca aktif ve tamamlanmış sprint’lerde yapılır.",
+    "RETRO_NOT_ACTION": "Yalnızca aksiyon maddeleri göreve çevrilebilir.",
+    "RETRO_ALREADY_CONVERTED": "Bu aksiyon zaten göreve çevrilmiş.",
+    "RETRO_NO_LIST": "Görevin oluşturulacağı bir List yok."
   },
   "spaceRoles": {
     "PRODUCT_OWNER": "Product Owner",
@@ -1090,5 +1094,24 @@
     "linkedItems": "Bağlı görevler",
     "linkItem": "Görev bağla",
     "unlinkItem": "{{key}} bağlantısını kaldır"
+  },
+  "retro": {
+    "link": "Retrospektif",
+    "title": "{{name}} retrospektifi",
+    "openReview": "Review özeti",
+    "column": {
+      "WENT_WELL": "İyi gitti",
+      "IMPROVE": "Geliştirilmeli",
+      "ACTION": "Aksiyonlar"
+    },
+    "addPlaceholder": "Bir madde yaz…",
+    "addTo": "{{column}} sütununa madde ekle",
+    "add": "Ekle",
+    "empty": "Henüz madde yok.",
+    "vote": "“{{text}}” maddesine oy ver",
+    "remove": "“{{text}}” maddesini sil",
+    "toTask": "Göreve çevir",
+    "toTaskNamed": "“{{text}}” aksiyonunu göreve çevir",
+    "taskCreated": "{{key}} oluşturuldu; Backlog’da."
   }
 }

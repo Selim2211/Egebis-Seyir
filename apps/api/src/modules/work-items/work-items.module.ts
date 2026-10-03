@@ -18,5 +18,6 @@ import { WorkItemsService } from './work-items.service';
     ItemQueriesService,
     LabelsService,
   ],
+  exports: [WorkItemsService],
 })
 export class WorkItemsModule {}

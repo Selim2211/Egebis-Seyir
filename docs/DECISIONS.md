@@ -577,3 +577,16 @@
   - **Aktivite:** bağlama, çözme, yorum ve yorum silme `doc` varlığına aktivite olarak yazılır.
 - **Alternatifler:** Ayrı `doc_comments` tablosu (mention ve tepki tablolarını çoğaltmak gerekirdi); bağlantıyı iş öğesi `links` tablosuna eklemek (farklı varlık türleri, farklı yaşam döngüsü); sayfa metnindeki @görev anmalarından otomatik bağlantı türetmek (editör uzantısı gerekir, sonraya).
 - **Bilinen sınırlar:** sayfa içine gömülü görev listesi/filtresi ve metinde `MOB-12` ile anma yok (brief [F2]); sayfa izleme/abonelik yok.
+
+## ADR-071 — Sprint retrospektifi
+
+- **Tarih:** 2026-10-03 · **Durum:** Kabul (brief §14 Faz 3; ayrıntılar geliştirici varsayılanı, onay bekliyor)
+- **Karar:**
+  - **Biçim:** her sprint için üç sütunlu pano: **İyi gitti**, **Geliştirilmeli**, **Aksiyonlar**. Maddeler kısa metindir (en çok 500 karakter), yazarı görünür. Sprint başına ayrı "retro oturumu" nesnesi yoktur; sprint'in kendisi bağlamdır (basit, geri dönüp düzenlenebilir).
+  - **Ne zaman:** yalnızca **aktif ve tamamlanmış** sprint'lerde; planlı ve iptal edilmişte 409 `RETRO_NOT_AVAILABLE`. Tamamlanmış sprint'te madde eklenebilir (retro genellikle sprint kapandıktan sonra yapılır).
+  - **Yetki:** okuma `space.view` (Stakeholder izler); madde ekleme, oy ve göreve çevirme `workItem.write` (Developer ve üstü); silmeyi yazar yapar, başkasınınkini sprint'i yöneten (`sprint.complete`: Scrum Master, PO) siler.
+  - **Oylama:** kişi başına madde başına bir oy, aç/kapa; çok oy alan madde sütunda üste çıkar (gizli/anonim oylama ve oy bütçesi yok).
+  - **Aksiyon → görev:** ACTION maddesi tek tıkla Space'in ilk List'inde bir **Task** olur (Backlog'a düşer; sprint'e planlamada alınır). Madde göreve bağlı kalır; görev silinirse bağ kopar ve yeniden çevrilebilir. Aynı aksiyon iki kez çevrilemez (`RETRO_ALREADY_CONVERTED`).
+  - **Giriş:** Geçmiş listesindeki sprint satırı ve Review sayfası "Retrospektif" bağlantısı verir.
+- **Alternatifler:** Retro'yu doküman şablonu olarak kurmak (oylama ve görev çevirme zor); anonim madde (yazar bilgisi moderasyon için gerekli, takım içi güven varsayımı); aksiyonu doğrudan sonraki sprint'e koymak (planlama kararı PO/SM'in).
+- **Bilinen sınırlar:** gerçek zamanlı ortak ekran yok (sayfa yenilenince görünür; brief [F2] realtime); sürükle-bırak gruplama, zamanlayıcı ve şablonlar (Başla/Dur/Devam) yok.

@@ -2,6 +2,8 @@ import {
   BacklogResponseSchema,
   CreatedSchema,
   EpicsResponseSchema,
+  RetroResponseSchema,
+  RetroTaskCreatedSchema,
   SprintBurndownSchema,
   SprintDetailSchema,
   SprintReviewSchema,
@@ -9,6 +11,7 @@ import {
   VelocityResponseSchema,
   type BacklogResponse,
   type CompleteSprintRequest,
+  type CreateRetroItemRequest,
   type CreateSprintRequest,
   type MoveBacklogItemsRequest,
   type UpdateSprintRequest,
@@ -156,3 +159,45 @@ export const useSetReviewNotes = () =>
       body: { notes: input.notes },
     }),
   );
+
+// ---------- Retrospektif (Faz 3.4) ----------
+
+export const retroQuery = (workspaceId: string, sprintId: string) =>
+  queryOptions({
+    queryKey: ['workspaces', workspaceId, 'sprints', sprintId, 'retro'],
+    queryFn: () => apiRequest(`${ws(workspaceId)}/sprints/${sprintId}/retro`, RetroResponseSchema),
+  });
+
+/** Retro değişimleri (madde ekle/sil, oy, göreve çevir); sayfa listesi tazelenir. */
+export function useRetro(sprintId: string) {
+  const qc = useQueryClient();
+  const { id } = useCurrentWorkspace();
+  const base = `${ws(id)}/sprints/${sprintId}/retro`;
+  const settle = {
+    onSettled: () => qc.invalidateQueries({ queryKey: retroQuery(id, sprintId).queryKey }),
+  };
+  return {
+    add: useMutation({
+      mutationFn: (body: CreateRetroItemRequest) =>
+        apiRequest(`${base}/items`, CreatedSchema, { method: 'POST', body }),
+      ...settle,
+    }),
+    remove: useMutation({
+      mutationFn: (retroItemId: string) =>
+        apiRequest(`${base}/items/${retroItemId}`, NoContent, { method: 'DELETE' }),
+      ...settle,
+    }),
+    vote: useMutation({
+      mutationFn: (retroItemId: string) =>
+        apiRequest(`${base}/items/${retroItemId}/vote`, NoContent, { method: 'PUT' }),
+      ...settle,
+    }),
+    toTask: useMutation({
+      mutationFn: (retroItemId: string) =>
+        apiRequest(`${base}/items/${retroItemId}/task`, RetroTaskCreatedSchema, {
+          method: 'POST',
+        }),
+      onSettled: () => qc.invalidateQueries({ queryKey: ['workspaces', id] }),
+    }),
+  };
+}

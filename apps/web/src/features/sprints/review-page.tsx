@@ -55,6 +55,11 @@ export function ReviewPage({ spaceId, sprintId }: { spaceId: string; sprintId: s
               {t(`sprints.status.${sprint.status}`)}
             </Badge>
             <Button asChild variant="ghost" size="sm" className="ml-auto">
+              <Link to="/spaces/$spaceId/retro/$sprintId" params={{ spaceId, sprintId }}>
+                {t('retro.link')}
+              </Link>
+            </Button>
+            <Button asChild variant="ghost" size="sm">
               <Link to="/spaces/$spaceId/board" params={{ spaceId }} search={{ sprint: sprint.id }}>
                 {t('review.openBoard')}
               </Link>
