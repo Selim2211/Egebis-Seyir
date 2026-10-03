@@ -31,6 +31,7 @@ import {
   Star,
   StarOff,
   Trash2,
+  Users,
 } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -315,6 +316,7 @@ function SpaceNode({
           {space.scrumEnabled && <ScrumLinks spaceId={space.id} />}
           <DocsLink spaceId={space.id} />
           <TimesheetLink spaceId={space.id} />
+          <WorkloadLink spaceId={space.id} />
           <SortableGroup
             items={space.folders}
             enabled={canManage}
@@ -379,6 +381,22 @@ function ScrumLinks({ spaceId }: { spaceId: string }) {
   );
 }
 
+/** Space iş yükü (Faz 4.4). */
+function WorkloadLink({ spaceId }: { spaceId: string }) {
+  const { t } = useTranslation();
+  const closeSidebar = useUiStore((s) => s.setSidebarOpen);
+  return (
+    <ScrumLink
+      to="/spaces/$spaceId/workload"
+      spaceId={spaceId}
+      onNavigate={() => closeSidebar(false)}
+    >
+      <Users className="text-muted-foreground size-4 shrink-0" aria-hidden />
+      <span className="truncate">{t('workload.link')}</span>
+    </ScrumLink>
+  );
+}
+
 /** Space zaman çizelgesi (Faz 4.3). */
 function TimesheetLink({ spaceId }: { spaceId: string }) {
   const { t } = useTranslation();
@@ -417,7 +435,8 @@ function ScrumLink({
     | '/spaces/$spaceId/backlog'
     | '/spaces/$spaceId/board'
     | '/spaces/$spaceId/docs'
-    | '/spaces/$spaceId/timesheet';
+    | '/spaces/$spaceId/timesheet'
+    | '/spaces/$spaceId/workload';
   spaceId: string;
   onNavigate: () => void;
   children: ReactNode;

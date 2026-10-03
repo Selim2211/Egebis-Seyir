@@ -18,20 +18,25 @@ import {
   MyTimerSchema,
   SPACE_PERMISSIONS as S,
   TimesheetSchema,
+  WorkloadSchema,
   type Created,
   type ItemTime,
   type MyTimer,
   type Timesheet,
+  type Workload,
 } from '@scrum/shared';
 import { createZodDto, ZodResponse } from 'nestjs-zod';
 import { z } from 'zod';
 import { RequireSpacePermission } from '../auth/decorators';
 import { TimeService } from './time.service';
+import { WorkloadService } from './workload.service';
 
 class ItemTimeDto extends createZodDto(ItemTimeSchema) {}
 class LogTimeDto extends createZodDto(LogTimeRequestSchema) {}
 class CreatedDto extends createZodDto(CreatedSchema) {}
 class MyTimerDto extends createZodDto(MyTimerSchema) {}
+class WorkloadDto extends createZodDto(WorkloadSchema) {}
+class WorkloadQueryDto extends createZodDto(z.object({ sprintId: z.uuid().optional() })) {}
 class TimesheetDto extends createZodDto(TimesheetSchema) {}
 class StoppedDto extends createZodDto(z.object({ minutes: z.int() })) {}
 class TimesheetQueryDto extends createZodDto(
@@ -44,7 +49,10 @@ const NO_CONTENT = HttpStatus.NO_CONTENT;
 /** Zaman takibi (Faz 4.3, ADR-075). Sayaç uçları kullanıcının kendi sayacını yönetir. */
 @Controller('workspaces/:workspaceId')
 export class TimeController {
-  constructor(private readonly time: TimeService) {}
+  constructor(
+    private readonly time: TimeService,
+    private readonly workload: WorkloadService,
+  ) {}
 
   @Get('items/:itemId/time')
   @RequireSpacePermission(S.SPACE_VIEW)
@@ -95,5 +103,16 @@ export class TimeController {
     @Query() query: TimesheetQueryDto,
   ): Promise<Timesheet> {
     return this.time.timesheet(spaceId, query.from, query.to);
+  }
+
+  /** Kişi bazlı iş yükü; sprintId verilirse yalnızca o sprint'in açık işleri (ADR-076). */
+  @Get('spaces/:spaceId/workload')
+  @RequireSpacePermission(S.REPORT_VIEW)
+  @ZodResponse({ type: WorkloadDto })
+  workloadOf(
+    @Uuid('spaceId') spaceId: string,
+    @Query() query: WorkloadQueryDto,
+  ): Promise<Workload> {
+    return this.workload.workload(spaceId, query.sprintId);
   }
 }

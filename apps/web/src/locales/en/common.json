@@ -1160,5 +1160,20 @@
     "thisWeek": "This week",
     "emptyWeek": "No time entries this week.",
     "topItems": "Most time spent"
+  },
+  "workload": {
+    "link": "Workload",
+    "title": "Workload",
+    "scope": "Scope",
+    "allOpen": "All open items",
+    "hint": "Finished items and Epics are not counted. Points and time are split evenly across multiple assignees.",
+    "empty": "No open items.",
+    "unassigned": "Unassigned",
+    "items": "Open items",
+    "points": "Points",
+    "remaining": "Remaining time",
+    "overdue": "Overdue",
+    "dueSoon": "Due in 7 days",
+    "loggedWeek": "Logged this week"
   }
 }

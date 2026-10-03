@@ -1160,5 +1160,20 @@
     "thisWeek": "Bu hafta",
     "emptyWeek": "Bu hafta için süre girişi yok.",
     "topItems": "En çok zaman harcanan işler"
+  },
+  "workload": {
+    "link": "İş yükü",
+    "title": "İş yükü",
+    "scope": "Kapsam",
+    "allOpen": "Tüm açık işler",
+    "hint": "Biten işler ve Epic’ler sayılmaz. Birden çok kişiye atanmış işte puan ve süre eşit paylaşılır.",
+    "empty": "Açık iş yok.",
+    "unassigned": "Atanmamış",
+    "items": "Açık iş",
+    "points": "Puan",
+    "remaining": "Kalan süre",
+    "overdue": "Geciken",
+    "dueSoon": "7 gün içinde",
+    "loggedWeek": "Bu hafta harcanan"
   }
 }

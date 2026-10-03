@@ -626,3 +626,15 @@
   - **Zaman çizelgesi:** Space için kişi × gün tablosu (haftalık gezinme, en çok 62 gün), gün ve kişi toplamları ve en çok zaman harcanan işler; `report.view` ister. Üst çubukta çalışan sayaç (görev bağlantısı, geçen süre, durdur) her sayfada görünür.
 - **Alternatifler:** Sayacı yalnızca tarayıcıda tutmak (sekme kapanınca kaybolur, cihazlar arası tutarsız); başlangıç/bitiş saatli girişler (saat dilimi ve çakışma karmaşıklığı, timesheet için günlük toplam yeterli); fatura/ücret alanları (kapsam dışı).
 - **Bilinen sınırlar:** CSV/PDF dışa aktarma (brief [F2]) ve proje bazlı çok Space'li rapor Dashboard adımında (4.6); onay akışı ve kilitli dönemler yok; Space saat dilimi ayarı yok.
+
+## ADR-076 — Kişi bazlı iş yükü
+
+- **Tarih:** 2026-10-03 · **Durum:** Kabul (brief §14 Faz 4; ayrıntılar geliştirici varsayılanı, onay bekliyor)
+- **Karar:**
+  - **Kapsam:** Space düzeyinde tek tablo: her kişi için açık (Done olmayan) iş adedi, puan, kalan süre, geciken ve 7 gün içinde bitecek iş sayısı ve bu hafta harcanan süre (ADR-075). Epic'ler (kapsayıcı) ve silinen/arşivli işler sayılmaz. İsteğe bağlı sprint süzgeci (aktif ve planlı sprint'ler); süzgeçsiz hâl tüm açık işlerdir.
+  - **Paylaşım kuralı:** birden çok kişiye atanmış iş her kişinin **adedine tam** girer; puan ve kalan süre atananlar arasında **eşit bölünür** (toplam iş yükü iki kez sayılmaz). Atanmamış işler ayrı "Atanmamış" satırındadır.
+  - **Kalan süre:** saat tahmini olan işlerde `tahmin − harcanan` (öğe başına en az 0). Tahmini olmayan iş süreye katkı yapmaz, yalnızca adet ve puana girer.
+  - **Kapasite:** kişi başına haftalık kapasite verisi henüz yok; bu yüzden tablo kapasiteye karşı yüzde değil, kişiler arası **göreli** çubuklar gösterir. Kapasite alanı (izin günleri, haftalık saat) Dashboard/kapasite adımında düşünülecek.
+  - **Yetki:** `report.view`. Hesap saf ve birim testlidir (`buildWorkload`).
+- **Alternatifler:** Puanı her atanana tam saymak (toplam şişer); kapasiteyi sabit 40 saat varsaymak (yanıltıcı, ayar olmadan güvenilmez); çok Space'li workspace iş yükü (Dashboard adımında).
+- **Bilinen sınırlar:** tarih bazlı yük dağılımı (hangi hafta ne kadar) ve aşırı yük uyarısı yok; Gantt adımıyla (4.5) birlikte zaman ekseninde yük düşünülebilir.
