@@ -9,8 +9,8 @@
 | 4.2 | Takvim görünümü                | Görevlerin bitiş/başlangıç tarihine göre ay/hafta takvimi, sürükleyerek tarih değiştirme                             | Tamamlandı |
 | 4.3 | Zaman takibi                   | Görevde süre kaydı (zamanlayıcı ve elle giriş), kişi/gün özeti                                                       | Tamamlandı |
 | 4.4 | Workload                       | Kişi bazlı iş yükü (puan/saat, kapasiteye karşı)                                                                     | Tamamlandı |
-| 4.5 | Gantt ve bağımlılık            | Görev çubukları, bağımlılık okları, kritik yol                                                                       | Sırada     |
-| 4.6 | Dashboard ve gelişmiş raporlar | Widget'lı pano, CFD, lead/cycle time, burn-up                                                                        | Bekliyor   |
+| 4.5 | Gantt ve bağımlılık            | Görev çubukları, bağımlılık okları, kritik yol                                                                       | Tamamlandı |
+| 4.6 | Dashboard ve gelişmiş raporlar | Widget'lı pano, CFD, lead/cycle time, burn-up                                                                        | Sırada     |
 
 ## 4.1 Ayrıntı
 
@@ -49,3 +49,13 @@ Karar: ADR-076.
 **Web**: Space ağacında "İş yükü" (`/spaces/:id/workload`): kişi satırları, puan ve kalan süre çubukları, geciken/yaklaşan sayıları, bu hafta harcanan süre; sprint süzgeci.
 
 **Doğrulama (2026-10-03):** shared `workload` 6 test; `workload.int-spec` 5 (toplama, kalan süre ve geciken/yaklaşan, eşit paylaşım, sprint süzgeci, özel Space); Playwright `faz4-workload` 1/1.
+
+## 4.5 Ayrıntı
+
+Karar: ADR-077.
+
+**API** (`/api/workspaces/:wid`): `GET spaces/:spaceId/gantt` (`space.view`): tarihli işler, bağımlılıklar (BLOCKS), kritik yol, çakışmalar, `canEdit`. Saf hesap `packages/shared/src/domain/schedule.ts` (`analyzeSchedule`, `durationDays`, `shiftSpan`).
+
+**Web**: Space ağacında "Gantt" (`/spaces/:id/gantt`): hiyerarşik satırlar, ay ekseni, çubuklar, SVG bağımlılık okları, kritik yol vurgusu, çakışma ve döngü uyarıları; çubuğu sürükleyerek tarih kaydırma.
+
+**Doğrulama (2026-10-03):** shared `schedule` 8 test; `gantt.int-spec` 6 (tarihli/tarihsiz, kritik yol, çakışma, Epic ilerlemesi, silinen ve dış Space bağlantıları, yetki); Playwright `faz4-gantt` 2/2 (oklar, kritik yol, çakışma uyarısı, fare ile sürükleme kalıcı).

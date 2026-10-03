@@ -19,6 +19,7 @@ import {
   GripVertical,
   Kanban,
   FileText,
+  ChartGantt as GanttChartIcon,
   Layers,
   List,
   ListOrdered,
@@ -316,6 +317,7 @@ function SpaceNode({
           {space.scrumEnabled && <ScrumLinks spaceId={space.id} />}
           <DocsLink spaceId={space.id} />
           <TimesheetLink spaceId={space.id} />
+          <GanttLink spaceId={space.id} />
           <WorkloadLink spaceId={space.id} />
           <SortableGroup
             items={space.folders}
@@ -381,6 +383,18 @@ function ScrumLinks({ spaceId }: { spaceId: string }) {
   );
 }
 
+/** Space Gantt görünümü (Faz 4.5). */
+function GanttLink({ spaceId }: { spaceId: string }) {
+  const { t } = useTranslation();
+  const closeSidebar = useUiStore((s) => s.setSidebarOpen);
+  return (
+    <ScrumLink to="/spaces/$spaceId/gantt" spaceId={spaceId} onNavigate={() => closeSidebar(false)}>
+      <GanttChartIcon className="text-muted-foreground size-4 shrink-0" aria-hidden />
+      <span className="truncate">{t('gantt.link')}</span>
+    </ScrumLink>
+  );
+}
+
 /** Space iş yükü (Faz 4.4). */
 function WorkloadLink({ spaceId }: { spaceId: string }) {
   const { t } = useTranslation();
@@ -436,7 +450,8 @@ function ScrumLink({
     | '/spaces/$spaceId/board'
     | '/spaces/$spaceId/docs'
     | '/spaces/$spaceId/timesheet'
-    | '/spaces/$spaceId/workload';
+    | '/spaces/$spaceId/workload'
+    | '/spaces/$spaceId/gantt';
   spaceId: string;
   onNavigate: () => void;
   children: ReactNode;

@@ -19,3 +19,4 @@ export * from './timeline';
 export * from './calendar';
 export * from './time';
 export * from './workload';
+export * from './schedule';

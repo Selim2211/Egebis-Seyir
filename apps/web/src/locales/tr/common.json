@@ -1175,5 +1175,21 @@
     "overdue": "Geciken",
     "dueSoon": "7 gün içinde",
     "loggedWeek": "Bu hafta harcanan"
+  },
+  "gantt": {
+    "link": "Gantt",
+    "title": "Gantt",
+    "hint": "Çubuğu sürükleyerek işin tarihlerini kaydır. Oklar “bitmeden başlayamaz” bağımlılıklarını gösterir.",
+    "empty": "Tarihli iş yok. Bir işe başlangıç/bitiş tarihi ver ya da iki işi “bloklar” ile bağla.",
+    "item": "İş",
+    "items": "Gantt satırları",
+    "noDates": "tarihsiz",
+    "critical": "Kritik yol: {{days}} gün, {{count}} iş",
+    "violations": "{{count}} bağımlılıkta çakışma: ardıl iş öncülü bitmeden başlıyor",
+    "cycle": "Bağımlılıklarda döngü var; kritik yol hesaplanamadı.",
+    "readOnly": "Salt okunur",
+    "barLabel": "{{key}} {{title}}, {{start}} – {{due}} {{critical}}",
+    "onCritical": "(kritik yolda)",
+    "legend": "Kırmızı çerçeve ve ok kritik yolu, kesikli turuncu ok çakışan bağımlılığı gösterir."
   }
 }

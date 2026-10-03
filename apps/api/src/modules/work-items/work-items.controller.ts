@@ -29,6 +29,7 @@ import {
   CreatedItemSchema,
   CreatedSchema,
   EpicsResponseSchema,
+  GanttSchema,
   CreateLabelRequestSchema,
   CreateWorkItemRequestSchema,
   LabelsResponseSchema,
@@ -42,6 +43,7 @@ import {
   type Created,
   type CreatedItem,
   type EpicsResponse,
+  type Gantt,
   type ItemSearchResponse,
   type MyWorkResponse,
   type MyWorkScope,
@@ -55,12 +57,14 @@ import { createZodDto, ZodResponse, ZodValidationPipe } from 'nestjs-zod';
 import { z } from 'zod';
 import { RequireSpacePermission } from '../auth/decorators';
 import { EpicsService } from './epics.service';
+import { GanttService } from './gantt.service';
 import { ItemDetailsService } from './item-details.service';
 import { ItemQueriesService } from './item-queries.service';
 import { ItemTreeService } from './item-tree.service';
 import { LabelsService } from './labels.service';
 import { WorkItemsService } from './work-items.service';
 
+class GanttDto extends createZodDto(GanttSchema) {}
 class EpicsDto extends createZodDto(EpicsResponseSchema) {}
 class WorkItemsDto extends createZodDto(WorkItemsResponseSchema) {}
 class WorkItemDetailDto extends createZodDto(WorkItemDetailSchema) {}
@@ -101,6 +105,7 @@ export class WorkItemsController {
     private readonly details: ItemDetailsService,
     private readonly queries: ItemQueriesService,
     private readonly epics: EpicsService,
+    private readonly gantt: GanttService,
   ) {}
 
   /** Görülebilen Space'lerde başlık, açıklama ve kimlik araması (ADR-053). */
@@ -126,6 +131,14 @@ export class WorkItemsController {
   @ZodResponse({ type: EpicsDto })
   epicList(@Uuid('spaceId') spaceId: string): Promise<EpicsResponse> {
     return this.epics.list(spaceId);
+  }
+
+  /** Gantt: tarihli işler, bağımlılıklar ve kritik yol (ADR-077). */
+  @Get('spaces/:spaceId/gantt')
+  @RequireSpacePermission(S.SPACE_VIEW)
+  @ZodResponse({ type: GanttDto })
+  ganttOf(@Uuid('spaceId') spaceId: string): Promise<Gantt> {
+    return this.gantt.gantt(spaceId);
   }
 
   @Get('lists/:listId/items')

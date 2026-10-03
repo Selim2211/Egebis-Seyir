@@ -638,3 +638,15 @@
   - **Yetki:** `report.view`. Hesap saf ve birim testlidir (`buildWorkload`).
 - **Alternatifler:** Puanı her atanana tam saymak (toplam şişer); kapasiteyi sabit 40 saat varsaymak (yanıltıcı, ayar olmadan güvenilmez); çok Space'li workspace iş yükü (Dashboard adımında).
 - **Bilinen sınırlar:** tarih bazlı yük dağılımı (hangi hafta ne kadar) ve aşırı yük uyarısı yok; Gantt adımıyla (4.5) birlikte zaman ekseninde yük düşünülebilir.
+
+## ADR-077 — Gantt, bağımlılık ve kritik yol
+
+- **Tarih:** 2026-10-03 · **Durum:** Kabul (brief §5.10 [F2]; ayrıntılar geliştirici varsayılanı, onay bekliyor)
+- **Karar:**
+  - **Veri:** Gantt, Space'in tarihli işlerinden kurulur (başlangıç ve/veya bitiş tarihi olan; bağımlılığı olan tarihsiz iş de satır olur, çubuksuz "tarihsiz" yazar). Üst-alt ilişkisi girintiyle gösterilir. Bağımlılık için yeni kavram yok: mevcut **"bloklar" (BLOCKS)** bağlantısı bitiş–başlangıç bağımlılığı sayılır ("A, B'yi bloklar": B, A bitmeden başlayamaz). Yalnızca iki ucu da aynı Space'te ve silinmemiş bağlantılar çizilir.
+  - **Kritik yol:** bağımlılık grafiğindeki en uzun zincir, iş sürelerinin (başlangıç–bitiş, bitiş dahil gün; tarih eksikse 1) toplamına göre. Saf ve birim testli (`analyzeSchedule`, Kahn sırası + en uzun yol). Döngü varsa uyarı gösterilir ve yol hesaplanmaz. Bu, tam CPM değildir (serbest bolluk/erken-geç tarih yok); tarihler kullanıcı tarafından girildiği için "çizelgeye göre en uzun zincir" kastedilir.
+  - **Çakışma:** ardıl iş öncülün bitiş gününde veya öncesinde başlıyorsa bağımlılık "çakışıyor" sayılır (turuncu kesikli ok ve üstte uyarı). Sistem tarihleri **otomatik kaydırmaz**.
+  - **Düzenleme:** çubuk sürüklenince işin iki tarihi aynı gün kadar kayar (süre korunur) ve `PATCH items/:id` ile kaydedilir; `workItem.write` ister, aksi halde salt okunur. Bağımlılık ekleme/silme görev detayındaki mevcut bağlantı arayüzünden yapılır. Çubuk uçlarını çekerek süre değiştirme ve oktan bağımlılık çizme sonraya.
+  - **Ekran:** Space ağacında "Gantt": sol sütunda iş listesi, sağda ay eksenli iz, bugün çizgisi, ilerleme dolgulu çubuklar (renk Epic rengi), SVG oklar. Kritik yoldaki çubuklar kırmızı çerçeveli, oklar kalın kırmızı.
+- **Alternatifler:** Ayrı bağımlılık tablosu ve türleri (SS/FF/SF; BLOCKS zaten mevcut ve görev detayında yönetiliyor); bağımlılık değişince tarihleri otomatik kaydırmak (beklenmedik tarih değişiklikleri; önce uyarı); harici Gantt kütüphanesi (boyut, tema ve erişilebilirlik; basit konumlu öğeler yeterli).
+- **Bilinen sınırlar:** klavye ile tarih kaydırma yok (detay panelinden değişir); yalnızca BLOCKS türü; milisaniye değil gün hassasiyeti; çok Space'li Gantt ve baseline karşılaştırması yok.

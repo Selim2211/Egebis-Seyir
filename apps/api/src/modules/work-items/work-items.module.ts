@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { EpicsService } from './epics.service';
+import { GanttService } from './gantt.service';
 import { ItemDetailsService } from './item-details.service';
 import { ItemQueriesService } from './item-queries.service';
 import { ItemTreeService } from './item-tree.service';
@@ -13,6 +14,7 @@ import { WorkItemsService } from './work-items.service';
   providers: [
     WorkItemsService,
     EpicsService,
+    GanttService,
     ItemTreeService,
     ItemDetailsService,
     ItemQueriesService,

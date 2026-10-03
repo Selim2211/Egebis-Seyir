@@ -1175,5 +1175,21 @@
     "overdue": "Overdue",
     "dueSoon": "Due in 7 days",
     "loggedWeek": "Logged this week"
+  },
+  "gantt": {
+    "link": "Gantt",
+    "title": "Gantt",
+    "hint": "Drag a bar to shift the item’s dates. Arrows show “cannot start until finished” dependencies.",
+    "empty": "No dated items. Give an item start/due dates or link two items with “blocks”.",
+    "item": "Item",
+    "items": "Gantt rows",
+    "noDates": "no dates",
+    "critical": "Critical path: {{days}} days, {{count}} items",
+    "violations": "{{count}} dependency conflicts: a successor starts before its predecessor ends",
+    "cycle": "The dependencies contain a cycle; the critical path could not be computed.",
+    "readOnly": "Read-only",
+    "barLabel": "{{key}} {{title}}, {{start}} – {{due}} {{critical}}",
+    "onCritical": "(on the critical path)",
+    "legend": "A red outline and arrow mark the critical path; a dashed orange arrow marks a conflicting dependency."
   }
 }
