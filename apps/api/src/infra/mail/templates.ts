@@ -15,14 +15,14 @@ export interface MailMessage {
   html: string;
 }
 
-const escapeHtml = (s: string) =>
+export const escapeHtml = (s: string) =>
   s.replace(
     /[&<>"']/g,
     (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!,
   );
 
 /** Sade, e-posta istemcilerinde güvenli tek sütun düzen. */
-function layout(
+export function layout(
   title: string,
   paragraphs: string[],
   action: { label: string; url: string },

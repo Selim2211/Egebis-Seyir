@@ -159,7 +159,8 @@
     "preferences": "Tercihler",
     "sessions": "Oturumlar",
     "general": "Genel",
-    "archive": "Arşiv ve çöp kutusu"
+    "archive": "Arşiv ve çöp kutusu",
+    "notifications": "Bildirimler"
   },
   "members": {
     "title": "Üyeler",
@@ -947,5 +948,49 @@
     "notesPlaceholder": "Neler gösterildi, paydaşlardan hangi geri bildirimler geldi?",
     "notesSaved": "Notlar kaydedildi.",
     "noNotes": "Henüz demo notu yok."
+  },
+  "notifications": {
+    "title": "Bildirimler",
+    "filter": "Bildirim süzgeci",
+    "all": "Tümü",
+    "unread": "Okunmamış",
+    "markAll": "Tümünü okundu yap",
+    "empty": "Henüz bildirim yok.",
+    "emptyUnread": "Okunmamış bildirim yok.",
+    "loadMore": "Daha eski bildirimler",
+    "unreadDot": "Okunmamış",
+    "someone": "Biri",
+    "bellUnread": "Bildirimler, {{count}} okunmamış",
+    "text": {
+      "ASSIGNED": "{{actor}} sana {{key}} görevini atadı.",
+      "MENTIONED": "{{actor}} seni {{key}} görevindeki bir yorumda etiketledi.",
+      "COMMENTED": "{{actor}}, {{key}} görevine yorum yazdı.",
+      "STATUS_CHANGED": "{{actor}}, {{key}} durumunu “{{detail}}” yaptı.",
+      "SPRINT_STARTED": "{{actor}}, {{sprint}} sprint’ini başlattı.",
+      "SPRINT_COMPLETED": "{{actor}}, {{sprint}} sprint’ini tamamladı."
+    },
+    "settingsTitle": "Bildirimler",
+    "settingsSubtitle": "Hangi olaylardan hangi kanaldan haber almak istediğini seç. Değişiklikler hemen kaydedilir.",
+    "event": "Olay",
+    "channelInApp": "Uygulama içi",
+    "channelEmail": "E-posta",
+    "prefsSaved": "Bildirim tercihleri kaydedildi.",
+    "switchLabel": "{{type}} — {{channel}}",
+    "types": {
+      "ASSIGNED": "Bana atandı",
+      "MENTIONED": "Etiketlendim",
+      "COMMENTED": "Yorum geldi",
+      "STATUS_CHANGED": "Durum değişti",
+      "SPRINT_STARTED": "Sprint başladı",
+      "SPRINT_COMPLETED": "Sprint tamamlandı"
+    },
+    "typeHelp": {
+      "ASSIGNED": "Bir görev sana atandığında.",
+      "MENTIONED": "Bir yorumda @ ile etiketlendiğinde.",
+      "COMMENTED": "İzlediğin veya atandığın görevlere yorum yazıldığında.",
+      "STATUS_CHANGED": "Atandığın veya izlediğin görevin durumu değiştiğinde.",
+      "SPRINT_STARTED": "Üyesi olduğun Space’te sprint başladığında.",
+      "SPRINT_COMPLETED": "Üyesi olduğun Space’te sprint tamamlandığında."
+    }
   }
 }

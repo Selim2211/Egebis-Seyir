@@ -516,3 +516,15 @@
   - **DoR ve planlama:** Backlog/sprint satırlarında eksik DoR "DoR 1/3" rozetiyle işaretlenir; sprint başlatma penceresi hazır olmayan öğe sayısını uyarır. Engel değil, işarettir (brief §6.3 "işaretlenir").
   - **Sprint Review** (`GET sprints/:id/review`): tamamlananlar, tamamlanmayanlar (kapanmış sprint'te çıkış olaylarından, açıkta güncel durumdan), sprint başladıktan sonra eklenen/çıkarılan öğeler (kapsam değişiklikleri) ve **demo notları** (en çok 5000 karakter). Notlar `sprint.complete` yetkisiyle, **tamamlanmış sprint'te de** yazılabilir; öğe kümesi kilitli kalır, not bir ek açıklamadır (değişiklik aktiviteye düşer). Açık sprint için de önizleme gösterilir.
 - **Alternatifler:** DoD'yi öğe başına kopyalanan checklist yapmak (Space maddesi değişince eski öğeler eskir, toplu güncelleme gerekir); işaretleri madde dizinleriyle tutmak (madde araya eklenince kayar); DoR'u sprint'e almada engel yapmak (brief yalnızca işaretlemeyi ister).
+
+## ADR-066 — Bildirimler
+
+- **Tarih:** 2026-10-03 · **Durum:** Kabul (brief §5.13; e-posta modu kullanıcı kararı ADR-060; ayrıntılar geliştirici varsayılanı)
+- **Karar:**
+  - **Olaylar ve alıcılar:** `ASSIGNED` (yeni atananlar), `MENTIONED` (yorumda etiketlenenler; düzenlemede yalnızca yeni etiketlenenler), `COMMENTED` (yorumdan önceki izleyiciler, etiketlenenler hariç), `STATUS_CHANGED` (atananlar, bildiren ve izleyiciler; yeni durum adı eklenir), `SPRINT_STARTED` / `SPRINT_COMPLETED` (Space üyeleri ve sprint öğelerinin atananları). Eylemi yapan kişi **hiçbir zaman** bildirim almaz; alıcı Space'i göremiyorsa elenir (özel Space sızıntısı olmaz).
+  - **Kanallar:** uygulama içi kutu ve **anında** e-posta (kuyruk üzerinden, ADR-021). Tercih tür × kanal bazlıdır (`notification_preferences`); kayıt yoksa ikisi de açıktır. Özet (digest) ve rahatsız etme saatleri sonraya.
+  - **Hata yalıtımı:** bildirim, asıl işlem tamamlandıktan **sonra** üretilir ve hata verirse yalnızca loglanır; atama, yorum, durum veya sprint işlemi bildirim yüzünden başarısız olmaz. Bedeli: bildirim ile asıl işlem aynı işlemde değildir (nadir bir çökmede bildirim kaybolabilir).
+  - **Kutu:** kullanıcıya özel `notifications` tablosu; içerik anlık görüntü olarak (`actorName`, `itemKey`, `itemTitle`, `sprintName`, `detail`) saklanır. 30'ar kayıt (`before` imleci), okunmamış süzgeci, tek tek ve toplu okundu. Rozet için hafif `unread-count` ucu 30 sn'de bir ve pencere odaklanınca yoklanır; gerçek zamanlı güncelleme (WebSocket) sonraya (brief [F2]).
+  - **Arayüz:** Kenar çubuğu ve üst çubukta rozetli zil, `/notifications` sayfası, Ayarlar › Bildirimler tercih tablosu (anahtarlar anında kaydedilir).
+  - **Kapsam dışı (şimdilik):** toplu düzenleme (bulk) ve ClickUp içe aktarma bildirim üretmez; eski bildirimlerin temizlenmesi (ör. 90 gün) henüz yok.
+- **Alternatifler:** Bildirimleri işlemin içinde yazmak (hata asıl işlemi bozar, e-posta kuyruğu işlem dışı kalmalı); olay veri yolundan (activity_events) bildirim türetmek (alıcı hesabı ve tercih süzmesi yine gerekir, kutuya okundu durumu eklenemez).

@@ -8,6 +8,7 @@ import {
   UserRound,
   Users,
   type LucideIcon,
+  Bell,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useCan } from '@/features/workspace/queries';
@@ -68,6 +69,7 @@ function SettingsLayout() {
         <SectionLabel>{t('settings.accountSection')}</SectionLabel>
         <SubLink to="/settings/profile" icon={UserRound} label={t('settings.profile')} />
         <SubLink to="/settings/preferences" icon={Settings2} label={t('settings.preferences')} />
+        <SubLink to="/settings/notifications" icon={Bell} label={t('settings.notifications')} />
         <SubLink to="/settings/sessions" icon={MonitorSmartphone} label={t('settings.sessions')} />
       </nav>
       <div className="min-w-0 flex-1 px-4 py-6 sm:px-8 sm:py-8">

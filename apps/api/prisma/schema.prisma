@@ -125,6 +125,10 @@ model User {
   commentReactions CommentReaction[]
   attachments      Attachment[]
 
+  notifications           Notification[]           @relation("NotificationRecipient")
+  notificationsCaused     Notification[]           @relation("NotificationActor")
+  notificationPreferences NotificationPreference[]
+
   @@map("users")
 }
 
@@ -189,6 +193,9 @@ model Workspace {
   attachments       Attachment[]
   sprints           Sprint[]
   sprintItemEvents  SprintItemEvent[]
+
+  notifications           Notification[]
+  notificationPreferences NotificationPreference[]
 
   @@map("workspaces")
 }
@@ -314,6 +321,8 @@ model Space {
   items    WorkItem[]
   labels   Label[]
   sprints  Sprint[]
+
+  notifications Notification[]
 
   @@index([workspaceId])
   @@map("spaces")
@@ -503,6 +512,8 @@ model WorkItem {
   comments     Comment[]
   attachments  Attachment[]
   sprintEvents SprintItemEvent[]
+
+  notifications Notification[]
 
   @@unique([workspaceId, keyPrefix, number])
   @@index([listId, rank])
@@ -726,6 +737,8 @@ model Sprint {
   items  WorkItem[]
   events SprintItemEvent[]
 
+  notifications Notification[]
+
   @@index([spaceId, status])
   @@map("sprints")
 }
@@ -749,4 +762,55 @@ model SprintItemEvent {
   @@index([sprintId, createdAt])
   @@index([workItemId])
   @@map("sprint_item_events")
+}
+
+// ---------- Bildirimler (Faz 2.5, ADR-066) ----------
+
+enum NotificationType {
+  ASSIGNED
+  MENTIONED
+  COMMENTED
+  STATUS_CHANGED
+  SPRINT_STARTED
+  SPRINT_COMPLETED
+}
+
+/// Uygulama içi bildirim kutusu; alıcıya özeldir. data: { actorName, itemKey?, itemTitle?, sprintName? } anlık görüntüsü.
+model Notification {
+  id          String           @id @default(uuid(7)) @db.Uuid
+  workspaceId String           @db.Uuid
+  workspace   Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  userId      String           @db.Uuid
+  user        User             @relation("NotificationRecipient", fields: [userId], references: [id], onDelete: Cascade)
+  actorId     String?          @db.Uuid
+  actor       User?            @relation("NotificationActor", fields: [actorId], references: [id], onDelete: SetNull)
+  type        NotificationType
+  spaceId     String           @db.Uuid
+  space       Space            @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  workItemId  String?          @db.Uuid
+  workItem    WorkItem?        @relation(fields: [workItemId], references: [id], onDelete: Cascade)
+  sprintId    String?          @db.Uuid
+  sprint      Sprint?          @relation(fields: [sprintId], references: [id], onDelete: Cascade)
+  data        Json
+  readAt      DateTime?        @db.Timestamptz
+  createdAt   DateTime         @default(now()) @db.Timestamptz
+
+  @@index([userId, readAt, createdAt])
+  @@index([userId, createdAt])
+  @@map("notifications")
+}
+
+/// Kullanıcının tür bazlı kanal tercihleri; satır yoksa ikisi de açıktır.
+model NotificationPreference {
+  id          String           @id @default(uuid(7)) @db.Uuid
+  workspaceId String           @db.Uuid
+  workspace   Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  userId      String           @db.Uuid
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type        NotificationType
+  inApp       Boolean          @default(true)
+  email       Boolean          @default(true)
+
+  @@unique([userId, type])
+  @@map("notification_preferences")
 }

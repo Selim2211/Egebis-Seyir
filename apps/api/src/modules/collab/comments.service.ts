@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import {
+  formatItemKey,
   ERROR_CODES,
   extractMentionIds,
   isRichTextEmpty,
@@ -17,6 +18,7 @@ import { ClsService } from 'nestjs-cls';
 import type { AppClsStore } from '../../infra/cls/request-context';
 import { TenantPrismaService } from '../../infra/prisma/tenant-prisma.service';
 import { SpaceAccessService } from '../access/space-access.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { ActivityService } from '../activity/activity.service';
 import { forbidden, notFound } from '../spaces/space-errors';
 import { asJson, fail, type TenantTx } from '../work-items/item-support';
@@ -32,6 +34,7 @@ export class CommentsService {
     private readonly cls: ClsService<AppClsStore>,
     private readonly access: SpaceAccessService,
     private readonly activity: ActivityService,
+    private readonly notifications: NotificationsService,
   ) {}
 
   private get ctx() {
@@ -45,10 +48,10 @@ export class CommentsService {
   private async activeItem(itemId: string) {
     const item = await this.tenant.db.workItem.findFirst({
       where: { id: itemId, deletedAt: null, list: { deletedAt: null }, space: { deletedAt: null } },
-      select: { id: true, spaceId: true },
+      select: { id: true, spaceId: true, keyPrefix: true, number: true, title: true },
     });
     if (!item) throw notFound();
-    return item;
+    return { ...item, key: formatItemKey(item.keyPrefix, item.number) };
   }
 
   // ---------- Okuma ----------
@@ -116,7 +119,12 @@ export class CommentsService {
     const { workspaceId, actorId } = this.ctx;
     const item = await this.activeItem(itemId);
     const { doc, mentions } = await this.prepare(item.spaceId, input.body);
-    return this.tenant.db.$transaction(async (tx) => {
+    // Yorumdan önceki izleyiciler: yorum yazan ve etiketlenenler sonradan eklenir (ADR-051).
+    const watchers = await this.tenant.db.workItemWatcher.findMany({
+      where: { workItemId: itemId },
+      select: { userId: true },
+    });
+    const created = await this.tenant.db.$transaction(async (tx) => {
       const comment = await tx.comment.create({
         data: {
           workspaceId,
@@ -142,6 +150,22 @@ export class CommentsService {
       });
       return { id: comment.id };
     });
+    // Bildirimler işlemden sonra: etiketlenenler MENTIONED, diğer izleyiciler COMMENTED alır (ADR-066).
+    const ref = { id: item.id, key: item.key, title: item.title };
+    await this.notifications.dispatch({
+      type: 'MENTIONED',
+      recipientIds: mentions,
+      spaceId: item.spaceId,
+      item: ref,
+    });
+    const mentioned = new Set(mentions);
+    await this.notifications.dispatch({
+      type: 'COMMENTED',
+      recipientIds: watchers.map((w) => w.userId).filter((id) => !mentioned.has(id)),
+      spaceId: item.spaceId,
+      item: ref,
+    });
+    return created;
   }
 
   async update(itemId: string, commentId: string, input: CommentRequest): Promise<void> {
@@ -153,6 +177,10 @@ export class CommentsService {
     if (!existing) throw notFound();
     if (existing.authorId !== actorId) throw forbidden(ERROR_CODES.COMMENT_FORBIDDEN);
     const { doc, mentions } = await this.prepare(item.spaceId, input.body);
+    const previous = await this.tenant.db.commentMention.findMany({
+      where: { commentId },
+      select: { userId: true },
+    });
     await this.tenant.db.$transaction(async (tx) => {
       await tx.comment.update({
         where: { id: commentId },
@@ -168,6 +196,14 @@ export class CommentsService {
         action: 'item.comment_edited',
         changes: { commentId },
       });
+    });
+    // Düzenlemede yalnızca yeni etiketlenenler bilgilendirilir.
+    const before = new Set(previous.map((m) => m.userId));
+    await this.notifications.dispatch({
+      type: 'MENTIONED',
+      recipientIds: mentions.filter((id) => !before.has(id)),
+      spaceId: item.spaceId,
+      item: { id: item.id, key: item.key, title: item.title },
     });
   }
 

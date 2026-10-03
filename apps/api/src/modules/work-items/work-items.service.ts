@@ -33,6 +33,7 @@ import type { AppClsStore } from '../../infra/cls/request-context';
 import { TenantPrismaService } from '../../infra/prisma/tenant-prisma.service';
 import { SpaceAccessService } from '../access/space-access.service';
 import { ActivityService } from '../activity/activity.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { toAttachmentDto } from '../collab/attachments.service';
 import { archivedParent, forbidden, notFound } from '../spaces/space-errors';
 import {
@@ -56,6 +57,7 @@ export class WorkItemsService {
     private readonly cls: ClsService<AppClsStore>,
     private readonly access: SpaceAccessService,
     private readonly activity: ActivityService,
+    private readonly notifications: NotificationsService,
   ) {}
 
   private get ctx() {
@@ -293,7 +295,7 @@ export class WorkItemsService {
       select: { rank: true },
     });
 
-    return db.$transaction(async (tx) => {
+    const created = await db.$transaction(async (tx) => {
       const counter = await tx.space.update({
         where: { id: space.id },
         data: { itemCounter: { increment: 1 } },
@@ -351,6 +353,16 @@ export class WorkItemsService {
       });
       return { id: item.id, key };
     });
+    // Atananlara bildirim; işlemden sonra, hata asıl işlemi bozmaz (ADR-066).
+    if (input.assigneeIds.length > 0) {
+      await this.notifications.dispatch({
+        type: 'ASSIGNED',
+        recipientIds: input.assigneeIds,
+        spaceId: space.id,
+        item: { id: created.id, key: created.key, title: input.title },
+      });
+    }
+    return created;
   }
 
   // ---------- Güncelleme ----------
@@ -405,6 +417,7 @@ export class WorkItemsService {
     }
 
     let completedAt: Date | null | undefined;
+    let nextStatusName: string | undefined;
     if (fields.statusId !== undefined && fields.statusId !== item.statusId) {
       const next = await db.status.findFirst({
         where: { id: fields.statusId, spaceId: item.spaceId },
@@ -416,6 +429,7 @@ export class WorkItemsService {
       if (to === 'DONE' && from !== 'DONE' && !force) await this.assertNoOpenChildren(item.id);
       if (to === 'ACTIVE' && from === 'NOT_STARTED' && !force) await this.assertNotBlocked(item.id);
       completedAt = nextCompletedAt(from, to, item.completedAt, new Date());
+      nextStatusName = next.name;
     }
 
     const scalars = {
@@ -495,6 +509,61 @@ export class WorkItemsService {
         changes: asJson(changes),
       });
     });
+
+    await this.notifyUpdate(item, fields, { assignees, statusName: nextStatusName });
+  }
+
+  /**
+   * Güncelleme bildirimleri (ADR-066): yeni atananlara ASSIGNED; durum değiştiyse atananlara,
+   * bildirene ve izleyicilere STATUS_CHANGED.
+   */
+  private async notifyUpdate(
+    item: {
+      id: string;
+      spaceId: string;
+      keyPrefix: string;
+      number: number;
+      title: string;
+      reporterId: string | null;
+      assignees: Array<{ userId: string }>;
+    },
+    fields: { title?: string; assigneeIds?: string[] },
+    change: { assignees: { from: string[]; to: string[] } | null; statusName: string | undefined },
+  ): Promise<void> {
+    const ref = {
+      id: item.id,
+      key: formatItemKey(item.keyPrefix, item.number),
+      title: fields.title ?? item.title,
+    };
+    if (change.assignees) {
+      const before = new Set(change.assignees.from);
+      const added = change.assignees.to.filter((id) => !before.has(id));
+      if (added.length > 0) {
+        await this.notifications.dispatch({
+          type: 'ASSIGNED',
+          recipientIds: added,
+          spaceId: item.spaceId,
+          item: ref,
+        });
+      }
+    }
+    if (change.statusName) {
+      const watchers = await this.tenant.db.workItemWatcher.findMany({
+        where: { workItemId: item.id },
+        select: { userId: true },
+      });
+      await this.notifications.dispatch({
+        type: 'STATUS_CHANGED',
+        recipientIds: [
+          ...(fields.assigneeIds ?? item.assignees.map((a) => a.userId)),
+          ...(item.reporterId ? [item.reporterId] : []),
+          ...watchers.map((w) => w.userId),
+        ],
+        spaceId: item.spaceId,
+        item: ref,
+        detail: change.statusName,
+      });
+    }
   }
 
   // ---------- Yardımcılar (move/copy/bulk de kullanır) ----------

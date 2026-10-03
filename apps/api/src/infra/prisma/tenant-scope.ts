@@ -28,6 +28,8 @@ export const TENANT_MODELS: ReadonlySet<string> = new Set([
   'CommentReaction',
   'Attachment',
   'Sprint',
+  'Notification',
+  'NotificationPreference',
   'SprintItemEvent',
 ]);
 

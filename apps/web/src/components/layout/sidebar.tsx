@@ -14,6 +14,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { useUnreadCount } from '@/features/notifications/queries';
 import { SidebarTree } from '@/features/spaces/sidebar-tree';
 import { useCan, useCurrentWorkspace } from '@/features/workspace/queries';
 import { useUiStore } from '@/lib/ui-store';
@@ -27,11 +28,14 @@ function NavLink({
   icon: Icon,
   label,
   exact = true,
+  badge = 0,
 }: {
   to: LinkProps['to'];
   icon: LucideIcon;
   label: string;
   exact?: boolean;
+  /** Okunmamış sayısı gibi küçük sayaç; 0 ise görünmez. */
+  badge?: number;
 }) {
   const close = useUiStore((s) => s.setSidebarOpen);
   return (
@@ -43,7 +47,15 @@ function NavLink({
       activeOptions={{ exact }}
     >
       <Icon className="size-4" aria-hidden />
-      {label}
+      <span className="flex-1">{label}</span>
+      {badge > 0 && (
+        <span
+          aria-label={`${badge}`}
+          className="bg-primary text-primary-foreground rounded-full px-1.5 text-[10px] leading-4 font-semibold tabular-nums"
+        >
+          {badge > 99 ? '99+' : badge}
+        </span>
+      )}
     </Link>
   );
 }
@@ -78,6 +90,7 @@ function PlannedItem({
 }
 
 export function Sidebar() {
+  const unread = useUnreadCount();
   const { t } = useTranslation();
   const { sidebarOpen, setSidebarOpen } = useUiStore();
   const workspace = useCurrentWorkspace();
@@ -120,7 +133,7 @@ export function Sidebar() {
         <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto p-2">
           <NavLink to="/" icon={House} label={t('nav.home')} />
           <NavLink to="/my-work" icon={ListTodo} label={t('nav.myWork')} />
-          <PlannedItem icon={Inbox} label={t('nav.inbox')} phase="F2" />
+          <NavLink to="/notifications" icon={Inbox} label={t('nav.inbox')} badge={unread} />
           <PlannedItem icon={FileText} label={t('nav.docs')} phase="F3" />
 
           <SidebarTree />

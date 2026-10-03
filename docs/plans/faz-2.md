@@ -10,7 +10,7 @@
 | 2.2 | Board                           | Durum sütunları, kart sürükle-bırak ile durum değişimi, swimlane (atanan/epic/öncelik), aktif sprint ve List kaynakları                                   | Tamamlandı |
 | 2.3 | Sprint yaşam döngüsü + Planning | Başlat/tamamla/iptal kuralları, Planning ekranı (Backlog ↔ Sprint, puan/kapasite), scope change uyarısı, devir akışı, geçmiş sprintler, Sprint Goal ayarı | Tamamlandı |
 | 2.4 | DoD/DoR + Sprint Review         | Space DoD/DoR maddeleri, Done'da DoD checklist, sprint'e alırken DoR işareti, Sprint Review özeti                                                         | Tamamlandı |
-| 2.5 | Bildirimler                     | Bildirim merkezi, atama/mention/durum/yorum/sprint olayları, anında e-posta, tür bazında tercih                                                           | Bekliyor   |
+| 2.5 | Bildirimler                     | Bildirim merkezi, atama/mention/durum/yorum/sprint olayları, anında e-posta, tür bazında tercih                                                           | Tamamlandı |
 | 2.6 | Burndown ve Velocity            | Günlük snapshot işi, Sprint Burndown, Velocity grafiği, rapor ekranı                                                                                      | Bekliyor   |
 
 Faz 2 [F2] etiketli işlerden brief'te sonraya bırakılanlar (Planning Poker, retrospektif, WIP limiti, CFD…) bu fazın adımlarında değildir; Faz 2 yol haritası maddeleri (brief §14) yukarıdaki altı adımla kapsanır.
@@ -60,3 +60,13 @@ Karar: ADR-065 (DoD zorunluluğu için ADR-060).
 **Düzeltilen hatalar (bu adımda bulundu):** (1) `backlog/move` sırası boş öğeleri okuduktan sonra sıralıyordu; ilk taşımada öncelik sırası boş yazılıp bozuluyordu, okumadan önce sıralanıyor. (2) Sprint tamamlama/iptal bildirimi, sprint listeden düştüğü için bileşen kaldırılınca hiç gösterilmiyordu (`mutateAsync` ile düzeltildi).
 
 **Doğrulama (2026-10-03):** test:int 13 dosya / 151 test (`readiness-review` 15); shared 138; Playwright `faz2-readiness` 5/5; tüm paket 45 senaryo yeşil, yalnızca Mailpit gerektiren `faz1-auth` bekliyor.
+
+## 2.5 Ayrıntı
+
+Karar: ADR-066 (e-posta modu için ADR-060).
+
+**API** (`/api/workspaces/:wid/notifications`): `GET ?unread=true&before=ISO`, `GET unread-count`, `POST :id/read`, `POST read-all`, `GET|PUT preferences`. Üretim `NotificationsService.dispatch` ile; çağıranlar: iş öğesi oluşturma/güncelleme (atama, durum), yorum oluşturma/düzenleme (etiket, yorum), sprint başlat/tamamla. Veri: `notifications`, `notification_preferences`, e-posta şablonu `notification-mail.ts` (TR/EN, alıcının diliyle).
+
+**Web**: `/notifications` (Tümü/Okunmamış, tıklayınca okundu + hedefe git, tümünü okundu yap, daha eski), kenar çubuğunda rozetli "Bildirimler", üst çubukta zil, Ayarlar › Bildirimler (tür × kanal anahtarları).
+
+**Doğrulama (2026-10-03):** test:int 14 dosya / 167 test (`notifications` 16: kime/ne zaman, kendine bildirim yok, çift bildirim yok, düzenlemede yalnızca yeni etiket, görünürlük, kutu, sayfalama, tercih kanalları, e-posta); shared 143, web birim 61; Playwright `faz2-notifications` 3/3 (bildirim satırları test için veritabanına eklenir, çünkü ikinci kullanıcı davet e-postası ister); tüm paket 48 senaryo yeşil, yalnızca Mailpit gerektiren `faz1-auth` bekliyor. Gerçek iki kullanıcılı tarayıcı akışı (biri atar, diğeri rozeti görür) Mailpit gelince eklenecek.

@@ -4,6 +4,7 @@ import { ClsService } from 'nestjs-cls';
 import type { AppClsStore } from '../../infra/cls/request-context';
 import { TenantPrismaService } from '../../infra/prisma/tenant-prisma.service';
 import { ActivityService } from '../activity/activity.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { isUniqueViolation, notFound } from '../spaces/space-errors';
 import { asJson, fail, type TenantTx } from '../work-items/item-support';
 import { conflict, countedItems, loadScrumSpace } from './sprint-support';
@@ -15,6 +16,7 @@ export class SprintLifecycleService {
     private readonly tenant: TenantPrismaService,
     private readonly cls: ClsService<AppClsStore>,
     private readonly activity: ActivityService,
+    private readonly notifications: NotificationsService,
   ) {}
 
   private get ctx() {
@@ -69,6 +71,7 @@ export class SprintLifecycleService {
       if (isUniqueViolation(error)) throw conflict(ERROR_CODES.SPRINT_ACTIVE_EXISTS);
       throw error;
     }
+    await this.notifySprint('SPRINT_STARTED', sprint);
   }
 
   /**
@@ -128,6 +131,7 @@ export class SprintLifecycleService {
         }),
       });
     });
+    await this.notifySprint('SPRINT_COMPLETED', sprint);
   }
 
   /** Planlı veya aktif sprint iptal edilir; öğeleri Backlog'a döner (brief §6.1.6). */
@@ -157,6 +161,30 @@ export class SprintLifecycleService {
         action: 'sprint.cancelled',
         changes: asJson({ name: sprint.name, returnedItems: items.length }),
       });
+    });
+  }
+
+  /**
+   * Sprint başladı/bitti bildirimi: Space üyeleri ve sprint öğelerinin atananları (ADR-066).
+   * Eylemi yapan ve Space'i göremeyenler serviste süzülür.
+   */
+  private async notifySprint(
+    type: 'SPRINT_STARTED' | 'SPRINT_COMPLETED',
+    sprint: { id: string; name: string; spaceId: string },
+  ): Promise<void> {
+    const db = this.tenant.db;
+    const [members, assignees] = await Promise.all([
+      db.spaceMember.findMany({ where: { spaceId: sprint.spaceId }, select: { userId: true } }),
+      db.workItemAssignee.findMany({
+        where: { workItem: { sprintId: sprint.id } },
+        select: { userId: true },
+      }),
+    ]);
+    await this.notifications.dispatch({
+      type,
+      recipientIds: [...members.map((m) => m.userId), ...assignees.map((a) => a.userId)],
+      spaceId: sprint.spaceId,
+      sprint: { id: sprint.id, name: sprint.name },
     });
   }
 

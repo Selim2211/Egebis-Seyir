@@ -12,3 +12,4 @@ export * from './work-item-links';
 export * from './attachments';
 export * from './sprint';
 export * from './readiness';
+export * from './notifications';

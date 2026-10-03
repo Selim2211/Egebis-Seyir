@@ -159,7 +159,8 @@
     "preferences": "Preferences",
     "sessions": "Sessions",
     "general": "General",
-    "archive": "Archive and trash"
+    "archive": "Archive and trash",
+    "notifications": "Notifications"
   },
   "members": {
     "title": "Members",
@@ -947,5 +948,49 @@
     "notesPlaceholder": "What was shown and what feedback did stakeholders give?",
     "notesSaved": "Notes saved.",
     "noNotes": "No demo notes yet."
+  },
+  "notifications": {
+    "title": "Notifications",
+    "filter": "Notification filter",
+    "all": "All",
+    "unread": "Unread",
+    "markAll": "Mark all as read",
+    "empty": "No notifications yet.",
+    "emptyUnread": "No unread notifications.",
+    "loadMore": "Older notifications",
+    "unreadDot": "Unread",
+    "someone": "Someone",
+    "bellUnread": "Notifications, {{count}} unread",
+    "text": {
+      "ASSIGNED": "{{actor}} assigned {{key}} to you.",
+      "MENTIONED": "{{actor}} mentioned you in a comment on {{key}}.",
+      "COMMENTED": "{{actor}} commented on {{key}}.",
+      "STATUS_CHANGED": "{{actor}} moved {{key}} to “{{detail}}”.",
+      "SPRINT_STARTED": "{{actor}} started {{sprint}}.",
+      "SPRINT_COMPLETED": "{{actor}} completed {{sprint}}."
+    },
+    "settingsTitle": "Notifications",
+    "settingsSubtitle": "Choose which events notify you and through which channel. Changes are saved immediately.",
+    "event": "Event",
+    "channelInApp": "In-app",
+    "channelEmail": "Email",
+    "prefsSaved": "Notification preferences saved.",
+    "switchLabel": "{{type}} — {{channel}}",
+    "types": {
+      "ASSIGNED": "Assigned to me",
+      "MENTIONED": "Mentioned",
+      "COMMENTED": "New comment",
+      "STATUS_CHANGED": "Status changed",
+      "SPRINT_STARTED": "Sprint started",
+      "SPRINT_COMPLETED": "Sprint completed"
+    },
+    "typeHelp": {
+      "ASSIGNED": "When an item is assigned to you.",
+      "MENTIONED": "When someone @mentions you in a comment.",
+      "COMMENTED": "When items you watch or are assigned to get a comment.",
+      "STATUS_CHANGED": "When the status of an item you watch or are assigned to changes.",
+      "SPRINT_STARTED": "When a sprint starts in a Space you belong to.",
+      "SPRINT_COMPLETED": "When a sprint is completed in a Space you belong to."
+    }
   }
 }
