@@ -13,6 +13,11 @@ export function ranksAfter(last: string | null, count: number): string[] {
   return generateNKeysBetween(last, null, count);
 }
 
+/** `before` ile `after` arasına sıralı `count` anahtar (ikisi de null olabilir). */
+export function ranksBetween(before: string | null, after: string | null, count: number): string[] {
+  return generateNKeysBetween(before, after, count);
+}
+
 /**
  * Sıralı kardeşler arasında `afterId`'nin hemen arkasına yerleştirme anahtarı.
  * `afterId = null` → en başa. Taşınan öğe (`movingId`) kardeşler arasındaysa yok sayılır.

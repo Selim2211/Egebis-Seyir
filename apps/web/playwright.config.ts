@@ -7,7 +7,8 @@ export const E2E = {
   apiPort: 3100,
   webPort: 5174,
   setupToken: 'e2e-setup-token',
-  databaseUrl: 'postgresql://scrum:scrum@localhost:5433/scrum_e2e',
+  // Docker yerine yerel Postgres kullanılacaksa E2E_DATABASE_URL ile değiştirilir.
+  databaseUrl: process.env.E2E_DATABASE_URL ?? 'postgresql://scrum:scrum@localhost:5433/scrum_e2e',
   mailpitUrl: 'http://localhost:8025',
 } as const;
 

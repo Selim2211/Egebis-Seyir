@@ -453,3 +453,31 @@
 
 - **Tarih:** 2026-10-02 · **Durum:** Kabul (brief §5.1)
 - **Karar:** En çok 2 MB, PNG/JPEG/WebP (içerik imzası doğrulanır), istemcide kare kırpılıp 256 px'e küçültülür. Dosya depolamada `avatars/<userId>` anahtarıyla durur; kullanıcıda yalnızca `avatarVersion` (önbellek anahtarı) saklanır. `GET /api/users/:id/avatar` yalnızca aynı workspace'te olan oturum sahiplerine açıktır. Fotoğraf yoksa baş harfler (mevcut davranış) gösterilir.
+
+## ADR-060 — Faz 2 kullanıcı kararları
+
+- **Tarih:** 2026-10-03 · **Durum:** Kabul (kullanıcı onayı)
+- **Karar:**
+  - **Sprint Goal:** Sprint başlatırken zorunludur; Space ayarıyla (`sprintGoalRequired`) yalnızca uyarıya çevrilebilir (brief §6.1.3).
+  - **DoD:** Story "Done"a çekilirken DoD maddeleri gösterilir ve eksikse uyarı çıkar; Space ayarıyla (`dodEnforced`) tamamlanmadan Done'a geçiş engellenir (brief §6.3).
+  - **E-posta bildirimleri:** Olay anında gönderilir; kullanıcı profilinden bildirim türü bazında kapatabilir. Özet (digest) ve rahatsız etme saatleri sonraya kalır (brief §5.13 [F2] tercih yönetimi).
+  - **Adım sırası:** 2.1 Sprint modeli + Product Backlog → 2.2 Board → 2.3 Sprint yaşam döngüsü + Planning → 2.4 DoD/DoR + Sprint Review → 2.5 Bildirimler → 2.6 Burndown/Velocity.
+
+## ADR-061 — Sprint modeli ve sprint üyeliği
+
+- **Tarih:** 2026-10-03 · **Durum:** Kabul (brief §5.6, §6.1; ayrıntılar geliştirici varsayılanı)
+- **Karar:**
+  - `sprints` tablosu Space'e bağlıdır; durumlar PLANNED → ACTIVE → COMPLETED veya CANCELLED. Space başına en çok bir ACTIVE sprint, kısmi benzersiz dizinle veritabanında garanti edilir (brief §6.1.1).
+  - Tarihler date-only'dir. Başlangıç ≤ bitiş. Kapasite şimdilik serbest nottur (kişi bazlı kapasite brief §5.6'da [F2], sonraya).
+  - Sprint'e **yalnızca üst düzey** Story, Bug ve Task girer (üst öğesi yok veya üst öğesi Epic olan). Epic hiçbir zaman sprint'e girmez; alt öğeler (Task, Sub-task) üstlerinin sprint'ini izler. `work_items.sprintId` tek kaynaktır.
+  - Sprint'e ekleme/çıkarma `sprint_item_events` tablosuna yazılır: neden (PLANNED, SCOPE_CHANGE, CARRIED_OVER), o anki puan. Burndown ve scope change raporları bundan beslenir (ADR-015). Aktif sprint'e ekleme SCOPE_CHANGE sayılır.
+  - Tamamlanmış ve iptal sprint salt-okunurdur; öğesi eklenip çıkarılamaz.
+- **Alternatifler:** Sub-task'ın da ayrı sprint'e girebilmesi (Jira'da bile karışıklık yaratır); sprint üyeliğini yalnızca olay tablosunda tutmak (her sorguda son durumu hesaplamak gerekir).
+
+## ADR-062 — Product Backlog ve öncelik sırası
+
+- **Tarih:** 2026-10-03 · **Durum:** Kabul (brief §5.5; ayrıntılar geliştirici varsayılanı)
+- **Karar:**
+  - Backlog Space'e aittir, List'e değil: Space'teki sprint'e atanmamış, Done kategorisinde olmayan, silinmemiş/arşivlenmemiş üst düzey Story, Bug ve Task'lardır. Epic'ler gruplama/filtre içindir, sırada görünmez.
+  - Sıra tek bir `work_items.backlogRank` (kesirli anahtar, `COLLATE "C"`) ile tutulur; Backlog ve sprint içi sıra aynı anahtarı kullanır, böylece sprint'e taşınan öğe önceliğini korur. List içi `rank` ayrıdır.
+  - Sıralamayı değiştirmek `backlog.rank` izni ister (PO). Sprint'e taşıma `sprint.plan` ister. Tahminsiz (puansız) Story/Bug vurgulanır.

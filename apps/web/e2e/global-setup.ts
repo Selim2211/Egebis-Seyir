@@ -14,5 +14,6 @@ export default async function globalSetup(): Promise<void> {
     input: 'TRUNCATE TABLE users, workspaces RESTART IDENTITY CASCADE;',
     stdio: ['pipe', 'inherit', 'inherit'],
   });
-  await fetch(`${E2E.mailpitUrl}/api/v1/messages`, { method: 'DELETE' });
+  // Mailpit yoksa yalnızca e-posta bekleyen senaryolar başarısız olur; diğerleri çalışır.
+  await fetch(`${E2E.mailpitUrl}/api/v1/messages`, { method: 'DELETE' }).catch(() => undefined);
 }

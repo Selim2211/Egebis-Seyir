@@ -20,17 +20,17 @@ test.describe.serial('Space / Folder / List', () => {
     await sidebar.getByRole('button', { name: 'Space oluştur' }).first().click();
 
     const dialog = page.getByRole('dialog', { name: 'Yeni Space oluştur' });
-    await dialog.getByLabel('Ad', { exact: true }).fill('Mobil Uygulama');
-    await expect(dialog.getByLabel('Anahtar')).toHaveValue('MOB');
+    await dialog.getByLabel('Ad', { exact: true }).fill('Kurumsal Site');
+    await expect(dialog.getByLabel('Anahtar')).toHaveValue('KUR');
     await dialog.getByRole('button', { name: 'Space oluştur' }).click();
 
-    await expect(page.getByText('Mobil Uygulama oluşturuldu.')).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Mobil Uygulama' })).toBeVisible();
+    await expect(page.getByText('Kurumsal Site oluşturuldu.')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Kurumsal Site' })).toBeVisible();
     await expect(page.getByRole('link', { name: 'Görevler' }).first()).toBeVisible();
 
     await page.getByRole('link', { name: 'Space ayarları' }).click();
     for (const status of ['Backlog', 'Yapılacak', 'Devam ediyor', 'İncelemede', 'Tamamlandı']) {
-      await expect(page.getByText(status, { exact: true })).toBeVisible();
+      await expect(page.getByRole('listitem').filter({ hasText: status }).first()).toBeVisible();
     }
   });
 
@@ -38,7 +38,7 @@ test.describe.serial('Space / Folder / List', () => {
     page,
   }) => {
     const sidebar = page.getByRole('complementary');
-    await sidebar.getByRole('link', { name: 'Mobil Uygulama' }).click();
+    await sidebar.getByRole('link', { name: 'Kurumsal Site' }).click();
 
     await page.getByRole('button', { name: 'Folder oluştur', exact: true }).click();
     await page.getByRole('dialog').getByLabel('Ad').fill('Sürüm 2.0');
@@ -48,7 +48,7 @@ test.describe.serial('Space / Folder / List', () => {
     await page.getByRole('button', { name: 'Liste oluştur', exact: true }).click();
     const dialog = page.getByRole('dialog');
     await dialog.getByLabel('Ad').fill('Hatalar');
-    await dialog.getByLabel('Konum').selectOption({ label: 'Mobil Uygulama › Sürüm 2.0' });
+    await dialog.getByLabel('Konum').selectOption({ label: 'Kurumsal Site › Sürüm 2.0' });
     await dialog.getByRole('button', { name: 'Oluştur' }).click();
     await expect(page).toHaveURL(/\/lists\//);
     await expect(page.getByRole('heading', { name: 'Hatalar' })).toBeVisible();
@@ -69,7 +69,7 @@ test.describe.serial('Space / Folder / List', () => {
     page,
   }) => {
     const sidebar = page.getByRole('complementary');
-    await sidebar.getByRole('link', { name: 'Mobil Uygulama' }).click();
+    await sidebar.getByRole('link', { name: 'Kurumsal Site' }).click();
 
     // Arşivle → bildirimdeki "Geri al".
     await sidebar.getByRole('button', { name: 'Görevler için işlemler' }).click();
@@ -90,6 +90,8 @@ test.describe.serial('Space / Folder / List', () => {
     await expect(page.getByText('30 gün sonra kalıcı olarak silinir')).toBeVisible();
     await page.getByRole('button', { name: 'Geri getir' }).click();
     await expect(page.getByText('Geri getirildi.')).toBeVisible();
+    // Sayfa yenilenince Space kapalı gelir; açınca liste görünür.
+    await sidebar.getByRole('link', { name: 'Kurumsal Site' }).click();
     await expect(sidebar.getByRole('link', { name: 'Görevler' })).toBeVisible();
   });
 });

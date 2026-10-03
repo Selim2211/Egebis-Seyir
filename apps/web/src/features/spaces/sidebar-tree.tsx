@@ -18,6 +18,7 @@ import {
   GripVertical,
   Layers,
   List,
+  ListOrdered,
   ListPlus,
   Lock,
   MoreHorizontal,
@@ -308,6 +309,7 @@ function SpaceNode({
       />
       {open && (
         <div role="group" aria-label={space.name}>
+          {space.scrumEnabled && <BacklogLink spaceId={space.id} />}
           <SortableGroup
             items={space.folders}
             enabled={canManage}
@@ -342,6 +344,29 @@ function SpaceNode({
           )}
         </div>
       )}
+    </div>
+  );
+}
+
+/** Space altındaki "Backlog ve sprint'ler" bağlantısı (yalnızca Scrum açık Space'lerde). */
+function BacklogLink({ spaceId }: { spaceId: string }) {
+  const { t } = useTranslation();
+  const closeSidebar = useUiStore((s) => s.setSidebarOpen);
+  return (
+    <div
+      className="text-sidebar-foreground hover:bg-sidebar-accent has-[[data-status=active]]:bg-sidebar-accent has-[[data-status=active]]:font-medium flex h-7.5 items-center gap-1 rounded-md pr-1 text-sm"
+      style={{ paddingLeft: 4 + 14 }}
+    >
+      <span className="w-5 shrink-0" aria-hidden />
+      <Link
+        to="/spaces/$spaceId/backlog"
+        params={{ spaceId }}
+        onClick={() => closeSidebar(false)}
+        className="flex min-w-0 flex-1 items-center gap-1.5 self-stretch outline-none focus-visible:underline"
+      >
+        <ListOrdered className="text-muted-foreground size-4 shrink-0" aria-hidden />
+        <span className="truncate">{t('backlog.link')}</span>
+      </Link>
     </div>
   );
 }

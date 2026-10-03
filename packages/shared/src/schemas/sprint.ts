@@ -1,0 +1,112 @@
+import { z } from 'zod';
+import { MAX_SPRINT_MOVE_ITEMS, SPRINT_STATUSES } from '../constants/sprint';
+import { checkSprintDates } from '../domain/sprint';
+import { DateOnlySchema, LabelSchema, WorkItemRowSchema } from './work-item';
+
+const SprintName = z.string().trim().min(1).max(80);
+const SprintGoal = z.string().trim().max(500);
+const CapacityNote = z.string().trim().max(500);
+
+export const SprintStatusSchema = z.enum(SPRINT_STATUSES);
+
+// ---------- Sprint CRUD ----------
+
+/** POST /api/workspaces/:wid/spaces/:spaceId/sprints */
+export const CreateSprintRequestSchema = z
+  .object({
+    name: SprintName,
+    goal: SprintGoal.nullish(),
+    startDate: DateOnlySchema,
+    endDate: DateOnlySchema,
+    capacityNote: CapacityNote.nullish(),
+  })
+  .superRefine((value, ctx) => {
+    const error = checkSprintDates(value.startDate, value.endDate);
+    if (error) ctx.addIssue({ code: 'custom', path: ['endDate'], message: error });
+  });
+export type CreateSprintRequest = z.infer<typeof CreateSprintRequestSchema>;
+
+/** PATCH /api/workspaces/:wid/sprints/:sprintId — planlı sprint'te hepsi, aktifte tarihler hariç. */
+export const UpdateSprintRequestSchema = z
+  .object({
+    name: SprintName,
+    goal: SprintGoal.nullable(),
+    startDate: DateOnlySchema,
+    endDate: DateOnlySchema,
+    capacityNote: CapacityNote.nullable(),
+  })
+  .partial()
+  .superRefine((value, ctx) => {
+    if (value.startDate && value.endDate) {
+      const error = checkSprintDates(value.startDate, value.endDate);
+      if (error) ctx.addIssue({ code: 'custom', path: ['endDate'], message: error });
+    }
+  });
+export type UpdateSprintRequest = z.infer<typeof UpdateSprintRequestSchema>;
+
+// ---------- Okuma ----------
+
+export const SprintSummarySchema = z.object({
+  id: z.uuid(),
+  spaceId: z.uuid(),
+  name: z.string(),
+  goal: z.string().nullable(),
+  startDate: DateOnlySchema,
+  endDate: DateOnlySchema,
+  capacityNote: z.string().nullable(),
+  status: SprintStatusSchema,
+  startedAt: z.iso.datetime().nullable(),
+  completedAt: z.iso.datetime().nullable(),
+  cancelledAt: z.iso.datetime().nullable(),
+  itemCount: z.int(),
+  points: z.number(),
+  doneItemCount: z.int(),
+  donePoints: z.number(),
+  unestimatedCount: z.int(),
+});
+export type SprintSummary = z.infer<typeof SprintSummarySchema>;
+
+/** GET /api/workspaces/:wid/spaces/:spaceId/sprints — en yeni önce. */
+export const SprintsResponseSchema = z.object({ sprints: z.array(SprintSummarySchema) });
+export type SprintsResponse = z.infer<typeof SprintsResponseSchema>;
+
+/** GET /api/workspaces/:wid/sprints/:sprintId — sprint ve öğeleri (öncelik sırasıyla). */
+export const SprintDetailSchema = z.object({
+  sprint: SprintSummarySchema,
+  items: z.array(WorkItemRowSchema),
+});
+export type SprintDetail = z.infer<typeof SprintDetailSchema>;
+
+export const BacklogEpicSchema = z.object({
+  id: z.uuid(),
+  key: z.string(),
+  title: z.string(),
+  color: z.string().nullable(),
+});
+export type BacklogEpic = z.infer<typeof BacklogEpicSchema>;
+
+/**
+ * GET /api/workspaces/:wid/spaces/:spaceId/backlog — sprint'e atanmamış açık öğeler
+ * öncelik sırasıyla (ADR-062), Epic'ler ve açık (planlı/aktif) sprint'ler.
+ */
+export const BacklogResponseSchema = z.object({
+  items: z.array(WorkItemRowSchema),
+  epics: z.array(BacklogEpicSchema),
+  labels: z.array(LabelSchema),
+  sprints: z.array(SprintSummarySchema),
+});
+export type BacklogResponse = z.infer<typeof BacklogResponseSchema>;
+
+// ---------- Taşıma / sıralama ----------
+
+/**
+ * POST /api/workspaces/:wid/spaces/:spaceId/backlog/move
+ * `sprintId` hedef kapsayıcıdır (null = Backlog). `afterId` hedefte hangi öğenin arkasına
+ * konacağıdır (null = en başa); verilmezse öğeler mevcut öncelik sırasını korur.
+ */
+export const MoveBacklogItemsRequestSchema = z.object({
+  itemIds: z.array(z.uuid()).min(1).max(MAX_SPRINT_MOVE_ITEMS),
+  sprintId: z.uuid().nullable(),
+  afterId: z.uuid().nullable().optional(),
+});
+export type MoveBacklogItemsRequest = z.infer<typeof MoveBacklogItemsRequestSchema>;

@@ -131,6 +131,8 @@ export const WorkItemSummarySchema = z.object({
   title: z.string(),
   listId: z.uuid(),
   parentId: z.uuid().nullable(),
+  /** Bulunduğu sprint (yalnızca üst düzey Story/Bug/Task, ADR-061). */
+  sprintId: z.uuid().nullable(),
   statusId: z.uuid(),
   priority: PrioritySchema,
   assignees: z.array(AssigneeSchema),

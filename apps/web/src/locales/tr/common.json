@@ -307,7 +307,12 @@
     "ATTACHMENT_TYPE_BLOCKED": "Bu dosya türüne güvenlik nedeniyle izin verilmiyor.",
     "ATTACHMENT_INVALID": "Dosya geçersiz veya içeriği uzantısıyla uyuşmuyor.",
     "ATTACHMENT_LIMIT": "Bir öğeye en çok 50 dosya eklenebilir.",
-    "AVATAR_INVALID": "Fotoğraf PNG, JPEG veya WebP olmalı ve 2 MB'ı aşmamalı."
+    "AVATAR_INVALID": "Fotoğraf PNG, JPEG veya WebP olmalı ve 2 MB'ı aşmamalı.",
+    "SCRUM_DISABLED": "Bu Space'te Scrum kapalı; sprint ve Backlog kullanılamaz.",
+    "SPRINT_READONLY": "Tamamlanmış veya iptal edilmiş sprint değiştirilemez.",
+    "SPRINT_NOT_PLANNED": "Yalnızca planlanmış sprint silinebilir.",
+    "SPRINT_DATES_LOCKED": "Aktif sprint'in tarihleri değiştirilemez.",
+    "SPRINT_ITEM_NOT_ELIGIBLE": "Yalnızca üst düzey Story, Bug ve Task'lar sprint'e alınabilir; tamamlananlar alınamaz."
   },
   "spaceRoles": {
     "PRODUCT_OWNER": "Product Owner",
@@ -400,7 +405,9 @@
     "members_one": "{{count}} üye",
     "members_other": "{{count}} üye",
     "notMember": "Bu Space'in üyesi değilsin; görüntüleyip yorum yapabilirsin.",
-    "scrumSoon": "Product Backlog, sprint planlama ve Board Faz 2'de bu sayfaya gelecek."
+    "backlogTitle": "Backlog ve sprint'ler",
+    "backlogBody": "Öncelik sırasını belirle, sprint planla ve öğeleri sprint'lere taşı.",
+    "openBacklog": "Backlog'u aç"
   },
   "listPage": {
     "views": "Görünümler",
@@ -487,7 +494,8 @@
     "completeAnyway": "Yine de tamamla",
     "blockedTitle": "Bu öğe engelleniyor",
     "blockedBody": "Henüz bitmemiş engelleyen öğe(ler): {{keys}}. Yine de başlansın mı?",
-    "startAnyway": "Yine de başla"
+    "startAnyway": "Yine de başla",
+    "childTitle": "Alt öğe başlığı"
   },
   "detail": {
     "properties": "Özellikler",
@@ -754,7 +762,68 @@
       "description": "Açıklama",
       "listId": "Liste",
       "spaceId": "Space",
-      "bulk": "Toplu"
+      "bulk": "Toplu",
+      "sprintId": "Sprint"
+    }
+  },
+  "backlog": {
+    "title": "Backlog",
+    "link": "Backlog ve sprint'ler",
+    "dragHandle": "{{key}} önceliğini sürükleyerek değiştir",
+    "select": "{{key}} öğesini seç",
+    "moveToSprint": "{{name}} sprint'ine taşı",
+    "moveToBacklog": "Backlog'a geri al",
+    "unestimated": "Tahmin girilmemiş",
+    "points": "Story Point",
+    "hours": "{{count}} sa",
+    "movedToSprint": "{{count}} öğe {{name}} sprint'ine taşındı.",
+    "movedToBacklog": "{{count}} öğe Backlog'a alındı.",
+    "search": "Backlog'ta ara…",
+    "epicFilter": "Epic'e göre süz",
+    "allEpics": "Tüm Epic'ler",
+    "noEpic": "Epic'siz",
+    "onlyUnestimated": "Yalnızca tahminsiz",
+    "selection": "Seçili öğeler",
+    "selected": "{{count}} seçili",
+    "moveSelected": "Sprint'e taşı…",
+    "clearSelection": "Seçimi temizle",
+    "noResults": "Süzgece uyan öğe yok.",
+    "empty": "Backlog boş. Listelere Story, Bug veya Task ekledikçe burada öncelik sırasıyla görünür.",
+    "reorderHint": "Sıralamayı değiştirmek için süzgeçleri temizle."
+  },
+  "sprints": {
+    "create": "Sprint oluştur",
+    "createTitle": "Yeni sprint",
+    "editTitle": "Sprint'i düzenle",
+    "name": "Ad",
+    "goal": "Sprint hedefi",
+    "goalPlaceholder": "Bu sprint'te ne başarılacak?",
+    "startDate": "Başlangıç",
+    "endDate": "Bitiş",
+    "datesLocked": "Aktif sprint'in tarihleri değiştirilemez.",
+    "capacity": "Kapasite notu",
+    "capacityPlaceholder": "Ör. 3 kişi, biri 2 gün izinli",
+    "submitCreate": "Sprint oluştur",
+    "created": "{{name}} oluşturuldu.",
+    "updated": "{{name}} güncellendi.",
+    "deleted": "{{name}} silindi; öğeleri Backlog'a döndü.",
+    "deleteTitle": "{{name}} silinsin mi?",
+    "deleteBody": "Sprint silinir, içindeki öğeler Backlog'a geri döner.",
+    "edit": "Düzenle",
+    "actions": "{{name}} için işlemler",
+    "totals": "{{count}} öğe · {{points}} puan",
+    "unestimated": "{{count}} tahminsiz",
+    "empty": "Bu sprint'te henüz öğe yok. Backlog'dan öğe taşıyabilirsin.",
+    "status": {
+      "PLANNED": "Planlandı",
+      "ACTIVE": "Aktif",
+      "COMPLETED": "Tamamlandı",
+      "CANCELLED": "İptal"
+    },
+    "errors": {
+      "required": "Bu alan zorunlu.",
+      "END_BEFORE_START": "Bitiş, başlangıçtan önce olamaz.",
+      "TOO_LONG": "Sprint en çok 8 hafta sürebilir."
     }
   }
 }

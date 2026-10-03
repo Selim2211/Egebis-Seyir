@@ -57,6 +57,24 @@ enum TshirtSize {
   XL
 }
 
+enum SprintStatus {
+  PLANNED
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum SprintItemAction {
+  ADDED
+  REMOVED
+}
+
+enum SprintItemReason {
+  PLANNED
+  SCOPE_CHANGE
+  CARRIED_OVER
+}
+
 enum ChecklistKind {
   ACCEPTANCE
   CHECKLIST
@@ -167,6 +185,8 @@ model Workspace {
   commentMentions   CommentMention[]
   commentReactions  CommentReaction[]
   attachments       Attachment[]
+  sprints           Sprint[]
+  sprintItemEvents  SprintItemEvent[]
 
   @@map("workspaces")
 }
@@ -284,6 +304,7 @@ model Space {
   lists    List[]
   items    WorkItem[]
   labels   Label[]
+  sprints  Sprint[]
 
   @@index([workspaceId])
   @@map("spaces")
@@ -436,6 +457,11 @@ model WorkItem {
   completedAt      DateTime?    @db.Timestamptz
   /// List içinde kesirli sıralama anahtarı (ADR-014); migration'da COLLATE "C".
   rank             String
+  /// Sprint (yalnızca üst düzey Story/Bug/Task, ADR-061); sprint silinirse boşalır.
+  sprintId         String?      @db.Uuid
+  sprint           Sprint?      @relation(fields: [sprintId], references: [id], onDelete: SetNull)
+  /// Space genelinde öncelik sırası (ADR-062); boşsa ilk okumada atanır, migration'da COLLATE "C".
+  backlogRank      String?
   // Bug alanları
   severity         BugSeverity?
   stepsToReproduce String?
@@ -456,17 +482,20 @@ model WorkItem {
   createdAt        DateTime     @default(now()) @db.Timestamptz
   updatedAt        DateTime     @updatedAt @db.Timestamptz
 
-  assignees   WorkItemAssignee[]
-  labels      WorkItemLabel[]
-  checklists  Checklist[]
-  linksFrom   WorkItemLink[]     @relation("LinkFrom")
-  linksTo     WorkItemLink[]     @relation("LinkTo")
-  watchers    WorkItemWatcher[]
-  comments    Comment[]
-  attachments Attachment[]
+  assignees    WorkItemAssignee[]
+  labels       WorkItemLabel[]
+  checklists   Checklist[]
+  linksFrom    WorkItemLink[]     @relation("LinkFrom")
+  linksTo      WorkItemLink[]     @relation("LinkTo")
+  watchers     WorkItemWatcher[]
+  comments     Comment[]
+  attachments  Attachment[]
+  sprintEvents SprintItemEvent[]
 
   @@unique([workspaceId, keyPrefix, number])
   @@index([listId, rank])
+  @@index([spaceId, backlogRank])
+  @@index([sprintId])
   @@index([spaceId])
   @@index([parentId])
   @@index([statusId])
@@ -654,4 +683,54 @@ model Attachment {
 
   @@index([workItemId])
   @@map("attachments")
+}
+
+// ---------- Sprint (Faz 2.1, ADR-061) ----------
+// Space başına en çok bir ACTIVE sprint: migration'daki kısmi benzersiz dizin (brief §6.1.1).
+
+model Sprint {
+  id           String       @id @default(uuid(7)) @db.Uuid
+  workspaceId  String       @db.Uuid
+  workspace    Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  spaceId      String       @db.Uuid
+  space        Space        @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  name         String
+  goal         String?
+  startDate    DateTime     @db.Date
+  endDate      DateTime     @db.Date
+  capacityNote String?
+  status       SprintStatus @default(PLANNED)
+  startedAt    DateTime?    @db.Timestamptz
+  completedAt  DateTime?    @db.Timestamptz
+  cancelledAt  DateTime?    @db.Timestamptz
+  createdById  String?      @db.Uuid
+  createdAt    DateTime     @default(now()) @db.Timestamptz
+  updatedAt    DateTime     @updatedAt @db.Timestamptz
+
+  items  WorkItem[]
+  events SprintItemEvent[]
+
+  @@index([spaceId, status])
+  @@map("sprints")
+}
+
+/// Sprint üyeliği geçmişi (ADR-061): burndown ve scope change raporlarını besler.
+model SprintItemEvent {
+  id          String           @id @default(uuid(7)) @db.Uuid
+  workspaceId String           @db.Uuid
+  workspace   Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  sprintId    String           @db.Uuid
+  sprint      Sprint           @relation(fields: [sprintId], references: [id], onDelete: Cascade)
+  workItemId  String           @db.Uuid
+  workItem    WorkItem         @relation(fields: [workItemId], references: [id], onDelete: Cascade)
+  action      SprintItemAction
+  reason      SprintItemReason
+  /// O andaki Story Point (puan sonradan değişse de geçmiş korunur).
+  points      Float?
+  actorId     String?          @db.Uuid
+  createdAt   DateTime         @default(now()) @db.Timestamptz
+
+  @@index([sprintId, createdAt])
+  @@index([workItemId])
+  @@map("sprint_item_events")
 }

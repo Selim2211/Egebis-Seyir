@@ -27,6 +27,8 @@ export const TENANT_MODELS: ReadonlySet<string> = new Set([
   'CommentMention',
   'CommentReaction',
   'Attachment',
+  'Sprint',
+  'SprintItemEvent',
 ]);
 
 const WHERE_OPERATIONS = new Set([

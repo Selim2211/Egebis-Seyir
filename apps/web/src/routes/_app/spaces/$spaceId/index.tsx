@@ -1,7 +1,7 @@
 import { SPACE_PERMISSIONS as S } from '@scrum/shared';
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute, Link } from '@tanstack/react-router';
-import { Folder, FolderPlus, List, ListPlus, Lock, Settings2, Sparkles } from 'lucide-react';
+import { Folder, FolderPlus, List, ListOrdered, ListPlus, Lock, Settings2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -16,7 +16,7 @@ export const Route = createFileRoute('/_app/spaces/$spaceId/')({
   component: SpacePage,
 });
 
-/** Space ana sayfası (brief §10 madde 4). Sprint/backlog özeti Faz 2'de eklenecek. */
+/** Space ana sayfası (brief §10 madde 4). Backlog bağlantısı Scrum açık Space'lerde görünür. */
 function SpacePage() {
   const { t } = useTranslation();
   const { spaceId } = Route.useParams();
@@ -127,9 +127,17 @@ function SpacePage() {
           )}
 
           {space.scrumEnabled && (
-            <div className="bg-muted/40 mt-6 flex gap-3 rounded-lg border border-dashed p-4 text-sm">
-              <Sparkles className="text-primary mt-0.5 size-4 shrink-0" aria-hidden />
-              <p className="text-muted-foreground">{t('spacePage.scrumSoon')}</p>
+            <div className="bg-card mt-6 flex items-center gap-3 rounded-lg border p-4 text-sm">
+              <ListOrdered className="text-primary size-5 shrink-0" aria-hidden />
+              <div className="min-w-0 flex-1">
+                <h2 className="font-semibold">{t('spacePage.backlogTitle')}</h2>
+                <p className="text-muted-foreground">{t('spacePage.backlogBody')}</p>
+              </div>
+              <Button size="sm" variant="outline" asChild>
+                <Link to="/spaces/$spaceId/backlog" params={{ spaceId }}>
+                  {t('spacePage.openBacklog')}
+                </Link>
+              </Button>
             </div>
           )}
         </section>

@@ -10,3 +10,4 @@ export * from './work-item-fields';
 export * from './rich-text';
 export * from './work-item-links';
 export * from './attachments';
+export * from './sprint';

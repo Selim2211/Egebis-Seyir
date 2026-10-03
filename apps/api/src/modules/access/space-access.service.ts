@@ -12,6 +12,7 @@ export interface SpaceRouteParams {
   listId?: string;
   itemId?: string;
   labelId?: string;
+  sprintId?: string;
 }
 
 const UUID = /^[0-9a-f-]{36}$/i;
@@ -58,6 +59,13 @@ export class SpaceAccessService {
         select: { spaceId: true },
       });
       return label?.spaceId ?? null;
+    }
+    if (params.sprintId && UUID.test(params.sprintId)) {
+      const sprint = await db.sprint.findFirst({
+        where: { id: params.sprintId },
+        select: { spaceId: true },
+      });
+      return sprint?.spaceId ?? null;
     }
     return null;
   }

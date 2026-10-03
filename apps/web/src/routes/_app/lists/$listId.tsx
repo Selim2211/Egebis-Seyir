@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { ContainerHeader, LoadingState, NotFoundState } from '@/features/spaces/container-header';
 import { listQuery, spaceQuery, useTreeSpace } from '@/features/spaces/queries';
+import { ItemNavContext } from '@/features/work-items/detail/item-nav-context';
 import { ItemPanel } from '@/features/work-items/detail/item-panel';
 import { ItemsView } from '@/features/work-items/items-view';
 import { itemsQuery } from '@/features/work-items/queries';
@@ -52,7 +53,8 @@ function ListPage() {
     });
 
   return (
-    <>
+    // Satırdaki başlığa tıklamak yan paneli açar (adreste ?item=KEY); Ctrl/Cmd+tık tam sayfayı açar.
+    <ItemNavContext.Provider value={(key) => onSearch({ item: key })}>
       <ContainerHeader
         type="LIST"
         id={list.id}
@@ -116,6 +118,6 @@ function ListPage() {
         <LoadingState />
       )}
       <ItemPanel itemKey={search.item} />
-    </>
+    </ItemNavContext.Provider>
   );
 }

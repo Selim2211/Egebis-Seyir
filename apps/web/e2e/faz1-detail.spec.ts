@@ -48,20 +48,23 @@ test.describe.serial('Görev detayı', () => {
     await openList(page);
     await page.getByRole('link', { name: 'Sipariş akışı' }).click();
     await expect(page).toHaveURL(/item=DET-1/);
-    await expect(panel(page).getByRole('textbox', { name: 'Başlık' })).toHaveValue('Sipariş akışı');
+    await expect(panel(page).getByRole('textbox', { name: 'Başlık' }).first()).toHaveValue(
+      'Sipariş akışı',
+    );
 
     // Açıklama: yaz, odak çıkınca kaydedilir.
     const editor = panel(page).getByRole('textbox', { name: 'Açıklama' });
     await editor.click();
     await page.keyboard.type('Müşteri sepeti onaylayıp ödeme yapar.');
-    await panel(page).getByRole('textbox', { name: 'Başlık' }).click();
+    await panel(page).getByRole('textbox', { name: 'Başlık' }).first().click();
 
     // Kabul kriteri.
     const criterion = panel(page).getByRole('textbox', { name: /Kabul kriteri ekle/ });
     await criterion.fill('Given sepet dolu When öde tıklanır Then ödeme sayfası açılır');
     await criterion.press('Enter');
     const check = panel(page).getByRole('checkbox', { name: /Given sepet dolu/ });
-    await check.check();
+    await check.click();
+    await expect(check).toBeChecked();
     await expect(panel(page).getByText('1/1')).toBeVisible();
 
     // Kapat ve yeniden aç: içerik kalıcı.

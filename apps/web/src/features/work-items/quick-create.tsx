@@ -79,7 +79,7 @@ export function QuickCreate({
         maxLength={500}
         onChange={(e) => setTitle(e.target.value)}
         placeholder={t(parent ? 'items.quickCreateChild' : 'items.quickCreate')}
-        aria-label={t('items.title')}
+        aria-label={t(parent ? 'items.childTitle' : 'items.title')}
         className="placeholder:text-muted-foreground h-8 min-w-0 flex-1 bg-transparent text-sm outline-none"
       />
       {title.trim() && (

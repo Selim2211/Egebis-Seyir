@@ -307,7 +307,12 @@
     "ATTACHMENT_TYPE_BLOCKED": "This file type is not allowed for security reasons.",
     "ATTACHMENT_INVALID": "The file is invalid or its content does not match its extension.",
     "ATTACHMENT_LIMIT": "An item can have at most 50 attachments.",
-    "AVATAR_INVALID": "The photo must be PNG, JPEG or WebP and at most 2 MB."
+    "AVATAR_INVALID": "The photo must be PNG, JPEG or WebP and at most 2 MB.",
+    "SCRUM_DISABLED": "Scrum is turned off in this Space; sprints and the Backlog are unavailable.",
+    "SPRINT_READONLY": "A completed or cancelled sprint cannot be changed.",
+    "SPRINT_NOT_PLANNED": "Only planned sprints can be deleted.",
+    "SPRINT_DATES_LOCKED": "The dates of an active sprint cannot be changed.",
+    "SPRINT_ITEM_NOT_ELIGIBLE": "Only top-level Stories, Bugs and Tasks can join a sprint; completed items cannot."
   },
   "spaceRoles": {
     "PRODUCT_OWNER": "Product Owner",
@@ -400,7 +405,9 @@
     "members_one": "{{count}} member",
     "members_other": "{{count}} members",
     "notMember": "You are not a member of this Space; you can view and comment.",
-    "scrumSoon": "Product Backlog, sprint planning and the Board arrive on this page in Phase 2."
+    "backlogTitle": "Backlog and sprints",
+    "backlogBody": "Set priorities, plan sprints and move items into them.",
+    "openBacklog": "Open Backlog"
   },
   "listPage": {
     "views": "Views",
@@ -487,7 +494,8 @@
     "completeAnyway": "Complete anyway",
     "blockedTitle": "This item is blocked",
     "blockedBody": "Unfinished blocking item(s): {{keys}}. Start anyway?",
-    "startAnyway": "Start anyway"
+    "startAnyway": "Start anyway",
+    "childTitle": "Sub-item title"
   },
   "detail": {
     "properties": "Properties",
@@ -754,7 +762,68 @@
       "description": "Description",
       "listId": "List",
       "spaceId": "Space",
-      "bulk": "Bulk"
+      "bulk": "Bulk",
+      "sprintId": "Sprint"
+    }
+  },
+  "backlog": {
+    "title": "Backlog",
+    "link": "Backlog and sprints",
+    "dragHandle": "Drag to change priority of {{key}}",
+    "select": "Select {{key}}",
+    "moveToSprint": "Move to {{name}}",
+    "moveToBacklog": "Move back to Backlog",
+    "unestimated": "Not estimated",
+    "points": "Story Points",
+    "hours": "{{count}} h",
+    "movedToSprint": "{{count}} items moved to {{name}}.",
+    "movedToBacklog": "{{count}} items moved to the Backlog.",
+    "search": "Search Backlog…",
+    "epicFilter": "Filter by Epic",
+    "allEpics": "All Epics",
+    "noEpic": "No Epic",
+    "onlyUnestimated": "Unestimated only",
+    "selection": "Selected items",
+    "selected": "{{count}} selected",
+    "moveSelected": "Move to sprint…",
+    "clearSelection": "Clear selection",
+    "noResults": "No items match the filters.",
+    "empty": "The Backlog is empty. Stories, Bugs and Tasks added to lists show up here in priority order.",
+    "reorderHint": "Clear the filters to change the order."
+  },
+  "sprints": {
+    "create": "Create sprint",
+    "createTitle": "New sprint",
+    "editTitle": "Edit sprint",
+    "name": "Name",
+    "goal": "Sprint goal",
+    "goalPlaceholder": "What will this sprint achieve?",
+    "startDate": "Start",
+    "endDate": "End",
+    "datesLocked": "The dates of an active sprint cannot be changed.",
+    "capacity": "Capacity note",
+    "capacityPlaceholder": "E.g. 3 people, one out for 2 days",
+    "submitCreate": "Create sprint",
+    "created": "{{name}} created.",
+    "updated": "{{name}} updated.",
+    "deleted": "{{name}} deleted; its items went back to the Backlog.",
+    "deleteTitle": "Delete {{name}}?",
+    "deleteBody": "The sprint is deleted and its items return to the Backlog.",
+    "edit": "Edit",
+    "actions": "Actions for {{name}}",
+    "totals": "{{count}} items · {{points}} points",
+    "unestimated": "{{count}} unestimated",
+    "empty": "This sprint has no items yet. Move items over from the Backlog.",
+    "status": {
+      "PLANNED": "Planned",
+      "ACTIVE": "Active",
+      "COMPLETED": "Completed",
+      "CANCELLED": "Cancelled"
+    },
+    "errors": {
+      "required": "This field is required.",
+      "END_BEFORE_START": "The end cannot be before the start.",
+      "TOO_LONG": "A sprint can last at most 8 weeks."
     }
   }
 }

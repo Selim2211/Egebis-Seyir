@@ -30,8 +30,11 @@ test.describe.serial('Görünümler ve arama', () => {
 
     const quick = page.getByRole('textbox', { name: 'Başlık' });
     for (const title of ['Ödeme ekranı', 'Rapor sayfası', 'Giriş hatası']) {
-      await page.keyboard.press('c');
-      await expect(quick).toBeFocused();
+      // Liste ilk öğeyle yeniden kurulur; kısayol hazır olana dek yeniden denenir.
+      await expect(async () => {
+        await page.keyboard.press('c');
+        await expect(quick).toBeFocused({ timeout: 500 });
+      }).toPass();
       await quick.fill(title);
       await quick.press('Enter');
       await expect(page.getByRole('link', { name: title })).toBeVisible();
@@ -43,7 +46,7 @@ test.describe.serial('Görünümler ve arama', () => {
     await page.getByRole('button', { name: 'GOR-2 durumunu değiştir' }).click();
     await page.getByRole('menuitemradio', { name: 'Devam ediyor' }).click();
 
-    await page.getByRole('tab', { name: 'Tablo' }).click();
+    await page.getByRole('tab', { name: 'Table' }).click();
     await expect(page).toHaveURL(/view=table/);
     await expect(page.getByRole('columnheader', { name: 'Durum' })).toBeVisible();
     await page.getByRole('button', { name: 'Başlık', exact: true }).click();
@@ -67,12 +70,12 @@ test.describe.serial('Görünümler ve arama', () => {
     await expect(page.getByRole('link', { name: 'Rapor sayfası' })).toBeVisible();
     await expect(page.getByRole('link', { name: 'Ödeme ekranı' })).toHaveCount(0);
 
-    await page.getByRole('button', { name: 'Temizle' }).click();
+    await page.getByRole('button', { name: 'Temizle', exact: true }).click();
     await expect(page.getByRole('link', { name: 'Ödeme ekranı' })).toBeVisible();
 
     await page.getByLabel('Grupla').selectOption('status');
     await expect(page.getByRole('button', { name: /Devam ediyor/ }).first()).toBeVisible();
-    await expect(page.getByRole('button', { name: /Yapılacak/ }).first()).toBeVisible();
+    await expect(page.getByRole('button', { name: /Backlog/ }).first()).toBeVisible();
 
     // Süzgeç açıkken hızlı oluşturma kapalı.
     await page.getByRole('button', { name: 'Durum', exact: true }).click();

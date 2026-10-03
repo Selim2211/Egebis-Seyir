@@ -38,6 +38,7 @@ const item = (over: Partial<WorkItemSummary>): WorkItemSummary => ({
   type: 'TASK',
   title: `Öğe ${n}`,
   listId: '00000000-0000-7000-8000-0000000000ff',
+  sprintId: null,
   parentId: null,
   statusId: S.todo,
   priority: 'NORMAL',

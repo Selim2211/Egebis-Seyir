@@ -37,6 +37,7 @@ export function toSummary(row: SummaryRow): WorkItemSummary {
     title: row.title,
     listId: row.listId,
     parentId: row.parentId,
+    sprintId: row.sprintId,
     statusId: row.statusId,
     priority: row.priority,
     assignees: row.assignees.map((a) => a.user),
@@ -94,6 +95,8 @@ export type TenantTx = Pick<
   | 'commentMention'
   | 'workItemWatcher'
   | 'attachment'
+  | 'sprint'
+  | 'sprintItemEvent'
 >;
 
 /** Birden çok List'ten gelen satırlar için ek ilişkiler (benim işlerim, arama). */

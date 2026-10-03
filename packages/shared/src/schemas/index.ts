@@ -6,3 +6,4 @@ export * from './space';
 export * from './work-item';
 export * from './collab';
 export * from './rich-text';
+export * from './sprint';

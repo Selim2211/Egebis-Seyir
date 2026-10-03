@@ -1,0 +1,100 @@
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  ParseUUIDPipe,
+  Patch,
+  Post,
+} from '@nestjs/common';
+import {
+  BacklogResponseSchema,
+  CreatedSchema,
+  CreateSprintRequestSchema,
+  MoveBacklogItemsRequestSchema,
+  SPACE_PERMISSIONS as S,
+  SprintDetailSchema,
+  SprintsResponseSchema,
+  UpdateSprintRequestSchema,
+  type BacklogResponse,
+  type Created,
+  type SprintDetail,
+  type SprintsResponse,
+} from '@scrum/shared';
+import { createZodDto, ZodResponse } from 'nestjs-zod';
+import { RequireSpacePermission } from '../auth/decorators';
+import { BacklogService } from './backlog.service';
+import { SprintsService } from './sprints.service';
+
+class SprintsDto extends createZodDto(SprintsResponseSchema) {}
+class SprintDetailDto extends createZodDto(SprintDetailSchema) {}
+class CreateSprintDto extends createZodDto(CreateSprintRequestSchema) {}
+class UpdateSprintDto extends createZodDto(UpdateSprintRequestSchema) {}
+class CreatedDto extends createZodDto(CreatedSchema) {}
+class BacklogDto extends createZodDto(BacklogResponseSchema) {}
+class MoveBacklogDto extends createZodDto(MoveBacklogItemsRequestSchema) {}
+
+const Uuid = (name: string) => Param(name, ParseUUIDPipe);
+const NO_CONTENT = HttpStatus.NO_CONTENT;
+
+/** Sprint'ler ve Product Backlog. Space izni guard'da çözülür (ADR-039). */
+@Controller('workspaces/:workspaceId')
+export class SprintsController {
+  constructor(
+    private readonly sprints: SprintsService,
+    private readonly backlog: BacklogService,
+  ) {}
+
+  @Get('spaces/:spaceId/sprints')
+  @RequireSpacePermission(S.SPACE_VIEW)
+  @ZodResponse({ type: SprintsDto })
+  list(@Uuid('spaceId') spaceId: string): Promise<SprintsResponse> {
+    return this.sprints.list(spaceId);
+  }
+
+  @Post('spaces/:spaceId/sprints')
+  @RequireSpacePermission(S.SPRINT_PLAN)
+  @ZodResponse({ type: CreatedDto, status: HttpStatus.CREATED })
+  create(@Uuid('spaceId') spaceId: string, @Body() body: CreateSprintDto): Promise<Created> {
+    return this.sprints.create(spaceId, body);
+  }
+
+  @Get('sprints/:sprintId')
+  @RequireSpacePermission(S.SPACE_VIEW)
+  @ZodResponse({ type: SprintDetailDto })
+  detail(@Uuid('sprintId') sprintId: string): Promise<SprintDetail> {
+    return this.sprints.detail(sprintId);
+  }
+
+  @Patch('sprints/:sprintId')
+  @RequireSpacePermission(S.SPRINT_PLAN)
+  @HttpCode(NO_CONTENT)
+  update(@Uuid('sprintId') sprintId: string, @Body() body: UpdateSprintDto): Promise<void> {
+    return this.sprints.update(sprintId, body);
+  }
+
+  @Delete('sprints/:sprintId')
+  @RequireSpacePermission(S.SPRINT_PLAN)
+  @HttpCode(NO_CONTENT)
+  remove(@Uuid('sprintId') sprintId: string): Promise<void> {
+    return this.sprints.remove(sprintId);
+  }
+
+  @Get('spaces/:spaceId/backlog')
+  @RequireSpacePermission(S.SPACE_VIEW)
+  @ZodResponse({ type: BacklogDto })
+  getBacklog(@Uuid('spaceId') spaceId: string): Promise<BacklogResponse> {
+    return this.backlog.backlog(spaceId);
+  }
+
+  /** Sprint'e taşı / Backlog'a geri al / yeniden sırala. İzin serviste kapsayıcıya göre denetlenir. */
+  @Post('spaces/:spaceId/backlog/move')
+  @RequireSpacePermission(S.SPACE_VIEW)
+  @HttpCode(NO_CONTENT)
+  move(@Uuid('spaceId') spaceId: string, @Body() body: MoveBacklogDto): Promise<void> {
+    return this.backlog.move(spaceId, body);
+  }
+}

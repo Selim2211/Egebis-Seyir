@@ -12,7 +12,15 @@ export interface ActivityInput {
   workspaceId: string;
   actorId: string | null;
   entityType:
-    'workspace' | 'member' | 'invitation' | 'space' | 'folder' | 'list' | 'item' | 'label';
+    | 'workspace'
+    | 'member'
+    | 'invitation'
+    | 'space'
+    | 'folder'
+    | 'list'
+    | 'item'
+    | 'label'
+    | 'sprint';
   entityId: string;
   action: string;
   changes?: Prisma.InputJsonValue;
