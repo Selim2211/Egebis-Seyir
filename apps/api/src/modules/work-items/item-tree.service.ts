@@ -159,6 +159,8 @@ export class ItemTreeService {
         data: {
           statusId: status.id,
           completedAt: nextCompletedAt(row.status.category, status.category, row.completedAt, now),
+          // Özel alan tanımları Space'e özel; değerler hedefte anlamsız (ADR-082).
+          customFields: {},
         },
       });
       await tx.workItemLabel.deleteMany({ where: { workItemId: row.id } });
@@ -268,6 +270,8 @@ export class ItemTreeService {
             goal: row.goal,
             tshirtSize: row.tshirtSize,
             color: row.color,
+            // Özel alanlar Space'e özeldir: başka Space'e kopyada değerler düşer (ADR-082).
+            customFields: crossSpace ? {} : asJson(row.customFields),
             assignees: {
               create: row.assignees.map((a) => ({ workspaceId, userId: a.userId })),
             },

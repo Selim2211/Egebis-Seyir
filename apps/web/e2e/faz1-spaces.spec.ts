@@ -30,7 +30,7 @@ test.describe.serial('Space / Folder / List', () => {
 
     await page.getByRole('link', { name: 'Space ayarları' }).click();
     for (const status of ['Backlog', 'Yapılacak', 'Devam ediyor', 'İncelemede', 'Tamamlandı']) {
-      await expect(page.getByRole('listitem').filter({ hasText: status }).first()).toBeVisible();
+      await expect(page.getByRole('textbox', { name: `“${status}” adı` })).toBeVisible();
     }
   });
 

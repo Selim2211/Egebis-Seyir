@@ -334,7 +334,11 @@
     "STATUS_NAME_TAKEN": "Bu adla bir durum zaten var.",
     "STATUS_WORKFLOW_INVALID": "Akışta en az bir Tamamlandı ve bir açık durum olmalı; ilk durum Tamamlandı olamaz.",
     "STATUS_LIMIT": "Bir Space’te en çok 20 durum olabilir.",
-    "STATUS_MOVE_TARGET_INVALID": "İşlerin taşınacağı geçerli bir durum seç."
+    "STATUS_MOVE_TARGET_INVALID": "İşlerin taşınacağı geçerli bir durum seç.",
+    "CUSTOM_FIELD_NAME_TAKEN": "Bu adla bir özel alan zaten var.",
+    "CUSTOM_FIELD_LIMIT": "Bir Space’te en çok 30 özel alan olabilir.",
+    "CUSTOM_FIELD_OPTIONS_REQUIRED": "Liste alanı için en az bir, birbirinden farklı seçenek gerekir.",
+    "CUSTOM_FIELD_VALUE_INVALID": "Bu değer alanın türüne uymuyor."
   },
   "spaceRoles": {
     "PRODUCT_OWNER": "Product Owner",
@@ -1297,5 +1301,40 @@
     "deleteHint": "Bu durumdaki işler seçtiğin duruma taşınır. Eski aktivite kayıtları korunur.",
     "moveTo": "İşlerin taşınacağı durum",
     "deleteConfirm": "Sil ve işleri taşı"
+  },
+  "customFields": {
+    "title": "Özel alanlar",
+    "help": "Bu Space’teki işlere eklenen alanlar. Değerler iş detayında girilir, Table görünümünde sütun olarak seçilebilir.",
+    "none": "Henüz özel alan yok.",
+    "yes": "Evet",
+    "empty": "—",
+    "inputFor": "{{name}} değeri",
+    "nameFor": "“{{name}}” alan adı",
+    "moveUp": "“{{name}}” alanını yukarı taşı",
+    "moveDown": "“{{name}}” alanını aşağı taşı",
+    "delete": "“{{name}}” alanını sil",
+    "newName": "Yeni alan adı",
+    "newType": "Yeni alan türü",
+    "newOptions": "Seçenekler",
+    "newOptionsHint": "Seçenekleri virgülle ayır",
+    "add": "Alan ekle",
+    "limit": "Bir Space’te en çok {{max}} özel alan olabilir.",
+    "optionsCount": "{{count}} seçenek",
+    "optionLabel": "Seçenek {{index}}",
+    "removeOption": "Seçenek {{index}} kaldır",
+    "addOption": "Seçenek ekle",
+    "deleteTitle": "“{{name}}” alanı silinsin mi?",
+    "deleteHint": "Alan ve işlerdeki tüm değerleri silinir. Bu geri alınamaz.",
+    "deleteConfirm": "Alanı sil",
+    "types": {
+      "TEXT": "Metin",
+      "NUMBER": "Sayı",
+      "DATE": "Tarih",
+      "DROPDOWN": "Liste",
+      "MULTI_SELECT": "Çoklu seçim",
+      "PERSON": "Kişi",
+      "URL": "Bağlantı (URL)",
+      "CHECKBOX": "Onay kutusu"
+    }
   }
 }

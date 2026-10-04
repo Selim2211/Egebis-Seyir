@@ -1,14 +1,21 @@
-import type { WorkItemSummary } from '@scrum/shared';
+import type { CustomField, WorkItemSummary } from '@scrum/shared';
 import { ArrowDown, ArrowUp, ChevronRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { WorkItemTypeIcon } from '@/components/work-item/work-item-visuals';
+import { CustomFieldValueText } from '@/features/custom-fields/field-input';
 import { formatShortDate } from '@/lib/format';
 import { cn } from '@/lib/utils';
 import { ItemOpenLink } from '../detail/item-nav';
 import { AssigneeStack, DueCell, EstimateCell, PriorityCell, StatusCell } from './cells';
 import { isOverdue } from './cell-utils';
 import { GroupHeader, RowMenu, SelectBox } from './row-parts';
-import { TABLE_COLUMNS, type TableColumnId } from './table-columns';
+import {
+  type ColumnDef,
+  columnDefs,
+  type CustomColumnId,
+  customColumnId,
+  type TableColumnId,
+} from './table-columns';
 import type { ViewProps } from './view-types';
 import type { SortKey, ViewRow } from './view-state';
 import { VirtualRows } from './virtual-rows';
@@ -20,6 +27,7 @@ const MENU_WIDTH = 40;
 
 interface TableProps extends ViewProps {
   columns: TableColumnId[];
+  customFields: CustomField[];
   sort: SortKey;
   dir: 'asc' | 'desc';
   onSort: (key: SortKey) => void;
@@ -28,8 +36,14 @@ interface TableProps extends ViewProps {
 /** Table görünümü: seçilebilir sütunlar, sütun başlığından sıralama, satır içi düzenleme. */
 export function TableView(props: TableProps) {
   const { t } = useTranslation();
-  const { rows, columns, sort, dir, onSort } = props;
-  const defs = TABLE_COLUMNS.filter((c) => columns.includes(c.id));
+  const { rows, columns, customFields, sort, dir, onSort } = props;
+  const columnLabel = (id: TableColumnId) =>
+    customFields.find((f) => customColumnId(f.id) === id)?.name ??
+    t(`view.columns.${id as Exclude<TableColumnId, CustomColumnId>}`);
+  const defs = columnDefs(
+    columns,
+    customFields.map((f) => f.id),
+  );
   const width =
     SELECT_WIDTH + KEY_WIDTH + TITLE_WIDTH + MENU_WIDTH + defs.reduce((sum, c) => sum + c.width, 0);
 
@@ -66,7 +80,7 @@ export function TableView(props: TableProps) {
           {defs.map((c) => (
             <HeaderCell
               key={c.id}
-              label={t(`view.columns.${c.id}`)}
+              label={columnLabel(c.id)}
               width={c.width}
               sortKey={c.sort}
               {...{ sort, dir, onSort }}
@@ -125,15 +139,7 @@ function HeaderCell({
   );
 }
 
-function TableRow({
-  row,
-  props,
-  defs,
-}: {
-  row: ViewRow;
-  props: TableProps;
-  defs: Array<(typeof TABLE_COLUMNS)[number]>;
-}) {
+function TableRow({ row, props, defs }: { row: ViewRow; props: TableProps; defs: ColumnDef[] }) {
   if (row.kind === 'group') {
     return (
       <GroupHeader
@@ -167,10 +173,10 @@ function ItemTableRow({
   depth: number;
   children: number;
   props: TableProps;
-  defs: Array<(typeof TABLE_COLUMNS)[number]>;
+  defs: ColumnDef[];
 }) {
   const { t } = useTranslation();
-  const { cells, labels, selected, collapsedItems } = props;
+  const { cells, labels, selected, collapsedItems, customFields } = props;
   const status = cells.space.statuses.find((s) => s.id === item.statusId);
   const done = status?.category === 'DONE';
   const collapsed = collapsedItems.has(item.id);
@@ -232,6 +238,14 @@ function ItemTableRow({
             {formatShortDate(item.createdAt.slice(0, 10))}
           </span>
         );
+      default: {
+        const field = customFields.find((f) => customColumnId(f.id) === id);
+        return field ? (
+          <span className="block truncate text-xs">
+            <CustomFieldValueText field={field} value={item.customFields[field.id]} />
+          </span>
+        ) : null;
+      }
     }
   };
 

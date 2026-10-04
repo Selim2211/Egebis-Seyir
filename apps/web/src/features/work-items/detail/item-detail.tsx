@@ -40,6 +40,7 @@ import { ItemOpenLink } from './item-nav';
 import { TimeSection } from '@/features/time/time-section';
 import { LinkedDocs } from './linked-docs';
 import { Links } from './links';
+import { ItemCustomFields } from './item-custom-fields';
 import { Properties } from './properties';
 import { useSaveItem } from './use-save-item';
 import { RichTextEditor } from './rich-text-editor';
@@ -307,6 +308,7 @@ function Content({
           className={cn('min-w-0', wide ? 'lg:order-2' : 'order-1')}
         >
           <Properties item={item} space={space} archived={item.archived} />
+          <ItemCustomFields item={item} canWrite={canWrite} />
         </aside>
       </div>
       <p className="text-muted-foreground px-4 pb-4 text-xs sm:px-6">

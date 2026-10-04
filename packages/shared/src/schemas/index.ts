@@ -18,3 +18,4 @@ export * from './flow';
 export * from './dashboard';
 export * from './saved-view';
 export * from './status';
+export * from './custom-field';

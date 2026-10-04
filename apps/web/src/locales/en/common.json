@@ -334,7 +334,11 @@
     "STATUS_NAME_TAKEN": "A status with this name already exists.",
     "STATUS_WORKFLOW_INVALID": "The flow needs at least one Done and one open status; the first status cannot be Done.",
     "STATUS_LIMIT": "A Space can have at most 20 statuses.",
-    "STATUS_MOVE_TARGET_INVALID": "Choose a valid status to move the items to."
+    "STATUS_MOVE_TARGET_INVALID": "Choose a valid status to move the items to.",
+    "CUSTOM_FIELD_NAME_TAKEN": "A custom field with this name already exists.",
+    "CUSTOM_FIELD_LIMIT": "A Space can have at most 30 custom fields.",
+    "CUSTOM_FIELD_OPTIONS_REQUIRED": "A list field needs at least one option, all different.",
+    "CUSTOM_FIELD_VALUE_INVALID": "This value does not match the field type."
   },
   "spaceRoles": {
     "PRODUCT_OWNER": "Product Owner",
@@ -1297,5 +1301,40 @@
     "deleteHint": "Items in this status move to the one you choose. Past activity is kept.",
     "moveTo": "Move items to",
     "deleteConfirm": "Delete and move items"
+  },
+  "customFields": {
+    "title": "Custom fields",
+    "help": "Fields added to items in this Space. Values are set in the item detail and can be shown as Table columns.",
+    "none": "No custom fields yet.",
+    "yes": "Yes",
+    "empty": "—",
+    "inputFor": "{{name}} value",
+    "nameFor": "Name of field “{{name}}”",
+    "moveUp": "Move field “{{name}}” up",
+    "moveDown": "Move field “{{name}}” down",
+    "delete": "Delete field “{{name}}”",
+    "newName": "New field name",
+    "newType": "New field type",
+    "newOptions": "Options",
+    "newOptionsHint": "Separate options with commas",
+    "add": "Add field",
+    "limit": "A Space can have at most {{max}} custom fields.",
+    "optionsCount": "{{count}} options",
+    "optionLabel": "Option {{index}}",
+    "removeOption": "Remove option {{index}}",
+    "addOption": "Add option",
+    "deleteTitle": "Delete field “{{name}}”?",
+    "deleteHint": "The field and all its values on items are deleted. This cannot be undone.",
+    "deleteConfirm": "Delete field",
+    "types": {
+      "TEXT": "Text",
+      "NUMBER": "Number",
+      "DATE": "Date",
+      "DROPDOWN": "Dropdown",
+      "MULTI_SELECT": "Multi-select",
+      "PERSON": "Person",
+      "URL": "Link (URL)",
+      "CHECKBOX": "Checkbox"
+    }
   }
 }

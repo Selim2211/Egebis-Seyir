@@ -30,6 +30,7 @@ import { SetupModule } from './modules/setup/setup.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { DocsModule } from './modules/docs/docs.module';
 import { TimeModule } from './modules/time/time.module';
+import { CustomFieldsModule } from './modules/custom-fields/custom-fields.module';
 import { ViewsModule } from './modules/views/views.module';
 import { SprintsModule } from './modules/sprints/sprints.module';
 import { SpacesModule } from './modules/spaces/spaces.module';
@@ -97,6 +98,7 @@ const isAuthRateLimited = (ctx: ExecutionContext): boolean =>
     DocsModule,
     TimeModule,
     ViewsModule,
+    CustomFieldsModule,
     NotificationsModule,
     CollabModule,
     HealthModule,

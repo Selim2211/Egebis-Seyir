@@ -24,6 +24,7 @@ import {
 } from '@/features/spaces/queries';
 import { SpaceAvatar } from '@/features/spaces/space-avatar';
 import { ReadinessFields } from '@/features/spaces/readiness-fields';
+import { CustomFieldsSection } from '@/features/custom-fields/custom-fields-editor';
 import { StatusesSection } from '@/features/spaces/statuses-editor';
 import { SpaceFields } from '@/features/spaces/space-form';
 import {
@@ -73,6 +74,7 @@ function SpaceSettingsPage() {
       {canEdit ? <GeneralForm space={space} /> : <GeneralSummary space={space} />}
       <MembersSection spaceId={spaceId} canEdit={canEdit} />
       <StatusesSection space={space} canEdit={canEdit} />
+      <CustomFieldsSection spaceId={spaceId} canEdit={canEdit} />
       {canEdit && <DangerZone space={space} />}
     </div>
   );

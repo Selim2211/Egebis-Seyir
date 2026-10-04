@@ -22,6 +22,17 @@ enum EstimationScale {
   NUMBER
 }
 
+enum CustomFieldType {
+  TEXT
+  NUMBER
+  DATE
+  DROPDOWN
+  MULTI_SELECT
+  PERSON
+  URL
+  CHECKBOX
+}
+
 enum StatusCategory {
   NOT_STARTED
   ACTIVE
@@ -211,6 +222,7 @@ model Workspace {
   activeTimers      ActiveTimer[]
   dashboardLayouts  DashboardLayout[]
   savedViews        SavedView[]
+  customFields      CustomField[]
   docItemLinks      DocItemLink[]
 
   notifications           Notification[]
@@ -335,6 +347,7 @@ model Space {
   keys             SpaceKey[]
   members          SpaceMember[]
   statuses         Status[]
+  customFields     CustomField[]
   folders          Folder[]
   lists            List[]
   items            WorkItem[]
@@ -487,6 +500,8 @@ model WorkItem {
   /// Tiptap belge JSON'u (ADR-048); düz metin karşılığı arama içindir.
   description      Json?
   descriptionText  String?
+  /// Özel alan değerleri: alan kimliği → değer (ADR-082).
+  customFields     Json         @default("{}")
   statusId         String       @db.Uuid
   status           Status       @relation(fields: [statusId], references: [id])
   priority         Priority     @default(NORMAL)
@@ -1068,4 +1083,23 @@ model SavedView {
   @@unique([listId, ownerId, name])
   @@index([listId])
   @@map("saved_views")
+}
+
+/// Space düzeyinde özel alan tanımı (brief §5.8, ADR-082). Değerler iş öğesinde `customFields` JSON'unda.
+model CustomField {
+  id          String          @id @default(uuid(7)) @db.Uuid
+  workspaceId String          @db.Uuid
+  workspace   Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  spaceId     String          @db.Uuid
+  space       Space           @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  name        String
+  type        CustomFieldType
+  /// Liste alanları için seçenekler: [{ id, label, color }].
+  options     Json            @default("[]")
+  rank        String
+  createdAt   DateTime        @default(now()) @db.Timestamptz
+  updatedAt   DateTime        @updatedAt @db.Timestamptz
+
+  @@index([spaceId])
+  @@map("custom_fields")
 }

@@ -1,6 +1,7 @@
 import {
   PRIORITIES,
   WORK_ITEM_TYPES,
+  type CustomField,
   type Label,
   type SpaceDetail,
   type WorkItemSummary,
@@ -20,7 +21,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useUiStore } from '@/lib/ui-store';
 import { cn } from '@/lib/utils';
-import { TABLE_COLUMNS, type TableColumnId, resolveColumns } from './table-columns';
+import { customColumnId, TABLE_COLUMNS, type TableColumnId, resolveColumns } from './table-columns';
 import {
   activeFilterCount,
   DUE_FILTERS,
@@ -140,6 +141,7 @@ export function ViewToolbar({
   labels,
   search,
   isTable,
+  customFields,
   onChange,
   onClear,
 }: {
@@ -148,13 +150,17 @@ export function ViewToolbar({
   labels: Label[];
   search: ViewSearch;
   isTable: boolean;
+  customFields: CustomField[];
   onChange: (patch: Partial<ViewSearch>) => void;
   onClear: () => void;
 }) {
   const { t } = useTranslation();
   const savedColumns = useUiStore((s) => s.tableColumns);
   const setColumns = useUiStore((s) => s.setTableColumns);
-  const visible = resolveColumns(savedColumns);
+  const visible = resolveColumns(
+    savedColumns,
+    customFields.map((f) => f.id),
+  );
   const filterCount = activeFilterCount(search);
   const assignees = new Map(items.flatMap((i) => i.assignees).map((a) => [a.id, a.name]));
   const flat =
@@ -304,6 +310,16 @@ export function ViewToolbar({
                 onCheckedChange={(checked) => toggleColumn(c.id, checked)}
               >
                 {t(`view.columns.${c.id}`)}
+              </DropdownMenuCheckboxItem>
+            ))}
+            {customFields.map((field) => (
+              <DropdownMenuCheckboxItem
+                key={field.id}
+                checked={visible.includes(customColumnId(field.id))}
+                onSelect={(e) => e.preventDefault()}
+                onCheckedChange={(checked) => toggleColumn(customColumnId(field.id), checked)}
+              >
+                {field.name}
               </DropdownMenuCheckboxItem>
             ))}
           </DropdownMenuContent>

@@ -22,6 +22,7 @@ import { useStatusGuard } from './status-guard';
 import { BulkBar } from './view/bulk-bar';
 import type { CellContext } from './view/cells';
 import { ListView } from './view/list-view';
+import { useCustomFields } from '@/features/custom-fields/queries';
 import { resolveColumns } from './view/table-columns';
 import { TableView } from './view/table-view';
 import { ViewToolbar } from './view/toolbar';
@@ -61,6 +62,7 @@ export function ItemsView({
   const lifecycle = useItemLifecycle();
   const copy = useCopyItem();
   const savedColumns = useUiStore((s) => s.tableColumns);
+  const customFields = useCustomFields(space.id);
   const [collapsedItems, setCollapsedItems] = useState<ReadonlySet<string>>(new Set());
   const [collapsedGroups, setCollapsedGroups] = useState<ReadonlySet<string>>(new Set());
   const [pickedIds, setPicked] = useState<ReadonlySet<string>>(new Set());
@@ -218,6 +220,7 @@ export function ItemsView({
       {!empty && (
         <ViewToolbar
           space={space}
+          customFields={customFields}
           items={data.items}
           labels={data.labels}
           search={search}
@@ -239,7 +242,11 @@ export function ItemsView({
           ) : isTable ? (
             <TableView
               {...viewProps}
-              columns={resolveColumns(savedColumns)}
+              columns={resolveColumns(
+                savedColumns,
+                customFields.map((f) => f.id),
+              )}
+              customFields={customFields}
               sort={search.sort ?? 'manual'}
               dir={search.dir ?? 'asc'}
               onSort={sortBy}

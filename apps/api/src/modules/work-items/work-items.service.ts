@@ -34,6 +34,7 @@ import type { AppClsStore } from '../../infra/cls/request-context';
 import { TenantPrismaService } from '../../infra/prisma/tenant-prisma.service';
 import { SpaceAccessService } from '../access/space-access.service';
 import { ActivityService } from '../activity/activity.service';
+import { CustomFieldsService } from '../custom-fields/custom-fields.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { toAttachmentDto } from '../collab/attachments.service';
 import { archivedParent, forbidden, notFound } from '../spaces/space-errors';
@@ -59,6 +60,7 @@ export class WorkItemsService {
     private readonly access: SpaceAccessService,
     private readonly activity: ActivityService,
     private readonly notifications: NotificationsService,
+    private readonly customFields: CustomFieldsService,
   ) {}
 
   private get ctx() {
@@ -386,7 +388,7 @@ export class WorkItemsService {
 
   async update(itemId: string, input: UpdateWorkItemRequest): Promise<void> {
     const { workspaceId, actorId } = this.ctx;
-    const { force, ...fields } = input;
+    const { force, customFields: customPatch, ...fields } = input;
     const db = this.tenant.db;
 
     const item = await db.workItem.findFirst({
@@ -409,6 +411,10 @@ export class WorkItemsService {
     const type = item.type;
 
     this.authorize(item, fields);
+    if (customPatch && !this.can(S.WORK_ITEM_WRITE)) throw forbidden(ERROR_CODES.FORBIDDEN);
+    const customValues = customPatch
+      ? await this.customFields.normalizePatch(item.spaceId, customPatch)
+      : {};
     const typeFieldInput = Object.fromEntries(TYPE_FIELDS.map((name) => [name, fields[name]]));
     const shape = checkTypeFields(type, typeFieldInput);
     if (!shape.ok) throw fail(shape.code);
@@ -486,6 +492,19 @@ export class WorkItemsService {
     }
     if (assignees) changes.assigneeIds = assignees;
     if (labels) changes.labelIds = labels;
+    const customBefore = item.customFields as Record<string, unknown>;
+    const customAfter: Record<string, unknown> = { ...customBefore };
+    const customFrom: Record<string, unknown> = {};
+    const customTo: Record<string, unknown> = {};
+    for (const [fieldId, value] of Object.entries(customValues)) {
+      if (JSON.stringify(customBefore[fieldId] ?? null) === JSON.stringify(value)) continue;
+      customFrom[fieldId] = customBefore[fieldId] ?? null;
+      customTo[fieldId] = value;
+      if (value === null) delete customAfter[fieldId];
+      else customAfter[fieldId] = value;
+    }
+    const customChanged = Object.keys(customTo).length > 0;
+    if (customChanged) changes.customFields = { from: customFrom, to: customTo };
     if (Object.keys(changes).length === 0) return;
 
     await db.$transaction(async (tx) => {
@@ -494,6 +513,7 @@ export class WorkItemsService {
         ...(fields.startDate !== undefined && { startDate: toDate(fields.startDate) }),
         ...(fields.dueDate !== undefined && { dueDate: toDate(fields.dueDate) }),
         ...(completedAt !== undefined && { completedAt }),
+        ...(customChanged && { customFields: asJson(customAfter) }),
         ...(description !== undefined && {
           description: description === null ? Prisma.JsonNull : asJson(description),
           descriptionText: description === null ? null : richTextToPlain(description),

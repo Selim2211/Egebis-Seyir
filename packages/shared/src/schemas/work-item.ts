@@ -7,6 +7,7 @@ import {
   WORK_ITEM_TYPES,
 } from '../constants/work-item';
 import { AttachmentSchema } from './collab';
+import { CustomFieldPatchSchema, CustomFieldValuesSchema } from './custom-field';
 import { RichTextSchema } from './rich-text';
 import { ColorSchema } from './space';
 
@@ -112,6 +113,7 @@ export const UpdateWorkItemRequestSchema = z
     estimateHours: hours,
     description: RichTextSchema.nullable(),
     force: z.boolean(),
+    customFields: CustomFieldPatchSchema,
     ...typeFields,
   })
   .partial()
@@ -143,6 +145,8 @@ export const WorkItemSummarySchema = z.object({
   dueDate: DateOnlySchema.nullable(),
   completedAt: z.iso.datetime().nullable(),
   childCount: z.int(),
+  /** Özel alan değerleri: alan kimliği → değer (ADR-082). */
+  customFields: CustomFieldValuesSchema,
   createdAt: z.iso.datetime(),
 });
 export type WorkItemSummary = z.infer<typeof WorkItemSummarySchema>;

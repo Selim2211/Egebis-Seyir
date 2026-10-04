@@ -50,6 +50,7 @@ export function toSummary(row: SummaryRow): WorkItemSummary {
     dueDate: dateOnly(row.dueDate),
     completedAt: row.completedAt?.toISOString() ?? null,
     childCount: row._count.children,
+    customFields: row.customFields as WorkItemSummary['customFields'],
     createdAt: row.createdAt.toISOString(),
   };
 }

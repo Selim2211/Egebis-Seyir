@@ -50,6 +50,7 @@ const item = (over: Partial<WorkItemSummary>): WorkItemSummary => ({
   dueDate: null,
   completedAt: null,
   childCount: 0,
+  customFields: {},
   createdAt: `2026-10-0${(n % 9) + 1}T10:00:00.000Z`,
   ...over,
 });

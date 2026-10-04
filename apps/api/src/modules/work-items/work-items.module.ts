@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { CustomFieldsModule } from '../custom-fields/custom-fields.module';
 import { EpicsService } from './epics.service';
 import { GanttService } from './gantt.service';
 import { ItemDetailsService } from './item-details.service';
@@ -10,6 +11,7 @@ import { WorkItemsService } from './work-items.service';
 
 /** İş öğeleri: Epic/Story/Task/Sub-task/Bug, etiketler, taşıma/kopyalama, arşiv/çöp (Faz 1.3). */
 @Module({
+  imports: [CustomFieldsModule],
   controllers: [WorkItemsController],
   providers: [
     WorkItemsService,

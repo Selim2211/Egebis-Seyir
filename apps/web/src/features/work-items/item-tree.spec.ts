@@ -16,6 +16,7 @@ const base: Omit<WorkItemSummary, 'id' | 'key' | 'title' | 'parentId'> = {
   dueDate: null,
   completedAt: null,
   childCount: 0,
+  customFields: {},
   createdAt: '2026-10-02T10:00:00.000Z',
 };
 
