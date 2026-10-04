@@ -18,5 +18,6 @@ import { SprintsService } from './sprints.service';
     SprintReportsService,
     RetroService,
   ],
+  exports: [SprintsService],
 })
 export class SprintsModule {}

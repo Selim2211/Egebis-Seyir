@@ -8,6 +8,6 @@ import { DocsService } from './docs.service';
 @Module({
   controllers: [DocsController],
   providers: [DocsService, DocLinksService, DocCommentsService],
-  exports: [DocLinksService],
+  exports: [DocLinksService, DocsService],
 })
 export class DocsModule {}

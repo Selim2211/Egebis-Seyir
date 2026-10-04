@@ -338,7 +338,10 @@
     "CUSTOM_FIELD_NAME_TAKEN": "A custom field with this name already exists.",
     "CUSTOM_FIELD_LIMIT": "A Space can have at most 30 custom fields.",
     "CUSTOM_FIELD_OPTIONS_REQUIRED": "A list field needs at least one option, all different.",
-    "CUSTOM_FIELD_VALUE_INVALID": "This value does not match the field type."
+    "CUSTOM_FIELD_VALUE_INVALID": "This value does not match the field type.",
+    "TEMPLATE_NAME_TAKEN": "A template with this name already exists.",
+    "TEMPLATE_LIMIT": "At most 50 templates per type.",
+    "TEMPLATE_INVALID": "The template could not be applied: missing input or broken template."
   },
   "spaceRoles": {
     "PRODUCT_OWNER": "Product Owner",
@@ -1336,5 +1339,49 @@
       "URL": "Link (URL)",
       "CHECKBOX": "Checkbox"
     }
+  },
+  "templates": {
+    "title": "Templates",
+    "help": "List, sprint and doc templates are managed here; item templates are saved from the item detail and used with “From template” on the List page.",
+    "none": "No templates yet.",
+    "kinds": {
+      "ITEM": "Item",
+      "LIST": "List",
+      "SPRINT": "Sprint",
+      "DOC": "Doc",
+      "SPACE": "Space"
+    },
+    "summary": {
+      "LIST": "{{count}} items",
+      "SPRINT": "{{count}} days",
+      "DOC": "Doc",
+      "SPACE": "{{count}} statuses"
+    },
+    "useInList": "Use on the List page",
+    "use": "Use",
+    "apply": "Use template “{{name}}”",
+    "delete": "Delete template “{{name}}”",
+    "nameFor": "Name to create from “{{name}}”",
+    "namePlaceholder": "Name (template’s if empty)",
+    "startDate": "Sprint start",
+    "create": "Create",
+    "applied": "Created from template “{{name}}”.",
+    "newKind": "Template type",
+    "source": "Source",
+    "chooseSource": "Choose source",
+    "newName": "Template name",
+    "save": "Save template",
+    "saved": "Template saved.",
+    "itemHint": "For an item template, use “Save as template” in the item detail.",
+    "saveItem": "Save as template",
+    "saveItemHint": "The item’s description, labels, checklists, custom fields and sub-items are saved.",
+    "fromTemplate": "From template",
+    "itemCreated": "Item created from template “{{name}}”.",
+    "spaceTitle": "Space templates",
+    "spaceHelp": "This Space’s status flow, custom fields, DoD/DoR and List names become a template for new Spaces.",
+    "spaceName": "Space template name",
+    "saveSpace": "Make this Space a template",
+    "fromSpaceTemplate": "Start from template",
+    "blankSpace": "Blank Space"
   }
 }

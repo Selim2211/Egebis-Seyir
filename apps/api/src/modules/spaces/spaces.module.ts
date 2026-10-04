@@ -23,5 +23,6 @@ import { StructureService } from './structure.service';
     LifecycleService,
     StatusesService,
   ],
+  exports: [SpacesService, StructureService],
 })
 export class SpacesModule {}

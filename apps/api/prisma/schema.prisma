@@ -22,6 +22,14 @@ enum EstimationScale {
   NUMBER
 }
 
+enum TemplateKind {
+  ITEM
+  LIST
+  SPRINT
+  DOC
+  SPACE
+}
+
 enum CustomFieldType {
   TEXT
   NUMBER
@@ -148,6 +156,7 @@ model User {
   docsCreated             Doc[]                    @relation("DocCreator")
   docsUpdated             Doc[]                    @relation("DocUpdater")
   docVersions             DocVersion[]             @relation("DocVersionAuthor")
+  templates       Template[]
 
   @@map("users")
 }
@@ -223,6 +232,7 @@ model Workspace {
   dashboardLayouts  DashboardLayout[]
   savedViews        SavedView[]
   customFields      CustomField[]
+  templates         Template[]
   docItemLinks      DocItemLink[]
 
   notifications           Notification[]
@@ -348,6 +358,7 @@ model Space {
   members          SpaceMember[]
   statuses         Status[]
   customFields     CustomField[]
+  templates        Template[]
   folders          Folder[]
   lists            List[]
   items            WorkItem[]
@@ -1102,4 +1113,23 @@ model CustomField {
 
   @@index([spaceId])
   @@map("custom_fields")
+}
+
+/// Şablon (brief §5.8, ADR-083). `spaceId` boşsa Space şablonudur (workspace geneli). Yük sunucuda üretilir.
+model Template {
+  id          String       @id @default(uuid(7)) @db.Uuid
+  workspaceId String       @db.Uuid
+  workspace   Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  spaceId     String?      @db.Uuid
+  space       Space?       @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  kind        TemplateKind
+  name        String
+  payload     Json
+  createdById String?      @db.Uuid
+  createdBy   User?        @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt   DateTime     @default(now()) @db.Timestamptz
+
+  @@index([workspaceId, kind])
+  @@index([spaceId])
+  @@map("templates")
 }

@@ -19,3 +19,4 @@ export * from './dashboard';
 export * from './saved-view';
 export * from './status';
 export * from './custom-field';
+export * from './template';

@@ -40,6 +40,7 @@ import { ItemOpenLink } from './item-nav';
 import { TimeSection } from '@/features/time/time-section';
 import { LinkedDocs } from './linked-docs';
 import { Links } from './links';
+import { SaveItemTemplate } from '@/features/templates/item-template-actions';
 import { ItemCustomFields } from './item-custom-fields';
 import { Properties } from './properties';
 import { useSaveItem } from './use-save-item';
@@ -309,6 +310,9 @@ function Content({
         >
           <Properties item={item} space={space} archived={item.archived} />
           <ItemCustomFields item={item} canWrite={canWrite} />
+          {canWrite && (
+            <SaveItemTemplate spaceId={item.spaceId} itemId={item.id} title={item.title} />
+          )}
         </aside>
       </div>
       <p className="text-muted-foreground px-4 pb-4 text-xs sm:px-6">

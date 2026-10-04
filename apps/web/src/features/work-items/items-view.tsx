@@ -23,6 +23,7 @@ import { BulkBar } from './view/bulk-bar';
 import type { CellContext } from './view/cells';
 import { ListView } from './view/list-view';
 import { useCustomFields } from '@/features/custom-fields/queries';
+import { ApplyItemTemplate } from '@/features/templates/item-template-actions';
 import { resolveColumns } from './view/table-columns';
 import { TableView } from './view/table-view';
 import { ViewToolbar } from './view/toolbar';
@@ -257,6 +258,9 @@ export function ItemsView({
           {canWrite && !filtered && (
             <div className={cn(!empty && 'border-t')}>
               <QuickCreate listId={listId} scrumEnabled={space.scrumEnabled} />
+              <div className="flex justify-end px-4 pb-2 empty:hidden sm:px-6">
+                <ApplyItemTemplate spaceId={space.id} listId={listId} />
+              </div>
             </div>
           )}
           {canWrite && filtered && (

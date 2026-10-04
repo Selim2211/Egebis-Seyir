@@ -338,7 +338,10 @@
     "CUSTOM_FIELD_NAME_TAKEN": "Bu adla bir özel alan zaten var.",
     "CUSTOM_FIELD_LIMIT": "Bir Space’te en çok 30 özel alan olabilir.",
     "CUSTOM_FIELD_OPTIONS_REQUIRED": "Liste alanı için en az bir, birbirinden farklı seçenek gerekir.",
-    "CUSTOM_FIELD_VALUE_INVALID": "Bu değer alanın türüne uymuyor."
+    "CUSTOM_FIELD_VALUE_INVALID": "Bu değer alanın türüne uymuyor.",
+    "TEMPLATE_NAME_TAKEN": "Bu adla bir şablon zaten var.",
+    "TEMPLATE_LIMIT": "Bu türde en çok 50 şablon olabilir.",
+    "TEMPLATE_INVALID": "Şablon uygulanamadı: eksik bilgi ya da bozuk şablon."
   },
   "spaceRoles": {
     "PRODUCT_OWNER": "Product Owner",
@@ -1336,5 +1339,49 @@
       "URL": "Bağlantı (URL)",
       "CHECKBOX": "Onay kutusu"
     }
+  },
+  "templates": {
+    "title": "Şablonlar",
+    "help": "List, sprint ve doküman şablonları bu ekranda; iş şablonları iş detayından kaydedilir ve List sayfasında “Şablondan ekle” ile kullanılır.",
+    "none": "Henüz şablon yok.",
+    "kinds": {
+      "ITEM": "İş",
+      "LIST": "List",
+      "SPRINT": "Sprint",
+      "DOC": "Doküman",
+      "SPACE": "Space"
+    },
+    "summary": {
+      "LIST": "{{count}} iş",
+      "SPRINT": "{{count}} gün",
+      "DOC": "Doküman",
+      "SPACE": "{{count}} durum"
+    },
+    "useInList": "List sayfasında kullan",
+    "use": "Kullan",
+    "apply": "“{{name}}” şablonunu kullan",
+    "delete": "“{{name}}” şablonunu sil",
+    "nameFor": "“{{name}}” ile oluşturulacak ad",
+    "namePlaceholder": "Ad (boşsa şablondaki)",
+    "startDate": "Sprint başlangıcı",
+    "create": "Oluştur",
+    "applied": "“{{name}}” şablonundan oluşturuldu.",
+    "newKind": "Şablon türü",
+    "source": "Kaynak",
+    "chooseSource": "Kaynak seç",
+    "newName": "Şablon adı",
+    "save": "Şablon kaydet",
+    "saved": "Şablon kaydedildi.",
+    "itemHint": "İş şablonu için iş detayında “Şablon olarak kaydet”i kullan.",
+    "saveItem": "Şablon olarak kaydet",
+    "saveItemHint": "İşin açıklaması, etiketleri, checklist’leri, özel alanları ve alt işleri şablona yazılır.",
+    "fromTemplate": "Şablondan ekle",
+    "itemCreated": "“{{name}}” şablonundan iş oluşturuldu.",
+    "spaceTitle": "Space şablonları",
+    "spaceHelp": "Bu Space’in durum akışı, özel alanları, DoD/DoR’si ve List adları yeni Space’ler için şablon olur.",
+    "spaceName": "Space şablonu adı",
+    "saveSpace": "Bu Space’i şablon yap",
+    "fromSpaceTemplate": "Şablondan başla",
+    "blankSpace": "Boş Space"
   }
 }

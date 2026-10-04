@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/dialog';
 import { UserAvatar } from '@/components/user-avatar';
 import { useMe } from '@/features/auth/queries';
+import { useCreateSpaceFromTemplate, useSpaceTemplates } from '@/features/templates/queries';
 import { useMembers } from '@/features/workspace/queries';
 import { useCreateSpace } from './queries';
 import { SpaceFields } from './space-form';
@@ -50,7 +51,11 @@ function CreateSpaceForm({ onDone }: { onDone: () => void }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { user } = useMe();
-  const create = useCreateSpace();
+  const plainCreate = useCreateSpace();
+  const fromTemplate = useCreateSpaceFromTemplate();
+  const templates = useSpaceTemplates().data?.templates ?? [];
+  const [templateId, setTemplateId] = useState('');
+  const create = templateId ? fromTemplate : plainCreate;
   const [values, setValues] = useState<SpaceFormValues>(EMPTY_SPACE);
   const [keyEdited, setKeyEdited] = useState(false);
   const [errors, setErrors] = useState<SpaceFormErrors>({});
@@ -70,16 +75,18 @@ function CreateSpaceForm({ onDone }: { onDone: () => void }) {
     const found = validateSpace(values);
     setErrors(found);
     if (Object.keys(found).length > 0) return;
-    create.mutate(
-      { ...toSpaceBody(values), members },
-      {
-        onSuccess: ({ id }) => {
-          toast.success(t('spaceForm.created', { name: values.name.trim() }));
-          onDone();
-          void navigate({ to: '/spaces/$spaceId', params: { spaceId: id } });
-        },
+    const done = {
+      onSuccess: ({ id }: { id: string }) => {
+        toast.success(t('spaceForm.created', { name: values.name.trim() }));
+        onDone();
+        void navigate({ to: '/spaces/$spaceId', params: { spaceId: id } });
       },
-    );
+    };
+    if (templateId) {
+      fromTemplate.mutate({ ...toSpaceBody(values), members, templateId }, done);
+    } else {
+      plainCreate.mutate({ ...toSpaceBody(values), members }, done);
+    }
   };
 
   return (
@@ -88,6 +95,19 @@ function CreateSpaceForm({ onDone }: { onDone: () => void }) {
         <DialogTitle>{t('spaceForm.createTitle')}</DialogTitle>
       </DialogHeader>
       <DialogBody>
+        {templates.length > 0 && (
+          <label className="flex flex-col gap-1.5 text-sm font-medium">
+            {t('templates.fromSpaceTemplate')}
+            <NativeSelect value={templateId} onChange={(e) => setTemplateId(e.target.value)}>
+              <option value="">{t('templates.blankSpace')}</option>
+              {templates.map((template) => (
+                <option key={template.id} value={template.id}>
+                  {template.name}
+                </option>
+              ))}
+            </NativeSelect>
+          </label>
+        )}
         <SpaceFields values={values} errors={errors} onChange={change} onNameChange={changeName} />
         <MemberPicker members={members} onChange={setMembers} />
         {create.error && <FormError error={create.error} />}

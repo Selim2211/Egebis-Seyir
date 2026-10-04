@@ -42,6 +42,7 @@ export const TENANT_MODELS: ReadonlySet<string> = new Set([
   'DashboardLayout',
   'SavedView',
   'CustomField',
+  'Template',
 ]);
 
 const WHERE_OPERATIONS = new Set([
