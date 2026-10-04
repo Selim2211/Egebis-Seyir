@@ -327,7 +327,10 @@
     "RETRO_ALREADY_CONVERTED": "Bu aksiyon zaten göreve çevrilmiş.",
     "RETRO_NO_LIST": "Görevin oluşturulacağı bir List yok.",
     "TIMER_NOT_RUNNING": "Çalışan bir sayaç yok.",
-    "TIME_RANGE_INVALID": "Tarih aralığı geçersiz (gelecek gün ya da en çok 62 gün)."
+    "TIME_RANGE_INVALID": "Tarih aralığı geçersiz (gelecek gün ya da en çok 62 gün).",
+    "SAVED_VIEW_NAME_TAKEN": "Bu adla bir görünümün zaten var.",
+    "SAVED_VIEW_LIMIT": "Bu List için en çok 50 görünüm kaydedebilirsin.",
+    "SAVED_VIEW_SHARE_FORBIDDEN": "Görünümü paylaşmak için düzenleme yetkisi gerekir."
   },
   "spaceRoles": {
     "PRODUCT_OWNER": "Product Owner",
@@ -1248,5 +1251,19 @@
       "workload": "İş yükü",
       "epics": "Epic ilerlemesi"
     }
+  },
+  "savedViews": {
+    "title": "Görünümler",
+    "empty": "Kayıtlı görünüm yok. Süzgeçleri ayarlayıp kaydet.",
+    "saveCurrent": "Geçerli görünümü kaydet…",
+    "name": "Görünüm adı",
+    "share": "Ekiple paylaş (List’i gören herkes görür)",
+    "saved": "“{{name}}” görünümü kaydedildi.",
+    "update": "“{{name}}” görünümünü güncelle",
+    "delete": "“{{name}}” görünümünü sil",
+    "deleteTitle": "“{{name}}” silinsin mi?",
+    "deleteHint": "Kayıtlı görünüm silinir; List’teki işler etkilenmez.",
+    "sharedBadge": "Paylaşımlı",
+    "deleteConfirm": "Sil"
   }
 }

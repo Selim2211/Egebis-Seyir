@@ -6,3 +6,4 @@ export * from './doc';
 export * from './retro';
 export * from './time';
 export * from './dashboard';
+export * from './saved-view';

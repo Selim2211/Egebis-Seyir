@@ -662,3 +662,16 @@
   - **CSV dışa aktarma:** tarayıcıda üretilir (sunucuya yük yok): zaman çizelgesi ve pano akış verisi. RFC 4180 tırnaklama, Excel için UTF-8 BOM ve **formül enjeksiyonuna karşı** `= + - @` ile başlayan metinlerin önüne `'` eklenir (`toCsv`, saf ve birim testli). PDF dışa aktarma yok.
 - **Alternatifler:** Her durum geçişi için ayrı geçmiş tablosu (aktivite kaydı zaten aynı bilgiyi taşıyor; ileride ölçek sorunu olursa türetilmiş tabloya geçilir); gece işiyle günlük CFD snapshot'ı (geçmişe dönük hesap gerektirmez ama bugüne kadarki veri eksik kalırdı); pano düzenini Workspace geneline koymak (kişiler farklı widget ister); PDF dışa aktarma (yazdırma ekranı Faz 6).
 - **Bilinen sınırlar:** durum kategorisi o günkü hâliyle değil **şu anki** durum-kategori eşlemesiyle hesaplanır (Faz 5'te özel durum akışı gelince eski eşleme tutulmalı); çok Space'li (workspace düzeyi) pano ve widget ekleme kataloğu sonraya; olay deposu çok büyürse akış sorgusu yavaşlayabilir (180 gün sınırı bu yüzden).
+
+## ADR-079 — Kayıtlı görünümler
+
+- **Tarih:** 2026-10-04 · **Durum:** Kabul (brief §5.14 [F2]; ayrıntılar geliştirici varsayılanı, onay bekliyor)
+- **Karar:**
+  - **Kapsam:** görünüm bir **List'e** bağlıdır ve o sayfanın adres durumunu saklar: görünüm türü (List/Table/Board/Takvim), arama, durum/öncelik/tip/atanan/etiket/bitiş süzgeçleri, sıralama, gruplama ve Board satır gruplaması. Açık yan panel (`item`) saklanmaz. Tablo sütun seçimi tarayıcıya özel kalır (kullanıcı tercihi).
+  - **Kişisel ve paylaşımlı:** kişisel görünümü List'i gören herkes kaydeder (Stakeholder dahil); **paylaşımlı** görünüm için düzenleme yetkisi (`workItem.write`) gerekir ve List'i gören herkese görünür. Güncelleme/silme sahibe ve Space yöneticisine (`space.settings`) aittir; sahip silinirse paylaşımlı görünüm kalır. Başkasının kişisel görünümü var olduğu bile sızmaz (404).
+  - **Sınırlar:** kişi başına List'te en çok 50 görünüm, ad en çok 60 karakter ve kişi + List başına benzersizdir; yapılandırma yalnızca bilinen anahtarları içerebilir ve en çok 4 KB'tır.
+  - **Esneklik:** ayar sunucuda serbest JSON olarak saklanır, **uygulanırken web'de anahtar anahtar doğrulanır** (`searchFromConfig`): sonradan bir seçenek kalkarsa geçerli kalanlar uygulanır, bozuk olan atlanır, sunucu şeması değişmeden kayıtlar bozulmaz.
+  - **Arayüz:** List başlığında "Görünümler" menüsü: kayıtlılar (paylaşımlı rozetli), geçerli durumla eşleşen etkin olarak işaretlenir ve düğmede adı görünür; "geçerli görünümü kaydet…", etkin görünümü güncelle ve sil.
+  - **Düzeltme:** Liste arama kutusu yerel metni adresten gelen dış değişikliklere (süzgeçleri temizle, görünüm uygulama) uymuyor, eski metni geri yazıyordu; dışarıdan gelen değer artık kutuya yansır.
+- **Alternatifler:** Görünümü Space düzeyinde tutmak (süzgeç seçenekleri List'e özel: durumlar, etiketler); web'in `ViewSearch` şemasını sunucuda birebir doğrulamak (iki yerde bakım, eski kayıtlar kırılır); tablo sütunlarını da kaydetmek (sütun tercihi şimdilik yerel).
+- **Bilinen sınırlar:** görünümü yeniden adlandırma yok (sil ve yeniden kaydet); sıralı/sabitlenmiş görünümler yok; Space geneli (çok List) görünüm yok.

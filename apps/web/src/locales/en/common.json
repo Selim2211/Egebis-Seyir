@@ -327,7 +327,10 @@
     "RETRO_ALREADY_CONVERTED": "This action already became a task.",
     "RETRO_NO_LIST": "There is no List to create the task in.",
     "TIMER_NOT_RUNNING": "No timer is running.",
-    "TIME_RANGE_INVALID": "Invalid date range (future day, or more than 62 days)."
+    "TIME_RANGE_INVALID": "Invalid date range (future day, or more than 62 days).",
+    "SAVED_VIEW_NAME_TAKEN": "You already have a view with this name.",
+    "SAVED_VIEW_LIMIT": "You can save at most 50 views per List.",
+    "SAVED_VIEW_SHARE_FORBIDDEN": "Sharing a view requires edit permission."
   },
   "spaceRoles": {
     "PRODUCT_OWNER": "Product Owner",
@@ -1248,5 +1251,19 @@
       "workload": "Workload",
       "epics": "Epic progress"
     }
+  },
+  "savedViews": {
+    "title": "Views",
+    "empty": "No saved views. Set up filters and save them.",
+    "saveCurrent": "Save current view…",
+    "name": "View name",
+    "share": "Share with the team (everyone who can see the List)",
+    "saved": "View “{{name}}” saved.",
+    "update": "Update view “{{name}}”",
+    "delete": "Delete view “{{name}}”",
+    "deleteTitle": "Delete “{{name}}”?",
+    "deleteHint": "The saved view is deleted; items in the List are not affected.",
+    "sharedBadge": "Shared",
+    "deleteConfirm": "Delete"
   }
 }

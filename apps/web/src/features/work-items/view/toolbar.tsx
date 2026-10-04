@@ -6,7 +6,7 @@ import {
   type WorkItemSummary,
 } from '@scrum/shared';
 import { ChevronDown, Columns3, Search, X } from 'lucide-react';
-import { type ReactNode, useEffect, useState } from 'react';
+import { type ReactNode, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NativeSelect } from '@/components/form';
 import { Button } from '@/components/ui/button';
@@ -88,9 +88,22 @@ function SearchBox({
 }) {
   const { t } = useTranslation();
   const [text, setText] = useState(value);
+  // Bu kutunun adrese yazdığı son değer; `value` bundan farklı gelirse değişiklik dışarıdandır
+  // (süzgeçleri temizle, kayıtlı görünümü uygula) ve kutu ona eşitlenir.
+  const emitted = useRef(value);
+  useEffect(() => {
+    if (value !== emitted.current) {
+      emitted.current = value;
+      setText(value);
+    }
+  }, [value]);
   useEffect(() => {
     if (text === value) return;
-    const timer = setTimeout(() => onChange(text.trim() ? text : undefined), 250);
+    const timer = setTimeout(() => {
+      const next = text.trim() ? text : undefined;
+      emitted.current = next ?? '';
+      onChange(next);
+    }, 250);
     return () => clearTimeout(timer);
   }, [text, value, onChange]);
 

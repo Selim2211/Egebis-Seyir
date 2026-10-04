@@ -10,6 +10,7 @@ import { listQuery, spaceQuery, useTreeSpace } from '@/features/spaces/queries';
 import { ItemNavContext } from '@/features/work-items/detail/item-nav-context';
 import { ItemPanel } from '@/features/work-items/detail/item-panel';
 import { ItemsView } from '@/features/work-items/items-view';
+import { SavedViewsMenu } from '@/features/work-items/view/saved-views-menu';
 import { itemsQuery } from '@/features/work-items/queries';
 import { ViewSearchSchema, type ViewSearch } from '@/features/work-items/view/view-state';
 import { useCurrentWorkspace } from '@/features/workspace/queries';
@@ -64,37 +65,56 @@ function ListPage() {
         archived={list.archived}
         canUnarchive={!!treeSpace?.permissions.includes(S.LIST_MANAGE)}
       >
-        <div role="tablist" aria-label={t('listPage.views')} className="-mb-px flex gap-1">
-          {(['list', 'table', 'board', 'calendar'] as const).map((key) => {
-            const Icon =
-              key === 'list'
-                ? List
-                : key === 'table'
-                  ? Table
-                  : key === 'board'
-                    ? Kanban
-                    : CalendarDays;
-            const selected = view === key;
-            return (
-              <Link
-                key={key}
-                to="."
-                search={(prev: ViewSearch) => ({ ...prev, view: key === 'list' ? undefined : key })}
-                replace
-                role="tab"
-                aria-selected={selected}
-                className={cn(
-                  'flex h-9 items-center gap-1.5 border-b-2 px-2.5 text-sm',
-                  selected
-                    ? 'border-primary font-semibold'
-                    : 'text-muted-foreground hover:text-foreground border-transparent',
-                )}
-              >
-                <Icon className="size-4" aria-hidden />
-                {t(`listPage.view.${key}`)}
-              </Link>
-            );
-          })}
+        <div className="flex items-end gap-2">
+          <div role="tablist" aria-label={t('listPage.views')} className="-mb-px flex gap-1">
+            {(['list', 'table', 'board', 'calendar'] as const).map((key) => {
+              const Icon =
+                key === 'list'
+                  ? List
+                  : key === 'table'
+                    ? Table
+                    : key === 'board'
+                      ? Kanban
+                      : CalendarDays;
+              const selected = view === key;
+              return (
+                <Link
+                  key={key}
+                  to="."
+                  search={(prev: ViewSearch) => ({
+                    ...prev,
+                    view: key === 'list' ? undefined : key,
+                  })}
+                  replace
+                  role="tab"
+                  aria-selected={selected}
+                  className={cn(
+                    'flex h-9 items-center gap-1.5 border-b-2 px-2.5 text-sm',
+                    selected
+                      ? 'border-primary font-semibold'
+                      : 'text-muted-foreground hover:text-foreground border-transparent',
+                  )}
+                >
+                  <Icon className="size-4" aria-hidden />
+                  {t(`listPage.view.${key}`)}
+                </Link>
+              );
+            })}
+          </div>
+          <div className="ml-auto pb-1">
+            <SavedViewsMenu
+              listId={list.id}
+              search={search}
+              permissions={space?.permissions ?? treeSpace?.permissions ?? []}
+              onApply={(config) =>
+                void navigate({
+                  to: '.',
+                  replace: true,
+                  search: (prev: ViewSearch) => ({ item: prev.item, ...config }),
+                })
+              }
+            />
+          </div>
         </div>
       </ContainerHeader>
 

@@ -16,3 +16,4 @@ export * from './workload';
 export * from './gantt';
 export * from './flow';
 export * from './dashboard';
+export * from './saved-view';

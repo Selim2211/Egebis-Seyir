@@ -133,6 +133,7 @@ model User {
   timeEntries             TimeEntry[]
   activeTimer             ActiveTimer?
   dashboardLayouts        DashboardLayout[]
+  savedViews              SavedView[]
   docsCreated             Doc[]                    @relation("DocCreator")
   docsUpdated             Doc[]                    @relation("DocUpdater")
   docVersions             DocVersion[]             @relation("DocVersionAuthor")
@@ -209,6 +210,7 @@ model Workspace {
   timeEntries       TimeEntry[]
   activeTimers      ActiveTimer[]
   dashboardLayouts  DashboardLayout[]
+  savedViews        SavedView[]
   docItemLinks      DocItemLink[]
 
   notifications           Notification[]
@@ -435,7 +437,8 @@ model List {
   createdAt   DateTime  @default(now()) @db.Timestamptz
   updatedAt   DateTime  @updatedAt @db.Timestamptz
 
-  items WorkItem[]
+  items      WorkItem[]
+  savedViews SavedView[]
 
   @@index([spaceId])
   @@index([folderId])
@@ -1038,4 +1041,27 @@ model DashboardLayout {
 
   @@id([userId, spaceId])
   @@map("dashboard_layouts")
+}
+
+// ---------- Kayıtlı görünümler (Faz 5.1, ADR-079) ----------
+
+/// Bir List'in kaydedilmiş süzgeç/sıralama/gruplama/görünüm ayarı; kişisel ya da paylaşımlı.
+model SavedView {
+  id          String    @id @default(uuid(7)) @db.Uuid
+  workspaceId String    @db.Uuid
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  listId      String    @db.Uuid
+  list        List      @relation(fields: [listId], references: [id], onDelete: Cascade)
+  /// Sahip silinirse paylaşımlı görünüm kalır.
+  ownerId     String?   @db.Uuid
+  owner       User?     @relation(fields: [ownerId], references: [id], onDelete: SetNull)
+  name        String
+  shared      Boolean   @default(false)
+  config      Json
+  createdAt   DateTime  @default(now()) @db.Timestamptz
+  updatedAt   DateTime  @updatedAt @db.Timestamptz
+
+  @@unique([listId, ownerId, name])
+  @@index([listId])
+  @@map("saved_views")
 }
