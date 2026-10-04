@@ -12,6 +12,7 @@ import {
   SpaceMembersResponseSchema,
   type TreeSpace,
   type UpdateSpaceRequest,
+  type UpdateStatusRequest,
   type UpdateWorkspaceSettingsRequest,
   WorkspaceSettingsSchema,
 } from '@scrum/shared';
@@ -107,6 +108,15 @@ export const useUpdateSpace = () =>
       method: 'PATCH',
       body: input.body,
     }),
+  );
+
+export const useUpdateStatus = () =>
+  useWorkspaceMutation(
+    (id, input: { spaceId: string; statusId: string; body: UpdateStatusRequest }) =>
+      apiRequest(`${ws(id)}/spaces/${input.spaceId}/statuses/${input.statusId}`, NoContent, {
+        method: 'PATCH',
+        body: input.body,
+      }),
   );
 
 export const useCreateFolder = () =>

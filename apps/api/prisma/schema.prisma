@@ -392,6 +392,8 @@ model Status {
   color       String
   category    StatusCategory
   rank        String
+  /// Board sütunu için en çok iş sayısı (ADR-080); aşılınca uyarır, engellemez.
+  wipLimit    Int?           @map("wip_limit")
   createdAt   DateTime       @default(now()) @db.Timestamptz
 
   items WorkItem[]

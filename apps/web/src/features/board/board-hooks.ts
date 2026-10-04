@@ -12,4 +12,10 @@ export function useCanMove(permissions: readonly string[], archived: boolean) {
 }
 
 export const toBoardStatuses = (space: SpaceDetail): BoardStatus[] =>
-  space.statuses.map(({ id, name, color, category }) => ({ id, name, color, category }));
+  space.statuses.map(({ id, name, color, category, wipLimit }) => ({
+    id,
+    name,
+    color,
+    category,
+    wipLimit,
+  }));

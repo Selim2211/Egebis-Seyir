@@ -9,6 +9,7 @@ import {
   WorkspaceStructureController,
 } from './spaces.controller';
 import { SpacesService } from './spaces.service';
+import { StatusesService } from './statuses.service';
 import { StructureService } from './structure.service';
 
 /** Space / Folder / List hiyerarşisi, favoriler, arşiv ve çöp kutusu (Faz 1.2). */
@@ -20,6 +21,7 @@ import { StructureService } from './structure.service';
     StructureService,
     FavoritesService,
     LifecycleService,
+    StatusesService,
   ],
 })
 export class SpacesModule {}

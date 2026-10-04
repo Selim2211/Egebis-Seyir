@@ -23,3 +23,4 @@ export * from './schedule';
 export * from './flow';
 export * from './dashboard';
 export * from './csv';
+export * from './wip';

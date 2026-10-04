@@ -904,7 +904,14 @@
     "noSprintTitle": "Planlı veya aktif sprint yok",
     "noSprintBody": "Sprint oluşturup Backlog'tan öğe taşıdığında pano burada görünür.",
     "readOnlyCompleted": "Bu sprint tamamlandı; pano salt-okunur.",
-    "readOnlyCancelled": "Bu sprint iptal edildi; pano salt-okunur."
+    "readOnlyCancelled": "Bu sprint iptal edildi; pano salt-okunur.",
+    "wipExceeded": "“{{status}}” sütunu WIP limitini ({{limit}}) aştı.",
+    "wip": {
+      "none": "",
+      "ok": "WIP: {{count}} / {{limit}}",
+      "full": "WIP limitine ulaşıldı: {{count}} / {{limit}}",
+      "over": "WIP limiti aşıldı: {{count}} / {{limit}}"
+    }
   },
   "scrumTabs": {
     "label": "Scrum"
@@ -1265,5 +1272,11 @@
     "deleteHint": "Kayıtlı görünüm silinir; List’teki işler etkilenmez.",
     "sharedBadge": "Paylaşımlı",
     "deleteConfirm": "Sil"
+  },
+  "statusEditor": {
+    "wipLimit": "WIP limiti",
+    "wipHint": "Board sütununda en çok iş sayısı. Aşılınca uyarır, engellemez. Boş: sınırsız.",
+    "wipFor": "“{{name}}” WIP limiti",
+    "unlimited": "Sınırsız"
   }
 }

@@ -235,6 +235,7 @@ export class SpacesService {
         name: s.name,
         color: s.color,
         category: s.category,
+        wipLimit: s.wipLimit,
       })),
       createdAt: space.createdAt.toISOString(),
     };

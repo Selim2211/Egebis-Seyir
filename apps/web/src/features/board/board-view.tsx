@@ -9,9 +9,10 @@ import {
   useSensor,
   useSensors,
 } from '@dnd-kit/core';
-import type { WorkItemSummary } from '@scrum/shared';
+import { type WipState, type WorkItemSummary, wipState } from '@scrum/shared';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 import { UserAvatar } from '@/components/user-avatar';
 import { PriorityIcon } from '@/components/work-item/work-item-visuals';
 import { cn } from '@/lib/utils';
@@ -63,7 +64,15 @@ export function BoardView({
     setActiveId(null);
     const item = byId.get(String(dragged.id));
     const target = over ? String(over.id).split(CELL_SEPARATOR)[1] : undefined;
-    if (item && target && target !== item.statusId) onStatus(item.id, target);
+    if (item && target && target !== item.statusId) {
+      const column = statuses.find((s) => s.id === target);
+      const count = columnTotals(lanes, target).count;
+      // WIP limiti engellemez; aşıldıysa yalnızca uyarır (ADR-080).
+      if (column && wipState(count + 1, column.wipLimit) === 'over') {
+        toast.warning(t('board.wipExceeded', { status: column.name, limit: column.wipLimit }));
+      }
+      onStatus(item.id, target);
+    }
   };
 
   const columns = `repeat(${statuses.length}, minmax(${COLUMN_MIN_REM}rem, 1fr))`;
@@ -93,10 +102,12 @@ export function BoardView({
               >
                 <span className="size-2 rounded-full" style={{ background: status.color }} />
                 <h2 className="font-semibold">{status.name}</h2>
-                <span className="text-muted-foreground text-xs tabular-nums">
-                  {total.count}
-                  {showPoints && ` · ${t('board.points', { points: total.points })}`}
-                </span>
+                <WipCounter count={total.count} limit={status.wipLimit} />
+                {showPoints && (
+                  <span className="text-muted-foreground text-xs tabular-nums">
+                    {t('board.points', { points: total.points })}
+                  </span>
+                )}
               </div>
             );
           })}
@@ -118,6 +129,28 @@ export function BoardView({
         {active && <BoardCard item={active} statuses={statuses} canMove overlay />}
       </DragOverlay>
     </DndContext>
+  );
+}
+
+const WIP_STYLES: Record<WipState, string> = {
+  none: 'text-muted-foreground',
+  ok: 'text-muted-foreground',
+  full: 'bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300',
+  over: 'bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300',
+};
+
+/** Sütun sayacı: limit varsa "3 / 5"; limite ulaşınca sarı, aşınca kırmızı (ADR-080). */
+function WipCounter({ count, limit }: { count: number; limit: number | null | undefined }) {
+  const { t } = useTranslation();
+  const state = wipState(count, limit);
+  return (
+    <span
+      data-wip={state}
+      title={limit != null ? t(`board.wip.${state}`, { count, limit }) : undefined}
+      className={cn('rounded px-1.5 text-xs tabular-nums', WIP_STYLES[state])}
+    >
+      {limit != null ? `${count} / ${limit}` : count}
+    </span>
   );
 }
 

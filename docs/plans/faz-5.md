@@ -6,8 +6,8 @@
 | #   | Adım                 | İçerik                                                                                                                    | Durum      |
 | --- | -------------------- | ------------------------------------------------------------------------------------------------------------------------- | ---------- |
 | 5.1 | Kayıtlı görünümler   | List görünümlerini (filtre, sıralama, gruplama, görünüm türü) adlandırıp kaydetme; kişisel ve paylaşımlı                  | Tamamlandı |
-| 5.2 | WIP limiti           | Board'da sütun (durum) başına en çok iş sayısı; aşılınca uyarı (engel değil)                                              | Sırada     |
-| 5.3 | Özel durum akışları  | Space'te durum ekle/sil/sırala/yeniden adlandır, kategori ata; raporlar için durum geçmişi eşlemesi                       | Bekliyor   |
+| 5.2 | WIP limiti           | Board'da sütun (durum) başına en çok iş sayısı; aşılınca uyarı (engel değil)                                              | Tamamlandı |
+| 5.3 | Özel durum akışları  | Space'te durum ekle/sil/sırala/yeniden adlandır, kategori ata; raporlar için durum geçmişi eşlemesi                       | Sırada     |
 | 5.4 | Özel alanlar         | Space düzeyinde alan tanımı (metin, sayı, tarih, liste, çoklu seçim, kişi, URL, onay kutusu), değer girişi, tabloda sütun | Bekliyor   |
 | 5.5 | Şablonlar            | Görev, List, sprint ve Space şablonları; doküman şablonları                                                               | Bekliyor   |
 | 5.6 | Otomasyonlar         | Tetikleyici (durum değişti…), koşul, eylem (kişi ata, bildirim, alan güncelle, alt görev); döngü koruması                 | Bekliyor   |

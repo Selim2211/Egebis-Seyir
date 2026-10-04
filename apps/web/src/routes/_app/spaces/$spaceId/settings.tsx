@@ -24,6 +24,7 @@ import {
 } from '@/features/spaces/queries';
 import { SpaceAvatar } from '@/features/spaces/space-avatar';
 import { ReadinessFields } from '@/features/spaces/readiness-fields';
+import { StatusesSection } from '@/features/spaces/statuses-editor';
 import { SpaceFields } from '@/features/spaces/space-form';
 import {
   type SpaceFormErrors,
@@ -71,7 +72,7 @@ function SpaceSettingsPage() {
 
       {canEdit ? <GeneralForm space={space} /> : <GeneralSummary space={space} />}
       <MembersSection spaceId={spaceId} canEdit={canEdit} />
-      <StatusesSection space={space} />
+      <StatusesSection space={space} canEdit={canEdit} />
       {canEdit && <DangerZone space={space} />}
     </div>
   );
@@ -284,28 +285,6 @@ function MembersSection({ spaceId, canEdit }: { spaceId: string; canEdit: boolea
           </Button>
         </div>
       )}
-    </Section>
-  );
-}
-
-function StatusesSection({ space }: { space: SpaceDetail }) {
-  const { t } = useTranslation();
-  return (
-    <Section title={t('spaceSettings.statuses')} description={t('spaceSettings.statusesHelp')}>
-      <ol className="flex flex-wrap gap-2">
-        {space.statuses.map((s) => (
-          <li
-            key={s.id}
-            className="flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium"
-          >
-            <span className="size-2 rounded-full" style={{ background: s.color }} aria-hidden />
-            {s.name}
-            <span className="text-muted-foreground font-normal">
-              · {t(`statusCategory.${s.category}`)}
-            </span>
-          </li>
-        ))}
-      </ol>
     </Section>
   );
 }

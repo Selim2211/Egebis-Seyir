@@ -67,6 +67,8 @@ export const StatusSchema = z.object({
   name: z.string(),
   color: z.string(),
   category: z.enum(STATUS_CATEGORIES),
+  /** Board sütunu WIP limiti; yoksa null (ADR-080). */
+  wipLimit: z.int().nullable(),
 });
 export type Status = z.infer<typeof StatusSchema>;
 

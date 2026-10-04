@@ -66,3 +66,6 @@ export const DEFAULT_STATUSES: Record<'tr' | 'en', readonly StatusSeed[]> = {
 
 /** Yeni Space'te açılan ilk liste (ADR-043). */
 export const DEFAULT_LIST_NAME: Record<'tr' | 'en', string> = { tr: 'Görevler', en: 'Tasks' };
+
+/** Durum başına WIP limiti aralığı (ADR-080). */
+export const WIP_LIMIT = { min: 1, max: 999 } as const;

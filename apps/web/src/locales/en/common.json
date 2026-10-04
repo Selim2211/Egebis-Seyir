@@ -904,7 +904,14 @@
     "noSprintTitle": "No planned or active sprint",
     "noSprintBody": "The board appears here once you create a sprint and move items into it.",
     "readOnlyCompleted": "This sprint is completed; the board is read-only.",
-    "readOnlyCancelled": "This sprint was cancelled; the board is read-only."
+    "readOnlyCancelled": "This sprint was cancelled; the board is read-only.",
+    "wipExceeded": "Column “{{status}}” exceeded its WIP limit ({{limit}}).",
+    "wip": {
+      "none": "",
+      "ok": "WIP: {{count}} / {{limit}}",
+      "full": "WIP limit reached: {{count}} / {{limit}}",
+      "over": "WIP limit exceeded: {{count}} / {{limit}}"
+    }
   },
   "scrumTabs": {
     "label": "Scrum"
@@ -1265,5 +1272,11 @@
     "deleteHint": "The saved view is deleted; items in the List are not affected.",
     "sharedBadge": "Shared",
     "deleteConfirm": "Delete"
+  },
+  "statusEditor": {
+    "wipLimit": "WIP limit",
+    "wipHint": "Maximum items in a Board column. Warns when exceeded, never blocks. Empty: unlimited.",
+    "wipFor": "WIP limit for “{{name}}”",
+    "unlimited": "Unlimited"
   }
 }

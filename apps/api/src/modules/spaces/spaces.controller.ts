@@ -28,6 +28,7 @@ import {
   SpaceDetailSchema,
   SpaceMembersResponseSchema,
   UpdateSpaceRequestSchema,
+  UpdateStatusRequestSchema,
   WORKSPACE_PERMISSIONS as W,
   type ArchiveResponse,
   type Created,
@@ -44,11 +45,13 @@ import { FavoritesService } from './favorites.service';
 import { LifecycleService } from './lifecycle.service';
 import { SpaceMembersService } from './space-members.service';
 import { SpacesService } from './spaces.service';
+import { StatusesService } from './statuses.service';
 import { StructureService } from './structure.service';
 
 class HierarchyDto extends createZodDto(HierarchyResponseSchema) {}
 class CreateSpaceDto extends createZodDto(CreateSpaceRequestSchema) {}
 class UpdateSpaceDto extends createZodDto(UpdateSpaceRequestSchema) {}
+class UpdateStatusDto extends createZodDto(UpdateStatusRequestSchema) {}
 class SpaceDetailDto extends createZodDto(SpaceDetailSchema) {}
 class CreatedDto extends createZodDto(CreatedSchema) {}
 class MoveDto extends createZodDto(MoveRequestSchema) {}
@@ -110,6 +113,7 @@ export class SpacesController {
     private readonly members: SpaceMembersService,
     private readonly structure: StructureService,
     private readonly lifecycle: LifecycleService,
+    private readonly statuses: StatusesService,
   ) {}
 
   @Post()
@@ -197,6 +201,19 @@ export class SpacesController {
     @Uuid('userId') userId: string,
   ): Promise<void> {
     await this.members.remove(spaceId, userId);
+  }
+
+  // ---------- Durumlar ----------
+
+  @Patch(':spaceId/statuses/:statusId')
+  @RequireSpacePermission(S.SPACE_SETTINGS)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async updateStatus(
+    @Uuid('spaceId') spaceId: string,
+    @Uuid('statusId') statusId: string,
+    @Body() body: UpdateStatusDto,
+  ): Promise<void> {
+    await this.statuses.update(spaceId, statusId, body);
   }
 
   // ---------- Folder / List oluşturma ----------

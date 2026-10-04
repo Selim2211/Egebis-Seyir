@@ -675,3 +675,13 @@
   - **Düzeltme:** Liste arama kutusu yerel metni adresten gelen dış değişikliklere (süzgeçleri temizle, görünüm uygulama) uymuyor, eski metni geri yazıyordu; dışarıdan gelen değer artık kutuya yansır.
 - **Alternatifler:** Görünümü Space düzeyinde tutmak (süzgeç seçenekleri List'e özel: durumlar, etiketler); web'in `ViewSearch` şemasını sunucuda birebir doğrulamak (iki yerde bakım, eski kayıtlar kırılır); tablo sütunlarını da kaydetmek (sütun tercihi şimdilik yerel).
 - **Bilinen sınırlar:** görünümü yeniden adlandırma yok (sil ve yeniden kaydet); sıralı/sabitlenmiş görünümler yok; Space geneli (çok List) görünüm yok.
+
+## ADR-080 — WIP limiti
+
+- **Tarih:** 2026-10-04 · **Durum:** Kabul (brief §5.8 [F2]; ayrıntılar geliştirici varsayılanı, onay bekliyor)
+- **Karar:**
+  - **Kapsam:** limit **durum** başınadır (`statuses.wip_limit`, 1–999, boş = sınırsız) ve Space'in tüm Board'larına (List panosu, Sprint panosu) uygulanır. Yalnızca **Space ayarlarında** (`space.settings`) konur; API `PATCH spaces/:spaceId/statuses/:statusId`.
+  - **Uyarır, engellemez:** Board sütun başlığı "sayı / limit" gösterir; limite ulaşınca sarı, aşınca kırmızı. Kartı limiti aşan sütuna bırakmak çalışır ve bir uyarı bildirimi gösterir. Sunucu limiti zorlamaz (durum değişikliği hep geçer); bu bilinçli bir seçimdir, çünkü limit ekip kuralıdır, sistem kilidi değil.
+  - **Sayım:** Board'da görünen kartlar (süzgeç ve sprint kapsamı uygulanmış hâliyle); alt görevler ve satır gruplaması sayıyı değiştirmez. Saf kural `wipState` (birim testli).
+- **Alternatifler:** Sunucuda sert engel (durum geçişi 409; kaçış yolu ve yetki kuralı gerekir); limiti Board'a göre ayrı tutmak (aynı durum iki panoda farklı limit karışıklığı); sütun başlığından düzenleme (şimdilik ayarlar).
+- **Bilinen sınırlar:** limit Board dışında (List/Tablo) gösterilmez; limit aşımı bildirim/e-posta üretmez.

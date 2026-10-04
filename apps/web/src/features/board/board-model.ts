@@ -9,6 +9,8 @@ export interface BoardStatus {
   name: string;
   color: string;
   category: 'NOT_STARTED' | 'ACTIVE' | 'DONE';
+  /** WIP limiti; yoksa null (ADR-080). */
+  wipLimit?: number | null;
 }
 
 export type LaneKind = 'all' | 'assignee' | 'unassigned' | 'epic' | 'noEpic' | 'priority';
