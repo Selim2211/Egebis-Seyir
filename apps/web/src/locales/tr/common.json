@@ -341,7 +341,9 @@
     "CUSTOM_FIELD_VALUE_INVALID": "Bu değer alanın türüne uymuyor.",
     "TEMPLATE_NAME_TAKEN": "Bu adla bir şablon zaten var.",
     "TEMPLATE_LIMIT": "Bu türde en çok 50 şablon olabilir.",
-    "TEMPLATE_INVALID": "Şablon uygulanamadı: eksik bilgi ya da bozuk şablon."
+    "TEMPLATE_INVALID": "Şablon uygulanamadı: eksik bilgi ya da bozuk şablon.",
+    "AUTOMATION_LIMIT": "Bir Space’te en çok 30 otomasyon olabilir.",
+    "AUTOMATION_INVALID": "Otomasyon geçersiz: durum, kişi, etiket veya alan değeri bu Space’e uymuyor."
   },
   "spaceRoles": {
     "PRODUCT_OWNER": "Product Owner",
@@ -1002,7 +1004,8 @@
       "STATUS_CHANGED": "{{actor}}, {{key}} durumunu “{{detail}}” yaptı.",
       "SPRINT_STARTED": "{{actor}}, {{sprint}} sprint’ini başlattı.",
       "SPRINT_COMPLETED": "{{actor}}, {{sprint}} sprint’ini tamamladı.",
-      "MENTIONED_DOC": "{{actor}} seni “{{doc}}” sayfasındaki bir yorumda etiketledi."
+      "MENTIONED_DOC": "{{actor}} seni “{{doc}}” sayfasındaki bir yorumda etiketledi.",
+      "AUTOMATION": "{{key}}: {{detail}}"
     },
     "settingsTitle": "Bildirimler",
     "settingsSubtitle": "Hangi olaylardan hangi kanaldan haber almak istediğini seç. Değişiklikler hemen kaydedilir.",
@@ -1017,7 +1020,8 @@
       "COMMENTED": "Yorum geldi",
       "STATUS_CHANGED": "Durum değişti",
       "SPRINT_STARTED": "Sprint başladı",
-      "SPRINT_COMPLETED": "Sprint tamamlandı"
+      "SPRINT_COMPLETED": "Sprint tamamlandı",
+      "AUTOMATION": "Otomasyon"
     },
     "typeHelp": {
       "ASSIGNED": "Bir görev sana atandığında.",
@@ -1025,7 +1029,8 @@
       "COMMENTED": "İzlediğin veya atandığın görevlere yorum yazıldığında.",
       "STATUS_CHANGED": "Atandığın veya izlediğin görevin durumu değiştiğinde.",
       "SPRINT_STARTED": "Üyesi olduğun Space’te sprint başladığında.",
-      "SPRINT_COMPLETED": "Üyesi olduğun Space’te sprint tamamlandığında."
+      "SPRINT_COMPLETED": "Üyesi olduğun Space’te sprint tamamlandığında.",
+      "AUTOMATION": "Bir otomasyon sana bildirim gönderdiğinde."
     }
   },
   "reports": {
@@ -1383,5 +1388,66 @@
     "saveSpace": "Bu Space’i şablon yap",
     "fromSpaceTemplate": "Şablondan başla",
     "blankSpace": "Boş Space"
+  },
+  "automations": {
+    "title": "Otomasyonlar",
+    "help": "Bir olay olunca kendiliğinden çalışan kurallar: tetikleyici, koşullar ve eylemler. Aynı kural zincirde iki kez çalışmaz; zincir en çok 3 basamak sürer.",
+    "add": "Otomasyon ekle",
+    "none": "Henüz otomasyon yok.",
+    "addTitle": "Yeni otomasyon",
+    "editTitle": "Otomasyonu düzenle",
+    "name": "Ad",
+    "when": "Ne zaman",
+    "trigger": "Tetikleyici",
+    "triggers": {
+      "ITEM_CREATED": "İş oluşturulunca",
+      "STATUS_CHANGED": "Durum değişince",
+      "PRIORITY_CHANGED": "Öncelik değişince"
+    },
+    "toStatus": "Yeni durum",
+    "toPriority": "Yeni öncelik",
+    "any": "Herhangi biri",
+    "conditions": "Koşullar (hepsi sağlanmalı)",
+    "conditionsHint": "İşaretlenmeyen koşul kısıt getirmez; her gruptan biri yeterlidir.",
+    "unassigned": "Atanmamış işler",
+    "then": "Ne yapılsın",
+    "actionType": "{{index}}. eylem türü",
+    "actions": {
+      "ASSIGN": "Kişi ata",
+      "NOTIFY": "Bildirim gönder",
+      "SET_PRIORITY": "Önceliği değiştir",
+      "SET_STATUS": "Durumu değiştir",
+      "SET_CUSTOM_FIELD": "Özel alanı güncelle",
+      "CREATE_SUBTASK": "Alt görev oluştur"
+    },
+    "person": "{{index}}. eylem kişisi",
+    "choosePerson": "Kişi seç",
+    "priorityValue": "{{index}}. eylem önceliği",
+    "statusValue": "{{index}}. eylem durumu",
+    "subtaskTitle": "{{index}}. eylem alt görev başlığı",
+    "notifyTo": "{{index}}. eylem alıcısı",
+    "toAssignees": "Atananlar",
+    "toReporter": "Bildiren",
+    "toUser": "Belirli kişi",
+    "message": "{{index}}. eylem mesajı",
+    "fieldValue": "{{index}}. eylem alanı",
+    "chooseField": "Alan seç",
+    "addAction": "Eylem ekle",
+    "removeAction": "{{index}}. eylemi kaldır",
+    "saved": "Otomasyon kaydedildi.",
+    "actionCount": "{{count}} eylem",
+    "enabledFor": "“{{name}}” açık",
+    "runsFor": "“{{name}}” çalışma günlüğü",
+    "edit": "“{{name}}” otomasyonunu düzenle",
+    "delete": "“{{name}}” otomasyonunu sil",
+    "deleteTitle": "“{{name}}” silinsin mi?",
+    "deleteHint": "Otomasyon ve çalışma günlüğü silinir. Daha önce yapılan değişiklikler geri alınmaz.",
+    "deleteConfirm": "Sil",
+    "noRuns": "Henüz çalışmadı.",
+    "outcome": {
+      "OK": "Çalıştı",
+      "SKIPPED": "Atlandı (döngü)",
+      "FAILED": "Başarısız"
+    }
   }
 }

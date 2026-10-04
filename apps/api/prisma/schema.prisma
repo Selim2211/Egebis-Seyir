@@ -22,6 +22,12 @@ enum EstimationScale {
   NUMBER
 }
 
+enum AutomationOutcome {
+  OK
+  SKIPPED
+  FAILED
+}
+
 enum TemplateKind {
   ITEM
   LIST
@@ -233,6 +239,8 @@ model Workspace {
   savedViews        SavedView[]
   customFields      CustomField[]
   templates         Template[]
+  automations       Automation[]
+  automationRuns    AutomationRun[]
   docItemLinks      DocItemLink[]
 
   notifications           Notification[]
@@ -359,6 +367,7 @@ model Space {
   statuses         Status[]
   customFields     CustomField[]
   templates        Template[]
+  automations      Automation[]
   folders          Folder[]
   lists            List[]
   items            WorkItem[]
@@ -859,6 +868,7 @@ enum NotificationType {
   STATUS_CHANGED
   SPRINT_STARTED
   SPRINT_COMPLETED
+  AUTOMATION
 }
 
 /// Uygulama içi bildirim kutusu; alıcıya özeldir. data: { actorName, itemKey?, itemTitle?, sprintName? } anlık görüntüsü.
@@ -1132,4 +1142,42 @@ model Template {
   @@index([workspaceId, kind])
   @@index([spaceId])
   @@map("templates")
+}
+
+/// Space düzeyinde otomasyon kuralı (brief §5.8, ADR-084): tetikleyici + koşullar + eylemler (JSON, sunucuda doğrulanır).
+model Automation {
+  id          String    @id @default(uuid(7)) @db.Uuid
+  workspaceId String    @db.Uuid
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  spaceId     String    @db.Uuid
+  space       Space     @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  name        String
+  enabled     Boolean   @default(true)
+  trigger     Json
+  conditions  Json      @default("{}")
+  actions     Json
+  createdById String?   @db.Uuid
+  createdAt   DateTime  @default(now()) @db.Timestamptz
+  updatedAt   DateTime  @updatedAt @db.Timestamptz
+
+  runs AutomationRun[]
+
+  @@index([spaceId])
+  @@map("automations")
+}
+
+/// Otomasyon çalışma günlüğü; her otomasyon için son 100 kayıt tutulur.
+model AutomationRun {
+  id           String            @id @default(uuid(7)) @db.Uuid
+  workspaceId  String            @db.Uuid
+  workspace    Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  automationId String            @db.Uuid
+  automation   Automation        @relation(fields: [automationId], references: [id], onDelete: Cascade)
+  itemKey      String?
+  outcome      AutomationOutcome
+  message      String?
+  createdAt    DateTime          @default(now()) @db.Timestamptz
+
+  @@index([automationId, createdAt])
+  @@map("automation_runs")
 }

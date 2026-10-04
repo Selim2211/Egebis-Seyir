@@ -17,6 +17,7 @@ import { ClsService } from 'nestjs-cls';
 import type { Prisma } from '../../generated/prisma/client';
 import type { AppClsStore } from '../../infra/cls/request-context';
 import { TenantPrismaService } from '../../infra/prisma/tenant-prisma.service';
+import { AutomationEvents } from '../../infra/events/automation-events';
 import { SpaceAccessService } from '../access/space-access.service';
 import { ActivityService } from '../activity/activity.service';
 import { archivedParent, forbidden, notFound } from '../spaces/space-errors';
@@ -42,6 +43,7 @@ export class ItemTreeService {
     private readonly access: SpaceAccessService,
     private readonly activity: ActivityService,
     private readonly items: WorkItemsService,
+    private readonly events: AutomationEvents,
   ) {}
 
   private get ctx() {
@@ -480,5 +482,25 @@ export class ItemTreeService {
         }
       }
     });
+
+    // Otomasyon tetikleyicileri (ADR-084): işlem bittikten sonra, değişen her öğe için.
+    for (const row of rows) {
+      if (status && status.id !== row.statusId) {
+        await this.events.emit({
+          type: 'STATUS_CHANGED',
+          toStatusId: status.id,
+          itemId: row.id,
+          spaceId,
+        });
+      }
+      if (patch.priority && patch.priority !== row.priority) {
+        await this.events.emit({
+          type: 'PRIORITY_CHANGED',
+          to: patch.priority,
+          itemId: row.id,
+          spaceId,
+        });
+      }
+    }
   }
 }

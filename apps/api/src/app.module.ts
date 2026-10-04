@@ -30,6 +30,8 @@ import { SetupModule } from './modules/setup/setup.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { DocsModule } from './modules/docs/docs.module';
 import { TimeModule } from './modules/time/time.module';
+import { AutomationsModule } from './modules/automations/automations.module';
+import { AutomationEventsModule } from './infra/events/automation-events';
 import { CustomFieldsModule } from './modules/custom-fields/custom-fields.module';
 import { TemplatesModule } from './modules/templates/templates.module';
 import { ViewsModule } from './modules/views/views.module';
@@ -99,6 +101,8 @@ const isAuthRateLimited = (ctx: ExecutionContext): boolean =>
     DocsModule,
     TimeModule,
     ViewsModule,
+    AutomationEventsModule,
+    AutomationsModule,
     CustomFieldsModule,
     TemplatesModule,
     NotificationsModule,

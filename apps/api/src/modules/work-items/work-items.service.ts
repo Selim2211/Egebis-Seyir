@@ -34,6 +34,7 @@ import type { AppClsStore } from '../../infra/cls/request-context';
 import { TenantPrismaService } from '../../infra/prisma/tenant-prisma.service';
 import { SpaceAccessService } from '../access/space-access.service';
 import { ActivityService } from '../activity/activity.service';
+import { AutomationEvents } from '../../infra/events/automation-events';
 import { CustomFieldsService } from '../custom-fields/custom-fields.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { toAttachmentDto } from '../collab/attachments.service';
@@ -61,6 +62,7 @@ export class WorkItemsService {
     private readonly activity: ActivityService,
     private readonly notifications: NotificationsService,
     private readonly customFields: CustomFieldsService,
+    private readonly events: AutomationEvents,
   ) {}
 
   private get ctx() {
@@ -381,6 +383,7 @@ export class WorkItemsService {
         item: { id: created.id, key: created.key, title: input.title },
       });
     }
+    await this.events.emit({ type: 'ITEM_CREATED', itemId: created.id, spaceId: space.id });
     return created;
   }
 
@@ -411,7 +414,9 @@ export class WorkItemsService {
     const type = item.type;
 
     this.authorize(item, fields);
-    if (customPatch && !this.can(S.WORK_ITEM_WRITE)) throw forbidden(ERROR_CODES.FORBIDDEN);
+    if (customPatch && !this.can(S.WORK_ITEM_WRITE) && !this.cls.get('automationChain')?.length) {
+      throw forbidden(ERROR_CODES.FORBIDDEN);
+    }
     const customValues = customPatch
       ? await this.customFields.normalizePatch(item.spaceId, customPatch)
       : {};
@@ -548,6 +553,22 @@ export class WorkItemsService {
     });
 
     await this.notifyUpdate(item, fields, { assignees, statusName: nextStatusName });
+    if (fields.statusId !== undefined && fields.statusId !== item.statusId) {
+      await this.events.emit({
+        type: 'STATUS_CHANGED',
+        toStatusId: fields.statusId,
+        itemId,
+        spaceId: item.spaceId,
+      });
+    }
+    if (fields.priority !== undefined && fields.priority !== item.priority) {
+      await this.events.emit({
+        type: 'PRIORITY_CHANGED',
+        to: fields.priority,
+        itemId,
+        spaceId: item.spaceId,
+      });
+    }
   }
 
   /**
@@ -610,6 +631,8 @@ export class WorkItemsService {
     item: { reporterId: string | null; assignees: Array<{ userId: string }> },
     fields: Record<string, unknown>,
   ): void {
+    // Otomasyon eylemleri sistem adına çalışır; yetki otomasyonu tanımlayan Space yöneticisine aittir.
+    if ((this.cls.get('automationChain')?.length ?? 0) > 0) return;
     const actorId = this.ctx.actorId;
     const keys = Object.keys(fields).filter((k) => fields[k] !== undefined);
     const estimateKeys = ['points', 'estimateHours'];

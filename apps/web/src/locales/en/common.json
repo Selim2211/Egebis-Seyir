@@ -341,7 +341,9 @@
     "CUSTOM_FIELD_VALUE_INVALID": "This value does not match the field type.",
     "TEMPLATE_NAME_TAKEN": "A template with this name already exists.",
     "TEMPLATE_LIMIT": "At most 50 templates per type.",
-    "TEMPLATE_INVALID": "The template could not be applied: missing input or broken template."
+    "TEMPLATE_INVALID": "The template could not be applied: missing input or broken template.",
+    "AUTOMATION_LIMIT": "A Space can have at most 30 automations.",
+    "AUTOMATION_INVALID": "The automation is invalid: a status, person, label or field value does not fit this Space."
   },
   "spaceRoles": {
     "PRODUCT_OWNER": "Product Owner",
@@ -1002,7 +1004,8 @@
       "STATUS_CHANGED": "{{actor}} moved {{key}} to “{{detail}}”.",
       "SPRINT_STARTED": "{{actor}} started {{sprint}}.",
       "SPRINT_COMPLETED": "{{actor}} completed {{sprint}}.",
-      "MENTIONED_DOC": "{{actor}} mentioned you in a comment on the page “{{doc}}”."
+      "MENTIONED_DOC": "{{actor}} mentioned you in a comment on the page “{{doc}}”.",
+      "AUTOMATION": "{{key}}: {{detail}}"
     },
     "settingsTitle": "Notifications",
     "settingsSubtitle": "Choose which events notify you and through which channel. Changes are saved immediately.",
@@ -1017,7 +1020,8 @@
       "COMMENTED": "New comment",
       "STATUS_CHANGED": "Status changed",
       "SPRINT_STARTED": "Sprint started",
-      "SPRINT_COMPLETED": "Sprint completed"
+      "SPRINT_COMPLETED": "Sprint completed",
+      "AUTOMATION": "Automation"
     },
     "typeHelp": {
       "ASSIGNED": "When an item is assigned to you.",
@@ -1025,7 +1029,8 @@
       "COMMENTED": "When items you watch or are assigned to get a comment.",
       "STATUS_CHANGED": "When the status of an item you watch or are assigned to changes.",
       "SPRINT_STARTED": "When a sprint starts in a Space you belong to.",
-      "SPRINT_COMPLETED": "When a sprint is completed in a Space you belong to."
+      "SPRINT_COMPLETED": "When a sprint is completed in a Space you belong to.",
+      "AUTOMATION": "When an automation sends you a notification."
     }
   },
   "reports": {
@@ -1383,5 +1388,66 @@
     "saveSpace": "Make this Space a template",
     "fromSpaceTemplate": "Start from template",
     "blankSpace": "Blank Space"
+  },
+  "automations": {
+    "title": "Automations",
+    "help": "Rules that run on their own when something happens: trigger, conditions and actions. A rule never runs twice in the same chain; chains go at most 3 deep.",
+    "add": "Add automation",
+    "none": "No automations yet.",
+    "addTitle": "New automation",
+    "editTitle": "Edit automation",
+    "name": "Name",
+    "when": "When",
+    "trigger": "Trigger",
+    "triggers": {
+      "ITEM_CREATED": "Item is created",
+      "STATUS_CHANGED": "Status changes",
+      "PRIORITY_CHANGED": "Priority changes"
+    },
+    "toStatus": "New status",
+    "toPriority": "New priority",
+    "any": "Any",
+    "conditions": "Conditions (all must hold)",
+    "conditionsHint": "An unchecked condition adds no restriction; one per group is enough.",
+    "unassigned": "Unassigned items",
+    "then": "Then",
+    "actionType": "Action {{index}} type",
+    "actions": {
+      "ASSIGN": "Assign person",
+      "NOTIFY": "Send notification",
+      "SET_PRIORITY": "Set priority",
+      "SET_STATUS": "Set status",
+      "SET_CUSTOM_FIELD": "Update custom field",
+      "CREATE_SUBTASK": "Create sub-task"
+    },
+    "person": "Action {{index}} person",
+    "choosePerson": "Choose person",
+    "priorityValue": "Action {{index}} priority",
+    "statusValue": "Action {{index}} status",
+    "subtaskTitle": "Action {{index}} sub-task title",
+    "notifyTo": "Action {{index}} recipient",
+    "toAssignees": "Assignees",
+    "toReporter": "Reporter",
+    "toUser": "A specific person",
+    "message": "Action {{index}} message",
+    "fieldValue": "Action {{index}} field",
+    "chooseField": "Choose field",
+    "addAction": "Add action",
+    "removeAction": "Remove action {{index}}",
+    "saved": "Automation saved.",
+    "actionCount": "{{count}} actions",
+    "enabledFor": "“{{name}}” enabled",
+    "runsFor": "Run log of “{{name}}”",
+    "edit": "Edit automation “{{name}}”",
+    "delete": "Delete automation “{{name}}”",
+    "deleteTitle": "Delete “{{name}}”?",
+    "deleteHint": "The automation and its run log are deleted. Past changes are not undone.",
+    "deleteConfirm": "Delete",
+    "noRuns": "Has not run yet.",
+    "outcome": {
+      "OK": "Ran",
+      "SKIPPED": "Skipped (loop)",
+      "FAILED": "Failed"
+    }
   }
 }

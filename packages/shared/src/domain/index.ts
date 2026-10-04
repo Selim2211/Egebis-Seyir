@@ -26,3 +26,4 @@ export * from './csv';
 export * from './wip';
 export * from './workflow';
 export * from './custom-fields';
+export * from './automation';

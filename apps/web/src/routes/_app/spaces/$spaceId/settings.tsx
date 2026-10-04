@@ -24,6 +24,7 @@ import {
 } from '@/features/spaces/queries';
 import { SpaceAvatar } from '@/features/spaces/space-avatar';
 import { ReadinessFields } from '@/features/spaces/readiness-fields';
+import { AutomationsSection } from '@/features/automations/automations-section';
 import { CustomFieldsSection } from '@/features/custom-fields/custom-fields-editor';
 import { StatusesSection } from '@/features/spaces/statuses-editor';
 import { TemplatesSection } from '@/features/templates/templates-section';
@@ -77,6 +78,7 @@ function SpaceSettingsPage() {
       <StatusesSection space={space} canEdit={canEdit} />
       <CustomFieldsSection spaceId={spaceId} canEdit={canEdit} />
       <TemplatesSection space={space} canEdit={canEdit} />
+      {canEdit && <AutomationsSection space={space} />}
       {canEdit && <DangerZone space={space} />}
     </div>
   );

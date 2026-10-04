@@ -10,8 +10,8 @@
 | 5.3 | Özel durum akışları  | Space'te durum ekle/sil/sırala/yeniden adlandır, kategori ata; raporlar için durum geçmişi eşlemesi                       | Tamamlandı |
 | 5.4 | Özel alanlar         | Space düzeyinde alan tanımı (metin, sayı, tarih, liste, çoklu seçim, kişi, URL, onay kutusu), değer girişi, tabloda sütun | Tamamlandı |
 | 5.5 | Şablonlar            | Görev, List, sprint ve Space şablonları; doküman şablonları                                                               | Tamamlandı |
-| 5.6 | Otomasyonlar         | Tetikleyici (durum değişti…), koşul, eylem (kişi ata, bildirim, alan güncelle, alt görev); döngü koruması                 | Sırada     |
-| 5.7 | CSV içe/dışa aktarma | List öğelerini CSV'ye aktarma ve CSV'den içe alma (eşleme, önizleme, hata raporu); `externalSource/externalId`            | Bekliyor   |
+| 5.6 | Otomasyonlar         | Tetikleyici (durum değişti…), koşul, eylem (kişi ata, bildirim, alan güncelle, alt görev); döngü koruması                 | Tamamlandı |
+| 5.7 | CSV içe/dışa aktarma | List öğelerini CSV'ye aktarma ve CSV'den içe alma (eşleme, önizleme, hata raporu); `externalSource/externalId`            | Sırada     |
 
 ## 5.1 Ayrıntı
 

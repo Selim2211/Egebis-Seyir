@@ -12,4 +12,6 @@ export interface AppClsStore extends ClsStore {
   /** Yalnızca @RequireSpacePermission uçlarında dolu (SpaceAccessGuard). */
   spaceId?: string;
   spacePermissions?: readonly string[];
+  /** Çalışmakta olan otomasyonlar (zincir); doluysa değişiklikler sistem adına yapılır (ADR-084). */
+  automationChain?: string[];
 }

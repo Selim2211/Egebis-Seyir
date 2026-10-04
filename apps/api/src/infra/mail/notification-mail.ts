@@ -74,6 +74,12 @@ function copy(p: NotificationMailInput): Copy {
           line: `${who} started ${sprint}.`,
           action: 'Open review',
         };
+      case 'AUTOMATION':
+        return {
+          subject: `${key}: ${detail}`,
+          line: `Automation on “${title}” (${key}): ${detail}`,
+          action: 'Open item',
+        };
       case 'SPRINT_COMPLETED':
         return {
           subject: `${sprint} completed`,
@@ -112,6 +118,12 @@ function copy(p: NotificationMailInput): Copy {
         subject: `${sprint} başladı`,
         line: `${who}, ${sprint} sprint'ini başlattı.`,
         action: 'Özeti aç',
+      };
+    case 'AUTOMATION':
+      return {
+        subject: `${key}: ${detail}`,
+        line: `“${title}” (${key}) için otomasyon: ${detail}`,
+        action: 'Görevi aç',
       };
     case 'SPRINT_COMPLETED':
       return {

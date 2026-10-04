@@ -5,6 +5,7 @@ export const NOTIFICATION_TYPES = [
   'STATUS_CHANGED',
   'SPRINT_STARTED',
   'SPRINT_COMPLETED',
+  'AUTOMATION',
 ] as const;
 export type NotificationType = (typeof NOTIFICATION_TYPES)[number];
 
