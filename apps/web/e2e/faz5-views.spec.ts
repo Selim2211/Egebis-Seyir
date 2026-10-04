@@ -3,6 +3,8 @@ import { ensureOwner, login, OWNER } from './accounts';
 
 /** Faz 5.1: kayıtlı görünümler: kaydet, uygula, paylaş, güncelle, sil. */
 test.describe.serial('Kayıtlı görünümler', () => {
+  let spaceUrl = '';
+
   test.beforeAll(async ({ request }) => {
     await ensureOwner(request);
   });
@@ -21,6 +23,7 @@ test.describe.serial('Kayıtlı görünümler', () => {
     await dialog.getByLabel('Anahtar').fill('GRN');
     await dialog.getByRole('button', { name: 'Space oluştur' }).click();
     await expect(page.getByRole('heading', { name: 'Görünüm Testi' })).toBeVisible();
+    spaceUrl = page.url();
 
     await page.getByRole('link', { name: 'Görevler' }).first().click();
     const quick = page.getByRole('textbox', { name: 'Başlık' });
@@ -54,7 +57,7 @@ test.describe.serial('Kayıtlı görünümler', () => {
   });
 
   test('görünüm silinir', async ({ page }) => {
-    await page.getByRole('complementary').getByRole('link', { name: 'Görünüm Testi' }).click();
+    await page.goto(spaceUrl);
     await page.getByRole('link', { name: 'Görevler' }).first().click();
     await page.getByRole('button', { name: 'Görünümler' }).click();
     await page.getByRole('menuitem', { name: /^Raporlar/ }).click();

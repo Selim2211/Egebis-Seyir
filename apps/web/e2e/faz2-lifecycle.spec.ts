@@ -193,7 +193,7 @@ test.describe.serial('Sprint yaşam döngüsü', () => {
       .click();
     await page.getByRole('menuitem', { name: 'Space ayarları' }).click();
     await page.getByRole('switch', { name: 'Sprint hedefi zorunlu' }).click();
-    await page.getByRole('button', { name: 'Kaydet' }).click();
+    await page.getByRole('button', { name: 'Kaydet', exact: true }).click();
     await expect(page.getByText('Değişiklikler kaydedildi.')).toBeVisible();
 
     await openBacklog(page);

@@ -343,7 +343,10 @@
     "TEMPLATE_LIMIT": "Bu türde en çok 50 şablon olabilir.",
     "TEMPLATE_INVALID": "Şablon uygulanamadı: eksik bilgi ya da bozuk şablon.",
     "AUTOMATION_LIMIT": "Bir Space’te en çok 30 otomasyon olabilir.",
-    "AUTOMATION_INVALID": "Otomasyon geçersiz: durum, kişi, etiket veya alan değeri bu Space’e uymuyor."
+    "AUTOMATION_INVALID": "Otomasyon geçersiz: durum, kişi, etiket veya alan değeri bu Space’e uymuyor.",
+    "IMPORT_EMPTY": "CSV boş ya da yalnızca başlık satırı var.",
+    "IMPORT_TOO_LARGE": "CSV en çok 500 satır içerebilir.",
+    "IMPORT_TITLE_UNMAPPED": "Başlık sütununu eşle."
   },
   "spaceRoles": {
     "PRODUCT_OWNER": "Product Owner",
@@ -1448,6 +1451,61 @@
       "OK": "Çalıştı",
       "SKIPPED": "Atlandı (döngü)",
       "FAILED": "Başarısız"
+    }
+  },
+  "importExport": {
+    "menu": "Veri",
+    "export": "CSV olarak dışa aktar",
+    "import": "CSV’den içe aktar…",
+    "exported": "{{count}} iş dışa aktarıldı.",
+    "importTitle": "CSV’den içe aktar",
+    "importHelp": "Başlık satırı olan bir CSV seç (en çok {{max}} satır). Sütunlar otomatik eşlenir; gerekirse düzelt. “ID” sütunu aynı anahtar ya da dış kimlikle eşleşen işleri günceller, diğerlerini oluşturur.",
+    "file": "CSV dosyası",
+    "tooLarge": "Dosya çok büyük (en çok 5 MB).",
+    "mapping": "Sütun eşleme",
+    "mapFor": "{{field}} sütunu",
+    "notMapped": "— eşleme yok —",
+    "summary": "{{total}} satır: {{valid}} içe aktarılabilir, {{invalid}} sorunlu (atlanır).",
+    "tooMany": "Dosya en çok {{max}} satır içerebilir; daha küçük parçalara böl.",
+    "issues": "Sorunlar ({{count}})",
+    "line": "Satır {{row}}",
+    "sample": "İlk satırlar",
+    "start": "{{count}} işi içe aktar",
+    "done": "{{created}} iş oluşturuldu, {{updated}} güncellendi.",
+    "result": "{{created}} oluşturuldu, {{updated}} güncellendi, {{skipped}} atlandı.",
+    "fields": {
+      "title": "Başlık",
+      "type": "Tip",
+      "status": "Durum",
+      "priority": "Öncelik",
+      "assignees": "Atananlar",
+      "labels": "Etiketler",
+      "points": "Puan",
+      "estimateHours": "Saat tahmini",
+      "startDate": "Başlangıç",
+      "dueDate": "Bitiş",
+      "parent": "Üst öğe",
+      "description": "Açıklama",
+      "externalId": "ID / dış kimlik"
+    },
+    "issue": {
+      "TITLE_UNMAPPED": "Başlık sütunu eşlenmedi.",
+      "TITLE_REQUIRED": "Başlık boş.",
+      "TYPE_INVALID": "Tanınmayan tip: {{detail}}",
+      "STATUS_UNKNOWN": "Bu Space’te böyle bir durum yok: {{detail}}",
+      "PRIORITY_INVALID": "Tanınmayan öncelik: {{detail}}",
+      "ASSIGNEE_UNKNOWN": "Üye bulunamadı: {{detail}}",
+      "NUMBER_INVALID": "Geçersiz sayı: {{detail}}",
+      "DATE_INVALID": "Geçersiz tarih: {{detail}}",
+      "DATE_ORDER": "Bitiş, başlangıçtan önce olamaz.",
+      "CUSTOM_FIELD_INVALID": "Özel alan değeri geçersiz: {{detail}}",
+      "PARENT_NOT_FOUND": "Üst öğe bulunamadı: {{detail}}",
+      "WORK_ITEM_PARENT_NOT_ALLOWED": "Bu tip bu üst öğenin altında olamaz.",
+      "WORK_ITEM_PARENT_REQUIRED": "Bu tip bir üst öğe ister.",
+      "WORK_ITEM_TYPE_NOT_ALLOWED": "Bu tip Scrum kapalı Space’te kullanılamaz.",
+      "WORK_ITEM_ESTIMATE_NOT_ALLOWED": "Bu tipe bu tür tahmin girilemez.",
+      "WORK_ITEM_ESTIMATE_INVALID": "Tahmin bu Space’in ölçeğine uymuyor.",
+      "WRITE_FAILED": "Kaydedilemedi: {{detail}}"
     }
   }
 }

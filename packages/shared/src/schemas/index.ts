@@ -21,3 +21,4 @@ export * from './status';
 export * from './custom-field';
 export * from './template';
 export * from './automation';
+export * from './csv-import';

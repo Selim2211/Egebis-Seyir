@@ -39,7 +39,7 @@ test.describe.serial('DoD, DoR ve Sprint Review', () => {
     await page
       .getByLabel('Definition of Done maddeleri')
       .fill('Kod gözden geçirildi\nTestler geçti');
-    await page.getByRole('button', { name: 'Kaydet' }).click();
+    await page.getByRole('button', { name: 'Kaydet', exact: true }).click();
     await expect(page.getByText('Değişiklikler kaydedildi.')).toBeVisible();
 
     await openList(page);
@@ -101,7 +101,7 @@ test.describe.serial('DoD, DoR ve Sprint Review', () => {
     await openSpace(page);
     await page.getByRole('link', { name: 'Space ayarları' }).click();
     await page.getByRole('switch', { name: 'Done için zorunlu' }).click();
-    await page.getByRole('button', { name: 'Kaydet' }).click();
+    await page.getByRole('button', { name: 'Kaydet', exact: true }).click();
     await expect(page.getByText('Değişiklikler kaydedildi.')).toBeVisible();
 
     await openList(page);
@@ -148,7 +148,7 @@ test.describe.serial('DoD, DoR ve Sprint Review', () => {
     await page
       .getByRole('textbox', { name: 'Demo notları' })
       .fill('Ödeme akışı gösterildi, iade eksik.');
-    await page.getByRole('button', { name: 'Kaydet' }).click();
+    await page.getByRole('button', { name: 'Kaydet', exact: true }).click();
     await expect(page.getByText('Notlar kaydedildi.')).toBeVisible();
     await page.reload();
     await expect(page.getByRole('textbox', { name: 'Demo notları' })).toHaveValue(

@@ -71,7 +71,7 @@ test.describe.serial('Yorum, ek, aktivite ve Ana sayfa', () => {
       .click();
     await page.keyboard.press('End');
     await page.keyboard.type(' (düzeltildi)');
-    await page.getByRole('button', { name: 'Kaydet' }).click();
+    await page.getByRole('button', { name: 'Kaydet', exact: true }).click();
     await expect(page.getByText('İlk yorumum (düzeltildi)')).toBeVisible();
     await expect(page.getByText('(düzenlendi)')).toBeVisible();
 

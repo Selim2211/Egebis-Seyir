@@ -10,6 +10,7 @@ import { listQuery, spaceQuery, useTreeSpace } from '@/features/spaces/queries';
 import { ItemNavContext } from '@/features/work-items/detail/item-nav-context';
 import { ItemPanel } from '@/features/work-items/detail/item-panel';
 import { ItemsView } from '@/features/work-items/items-view';
+import { DataMenu } from '@/features/import-export/data-menu';
 import { SavedViewsMenu } from '@/features/work-items/view/saved-views-menu';
 import { itemsQuery } from '@/features/work-items/queries';
 import { ViewSearchSchema, type ViewSearch } from '@/features/work-items/view/view-state';
@@ -101,7 +102,15 @@ function ListPage() {
               );
             })}
           </div>
-          <div className="ml-auto pb-1">
+          <div className="ml-auto flex items-center gap-2 pb-1">
+            <DataMenu
+              listId={list.id}
+              spaceId={list.space.id}
+              listName={list.name}
+              canImport={(space?.permissions ?? treeSpace?.permissions ?? []).includes(
+                S.WORK_ITEM_WRITE,
+              )}
+            />
             <SavedViewsMenu
               listId={list.id}
               search={search}

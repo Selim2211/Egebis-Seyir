@@ -343,7 +343,10 @@
     "TEMPLATE_LIMIT": "At most 50 templates per type.",
     "TEMPLATE_INVALID": "The template could not be applied: missing input or broken template.",
     "AUTOMATION_LIMIT": "A Space can have at most 30 automations.",
-    "AUTOMATION_INVALID": "The automation is invalid: a status, person, label or field value does not fit this Space."
+    "AUTOMATION_INVALID": "The automation is invalid: a status, person, label or field value does not fit this Space.",
+    "IMPORT_EMPTY": "The CSV is empty or has only a header row.",
+    "IMPORT_TOO_LARGE": "The CSV can have at most 500 rows.",
+    "IMPORT_TITLE_UNMAPPED": "Map the title column."
   },
   "spaceRoles": {
     "PRODUCT_OWNER": "Product Owner",
@@ -1448,6 +1451,61 @@
       "OK": "Ran",
       "SKIPPED": "Skipped (loop)",
       "FAILED": "Failed"
+    }
+  },
+  "importExport": {
+    "menu": "Data",
+    "export": "Export as CSV",
+    "import": "Import from CSV…",
+    "exported": "{{count}} items exported.",
+    "importTitle": "Import from CSV",
+    "importHelp": "Choose a CSV with a header row (up to {{max}} rows). Columns are mapped automatically; adjust if needed. An “ID” column updates items with the same key or external ID and creates the rest.",
+    "file": "CSV file",
+    "tooLarge": "The file is too large (5 MB max).",
+    "mapping": "Column mapping",
+    "mapFor": "{{field}} column",
+    "notMapped": "— not mapped —",
+    "summary": "{{total}} rows: {{valid}} can be imported, {{invalid}} have problems (skipped).",
+    "tooMany": "The file can have at most {{max}} rows; split it into smaller parts.",
+    "issues": "Issues ({{count}})",
+    "line": "Row {{row}}",
+    "sample": "First rows",
+    "start": "Import {{count}} items",
+    "done": "{{created}} items created, {{updated}} updated.",
+    "result": "{{created}} created, {{updated}} updated, {{skipped}} skipped.",
+    "fields": {
+      "title": "Title",
+      "type": "Type",
+      "status": "Status",
+      "priority": "Priority",
+      "assignees": "Assignees",
+      "labels": "Labels",
+      "points": "Points",
+      "estimateHours": "Estimate hours",
+      "startDate": "Start date",
+      "dueDate": "Due date",
+      "parent": "Parent",
+      "description": "Description",
+      "externalId": "ID / external ID"
+    },
+    "issue": {
+      "TITLE_UNMAPPED": "The title column is not mapped.",
+      "TITLE_REQUIRED": "Title is empty.",
+      "TYPE_INVALID": "Unknown type: {{detail}}",
+      "STATUS_UNKNOWN": "No such status in this Space: {{detail}}",
+      "PRIORITY_INVALID": "Unknown priority: {{detail}}",
+      "ASSIGNEE_UNKNOWN": "Member not found: {{detail}}",
+      "NUMBER_INVALID": "Invalid number: {{detail}}",
+      "DATE_INVALID": "Invalid date: {{detail}}",
+      "DATE_ORDER": "Due date cannot be before the start date.",
+      "CUSTOM_FIELD_INVALID": "Invalid custom field value: {{detail}}",
+      "PARENT_NOT_FOUND": "Parent not found: {{detail}}",
+      "WORK_ITEM_PARENT_NOT_ALLOWED": "This type cannot go under that parent.",
+      "WORK_ITEM_PARENT_REQUIRED": "This type needs a parent.",
+      "WORK_ITEM_TYPE_NOT_ALLOWED": "This type is not available in a non-Scrum Space.",
+      "WORK_ITEM_ESTIMATE_NOT_ALLOWED": "This type cannot take that kind of estimate.",
+      "WORK_ITEM_ESTIMATE_INVALID": "The estimate does not fit this Space’s scale.",
+      "WRITE_FAILED": "Could not be saved: {{detail}}"
     }
   }
 }

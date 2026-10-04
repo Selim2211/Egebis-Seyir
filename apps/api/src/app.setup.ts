@@ -13,6 +13,8 @@ export function configureApp(app: INestApplication, opts: { trustProxy?: boolean
   if (opts.trustProxy) (app as NestExpressApplication).set('trust proxy', 'loopback');
   app.use(helmet());
   app.use(cookieParser());
+  // CSV içe aktarma gövdesi büyük olabilir (ADR-085): JSON sınırı 100 KB yerine 6 MB (içe aktarma ayrıca 5 MB ile sınırlı).
+  (app as NestExpressApplication).useBodyParser('json', { limit: '6mb' });
   app.enableShutdownHooks();
 }
 
