@@ -685,3 +685,15 @@
   - **Sayım:** Board'da görünen kartlar (süzgeç ve sprint kapsamı uygulanmış hâliyle); alt görevler ve satır gruplaması sayıyı değiştirmez. Saf kural `wipState` (birim testli).
 - **Alternatifler:** Sunucuda sert engel (durum geçişi 409; kaçış yolu ve yetki kuralı gerekir); limiti Board'a göre ayrı tutmak (aynı durum iki panoda farklı limit karışıklığı); sütun başlığından düzenleme (şimdilik ayarlar).
 - **Bilinen sınırlar:** limit Board dışında (List/Tablo) gösterilmez; limit aşımı bildirim/e-posta üretmez.
+
+## ADR-081 — Özel durum akışları
+
+- **Tarih:** 2026-10-04 · **Durum:** Kabul (brief §5.8 [F2]; ayrıntılar geliştirici varsayılanı, onay bekliyor)
+- **Karar:**
+  - **Kapsam:** durum akışı **Space** bazındadır (List'e özel değil); tüm List ve Board'lar aynı durumları paylaşır. Space ayarlarında (`space.settings`) durum eklenir, yeniden adlandırılır, renklenir, kategorisi değişir, yukarı/aşağı düğmeleriyle sıralanır (klavye erişilebilir; sürükle-bırak yok) ve silinir. API: `POST/PATCH/DELETE spaces/:spaceId/statuses[/:statusId]`, `POST …/move`.
+  - **Kategori:** her durum NOT_STARTED / ACTIVE / DONE kategorisinden birine bağlıdır; raporlar, Done kuralları (DoD, açık alt öğe) ve tamamlanma zamanı kategoriye bakar, ada değil. Kategori değişince o durumdaki işlerin `completedAt` değeri tutarlı kılınır (Done'a geçen boşsa şimdi, Done'dan çıkan temizlenir).
+  - **Akış kuralı** (`checkWorkflow`, saf ve birim testli): akışta en az bir Done ve bir Done-dışı durum bulunur; ilk durum Done olamaz (yeni işler ilk durumda başlar); en çok **20** etkin durum; durum adı Space içinde (büyük/küçük harf duyarsız) benzersiz. İhlal 409 (`STATUS_WORKFLOW_INVALID`, `STATUS_LIMIT`, `STATUS_NAME_TAKEN`).
+  - **Silme = arşiv:** durumu silerken işler zorunlu olarak seçilen etkin başka bir duruma taşınır (`?moveTo`, boş durumda gerekmez; `STATUS_MOVE_TARGET_INVALID`). Her taşınan iş için sistem işaretli `item.updated` olayı yazılır; durum kaydı `archivedAt` ile **arşivlenir**, silinmez. Böylece eski aktivite kayıtları ve akış raporları (`activity_events` içindeki durum kimlikleri) eşlemeyi kaybetmez; arşivli durum seçeneklerde, Board'da ve yeni işlerde görünmez.
+  - **WIP limiti** (ADR-080) aynı düzenleyicide.
+- **Alternatifler:** List bazında akış (ClickUp'ın List'e özel durumu: Space'te Scrum/rapor tutarlılığını bozar); durumu kalıcı silip eski olayları yetim bırakmak; kategori yerine ada bakan kurallar; sürükle-bırak sıralama (erişilebilirlik için düğme).
+- **Bilinen sınırlar:** akış raporları durumun **şu anki** kategorisiyle hesaplanır; bir durumun kategorisi sonradan değişirse geçmiş rapor da o kategoriyle yeniden yorumlanır (kategori değişiklikleri sürüm geçmişi tutulmuyor); durum değişimi izin/otomasyon kurallarına bağlanmıyor (5.6); Space şablonları durum akışını 5.5'te taşıyacak.

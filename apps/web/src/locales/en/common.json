@@ -330,7 +330,11 @@
     "TIME_RANGE_INVALID": "Invalid date range (future day, or more than 62 days).",
     "SAVED_VIEW_NAME_TAKEN": "You already have a view with this name.",
     "SAVED_VIEW_LIMIT": "You can save at most 50 views per List.",
-    "SAVED_VIEW_SHARE_FORBIDDEN": "Sharing a view requires edit permission."
+    "SAVED_VIEW_SHARE_FORBIDDEN": "Sharing a view requires edit permission.",
+    "STATUS_NAME_TAKEN": "A status with this name already exists.",
+    "STATUS_WORKFLOW_INVALID": "The flow needs at least one Done and one open status; the first status cannot be Done.",
+    "STATUS_LIMIT": "A Space can have at most 20 statuses.",
+    "STATUS_MOVE_TARGET_INVALID": "Choose a valid status to move the items to."
   },
   "spaceRoles": {
     "PRODUCT_OWNER": "Product Owner",
@@ -1277,6 +1281,21 @@
     "wipLimit": "WIP limit",
     "wipHint": "Maximum items in a Board column. Warns when exceeded, never blocks. Empty: unlimited.",
     "wipFor": "WIP limit for “{{name}}”",
-    "unlimited": "Unlimited"
+    "unlimited": "Unlimited",
+    "help": "Statuses define the item flow; the category (Not started / Active / Done) drives reports and Done rules. At least one Done and one open status must remain; the first status cannot be Done.",
+    "colorFor": "Color of “{{name}}”",
+    "nameFor": "Name of “{{name}}”",
+    "categoryFor": "Category of “{{name}}”",
+    "moveUp": "Move “{{name}}” up",
+    "moveDown": "Move “{{name}}” down",
+    "delete": "Delete status “{{name}}”",
+    "newName": "New status name",
+    "newCategory": "New status category",
+    "add": "Add status",
+    "limit": "A Space can have at most {{max}} statuses.",
+    "deleteTitle": "Delete status “{{name}}”?",
+    "deleteHint": "Items in this status move to the one you choose. Past activity is kept.",
+    "moveTo": "Move items to",
+    "deleteConfirm": "Delete and move items"
   }
 }

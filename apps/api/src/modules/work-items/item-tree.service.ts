@@ -139,7 +139,7 @@ export class ItemTreeService {
    */
   private async remapAcrossSpaces(tx: Tx, ids: string[], spaceId: string) {
     const [targetStatuses, rows] = await Promise.all([
-      tx.status.findMany({ where: { spaceId }, orderBy: { rank: 'asc' } }),
+      tx.status.findMany({ where: { spaceId, archivedAt: null }, orderBy: { rank: 'asc' } }),
       tx.workItem.findMany({
         where: { id: { in: ids } },
         include: { status: true, labels: { include: { label: true } } },
@@ -192,7 +192,7 @@ export class ItemTreeService {
     if (crossSpace && source.type === 'SUBTASK') throw fail(ERROR_CODES.WORK_ITEM_PARENT_REQUIRED);
 
     const firstStatus = await db.status.findFirstOrThrow({
-      where: { spaceId: target.spaceId },
+      where: { spaceId: target.spaceId, archivedAt: null },
       orderBy: { rank: 'asc' },
     });
     const targetLabels = await db.label.findMany({ where: { spaceId: target.spaceId } });
@@ -382,7 +382,7 @@ export class ItemTreeService {
       [...(patch.addLabelIds ?? []), ...(patch.removeLabelIds ?? [])],
     );
     const status = patch.statusId
-      ? await db.status.findFirst({ where: { id: patch.statusId, spaceId } })
+      ? await db.status.findFirst({ where: { id: patch.statusId, spaceId, archivedAt: null } })
       : null;
     if (patch.statusId && !status) throw notFound();
 

@@ -10,12 +10,14 @@ import {
   Patch,
   Post,
   Put,
+  Query,
 } from '@nestjs/common';
 import {
   ArchiveResponseSchema,
   CreatedSchema,
   CreateListRequestSchema,
   CreateSpaceRequestSchema,
+  CreateStatusRequestSchema,
   FavoriteTypeParamSchema,
   FolderDetailSchema,
   HierarchyResponseSchema,
@@ -51,6 +53,7 @@ import { StructureService } from './structure.service';
 class HierarchyDto extends createZodDto(HierarchyResponseSchema) {}
 class CreateSpaceDto extends createZodDto(CreateSpaceRequestSchema) {}
 class UpdateSpaceDto extends createZodDto(UpdateSpaceRequestSchema) {}
+class CreateStatusDto extends createZodDto(CreateStatusRequestSchema) {}
 class UpdateStatusDto extends createZodDto(UpdateStatusRequestSchema) {}
 class SpaceDetailDto extends createZodDto(SpaceDetailSchema) {}
 class CreatedDto extends createZodDto(CreatedSchema) {}
@@ -204,6 +207,35 @@ export class SpacesController {
   }
 
   // ---------- Durumlar ----------
+
+  @Post(':spaceId/statuses')
+  @RequireSpacePermission(S.SPACE_SETTINGS)
+  @ZodResponse({ type: CreatedDto, status: HttpStatus.CREATED })
+  createStatus(@Uuid('spaceId') spaceId: string, @Body() body: CreateStatusDto): Promise<Created> {
+    return this.statuses.create(spaceId, body);
+  }
+
+  @Post(':spaceId/statuses/:statusId/move')
+  @RequireSpacePermission(S.SPACE_SETTINGS)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async moveStatus(
+    @Uuid('spaceId') spaceId: string,
+    @Uuid('statusId') statusId: string,
+    @Body() body: MoveDto,
+  ): Promise<void> {
+    await this.statuses.move(spaceId, statusId, body.afterId);
+  }
+
+  @Delete(':spaceId/statuses/:statusId')
+  @RequireSpacePermission(S.SPACE_SETTINGS)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async removeStatus(
+    @Uuid('spaceId') spaceId: string,
+    @Uuid('statusId') statusId: string,
+    @Query('moveTo', new ParseUUIDPipe({ optional: true })) moveTo?: string,
+  ): Promise<void> {
+    await this.statuses.remove(spaceId, statusId, moveTo);
+  }
 
   @Patch(':spaceId/statuses/:statusId')
   @RequireSpacePermission(S.SPACE_SETTINGS)

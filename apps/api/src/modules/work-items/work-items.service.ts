@@ -437,7 +437,7 @@ export class WorkItemsService {
     let nextStatusName: string | undefined;
     if (fields.statusId !== undefined && fields.statusId !== item.statusId) {
       const next = await db.status.findFirst({
-        where: { id: fields.statusId, spaceId: item.spaceId },
+        where: { id: fields.statusId, spaceId: item.spaceId, archivedAt: null },
       });
       if (!next) throw notFound();
       const from = item.status.category;
@@ -653,7 +653,7 @@ export class WorkItemsService {
   /** İstenen durum Space'e ait olmalı; verilmediyse akışın ilk durumu. */
   async resolveStatus(spaceId: string, statusId: string | undefined): Promise<string> {
     const status = await this.tenant.db.status.findFirst({
-      where: statusId ? { id: statusId, spaceId } : { spaceId },
+      where: statusId ? { id: statusId, spaceId, archivedAt: null } : { spaceId, archivedAt: null },
       orderBy: { rank: 'asc' },
       select: { id: true },
     });

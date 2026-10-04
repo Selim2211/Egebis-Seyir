@@ -330,7 +330,11 @@
     "TIME_RANGE_INVALID": "Tarih aralığı geçersiz (gelecek gün ya da en çok 62 gün).",
     "SAVED_VIEW_NAME_TAKEN": "Bu adla bir görünümün zaten var.",
     "SAVED_VIEW_LIMIT": "Bu List için en çok 50 görünüm kaydedebilirsin.",
-    "SAVED_VIEW_SHARE_FORBIDDEN": "Görünümü paylaşmak için düzenleme yetkisi gerekir."
+    "SAVED_VIEW_SHARE_FORBIDDEN": "Görünümü paylaşmak için düzenleme yetkisi gerekir.",
+    "STATUS_NAME_TAKEN": "Bu adla bir durum zaten var.",
+    "STATUS_WORKFLOW_INVALID": "Akışta en az bir Tamamlandı ve bir açık durum olmalı; ilk durum Tamamlandı olamaz.",
+    "STATUS_LIMIT": "Bir Space’te en çok 20 durum olabilir.",
+    "STATUS_MOVE_TARGET_INVALID": "İşlerin taşınacağı geçerli bir durum seç."
   },
   "spaceRoles": {
     "PRODUCT_OWNER": "Product Owner",
@@ -1277,6 +1281,21 @@
     "wipLimit": "WIP limiti",
     "wipHint": "Board sütununda en çok iş sayısı. Aşılınca uyarır, engellemez. Boş: sınırsız.",
     "wipFor": "“{{name}}” WIP limiti",
-    "unlimited": "Sınırsız"
+    "unlimited": "Sınırsız",
+    "help": "Durumlar işin akışını belirler; kategori (Başlanmadı / Devam ediyor / Tamamlandı) raporları ve Done kurallarını yönetir. En az bir Tamamlandı ve bir açık durum kalmalı; ilk durum Tamamlandı olamaz.",
+    "colorFor": "“{{name}}” rengi",
+    "nameFor": "“{{name}}” adı",
+    "categoryFor": "“{{name}}” kategorisi",
+    "moveUp": "“{{name}}” durumunu yukarı taşı",
+    "moveDown": "“{{name}}” durumunu aşağı taşı",
+    "delete": "“{{name}}” durumunu sil",
+    "newName": "Yeni durum adı",
+    "newCategory": "Yeni durum kategorisi",
+    "add": "Durum ekle",
+    "limit": "Bir Space’te en çok {{max}} durum olabilir.",
+    "deleteTitle": "“{{name}}” durumu silinsin mi?",
+    "deleteHint": "Bu durumdaki işler seçtiğin duruma taşınır. Eski aktivite kayıtları korunur.",
+    "moveTo": "İşlerin taşınacağı durum",
+    "deleteConfirm": "Sil ve işleri taşı"
   }
 }

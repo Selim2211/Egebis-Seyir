@@ -204,7 +204,7 @@ export class SpacesService {
     const space = await db.space.findFirst({
       where: { id: spaceId, deletedAt: null },
       include: {
-        statuses: { orderBy: { rank: 'asc' } },
+        statuses: { where: { archivedAt: null }, orderBy: { rank: 'asc' } },
         members: {
           where: { userId: this.ctx.actorId },
           select: { role: { select: { key: true } } },

@@ -3,6 +3,7 @@ import {
   CreatedSchema,
   type CreateListRequest,
   type CreateSpaceRequest,
+  type CreateStatusRequest,
   type FavoriteType,
   FolderDetailSchema,
   HierarchyResponseSchema,
@@ -117,6 +118,31 @@ export const useUpdateStatus = () =>
         method: 'PATCH',
         body: input.body,
       }),
+  );
+
+export const useCreateStatus = () =>
+  useWorkspaceMutation((id, input: { spaceId: string; body: CreateStatusRequest }) =>
+    apiRequest(`${ws(id)}/spaces/${input.spaceId}/statuses`, CreatedSchema, {
+      method: 'POST',
+      body: input.body,
+    }),
+  );
+
+export const useMoveStatus = () =>
+  useWorkspaceMutation((id, input: { spaceId: string; statusId: string; afterId: string | null }) =>
+    apiRequest(`${ws(id)}/spaces/${input.spaceId}/statuses/${input.statusId}/move`, NoContent, {
+      method: 'POST',
+      body: { afterId: input.afterId },
+    }),
+  );
+
+export const useDeleteStatus = () =>
+  useWorkspaceMutation((id, input: { spaceId: string; statusId: string; moveTo: string }) =>
+    apiRequest(
+      `${ws(id)}/spaces/${input.spaceId}/statuses/${input.statusId}?moveTo=${input.moveTo}`,
+      NoContent,
+      { method: 'DELETE' },
+    ),
   );
 
 export const useCreateFolder = () =>

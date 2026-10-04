@@ -394,6 +394,8 @@ model Status {
   rank        String
   /// Board sütunu için en çok iş sayısı (ADR-080); aşılınca uyarır, engellemez.
   wipLimit    Int?           @map("wip_limit")
+  /// Silinen durum: işler başka duruma taşınır, kayıt geçmiş raporları için kalır (ADR-081).
+  archivedAt  DateTime?      @db.Timestamptz
   createdAt   DateTime       @default(now()) @db.Timestamptz
 
   items WorkItem[]
