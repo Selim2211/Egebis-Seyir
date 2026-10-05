@@ -1,28 +1,37 @@
 import { Global, Injectable, Module } from '@nestjs/common';
 import type { AutomationEvent } from '@scrum/shared';
 
+/** İş öğesi olayları (otomasyon tetikleyicileri ve webhook olaylarının ortak kaynağı). */
 export type AutomationEventInput = AutomationEvent & { itemId: string; spaceId: string };
-type Handler = (event: AutomationEventInput) => Promise<void>;
+
+/** Otomasyon dışındaki dış olaylar (webhook): yorum ve sprint (ADR-087). */
+export type ExternalEventInput =
+  | { type: 'COMMENT_CREATED'; itemId: string; spaceId: string; commentId: string }
+  | { type: 'SPRINT_STARTED' | 'SPRINT_COMPLETED'; sprintId: string; spaceId: string };
+
+export type DomainEventInput = AutomationEventInput | ExternalEventInput;
+type Handler = (event: DomainEventInput) => Promise<void>;
 
 /**
- * İş öğesi olaylarını otomasyon motoruna ileten dahili veri yolu (ADR-084). İş servisleri
- * motoru doğrudan bilmez (döngüsel bağımlılık olmasın); motor açılışta işleyicisini kaydeder.
+ * Alan olaylarını dinleyicilere ileten dahili veri yolu (ADR-084, ADR-087). Üreticiler dinleyicileri
+ * (otomasyon motoru, webhook gönderimi) bilmez; dinleyiciler açılışta kaydolur.
  */
 @Injectable()
 export class AutomationEvents {
-  private handler: Handler | null = null;
+  private readonly handlers: Handler[] = [];
 
   register(handler: Handler): void {
-    this.handler = handler;
+    this.handlers.push(handler);
   }
 
-  /** İşleyici hata verse bile asıl işlem etkilenmez. */
-  async emit(event: AutomationEventInput): Promise<void> {
-    if (!this.handler) return;
-    try {
-      await this.handler(event);
-    } catch {
-      // Otomasyon hataları çalışma günlüğüne yazılır; burada yutulur.
+  /** Bir dinleyici hata verse bile asıl işlem ve diğer dinleyiciler etkilenmez. */
+  async emit(event: DomainEventInput): Promise<void> {
+    for (const handler of this.handlers) {
+      try {
+        await handler(event);
+      } catch {
+        // Dinleyici hataları kendi günlüklerine yazılır; burada yutulur.
+      }
     }
   }
 }

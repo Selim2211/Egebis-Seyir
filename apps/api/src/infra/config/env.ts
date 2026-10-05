@@ -30,6 +30,9 @@ export const EnvSchema = z.object({
   /** Arka plan kuyruğu (pg-boss). Kapalıysa işler istek içinde çalışır (testler). */
   QUEUE_ENABLED: z.stringbool().default(true),
 
+  /** Webhook adresi dahili/özel ağda olabilir mi (ADR-087)? Verilmezse yalnızca production dışında. */
+  WEBHOOK_ALLOW_PRIVATE_HOSTS: z.stringbool().optional(),
+
   /** Dosya ekleri ve profil fotoğrafları (ADR-056); Docker'da kalıcı volume olmalı. */
   UPLOAD_DIR: z.string().default('./data/uploads'),
   /** Dosya başına en çok MB (ADR-056). */

@@ -30,6 +30,7 @@ import { SetupModule } from './modules/setup/setup.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { DocsModule } from './modules/docs/docs.module';
 import { TimeModule } from './modules/time/time.module';
+import { WebhooksModule } from './modules/webhooks/webhooks.module';
 import { CsvModule } from './modules/import-export/csv.module';
 import { AutomationsModule } from './modules/automations/automations.module';
 import { AutomationEventsModule } from './infra/events/automation-events';
@@ -105,6 +106,7 @@ const isAuthRateLimited = (ctx: ExecutionContext): boolean =>
     AutomationEventsModule,
     AutomationsModule,
     CsvModule,
+    WebhooksModule,
     CustomFieldsModule,
     TemplatesModule,
     NotificationsModule,

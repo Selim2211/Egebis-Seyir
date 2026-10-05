@@ -350,7 +350,9 @@
     "IMPORT_TITLE_UNMAPPED": "Map the title column.",
     "API_TOKEN_LIMIT": "At most 20 active tokens.",
     "TOKEN_READ_ONLY": "This token is read-only and cannot make changes.",
-    "TOKEN_NOT_ALLOWED": "This endpoint cannot be used with a token."
+    "TOKEN_NOT_ALLOWED": "This endpoint cannot be used with a token.",
+    "WEBHOOK_LIMIT": "A Space can have at most 10 webhooks.",
+    "WEBHOOK_URL_BLOCKED": "This address cannot be used (internal network or blocked address)."
   },
   "spaceRoles": {
     "PRODUCT_OWNER": "Product Owner",
@@ -1535,5 +1537,47 @@
     "revoke": "Revoke token “{{name}}”",
     "revoked": "Token revoked.",
     "usage": "Send it in the Authorization: Bearer header. Tokens cannot reach account, session or token management endpoints."
+  },
+  "webhooks": {
+    "title": "Webhooks and chat notifications",
+    "help": "Sends a request to an external address when something happens. “Generic” is signed JSON (X-Scrum-Signature: HMAC-SHA256); for Slack and Teams paste the incoming webhook URL and it arrives as a message.",
+    "none": "No webhooks yet.",
+    "add": "Add webhook",
+    "newName": "Webhook name",
+    "format": "Format",
+    "formats": {
+      "GENERIC": "Generic (JSON)",
+      "SLACK": "Slack",
+      "TEAMS": "Teams"
+    },
+    "url": "Webhook URL",
+    "urlPlaceholder": "https://…",
+    "events": "Events",
+    "eventNames": {
+      "item.created": "Item created",
+      "item.status_changed": "Status changed",
+      "item.priority_changed": "Priority changed",
+      "comment.created": "Comment added",
+      "sprint.started": "Sprint started",
+      "sprint.completed": "Sprint completed"
+    },
+    "eventCount": "{{count}} events",
+    "enabledFor": "“{{name}}” enabled",
+    "deliveriesFor": "Delivery log of “{{name}}”",
+    "noDeliveries": "No deliveries yet.",
+    "status": {
+      "PENDING": "Pending",
+      "OK": "Delivered",
+      "FAILED": "Failed"
+    },
+    "test": "Send a test to “{{name}}”",
+    "testSent": "Test event sent; see the result in the delivery log.",
+    "delete": "Delete webhook “{{name}}”",
+    "deleteTitle": "Delete “{{name}}”?",
+    "deleteHint": "The webhook and its delivery log are deleted.",
+    "deleteConfirm": "Delete",
+    "copySecret": "“{{name}}” created. Copy the signing secret now; it will not be shown again.",
+    "secretValue": "Signing secret",
+    "copied": "Signing secret copied."
   }
 }

@@ -764,3 +764,25 @@
   - **Arayüz:** Ayarlar → "API erişimi": oluştur (ad, süre, salt okunur), tek seferlik kopyalama kutusu, etkin token listesi, iptal, curl örneği.
 - **Alternatifler:** OAuth2 istemci kaydı (kurum içi betikler için aşırı); workspace düzeyi servis hesabı token'ı (kişiye bağlı denetim izi ve yetki daha basit; ileride eklenebilir); token başına kapsam listesi (şimdilik yalnızca okuma/yazma).
 - **Bilinen sınırlar:** token başına Space/workspace kısıtı yok (sahibin tüm yetkisi); istek başına oran sınırı yalnızca genel kurallara bağlı; denetim günlüğünde token ile yapılan değişiklik kullanıcı adıyla görünür, hangi token olduğu ayrıca işaretlenmez; üretimde OpenAPI belgesi kapalı olduğundan uç listesi ayrıca yayımlanmalı.
+
+## ADR-087 — Giden webhook'lar
+
+- **Tarih:** 2026-10-05 · **Durum:** Kabul (brief §5.18 [F3]; ayrıntılar geliştirici varsayılanı, onay bekliyor)
+- **Karar:**
+  - **Kapsam:** webhook **Space** düzeyindedir (Space başına en çok 10); ad, adres, biçim (ADR-088), seçilen olaylar ve açık/kapalı. Olaylar: `item.created`, `item.status_changed`, `item.priority_changed`, `comment.created`, `sprint.started`, `sprint.completed` (+ elle `ping` testi). Yönetim ve günlük `space.settings` yetkisiyle.
+  - **Olay kaynağı:** otomasyon motorunun kullandığı dahili olay yolu (`AutomationEvents`, ADR-084) çok dinleyicili yapıldı ve yorum/sprint olaylarıyla genişletildi. İş servisleri dinleyicileri bilmez; webhook servisi açılışta kaydolur. Dinleyici hatası asıl işlemi ve diğer dinleyicileri etkilemez.
+  - **Teslimat:** olay → `webhook_deliveries` kaydı (yük anlık görüntü olarak saklanır) → `webhook.deliver` kuyruk işi (pg-boss; 5 yeniden deneme, üstel geri çekilme). `QUEUE_ENABLED=false` iken (testler) aynı istekte çalışır. Her deneme 10 sn zaman aşımlıdır, **yönlendirme izlenmez**, yalnızca 2xx başarıdır; durum `OK/FAILED`, deneme sayısı, HTTP kodu ve hata günlüğe yazılır; webhook başına son 50 kayıt tutulur.
+  - **İmza (Genel biçim):** gövde JSON; başlıklar `X-Scrum-Event`, `X-Scrum-Delivery`, `X-Scrum-Timestamp` ve `X-Scrum-Signature: sha256=HMAC_SHA256(secret, "<timestamp>.<gövde>")`. Anahtar (`whsec_…`) oluşturmada **bir kez** gösterilir; alıcı zaman damgasını kontrol ederek tekrar saldırısını önleyebilir.
+  - **SSRF koruması:** adres yalnızca `http(s)`, kimlik bilgisi içeremez; bulut meta veri adresleri (`169.254.*`, `metadata.google.internal`) **her zaman** yasaktır. Dahili/özel ağ adresleri (`localhost`, `10.*`, `192.168.*`, `172.16–31.*`, `*.internal`, IPv6 yerel) `WEBHOOK_ALLOW_PRIVATE_HOSTS` ile yönetilir: verilmezse yalnızca production dışında izinli (kurum içi Mattermost vb. için üretimde bilinçli açılır). Kapalıyken gönderim anında DNS çözümlenip özel adrese çözülen adlar da reddedilir.
+  - **Yük:** `{ event, workspaceId, space{id,key,name}, actor{id,name,locale}, item{id,key,title,type,status,priority} | sprint{id,name,goal}, commentId?, url }`.
+- **Alternatifler:** Aktivite kaydını doğrudan okuyan ayrı bir "outbox" işi (olay kaybı olmaz ama işlem içi yazım ve ek tablo/iş gerekir; ölçek gerektirirse); yalnızca workspace düzeyi webhook (Space yöneticisi kendi kanalını yönetemez); imzasız genel istek.
+- **Bilinen sınırlar:** olay bırakma işlemi bittikten sonra yapılır ve süreç o anda çökerse olay kaybolabilir (en az bir kez garantisi yok, "outbox" değil); `item.updated` gibi ayrıntılı alan değişimi, atama, etiket ve silme olayları yok; DNS çözümlemesi ile bağlantı arasında rebinding penceresi kalır; imza anahtarı düz saklanır (HMAC için gerekli) ve döndürülemez (sil ve yeniden oluştur); teslimatı elle yeniden gönderme yok.
+
+## ADR-088 — Slack ve Teams sohbet bildirimleri
+
+- **Tarih:** 2026-10-05 · **Durum:** Kabul (brief §5.18 [F3]; ayrıntılar geliştirici varsayılanı, onay bekliyor)
+- **Karar:**
+  - **Webhook altyapısı üzerinde biçim:** ayrı bir entegrasyon hesabı/OAuth uygulaması kurulmadı; kullanıcı Slack'te "Incoming Webhook" ya da Teams'te "Workflows → webhook isteği alındığında" adresini webhook olarak ekler ve **biçim** olarak Slack/Teams seçer. Aynı olay seçimi, teslimat günlüğü, yeniden deneme ve SSRF kuralları geçerlidir; bu biçimlerde imza yoktur (alıcı bunu doğrulamaz) ve gizli anahtar üretilmez.
+  - **Mesaj:** olayı yapan kişinin diline (TR/EN) göre kısa cümle + ayrıntı satırı; öğe/sprint adresine bağlantı. Slack: `{ text }` (mrkdwn bağlantı `<url|başlık>`). Teams: Adaptive Card içeren `message` (Workflows webhook'u; "Scrum Manager'da aç" düğmesi).
+- **Alternatifler:** Slack OAuth uygulaması / Teams botu (kanal seçimi ve iki yönlü komut sağlar ama uygulama kaydı, kurumsal onay ve genel adres gerektirir); eski Office 365 Connector `MessageCard` biçimi (Microsoft emekli ediyor).
+- **Bilinen sınırlar:** tek yönlü (komut/eylem düğmesi yok); mesaj dili alıcı kanala göre değil olayı yapan kişiye göre; mesajda alan ayrıntısı (örn. eski durum) yok; Teams Adaptive Card'ının her kanal türünde aynı görünmesi garanti edilmez; Google Chat/Mattermost için ayrı biçim yok (Genel biçim kullanılabilir).

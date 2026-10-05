@@ -241,6 +241,8 @@ model Workspace {
   customFields      CustomField[]
   templates         Template[]
   automations       Automation[]
+  webhooks          Webhook[]
+  webhookDeliveries WebhookDelivery[]
   automationRuns    AutomationRun[]
   docItemLinks      DocItemLink[]
 
@@ -369,6 +371,7 @@ model Space {
   customFields     CustomField[]
   templates        Template[]
   automations      Automation[]
+  webhooks         Webhook[]
   folders          Folder[]
   lists            List[]
   items            WorkItem[]
@@ -1200,4 +1203,59 @@ model ApiToken {
 
   @@index([userId])
   @@map("api_tokens")
+}
+
+enum WebhookFormat {
+  GENERIC
+  SLACK
+  TEAMS
+}
+
+enum DeliveryStatus {
+  PENDING
+  OK
+  FAILED
+}
+
+/// Space'in giden webhook'u (brief §5.18, ADR-087). GENERIC imzalı JSON gönderir; SLACK/TEAMS sohbet mesajı (ADR-088).
+model Webhook {
+  id          String        @id @default(uuid(7)) @db.Uuid
+  workspaceId String        @db.Uuid
+  workspace   Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  spaceId     String        @db.Uuid
+  space       Space         @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  name        String
+  format      WebhookFormat @default(GENERIC)
+  url         String
+  /// GENERIC için HMAC anahtarı; yalnızca oluşturmada gösterilir.
+  secret      String?
+  events      String[]
+  enabled     Boolean       @default(true)
+  createdById String?       @db.Uuid
+  createdAt   DateTime      @default(now()) @db.Timestamptz
+
+  deliveries WebhookDelivery[]
+
+  @@index([spaceId])
+  @@map("webhooks")
+}
+
+/// Teslimat günlüğü; webhook başına son 50 kayıt tutulur.
+model WebhookDelivery {
+  id             String         @id @default(uuid(7)) @db.Uuid
+  workspaceId    String         @db.Uuid
+  workspace      Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  webhookId      String         @db.Uuid
+  webhook        Webhook        @relation(fields: [webhookId], references: [id], onDelete: Cascade)
+  event          String
+  payload        Json
+  status         DeliveryStatus @default(PENDING)
+  attempts       Int            @default(0)
+  responseStatus Int?
+  error          String?
+  createdAt      DateTime       @default(now()) @db.Timestamptz
+  deliveredAt    DateTime?      @db.Timestamptz
+
+  @@index([webhookId, createdAt])
+  @@map("webhook_deliveries")
 }

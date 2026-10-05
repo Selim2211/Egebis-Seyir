@@ -3,6 +3,7 @@ import { ERROR_CODES, type CompleteSprintRequest, sprintTotals } from '@scrum/sh
 import { ClsService } from 'nestjs-cls';
 import type { AppClsStore } from '../../infra/cls/request-context';
 import { TenantPrismaService } from '../../infra/prisma/tenant-prisma.service';
+import { AutomationEvents } from '../../infra/events/automation-events';
 import { ActivityService } from '../activity/activity.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { isUniqueViolation, notFound } from '../spaces/space-errors';
@@ -19,6 +20,7 @@ export class SprintLifecycleService {
     private readonly activity: ActivityService,
     private readonly notifications: NotificationsService,
     private readonly reports: SprintReportsService,
+    private readonly events: AutomationEvents,
   ) {}
 
   private get ctx() {
@@ -179,6 +181,7 @@ export class SprintLifecycleService {
     type: 'SPRINT_STARTED' | 'SPRINT_COMPLETED',
     sprint: { id: string; name: string; spaceId: string },
   ): Promise<void> {
+    await this.events.emit({ type, sprintId: sprint.id, spaceId: sprint.spaceId });
     const db = this.tenant.db;
     const [members, assignees] = await Promise.all([
       db.spaceMember.findMany({ where: { spaceId: sprint.spaceId }, select: { userId: true } }),

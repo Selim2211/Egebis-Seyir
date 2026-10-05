@@ -23,3 +23,4 @@ export * from './template';
 export * from './automation';
 export * from './csv-import';
 export * from './api-token';
+export * from './webhook';

@@ -19,6 +19,7 @@ import type { AppClsStore } from '../../infra/cls/request-context';
 import { TenantPrismaService } from '../../infra/prisma/tenant-prisma.service';
 import { SpaceAccessService } from '../access/space-access.service';
 import { NotificationsService } from '../notifications/notifications.service';
+import { AutomationEvents } from '../../infra/events/automation-events';
 import { ActivityService } from '../activity/activity.service';
 import { forbidden, notFound } from '../spaces/space-errors';
 import { asJson, fail, type TenantTx } from '../work-items/item-support';
@@ -35,6 +36,7 @@ export class CommentsService {
     private readonly access: SpaceAccessService,
     private readonly activity: ActivityService,
     private readonly notifications: NotificationsService,
+    private readonly events: AutomationEvents,
   ) {}
 
   private get ctx() {
@@ -164,6 +166,12 @@ export class CommentsService {
       recipientIds: watchers.map((w) => w.userId).filter((id) => !mentioned.has(id)),
       spaceId: item.spaceId,
       item: ref,
+    });
+    await this.events.emit({
+      type: 'COMMENT_CREATED',
+      itemId: item.id,
+      spaceId: item.spaceId,
+      commentId: created.id,
     });
     return created;
   }

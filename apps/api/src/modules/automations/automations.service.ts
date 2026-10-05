@@ -59,7 +59,9 @@ export class AutomationsService implements OnModuleInit {
   ) {}
 
   onModuleInit(): void {
-    this.events.register((event) => this.handle(event));
+    this.events.register(async (event) => {
+      if ('itemId' in event && event.type !== 'COMMENT_CREATED') await this.handle(event);
+    });
   }
 
   private get ctx() {

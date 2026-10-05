@@ -350,7 +350,9 @@
     "IMPORT_TITLE_UNMAPPED": "Başlık sütununu eşle.",
     "API_TOKEN_LIMIT": "En çok 20 etkin token olabilir.",
     "TOKEN_READ_ONLY": "Bu token salt okunur; değişiklik yapamaz.",
-    "TOKEN_NOT_ALLOWED": "Bu uç token ile kullanılamaz."
+    "TOKEN_NOT_ALLOWED": "Bu uç token ile kullanılamaz.",
+    "WEBHOOK_LIMIT": "Bir Space’te en çok 10 webhook olabilir.",
+    "WEBHOOK_URL_BLOCKED": "Bu adres kullanılamaz (dahili ağ veya yasak adres)."
   },
   "spaceRoles": {
     "PRODUCT_OWNER": "Product Owner",
@@ -1535,5 +1537,47 @@
     "revoke": "“{{name}}” token’ını iptal et",
     "revoked": "Token iptal edildi.",
     "usage": "İsteklere Authorization: Bearer başlığıyla ekle. Token hesap, oturum ve token yönetimi uçlarına erişemez."
+  },
+  "webhooks": {
+    "title": "Webhook’lar ve sohbet bildirimleri",
+    "help": "Bir olay olunca dış bir adrese istek gönderir. “Genel” biçim imzalı JSON’dur (X-Scrum-Signature: HMAC-SHA256); Slack ve Teams için gelen webhook adresini yapıştır, mesaj olarak gelir.",
+    "none": "Henüz webhook yok.",
+    "add": "Webhook ekle",
+    "newName": "Webhook adı",
+    "format": "Biçim",
+    "formats": {
+      "GENERIC": "Genel (JSON)",
+      "SLACK": "Slack",
+      "TEAMS": "Teams"
+    },
+    "url": "Webhook adresi",
+    "urlPlaceholder": "https://…",
+    "events": "Olaylar",
+    "eventNames": {
+      "item.created": "İş oluşturuldu",
+      "item.status_changed": "Durum değişti",
+      "item.priority_changed": "Öncelik değişti",
+      "comment.created": "Yorum yazıldı",
+      "sprint.started": "Sprint başladı",
+      "sprint.completed": "Sprint tamamlandı"
+    },
+    "eventCount": "{{count}} olay",
+    "enabledFor": "“{{name}}” açık",
+    "deliveriesFor": "“{{name}}” teslimat günlüğü",
+    "noDeliveries": "Henüz teslimat yok.",
+    "status": {
+      "PENDING": "Bekliyor",
+      "OK": "Gönderildi",
+      "FAILED": "Başarısız"
+    },
+    "test": "“{{name}}” için test gönder",
+    "testSent": "Test olayı gönderildi; sonucu teslimat günlüğünde gör.",
+    "delete": "“{{name}}” webhook’unu sil",
+    "deleteTitle": "“{{name}}” silinsin mi?",
+    "deleteHint": "Webhook ve teslimat günlüğü silinir.",
+    "deleteConfirm": "Sil",
+    "copySecret": "“{{name}}” oluşturuldu. İmza anahtarını şimdi kopyala; bir daha gösterilmeyecek.",
+    "secretValue": "İmza anahtarı",
+    "copied": "İmza anahtarı kopyalandı."
   }
 }
