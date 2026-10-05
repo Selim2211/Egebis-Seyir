@@ -10,7 +10,8 @@ export const API_PREFIX = 'api';
 /** main.ts ve entegrasyon testleri aynı HTTP ayarlarını kullanır. */
 export function configureApp(app: INestApplication, opts: { trustProxy?: boolean } = {}): void {
   app.setGlobalPrefix(API_PREFIX);
-  if (opts.trustProxy) (app as NestExpressApplication).set('trust proxy', 'loopback');
+  // Docker ağında ters vekil (Caddy) özel ağ adresinden gelir; gerçek istemci IP'si X-Forwarded-For'dan okunur.
+  if (opts.trustProxy) (app as NestExpressApplication).set('trust proxy', 'loopback, uniquelocal');
   app.use(helmet());
   app.use(cookieParser());
   // CSV içe aktarma gövdesi büyük olabilir (ADR-085): JSON sınırı 100 KB yerine 6 MB (içe aktarma ayrıca 5 MB ile sınırlı).

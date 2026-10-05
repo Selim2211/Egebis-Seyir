@@ -14,7 +14,6 @@ export const EnvSchema = z.object({
   /** Reverse proxy (Caddy) arkasında gerçek istemci IP'si için. */
   TRUST_PROXY: z.stringbool().default(false),
 
-  /** İlk kurulum anahtarı (ADR-034). Boşsa açılışta üretilip loglanır. */
   /** Giriş/kurulum/sıfırlama uçlarında dakika başına istek sınırı (IP başına). */
   AUTH_RATE_LIMIT: z.coerce.number().int().positive().default(10),
 
@@ -48,7 +47,9 @@ export const EnvSchema = z.object({
 export type Env = z.infer<typeof EnvSchema>;
 
 export function validateEnv(raw: Record<string, unknown>): Env {
-  const result = EnvSchema.safeParse(raw);
+  // Boş değer (ör. Docker Compose'ta `KEY=` ya da `${KEY:-}`) verilmemiş sayılır; varsayılan uygulanır.
+  const cleaned = Object.fromEntries(Object.entries(raw).filter(([, value]) => value !== ''));
+  const result = EnvSchema.safeParse(cleaned);
   if (!result.success) {
     throw new Error(`Geçersiz ortam değişkenleri:\n${z.prettifyError(result.error)}`);
   }

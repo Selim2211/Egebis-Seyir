@@ -1,0 +1,132 @@
+# Scrum Manager — sunucu kurulumu (ADR-028, ADR-091).
+# Kurulum: .env.example'ı .env olarak kopyala, değerleri doldur, sonra:
+#   docker compose up -d --build
+# Ayrıntılar: docs/DEPLOY.md
+name: scrum-manager
+
+x-api-env: &api-env
+  NODE_ENV: production
+  PORT: 3000
+  LOG_LEVEL: ${LOG_LEVEL:-info}
+  DATABASE_URL: postgresql://${POSTGRES_USER:-scrum}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD gerekli}@postgres:5432/${POSTGRES_DB:-scrum}
+  APP_URL: ${APP_URL:?APP_URL gerekli}
+  COOKIE_SECURE: ${COOKIE_SECURE:-true}
+  TRUST_PROXY: 'true'
+  AUTH_RATE_LIMIT: ${AUTH_RATE_LIMIT:-10}
+  MAIL_TRANSPORT: smtp
+  SMTP_HOST: ${SMTP_HOST:-localhost}
+  SMTP_PORT: ${SMTP_PORT:-587}
+  SMTP_SECURE: ${SMTP_SECURE:-false}
+  SMTP_USER: ${SMTP_USER:-}
+  SMTP_PASS: ${SMTP_PASS:-}
+  MAIL_FROM: ${MAIL_FROM:-Scrum Manager <no-reply@localhost>}
+  QUEUE_ENABLED: 'true'
+  UPLOAD_DIR: /data/uploads
+  MAX_UPLOAD_MB: ${MAX_UPLOAD_MB:-25}
+  WEBHOOK_ALLOW_PRIVATE_HOSTS: ${WEBHOOK_ALLOW_PRIVATE_HOSTS:-false}
+  ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+  TZ: ${TZ:-Europe/Istanbul}
+
+services:
+  postgres:
+    image: postgres:17
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-scrum}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD gerekli}
+      POSTGRES_DB: ${POSTGRES_DB:-scrum}
+      # Türkçe tam metin arama ve ILIKE için glibc yerel ayarı gerekir (C/musl yerel ayarında ö, ş, ğ tanınmaz).
+      POSTGRES_INITDB_ARGS: --locale=en_US.UTF-8 --encoding=UTF8
+      TZ: ${TZ:-Europe/Istanbul}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}']
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks: [internal]
+
+  # Veritabanı şemasını günceller ve çıkar; API bundan sonra başlar.
+  migrate:
+    build:
+      context: .
+      dockerfile: docker/api.Dockerfile
+      target: migrate
+    image: scrum-manager-migrate:latest
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-scrum}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD gerekli}@postgres:5432/${POSTGRES_DB:-scrum}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: 'no'
+    networks: [internal]
+
+  api:
+    build:
+      context: .
+      dockerfile: docker/api.Dockerfile
+      target: runtime
+    image: scrum-manager-api:latest
+    restart: unless-stopped
+    environment:
+      # Boş bırakılan isteğe bağlı değişkenler verilmemiş sayılır (env doğrulaması).
+      <<: *api-env
+    volumes:
+      - uploads:/data/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    networks: [internal]
+
+  web:
+    build:
+      context: .
+      dockerfile: docker/web.Dockerfile
+    image: scrum-manager-web:latest
+    restart: unless-stopped
+    environment:
+      SITE_ADDRESS: ${SITE_ADDRESS:-:80}
+    ports:
+      - '${HTTP_PORT:-80}:80'
+      - '${HTTPS_PORT:-443}:443'
+      - '${HTTPS_PORT:-443}:443/udp'
+    volumes:
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      api:
+        condition: service_healthy
+    networks: [internal]
+
+  backup:
+    image: postgres:17
+    restart: unless-stopped
+    entrypoint: ['/bin/sh', '/backup.sh']
+    environment:
+      PGHOST: postgres
+      PGUSER: ${POSTGRES_USER:-scrum}
+      PGPASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD gerekli}
+      PGDATABASE: ${POSTGRES_DB:-scrum}
+      BACKUP_HOUR: ${BACKUP_HOUR:-3}
+      BACKUP_KEEP_DAYS: ${BACKUP_KEEP_DAYS:-14}
+      TZ: ${TZ:-Europe/Istanbul}
+    volumes:
+      - ./docker/backup.sh:/backup.sh:ro
+      - ${BACKUP_DIR:-./backups}:/backups
+      - uploads:/data/uploads:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks: [internal]
+
+volumes:
+  postgres-data:
+  uploads:
+  caddy-data:
+  caddy-config:
+
+networks:
+  internal:

@@ -4,6 +4,13 @@ import { tanstackRouter } from '@tanstack/router-plugin/vite';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 
+/** Modül yolundan npm paket adı (pnpm'in `.pnpm/<ad>@<sürüm>/node_modules/<ad>` yapısı dahil). */
+function packageName(id: string): string | undefined {
+  return /node_modules\/(?:\.pnpm\/[^/]+\/node_modules\/)?((?:@[^/]+\/)?[^/]+)/.exec(
+    id.replace(/\\/g, '/'),
+  )?.[1];
+}
+
 export default defineConfig({
   plugins: [
     // Router eklentisi react eklentisinden önce gelmeli (dosya tabanlı rotalar).
@@ -13,6 +20,23 @@ export default defineConfig({
   ],
   resolve: {
     alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
+  },
+  build: {
+    target: 'es2022',
+    // Sık değişmeyen kütüphaneler ayrı parçada: uygulama güncellense de tarayıcı önbelleği geçerli kalır.
+    rollupOptions: {
+      output: {
+        manualChunks(id: string) {
+          const name = packageName(id);
+          if (!name) return undefined;
+          if (name === 'react' || name === 'react-dom' || name === 'scheduler') return 'react';
+          if (name.startsWith('@tanstack/')) return 'tanstack';
+          if (name === 'i18next' || name === 'react-i18next') return 'i18n';
+          if (name === 'zod') return 'zod';
+          return undefined;
+        },
+      },
+    },
   },
   server: {
     port: 5173,

@@ -9,10 +9,14 @@
 | 6.3 | Slack/Teams bildirimi       | Gelen webhook URL'sine olay mesajı (Space başına), webhook altyapısı üzerinde                                                    | Tamamlandı |
 | 6.4 | GitHub/GitLab bağlantısı    | Gelen webhook (imzalı): commit/PR/MR metnindeki `PRJ-142` anahtarını göreve bağlar, aktivite ve detayda görünür                  | Tamamlandı |
 | 6.5 | Yapay zekâ destekli özellik | Sağlayıcı soyutlaması (Anthropic API anahtarı ayarda); özet, story + kabul kriteri önerisi, Epic bölme önerisi; kapalıyken gizli | Tamamlandı |
-| 6.6 | Mobil deneyim               | (sonra) duyarlı iyileştirmeler, dokunmatik hedefler, klavye alternatifleri                                                       | Sırada     |
+| 6.6 | Mobil deneyim               | (sonra) duyarlı iyileştirmeler, dokunmatik hedefler, klavye alternatifleri                                                       | İptal      |
 
 ## 6.1 Ayrıntı
 
 Karar: ADR-086. `api_tokens` (SHA-256 özet, önek, salt okunur, süre, son kullanım, iptal). `POST/GET/DELETE /api/tokens` yalnızca oturumla. AuthGuard: cookie yoksa `Authorization: Bearer smt_…`; token ile `/auth*` ve `/tokens*` yasak (403 `TOKEN_NOT_ALLOWED`), salt okunur token yazamaz (403 `TOKEN_READ_ONLY`), CSRF atlanır. Web: Ayarlar → API erişimi.
 
 **Doğrulama (2026-10-05):** `api-tokens.int-spec` 5; Playwright `faz6-api-tokens` 1/1.
+
+## Kapanış (2026-10-05)
+
+Kullanıcı kararı: 6.6 (mobil iyileştirmeler) yapılmadan Faz 6 kapatıldı. Ardından paket boyutu optimizasyonu, tam test turu ve Docker Compose ile üretim kurulumu yapıldı (ADR-091, `docs/DEPLOY.md`).

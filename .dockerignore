@@ -1,0 +1,21 @@
+# Derleme bağlamına yalnızca kaynak kod girer; bağımlılıklar ve çıktılar imajda yeniden üretilir.
+**/node_modules
+**/dist
+**/dist-e2e
+**/.turbo
+**/.tanstack
+**/coverage
+**/test-results
+**/playwright-report
+**/*.tsbuildinfo
+apps/api/src/generated
+apps/api/data
+**/.env
+**/.env.*
+!**/.env.example
+.git
+.github
+.husky
+.claude
+docs
+*.log

@@ -1,0 +1,44 @@
+# Scrum Manager ters vekil (ADR-028).
+# SITE_ADDRESS bir alan adıysa (ör. scrum.sirket.com) Caddy otomatik Let's Encrypt sertifikası alır.
+# ":80" verilirse yalnızca HTTP (sertifikayı önündeki başka bir vekil sağlıyorsa).
+{
+	# Yönetim API'si dışarıya kapalı.
+	admin off
+}
+
+{$SITE_ADDRESS::80} {
+	encode zstd gzip
+
+	# İstek gövdesi üst sınırı: dosya ekleri (MAX_UPLOAD_MB) + pay.
+	request_body {
+		max_size 64MB
+	}
+
+	header {
+		X-Content-Type-Options nosniff
+		Referrer-Policy strict-origin-when-cross-origin
+		X-Frame-Options DENY
+		Permissions-Policy "camera=(), microphone=(), geolocation=()"
+		-Server
+	}
+
+	handle /api/* {
+		reverse_proxy api:3000
+	}
+
+	handle {
+		root * /srv
+
+		# Parmak izli dosyalar hiç değişmez: uzun süreli önbellek.
+		@assets path /assets/*
+		header @assets Cache-Control "public, max-age=31536000, immutable"
+
+		# index.html her zaman taze (yeni sürüm hemen görülsün).
+		@html path / /index.html
+		header @html Cache-Control "no-cache"
+
+		# Tek sayfa uygulaması: bilinmeyen yollar index.html'e düşer.
+		try_files {path} /index.html
+		file_server
+	}
+}

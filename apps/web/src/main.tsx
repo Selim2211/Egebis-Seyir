@@ -10,7 +10,6 @@ import { initI18n } from '@/lib/i18n';
 import { bindThemeToDocument } from '@/lib/ui-store';
 import { routeTree } from './routeTree.gen';
 
-initI18n();
 bindThemeToDocument();
 
 /** Kullanım sırasında oturum düşerse (iptal, süre dolumu) giriş ekranına dön. */
@@ -51,12 +50,15 @@ declare module '@tanstack/react-router' {
 const root = document.getElementById('root');
 if (!root) throw new Error('#root bulunamadı');
 
-createRoot(root).render(
-  <StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider delayDuration={300}>
-        <RouterProvider router={router} />
-      </TooltipProvider>
-    </QueryClientProvider>
-  </StrictMode>,
+// Etkin dil dosyası inmeden çizilmez (çevrilmemiş anahtar görünmesin).
+void initI18n().then(() =>
+  createRoot(root).render(
+    <StrictMode>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider delayDuration={300}>
+          <RouterProvider router={router} />
+        </TooltipProvider>
+      </QueryClientProvider>
+    </StrictMode>,
+  ),
 );
