@@ -354,7 +354,11 @@
     "TOKEN_NOT_ALLOWED": "Bu uç token ile kullanılamaz.",
     "WEBHOOK_LIMIT": "Bir Space’te en çok 10 webhook olabilir.",
     "WEBHOOK_URL_BLOCKED": "Bu adres kullanılamaz (dahili ağ veya yasak adres).",
-    "GIT_INTEGRATION_LIMIT": "En çok 10 Git entegrasyonu olabilir."
+    "GIT_INTEGRATION_LIMIT": "En çok 10 Git entegrasyonu olabilir.",
+    "AI_DISABLED": "Yapay zekâ bu kurulumda kapalı.",
+    "AI_RATE_LIMITED": "Çok fazla istek; bir dakika sonra tekrar dene.",
+    "AI_FAILED": "Yapay zekâ servisinden geçerli bir yanıt alınamadı.",
+    "AI_NOT_APPLICABLE": "Bu öneri bu iş tipi için kullanılamaz."
   },
   "spaceRoles": {
     "PRODUCT_OWNER": "Product Owner",
@@ -1617,5 +1621,21 @@
       "MERGED": "Birleşti",
       "CLOSED": "Kapandı"
     }
+  },
+  "ai": {
+    "title": "Yapay zekâ",
+    "assist": "Yapay zekâ",
+    "summarize": "İşi özetle",
+    "suggestStory": "Hikâye ve kabul kriteri öner",
+    "splitEpic": "Epic’i Story’lere böl",
+    "result": "Yapay zekâ önerisi",
+    "disclaimer": "Öneri; kaydetmeden önce kontrol et.",
+    "addDescription": "Açıklamaya ekle",
+    "addCriteria": "Kabul kriterleri listesi olarak ekle",
+    "criteriaTitle": "Kabul kriterleri (öneri)",
+    "added": "Eklendi",
+    "create": "Oluştur",
+    "createStory": "“{{title}}” hikâyesini oluştur",
+    "storyCreated": "{{key}} oluşturuldu."
   }
 }

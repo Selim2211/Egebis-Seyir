@@ -6,6 +6,8 @@ const isCI = !!process.env.CI;
 export const E2E = {
   apiPort: 3100,
   webPort: 5174,
+  /** Sahte yapay zekâ model sunucusu (testte başlatılır); gerçek API'ye hiç gidilmez. */
+  aiPort: 3199,
   // Docker yerine yerel Postgres kullanılacaksa E2E_DATABASE_URL ile değiştirilir.
   databaseUrl: process.env.E2E_DATABASE_URL ?? 'postgresql://scrum:scrum@localhost:5433/scrum_e2e',
   mailpitUrl: 'http://localhost:8025',
@@ -41,6 +43,8 @@ export default defineConfig({
         AUTH_RATE_LIMIT: '1000',
         MAIL_TRANSPORT: 'smtp',
         QUEUE_ENABLED: 'true',
+        ANTHROPIC_API_KEY: 'e2e-key',
+        AI_BASE_URL: 'http://127.0.0.1:3199',
       },
     },
     {

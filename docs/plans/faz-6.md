@@ -8,8 +8,8 @@
 | 6.2 | Giden webhook'lar           | Space/Workspace webhook'u: olay seçimi, HMAC imzası, teslimat günlüğü, yeniden deneme                                            | Tamamlandı |
 | 6.3 | Slack/Teams bildirimi       | Gelen webhook URL'sine olay mesajı (Space başına), webhook altyapısı üzerinde                                                    | Tamamlandı |
 | 6.4 | GitHub/GitLab bağlantısı    | Gelen webhook (imzalı): commit/PR/MR metnindeki `PRJ-142` anahtarını göreve bağlar, aktivite ve detayda görünür                  | Tamamlandı |
-| 6.5 | Yapay zekâ destekli özellik | Sağlayıcı soyutlaması (Anthropic API anahtarı ayarda); özet, story + kabul kriteri önerisi, Epic bölme önerisi; kapalıyken gizli | Sırada     |
-| 6.6 | Mobil deneyim               | (sonra) duyarlı iyileştirmeler, dokunmatik hedefler, klavye alternatifleri                                                       | Bekliyor   |
+| 6.5 | Yapay zekâ destekli özellik | Sağlayıcı soyutlaması (Anthropic API anahtarı ayarda); özet, story + kabul kriteri önerisi, Epic bölme önerisi; kapalıyken gizli | Tamamlandı |
+| 6.6 | Mobil deneyim               | (sonra) duyarlı iyileştirmeler, dokunmatik hedefler, klavye alternatifleri                                                       | Sırada     |
 
 ## 6.1 Ayrıntı
 

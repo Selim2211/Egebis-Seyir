@@ -41,6 +41,7 @@ import { TimeSection } from '@/features/time/time-section';
 import { LinkedDocs } from './linked-docs';
 import { Links } from './links';
 import { SaveItemTemplate } from '@/features/templates/item-template-actions';
+import { AiAssist } from '@/features/ai/ai-assist';
 import { GitLinks } from './git-links';
 import { ItemCustomFields } from './item-custom-fields';
 import { Properties } from './properties';
@@ -312,6 +313,7 @@ function Content({
           <Properties item={item} space={space} archived={item.archived} />
           <ItemCustomFields item={item} canWrite={canWrite} />
           <GitLinks item={item} />
+          <AiAssist item={item} canWrite={canWrite} />
           {canWrite && (
             <SaveItemTemplate spaceId={item.spaceId} itemId={item.id} title={item.title} />
           )}

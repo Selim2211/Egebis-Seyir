@@ -354,7 +354,11 @@
     "TOKEN_NOT_ALLOWED": "This endpoint cannot be used with a token.",
     "WEBHOOK_LIMIT": "A Space can have at most 10 webhooks.",
     "WEBHOOK_URL_BLOCKED": "This address cannot be used (internal network or blocked address).",
-    "GIT_INTEGRATION_LIMIT": "At most 10 Git integrations."
+    "GIT_INTEGRATION_LIMIT": "At most 10 Git integrations.",
+    "AI_DISABLED": "AI is turned off on this installation.",
+    "AI_RATE_LIMITED": "Too many requests; try again in a minute.",
+    "AI_FAILED": "Could not get a valid answer from the AI service.",
+    "AI_NOT_APPLICABLE": "This suggestion is not available for this item type."
   },
   "spaceRoles": {
     "PRODUCT_OWNER": "Product Owner",
@@ -1617,5 +1621,21 @@
       "MERGED": "Merged",
       "CLOSED": "Closed"
     }
+  },
+  "ai": {
+    "title": "AI",
+    "assist": "AI",
+    "summarize": "Summarize item",
+    "suggestStory": "Suggest story and acceptance criteria",
+    "splitEpic": "Split Epic into Stories",
+    "result": "AI suggestion",
+    "disclaimer": "A suggestion; review it before saving.",
+    "addDescription": "Add to description",
+    "addCriteria": "Add as acceptance checklist",
+    "criteriaTitle": "Acceptance criteria (suggested)",
+    "added": "Added",
+    "create": "Create",
+    "createStory": "Create story “{{title}}”",
+    "storyCreated": "{{key}} created."
   }
 }

@@ -33,6 +33,13 @@ export const EnvSchema = z.object({
   /** Webhook adresi dahili/özel ağda olabilir mi (ADR-087)? Verilmezse yalnızca production dışında. */
   WEBHOOK_ALLOW_PRIVATE_HOSTS: z.stringbool().optional(),
 
+  /** Yapay zekâ destekli özellikler (ADR-090): anahtar yoksa özellik kapalı; metin Anthropic API'sine gider. */
+  ANTHROPIC_API_KEY: z.string().min(1).optional(),
+  AI_MODEL: z.string().default('claude-sonnet-5-5'),
+  AI_BASE_URL: z.url().default('https://api.anthropic.com'),
+  /** Kullanıcı başına dakikada en çok istek. */
+  AI_RATE_LIMIT: z.coerce.number().int().positive().default(10),
+
   /** Dosya ekleri ve profil fotoğrafları (ADR-056); Docker'da kalıcı volume olmalı. */
   UPLOAD_DIR: z.string().default('./data/uploads'),
   /** Dosya başına en çok MB (ADR-056). */
