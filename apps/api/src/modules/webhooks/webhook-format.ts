@@ -98,7 +98,7 @@ function teams(payload: WebhookPayload): unknown {
           version: '1.4',
           body,
           ...(payload.url && {
-            actions: [{ type: 'Action.OpenUrl', title: 'Scrum Manager', url: payload.url }],
+            actions: [{ type: 'Action.OpenUrl', title: 'Egebis Seyir', url: payload.url }],
           }),
         },
       },

@@ -96,7 +96,7 @@ export function passwordResetMail(p: {
       text: `Hi ${p.name},\n\nReset your password: ${p.url}\n\nThis link expires in ${p.expiresInMinutes} minutes. If you didn't request it, ignore this email.`,
       html: layout(
         'Reset your password',
-        [`Hi ${name}, we received a request to reset your Scrum Manager password.`],
+        [`Hi ${name}, we received a request to reset your Egebis Seyir password.`],
         { label: 'Set a new password', url: p.url },
         `This link expires in ${p.expiresInMinutes} minutes. If you didn't request it, ignore this email; your password stays the same.`,
       ),
@@ -108,7 +108,7 @@ export function passwordResetMail(p: {
     text: `Merhaba ${p.name},\n\nŞifreni sıfırla: ${p.url}\n\nBağlantı ${p.expiresInMinutes} dakika geçerlidir. Bu isteği sen yapmadıysan e-postayı yok say.`,
     html: layout(
       'Şifreni sıfırla',
-      [`Merhaba ${name}, Scrum Manager şifreni sıfırlama isteği aldık.`],
+      [`Merhaba ${name}, Egebis Seyir şifreni sıfırlama isteği aldık.`],
       { label: 'Yeni şifre belirle', url: p.url },
       `Bağlantı ${p.expiresInMinutes} dakika geçerlidir. Bu isteği sen yapmadıysan e-postayı yok say; şifren değişmez.`,
     ),

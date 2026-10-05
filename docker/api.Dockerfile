@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.7
-# Scrum Manager API imajı (NestJS). Çok aşamalı: derleme → yalnız üretim bağımlılıkları → küçük çalışma imajı.
+# Egebis Seyir API imajı (NestJS). Çok aşamalı: derleme → yalnız üretim bağımlılıkları → küçük çalışma imajı.
 # Derleme bağlamı depo köküdür: docker build -f docker/api.Dockerfile .
 
 ARG NODE_VERSION=24-alpine

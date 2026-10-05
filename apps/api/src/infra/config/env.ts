@@ -24,7 +24,7 @@ export const EnvSchema = z.object({
   SMTP_SECURE: z.stringbool().default(false),
   SMTP_USER: z.string().optional(),
   SMTP_PASS: z.string().optional(),
-  MAIL_FROM: z.string().default('Scrum Manager <no-reply@localhost>'),
+  MAIL_FROM: z.string().default('Egebis Seyir <no-reply@localhost>'),
 
   /** Arka plan kuyruğu (pg-boss). Kapalıysa işler istek içinde çalışır (testler). */
   QUEUE_ENABLED: z.stringbool().default(true),

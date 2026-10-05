@@ -3,6 +3,7 @@ import { Globe } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NativeSelect } from '@/components/form';
+import { Logo } from '@/components/logo';
 import { type Language, useUiStore } from '@/lib/ui-store';
 
 /** Oturumsuz sayfaların düzeni: ortalanmış dar sütun + dil seçimi (taslak: Giriş, Davetle kayıt). */
@@ -13,9 +14,7 @@ export function AuthLayout({ children }: { children: ReactNode }) {
     <div className="bg-background flex min-h-dvh flex-col">
       <main className="flex flex-1 items-center justify-center px-4 py-12">
         <div className="w-full max-w-sm">
-          <div className="bg-primary text-primary-foreground flex size-10 items-center justify-center rounded-xl text-lg font-bold">
-            S
-          </div>
+          <Logo size={44} />
           {children}
         </div>
       </main>

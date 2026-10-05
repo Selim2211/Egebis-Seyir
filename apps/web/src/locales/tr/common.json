@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "Scrum Manager",
+    "name": "Egebis Seyir",
     "tagline": "Fikirden teslime, Scrum disipliniyle."
   },
   "common": {
@@ -90,7 +90,7 @@
     "uiLanguage": "Arayüz dili",
     "backToLogin": "Girişe dön",
     "login": {
-      "title": "Scrum Manager'a giriş yap",
+      "title": "Egebis Seyir'e giriş yap",
       "subtitle": "Çalışma alanına devam et.",
       "forgot": "Şifremi unuttum",
       "remember": "Beni bu cihazda hatırla",
@@ -98,7 +98,7 @@
       "noAccount": "Hesabın yok mu? Workspace yöneticinden davet iste; hesabını davet e-postasındaki bağlantıyla oluşturursun."
     },
     "setup": {
-      "title": "Scrum Manager'ı kur",
+      "title": "Egebis Seyir'i kur",
       "subtitle": "İlk workspace'i ve yönetici (Owner) hesabını oluştur. Bu ekran yalnızca bir kez görünür.",
       "workspaceName": "Kurum / workspace adı",
       "workspacePlaceholder": "Örn. şirketinin adı",

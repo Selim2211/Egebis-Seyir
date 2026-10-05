@@ -1,4 +1,4 @@
-# Scrum Manager ters vekil (ADR-028).
+# Egebis Seyir ters vekil (ADR-028).
 # SITE_ADDRESS bir alan adıysa (ör. scrum.sirket.com) Caddy otomatik Let's Encrypt sertifikası alır.
 # ":80" verilirse yalnızca HTTP (sertifikayı önündeki başka bir vekil sağlıyorsa).
 {

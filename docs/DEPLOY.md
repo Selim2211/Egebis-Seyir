@@ -1,4 +1,4 @@
-# Scrum Manager — Sunucuya Kurulum (Docker)
+# Egebis Seyir — Sunucuya Kurulum (Docker)
 
 Bu belge uygulamayı tek bir Linux sunucuya Docker Compose ile kurmayı anlatır. Kurulum beş konteynerden oluşur:
 

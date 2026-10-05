@@ -205,7 +205,7 @@ export class WebhooksService implements OnModuleInit {
       workspaceId: hook.workspaceId,
       space,
       actor: null,
-      message: 'Scrum Manager webhook testi',
+      message: 'Egebis Seyir webhook testi',
     });
   }
 

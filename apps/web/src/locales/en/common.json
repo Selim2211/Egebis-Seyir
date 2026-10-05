@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "Scrum Manager",
+    "name": "Egebis Seyir",
     "tagline": "From idea to delivery, with Scrum discipline."
   },
   "common": {
@@ -90,7 +90,7 @@
     "uiLanguage": "Interface language",
     "backToLogin": "Back to sign in",
     "login": {
-      "title": "Sign in to Scrum Manager",
+      "title": "Sign in to Egebis Seyir",
       "subtitle": "Continue to your workspace.",
       "forgot": "Forgot password",
       "remember": "Remember me on this device",
@@ -98,7 +98,7 @@
       "noAccount": "No account? Ask a workspace admin for an invitation; you'll create your account from the link in the invitation email."
     },
     "setup": {
-      "title": "Set up Scrum Manager",
+      "title": "Set up Egebis Seyir",
       "subtitle": "Create the first workspace and its Owner account. This screen appears only once.",
       "workspaceName": "Organization / workspace name",
       "workspacePlaceholder": "e.g. your company's name",

@@ -28,7 +28,7 @@ export function configureApp(app: INestApplication, opts: { trustProxy?: boolean
 /** OpenAPI dokümanı: /api/docs (yalnızca production dışı). */
 export function setupOpenApi(app: INestApplication): void {
   const config = new DocumentBuilder()
-    .setTitle('Scrum Manager API')
+    .setTitle('Egebis Seyir API')
     .setVersion(process.env.npm_package_version ?? 'dev')
     .build();
   const document = SwaggerModule.createDocument(app, config);

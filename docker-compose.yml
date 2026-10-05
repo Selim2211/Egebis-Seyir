@@ -1,4 +1,4 @@
-# Scrum Manager — sunucu kurulumu (ADR-028, ADR-091).
+# Egebis Seyir — sunucu kurulumu (ADR-028, ADR-091).
 # Kurulum: .env.example'ı .env olarak kopyala, değerleri doldur, sonra:
 #   docker compose up -d --build
 # Ayrıntılar: docs/DEPLOY.md
@@ -19,7 +19,7 @@ x-api-env: &api-env
   SMTP_SECURE: ${SMTP_SECURE:-false}
   SMTP_USER: ${SMTP_USER:-}
   SMTP_PASS: ${SMTP_PASS:-}
-  MAIL_FROM: ${MAIL_FROM:-Scrum Manager <no-reply@localhost>}
+  MAIL_FROM: ${MAIL_FROM:-Egebis Seyir <no-reply@localhost>}
   QUEUE_ENABLED: 'true'
   UPLOAD_DIR: /data/uploads
   MAX_UPLOAD_MB: ${MAX_UPLOAD_MB:-25}

@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.7
-# Scrum Manager web imajı: React uygulaması derlenir, Caddy ile sunulur (statik dosya + /api ters vekil + HTTPS).
+# Egebis Seyir web imajı: React uygulaması derlenir, Caddy ile sunulur (statik dosya + /api ters vekil + HTTPS).
 # Derleme bağlamı depo köküdür: docker build -f docker/web.Dockerfile .
 
 ARG NODE_VERSION=24-alpine

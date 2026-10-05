@@ -1,4 +1,4 @@
-# Scrum Manager — Claude Code Rehberi
+# Egebis Seyir — Claude Code Rehberi
 
 Her oturumda önce şunları oku:
 
