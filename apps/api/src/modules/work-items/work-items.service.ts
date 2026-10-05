@@ -197,6 +197,12 @@ export class WorkItemsService {
       deletedAt: null,
     });
 
+    const gitLinks = await this.tenant.db.gitLink.findMany({
+      where: { workItemId: row.id },
+      orderBy: { createdAt: 'desc' },
+      take: 50,
+    });
+
     return {
       ...toSummary(row),
       readiness,
@@ -214,6 +220,18 @@ export class WorkItemsService {
       watcherCount: watchers.length,
       attachments: attachments.map(toAttachmentDto),
       commentCount,
+      gitLinks: gitLinks.map((g) => ({
+        id: g.id,
+        provider: g.provider,
+        kind: g.kind,
+        repo: g.repo,
+        ref: g.kind === 'COMMIT' ? g.externalId.slice(0, 7) : g.externalId,
+        title: g.title,
+        url: g.url,
+        state: g.state,
+        author: g.author,
+        createdAt: g.createdAt.toISOString(),
+      })),
       ancestors,
       children: children.map(toSummary),
       labels: row.labels.map((l) => l.label),

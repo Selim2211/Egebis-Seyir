@@ -21,7 +21,7 @@ import { PrismaService } from '../../infra/prisma/prisma.service';
 import { safeEqual } from '../../infra/security/tokens';
 import { type AuthedRequest, CSRF_COOKIE, CSRF_HEADER, SESSION_COOKIE } from './auth.constants';
 import { SpaceAccessService } from '../access/space-access.service';
-import { IS_PUBLIC, REQUIRED_PERMISSION, REQUIRED_SPACE_PERMISSION } from './decorators';
+import { IS_PUBLIC, REQUIRED_PERMISSION, REQUIRED_SPACE_PERMISSION, SKIP_CSRF } from './decorators';
 import { ApiTokensService } from './api-tokens.service';
 import { SessionService } from './session.service';
 
@@ -87,9 +87,14 @@ const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
 /** 2) CSRF (double-submit, ADR-038): durum değiştiren isteklerde başlık = cookie olmalı. */
 @Injectable()
 export class CsrfGuard implements CanActivate {
+  constructor(private readonly reflector: Reflector) {}
+
   canActivate(ctx: ExecutionContext): boolean {
     const req = ctx.switchToHttp().getRequest<AuthedRequest>();
     if (SAFE_METHODS.has(req.method)) return true;
+    if (this.reflector.getAllAndOverride<boolean>(SKIP_CSRF, [ctx.getHandler(), ctx.getClass()])) {
+      return true;
+    }
     // Bearer token ortam kimlik bilgisi (cookie) değildir; CSRF riski yok (ADR-086).
     if (req.apiToken) return true;
     const expected = cookie(req, CSRF_COOKIE);

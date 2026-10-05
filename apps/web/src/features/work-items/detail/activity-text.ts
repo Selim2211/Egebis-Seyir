@@ -99,6 +99,10 @@ export function describeEvent(event: ActivityEvent, t: TFunction): string[] {
       return [t('activity.trashed')];
     case 'item.restored':
       return [t('activity.restored')];
+    case 'item.git_linked':
+      return [t('activity.gitLinked', { detail })];
+    case 'item.git_updated':
+      return [t('activity.gitUpdated', { detail })];
     case 'item.commented':
       return [t('activity.commented')];
     case 'item.comment_edited':

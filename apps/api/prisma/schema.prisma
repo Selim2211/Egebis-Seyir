@@ -243,6 +243,8 @@ model Workspace {
   automations       Automation[]
   webhooks          Webhook[]
   webhookDeliveries WebhookDelivery[]
+  gitIntegrations   GitIntegration[]
+  gitLinks          GitLink[]
   automationRuns    AutomationRun[]
   docItemLinks      DocItemLink[]
 
@@ -526,6 +528,7 @@ model WorkItem {
   descriptionText  String?
   /// Özel alan değerleri: alan kimliği → değer (ADR-082).
   customFields     Json         @default("{}")
+  gitLinks         GitLink[]
   statusId         String       @db.Uuid
   status           Status       @relation(fields: [statusId], references: [id])
   priority         Priority     @default(NORMAL)
@@ -1258,4 +1261,60 @@ model WebhookDelivery {
 
   @@index([webhookId, createdAt])
   @@map("webhook_deliveries")
+}
+
+enum GitProvider {
+  GITHUB
+  GITLAB
+}
+
+enum GitLinkKind {
+  COMMIT
+  PULL_REQUEST
+}
+
+enum GitLinkState {
+  OPEN
+  MERGED
+  CLOSED
+}
+
+/// Gelen Git webhook'u tanımı (brief §5.18, ADR-089): sağlayıcı olayları iş anahtarlarına bağlar.
+model GitIntegration {
+  id          String      @id @default(uuid(7)) @db.Uuid
+  workspaceId String      @db.Uuid
+  workspace   Workspace   @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  name        String
+  provider    GitProvider
+  /// GitHub: HMAC-SHA256 anahtarı; GitLab: gizli token. Yalnızca oluşturmada gösterilir.
+  secret      String
+  enabled     Boolean     @default(true)
+  lastEventAt DateTime?   @db.Timestamptz
+  createdAt   DateTime    @default(now()) @db.Timestamptz
+
+  @@index([workspaceId])
+  @@map("git_integrations")
+}
+
+/// İş öğesine bağlı commit veya PR/MR.
+model GitLink {
+  id          String       @id @default(uuid(7)) @db.Uuid
+  workspaceId String       @db.Uuid
+  workspace   Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  workItemId  String       @db.Uuid
+  workItem    WorkItem     @relation(fields: [workItemId], references: [id], onDelete: Cascade)
+  provider    GitProvider
+  kind        GitLinkKind
+  repo        String
+  externalId  String
+  title       String
+  url         String?
+  state       GitLinkState?
+  author      String?
+  createdAt   DateTime     @default(now()) @db.Timestamptz
+  updatedAt   DateTime     @updatedAt @db.Timestamptz
+
+  @@unique([workItemId, provider, kind, repo, externalId])
+  @@index([workItemId])
+  @@map("git_links")
 }

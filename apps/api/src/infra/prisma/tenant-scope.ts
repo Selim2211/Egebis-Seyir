@@ -47,6 +47,8 @@ export const TENANT_MODELS: ReadonlySet<string> = new Set([
   'AutomationRun',
   'Webhook',
   'WebhookDelivery',
+  'GitIntegration',
+  'GitLink',
 ]);
 
 const WHERE_OPERATIONS = new Set([

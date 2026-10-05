@@ -7,6 +7,7 @@ import {
   WORK_ITEM_TYPES,
 } from '../constants/work-item';
 import { AttachmentSchema } from './collab';
+import { GitLinkSchema } from './git';
 import { CustomFieldPatchSchema, CustomFieldValuesSchema } from './custom-field';
 import { RichTextSchema } from './rich-text';
 import { ColorSchema } from './space';
@@ -259,6 +260,8 @@ export const WorkItemDetailSchema = WorkItemSummarySchema.extend({
   watcherCount: z.int(),
   attachments: z.array(AttachmentSchema),
   commentCount: z.int(),
+  /** Bağlı commit ve PR/MR'ler (ADR-089). */
+  gitLinks: z.array(GitLinkSchema),
   /** Kökten ebeveyne kadar üst öğeler. */
   ancestors: z.array(crumb),
   children: z.array(WorkItemSummarySchema),

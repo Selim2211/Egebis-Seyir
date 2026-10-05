@@ -6,6 +6,10 @@ export const IS_PUBLIC = 'auth:public';
 /** Oturum gerektirmeyen uç. Oturum varsa yine de `req.user` doldurulur. */
 export const Public = () => SetMetadata(IS_PUBLIC, true);
 
+export const SKIP_CSRF = 'auth:skip-csrf';
+/** CSRF denetimi atlanan uç: oturum cookie'si kullanmayan, kendi imzasıyla doğrulanan dış çağrılar. */
+export const SkipCsrf = () => SetMetadata(SKIP_CSRF, true);
+
 export const AUTH_RATE_LIMITED = 'auth:rate-limited';
 /** Kaba kuvvet denemelerine açık uçlar için sıkı oran sınırı (AUTH_RATE_LIMIT). */
 export const AuthRateLimit = () => SetMetadata(AUTH_RATE_LIMITED, true);

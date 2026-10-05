@@ -159,7 +159,8 @@
     "general": "Genel",
     "archive": "Arşiv ve çöp kutusu",
     "notifications": "Bildirimler",
-    "api": "API erişimi"
+    "api": "API erişimi",
+    "integrations": "Entegrasyonlar"
   },
   "members": {
     "title": "Üyeler",
@@ -352,7 +353,8 @@
     "TOKEN_READ_ONLY": "Bu token salt okunur; değişiklik yapamaz.",
     "TOKEN_NOT_ALLOWED": "Bu uç token ile kullanılamaz.",
     "WEBHOOK_LIMIT": "Bir Space’te en çok 10 webhook olabilir.",
-    "WEBHOOK_URL_BLOCKED": "Bu adres kullanılamaz (dahili ağ veya yasak adres)."
+    "WEBHOOK_URL_BLOCKED": "Bu adres kullanılamaz (dahili ağ veya yasak adres).",
+    "GIT_INTEGRATION_LIMIT": "En çok 10 Git entegrasyonu olabilir."
   },
   "spaceRoles": {
     "PRODUCT_OWNER": "Product Owner",
@@ -817,7 +819,9 @@
       "sprintId": "Sprint",
       "dodChecked": "DoD maddeleri",
       "dorChecked": "DoR maddeleri"
-    }
+    },
+    "gitLinked": "Git bağlantısı eklendi: {{detail}}",
+    "gitUpdated": "Git bağlantısı güncellendi: {{detail}}"
   },
   "backlog": {
     "title": "Backlog",
@@ -1579,5 +1583,39 @@
     "copySecret": "“{{name}}” oluşturuldu. İmza anahtarını şimdi kopyala; bir daha gösterilmeyecek.",
     "secretValue": "İmza anahtarı",
     "copied": "İmza anahtarı kopyalandı."
+  },
+  "integrations": {
+    "title": "Entegrasyonlar",
+    "subtitle": "GitHub veya GitLab’daki commit ve PR/MR’leri, başlığında ya da mesajında iş anahtarı (ör. MOB-12) geçiyorsa o işe bağlar.",
+    "noAccess": "Entegrasyonları yalnızca workspace yöneticileri yönetebilir.",
+    "active": "Etkin entegrasyonlar",
+    "none": "Henüz entegrasyon yok.",
+    "name": "Ad",
+    "namePlaceholder": "ör. acme/app deposu",
+    "provider": "Sağlayıcı",
+    "providers": {
+      "GITHUB": "GitHub",
+      "GITLAB": "GitLab"
+    },
+    "create": "Entegrasyon oluştur",
+    "copyNow": "“{{name}}” oluşturuldu. Aşağıdaki adres ve gizli anahtarı sağlayıcıya gir; anahtar bir daha gösterilmeyecek.",
+    "payloadUrl": "Webhook adresi",
+    "secret": "Gizli anahtar",
+    "copied": "Kopyalandı.",
+    "githubSteps": "GitHub: depo → Settings → Webhooks → Add webhook. Payload URL’ye adresi, Secret’a anahtarı gir; Content type: application/json; olaylar: Pushes ve Pull requests.",
+    "gitlabSteps": "GitLab: proje → Settings → Webhooks. URL’ye adresi, Secret token’a anahtarı gir; Push events ve Merge request events’i işaretle.",
+    "enabledFor": "“{{name}}” açık",
+    "lastEvent": "son olay {{when}}",
+    "noEvents": "henüz olay gelmedi",
+    "delete": "“{{name}}” entegrasyonunu sil",
+    "deleted": "Entegrasyon silindi."
+  },
+  "gitLinks": {
+    "title": "Geliştirme",
+    "state": {
+      "OPEN": "Açık",
+      "MERGED": "Birleşti",
+      "CLOSED": "Kapandı"
+    }
   }
 }

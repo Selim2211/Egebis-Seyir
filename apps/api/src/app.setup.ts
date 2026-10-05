@@ -14,7 +14,13 @@ export function configureApp(app: INestApplication, opts: { trustProxy?: boolean
   app.use(helmet());
   app.use(cookieParser());
   // CSV içe aktarma gövdesi büyük olabilir (ADR-085): JSON sınırı 100 KB yerine 6 MB (içe aktarma ayrıca 5 MB ile sınırlı).
-  (app as NestExpressApplication).useBodyParser('json', { limit: '6mb' });
+  // Ham gövde, Git webhook imzasının doğrulanması için saklanır (ADR-089).
+  (app as NestExpressApplication).useBodyParser('json', {
+    limit: '6mb',
+    verify: (req: object, _res: unknown, buf: Buffer) => {
+      (req as { rawBody?: Buffer }).rawBody = buf;
+    },
+  });
   app.enableShutdownHooks();
 }
 

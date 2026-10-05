@@ -159,7 +159,8 @@
     "general": "General",
     "archive": "Archive and trash",
     "notifications": "Notifications",
-    "api": "API access"
+    "api": "API access",
+    "integrations": "Integrations"
   },
   "members": {
     "title": "Members",
@@ -352,7 +353,8 @@
     "TOKEN_READ_ONLY": "This token is read-only and cannot make changes.",
     "TOKEN_NOT_ALLOWED": "This endpoint cannot be used with a token.",
     "WEBHOOK_LIMIT": "A Space can have at most 10 webhooks.",
-    "WEBHOOK_URL_BLOCKED": "This address cannot be used (internal network or blocked address)."
+    "WEBHOOK_URL_BLOCKED": "This address cannot be used (internal network or blocked address).",
+    "GIT_INTEGRATION_LIMIT": "At most 10 Git integrations."
   },
   "spaceRoles": {
     "PRODUCT_OWNER": "Product Owner",
@@ -817,7 +819,9 @@
       "sprintId": "Sprint",
       "dodChecked": "DoD items",
       "dorChecked": "DoR items"
-    }
+    },
+    "gitLinked": "Git link added: {{detail}}",
+    "gitUpdated": "Git link updated: {{detail}}"
   },
   "backlog": {
     "title": "Backlog",
@@ -1579,5 +1583,39 @@
     "copySecret": "“{{name}}” created. Copy the signing secret now; it will not be shown again.",
     "secretValue": "Signing secret",
     "copied": "Signing secret copied."
+  },
+  "integrations": {
+    "title": "Integrations",
+    "subtitle": "Links commits and PRs/MRs on GitHub or GitLab to an item when its title or message contains the item key (e.g. MOB-12).",
+    "noAccess": "Only workspace administrators can manage integrations.",
+    "active": "Active integrations",
+    "none": "No integrations yet.",
+    "name": "Name",
+    "namePlaceholder": "e.g. acme/app repository",
+    "provider": "Provider",
+    "providers": {
+      "GITHUB": "GitHub",
+      "GITLAB": "GitLab"
+    },
+    "create": "Create integration",
+    "copyNow": "“{{name}}” created. Enter the address and secret below at the provider; the secret will not be shown again.",
+    "payloadUrl": "Webhook URL",
+    "secret": "Secret",
+    "copied": "Copied.",
+    "githubSteps": "GitHub: repo → Settings → Webhooks → Add webhook. Put the URL in Payload URL and the secret in Secret; Content type: application/json; events: Pushes and Pull requests.",
+    "gitlabSteps": "GitLab: project → Settings → Webhooks. Put the URL in URL and the secret in Secret token; tick Push events and Merge request events.",
+    "enabledFor": "“{{name}}” enabled",
+    "lastEvent": "last event {{when}}",
+    "noEvents": "no events yet",
+    "delete": "Delete integration “{{name}}”",
+    "deleted": "Integration deleted."
+  },
+  "gitLinks": {
+    "title": "Development",
+    "state": {
+      "OPEN": "Open",
+      "MERGED": "Merged",
+      "CLOSED": "Closed"
+    }
   }
 }
