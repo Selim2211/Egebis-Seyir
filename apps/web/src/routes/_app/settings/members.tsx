@@ -7,13 +7,14 @@ import {
   type WorkspaceRole,
 } from '@scrum/shared';
 import { createFileRoute } from '@tanstack/react-router';
-import { Clock, Mail, Send, UserMinus } from 'lucide-react';
+import { Clock, Copy, Mail, Send, UserMinus, UserPlus } from 'lucide-react';
 import { type FormEvent, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { FormError, NativeSelect } from '@/components/form';
 import { PageHeading } from '@/components/layout/page-heading';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { UserAvatar } from '@/components/user-avatar';
 import { useMe } from '@/features/auth/queries';
@@ -22,6 +23,7 @@ import { SpaceAvatar } from '@/features/spaces/space-avatar';
 import {
   useCan,
   useChangeMemberRole,
+  useCreateMember,
   useCurrentWorkspace,
   useInvitations,
   useInvite,
@@ -45,10 +47,184 @@ function MembersPage() {
   return (
     <>
       <PageHeading title={t('members.title')} subtitle={t('members.subtitle')} />
+      {canManage && <CreateAccountForm />}
       {canManage && <InviteForm />}
       {canManage && <PendingInvitations />}
       <MembersTable canManage={canManage} />
     </>
+  );
+}
+
+/** Yönetici hesabı doğrudan açar (ADR-092): e-posta/davet gerekmez; bilgiler ekranda verilir. */
+function CreateAccountForm() {
+  const { t } = useTranslation();
+  const create = useCreateMember();
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [role, setRole] = useState<(typeof INVITABLE_ROLES)[number]>('MEMBER');
+  const [password, setPassword] = useState('');
+  const [spaceIds, setSpaceIds] = useState<string[]>([]);
+  const [spacesMissing, setSpacesMissing] = useState(false);
+  const [emailInvalid, setEmailInvalid] = useState(false);
+  const [done, setDone] = useState<{
+    email: string;
+    password: string | null;
+    existing: boolean;
+  } | null>(null);
+  const guest = role === 'GUEST';
+  const shortPassword = password.length > 0 && password.length < 8;
+
+  const submit = (e: FormEvent) => {
+    e.preventDefault();
+    const parsed = EmailSchema.safeParse(email.trim());
+    setEmailInvalid(!parsed.success);
+    const missing = guest && spaceIds.length === 0;
+    setSpacesMissing(missing);
+    if (!name.trim() || !parsed.success || shortPassword || missing) return;
+    create.mutate(
+      {
+        name: name.trim(),
+        email: parsed.data,
+        role,
+        ...(password ? { password } : {}),
+        spaceIds: guest ? spaceIds : [],
+      },
+      {
+        onSuccess: (created) => {
+          setDone({
+            email: parsed.data,
+            password: password || created.temporaryPassword,
+            existing: created.existingAccount,
+          });
+          setName('');
+          setEmail('');
+          setPassword('');
+          setSpaceIds([]);
+        },
+      },
+    );
+  };
+
+  return (
+    <section className="bg-card mb-4 rounded-lg border p-4" aria-labelledby="create-account-title">
+      <h2 id="create-account-title" className="text-sm font-semibold">
+        {t('members.createTitle')}
+      </h2>
+      <p className="text-muted-foreground mt-0.5 mb-3 text-xs">{t('members.createHint')}</p>
+      <form onSubmit={submit} noValidate>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="create-name">{t('members.createName')}</Label>
+            <Input
+              id="create-name"
+              value={name}
+              maxLength={100}
+              onChange={(e) => setName(e.target.value)}
+            />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="create-email">{t('members.createEmail')}</Label>
+            <Input
+              id="create-email"
+              type="email"
+              value={email}
+              aria-invalid={emailInvalid || undefined}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            {emailInvalid && (
+              <p className="text-destructive text-xs">
+                {t('members.invalidEmails', { emails: email })}
+              </p>
+            )}
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="create-role">{t('members.role')}</Label>
+            <NativeSelect
+              id="create-role"
+              value={role}
+              onChange={(e) => setRole(e.target.value as typeof role)}
+            >
+              {INVITABLE_ROLES.map((r) => (
+                <option key={r} value={r}>
+                  {t(`roles.${r}`)}
+                </option>
+              ))}
+            </NativeSelect>
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="create-password">{t('members.createPassword')}</Label>
+            <Input
+              id="create-password"
+              type="text"
+              autoComplete="off"
+              value={password}
+              placeholder={t('members.createPasswordPlaceholder')}
+              aria-invalid={shortPassword || undefined}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <p
+              className={
+                shortPassword ? 'text-destructive text-xs' : 'text-muted-foreground text-xs'
+              }
+            >
+              {t('members.createPasswordHint')}
+            </p>
+          </div>
+        </div>
+        {guest && (
+          <GuestSpaces selected={spaceIds} missing={spacesMissing} onChange={setSpaceIds} />
+        )}
+        <div className="mt-3 flex items-center gap-3">
+          <Button type="submit" disabled={create.isPending}>
+            <UserPlus />
+            {t('members.createSubmit')}
+          </Button>
+        </div>
+        {create.error && (
+          <div className="mt-3">
+            <FormError error={create.error} />
+          </div>
+        )}
+      </form>
+      {done && (
+        <div
+          role="status"
+          className="mt-3 rounded-md border border-emerald-300 bg-emerald-50 p-3 text-sm dark:border-emerald-500/40 dark:bg-emerald-500/10"
+        >
+          <p className="font-medium">
+            {done.existing
+              ? t('members.createdExisting', { email: done.email })
+              : t('members.created', { email: done.email })}
+          </p>
+          {done.password && (
+            <div className="mt-2 flex items-center gap-2">
+              <span className="text-muted-foreground text-xs">{t('members.createPassword')}:</span>
+              <code
+                aria-label={t('members.passwordValue')}
+                className="bg-background rounded border px-2 py-1 text-xs"
+              >
+                {done.password}
+              </code>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  void navigator.clipboard.writeText(`${done.email} / ${done.password ?? ''}`);
+                  toast.success(t('members.copied'));
+                }}
+              >
+                <Copy />
+                {t('members.copyLogin')}
+              </Button>
+            </div>
+          )}
+          <p className="text-muted-foreground mt-2 text-xs">{t('members.shareOnce')}</p>
+          <Button variant="ghost" size="sm" className="mt-1" onClick={() => setDone(null)}>
+            {t('common.close')}
+          </Button>
+        </div>
+      )}
+    </section>
   );
 }
 

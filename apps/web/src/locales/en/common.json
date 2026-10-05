@@ -193,7 +193,21 @@
     "guestSpaces": "Spaces to share",
     "guestSpacesHint": "Guests only see the selected Spaces and can comment there.",
     "guestSpacesRequired": "Choose at least one Space for a guest invitation.",
-    "noSpacesToShare": "Create a Space first."
+    "noSpacesToShare": "Create a Space first.",
+    "createTitle": "Create account",
+    "createHint": "Creates the account directly, without sending any e-mail. You give the person their e-mail address and password; they can sign in and change the password in their profile.",
+    "createName": "Full name",
+    "createEmail": "E-mail",
+    "createPassword": "Password",
+    "createPasswordPlaceholder": "Leave empty to generate one",
+    "createPasswordHint": "At least 8 characters. If left empty, a secure temporary password is generated.",
+    "createSubmit": "Create account",
+    "created": "Account for {{email}} created.",
+    "createdExisting": "{{email}} already had an account; added to this workspace (password unchanged).",
+    "passwordValue": "Password value",
+    "copyLogin": "Copy e-mail and password",
+    "copied": "Copied.",
+    "shareOnce": "This password will not be shown again; hand it over now."
   },
   "profile": {
     "title": "Profile",

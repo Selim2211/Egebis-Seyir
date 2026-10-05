@@ -76,3 +76,33 @@ export type AcceptInvitationRequest = z.infer<typeof AcceptInvitationRequestSche
 /** Davet kabulünden sonra yönlendirme için. */
 export const AcceptInvitationResponseSchema = z.object({ workspaceId: z.uuid() });
 export type AcceptInvitationResponse = z.infer<typeof AcceptInvitationResponseSchema>;
+
+/**
+ * POST /api/workspaces/:workspaceId/members — yönetici davet beklemeden hesabı doğrudan açar (ADR-092).
+ * Şifre verilmezse sunucu üretir ve yalnızca yanıtta bir kez döner. Guest en az bir Space ile açılır.
+ */
+export const CreateMemberRequestSchema = z
+  .object({
+    name: z.string().trim().min(1).max(100),
+    email: EmailSchema,
+    role: z.enum(WORKSPACE_ROLES).exclude(['OWNER']),
+    /** En az 8 karakter; boşsa sunucu üretir. */
+    password: z.string().min(8).max(256).optional(),
+    spaceIds: z.array(z.uuid()).max(50).default([]),
+    locale: z.enum(LOCALES).default('tr'),
+  })
+  .refine((v) => v.role !== 'GUEST' || v.spaceIds.length > 0, {
+    path: ['spaceIds'],
+    message: ERROR_CODES.GUEST_SPACES_REQUIRED,
+  });
+export type CreateMemberRequest = z.input<typeof CreateMemberRequestSchema>;
+export type CreateMemberData = z.output<typeof CreateMemberRequestSchema>;
+
+export const CreatedMemberSchema = z.object({
+  userId: z.uuid(),
+  /** Üretilen geçici şifre (şifre verilmediyse); aksi halde null. Bir daha gösterilmez. */
+  temporaryPassword: z.string().nullable(),
+  /** E-posta zaten bir hesaba aitti: yalnızca workspace'e eklendi, şifre değişmedi. */
+  existingAccount: z.boolean(),
+});
+export type CreatedMember = z.infer<typeof CreatedMemberSchema>;

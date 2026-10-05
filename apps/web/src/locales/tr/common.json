@@ -193,7 +193,21 @@
     "guestSpaces": "Paylaşılacak Space'ler",
     "guestSpacesHint": "Guest yalnızca seçilen Space'leri görür ve orada yorum yapabilir.",
     "guestSpacesRequired": "Guest daveti için en az bir Space seç.",
-    "noSpacesToShare": "Önce bir Space oluştur."
+    "noSpacesToShare": "Önce bir Space oluştur.",
+    "createTitle": "Hesap oluştur",
+    "createHint": "E-posta göndermeden hesabı doğrudan açar. Kişiye e-posta adresini ve şifresini sen iletirsin; kişi giriş yapıp şifresini profilinden değiştirebilir.",
+    "createName": "Ad soyad",
+    "createEmail": "E-posta",
+    "createPassword": "Şifre",
+    "createPasswordPlaceholder": "Boş bırak: otomatik üretilir",
+    "createPasswordHint": "En az 8 karakter. Boş bırakırsan güvenli bir geçici şifre üretilir.",
+    "createSubmit": "Hesabı oluştur",
+    "created": "{{email}} hesabı oluşturuldu.",
+    "createdExisting": "{{email}} zaten bir hesaba sahipti; bu workspace’e eklendi (şifresi değişmedi).",
+    "passwordValue": "Şifre değeri",
+    "copyLogin": "E-posta ve şifreyi kopyala",
+    "copied": "Kopyalandı.",
+    "shareOnce": "Bu şifre bir daha gösterilmeyecek; şimdi kişiye ilet."
   },
   "profile": {
     "title": "Profil",

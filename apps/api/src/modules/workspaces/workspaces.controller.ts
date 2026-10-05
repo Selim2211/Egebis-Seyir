@@ -16,6 +16,9 @@ import {
   AcceptInvitationRequestSchema,
   AcceptInvitationResponseSchema,
   CreateInvitationsRequestSchema,
+  CreateMemberRequestSchema,
+  CreatedMemberSchema,
+  type CreatedMember,
   InvitationPreviewSchema,
   InvitationsResponseSchema,
   MembersResponseSchema,
@@ -45,6 +48,8 @@ class CreateInvitationsDto extends createZodDto(CreateInvitationsRequestSchema) 
 class InvitationPreviewDto extends createZodDto(InvitationPreviewSchema) {}
 class AcceptInvitationDto extends createZodDto(AcceptInvitationRequestSchema) {}
 class AcceptInvitationResponseDto extends createZodDto(AcceptInvitationResponseSchema) {}
+class CreateMemberDto extends createZodDto(CreateMemberRequestSchema) {}
+class CreatedMemberDto extends createZodDto(CreatedMemberSchema) {}
 class WorkspaceSettingsDto extends createZodDto(WorkspaceSettingsSchema) {}
 class UpdateWorkspaceSettingsDto extends createZodDto(UpdateWorkspaceSettingsRequestSchema) {}
 
@@ -57,6 +62,13 @@ export class MembersController {
   @ZodResponse({ type: MembersDto })
   async list(): Promise<MembersResponse> {
     return { members: await this.members.list() };
+  }
+
+  @Post()
+  @RequirePermission(W.MEMBERS_MANAGE)
+  @ZodResponse({ type: CreatedMemberDto, status: HttpStatus.CREATED })
+  create(@Body() body: CreateMemberDto): Promise<CreatedMember> {
+    return this.members.createAccount(body);
   }
 
   @Patch(':userId')

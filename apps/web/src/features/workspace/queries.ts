@@ -1,4 +1,6 @@
 import {
+  CreatedMemberSchema,
+  type CreateMemberRequest,
   AcceptInvitationResponseSchema,
   type AcceptInvitationRequest,
   type CreateInvitationsRequest,
@@ -52,7 +54,7 @@ export function useInvitations(enabled: boolean) {
   return useQuery({ ...invitationsQuery(id), enabled });
 }
 
-function useWorkspaceMutation<T>(fn: (workspaceId: string, input: T) => Promise<unknown>) {
+function useWorkspaceMutation<T, R = unknown>(fn: (workspaceId: string, input: T) => Promise<R>) {
   const qc = useQueryClient();
   const { id } = useCurrentWorkspace();
   return useMutation({
@@ -64,6 +66,11 @@ function useWorkspaceMutation<T>(fn: (workspaceId: string, input: T) => Promise<
 export const useInvite = () =>
   useWorkspaceMutation((id, body: CreateInvitationsRequest) =>
     apiRequest(`${ws(id)}/invitations`, NoContent, { method: 'POST', body }),
+  );
+
+export const useCreateMember = () =>
+  useWorkspaceMutation((id, body: CreateMemberRequest) =>
+    apiRequest(`${ws(id)}/members`, CreatedMemberSchema, { method: 'POST', body }),
   );
 
 export const useResendInvitation = () =>
