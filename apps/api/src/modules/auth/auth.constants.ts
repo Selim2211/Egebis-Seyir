@@ -22,4 +22,8 @@ export interface AuthUser {
   sessionId: string;
 }
 
-export type AuthedRequest = Request & { user?: AuthUser };
+export type AuthedRequest = Request & {
+  user?: AuthUser;
+  /** Bearer API token ile doğrulandıysa (oturum değil): CSRF gerekmez, bazı uçlar yasak (ADR-086). */
+  apiToken?: { id: string; readOnly: boolean };
+};

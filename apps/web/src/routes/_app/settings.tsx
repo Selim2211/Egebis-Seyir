@@ -1,6 +1,7 @@
 import { WORKSPACE_PERMISSIONS } from '@scrum/shared';
 import { createFileRoute, Link, type LinkProps, Outlet } from '@tanstack/react-router';
 import {
+  KeyRound,
   Archive,
   Building2,
   MonitorSmartphone,
@@ -71,6 +72,7 @@ function SettingsLayout() {
         <SubLink to="/settings/preferences" icon={Settings2} label={t('settings.preferences')} />
         <SubLink to="/settings/notifications" icon={Bell} label={t('settings.notifications')} />
         <SubLink to="/settings/sessions" icon={MonitorSmartphone} label={t('settings.sessions')} />
+        <SubLink to="/settings/api" icon={KeyRound} label={t('settings.api')} />
       </nav>
       <div className="min-w-0 flex-1 px-4 py-6 sm:px-8 sm:py-8">
         <div className="max-w-4xl">

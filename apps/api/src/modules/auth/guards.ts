@@ -22,6 +22,7 @@ import { safeEqual } from '../../infra/security/tokens';
 import { type AuthedRequest, CSRF_COOKIE, CSRF_HEADER, SESSION_COOKIE } from './auth.constants';
 import { SpaceAccessService } from '../access/space-access.service';
 import { IS_PUBLIC, REQUIRED_PERMISSION, REQUIRED_SPACE_PERMISSION } from './decorators';
+import { ApiTokensService } from './api-tokens.service';
 import { SessionService } from './session.service';
 
 const cookie = (req: AuthedRequest, name: string): string | undefined => {
@@ -35,13 +36,23 @@ export class AuthGuard implements CanActivate {
   constructor(
     private readonly reflector: Reflector,
     private readonly sessions: SessionService,
+    private readonly apiTokens: ApiTokensService,
     private readonly cls: ClsService<AppClsStore>,
   ) {}
 
   async canActivate(ctx: ExecutionContext): Promise<boolean> {
     const req = ctx.switchToHttp().getRequest<AuthedRequest>();
     const token = cookie(req, SESSION_COOKIE);
-    const user = token ? await this.sessions.authenticate(token) : null;
+    let user = token ? await this.sessions.authenticate(token) : null;
+    if (!user) {
+      const bearer = /^Bearer (\S+)$/.exec(req.headers.authorization ?? '')?.[1];
+      const viaToken = bearer ? await this.apiTokens.authenticate(bearer) : null;
+      if (viaToken) {
+        user = viaToken.user;
+        req.apiToken = { id: viaToken.tokenId, readOnly: viaToken.readOnly };
+        this.assertTokenAllowed(req);
+      }
+    }
     if (user) {
       req.user = user;
       this.cls.set('userId', user.id);
@@ -55,6 +66,20 @@ export class AuthGuard implements CanActivate {
     if (!isPublic && !user) throw new UnauthorizedException({ code: ERROR_CODES.UNAUTHENTICATED });
     return true;
   }
+
+  /**
+   * API token'ı oturum yönetimi, şifre ve token uçlarına erişemez (çalınan token hesabı ele
+   * geçirmesin); salt okunur token yazma yapamaz (ADR-086).
+   */
+  private assertTokenAllowed(req: AuthedRequest): void {
+    const path = req.path.replace(/^\/api/, '');
+    if (path.startsWith('/auth') || path.startsWith('/tokens')) {
+      throw new ForbiddenException({ code: ERROR_CODES.TOKEN_NOT_ALLOWED });
+    }
+    if (req.apiToken?.readOnly && !['GET', 'HEAD', 'OPTIONS'].includes(req.method)) {
+      throw new ForbiddenException({ code: ERROR_CODES.TOKEN_READ_ONLY });
+    }
+  }
 }
 
 const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
@@ -65,6 +90,8 @@ export class CsrfGuard implements CanActivate {
   canActivate(ctx: ExecutionContext): boolean {
     const req = ctx.switchToHttp().getRequest<AuthedRequest>();
     if (SAFE_METHODS.has(req.method)) return true;
+    // Bearer token ortam kimlik bilgisi (cookie) değildir; CSRF riski yok (ADR-086).
+    if (req.apiToken) return true;
     const expected = cookie(req, CSRF_COOKIE);
     const provided = req.headers[CSRF_HEADER];
     if (!expected || typeof provided !== 'string' || !safeEqual(expected, provided)) {

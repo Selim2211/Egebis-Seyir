@@ -163,6 +163,7 @@ model User {
   docsUpdated             Doc[]                    @relation("DocUpdater")
   docVersions             DocVersion[]             @relation("DocVersionAuthor")
   templates       Template[]
+  apiTokens       ApiToken[]
 
   @@map("users")
 }
@@ -1180,4 +1181,23 @@ model AutomationRun {
 
   @@index([automationId, createdAt])
   @@map("automation_runs")
+}
+
+/// Kişisel API erişim token'ı (brief §5.18, ADR-086): kullanıcı adına çalışır; yalnızca SHA-256 özeti saklanır.
+model ApiToken {
+  id         String    @id @default(uuid(7)) @db.Uuid
+  userId     String    @db.Uuid
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name       String
+  /// Listede tanımak için token'ın ilk karakterleri (gizli kısım değil).
+  prefix     String
+  tokenHash  String    @unique
+  readOnly   Boolean   @default(false)
+  expiresAt  DateTime? @db.Timestamptz
+  lastUsedAt DateTime? @db.Timestamptz
+  revokedAt  DateTime? @db.Timestamptz
+  createdAt  DateTime  @default(now()) @db.Timestamptz
+
+  @@index([userId])
+  @@map("api_tokens")
 }

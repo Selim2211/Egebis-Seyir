@@ -751,3 +751,16 @@
   - **Sınırlar:** dosya en çok 5 MB ve **500 satır** (aşarsa 422 `IMPORT_TOO_LARGE`; daha büyük veri parçalanır); API JSON gövde sınırı 100 KB'tan **6 MB'a** çıkarıldı (tüm uçlar için; alan doğrulamaları sınırlı olduğundan kabul edildi).
 - **Alternatifler:** Yükleme `multipart` ile (JSON gövde sınırı sorunu çıkmaz ama dosya depolama/akış katmanı ve geçici dosya gerekir); asenkron arka plan işi (büyük dosyada iyi, ama 500 satır sınırında gereksiz karmaşa); dışa aktarmanın tarayıcıda görünen süzgeçli satırlarla sınırlanması (şimdilik tüm List); XLSX desteği.
 - **Bilinen sınırlar:** sprint, yorum, ek, bağlantı (blocks), izleyen ve zaman kaydı içe/dışa aktarılmaz; durum eşlemesi yalnızca ad (olmayan durum satırı reddeder, otomatik oluşturmaz); kişi alanında aynı ad iki üyede varsa ilki yerine e-posta tercih edilmeli; 500 satırlık içe aktarma satır satır yazıldığı için birkaç saniye sürebilir; ClickUp/Jira dışa aktarma dosyalarının özel biçimleri (alt görev iç içe sütunları vb.) özel olarak ele alınmaz; JSON gövde sınırı global olduğu için kimlik doğrulamasız uçlar da 6 MB'a kadar gövde okur.
+
+## ADR-086 — Kişisel API token'ları
+
+- **Tarih:** 2026-10-05 · **Durum:** Kabul (brief §5.18 [F3]; ayrıntılar geliştirici varsayılanı, onay bekliyor)
+- **Karar:**
+  - **Herkese açık API = mevcut REST API:** ayrı bir "public API" katmanı kurulmadı; tüm `/api` uçları, kullanıcı adına verilen **kişisel erişim token'ı** ile `Authorization: Bearer smt_…` başlığıyla kullanılabilir. Yetkiler token sahibinin rolleriyle aynıdır (token yetki genişletmez). OpenAPI belgesi geliştirmede `/api/docs`'ta (üretimde kapalı; ADR kararı değişmedi).
+  - **Saklama:** token 256 bit rastgele, `smt_` önekli; veritabanında yalnızca **SHA-256 özeti** tutulur, düz değer oluşturma yanıtında **bir kez** gösterilir; listede ilk 10 karakter (önek) ve ad görünür.
+  - **Kısıtlar:** kullanıcı başına en çok 20 etkin token; isteğe bağlı süre (30/90/365 gün ya da süresiz); **salt okunur** seçeneği (GET dışı 403 `TOKEN_READ_ONLY`); iptal anında geçerli; son kullanım zamanı dakikada bir güncellenir.
+  - **Yetki sınırı:** token ile `/api/auth*` (oturum, şifre, profil) ve `/api/tokens*` uçlarına erişilemez (403 `TOKEN_NOT_ALLOWED`); böylece çalınan token hesabı ele geçirmez ve kendini çoğaltamaz. Token yönetimi yalnızca oturumla (web arayüzü).
+  - **CSRF:** Bearer başlığı tarayıcının otomatik göndermediği bir kimlik bilgisidir; token isteklerinde CSRF denetimi atlanır. Cookie ile gelen istekler değişmedi.
+  - **Arayüz:** Ayarlar → "API erişimi": oluştur (ad, süre, salt okunur), tek seferlik kopyalama kutusu, etkin token listesi, iptal, curl örneği.
+- **Alternatifler:** OAuth2 istemci kaydı (kurum içi betikler için aşırı); workspace düzeyi servis hesabı token'ı (kişiye bağlı denetim izi ve yetki daha basit; ileride eklenebilir); token başına kapsam listesi (şimdilik yalnızca okuma/yazma).
+- **Bilinen sınırlar:** token başına Space/workspace kısıtı yok (sahibin tüm yetkisi); istek başına oran sınırı yalnızca genel kurallara bağlı; denetim günlüğünde token ile yapılan değişiklik kullanıcı adıyla görünür, hangi token olduğu ayrıca işaretlenmez; üretimde OpenAPI belgesi kapalı olduğundan uç listesi ayrıca yayımlanmalı.

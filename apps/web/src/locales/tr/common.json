@@ -158,7 +158,8 @@
     "sessions": "Oturumlar",
     "general": "Genel",
     "archive": "Arşiv ve çöp kutusu",
-    "notifications": "Bildirimler"
+    "notifications": "Bildirimler",
+    "api": "API erişimi"
   },
   "members": {
     "title": "Üyeler",
@@ -346,7 +347,10 @@
     "AUTOMATION_INVALID": "Otomasyon geçersiz: durum, kişi, etiket veya alan değeri bu Space’e uymuyor.",
     "IMPORT_EMPTY": "CSV boş ya da yalnızca başlık satırı var.",
     "IMPORT_TOO_LARGE": "CSV en çok 500 satır içerebilir.",
-    "IMPORT_TITLE_UNMAPPED": "Başlık sütununu eşle."
+    "IMPORT_TITLE_UNMAPPED": "Başlık sütununu eşle.",
+    "API_TOKEN_LIMIT": "En çok 20 etkin token olabilir.",
+    "TOKEN_READ_ONLY": "Bu token salt okunur; değişiklik yapamaz.",
+    "TOKEN_NOT_ALLOWED": "Bu uç token ile kullanılamaz."
   },
   "spaceRoles": {
     "PRODUCT_OWNER": "Product Owner",
@@ -1507,5 +1511,29 @@
       "WORK_ITEM_ESTIMATE_INVALID": "Tahmin bu Space’in ölçeğine uymuyor.",
       "WRITE_FAILED": "Kaydedilemedi: {{detail}}"
     }
+  },
+  "apiAccess": {
+    "title": "API erişimi",
+    "subtitle": "Betik ve entegrasyonlar için kişisel erişim token’ları. Token senin adına, senin yetkilerinle çalışır.",
+    "active": "Etkin token’lar",
+    "none": "Henüz token yok.",
+    "name": "Token adı",
+    "namePlaceholder": "ör. CI betiği",
+    "expiry": "Geçerlilik",
+    "never": "Süresiz",
+    "days": "{{count}} gün",
+    "readOnly": "Salt okunur",
+    "readOnlyBadge": "Salt okunur",
+    "create": "Token oluştur",
+    "copyNow": "“{{name}}” oluşturuldu. Token’ı şimdi kopyala; bir daha gösterilmeyecek.",
+    "tokenValue": "Token değeri",
+    "copy": "Kopyala",
+    "copied": "Token kopyalandı.",
+    "lastUsed": "Son kullanım {{when}}",
+    "neverUsed": "Hiç kullanılmadı",
+    "expires": "bitiş {{date}}",
+    "revoke": "“{{name}}” token’ını iptal et",
+    "revoked": "Token iptal edildi.",
+    "usage": "İsteklere Authorization: Bearer başlığıyla ekle. Token hesap, oturum ve token yönetimi uçlarına erişemez."
   }
 }

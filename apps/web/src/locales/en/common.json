@@ -158,7 +158,8 @@
     "sessions": "Sessions",
     "general": "General",
     "archive": "Archive and trash",
-    "notifications": "Notifications"
+    "notifications": "Notifications",
+    "api": "API access"
   },
   "members": {
     "title": "Members",
@@ -346,7 +347,10 @@
     "AUTOMATION_INVALID": "The automation is invalid: a status, person, label or field value does not fit this Space.",
     "IMPORT_EMPTY": "The CSV is empty or has only a header row.",
     "IMPORT_TOO_LARGE": "The CSV can have at most 500 rows.",
-    "IMPORT_TITLE_UNMAPPED": "Map the title column."
+    "IMPORT_TITLE_UNMAPPED": "Map the title column.",
+    "API_TOKEN_LIMIT": "At most 20 active tokens.",
+    "TOKEN_READ_ONLY": "This token is read-only and cannot make changes.",
+    "TOKEN_NOT_ALLOWED": "This endpoint cannot be used with a token."
   },
   "spaceRoles": {
     "PRODUCT_OWNER": "Product Owner",
@@ -1507,5 +1511,29 @@
       "WORK_ITEM_ESTIMATE_INVALID": "The estimate does not fit this Space’s scale.",
       "WRITE_FAILED": "Could not be saved: {{detail}}"
     }
+  },
+  "apiAccess": {
+    "title": "API access",
+    "subtitle": "Personal access tokens for scripts and integrations. A token acts as you, with your permissions.",
+    "active": "Active tokens",
+    "none": "No tokens yet.",
+    "name": "Token name",
+    "namePlaceholder": "e.g. CI script",
+    "expiry": "Expires",
+    "never": "Never",
+    "days": "{{count}} days",
+    "readOnly": "Read-only",
+    "readOnlyBadge": "Read-only",
+    "create": "Create token",
+    "copyNow": "“{{name}}” created. Copy the token now; it will not be shown again.",
+    "tokenValue": "Token value",
+    "copy": "Copy",
+    "copied": "Token copied.",
+    "lastUsed": "Last used {{when}}",
+    "neverUsed": "Never used",
+    "expires": "expires {{date}}",
+    "revoke": "Revoke token “{{name}}”",
+    "revoked": "Token revoked.",
+    "usage": "Send it in the Authorization: Bearer header. Tokens cannot reach account, session or token management endpoints."
   }
 }
