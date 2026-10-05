@@ -1,8 +1,12 @@
 import { useId } from 'react';
+import { cn } from '@/lib/utils';
 
-/** Egebis Seyir işareti: iki yelken ve dalga (ilerleyiş, sprint ritmi). `public/logo.svg` ile aynı çizim. */
-export function Logo({ size = 40, className }: { size?: number; className?: string }) {
-  const gradient = useId();
+/**
+ * Egebis Seyir işareti: iki gradyanlı yelken ve dalga (ilerleyiş, sprint ritmi). Vektör çizim,
+ * her çözünürlükte keskindir. `public/logo.svg` ile aynı geometri.
+ */
+export function Logo({ size = 32, className }: { size?: number; className?: string }) {
+  const id = useId();
   return (
     <svg
       width={size}
@@ -13,22 +17,65 @@ export function Logo({ size = 40, className }: { size?: number; className?: stri
       className={className}
     >
       <defs>
-        <linearGradient id={gradient} x1="8" y1="4" x2="58" y2="62" gradientUnits="userSpaceOnUse">
-          <stop offset="0" stopColor="#6366F1" />
-          <stop offset="1" stopColor="#0EA5E9" />
+        <linearGradient
+          id={`${id}-a`}
+          x1="12"
+          y1="8"
+          x2="30"
+          y2="46"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop offset="0" stopColor="#8B5CF6" />
+          <stop offset="1" stopColor="#4F46E5" />
+        </linearGradient>
+        <linearGradient
+          id={`${id}-b`}
+          x1="34"
+          y1="14"
+          x2="54"
+          y2="46"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop offset="0" stopColor="#22D3EE" />
+          <stop offset="1" stopColor="#2563EB" />
+        </linearGradient>
+        <linearGradient
+          id={`${id}-c`}
+          x1="8"
+          y1="50"
+          x2="56"
+          y2="50"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop offset="0" stopColor="#A78BFA" />
+          <stop offset="0.5" stopColor="#38BDF8" />
+          <stop offset="1" stopColor="#22D3EE" />
         </linearGradient>
       </defs>
-      <rect width="64" height="64" rx="15" fill={`url(#${gradient})`} />
-      <path d="M31 11v31H15.5z" fill="#fff" />
-      <path d="M35 19v23h14.5z" fill="#fff" fillOpacity=".72" />
+      <path d="M29 6C29 6 12 25 10.5 45H29Z" fill={`url(#${id}-a)`} />
+      <path d="M34 14C34 14 49 28 53.5 45H34Z" fill={`url(#${id}-b)`} />
       <path
-        d="M9 50.5q5.75-5.5 11.5 0t11.5 0 11.5 0 11.5 0"
+        d="M7 53C14.5 47.5 22 58 31.5 52.5S49 47.5 57 53"
         fill="none"
-        stroke="#fff"
-        strokeWidth="3.6"
+        stroke={`url(#${id}-c)`}
+        strokeWidth="4.4"
         strokeLinecap="round"
-        strokeLinejoin="round"
       />
     </svg>
+  );
+}
+
+/** Logo + "Egebis Seyir" yazısı (kenar çubuğu üst köşesi, giriş ekranları). */
+export function BrandMark({ size = 30, className }: { size?: number; className?: string }) {
+  return (
+    <span className={cn('flex items-center gap-2.5', className)}>
+      <Logo size={size} />
+      <span className="flex flex-col leading-none">
+        <span className="text-muted-foreground text-[10px] font-medium tracking-[0.22em]">
+          EGEBIS
+        </span>
+        <span className="mt-0.5 text-[19px] font-bold tracking-tight">Seyir</span>
+      </span>
+    </span>
   );
 }

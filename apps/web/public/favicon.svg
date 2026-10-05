@@ -1,12 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Egebis Seyir">
   <defs>
-    <linearGradient id="bg" x1="8" y1="4" x2="58" y2="62" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#6366F1"/>
-      <stop offset="1" stop-color="#0EA5E9"/>
-    </linearGradient>
+    <linearGradient id="a" x1="12" y1="8" x2="30" y2="46" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#8B5CF6"/><stop offset="1" stop-color="#4F46E5"/></linearGradient>
+    <linearGradient id="b" x1="34" y1="14" x2="54" y2="46" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#22D3EE"/><stop offset="1" stop-color="#2563EB"/></linearGradient>
+    <linearGradient id="c" x1="8" y1="50" x2="56" y2="50" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#A78BFA"/><stop offset=".5" stop-color="#38BDF8"/><stop offset="1" stop-color="#22D3EE"/></linearGradient>
   </defs>
-  <rect width="64" height="64" rx="15" fill="url(#bg)"/>
-  <path d="M31 11v31H15.5z" fill="#fff"/>
-  <path d="M35 19v23h14.5z" fill="#fff" fill-opacity=".72"/>
-  <path d="M9 50.5q5.75-5.5 11.5 0t11.5 0 11.5 0 11.5 0" fill="none" stroke="#fff" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M29 6C29 6 12 25 10.5 45H29Z" fill="url(#a)"/>
+  <path d="M34 14C34 14 49 28 53.5 45H34Z" fill="url(#b)"/>
+  <path d="M7 53C14.5 47.5 22 58 31.5 52.5S49 47.5 57 53" fill="none" stroke="url(#c)" stroke-width="4.4" stroke-linecap="round"/>
 </svg>

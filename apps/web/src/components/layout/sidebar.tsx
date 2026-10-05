@@ -11,6 +11,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { BrandMark } from '@/components/logo';
 import { Button } from '@/components/ui/button';
 import { useUnreadCount } from '@/features/notifications/queries';
 import { SidebarTree } from '@/features/spaces/sidebar-tree';
@@ -80,7 +81,10 @@ export function Sidebar() {
         )}
         aria-label={t('app.name')}
       >
-        <div className="border-sidebar-border flex h-12 items-center gap-2 border-b px-3">
+        <div className="flex h-14 shrink-0 items-center px-4">
+          <BrandMark size={32} />
+        </div>
+        <div className="border-sidebar-border flex h-12 items-center gap-2 border-y px-3">
           <div className="bg-primary text-primary-foreground flex size-6.5 shrink-0 items-center justify-center rounded-md text-xs font-bold">
             {workspace.name.slice(0, 1).toLocaleUpperCase('tr')}
           </div>
