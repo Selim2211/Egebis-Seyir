@@ -60,6 +60,12 @@ test.describe.serial('Doküman arama, ekler ve görev listesi', () => {
       page.getByRole('textbox', { name: 'Sayfa içeriği' }).getByRole('checkbox', { checked: true }),
     ).toHaveCount(1);
 
+    // Markdown dışa aktarma.
+    const download = page.waitForEvent('download');
+    await page.getByRole('button', { name: 'Markdown indir' }).click();
+    const file = await download;
+    expect(file.suggestedFilename()).toBe('Kurulum rehberi.md');
+
     // Global arama sayfayı bulur ve açar.
     await page.keyboard.press('Control+k');
     await page.getByRole('combobox', { name: 'Ara' }).fill('Sunucuyu');

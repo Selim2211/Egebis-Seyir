@@ -1,4 +1,4 @@
-import { isInSubtree, type DocNodeDto } from '@scrum/shared';
+import { diffLines, isInSubtree, richTextToMarkdownLines, type DocNodeDto } from '@scrum/shared';
 import { useQuery } from '@tanstack/react-query';
 import { RotateCcw } from 'lucide-react';
 import { useState } from 'react';
@@ -113,6 +113,20 @@ export function VersionsDialog({
     ...docVersionQuery(workspaceId, docId, selected ?? 0),
     enabled: selected !== null,
   });
+  // Seçili sürümün güncel sürümle farkı (Faz 7.6).
+  const [showDiff, setShowDiff] = useState(false);
+  const currentVersion = versions.find((v) => v.current)?.version ?? null;
+  const currentDetail = useQuery({
+    ...docVersionQuery(workspaceId, docId, currentVersion ?? 0),
+    enabled: showDiff && currentVersion !== null,
+  });
+  const diff =
+    showDiff && preview.data && currentDetail.data && !preview.data.current
+      ? diffLines(
+          [preview.data.title, ...richTextToMarkdownLines(preview.data.content)],
+          [currentDetail.data.title, ...richTextToMarkdownLines(currentDetail.data.content)],
+        )
+      : null;
 
   return (
     <Dialog open onOpenChange={(open) => !open && onClose()}>
@@ -162,8 +176,48 @@ export function VersionsDialog({
               <p className="text-destructive text-sm">{errorMessage(preview.error)}</p>
             ) : (
               <>
-                <h3 className="mb-2 text-base font-semibold">{preview.data.title}</h3>
-                {preview.data.content ? (
+                {!preview.data.current && (
+                  <label className="mb-2 flex items-center gap-2 text-xs">
+                    <input
+                      type="checkbox"
+                      checked={showDiff}
+                      onChange={(e) => setShowDiff(e.target.checked)}
+                    />
+                    {t('docs.showDiff')}
+                  </label>
+                )}
+                {diff ? (
+                  <ul aria-label={t('docs.diff')} className="font-mono text-xs">
+                    {diff.map((op, i) => (
+                      <li
+                        key={i}
+                        className={cn(
+                          'px-1 whitespace-pre-wrap',
+                          op.type === 'add' &&
+                            'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300',
+                          op.type === 'del' &&
+                            'bg-red-500/15 text-red-700 line-through dark:text-red-300',
+                        )}
+                      >
+                        <span aria-hidden>
+                          {op.type === 'add' ? '+ ' : op.type === 'del' ? '− ' : '  '}
+                        </span>
+                        <span className="sr-only">
+                          {t(
+                            op.type === 'add'
+                              ? 'docs.diffAdded'
+                              : op.type === 'del'
+                                ? 'docs.diffRemoved'
+                                : 'docs.diffSame',
+                          )}
+                        </span>
+                        {op.text || ' '}
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+                {!diff && <h3 className="mb-2 text-base font-semibold">{preview.data.title}</h3>}
+                {diff ? null : preview.data.content ? (
                   <RichTextView doc={preview.data.content} />
                 ) : (
                   <p className="text-muted-foreground text-sm">{t('docs.emptyVersion')}</p>

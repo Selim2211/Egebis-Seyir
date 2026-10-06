@@ -251,3 +251,19 @@
   flex: 1;
   min-width: 0;
 }
+
+/* Doküman sayfası yazdırma / PDF (Faz 7.6): yalnızca sayfa gövdesi basılır. */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .doc-print,
+  .doc-print * {
+    visibility: visible;
+  }
+  .doc-print {
+    position: absolute;
+    inset: 0 auto auto 0;
+    width: 100%;
+  }
+}

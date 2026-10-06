@@ -1176,7 +1176,14 @@
     "versionRestored": "Sürüm {{version}} geri yüklendi.",
     "linkedItems": "Bağlı görevler",
     "linkItem": "Görev bağla",
-    "unlinkItem": "{{key}} bağlantısını kaldır"
+    "unlinkItem": "{{key}} bağlantısını kaldır",
+    "exportMarkdown": "Markdown indir",
+    "print": "Yazdır / PDF",
+    "showDiff": "Güncel sürümle farkı göster",
+    "diff": "Sürüm farkı",
+    "diffAdded": "Eklendi: ",
+    "diffRemoved": "Silindi: ",
+    "diffSame": "Değişmedi: "
   },
   "retro": {
     "link": "Retrospektif",

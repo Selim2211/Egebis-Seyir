@@ -1176,7 +1176,14 @@
     "versionRestored": "Version {{version}} restored.",
     "linkedItems": "Linked items",
     "linkItem": "Link item",
-    "unlinkItem": "Remove link to {{key}}"
+    "unlinkItem": "Remove link to {{key}}",
+    "exportMarkdown": "Download Markdown",
+    "print": "Print / PDF",
+    "showDiff": "Show changes against the current version",
+    "diff": "Version diff",
+    "diffAdded": "Added: ",
+    "diffRemoved": "Removed: ",
+    "diffSame": "Unchanged: "
   },
   "retro": {
     "link": "Retrospective",

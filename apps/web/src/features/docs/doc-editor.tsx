@@ -1,7 +1,7 @@
-import type { DocDetail, RichTextDoc } from '@scrum/shared';
+import { docToMarkdown, type DocDetail, type RichTextDoc } from '@scrum/shared';
 import { useQueryClient } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
-import { AlertTriangle, History, RotateCcw } from 'lucide-react';
+import { AlertTriangle, FileDown, History, Printer, RotateCcw } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
@@ -85,7 +85,7 @@ export function DocEditor({
   };
 
   return (
-    <article className="flex min-w-0 flex-col gap-3">
+    <article className="doc-print flex min-w-0 flex-col gap-3">
       {doc.ancestors.length > 0 && (
         <nav
           aria-label={t('docs.breadcrumb')}
@@ -148,6 +148,32 @@ export function DocEditor({
         ) : (
           <h1 className="px-2 text-2xl font-semibold">{doc.title}</h1>
         )}
+        <Button
+          variant="outline"
+          size="sm"
+          className="mt-1.5 shrink-0 print:hidden"
+          onClick={() => {
+            const blob = new Blob([docToMarkdown(doc.title, doc.content)], {
+              type: 'text/markdown;charset=utf-8',
+            });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `${doc.title.replace(/[\\/:*?"<>|]+/g, '-').slice(0, 80) || 'sayfa'}.md`;
+            link.click();
+            URL.revokeObjectURL(url);
+          }}
+        >
+          <FileDown /> {t('docs.exportMarkdown')}
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          className="mt-1.5 shrink-0 print:hidden"
+          onClick={() => window.print()}
+        >
+          <Printer /> {t('docs.print')}
+        </Button>
         <Button variant="outline" size="sm" onClick={onOpenVersions} className="mt-1.5 shrink-0">
           <History /> {t('docs.versions')}
         </Button>

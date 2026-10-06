@@ -286,7 +286,7 @@ describe('Bildirimler (gerçek veritabanı)', () => {
     it('varsayılan olarak tüm türler ve kanallar açık', async () => {
       const prefs = (await elif.get(api('/notifications/preferences')).expect(200))
         .body as NotificationPreferences;
-      expect(prefs.preferences).toHaveLength(7);
+      expect(prefs.preferences).toHaveLength(8);
       expect(prefs.preferences.every((p) => p.inApp && p.email)).toBe(true);
     });
 

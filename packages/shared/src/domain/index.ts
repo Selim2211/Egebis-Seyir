@@ -32,3 +32,4 @@ export * from './webhook-url';
 export * from './git-events';
 export * from './recurrence';
 export * from './goal';
+export * from './doc-export';
