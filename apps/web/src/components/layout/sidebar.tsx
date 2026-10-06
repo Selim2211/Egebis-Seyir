@@ -4,6 +4,7 @@ import {
   House,
   Inbox,
   ListTodo,
+  MessageSquare,
   Palette,
   Target,
   Settings2,
@@ -14,6 +15,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { BrandMark } from '@/components/logo';
 import { Button } from '@/components/ui/button';
+import { useConversations } from '@/features/messages/queries';
 import { useUnreadCount } from '@/features/notifications/queries';
 import { SidebarTree } from '@/features/spaces/sidebar-tree';
 import { useCan, useCurrentWorkspace } from '@/features/workspace/queries';
@@ -66,6 +68,9 @@ export function Sidebar() {
   const { sidebarOpen, setSidebarOpen } = useUiStore();
   const workspace = useCurrentWorkspace();
   const canManageMembers = useCan(WORKSPACE_PERMISSIONS.MEMBERS_MANAGE);
+  // Misafirler mesajlaşamaz (ADR-098); onlar için yoklama da yapılmaz.
+  const canMessage = workspace.role !== 'GUEST';
+  const unreadMessages = useConversations(canMessage).data?.unreadCount ?? 0;
 
   return (
     <>
@@ -108,6 +113,14 @@ export function Sidebar() {
           <NavLink to="/" icon={House} label={t('nav.home')} />
           <NavLink to="/my-work" icon={ListTodo} label={t('nav.myWork')} />
           <NavLink to="/goals" icon={Target} label={t('nav.goals')} />
+          {canMessage && (
+            <NavLink
+              to="/messages"
+              icon={MessageSquare}
+              label={t('nav.messages')}
+              badge={unreadMessages}
+            />
+          )}
           <NavLink to="/notifications" icon={Inbox} label={t('nav.inbox')} badge={unread} />
 
           <SidebarTree />

@@ -155,6 +155,9 @@ model User {
   notificationPreferences NotificationPreference[]
   reminders               Reminder[]
   goalsOwned              Goal[]
+  conversationsLow        Conversation[]           @relation("ConversationLow")
+  conversationsHigh       Conversation[]           @relation("ConversationHigh")
+  messagesSent            Message[]
   retroItems              RetroItem[]
   retroVotes              RetroVote[]
   timeEntries             TimeEntry[]
@@ -255,6 +258,8 @@ model Workspace {
   notificationPreferences NotificationPreference[]
   reminders               Reminder[]
   goals                   Goal[]
+  conversations           Conversation[]
+  messages                Message[]
 
   @@map("workspaces")
 }
@@ -923,6 +928,47 @@ model Notification {
 enum GoalKind {
   TASKS
   NUMBER
+}
+
+/// Birebir mesajlaşma (Faz 7.8, ADR-098): iki kullanıcı arasındaki tek konuşma. `userLowId < userHighId`
+/// sıralaması aynı çiftin iki ayrı konuşma açmasını engeller.
+model Conversation {
+  id            String    @id @default(uuid(7)) @db.Uuid
+  workspaceId   String    @db.Uuid
+  workspace     Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  userLowId     String    @db.Uuid
+  userLow       User      @relation("ConversationLow", fields: [userLowId], references: [id], onDelete: Cascade)
+  userHighId    String    @db.Uuid
+  userHigh      User      @relation("ConversationHigh", fields: [userHighId], references: [id], onDelete: Cascade)
+  /// Her tarafın en son okuduğu an; okunmamış sayısı bundan sonrasına bakar.
+  lastReadLowAt  DateTime? @db.Timestamptz
+  lastReadHighAt DateTime? @db.Timestamptz
+  lastMessageAt DateTime? @db.Timestamptz
+  createdAt     DateTime  @default(now()) @db.Timestamptz
+
+  messages Message[]
+
+  @@unique([workspaceId, userLowId, userHighId])
+  @@index([userLowId])
+  @@index([userHighId])
+  @@map("conversations")
+}
+
+model Message {
+  id             String       @id @default(uuid(7)) @db.Uuid
+  workspaceId    String       @db.Uuid
+  workspace      Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  conversationId String       @db.Uuid
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderId       String?      @db.Uuid
+  sender         User?        @relation(fields: [senderId], references: [id], onDelete: SetNull)
+  body           String
+  createdAt      DateTime     @default(now()) @db.Timestamptz
+  /// Gönderen sildiğinde dolar; içerik arayüze gönderilmez.
+  deletedAt      DateTime?    @db.Timestamptz
+
+  @@index([conversationId, createdAt])
+  @@map("messages")
 }
 
 /// Hedef (Faz 7.9, ADR-097): workspace düzeyinde; görev bazlı (bağlı görevlerin ilerlemesi) ya da sayısal.

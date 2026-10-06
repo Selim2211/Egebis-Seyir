@@ -102,3 +102,4 @@ Güvenlik/yetki büyük ölçüde hazır (RBAC, oturum, CSRF, API token, audit).
 3. ClickUp'tan sayılanlar yapılacak: tekrarlayan görev (7.1), hatırlatıcı (7.3), Form (7.4), Goals (7.9).
 
 7.9 Hedefler (Goals): tamamlandı (ADR-097).
+7.8 Birebir mesajlaşma: tamamlandı (ADR-098).

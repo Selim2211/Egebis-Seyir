@@ -34,7 +34,8 @@
     "closeMenu": "Menüyü kapat",
     "comingSoon": "Sonraki adımda gelecek",
     "workspace": "Workspace",
-    "goals": "Hedefler"
+    "goals": "Hedefler",
+    "messages": "Mesajlar"
   },
   "spaces": {
     "emptyTitle": "Henüz Space yok",
@@ -382,7 +383,8 @@
     "FORM_FIELD_REQUIRED": "Bu alan zorunlu.",
     "FORM_LIMIT": "Bir Space en fazla 20 form içerebilir.",
     "GOAL_WRONG_KIND": "Bu işlem bu tür hedefte yapılamaz.",
-    "GOAL_LIMIT": "Çalışma alanı en fazla 200 hedef içerebilir."
+    "GOAL_LIMIT": "Çalışma alanı en fazla 200 hedef içerebilir.",
+    "MESSAGE_SELF": "Kendinize mesaj gönderemezsiniz."
   },
   "spaceRoles": {
     "PRODUCT_OWNER": "Product Owner",
@@ -1772,5 +1774,23 @@
     "deleteTitle": "“{{name}}” silinsin mi?",
     "deleteBody": "Hedef silinir; bağlı görevler etkilenmez.",
     "deleteConfirm": "Hedefi sil"
+  },
+  "messages": {
+    "title": "Mesajlar",
+    "subtitle": "Ekip arkadaşlarınla birebir yazış.",
+    "conversations": "Konuşmalar",
+    "empty": "Henüz konuşma yok.",
+    "new": "Yeni mesaj",
+    "pickPerson": "Kişi seç…",
+    "pick": "Bir konuşma seç ya da yeni mesaj başlat.",
+    "you": "Sen: ",
+    "unread": "{{count}} okunmamış mesaj",
+    "thread": "Mesajlar",
+    "hasMore": "Daha eski mesajlar var.",
+    "deleted": "Bu mesaj silindi.",
+    "delete": "Mesajı sil",
+    "write": "Mesaj yaz",
+    "placeholder": "Mesajını yaz… (Enter gönderir, Shift+Enter yeni satır)",
+    "send": "Gönder"
   }
 }

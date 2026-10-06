@@ -29,3 +29,4 @@ export * from './ai';
 export * from './reminder';
 export * from './form';
 export * from './goal';
+export * from './message';

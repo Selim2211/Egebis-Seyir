@@ -34,7 +34,8 @@
     "closeMenu": "Close menu",
     "comingSoon": "Coming in the next step",
     "workspace": "Workspace",
-    "goals": "Goals"
+    "goals": "Goals",
+    "messages": "Messages"
   },
   "spaces": {
     "emptyTitle": "No spaces yet",
@@ -382,7 +383,8 @@
     "FORM_FIELD_REQUIRED": "This field is required.",
     "FORM_LIMIT": "A space can have at most 20 forms.",
     "GOAL_WRONG_KIND": "This action is not available for this kind of goal.",
-    "GOAL_LIMIT": "A workspace can have at most 200 goals."
+    "GOAL_LIMIT": "A workspace can have at most 200 goals.",
+    "MESSAGE_SELF": "You cannot message yourself."
   },
   "spaceRoles": {
     "PRODUCT_OWNER": "Product Owner",
@@ -1772,5 +1774,23 @@
     "deleteTitle": "Delete “{{name}}”?",
     "deleteBody": "The goal is deleted; linked tasks are not affected.",
     "deleteConfirm": "Delete goal"
+  },
+  "messages": {
+    "title": "Messages",
+    "subtitle": "Chat one-to-one with your teammates.",
+    "conversations": "Conversations",
+    "empty": "No conversations yet.",
+    "new": "New message",
+    "pickPerson": "Pick a person…",
+    "pick": "Pick a conversation or start a new message.",
+    "you": "You: ",
+    "unread": "{{count}} unread messages",
+    "thread": "Messages",
+    "hasMore": "There are older messages.",
+    "deleted": "This message was deleted.",
+    "delete": "Delete message",
+    "write": "Write a message",
+    "placeholder": "Write a message… (Enter sends, Shift+Enter for a new line)",
+    "send": "Send"
   }
 }
