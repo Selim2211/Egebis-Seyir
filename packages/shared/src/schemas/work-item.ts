@@ -432,5 +432,13 @@ export const SearchResponseSchema = z.object({
       ...rowContext,
     }),
   ),
+  /** Doküman sayfaları (başlık ve metin); `doc.view` izni olan Space'lerden. */
+  docs: z.array(
+    z.object({
+      id: z.uuid(),
+      title: z.string(),
+      space: rowContext.space,
+    }),
+  ),
 });
 export type SearchResponse = z.infer<typeof SearchResponseSchema>;

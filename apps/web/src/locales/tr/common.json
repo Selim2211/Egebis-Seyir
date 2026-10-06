@@ -750,8 +750,8 @@
   },
   "search": {
     "title": "Ara",
-    "help": "Görev başlığı, açıklama veya kimlik (ör. MOB-12) ara.",
-    "hint": "Görev başlığı, açıklama veya MOB-12 yaz.",
+    "help": "Görev veya doküman başlığı, açıklama ya da kimlik (ör. MOB-12) ara.",
+    "hint": "Görev, doküman veya MOB-12 yaz.",
     "noResults": "Sonuç bulunamadı.",
     "count_one": "{{count}} sonuç",
     "count_other": "{{count}} sonuç"

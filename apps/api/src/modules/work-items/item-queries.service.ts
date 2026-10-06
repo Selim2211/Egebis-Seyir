@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import {
   parseItemKey,
   SEARCH_LIMIT,
+  SPACE_PERMISSIONS as S,
   type MyWorkResponse,
   type MyWorkScope,
   type SearchResponse,
@@ -16,6 +17,7 @@ import { rowInclude, toRow } from './item-support';
 
 const MY_WORK_LIMIT = 500;
 const MAX_QUERY_WORDS = 8;
+const DOC_SEARCH_LIMIT = 8;
 
 /** `%` ve `_` kullanıcı girdisinde düz karakterdir. */
 const escapeLike = (text: string) => text.replace(/[\\%_]/g, (c) => `\\${c}`);
@@ -57,10 +59,10 @@ export class ItemQueriesService {
    */
   async search(query: string): Promise<SearchResponse> {
     const q = query.trim().slice(0, 200);
-    if (q.length === 0) return { items: [] };
+    if (q.length === 0) return { items: [], docs: [] };
     const workspaceId = this.cls.get('workspaceId')!;
     const spaceIds = [...(await this.access.permissionMap({ deletedAt: null })).keys()];
-    if (spaceIds.length === 0) return { items: [] };
+    if (spaceIds.length === 0) return { items: [], docs: [] };
 
     const words = (q.match(/[\p{L}\p{N}]+/gu) ?? []).slice(0, MAX_QUERY_WORDS);
     const tsQuery = words.map((w) => `${w}:*`).join(' & ');
@@ -91,7 +93,8 @@ export class ItemQueriesService {
         w."createdAt" DESC
       LIMIT ${SEARCH_LIMIT}
     `);
-    if (hits.length === 0) return { items: [] };
+    const docs = await this.searchDocs(workspaceId, q, words, spaceIds);
+    if (hits.length === 0) return { items: [], docs };
 
     const rows = await this.tenant.db.workItem.findMany({
       where: { id: { in: hits.map((h) => h.id) } },
@@ -99,6 +102,7 @@ export class ItemQueriesService {
     });
     const byId = new Map(rows.map((r) => [r.id, r]));
     return {
+      docs,
       items: hits.flatMap(({ id }) => {
         const row = byId.get(id);
         if (!row) return [];
@@ -106,5 +110,48 @@ export class ItemQueriesService {
         return { id, key: itemKey, type, title, space, list, status };
       }),
     };
+  }
+
+  /** Doküman sayfaları: başlık (parça) ve metin (Türkçe FTS, ön ek); yalnızca `doc.view` izinli Space'ler. */
+  private async searchDocs(
+    workspaceId: string,
+    q: string,
+    words: string[],
+    spaceIds: string[],
+  ): Promise<SearchResponse['docs']> {
+    const map = await this.access.permissionMap({ deletedAt: null });
+    const viewable = spaceIds.filter((id) => map.get(id)?.includes(S.DOC_VIEW));
+    if (viewable.length === 0) return [];
+    const tsQuery = words.map((w) => `${w}:*`).join(' & ');
+    const contains = `%${escapeLike(q)}%`;
+    const startsWith = `${escapeLike(q)}%`;
+    const textMatch =
+      tsQuery === ''
+        ? Prisma.sql`FALSE`
+        : Prisma.sql`to_tsvector('turkish', d."title" || ' ' || d."plainText") @@ to_tsquery('turkish', ${tsQuery})`;
+    const hits = await this.prisma.$queryRaw<Array<{ id: string }>>(Prisma.sql`
+      SELECT d."id"
+      FROM "docs" d
+      JOIN "spaces" s ON s."id" = d."spaceId" AND s."deletedAt" IS NULL
+      WHERE d."workspaceId" = ${workspaceId}::uuid
+        AND d."spaceId" = ANY(${viewable}::uuid[])
+        AND d."deletedAt" IS NULL
+        AND (d."title" ILIKE ${contains} OR ${textMatch})
+      ORDER BY
+        CASE WHEN d."title" ILIKE ${startsWith} THEN 0 WHEN d."title" ILIKE ${contains} THEN 1 ELSE 2 END,
+        d."updatedAt" DESC
+      LIMIT ${DOC_SEARCH_LIMIT}
+    `);
+    if (hits.length === 0) return [];
+    const rows = await this.tenant.db.doc.findMany({
+      where: { id: { in: hits.map((h) => h.id) } },
+      select: {
+        id: true,
+        title: true,
+        space: { select: { id: true, name: true, key: true, color: true, icon: true } },
+      },
+    });
+    const byId = new Map(rows.map((r) => [r.id, r]));
+    return hits.flatMap(({ id }) => byId.get(id) ?? []);
   }
 }

@@ -91,6 +91,37 @@ describe('Global arama ve Benim işlerim (gerçek veritabanı)', () => {
       });
     });
 
+    it('doküman sayfalarını başlık ve metinden bulur; görünmeyen Space ve silinen sayfa çıkmaz', async () => {
+      const s = await space();
+      const page = (
+        await owner
+          .post(api(`/spaces/${s.id}/docs`), {
+            title: 'Dağıtım rehberi',
+            content: doc('Sunucuya kurulum adımları'),
+          })
+          .expect(201)
+      ).body as Created;
+      const gone = (
+        await owner.post(api(`/spaces/${s.id}/docs`), { title: 'Silinecek rehber' }).expect(201)
+      ).body as Created;
+      await owner.delete(api(`/docs/${gone.id}`)).expect(204);
+
+      const docs = async (q: string, client = owner) =>
+        (
+          (await client.get(api(`/search?q=${encodeURIComponent(q)}`)).expect(200))
+            .body as SearchResponse
+        ).docs.map((d) => d.id);
+      expect(await docs('rehber')).toEqual([page.id]); // başlık, silinen yok
+      expect(await docs('kurulum')).toEqual([page.id]); // metin
+      expect(await docs('kurul')).toEqual([page.id]); // ön ek
+      expect(await docs('bulunmayan')).toEqual([]);
+
+      const hidden = await space({ name: 'Gizli', key: 'GIZ', isPrivate: true });
+      await owner.post(api(`/spaces/${hidden.id}/docs`), { title: 'Gizli rehber' }).expect(201);
+      const elif = await inviteAndAccept(ctx, owner, ws, ELIF);
+      expect(await docs('rehber', elif)).toEqual([page.id]);
+    });
+
     it('% ve _ düz karakterdir; tırnak ve SQL parçaları zarar vermez', async () => {
       const s = await space();
       await create(s.listId, { type: 'TASK', title: 'Yüzde %50 indirim' });

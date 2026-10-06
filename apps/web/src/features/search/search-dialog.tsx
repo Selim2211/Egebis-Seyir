@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
-import { Search } from 'lucide-react';
+import { FileText, Search } from 'lucide-react';
 import { useEffect, useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
@@ -36,7 +36,12 @@ export function SearchDialog({
   }, [text]);
 
   const { data, isFetching } = useQuery(globalSearchQuery(workspaceId, query));
-  const results = query.trim() ? (data?.items ?? []) : [];
+  const results = query.trim()
+    ? [
+        ...(data?.items ?? []).map((item) => ({ kind: 'item' as const, ...item })),
+        ...(data?.docs ?? []).map((doc) => ({ kind: 'doc' as const, ...doc })),
+      ]
+    : [];
 
   const close = () => {
     onOpenChange(false);
@@ -44,9 +49,17 @@ export function SearchDialog({
     setQuery('');
     setActive(0);
   };
-  const go = (key: string) => {
+  const go = (result: (typeof results)[number]) => {
     close();
-    void navigate({ to: '/items/$key', params: { key } });
+    if (result.kind === 'doc') {
+      void navigate({
+        to: '/spaces/$spaceId/docs',
+        params: { spaceId: result.space.id },
+        search: { doc: result.id },
+      });
+    } else {
+      void navigate({ to: '/items/$key', params: { key: result.key } });
+    }
   };
 
   return (
@@ -84,7 +97,7 @@ export function SearchDialog({
                 setActive((a) => (a - 1 + results.length) % results.length);
               } else if (e.key === 'Enter' && results[active]) {
                 e.preventDefault();
-                go(results[active].key);
+                go(results[active]);
               }
             }}
             placeholder={t('topbar.search')}
@@ -101,7 +114,7 @@ export function SearchDialog({
           <ul id={`${listId}-list`} role="listbox" className="max-h-80 overflow-y-auto p-1.5">
             {results.map((item, index) => (
               <li
-                key={item.id}
+                key={`${item.kind}-${item.id}`}
                 id={`${listId}-${index}`}
                 role="option"
                 aria-selected={index === active}
@@ -110,16 +123,22 @@ export function SearchDialog({
                   type="button"
                   tabIndex={-1}
                   onMouseEnter={() => setActive(index)}
-                  onClick={() => go(item.key)}
+                  onClick={() => go(item)}
                   className={cn(
                     'flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm',
                     index === active && 'bg-accent',
                   )}
                 >
-                  <WorkItemTypeIcon type={item.type} />
-                  <span className="text-muted-foreground shrink-0 font-mono text-xs">
-                    {item.key}
-                  </span>
+                  {item.kind === 'doc' ? (
+                    <FileText className="text-muted-foreground size-4 shrink-0" aria-hidden />
+                  ) : (
+                    <>
+                      <WorkItemTypeIcon type={item.type} />
+                      <span className="text-muted-foreground shrink-0 font-mono text-xs">
+                        {item.key}
+                      </span>
+                    </>
+                  )}
                   <span className="min-w-0 flex-1 truncate">{item.title}</span>
                   <span className="text-muted-foreground flex shrink-0 items-center gap-1 text-xs">
                     <SpaceAvatar space={{ ...item.space, icon: null }} size={14} />

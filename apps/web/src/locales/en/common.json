@@ -750,8 +750,8 @@
   },
   "search": {
     "title": "Search",
-    "help": "Search task titles, descriptions or an ID (e.g. MOB-12).",
-    "hint": "Type a task title, description or MOB-12.",
+    "help": "Search item or page titles, text, or an ID (e.g. MOB-12).",
+    "hint": "Type an item, a page or MOB-12.",
     "noResults": "No results found.",
     "count_one": "{{count}} result",
     "count_other": "{{count}} results"
