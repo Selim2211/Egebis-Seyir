@@ -376,7 +376,10 @@
     "RECURRENCE_NEEDS_DUE_DATE": "A due date is required for recurrence.",
     "RECURRENCE_NOT_ALLOWED": "Epics cannot recur.",
     "REMINDER_IN_PAST": "The reminder time cannot be in the past.",
-    "REMINDER_LIMIT": "At most 10 pending reminders per item."
+    "REMINDER_LIMIT": "At most 10 pending reminders per item.",
+    "FORM_DISABLED": "This form is turned off.",
+    "FORM_FIELD_REQUIRED": "This field is required.",
+    "FORM_LIMIT": "A space can have at most 20 forms."
   },
   "spaceRoles": {
     "PRODUCT_OWNER": "Product Owner",
@@ -846,7 +849,8 @@
     },
     "gitLinked": "Git link added: {{detail}}",
     "gitUpdated": "Git link updated: {{detail}}",
-    "recurred": "Created because recurring task {{key}} was completed."
+    "recurred": "Created because recurring task {{key}} was completed.",
+    "formSubmitted": "Created through the “{{name}}” form."
   },
   "backlog": {
     "title": "Backlog",
@@ -1691,5 +1695,44 @@
     "notePlaceholder": "Note (optional)",
     "add": "Remind me",
     "delete": "Delete reminder at {{when}}"
+  },
+  "forms": {
+    "link": "Forms",
+    "title": "Forms",
+    "subtitle": "Fill in a form to file a request or a bug report with the team.",
+    "empty": "There are no open forms in this Space.",
+    "submit": "Submit",
+    "submitted": "{{key}} created.",
+    "fieldTitle": "Title",
+    "fieldDescription": "Description",
+    "fieldPriority": "Priority",
+    "fieldDueDate": "Due date",
+    "fieldAssignee": "Assignee",
+    "settingsTitle": "Forms",
+    "settingsHelp": "Forms that let Space members (viewers included) open items in a specific List.",
+    "add": "Add form",
+    "none": "No forms yet.",
+    "addTitle": "Add form",
+    "editTitle": "Edit form",
+    "edit": "Edit form {{name}}",
+    "delete": "Delete form {{name}}",
+    "deleteTitle": "Delete this form?",
+    "deleteBody": "The form “{{name}}” is deleted; items already created stay.",
+    "enabledToggle": "Form {{name}} is open",
+    "saved": "Form saved.",
+    "name": "Form name",
+    "description": "Description",
+    "targetList": "Target List",
+    "itemType": "Item type to create",
+    "fields": "Fields",
+    "titleAlways": "Title is required on every form.",
+    "required": "Required",
+    "field": {
+      "description": "Description",
+      "priority": "Priority",
+      "dueDate": "Due date",
+      "assignee": "Assignee"
+    },
+    "deleteConfirm": "Delete form"
   }
 }

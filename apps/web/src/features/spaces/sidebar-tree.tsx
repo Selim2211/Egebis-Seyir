@@ -34,6 +34,7 @@ import {
   StarOff,
   Trash2,
   Users,
+  ClipboardList,
 } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -317,6 +318,7 @@ function SpaceNode({
         <div role="group" aria-label={space.name}>
           {space.scrumEnabled && <ScrumLinks spaceId={space.id} />}
           <DocsLink spaceId={space.id} />
+          <FormsLink spaceId={space.id} />
           <TimesheetLink spaceId={space.id} />
           <DashboardLink spaceId={space.id} />
           <GanttLink spaceId={space.id} />
@@ -457,6 +459,18 @@ function DocsLink({ spaceId }: { spaceId: string }) {
   );
 }
 
+/** Space'in formları (Faz 7.4). */
+function FormsLink({ spaceId }: { spaceId: string }) {
+  const { t } = useTranslation();
+  const closeSidebar = useUiStore((s) => s.setSidebarOpen);
+  return (
+    <ScrumLink to="/spaces/$spaceId/forms" spaceId={spaceId} onNavigate={() => closeSidebar(false)}>
+      <ClipboardList className="text-muted-foreground size-4 shrink-0" aria-hidden />
+      <span className="truncate">{t('forms.link')}</span>
+    </ScrumLink>
+  );
+}
+
 function ScrumLink({
   to,
   spaceId,
@@ -467,6 +481,7 @@ function ScrumLink({
     | '/spaces/$spaceId/backlog'
     | '/spaces/$spaceId/board'
     | '/spaces/$spaceId/docs'
+    | '/spaces/$spaceId/forms'
     | '/spaces/$spaceId/timesheet'
     | '/spaces/$spaceId/workload'
     | '/spaces/$spaceId/gantt'

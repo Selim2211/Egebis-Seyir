@@ -242,6 +242,7 @@ model Workspace {
   customFields      CustomField[]
   templates         Template[]
   automations       Automation[]
+  forms             Form[]
   webhooks          Webhook[]
   webhookDeliveries WebhookDelivery[]
   gitIntegrations   GitIntegration[]
@@ -375,6 +376,7 @@ model Space {
   customFields     CustomField[]
   templates        Template[]
   automations      Automation[]
+  forms            Form[]
   webhooks         Webhook[]
   folders          Folder[]
   lists            List[]
@@ -484,6 +486,7 @@ model List {
 
   items      WorkItem[]
   savedViews SavedView[]
+  forms      Form[]
 
   @@index([spaceId])
   @@index([folderId])
@@ -1183,6 +1186,29 @@ model Template {
 }
 
 /// Space düzeyinde otomasyon kuralı (brief §5.8, ADR-084): tetikleyici + koşullar + eylemler (JSON, sunucuda doğrulanır).
+/// Form (Faz 7.4): Space üyelerinin (Stakeholder dahil) belirli bir List'e görev açmasını sağlar.
+model Form {
+  id          String       @id @default(uuid(7)) @db.Uuid
+  workspaceId String       @db.Uuid
+  workspace   Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  spaceId     String       @db.Uuid
+  space       Space        @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  listId      String       @db.Uuid
+  list        List         @relation(fields: [listId], references: [id], onDelete: Cascade)
+  name        String
+  description String?
+  itemType    WorkItemType @default(TASK)
+  /// Başlık dışındaki alanlar: [{key, required}] (shared FormFieldSchema).
+  fields      Json         @default("[]")
+  enabled     Boolean      @default(true)
+  createdById String?      @db.Uuid
+  createdAt   DateTime     @default(now()) @db.Timestamptz
+  updatedAt   DateTime     @updatedAt @db.Timestamptz
+
+  @@index([spaceId])
+  @@map("forms")
+}
+
 model Automation {
   id          String    @id @default(uuid(7)) @db.Uuid
   workspaceId String    @db.Uuid

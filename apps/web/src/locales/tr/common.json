@@ -376,7 +376,10 @@
     "RECURRENCE_NEEDS_DUE_DATE": "Tekrar için bitiş tarihi gerekir.",
     "RECURRENCE_NOT_ALLOWED": "Epic tekrarlayamaz.",
     "REMINDER_IN_PAST": "Hatırlatma zamanı geçmişte olamaz.",
-    "REMINDER_LIMIT": "Bu görevde en fazla 10 bekleyen hatırlatıcı olabilir."
+    "REMINDER_LIMIT": "Bu görevde en fazla 10 bekleyen hatırlatıcı olabilir.",
+    "FORM_DISABLED": "Bu form kapalı.",
+    "FORM_FIELD_REQUIRED": "Bu alan zorunlu.",
+    "FORM_LIMIT": "Bir Space en fazla 20 form içerebilir."
   },
   "spaceRoles": {
     "PRODUCT_OWNER": "Product Owner",
@@ -846,7 +849,8 @@
     },
     "gitLinked": "Git bağlantısı eklendi: {{detail}}",
     "gitUpdated": "Git bağlantısı güncellendi: {{detail}}",
-    "recurred": "Tekrarlayan görev {{key}} tamamlandığı için oluşturuldu."
+    "recurred": "Tekrarlayan görev {{key}} tamamlandığı için oluşturuldu.",
+    "formSubmitted": "“{{name}}” formuyla oluşturuldu."
   },
   "backlog": {
     "title": "Backlog",
@@ -1691,5 +1695,44 @@
     "notePlaceholder": "Not (isteğe bağlı)",
     "add": "Hatırlat",
     "delete": "{{when}} hatırlatıcısını sil"
+  },
+  "forms": {
+    "link": "Formlar",
+    "title": "Formlar",
+    "subtitle": "Bir form doldurarak ekibe talep veya hata bildirimi aç.",
+    "empty": "Bu Space için açık form yok.",
+    "submit": "Gönder",
+    "submitted": "{{key}} oluşturuldu.",
+    "fieldTitle": "Başlık",
+    "fieldDescription": "Açıklama",
+    "fieldPriority": "Öncelik",
+    "fieldDueDate": "Bitiş tarihi",
+    "fieldAssignee": "Atanacak kişi",
+    "settingsTitle": "Formlar",
+    "settingsHelp": "Space üyelerinin (görüntüleyiciler dahil) belirli bir List’e görev açmasını sağlayan formlar.",
+    "add": "Form ekle",
+    "none": "Henüz form yok.",
+    "addTitle": "Form ekle",
+    "editTitle": "Formu düzenle",
+    "edit": "{{name}} formunu düzenle",
+    "delete": "{{name}} formunu sil",
+    "deleteTitle": "Form silinsin mi?",
+    "deleteBody": "“{{name}}” formu silinir; açılmış görevler kalır.",
+    "enabledToggle": "{{name}} formu açık",
+    "saved": "Form kaydedildi.",
+    "name": "Form adı",
+    "description": "Açıklama",
+    "targetList": "Hedef List",
+    "itemType": "Açılacak tip",
+    "fields": "Alanlar",
+    "titleAlways": "Başlık her formda zorunludur.",
+    "required": "Zorunlu",
+    "field": {
+      "description": "Açıklama",
+      "priority": "Öncelik",
+      "dueDate": "Bitiş tarihi",
+      "assignee": "Atanacak kişi"
+    },
+    "deleteConfirm": "Formu sil"
   }
 }

@@ -45,6 +45,7 @@ export const TENANT_MODELS: ReadonlySet<string> = new Set([
   'CustomField',
   'Template',
   'Automation',
+  'Form',
   'AutomationRun',
   'Webhook',
   'WebhookDelivery',

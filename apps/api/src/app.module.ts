@@ -27,6 +27,7 @@ import {
 import { HealthModule } from './modules/health/health.module';
 import { CollabModule } from './modules/collab/collab.module';
 import { SetupModule } from './modules/setup/setup.module';
+import { FormsModule } from './modules/forms/forms.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { RemindersModule } from './modules/reminders/reminders.module';
 import { DocsModule } from './modules/docs/docs.module';
@@ -116,6 +117,7 @@ const isAuthRateLimited = (ctx: ExecutionContext): boolean =>
     TemplatesModule,
     NotificationsModule,
     RemindersModule,
+    FormsModule,
     CollabModule,
     HealthModule,
   ],

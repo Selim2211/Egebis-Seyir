@@ -113,6 +113,8 @@ export function describeEvent(event: ActivityEvent, t: TFunction): string[] {
       ];
     case 'item.copied':
       return [t('activity.copied', { key: detail })];
+    case 'item.form_submitted':
+      return [t('activity.formSubmitted', { name: event.changes[0]?.to ?? detail })];
     case 'item.recurred':
       return [t('activity.recurred', { key: detail })];
     case 'item.archived':
