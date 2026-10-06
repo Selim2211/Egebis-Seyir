@@ -24,6 +24,8 @@ import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuSeparator,
@@ -36,6 +38,7 @@ import { useMe } from '@/features/auth/queries';
 import { useCurrentWorkspace, useMembers } from '@/features/workspace/queries';
 import { useErrorMessage } from '@/lib/use-error-message';
 import { cn } from '@/lib/utils';
+import { useTeams } from '@/features/teams/queries';
 import { labelsQuery, useCreateLabel } from '../queries';
 import { Reminders } from './reminders';
 import { useSaveItem } from './use-save-item';
@@ -446,6 +449,7 @@ function Assignees({
 }) {
   const { t } = useTranslation();
   const members = useMembers(canWrite).data?.members ?? [];
+  const teams = useTeams(canWrite).data?.teams ?? [];
   const ids = item.assignees.map((a) => a.id);
 
   const chips = item.assignees.length ? (
@@ -474,6 +478,29 @@ function Assignees({
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="max-h-72 w-64 overflow-y-auto">
+        {teams.length > 0 && (
+          <>
+            <DropdownMenuLabel>{t('teams.addTeam')}</DropdownMenuLabel>
+            {teams.map((team) => (
+              <DropdownMenuItem
+                key={team.id}
+                disabled={team.members.length === 0}
+                onSelect={() =>
+                  onSave({ assigneeIds: [...new Set([...ids, ...team.members.map((m) => m.id)])] })
+                }
+              >
+                <span
+                  className="size-2.5 shrink-0 rounded-full"
+                  style={{ backgroundColor: team.color }}
+                  aria-hidden
+                />
+                {team.name}
+                <span className="text-muted-foreground ml-auto text-xs">{team.members.length}</span>
+              </DropdownMenuItem>
+            ))}
+            <DropdownMenuSeparator />
+          </>
+        )}
         {members.map((m) => (
           <DropdownMenuCheckboxItem
             key={m.userId}

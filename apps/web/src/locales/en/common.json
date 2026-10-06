@@ -162,7 +162,8 @@
     "archive": "Archive and trash",
     "notifications": "Notifications",
     "api": "API access",
-    "integrations": "Integrations"
+    "integrations": "Integrations",
+    "teams": "Teams"
   },
   "members": {
     "title": "Members",
@@ -384,7 +385,9 @@
     "FORM_LIMIT": "A space can have at most 20 forms.",
     "GOAL_WRONG_KIND": "This action is not available for this kind of goal.",
     "GOAL_LIMIT": "A workspace can have at most 200 goals.",
-    "MESSAGE_SELF": "You cannot message yourself."
+    "MESSAGE_SELF": "You cannot message yourself.",
+    "TEAM_NAME_TAKEN": "A team with this name already exists.",
+    "TEAM_LIMIT": "A workspace can have at most 100 teams."
   },
   "spaceRoles": {
     "PRODUCT_OWNER": "Product Owner",
@@ -1802,5 +1805,25 @@
     "write": "Write a message",
     "placeholder": "Write a message… (Enter sends, Shift+Enter for a new line)",
     "send": "Send"
+  },
+  "teams": {
+    "title": "Teams",
+    "subtitle": "Group people and assign a whole team to an item in one click.",
+    "add": "Add team",
+    "addTitle": "Add team",
+    "editTitle": "Edit team",
+    "empty": "No teams yet.",
+    "name": "Team name",
+    "color": "Color",
+    "members": "Members",
+    "memberCount_one": "{{count}} member",
+    "memberCount_other": "{{count}} members",
+    "edit": "Edit team {{name}}",
+    "delete": "Delete team {{name}}",
+    "deleteTitle": "Delete team “{{name}}”?",
+    "deleteBody": "The team is deleted; people and their assigned items are not affected.",
+    "deleteConfirm": "Delete team",
+    "saved": "Team saved.",
+    "addTeam": "Add team"
   }
 }

@@ -162,7 +162,8 @@
     "archive": "Arşiv ve çöp kutusu",
     "notifications": "Bildirimler",
     "api": "API erişimi",
-    "integrations": "Entegrasyonlar"
+    "integrations": "Entegrasyonlar",
+    "teams": "Ekipler"
   },
   "members": {
     "title": "Üyeler",
@@ -384,7 +385,9 @@
     "FORM_LIMIT": "Bir Space en fazla 20 form içerebilir.",
     "GOAL_WRONG_KIND": "Bu işlem bu tür hedefte yapılamaz.",
     "GOAL_LIMIT": "Çalışma alanı en fazla 200 hedef içerebilir.",
-    "MESSAGE_SELF": "Kendinize mesaj gönderemezsiniz."
+    "MESSAGE_SELF": "Kendinize mesaj gönderemezsiniz.",
+    "TEAM_NAME_TAKEN": "Bu adla bir ekip zaten var.",
+    "TEAM_LIMIT": "Çalışma alanı en fazla 100 ekip içerebilir."
   },
   "spaceRoles": {
     "PRODUCT_OWNER": "Product Owner",
@@ -1802,5 +1805,25 @@
     "write": "Mesaj yaz",
     "placeholder": "Mesajını yaz… (Enter gönderir, Shift+Enter yeni satır)",
     "send": "Gönder"
+  },
+  "teams": {
+    "title": "Ekipler",
+    "subtitle": "Kullanıcıları gruplayıp göreve tek tıkla toplu ata.",
+    "add": "Ekip ekle",
+    "addTitle": "Ekip ekle",
+    "editTitle": "Ekibi düzenle",
+    "empty": "Henüz ekip yok.",
+    "name": "Ekip adı",
+    "color": "Renk",
+    "members": "Üyeler",
+    "memberCount_one": "{{count}} üye",
+    "memberCount_other": "{{count}} üye",
+    "edit": "{{name}} ekibini düzenle",
+    "delete": "{{name}} ekibini sil",
+    "deleteTitle": "“{{name}}” ekibi silinsin mi?",
+    "deleteBody": "Ekip silinir; üyeler ve onlara atanmış görevler etkilenmez.",
+    "deleteConfirm": "Ekibi sil",
+    "saved": "Ekip kaydedildi.",
+    "addTeam": "Ekibi ekle"
   }
 }

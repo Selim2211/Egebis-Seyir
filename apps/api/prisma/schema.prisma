@@ -155,6 +155,7 @@ model User {
   notificationPreferences NotificationPreference[]
   reminders               Reminder[]
   goalsOwned              Goal[]
+  teamMemberships         TeamMember[]
   conversationsLow        Conversation[]           @relation("ConversationLow")
   conversationsHigh       Conversation[]           @relation("ConversationHigh")
   messagesSent            Message[]
@@ -258,6 +259,7 @@ model Workspace {
   notificationPreferences NotificationPreference[]
   reminders               Reminder[]
   goals                   Goal[]
+  teams                   Team[]
   conversations           Conversation[]
   messages                Message[]
 
@@ -969,6 +971,34 @@ model Message {
 
   @@index([conversationId, createdAt])
   @@map("messages")
+}
+
+/// Ekip (Faz 7.7, ADR-101): kullanıcıları gruplar; göreve toplu atamada kısayol olarak kullanılır.
+model Team {
+  id          String    @id @default(uuid(7)) @db.Uuid
+  workspaceId String    @db.Uuid
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  name        String
+  color       String    @default("#2563EB")
+  createdAt   DateTime  @default(now()) @db.Timestamptz
+
+  members TeamMember[]
+
+  @@unique([workspaceId, name])
+  @@map("teams")
+}
+
+model TeamMember {
+  teamId      String   @db.Uuid
+  team        Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  userId      String   @db.Uuid
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspaceId String   @db.Uuid
+  createdAt   DateTime @default(now()) @db.Timestamptz
+
+  @@id([teamId, userId])
+  @@index([userId])
+  @@map("team_members")
 }
 
 /// Hedef (Faz 7.9, ADR-097): workspace düzeyinde; görev bazlı (bağlı görevlerin ilerlemesi) ya da sayısal.

@@ -30,6 +30,7 @@ import { SetupModule } from './modules/setup/setup.module';
 import { FormsModule } from './modules/forms/forms.module';
 import { GoalsModule } from './modules/goals/goals.module';
 import { MessagesModule } from './modules/messages/messages.module';
+import { TeamsModule } from './modules/teams/teams.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { RemindersModule } from './modules/reminders/reminders.module';
 import { DocsModule } from './modules/docs/docs.module';
@@ -122,6 +123,7 @@ const isAuthRateLimited = (ctx: ExecutionContext): boolean =>
     FormsModule,
     GoalsModule,
     MessagesModule,
+    TeamsModule,
     CollabModule,
     HealthModule,
   ],

@@ -70,6 +70,9 @@ function SettingsLayout() {
         {canViewMembers && (
           <SubLink to="/settings/members" icon={Users} label={t('settings.members')} />
         )}
+        {canViewMembers && (
+          <SubLink to="/settings/teams" icon={Users} label={t('settings.teams')} />
+        )}
         <SubLink to="/settings/archive" icon={Archive} label={t('settings.archive')} />
         <SectionLabel>{t('settings.accountSection')}</SectionLabel>
         <SubLink to="/settings/profile" icon={UserRound} label={t('settings.profile')} />

@@ -31,6 +31,8 @@ export const TENANT_MODELS: ReadonlySet<string> = new Set([
   'Notification',
   'NotificationPreference',
   'Reminder',
+  'Team',
+  'TeamMember',
   'Goal',
   'GoalItem',
   'Conversation',
