@@ -93,7 +93,9 @@ test.describe.serial('Görev detayı', () => {
     await page.getByRole('button', { name: 'Bağlantı ekle' }).click();
     await page.getByRole('textbox', { name: /Başlık veya/ }).fill('Sipariş');
     await page.getByRole('button', { name: /DET-1/ }).click();
-    await expect(page.getByText('Engelliyor')).toBeVisible();
+    await expect(
+      page.getByRole('region', { name: 'Bağlantılı öğeler' }).getByText('Engelliyor'),
+    ).toBeVisible();
 
     await page.goto('/items/DET-1');
     await expect(page.getByText('Tarafından engelleniyor')).toBeVisible();

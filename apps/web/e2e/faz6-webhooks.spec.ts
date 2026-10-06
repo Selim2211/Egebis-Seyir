@@ -51,7 +51,7 @@ test.describe.serial('Webhook’lar', () => {
     await page.getByRole('button', { name: '“Ekip kanalı” için test gönder' }).click();
     await expect(page.getByText('Test olayı gönderildi')).toBeVisible();
     await page.getByRole('button', { name: '“Ekip kanalı” teslimat günlüğü' }).click();
-    await expect(page.getByText('Gönderildi')).toBeVisible();
+    await expect(page.getByText('Gönderildi', { exact: true })).toBeVisible();
     await expect.poll(() => received.length).toBeGreaterThan(0);
     expect(received[0]).toContain('ping:');
   });
