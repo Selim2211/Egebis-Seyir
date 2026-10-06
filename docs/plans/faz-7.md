@@ -6,33 +6,33 @@
 
 ## 1. Project Management (ClickUp karşılaştırması)
 
-| ClickUp işlevi                                                      | Durum | Not                                                                                                   |
-| ------------------------------------------------------------------- | ----- | ----------------------------------------------------------------------------------------------------- |
-| Hiyerarşi Space > Folder > List > Task > Subtask                    | ✅    | Epic/Story/Task/Bug/Sub-task tipleri ile                                                              |
-| List görünümü                                                       | ✅    | `list-view`, gruplama, sıralama, filtre                                                               |
-| Table görünümü (sütun seç, satır içi düzenle)                       | ✅    | `table-view`                                                                                          |
-| Board/Kanban (sürükle-bırak, WIP)                                   | ✅    | WIP limiti ADR-080                                                                                    |
-| Calendar görünümü                                                   | ✅    |                                                                                                       |
-| Gantt (bağımlılık okları, kritik yol)                               | 🟡    | Bağımlılık var; **kritik yol, sürükleyerek tarih değiştirme/bağımlılık çizme, baseline** doğrulanmalı |
-| Timeline / Workload                                                 | ✅    | Workload, Roadmap var                                                                                 |
-| Sprint (başlat/bitir, devir, burndown, velocity)                    | ✅    |                                                                                                       |
-| Backlog, Sprint planlama, Retro, Review                             | ✅    |                                                                                                       |
-| Kayıtlı görünümler + paylaşım                                       | ✅    |                                                                                                       |
-| Çoklu atanan, izleyici, etiket, öncelik, tarih                      | ✅    |                                                                                                       |
-| Bağımlılık (blocks / waiting on), ilişki                            | ✅    | `WorkItemLink`                                                                                        |
-| Checklist, kabul kriteri                                            | ✅    |                                                                                                       |
-| Özel alanlar, şablonlar, otomasyonlar                               | ✅    |                                                                                                       |
-| Zaman takibi, timesheet                                             | ✅    |                                                                                                       |
-| **Tekrarlayan görevler**                                            | ❌    | 7.1                                                                                                   |
-| **Görev klonlama / duplicate**                                      | ❌    | 7.1 (doğrulanacak)                                                                                    |
-| **Birden çok List'te görev (multi-home)**                           | ❌    | Mimari değişiklik; düşük öncelik                                                                      |
-| **Görev tamamlanınca bağımlıyı otomatik kaydır (Gantt reschedule)** | ❌    | 7.2                                                                                                   |
-| **Mind map / Whiteboard**                                           | ❌    | Kapsam dışı önerisi                                                                                   |
-| **Dashboard widget'ları**                                           | ✅    | Kişisel/Space dashboard                                                                               |
-| **Hatırlatıcı, kişisel To-do (My Work)**                            | 🟡    | My Work var; hatırlatıcı yok → 7.3                                                                    |
-| **Sürükle-bırak toplu işlem, bulk edit**                            | ✅    | `bulk-bar`                                                                                            |
-| **Form görünümü (dışarıdan görev toplama)**                         | ❌    | 7.4                                                                                                   |
-| **Goals / hedefler (OKR)**                                          | ❌    | Düşük öncelik                                                                                         |
+| ClickUp işlevi                                                      | Durum | Not                                                                            |
+| ------------------------------------------------------------------- | ----- | ------------------------------------------------------------------------------ |
+| Hiyerarşi Space > Folder > List > Task > Subtask                    | ✅    | Epic/Story/Task/Bug/Sub-task tipleri ile                                       |
+| List görünümü                                                       | ✅    | `list-view`, gruplama, sıralama, filtre                                        |
+| Table görünümü (sütun seç, satır içi düzenle)                       | ✅    | `table-view`                                                                   |
+| Board/Kanban (sürükle-bırak, WIP)                                   | ✅    | WIP limiti ADR-080                                                             |
+| Calendar görünümü                                                   | ✅    |                                                                                |
+| Gantt (bağımlılık okları, kritik yol, sürükleme)                    | ✅    | Kritik yol ve çubuk sürükleme var; **bağımlılık çizme, baseline** doğrulanmalı |
+| Timeline / Workload                                                 | ✅    | Workload, Roadmap var                                                          |
+| Sprint (başlat/bitir, devir, burndown, velocity)                    | ✅    |                                                                                |
+| Backlog, Sprint planlama, Retro, Review                             | ✅    |                                                                                |
+| Kayıtlı görünümler + paylaşım                                       | ✅    |                                                                                |
+| Çoklu atanan, izleyici, etiket, öncelik, tarih                      | ✅    |                                                                                |
+| Bağımlılık (blocks / waiting on), ilişki                            | ✅    | `WorkItemLink`                                                                 |
+| Checklist, kabul kriteri                                            | ✅    |                                                                                |
+| Özel alanlar, şablonlar, otomasyonlar                               | ✅    |                                                                                |
+| Zaman takibi, timesheet                                             | ✅    |                                                                                |
+| **Tekrarlayan görevler**                                            | ❌    | 7.1                                                                            |
+| **Görev klonlama**                                                  | ❌    | 7.1 (kodda yok; şablondan oluşturma var)                                       |
+| **Birden çok List'te görev (multi-home)**                           | ❌    | Mimari değişiklik; düşük öncelik                                               |
+| **Görev tamamlanınca bağımlıyı otomatik kaydır (Gantt reschedule)** | ❌    | 7.2                                                                            |
+| **Mind map / Whiteboard**                                           | ❌    | Kapsam dışı önerisi                                                            |
+| **Dashboard widget'ları**                                           | ✅    | Kişisel/Space dashboard                                                        |
+| **Hatırlatıcı, kişisel To-do (My Work)**                            | 🟡    | My Work var; hatırlatıcı yok → 7.3                                             |
+| **Sürükle-bırak toplu işlem, bulk edit**                            | ✅    | `bulk-bar`                                                                     |
+| **Form görünümü (dışarıdan görev toplama)**                         | ❌    | 7.4                                                                            |
+| **Goals / hedefler (OKR)**                                          | ❌    | Düşük öncelik                                                                  |
 
 ## 2. Document Management (Confluence karşılaştırması)
 
@@ -46,7 +46,7 @@
 | Çöp kutusu                                       | ✅    |                                                                                                                                                             |
 | **Dokümanda arama**                              | ❌    | Global arama yalnızca iş öğelerini tarıyor (`work_items` FTS dizini). `docs.plainText` için FTS dizini + arama sonuçlarına doküman ekleme → 7.5 (öncelikli) |
 | **Dosya/görsel eki (sayfaya)**                   | ❌    | `Attachment` yalnızca `workItemId` ile bağlı → `docId` eklenmeli                                                                                            |
-| **Sayfa şablonları**                             | 🟡    | `TemplateKind.DOC` şemada var; arayüz doğrulanacak                                                                                                          |
+| Sayfa şablonları                                 | ✅    | `TemplateKind.DOC` (ADR-083)                                                                                                                                |
 | **Workspace düzeyi doküman (Space'siz wiki)**    | ❌    | Doküman şu an Space'e bağlı (`spaceId` zorunlu). Yöneticinin "doküman deposu" hedefi için workspace seviyesi gerekebilir → karar gerekli                    |
 | **Doküman dışa aktarma (PDF/Markdown/Word)**     | ❌    | 7.6                                                                                                                                                         |
 | **Etiket/kategori, favori, son görüntülenenler** | ❌    | Favori modeli var (`FavoriteType`), Doc eklenmeli                                                                                                           |
@@ -81,7 +81,7 @@ Güvenlik/yetki büyük ölçüde hazır (RBAC, oturum, CSRF, API token, audit).
 | #   | Adım                               | İçerik                                                                                        | Durum        |
 | --- | ---------------------------------- | --------------------------------------------------------------------------------------------- | ------------ |
 | 7.1 | Tekrarlayan görev + klonlama       | Tekrar kuralı (günlük/haftalık/aylık), tamamlanınca sonraki örneği üretme; görev kopyalama    | Bekliyor     |
-| 7.2 | Gantt iyileştirme                  | Sürükleyerek tarih, bağımlılık çizme, kritik yol, bağımlıyı otomatik kaydırma                 | Bekliyor     |
+| 7.2 | Gantt iyileştirme                  | Bağımlılık çizme, bağımlıyı otomatik kaydırma, baseline                                       | Bekliyor     |
 | 7.3 | Hatırlatıcı                        | Göreve hatırlatma zamanı, bildirim/e-posta                                                    | Bekliyor     |
 | 7.4 | Form görünümü                      | Kayıtlı form ile görev oluşturma                                                              | Bekliyor     |
 | 7.5 | Doküman arama + ekler + editör     | Docs FTS ve global aramaya ekleme, sayfaya dosya/görsel, kod bloğu, görev listesi, slash menü | Bekliyor     |
