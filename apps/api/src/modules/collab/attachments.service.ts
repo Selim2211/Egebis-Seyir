@@ -20,6 +20,12 @@ import { fail } from '../work-items/item-support';
 
 const HEADER_BYTES = 16;
 
+export type Owner = { kind: 'item' | 'doc'; id: string };
+const asOwner = (owner: Owner | string): Owner =>
+  typeof owner === 'string' ? { kind: 'item', id: owner } : owner;
+const ownerWhere = (owner: Owner) =>
+  owner.kind === 'item' ? { workItemId: owner.id } : { docId: owner.id };
+
 /** Multer'ın `originalname` değeri latin1 çözülür; UTF-8 adı geri kazanır. */
 const decodeName = (name: string) => Buffer.from(name, 'latin1').toString('utf8');
 
@@ -59,23 +65,34 @@ export class AttachmentsService {
     return { workspaceId: this.cls.get('workspaceId')!, actorId: this.cls.get('userId')! };
   }
 
-  private async activeItem(itemId: string) {
-    const item = await this.tenant.db.workItem.findFirst({
-      where: { id: itemId, deletedAt: null, list: { deletedAt: null }, space: { deletedAt: null } },
-      select: { id: true },
-    });
-    if (!item) throw notFound();
+  /** Ekin sahibi: görev ya da doküman sayfası (ADR-056, Faz 7.5). */
+  private async activeOwner(owner: Owner) {
+    const found =
+      owner.kind === 'item'
+        ? await this.tenant.db.workItem.findFirst({
+            where: {
+              id: owner.id,
+              deletedAt: null,
+              list: { deletedAt: null },
+              space: { deletedAt: null },
+            },
+            select: { id: true },
+          })
+        : await this.tenant.db.doc.findFirst({
+            where: { id: owner.id, deletedAt: null, space: { deletedAt: null } },
+            select: { id: true },
+          });
+    if (!found) throw notFound();
   }
 
-  async upload(itemId: string, file: Express.Multer.File | undefined): Promise<Created> {
+  async upload(owner: Owner | string, file: Express.Multer.File | undefined): Promise<Created> {
+    const target = asOwner(owner);
     const { workspaceId, actorId } = this.ctx;
     if (!file) throw fail(ERROR_CODES.ATTACHMENT_INVALID, 400);
-    await this.activeItem(itemId);
+    await this.activeOwner(target);
     const db = this.tenant.db;
 
-    if (
-      (await db.attachment.count({ where: { workItemId: itemId } })) >= MAX_ATTACHMENTS_PER_ITEM
-    ) {
+    if ((await db.attachment.count({ where: ownerWhere(target) })) >= MAX_ATTACHMENTS_PER_ITEM) {
       throw fail(ERROR_CODES.ATTACHMENT_LIMIT);
     }
     const fileName = decodeName(file.originalname).trim();
@@ -93,7 +110,7 @@ export class AttachmentsService {
         const row = await tx.attachment.create({
           data: {
             workspaceId,
-            workItemId: itemId,
+            ...ownerWhere(target),
             uploaderId: actorId,
             fileName,
             mimeType: check.mime,
@@ -104,9 +121,9 @@ export class AttachmentsService {
         await this.activity.record(tx, {
           workspaceId,
           actorId,
-          entityType: 'item',
-          entityId: itemId,
-          action: 'item.attachment_added',
+          entityType: target.kind,
+          entityId: target.id,
+          action: `${target.kind}.attachment_added`,
           changes: { fileName, size: file.size },
         });
         return { id: row.id };
@@ -122,13 +139,14 @@ export class AttachmentsService {
    * istendiğinde; diğer her şey `attachment` olarak iner (ADR-056).
    */
   async open(
-    itemId: string,
+    owner: Owner | string,
     attachmentId: string,
     preview: boolean,
   ): Promise<{ file: StreamableFile; csp: string | null }> {
-    await this.activeItem(itemId);
+    const target = asOwner(owner);
+    await this.activeOwner(target);
     const row = await this.tenant.db.attachment.findFirst({
-      where: { id: attachmentId, workItemId: itemId },
+      where: { id: attachmentId, ...ownerWhere(target) },
     });
     if (!row || !(await this.storage.exists(row.storageKey))) throw notFound();
     const inline = preview && isPreviewable(row.mimeType);
@@ -141,21 +159,22 @@ export class AttachmentsService {
     return { file, csp: row.mimeType === 'application/pdf' ? null : "default-src 'none'; sandbox" };
   }
 
-  async remove(itemId: string, attachmentId: string): Promise<void> {
+  async remove(owner: Owner | string, attachmentId: string): Promise<void> {
+    const target = asOwner(owner);
     const { workspaceId, actorId } = this.ctx;
-    await this.activeItem(itemId);
+    await this.activeOwner(target);
     const row = await this.tenant.db.$transaction(async (tx) => {
       const found = await tx.attachment.findFirst({
-        where: { id: attachmentId, workItemId: itemId },
+        where: { id: attachmentId, ...ownerWhere(target) },
       });
       if (!found) throw notFound();
       await tx.attachment.delete({ where: { id: attachmentId } });
       await this.activity.record(tx, {
         workspaceId,
         actorId,
-        entityType: 'item',
-        entityId: itemId,
-        action: 'item.attachment_removed',
+        entityType: target.kind,
+        entityId: target.id,
+        action: `${target.kind}.attachment_removed`,
         changes: { fileName: found.fileName },
       });
       return found;

@@ -7,7 +7,12 @@ import { Button } from '@/components/ui/button';
 import { useCurrentWorkspace } from '@/features/workspace/queries';
 import { useErrorMessage } from '@/lib/use-error-message';
 import { cn } from '@/lib/utils';
-import { attachmentUrl, useDeleteAttachment, useUploadAttachment } from '../queries';
+import {
+  type AttachmentScope,
+  attachmentUrl,
+  useDeleteAttachment,
+  useUploadAttachment,
+} from '../queries';
 
 const formatSize = (bytes: number): string =>
   bytes < 1024
@@ -21,10 +26,13 @@ export function Attachments({
   itemId,
   attachments,
   canWrite,
+  scope = 'items',
 }: {
+  /** Ekin sahibinin kimliği (görev ya da doküman sayfası). */
   itemId: string;
   attachments: Attachment[];
   canWrite: boolean;
+  scope?: AttachmentScope;
 }) {
   const { t } = useTranslation();
   const errorMessage = useErrorMessage();
@@ -41,7 +49,7 @@ export function Attachments({
     void (async () => {
       for (const file of Array.from(files)) {
         try {
-          await upload.mutateAsync({ itemId, file });
+          await upload.mutateAsync({ itemId, file, scope });
         } catch (error) {
           toast.error(`${file.name}: ${errorMessage(error)}`);
         }
@@ -111,13 +119,13 @@ export function Attachments({
               <li key={a.id} className="group/att flex items-center gap-2.5 rounded-md border p-2">
                 {isImage ? (
                   <a
-                    href={attachmentUrl(workspaceId, itemId, a.id, true)}
+                    href={attachmentUrl(workspaceId, itemId, a.id, true, scope)}
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label={t('attachments.preview', { name: a.fileName })}
                   >
                     <img
-                      src={attachmentUrl(workspaceId, itemId, a.id, true)}
+                      src={attachmentUrl(workspaceId, itemId, a.id, true, scope)}
                       alt=""
                       loading="lazy"
                       className="bg-muted size-12 rounded object-cover"
@@ -134,7 +142,7 @@ export function Attachments({
                 )}
                 <div className="min-w-0 flex-1">
                   <a
-                    href={attachmentUrl(workspaceId, itemId, a.id, a.previewable)}
+                    href={attachmentUrl(workspaceId, itemId, a.id, a.previewable, scope)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="block truncate text-sm font-medium hover:underline"
@@ -149,7 +157,7 @@ export function Attachments({
                 </div>
                 <Button variant="ghost" size="icon" className="size-7" asChild>
                   <a
-                    href={attachmentUrl(workspaceId, itemId, a.id)}
+                    href={attachmentUrl(workspaceId, itemId, a.id, false, scope)}
                     download={a.fileName}
                     aria-label={t('attachments.download', { name: a.fileName })}
                   >
@@ -164,7 +172,7 @@ export function Attachments({
                     aria-label={t('attachments.delete', { name: a.fileName })}
                     onClick={() =>
                       remove.mutate(
-                        { itemId, attachmentId: a.id },
+                        { itemId, attachmentId: a.id, scope },
                         { onError: (error) => toast.error(errorMessage(error)) },
                       )
                     }

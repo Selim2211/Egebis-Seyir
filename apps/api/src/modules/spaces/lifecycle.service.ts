@@ -221,14 +221,21 @@ export class LifecycleService implements OnModuleInit {
     // Öğe, List, Folder veya Space süresi dolduğu için silinecek öğelerin ek dosyaları (ADR-056).
     const doomed = await this.prisma.attachment.findMany({
       where: {
-        workItem: {
-          OR: [
-            { deletedAt: { lt: cutoff } },
-            { list: { deletedAt: { lt: cutoff } } },
-            { list: { folder: { deletedAt: { lt: cutoff } } } },
-            { space: { deletedAt: { lt: cutoff } } },
-          ],
-        },
+        OR: [
+          {
+            workItem: {
+              OR: [
+                { deletedAt: { lt: cutoff } },
+                { list: { deletedAt: { lt: cutoff } } },
+                { list: { folder: { deletedAt: { lt: cutoff } } } },
+                { space: { deletedAt: { lt: cutoff } } },
+              ],
+            },
+          },
+          {
+            doc: { OR: [{ deletedAt: { lt: cutoff } }, { space: { deletedAt: { lt: cutoff } } }] },
+          },
+        ],
       },
       select: { storageKey: true },
     });

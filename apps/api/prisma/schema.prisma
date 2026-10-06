@@ -769,8 +769,11 @@ model Attachment {
   id          String    @id @default(uuid(7)) @db.Uuid
   workspaceId String    @db.Uuid
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  workItemId  String    @db.Uuid
-  workItem    WorkItem  @relation(fields: [workItemId], references: [id], onDelete: Cascade)
+  /// Ek ya bir görevin ya da bir doküman sayfasının (CHECK: tam biri dolu).
+  workItemId  String?   @db.Uuid
+  workItem    WorkItem? @relation(fields: [workItemId], references: [id], onDelete: Cascade)
+  docId       String?   @db.Uuid
+  doc         Doc?      @relation(fields: [docId], references: [id], onDelete: Cascade)
   uploaderId  String?   @db.Uuid
   uploader    User?     @relation(fields: [uploaderId], references: [id], onDelete: SetNull)
   /// Özgün dosya adı (yalnızca görüntüleme/indirme; diskte rastgele anahtar kullanılır).
@@ -781,6 +784,7 @@ model Attachment {
   createdAt   DateTime  @default(now()) @db.Timestamptz
 
   @@index([workItemId])
+  @@index([docId])
   @@map("attachments")
 }
 
@@ -948,8 +952,9 @@ model Doc {
   deletedAt   DateTime? @db.Timestamptz
 
   versions DocVersion[]
-  comments Comment[]
-  links    DocItemLink[]
+  comments    Comment[]
+  links       DocItemLink[]
+  attachments Attachment[]
 
   @@index([spaceId, parentId])
   @@index([spaceId, deletedAt])

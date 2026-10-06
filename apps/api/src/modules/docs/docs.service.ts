@@ -30,6 +30,7 @@ import { TenantPrismaService } from '../../infra/prisma/tenant-prisma.service';
 import { ActivityService } from '../activity/activity.service';
 import { archivedParent, notFound } from '../spaces/space-errors';
 import { asJson, fail, type TenantTx } from '../work-items/item-support';
+import { toAttachmentDto } from '../collab/attachments.service';
 import { DocLinksService } from './doc-links.service';
 
 const conflict = (code: ErrorCode) => new HttpException({ code }, HttpStatus.CONFLICT);
@@ -161,6 +162,13 @@ export class DocsService {
       updatedBy: doc.updatedBy,
       ancestors,
       links: await this.links.itemsOfDoc(docId),
+      attachments: (
+        await db.attachment.findMany({
+          where: { docId },
+          orderBy: { createdAt: 'asc' },
+          include: { uploader: { select: { id: true, name: true } } },
+        })
+      ).map(toAttachmentDto),
       deleted: doc.deletedAt !== null,
     };
   }

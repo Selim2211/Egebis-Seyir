@@ -339,21 +339,31 @@ export const useComment = () =>
     }
   });
 
+/** Ekin sahibi: `items` (görev, varsayılan) ya da `docs` (doküman sayfası). */
+export type AttachmentScope = 'items' | 'docs';
+
 export const useUploadAttachment = () =>
-  useWorkspaceMutation((id, input: { itemId: string; file: File }) => {
+  useWorkspaceMutation((id, input: { itemId: string; file: File; scope?: AttachmentScope }) => {
     const form = new FormData();
     form.append('file', input.file);
-    return apiRequest(`${ws(id)}/items/${input.itemId}/attachments`, CreatedSchema, {
-      method: 'POST',
-      body: form,
-    });
+    return apiRequest(
+      `${ws(id)}/${input.scope ?? 'items'}/${input.itemId}/attachments`,
+      CreatedSchema,
+      {
+        method: 'POST',
+        body: form,
+      },
+    );
   });
 
 export const useDeleteAttachment = () =>
-  useWorkspaceMutation((id, input: { itemId: string; attachmentId: string }) =>
-    apiRequest(`${ws(id)}/items/${input.itemId}/attachments/${input.attachmentId}`, NoContent, {
-      method: 'DELETE',
-    }),
+  useWorkspaceMutation(
+    (id, input: { itemId: string; attachmentId: string; scope?: AttachmentScope }) =>
+      apiRequest(
+        `${ws(id)}/${input.scope ?? 'items'}/${input.itemId}/attachments/${input.attachmentId}`,
+        NoContent,
+        { method: 'DELETE' },
+      ),
   );
 
 /** Ek adresi: `preview` satır içi önizleme (yalnızca resim/PDF), aksi halde indirme. */
@@ -362,8 +372,9 @@ export const attachmentUrl = (
   itemId: string,
   attachmentId: string,
   preview = false,
+  scope: AttachmentScope = 'items',
 ) =>
-  `/api${ws(workspaceId)}/items/${itemId}/attachments/${attachmentId}${preview ? '?preview=1' : ''}`;
+  `/api${ws(workspaceId)}/${scope}/${itemId}/attachments/${attachmentId}${preview ? '?preview=1' : ''}`;
 
 export const itemActivityQuery = (workspaceId: string, itemId: string) =>
   infiniteQueryOptions({

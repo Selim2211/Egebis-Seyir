@@ -157,6 +157,48 @@ export class CollabController {
     await this.attachments.remove(itemId, attachmentId);
   }
 
+  // ---------- Doküman sayfası ekleri (Faz 7.5) ----------
+
+  @Post('docs/:docId/attachments')
+  @RequireSpacePermission(S.DOC_WRITE)
+  @UseInterceptors(FileInterceptor('file'))
+  @ZodResponse({ type: CreatedDto, status: HttpStatus.CREATED })
+  uploadDocAttachment(
+    @Uuid('docId') docId: string,
+    @UploadedFile() file: Express.Multer.File | undefined,
+  ): Promise<Created> {
+    return this.attachments.upload({ kind: 'doc', id: docId }, file);
+  }
+
+  @Get('docs/:docId/attachments/:attachmentId')
+  @RequireSpacePermission(S.DOC_VIEW)
+  @Header('X-Content-Type-Options', 'nosniff')
+  @Header('Cache-Control', 'private, max-age=0, must-revalidate')
+  async downloadDocAttachment(
+    @Uuid('docId') docId: string,
+    @Uuid('attachmentId') attachmentId: string,
+    @Query('preview') preview: string | undefined,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<StreamableFile> {
+    const { file, csp } = await this.attachments.open(
+      { kind: 'doc', id: docId },
+      attachmentId,
+      preview === '1',
+    );
+    if (csp) res.setHeader('Content-Security-Policy', csp);
+    return file;
+  }
+
+  @Delete('docs/:docId/attachments/:attachmentId')
+  @RequireSpacePermission(S.DOC_WRITE)
+  @HttpCode(NO_CONTENT)
+  async deleteDocAttachment(
+    @Uuid('docId') docId: string,
+    @Uuid('attachmentId') attachmentId: string,
+  ): Promise<void> {
+    await this.attachments.remove({ kind: 'doc', id: docId }, attachmentId);
+  }
+
   // ---------- Aktivite ----------
 
   @Get('items/:itemId/activity')

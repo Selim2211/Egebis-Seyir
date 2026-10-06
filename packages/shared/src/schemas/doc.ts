@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { DOC_TITLE_MAX } from '../constants/doc';
 import { STATUS_CATEGORIES } from '../constants/work-item';
+import { AttachmentSchema } from './collab';
 import { RichTextSchema } from './rich-text';
 import { WorkItemTypeSchema } from './work-item';
 
@@ -61,6 +62,8 @@ export const DocDetailSchema = z.object({
   ancestors: z.array(docCrumb),
   /** Bağlı görevler ve Epic'ler. */
   links: z.array(DocLinkedItemSchema),
+  /** Sayfaya eklenen dosyalar (Faz 7.5). */
+  attachments: z.array(AttachmentSchema),
   deleted: z.boolean(),
 });
 export type DocDetail = z.infer<typeof DocDetailSchema>;

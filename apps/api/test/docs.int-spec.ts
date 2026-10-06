@@ -303,6 +303,41 @@ describe('Doküman sayfaları (gerçek veritabanı)', () => {
       await elif.get(api(`/docs/${id}/versions`)).expect(404);
     });
 
+    it('sayfaya dosya eklenir, indirilir, silinir; yetki ve görünürlük korunur', async () => {
+      const s = await space();
+      const { id } = await doc(s.id, { title: 'Ekli sayfa' });
+      const pdf = Buffer.from('%PDF-1.4\n%test\n');
+      await owner.upload(api(`/docs/${id}/attachments`), pdf, 'sartname.pdf').expect(201);
+      await owner
+        .upload(api(`/docs/${id}/attachments`), Buffer.from('MZ'), 'kurulum.exe')
+        .expect(422);
+
+      const page = await detail(id);
+      expect(page.attachments.map((a) => [a.fileName, a.previewable])).toEqual([
+        ['sartname.pdf', true],
+      ]);
+      const attId = page.attachments[0]!.id;
+      const dl = await owner.download(api(`/docs/${id}/attachments/${attId}`)).expect(200);
+      expect(Buffer.from(dl.body as Buffer).equals(pdf)).toBe(true);
+
+      // Aynı kimlik görev yolundan açılmaz; bir sayfanın eki başka sayfadan okunmaz.
+      const other = await doc(s.id, { title: 'Diğer' });
+      await owner.download(api(`/docs/${other.id}/attachments/${attId}`)).expect(404);
+
+      const elif = await inviteAndAccept(ctx, owner, ws, ELIF);
+      await elif.download(api(`/docs/${id}/attachments/${attId}`)).expect(200);
+      await elif.upload(api(`/docs/${id}/attachments`), pdf, 'b.pdf').expect(403);
+      await elif.delete(api(`/docs/${id}/attachments/${attId}`)).expect(403);
+
+      await owner.delete(api(`/docs/${id}/attachments/${attId}`)).expect(204);
+      expect((await detail(id)).attachments).toEqual([]);
+      await owner.delete(api(`/docs/${id}/attachments/${attId}`)).expect(404);
+
+      // Silinen sayfaya ek yüklenemez.
+      await owner.delete(api(`/docs/${id}`)).expect(204);
+      await owner.upload(api(`/docs/${id}/attachments`), pdf, 'c.pdf').expect(404);
+    });
+
     it('arşivli Space’te yazma reddedilir', async () => {
       const s = await space();
       const { id } = await doc(s.id, { title: 'Not' });

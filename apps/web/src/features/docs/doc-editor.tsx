@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Attachments } from '@/features/work-items/detail/attachments';
 import { RichTextEditor } from '@/features/work-items/detail/rich-text-editor';
 import { useCurrentWorkspace } from '@/features/workspace/queries';
 import { relativeTime } from '@/lib/format';
@@ -181,6 +182,14 @@ export function DocEditor({
         }}
       />
       <DocLinks doc={doc} canWrite={editable} />
+      <div className="px-2">
+        <Attachments
+          itemId={doc.id}
+          attachments={doc.attachments}
+          canWrite={editable}
+          scope="docs"
+        />
+      </div>
 
       <div className="px-2 pt-2">
         <Comments itemId={doc.id} scope="docs" canComment={canComment && !doc.deleted} />
