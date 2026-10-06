@@ -14,12 +14,12 @@ x-api-env: &api-env
   TRUST_PROXY: 'true'
   AUTH_RATE_LIMIT: ${AUTH_RATE_LIMIT:-10}
   MAIL_TRANSPORT: smtp
-  SMTP_HOST: ${SMTP_HOST:-localhost}
+  SMTP_HOST: ${SMTP_HOST:-smtp.gmail.com}
   SMTP_PORT: ${SMTP_PORT:-587}
   SMTP_SECURE: ${SMTP_SECURE:-false}
-  SMTP_USER: ${SMTP_USER:-}
+  SMTP_USER: ${SMTP_USER:-egebisseyir@gmail.com}
   SMTP_PASS: ${SMTP_PASS:-}
-  MAIL_FROM: ${MAIL_FROM:-Egebis Seyir <no-reply@localhost>}
+  MAIL_FROM: ${MAIL_FROM:-Egebis Seyir <egebisseyir@gmail.com>}
   QUEUE_ENABLED: 'true'
   UPLOAD_DIR: /data/uploads
   MAX_UPLOAD_MB: ${MAX_UPLOAD_MB:-25}
