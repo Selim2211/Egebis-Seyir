@@ -80,6 +80,12 @@ function copy(p: NotificationMailInput): Copy {
           line: `Automation on “${title}” (${key}): ${detail}`,
           action: 'Open item',
         };
+      case 'REMINDER':
+        return {
+          subject: `Reminder: ${key}`,
+          line: `Reminder for “${title}” (${key}): ${detail}`,
+          action: 'Open item',
+        };
       case 'SPRINT_COMPLETED':
         return {
           subject: `${sprint} completed`,
@@ -123,6 +129,12 @@ function copy(p: NotificationMailInput): Copy {
       return {
         subject: `${key}: ${detail}`,
         line: `“${title}” (${key}) için otomasyon: ${detail}`,
+        action: 'Görevi aç',
+      };
+    case 'REMINDER':
+      return {
+        subject: `Hatırlatıcı: ${key}`,
+        line: `“${title}” (${key}) için hatırlatıcı: ${detail}`,
         action: 'Görevi aç',
       };
     case 'SPRINT_COMPLETED':

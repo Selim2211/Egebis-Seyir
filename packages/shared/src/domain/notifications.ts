@@ -6,6 +6,7 @@ export const NOTIFICATION_TYPES = [
   'SPRINT_STARTED',
   'SPRINT_COMPLETED',
   'AUTOMATION',
+  'REMINDER',
 ] as const;
 export type NotificationType = (typeof NOTIFICATION_TYPES)[number];
 

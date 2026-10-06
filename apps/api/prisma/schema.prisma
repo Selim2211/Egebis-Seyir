@@ -153,6 +153,7 @@ model User {
   notifications           Notification[]           @relation("NotificationRecipient")
   notificationsCaused     Notification[]           @relation("NotificationActor")
   notificationPreferences NotificationPreference[]
+  reminders               Reminder[]
   retroItems              RetroItem[]
   retroVotes              RetroVote[]
   timeEntries             TimeEntry[]
@@ -250,6 +251,7 @@ model Workspace {
 
   notifications           Notification[]
   notificationPreferences NotificationPreference[]
+  reminders               Reminder[]
 
   @@map("workspaces")
 }
@@ -588,6 +590,7 @@ model WorkItem {
   sprintEvents SprintItemEvent[]
 
   notifications Notification[]
+  reminders     Reminder[]
 
   @@unique([workspaceId, keyPrefix, number])
   @@index([listId, rank])
@@ -882,6 +885,7 @@ enum NotificationType {
   SPRINT_STARTED
   SPRINT_COMPLETED
   AUTOMATION
+  REMINDER
 }
 
 /// Uygulama içi bildirim kutusu; alıcıya özeldir. data: { actorName, itemKey?, itemTitle?, sprintName? } anlık görüntüsü.
@@ -910,6 +914,26 @@ model Notification {
 }
 
 /// Kullanıcının tür bazlı kanal tercihleri; satır yoksa ikisi de açıktır.
+/// Kişisel görev hatırlatıcısı (Faz 7.3): zamanı gelince bildirim ve e-posta üretilir.
+model Reminder {
+  id          String    @id @default(uuid(7)) @db.Uuid
+  workspaceId String    @db.Uuid
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  userId      String    @db.Uuid
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workItemId  String    @db.Uuid
+  workItem    WorkItem  @relation(fields: [workItemId], references: [id], onDelete: Cascade)
+  remindAt    DateTime  @db.Timestamptz
+  note        String?
+  /// Gönderildiğinde dolar; gönderilenler listede kalır, kullanıcı silebilir.
+  sentAt      DateTime? @db.Timestamptz
+  createdAt   DateTime  @default(now()) @db.Timestamptz
+
+  @@index([sentAt, remindAt])
+  @@index([workItemId, userId])
+  @@map("reminders")
+}
+
 model NotificationPreference {
   id          String           @id @default(uuid(7)) @db.Uuid
   workspaceId String           @db.Uuid

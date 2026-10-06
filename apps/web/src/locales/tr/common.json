@@ -374,7 +374,9 @@
     "AI_FAILED": "Yapay zekâ servisinden geçerli bir yanıt alınamadı.",
     "AI_NOT_APPLICABLE": "Bu öneri bu iş tipi için kullanılamaz.",
     "RECURRENCE_NEEDS_DUE_DATE": "Tekrar için bitiş tarihi gerekir.",
-    "RECURRENCE_NOT_ALLOWED": "Epic tekrarlayamaz."
+    "RECURRENCE_NOT_ALLOWED": "Epic tekrarlayamaz.",
+    "REMINDER_IN_PAST": "Hatırlatma zamanı geçmişte olamaz.",
+    "REMINDER_LIMIT": "Bu görevde en fazla 10 bekleyen hatırlatıcı olabilir."
   },
   "spaceRoles": {
     "PRODUCT_OWNER": "Product Owner",
@@ -1041,7 +1043,8 @@
       "SPRINT_STARTED": "{{actor}}, {{sprint}} sprint’ini başlattı.",
       "SPRINT_COMPLETED": "{{actor}}, {{sprint}} sprint’ini tamamladı.",
       "MENTIONED_DOC": "{{actor}} seni “{{doc}}” sayfasındaki bir yorumda etiketledi.",
-      "AUTOMATION": "{{key}}: {{detail}}"
+      "AUTOMATION": "{{key}}: {{detail}}",
+      "REMINDER": "{{key}} için hatırlatıcı: {{detail}}"
     },
     "settingsTitle": "Bildirimler",
     "settingsSubtitle": "Hangi olaylardan hangi kanaldan haber almak istediğini seç. Değişiklikler hemen kaydedilir.",
@@ -1057,7 +1060,8 @@
       "STATUS_CHANGED": "Durum değişti",
       "SPRINT_STARTED": "Sprint başladı",
       "SPRINT_COMPLETED": "Sprint tamamlandı",
-      "AUTOMATION": "Otomasyon"
+      "AUTOMATION": "Otomasyon",
+      "REMINDER": "Hatırlatıcı"
     },
     "typeHelp": {
       "ASSIGNED": "Bir görev sana atandığında.",
@@ -1066,7 +1070,8 @@
       "STATUS_CHANGED": "Atandığın veya izlediğin görevin durumu değiştiğinde.",
       "SPRINT_STARTED": "Üyesi olduğun Space’te sprint başladığında.",
       "SPRINT_COMPLETED": "Üyesi olduğun Space’te sprint tamamlandığında.",
-      "AUTOMATION": "Bir otomasyon sana bildirim gönderdiğinde."
+      "AUTOMATION": "Bir otomasyon sana bildirim gönderdiğinde.",
+      "REMINDER": "Bir görev için kurduğun hatırlatıcının zamanı geldiğinde."
     }
   },
   "reports": {
@@ -1678,5 +1683,13 @@
       "MONTHLY": "Aylık",
       "YEARLY": "Yıllık"
     }
+  },
+  "reminders": {
+    "label": "Hatırlatıcı",
+    "when": "Hatırlatma zamanı",
+    "note": "Hatırlatma notu",
+    "notePlaceholder": "Not (isteğe bağlı)",
+    "add": "Hatırlat",
+    "delete": "{{when}} hatırlatıcısını sil"
   }
 }

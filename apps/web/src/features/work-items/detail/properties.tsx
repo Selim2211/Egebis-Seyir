@@ -37,6 +37,7 @@ import { useCurrentWorkspace, useMembers } from '@/features/workspace/queries';
 import { useErrorMessage } from '@/lib/use-error-message';
 import { cn } from '@/lib/utils';
 import { labelsQuery, useCreateLabel } from '../queries';
+import { Reminders } from './reminders';
 import { useSaveItem } from './use-save-item';
 import { useStatusGuard } from '../status-guard';
 
@@ -265,6 +266,10 @@ export function Properties({
           />
         </Row>
       )}
+
+      <Row label={t('reminders.label')}>
+        <Reminders itemId={item.id} />
+      </Row>
 
       <Row label={t(kind === 'POINTS' ? 'detail.points' : 'detail.hours')}>
         {kind === 'POINTS' ? (

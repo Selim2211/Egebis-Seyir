@@ -374,7 +374,9 @@
     "AI_FAILED": "Could not get a valid answer from the AI service.",
     "AI_NOT_APPLICABLE": "This suggestion is not available for this item type.",
     "RECURRENCE_NEEDS_DUE_DATE": "A due date is required for recurrence.",
-    "RECURRENCE_NOT_ALLOWED": "Epics cannot recur."
+    "RECURRENCE_NOT_ALLOWED": "Epics cannot recur.",
+    "REMINDER_IN_PAST": "The reminder time cannot be in the past.",
+    "REMINDER_LIMIT": "At most 10 pending reminders per item."
   },
   "spaceRoles": {
     "PRODUCT_OWNER": "Product Owner",
@@ -1041,7 +1043,8 @@
       "SPRINT_STARTED": "{{actor}} started {{sprint}}.",
       "SPRINT_COMPLETED": "{{actor}} completed {{sprint}}.",
       "MENTIONED_DOC": "{{actor}} mentioned you in a comment on the page “{{doc}}”.",
-      "AUTOMATION": "{{key}}: {{detail}}"
+      "AUTOMATION": "{{key}}: {{detail}}",
+      "REMINDER": "Reminder for {{key}}: {{detail}}"
     },
     "settingsTitle": "Notifications",
     "settingsSubtitle": "Choose which events notify you and through which channel. Changes are saved immediately.",
@@ -1057,7 +1060,8 @@
       "STATUS_CHANGED": "Status changed",
       "SPRINT_STARTED": "Sprint started",
       "SPRINT_COMPLETED": "Sprint completed",
-      "AUTOMATION": "Automation"
+      "AUTOMATION": "Automation",
+      "REMINDER": "Reminder"
     },
     "typeHelp": {
       "ASSIGNED": "When an item is assigned to you.",
@@ -1066,7 +1070,8 @@
       "STATUS_CHANGED": "When the status of an item you watch or are assigned to changes.",
       "SPRINT_STARTED": "When a sprint starts in a Space you belong to.",
       "SPRINT_COMPLETED": "When a sprint is completed in a Space you belong to.",
-      "AUTOMATION": "When an automation sends you a notification."
+      "AUTOMATION": "When an automation sends you a notification.",
+      "REMINDER": "When a reminder you set on an item is due."
     }
   },
   "reports": {
@@ -1678,5 +1683,13 @@
       "MONTHLY": "Monthly",
       "YEARLY": "Yearly"
     }
+  },
+  "reminders": {
+    "label": "Reminder",
+    "when": "Reminder time",
+    "note": "Reminder note",
+    "notePlaceholder": "Note (optional)",
+    "add": "Remind me",
+    "delete": "Delete reminder at {{when}}"
   }
 }

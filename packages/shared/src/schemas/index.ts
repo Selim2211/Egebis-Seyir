@@ -26,3 +26,4 @@ export * from './api-token';
 export * from './webhook';
 export * from './git';
 export * from './ai';
+export * from './reminder';

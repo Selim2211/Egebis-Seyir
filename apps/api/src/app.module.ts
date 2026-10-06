@@ -28,6 +28,7 @@ import { HealthModule } from './modules/health/health.module';
 import { CollabModule } from './modules/collab/collab.module';
 import { SetupModule } from './modules/setup/setup.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
+import { RemindersModule } from './modules/reminders/reminders.module';
 import { DocsModule } from './modules/docs/docs.module';
 import { TimeModule } from './modules/time/time.module';
 import { AiModule } from './modules/ai/ai.module';
@@ -114,6 +115,7 @@ const isAuthRateLimited = (ctx: ExecutionContext): boolean =>
     CustomFieldsModule,
     TemplatesModule,
     NotificationsModule,
+    RemindersModule,
     CollabModule,
     HealthModule,
   ],

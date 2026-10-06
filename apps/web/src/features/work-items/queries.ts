@@ -10,6 +10,8 @@ import {
   LabelsResponseSchema,
   SplitItemResponseSchema,
   MyWorkResponseSchema,
+  RemindersResponseSchema,
+  type CreateReminderRequest,
   SearchResponseSchema,
   type BulkUpdateRequest,
   type CopyItemRequest,
@@ -39,6 +41,28 @@ export const itemsQuery = (workspaceId: string, listId: string) =>
     queryKey: ['workspaces', workspaceId, 'lists', listId, 'items'],
     queryFn: () => apiRequest(`${ws(workspaceId)}/lists/${listId}/items`, WorkItemsResponseSchema),
   });
+
+export const remindersQuery = (workspaceId: string, itemId: string) =>
+  queryOptions({
+    queryKey: ['workspaces', workspaceId, 'items', itemId, 'reminders'],
+    queryFn: () =>
+      apiRequest(`${ws(workspaceId)}/items/${itemId}/reminders`, RemindersResponseSchema),
+  });
+
+export const useAddReminder = () =>
+  useWorkspaceMutation((id, input: { itemId: string; body: CreateReminderRequest }) =>
+    apiRequest(`${ws(id)}/items/${input.itemId}/reminders`, CreatedSchema, {
+      method: 'POST',
+      body: input.body,
+    }),
+  );
+
+export const useDeleteReminder = () =>
+  useWorkspaceMutation((id, input: { itemId: string; reminderId: string }) =>
+    apiRequest(`${ws(id)}/items/${input.itemId}/reminders/${input.reminderId}`, NoContent, {
+      method: 'DELETE',
+    }),
+  );
 
 export const itemQuery = (workspaceId: string, itemId: string) =>
   queryOptions({

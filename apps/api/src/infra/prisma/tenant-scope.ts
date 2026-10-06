@@ -30,6 +30,7 @@ export const TENANT_MODELS: ReadonlySet<string> = new Set([
   'Sprint',
   'Notification',
   'NotificationPreference',
+  'Reminder',
   'SprintItemEvent',
   'SprintSnapshot',
   'Doc',
