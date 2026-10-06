@@ -6,6 +6,7 @@ import {
   TSHIRT_SIZES,
   WORK_ITEM_TYPES,
 } from '../constants/work-item';
+import { RECURRENCE_FREQUENCIES, RECURRENCE_MAX_INTERVAL } from '../domain/recurrence';
 import { AttachmentSchema } from './collab';
 import { GitLinkSchema } from './git';
 import { CustomFieldPatchSchema, CustomFieldValuesSchema } from './custom-field';
@@ -16,6 +17,12 @@ const Title = z.string().trim().min(1).max(500);
 const LongText = z.string().trim().max(10_000).nullable();
 /** Tarihler gün bazlıdır (saat dilimi yok): YYYY-MM-DD. */
 export const DateOnlySchema = z.iso.date();
+
+/** Tekrarlayan görev kuralı (Faz 7.1); görev tamamlanınca bir sonraki örnek üretilir. */
+export const RecurrenceRuleSchema = z.object({
+  freq: z.enum(RECURRENCE_FREQUENCIES),
+  interval: z.int().min(1).max(RECURRENCE_MAX_INTERVAL),
+});
 
 export const WorkItemTypeSchema = z.enum(WORK_ITEM_TYPES);
 export const PrioritySchema = z.enum(PRIORITIES);
@@ -115,6 +122,8 @@ export const UpdateWorkItemRequestSchema = z
     description: RichTextSchema.nullable(),
     force: z.boolean(),
     customFields: CustomFieldPatchSchema,
+    /** `null` tekrarı kaldırır; tekrar için bitiş tarihi gerekir (Epic'te kullanılmaz). */
+    recurrence: RecurrenceRuleSchema.nullable(),
     ...typeFields,
   })
   .partial()
@@ -249,6 +258,7 @@ export type SetReadinessRequest = z.infer<typeof SetReadinessRequestSchema>;
 
 export const WorkItemDetailSchema = WorkItemSummarySchema.extend({
   readiness: ReadinessSchema,
+  recurrence: RecurrenceRuleSchema.nullable(),
   spaceId: z.uuid(),
   reporter: AssigneeSchema.nullable(),
   description: RichTextSchema.nullable(),

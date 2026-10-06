@@ -6,6 +6,7 @@ import { ItemDetailsService } from './item-details.service';
 import { ItemQueriesService } from './item-queries.service';
 import { ItemTreeService } from './item-tree.service';
 import { LabelsService } from './labels.service';
+import { RecurrenceService } from './recurrence.service';
 import { WorkItemsController } from './work-items.controller';
 import { WorkItemsService } from './work-items.service';
 
@@ -21,6 +22,7 @@ import { WorkItemsService } from './work-items.service';
     ItemDetailsService,
     ItemQueriesService,
     LabelsService,
+    RecurrenceService,
   ],
   exports: [WorkItemsService],
 })

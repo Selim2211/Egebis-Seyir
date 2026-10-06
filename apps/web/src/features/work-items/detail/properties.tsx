@@ -255,6 +255,17 @@ export function Properties({
         />
       </Row>
 
+      {item.type !== 'EPIC' && (
+        <Row label={t('recurrence.label')}>
+          <RecurrenceInput
+            value={item.recurrence}
+            disabled={!canWrite}
+            needsDueDate={!item.dueDate}
+            onChange={(recurrence) => save({ recurrence })}
+          />
+        </Row>
+      )}
+
       <Row label={t(kind === 'POINTS' ? 'detail.points' : 'detail.hours')}>
         {kind === 'POINTS' ? (
           <PointsInput
@@ -319,6 +330,77 @@ export function Properties({
       {item.type === 'BUG' && <BugFields item={item} disabled={!canWrite} onSave={save} />}
       {item.type === 'EPIC' && <EpicFields item={item} disabled={!canWrite} onSave={save} />}
     </dl>
+  );
+}
+
+const RECURRENCE_FREQS = ['DAILY', 'WEEKLY', 'MONTHLY', 'YEARLY'] as const;
+
+/** Tekrar kuralı (Faz 7.1): tamamlanınca bir sonraki örnek üretilir; bitiş tarihi gerekir. */
+function RecurrenceInput({
+  value,
+  disabled,
+  needsDueDate,
+  onChange,
+}: {
+  value: WorkItemDetail['recurrence'];
+  disabled: boolean;
+  needsDueDate: boolean;
+  onChange: (rule: WorkItemDetail['recurrence']) => void;
+}) {
+  const { t } = useTranslation();
+  const hint = needsDueDate && !value;
+  return (
+    <div className="flex flex-col gap-1">
+      <div className="flex items-center gap-2">
+        <NativeSelect
+          aria-label={t('recurrence.label')}
+          value={value?.freq ?? ''}
+          disabled={disabled || hint}
+          className="h-8"
+          onChange={(e) =>
+            onChange(
+              e.target.value === ''
+                ? null
+                : {
+                    freq: e.target.value as (typeof RECURRENCE_FREQS)[number],
+                    interval: value?.interval ?? 1,
+                  },
+            )
+          }
+        >
+          <option value="">{t('recurrence.none')}</option>
+          {RECURRENCE_FREQS.map((f) => (
+            <option key={f} value={f}>
+              {t(`recurrence.freq.${f}`)}
+            </option>
+          ))}
+        </NativeSelect>
+        {value && (
+          <label className="text-muted-foreground flex items-center gap-1 text-xs">
+            {t('recurrence.every')}
+            <input
+              type="number"
+              min={1}
+              max={365}
+              defaultValue={value.interval}
+              key={value.interval}
+              disabled={disabled}
+              aria-label={t('recurrence.interval')}
+              className="bg-background h-8 w-16 rounded-md border px-2 text-sm"
+              onBlur={(e) => {
+                const interval = Math.min(
+                  Math.max(Math.round(Number(e.target.value)) || 1, 1),
+                  365,
+                );
+                if (interval !== value.interval) onChange({ ...value, interval });
+              }}
+            />
+          </label>
+        )}
+      </div>
+      {hint && <p className="text-muted-foreground text-xs">{t('recurrence.needsDueDate')}</p>}
+      {value && <p className="text-muted-foreground text-xs">{t('recurrence.help')}</p>}
+    </div>
   );
 }
 

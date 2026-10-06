@@ -1,4 +1,9 @@
-import type { ActivityChange, ActivityEvent } from '@scrum/shared';
+import {
+  RECURRENCE_FREQUENCIES,
+  type ActivityChange,
+  type ActivityEvent,
+  type RecurrenceFrequency,
+} from '@scrum/shared';
 import type { TFunction } from 'i18next';
 
 /** Çevirisi olan alan adları; olmayan alan ham adıyla gösterilir. */
@@ -27,6 +32,7 @@ export const ACTIVITY_FIELDS = [
   'listId',
   'spaceId',
   'bulk',
+  'recurrence',
 ] as const;
 export type ActivityField = (typeof ACTIVITY_FIELDS)[number];
 const isField = (field: string): field is ActivityField =>
@@ -56,6 +62,22 @@ function describeChange(change: ActivityChange, t: TFunction): string | null {
     });
   }
   if (change.field === 'description') return t('activity.descriptionEdited');
+  if (change.field === 'recurrence') {
+    const name = (v: string | string[] | null) => {
+      const [freq, interval] = typeof v === 'string' ? v.split(':') : [];
+      return freq && (RECURRENCE_FREQUENCIES as readonly string[]).includes(freq)
+        ? t('recurrence.summary', {
+            count: Number(interval),
+            context: freq as RecurrenceFrequency,
+          })
+        : none;
+    };
+    return t('activity.changed', {
+      field: t('activity.fields.recurrence'),
+      from: name(change.from),
+      to: name(change.to),
+    });
+  }
   if (change.field === 'assigneeIds' || change.field === 'labelIds') {
     const before = new Set(Array.isArray(change.from) ? change.from : []);
     const after = new Set(Array.isArray(change.to) ? change.to : []);
@@ -91,6 +113,8 @@ export function describeEvent(event: ActivityEvent, t: TFunction): string[] {
       ];
     case 'item.copied':
       return [t('activity.copied', { key: detail })];
+    case 'item.recurred':
+      return [t('activity.recurred', { key: detail })];
     case 'item.archived':
       return [t('activity.archived')];
     case 'item.unarchived':

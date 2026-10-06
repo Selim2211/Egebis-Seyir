@@ -372,7 +372,9 @@
     "AI_DISABLED": "AI is turned off on this installation.",
     "AI_RATE_LIMITED": "Too many requests; try again in a minute.",
     "AI_FAILED": "Could not get a valid answer from the AI service.",
-    "AI_NOT_APPLICABLE": "This suggestion is not available for this item type."
+    "AI_NOT_APPLICABLE": "This suggestion is not available for this item type.",
+    "RECURRENCE_NEEDS_DUE_DATE": "A due date is required for recurrence.",
+    "RECURRENCE_NOT_ALLOWED": "Epics cannot recur."
   },
   "spaceRoles": {
     "PRODUCT_OWNER": "Product Owner",
@@ -837,10 +839,12 @@
       "bulk": "Bulk",
       "sprintId": "Sprint",
       "dodChecked": "DoD items",
-      "dorChecked": "DoR items"
+      "dorChecked": "DoR items",
+      "recurrence": "Repeat"
     },
     "gitLinked": "Git link added: {{detail}}",
-    "gitUpdated": "Git link updated: {{detail}}"
+    "gitUpdated": "Git link updated: {{detail}}",
+    "recurred": "Created because recurring task {{key}} was completed."
   },
   "backlog": {
     "title": "Backlog",
@@ -1652,5 +1656,27 @@
     "create": "Create",
     "createStory": "Create story “{{title}}”",
     "storyCreated": "{{key}} created."
+  },
+  "recurrence": {
+    "label": "Repeat",
+    "none": "Does not repeat",
+    "every": "Every",
+    "interval": "Repeat interval",
+    "needsDueDate": "Pick a due date first to repeat.",
+    "help": "When the task is completed, the next one is created automatically.",
+    "summary_DAILY_one": "every day",
+    "summary_DAILY_other": "every {{count}} days",
+    "summary_WEEKLY_one": "every week",
+    "summary_WEEKLY_other": "every {{count}} weeks",
+    "summary_MONTHLY_one": "every month",
+    "summary_MONTHLY_other": "every {{count}} months",
+    "summary_YEARLY_one": "every year",
+    "summary_YEARLY_other": "every {{count}} years",
+    "freq": {
+      "DAILY": "Daily",
+      "WEEKLY": "Weekly",
+      "MONTHLY": "Monthly",
+      "YEARLY": "Yearly"
+    }
   }
 }

@@ -22,6 +22,7 @@ import {
   SPACE_PERMISSIONS as S,
   nextCompletedAt,
   type CreatedItem,
+  type RecurrenceRule,
   type CreateWorkItemData,
   type UpdateWorkItemRequest,
   type WorkItemDetail,
@@ -205,6 +206,7 @@ export class WorkItemsService {
 
     return {
       ...toSummary(row),
+      recurrence: (row.recurrence as RecurrenceRule | null) ?? null,
       readiness,
       spaceId: row.spaceId,
       reporter: row.reporter,
@@ -409,7 +411,7 @@ export class WorkItemsService {
 
   async update(itemId: string, input: UpdateWorkItemRequest): Promise<void> {
     const { workspaceId, actorId } = this.ctx;
-    const { force, customFields: customPatch, ...fields } = input;
+    const { force, customFields: customPatch, recurrence, ...fields } = input;
     const db = this.tenant.db;
 
     const item = await db.workItem.findFirst({
@@ -447,6 +449,12 @@ export class WorkItemsService {
     });
     if (!estimate.ok) throw fail(estimate.code);
     this.validateDates(fields.startDate, fields.dueDate, item.startDate, item.dueDate);
+    const rule = recurrence !== undefined ? recurrence : (item.recurrence as RecurrenceRule | null);
+    if (rule) {
+      if (type === 'EPIC') throw fail(ERROR_CODES.RECURRENCE_NOT_ALLOWED);
+      const due = fields.dueDate !== undefined ? fields.dueDate : item.dueDate;
+      if (!due) throw fail(ERROR_CODES.RECURRENCE_NEEDS_DUE_DATE);
+    }
 
     // Açıklama (ADR-048): boş belge null olarak saklanır; düz metin aramada kullanılır.
     const description =
@@ -515,6 +523,17 @@ export class WorkItemsService {
     }
     if (assignees) changes.assigneeIds = assignees;
     if (labels) changes.labelIds = labels;
+    const recurrenceChanged =
+      recurrence !== undefined &&
+      JSON.stringify(recurrence) !== JSON.stringify(item.recurrence ?? null);
+    if (recurrenceChanged) {
+      const label = (r: RecurrenceRule | null | undefined) =>
+        r ? `${r.freq}:${r.interval}` : null;
+      changes.recurrence = {
+        from: label(item.recurrence as RecurrenceRule | null),
+        to: label(recurrence),
+      };
+    }
     const customBefore = item.customFields as Record<string, unknown>;
     const customAfter: Record<string, unknown> = { ...customBefore };
     const customFrom: Record<string, unknown> = {};
@@ -537,6 +556,9 @@ export class WorkItemsService {
         ...(fields.dueDate !== undefined && { dueDate: toDate(fields.dueDate) }),
         ...(completedAt !== undefined && { completedAt }),
         ...(customChanged && { customFields: asJson(customAfter) }),
+        ...(recurrenceChanged && {
+          recurrence: recurrence === null ? Prisma.JsonNull : asJson(recurrence),
+        }),
         ...(description !== undefined && {
           description: description === null ? Prisma.JsonNull : asJson(description),
           descriptionText: description === null ? null : richTextToPlain(description),

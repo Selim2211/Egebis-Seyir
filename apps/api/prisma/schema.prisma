@@ -528,6 +528,8 @@ model WorkItem {
   descriptionText  String?
   /// Özel alan değerleri: alan kimliği → değer (ADR-082).
   customFields     Json         @default("{}")
+  /// Tekrar kuralı {freq, interval}; tamamlanınca yeni örnek üretilir ve kural ona geçer (Faz 7.1).
+  recurrence       Json?
   gitLinks         GitLink[]
   statusId         String       @db.Uuid
   status           Status       @relation(fields: [statusId], references: [id])

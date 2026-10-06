@@ -372,7 +372,9 @@
     "AI_DISABLED": "Yapay zekâ bu kurulumda kapalı.",
     "AI_RATE_LIMITED": "Çok fazla istek; bir dakika sonra tekrar dene.",
     "AI_FAILED": "Yapay zekâ servisinden geçerli bir yanıt alınamadı.",
-    "AI_NOT_APPLICABLE": "Bu öneri bu iş tipi için kullanılamaz."
+    "AI_NOT_APPLICABLE": "Bu öneri bu iş tipi için kullanılamaz.",
+    "RECURRENCE_NEEDS_DUE_DATE": "Tekrar için bitiş tarihi gerekir.",
+    "RECURRENCE_NOT_ALLOWED": "Epic tekrarlayamaz."
   },
   "spaceRoles": {
     "PRODUCT_OWNER": "Product Owner",
@@ -837,10 +839,12 @@
       "bulk": "Toplu",
       "sprintId": "Sprint",
       "dodChecked": "DoD maddeleri",
-      "dorChecked": "DoR maddeleri"
+      "dorChecked": "DoR maddeleri",
+      "recurrence": "Tekrar"
     },
     "gitLinked": "Git bağlantısı eklendi: {{detail}}",
-    "gitUpdated": "Git bağlantısı güncellendi: {{detail}}"
+    "gitUpdated": "Git bağlantısı güncellendi: {{detail}}",
+    "recurred": "Tekrarlayan görev {{key}} tamamlandığı için oluşturuldu."
   },
   "backlog": {
     "title": "Backlog",
@@ -1652,5 +1656,27 @@
     "create": "Oluştur",
     "createStory": "“{{title}}” hikâyesini oluştur",
     "storyCreated": "{{key}} oluşturuldu."
+  },
+  "recurrence": {
+    "label": "Tekrar",
+    "none": "Tekrarlama",
+    "every": "Her",
+    "interval": "Tekrar aralığı",
+    "needsDueDate": "Tekrar için önce bitiş tarihi seç.",
+    "help": "Görev tamamlanınca bir sonraki örnek otomatik oluşur.",
+    "summary_DAILY_one": "her gün",
+    "summary_DAILY_other": "her {{count}} günde bir",
+    "summary_WEEKLY_one": "her hafta",
+    "summary_WEEKLY_other": "her {{count}} haftada bir",
+    "summary_MONTHLY_one": "her ay",
+    "summary_MONTHLY_other": "her {{count}} ayda bir",
+    "summary_YEARLY_one": "her yıl",
+    "summary_YEARLY_other": "her {{count}} yılda bir",
+    "freq": {
+      "DAILY": "Günlük",
+      "WEEKLY": "Haftalık",
+      "MONTHLY": "Aylık",
+      "YEARLY": "Yıllık"
+    }
   }
 }
