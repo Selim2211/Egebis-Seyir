@@ -653,7 +653,8 @@
     "heading1": "Başlık 1",
     "heading3": "Başlık 3",
     "table": "Tablo ekle / sil",
-    "rule": "Ayırıcı çizgi"
+    "rule": "Ayırıcı çizgi",
+    "taskList": "Görev listesi"
   },
   "severity": {
     "CRITICAL": "Kritik",

@@ -136,3 +136,22 @@ describe('mention (ADR-055)', () => {
     expect(richTextToPlain(stripped)).toBe('Selam @Ali ve @Veli@Ali');
   });
 });
+
+describe('görev listesi (Faz 7.5)', () => {
+  const task = (checked: unknown): RichTextNode => ({
+    type: 'taskItem',
+    attrs: { checked },
+    content: [p('Kurulumu bitir')],
+  });
+  it('onay kutulu maddeleri kabul eder; geçersiz değeri reddeder', () => {
+    expect(isValidRichText(doc({ type: 'taskList', content: [task(true), task(false)] }))).toBe(
+      true,
+    );
+    expect(isValidRichText(doc({ type: 'taskList', content: [task('evet')] }))).toBe(false);
+  });
+  it('düz metne satır sonuyla çevrilir', () => {
+    expect(richTextToPlain(doc({ type: 'taskList', content: [task(false)] }))).toContain(
+      'Kurulumu bitir',
+    );
+  });
+});

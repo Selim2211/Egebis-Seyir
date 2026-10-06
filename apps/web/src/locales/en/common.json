@@ -653,7 +653,8 @@
     "heading1": "Heading 1",
     "heading3": "Heading 3",
     "table": "Insert / delete table",
-    "rule": "Divider"
+    "rule": "Divider",
+    "taskList": "Task list"
   },
   "severity": {
     "CRITICAL": "Critical",

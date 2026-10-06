@@ -24,7 +24,7 @@
 | Özel alanlar, şablonlar, otomasyonlar                               | ✅    |                                                                                |
 | Zaman takibi, timesheet                                             | ✅    |                                                                                |
 | **Tekrarlayan görevler**                                            | ❌    | 7.1                                                                            |
-| **Görev klonlama**                                                  | ❌    | 7.1 (kodda yok; şablondan oluşturma var)                                       |
+| Görev klonlama                                                      | ✅    | `useCopyItem` / `POST items/:id/copy` var                                      |
 | **Birden çok List'te görev (multi-home)**                           | ❌    | Mimari değişiklik; düşük öncelik                                               |
 | **Görev tamamlanınca bağımlıyı otomatik kaydır (Gantt reschedule)** | ❌    | 7.2                                                                            |
 | **Mind map / Whiteboard**                                           | ❌    | Kapsam dışı önerisi                                                            |
@@ -36,24 +36,24 @@
 
 ## 2. Document Management (Confluence karşılaştırması)
 
-| Confluence işlevi                                | Durum | Not                                                                                                                                                         |
-| ------------------------------------------------ | ----- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Sayfa ağacı, sürüklemeyle taşıma                 | ✅    |                                                                                                                                                             |
-| Zengin editör (tablo, başlık)                    | 🟡    | **Kod bloğu, görsel yapıştırma, görev listesi, bilgi/uyarı kutusu, slash menü** eksik → 7.5                                                                 |
-| Sürüm geçmişi + geri yükleme                     | ✅    | **İki sürüm farkı (diff)** yok → 7.6                                                                                                                        |
-| Sayfa yorumları, @mention                        | ✅    |                                                                                                                                                             |
-| Sayfa ↔ görev bağlama                            | ✅    |                                                                                                                                                             |
-| Çöp kutusu                                       | ✅    |                                                                                                                                                             |
-| **Dokümanda arama**                              | ❌    | Global arama yalnızca iş öğelerini tarıyor (`work_items` FTS dizini). `docs.plainText` için FTS dizini + arama sonuçlarına doküman ekleme → 7.5 (öncelikli) |
-| **Dosya/görsel eki (sayfaya)**                   | ❌    | `Attachment` yalnızca `workItemId` ile bağlı → `docId` eklenmeli                                                                                            |
-| Sayfa şablonları                                 | ✅    | `TemplateKind.DOC` (ADR-083)                                                                                                                                |
-| **Workspace düzeyi doküman (Space'siz wiki)**    | ❌    | Doküman şu an Space'e bağlı (`spaceId` zorunlu). Yöneticinin "doküman deposu" hedefi için workspace seviyesi gerekebilir → karar gerekli                    |
-| **Doküman dışa aktarma (PDF/Markdown/Word)**     | ❌    | 7.6                                                                                                                                                         |
-| **Etiket/kategori, favori, son görüntülenenler** | ❌    | Favori modeli var (`FavoriteType`), Doc eklenmeli                                                                                                           |
-| **Sayfa paylaşım bağlantısı (salt okunur)**      | ❌    | Güvenlik fazı                                                                                                                                               |
-| **Eşzamanlı çoklu düzenleme (canlı)**            | ❌    | Şimdilik revision çakışma denetimi (409); Yjs hazırlığı mevcut                                                                                              |
-| **Doküman izinleri (sayfa bazlı)**               | ❌    | Güvenlik fazı                                                                                                                                               |
-| **Büyük doküman/ek saklama tasarımı**            | 🟡    | Yerel disk volume; yedek var. Değerlendirme aşağıda                                                                                                         |
+| Confluence işlevi                                | Durum | Not                                                                                                                                      |
+| ------------------------------------------------ | ----- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Sayfa ağacı, sürüklemeyle taşıma                 | ✅    |                                                                                                                                          |
+| Zengin editör (tablo, başlık)                    | 🟡    | **Kod bloğu, görsel yapıştırma, görev listesi, bilgi/uyarı kutusu, slash menü** eksik → 7.5                                              |
+| Sürüm geçmişi + geri yükleme                     | ✅    | **İki sürüm farkı (diff)** yok → 7.6                                                                                                     |
+| Sayfa yorumları, @mention                        | ✅    |                                                                                                                                          |
+| Sayfa ↔ görev bağlama                            | ✅    |                                                                                                                                          |
+| Çöp kutusu                                       | ✅    |                                                                                                                                          |
+| Dokümanda arama                                  | ✅    | 7.5: global arama sayfaları da bulur (FTS + trigram)                                                                                     |
+| Dosya eki (sayfaya)                              | ✅    | 7.5: `attachments.docId`, sayfa altında Ekler bölümü                                                                                     |
+| Sayfa şablonları                                 | ✅    | `TemplateKind.DOC` (ADR-083)                                                                                                             |
+| **Workspace düzeyi doküman (Space'siz wiki)**    | ❌    | Doküman şu an Space'e bağlı (`spaceId` zorunlu). Yöneticinin "doküman deposu" hedefi için workspace seviyesi gerekebilir → karar gerekli |
+| **Doküman dışa aktarma (PDF/Markdown/Word)**     | ❌    | 7.6                                                                                                                                      |
+| **Etiket/kategori, favori, son görüntülenenler** | ❌    | Favori modeli var (`FavoriteType`), Doc eklenmeli                                                                                        |
+| **Sayfa paylaşım bağlantısı (salt okunur)**      | ❌    | Güvenlik fazı                                                                                                                            |
+| **Eşzamanlı çoklu düzenleme (canlı)**            | ❌    | Şimdilik revision çakışma denetimi (409); Yjs hazırlığı mevcut                                                                           |
+| **Doküman izinleri (sayfa bazlı)**               | ❌    | Güvenlik fazı                                                                                                                            |
+| **Büyük doküman/ek saklama tasarımı**            | 🟡    | Yerel disk volume; yedek var. Değerlendirme aşağıda                                                                                      |
 
 ## 3. Team Management
 
@@ -78,15 +78,15 @@ Güvenlik/yetki büyük ölçüde hazır (RBAC, oturum, CSRF, API token, audit).
 
 ## Adımlar (öneri sırası)
 
-| #   | Adım                               | İçerik                                                                                        | Durum        |
-| --- | ---------------------------------- | --------------------------------------------------------------------------------------------- | ------------ |
-| 7.1 | Tekrarlayan görev + klonlama       | Tekrar kuralı (günlük/haftalık/aylık), tamamlanınca sonraki örneği üretme; görev kopyalama    | Bekliyor     |
-| 7.2 | Gantt iyileştirme                  | Bağımlılık çizme, bağımlıyı otomatik kaydırma, baseline                                       | Bekliyor     |
-| 7.3 | Hatırlatıcı                        | Göreve hatırlatma zamanı, bildirim/e-posta                                                    | Bekliyor     |
-| 7.4 | Form görünümü                      | Kayıtlı form ile görev oluşturma                                                              | Bekliyor     |
-| 7.5 | Doküman arama + ekler + editör     | Docs FTS ve global aramaya ekleme, sayfaya dosya/görsel, kod bloğu, görev listesi, slash menü | Bekliyor     |
-| 7.6 | Doküman sürüm farkı + dışa aktarma | İki sürüm diff, PDF/Markdown                                                                  | Bekliyor     |
-| 7.7 | Ekip (grup) kavramı                | Kullanıcı grupları, gruba atama                                                               | İsteğe bağlı |
+| #   | Adım                               | İçerik                                                                                                | Durum        |
+| --- | ---------------------------------- | ----------------------------------------------------------------------------------------------------- | ------------ |
+| 7.1 | Tekrarlayan görev                  | Tekrar kuralı (günlük/haftalık/aylık), tamamlanınca sonraki örneği üretme                             | Bekliyor     |
+| 7.2 | Gantt iyileştirme                  | Bağımlılık çizme, bağımlıyı otomatik kaydırma, baseline                                               | Bekliyor     |
+| 7.3 | Hatırlatıcı                        | Göreve hatırlatma zamanı, bildirim/e-posta                                                            | Bekliyor     |
+| 7.4 | Form görünümü                      | Kayıtlı form ile görev oluşturma                                                                      | Bekliyor     |
+| 7.5 | Doküman arama + ekler + editör     | Docs FTS ve global arama, sayfaya dosya eki, görev listesi (slash menü ve satır içi görsel ertelendi) | Tamamlandı   |
+| 7.6 | Doküman sürüm farkı + dışa aktarma | İki sürüm diff, PDF/Markdown                                                                          | Bekliyor     |
+| 7.7 | Ekip (grup) kavramı                | Kullanıcı grupları, gruba atama                                                                       | İsteğe bağlı |
 
 ## Açık kararlar (toplantıda)
 
@@ -94,3 +94,9 @@ Güvenlik/yetki büyük ölçüde hazır (RBAC, oturum, CSRF, API token, audit).
 2. Mesajlaşma: kanal/DM mi, yalnızca görev/doküman yorumları mı?
 3. Tekrarlayan görev, Form, Goals gibi ClickUp özelliklerinden hangileri gerçekten gerekli?
 4. Mind map/Whiteboard kapsam dışı mı?
+
+## Kararlar (2026-10-06, kullanıcı)
+
+1. Dokümanlar Space içinde kalır.
+2. Mesajlaşma hem birebir mesaj (DM) hem yorumlar olarak olacak → 7.8 (son).
+3. ClickUp'tan sayılanlar yapılacak: tekrarlayan görev (7.1), hatırlatıcı (7.3), Form (7.4), Goals (7.9).

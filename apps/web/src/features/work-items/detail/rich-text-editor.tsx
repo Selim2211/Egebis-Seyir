@@ -1,4 +1,5 @@
 import type { RichTextDoc } from '@scrum/shared';
+import { TaskItem, TaskList } from '@tiptap/extension-list';
 import Placeholder from '@tiptap/extension-placeholder';
 import { TableKit } from '@tiptap/extension-table';
 import { EditorContent, useEditor } from '@tiptap/react';
@@ -7,6 +8,7 @@ import {
   Bold,
   Code,
   Code2,
+  ListChecks,
   Italic,
   Link as LinkIcon,
   List,
@@ -37,6 +39,7 @@ type ToolName =
   | 'rule'
   | 'bulletList'
   | 'orderedList'
+  | 'taskList'
   | 'blockquote'
   | 'codeBlock'
   | 'undo'
@@ -85,7 +88,13 @@ export function RichTextEditor({
         },
       }),
       Placeholder.configure({ placeholder }),
-      ...(variant === 'page' ? [TableKit.configure({ table: { resizable: false } })] : []),
+      ...(variant === 'page'
+        ? [
+            TableKit.configure({ table: { resizable: false } }),
+            TaskList,
+            TaskItem.configure({ nested: true }),
+          ]
+        : []),
     ],
     editorProps: {
       attributes: {
@@ -259,6 +268,13 @@ export function RichTextEditor({
             () => chain().toggleOrderedList().run(),
             editor.isActive('orderedList'),
           )}
+          {variant === 'page' &&
+            tool(
+              'taskList',
+              <ListChecks className="size-4" />,
+              () => chain().toggleTaskList().run(),
+              editor.isActive('taskList'),
+            )}
           {tool(
             'blockquote',
             <Quote className="size-4" />,

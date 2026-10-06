@@ -34,6 +34,9 @@ export const RICH_TEXT_NODES = [
   'tableRow',
   'tableHeader',
   'tableCell',
+  /** Görev listesi (onay kutulu madde, Faz 7.5). */
+  'taskList',
+  'taskItem',
   /** Yalnızca yorumlarda üretilir; `attrs.id` kullanıcı kimliğidir (ADR-055). */
   'mention',
 ] as const;
@@ -52,6 +55,7 @@ const BLOCK_NODES = new Set([
   'paragraph',
   'heading',
   'listItem',
+  'taskItem',
   'codeBlock',
   'blockquote',
   'horizontalRule',
@@ -75,6 +79,9 @@ function validNode(node: unknown, depth: number): node is RichTextNode {
     if (typeof id !== 'string' || id.length === 0 || id.length > 64) return false;
     if (attrs?.label !== undefined && typeof attrs.label !== 'string') return false;
     if (content !== undefined) return false;
+  }
+  if (type === 'taskItem' && attrs?.checked !== undefined && typeof attrs.checked !== 'boolean') {
+    return false;
   }
   if (type === 'heading') {
     const level = attrs?.level;

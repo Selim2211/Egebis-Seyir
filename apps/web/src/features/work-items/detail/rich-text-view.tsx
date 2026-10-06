@@ -53,6 +53,25 @@ function renderNode(node: RichTextNode, key: number): ReactNode {
       return <ol key={key}>{children}</ol>;
     case 'listItem':
       return <li key={key}>{children}</li>;
+    case 'taskList':
+      return (
+        <ul key={key} data-type="taskList" className="list-none pl-0">
+          {children}
+        </ul>
+      );
+    case 'taskItem':
+      return (
+        <li key={key} className="flex items-start gap-2">
+          <input
+            type="checkbox"
+            checked={node.attrs?.checked === true}
+            disabled
+            readOnly
+            className="mt-1"
+          />
+          <div className="min-w-0 flex-1">{children}</div>
+        </li>
+      );
     case 'blockquote':
       return <blockquote key={key}>{children}</blockquote>;
     case 'codeBlock':
