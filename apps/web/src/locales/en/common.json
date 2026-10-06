@@ -1280,7 +1280,10 @@
     "readOnly": "Read-only",
     "barLabel": "{{key}} {{title}}, {{start}} – {{due}} {{critical}}",
     "onCritical": "(on the critical path)",
-    "legend": "A red outline and arrow mark the critical path; a dashed orange arrow marks a conflicting dependency."
+    "legend": "A red outline and arrow mark the critical path; a dashed orange arrow marks a conflicting dependency.",
+    "autoShift": "Shift dependent items automatically",
+    "cascaded_one": "{{count}} dependent item shifted too.",
+    "cascaded_other": "{{count}} dependent items shifted too."
   },
   "dashboard": {
     "link": "Dashboard",

@@ -33,3 +33,4 @@ export * from './git-events';
 export * from './recurrence';
 export * from './goal';
 export * from './doc-export';
+export * from './gantt-cascade';

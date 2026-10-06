@@ -1280,7 +1280,10 @@
     "readOnly": "Salt okunur",
     "barLabel": "{{key}} {{title}}, {{start}} – {{due}} {{critical}}",
     "onCritical": "(kritik yolda)",
-    "legend": "Kırmızı çerçeve ve ok kritik yolu, kesikli turuncu ok çakışan bağımlılığı gösterir."
+    "legend": "Kırmızı çerçeve ve ok kritik yolu, kesikli turuncu ok çakışan bağımlılığı gösterir.",
+    "autoShift": "Bağımlı işleri otomatik kaydır",
+    "cascaded_one": "{{count}} bağımlı iş de kaydırıldı.",
+    "cascaded_other": "{{count}} bağımlı iş de kaydırıldı."
   },
   "dashboard": {
     "link": "Panel",

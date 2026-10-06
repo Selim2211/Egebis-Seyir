@@ -879,3 +879,10 @@
 - **Karar:** Sayfa istemcide Markdown'a çevrilip indirilir (`docToMarkdown`; başlık, biçimler, bağlantı, listeler, görev listesi, kod bloğu, tablo). PDF için tarayıcının yazdırma iletişimi kullanılır; yazdırma stili yalnızca sayfa gövdesini basar. Sürüm geçmişinde seçili eski sürüm, güncel sürümle satır tabanlı (LCS) farkla karşılaştırılabilir; eklenen/silinen satırlar renk ve +/− işaretiyle, ekran okuyucu için metinle gösterilir. Hepsi saf, birim testli işlevlerdir (`doc-export.ts`); sunucuya yeni uç eklenmedi.
 - **Alternatifler:** Sunucuda PDF üretimi (başsız tarayıcı bağımlılığı, Docker imajını büyütür); Word/HTML dışa aktarma (talep yok).
 - **Bilinen sınırlar:** iki rastgele sürüm arası fark yok (yalnızca seçili ↔ güncel); fark kelime düzeyinde değil satır (blok) düzeyindedir; PDF biçimi tarayıcıya bağlıdır.
+
+## ADR-100 — Gantt'ta bağımlı işleri otomatik kaydırma (Faz 7.2)
+
+- **Tarih:** 2026-10-06 · **Durum:** Kabul
+- **Karar:** Gantt'ta bir çubuk sürüklenince, "Bağımlı işleri otomatik kaydır" açıksa (varsayılan) bitiş-başlangıç kuralı korunur: öncülün bitişine çakışan (başlangıcı ≤ öncül bitişi) ardıllar, ihlali gidermeye yetecek **en az** gün kadar ileri kaydırılır ve zincir ardılların ardıllarına sürer (`cascadeReschedule`, saf ve birim testli; çakışma ölçütü `analyzeSchedule` ile aynı). Geri çekmede ardıllar yerinde kalır, döngüde yalnızca taşınan iş güncellenir. Güncellemeler mevcut `PATCH items/:id` ile öncülden başlayarak sırayla yapılır (yeni API ucu yok; her değişiklik normal doğrulama ve aktivite kaydından geçer). Kapalıysa yalnızca sürüklenen iş taşınır.
+- **Alternatifler:** Sunucu tarafında tek işlemde toplu kaydırma (atomik olur ama yeni uç ve yetki/etkinlik mantığı gerektirir); baseline (planlanan tarih anlık görüntüsü) ve sürükleyerek bağımlılık çizme — ertelendi, talep netleşince.
+- **Bilinen sınırlar:** zincirin ortasında bir hata olursa önceki kaydırmalar kalır ve hata gösterilir; tarihsiz ardıllar kaydırılmaz; baseline ve bağımlılık çizme yok.

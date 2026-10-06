@@ -3,6 +3,7 @@ import {
   daysBetween,
   type Gantt,
   type GanttItem,
+  cascadeReschedule,
   GanttSchema,
   shiftSpan,
   SPACE_PERMISSIONS as S,
@@ -139,6 +140,8 @@ function GanttChart({ data }: { data: Gantt }) {
       : null;
   };
 
+  const [autoShift, setAutoShift] = useState(true);
+
   const startDrag = (e: React.PointerEvent, item: GanttItem) => {
     if (!data.canEdit || e.button !== 0) return;
     const originX = e.clientX;
@@ -152,10 +155,21 @@ function GanttChart({ data }: { data: Gantt }) {
       window.removeEventListener('pointerup', up);
       setDrag(null);
       if (days === 0) return;
-      update.mutate(
-        { itemId: item.id, body: shiftSpan(item, days) },
-        { onError: (error) => toast.error(errorMessage(error)) },
-      );
+      // Bağımlı işler otomatik kaydırılır (Faz 7.2): öncül önce, ardıllar sırayla.
+      const plan = autoShift
+        ? cascadeReschedule(data.items, data.dependencies, item.id, days)
+        : [{ id: item.id, ...shiftSpan(item, days) }];
+      void (async () => {
+        for (const { id, startDate, dueDate } of plan) {
+          try {
+            await update.mutateAsync({ itemId: id, body: { startDate, dueDate } });
+          } catch (error) {
+            toast.error(errorMessage(error));
+            return;
+          }
+        }
+        if (plan.length > 1) toast.success(t('gantt.cascaded', { count: plan.length - 1 }));
+      })();
     };
     window.addEventListener('pointermove', move);
     window.addEventListener('pointerup', up);
@@ -188,6 +202,16 @@ function GanttChart({ data }: { data: Gantt }) {
   return (
     <div className="flex flex-col gap-3">
       <div className="flex flex-wrap items-center gap-3 text-xs">
+        {data.canEdit && (
+          <label className="flex items-center gap-1.5">
+            <input
+              type="checkbox"
+              checked={autoShift}
+              onChange={(e) => setAutoShift(e.target.checked)}
+            />
+            {t('gantt.autoShift')}
+          </label>
+        )}
         {data.criticalPath.length > 0 && (
           <span className="rounded-md border border-red-500/40 bg-red-500/10 px-2 py-1 text-red-700 dark:text-red-300">
             {t('gantt.critical', { days: data.criticalDays, count: data.criticalPath.length })}
