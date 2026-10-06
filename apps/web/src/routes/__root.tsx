@@ -25,7 +25,24 @@ function Root() {
   return (
     <>
       <Outlet />
-      <Toaster position="bottom-right" theme={theme} closeButton richColors />
+      <Toaster
+        position="bottom-right"
+        theme={theme}
+        closeButton
+        toastOptions={{
+          unstyled: false,
+          classNames: {
+            toast: 'popup-surface !rounded-xl !border-l-4 !bg-popover !text-popover-foreground',
+            title: '!font-medium',
+            description: '!text-muted-foreground',
+            closeButton: '!bg-popover !text-muted-foreground !border-border',
+            success: '!border-l-[var(--status-done)]',
+            error: '!border-l-[var(--destructive)]',
+            warning: '!border-l-[var(--priority-high)]',
+            info: '!border-l-[var(--primary)]',
+          },
+        }}
+      />
     </>
   );
 }

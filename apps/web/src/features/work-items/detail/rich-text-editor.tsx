@@ -20,8 +20,19 @@ import {
   Table as TableIcon,
   Undo2,
 } from 'lucide-react';
-import { type ReactNode, useEffect, useRef } from 'react';
+import { type FormEvent, type ReactNode, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogBody,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 
 const SAVE_DELAY_MS = 1500;
@@ -67,6 +78,8 @@ export function RichTextEditor({
   variant?: 'compact' | 'page';
 }) {
   const { t } = useTranslation();
+  const [linkOpen, setLinkOpen] = useState(false);
+  const [linkValue, setLinkValue] = useState('');
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const dirty = useRef(false);
   const onSaveRef = useRef(onSave);
@@ -162,14 +175,20 @@ export function RichTextEditor({
   if (!editor) return null;
 
   const setLink = () => {
-    const previous = (editor.getAttributes('link').href as string | undefined) ?? '';
-    const href = window.prompt(t('editor.linkPrompt'), previous);
-    if (href === null) return;
-    if (href.trim() === '') {
+    setLinkValue((editor.getAttributes('link').href as string | undefined) ?? '');
+    setLinkOpen(true);
+  };
+  const applyLink = (e: FormEvent) => {
+    e.preventDefault();
+    const href = linkValue.trim();
+    if (href === '') {
       editor.chain().focus().extendMarkRange('link').unsetLink().run();
-    } else if (/^(https?:\/\/|mailto:)/i.test(href.trim())) {
-      editor.chain().focus().extendMarkRange('link').setLink({ href: href.trim() }).run();
+    } else if (/^(https?:\/\/|mailto:)/i.test(href)) {
+      editor.chain().focus().extendMarkRange('link').setLink({ href }).run();
+    } else {
+      return;
     }
+    setLinkOpen(false);
   };
 
   const tool = (
@@ -319,6 +338,31 @@ export function RichTextEditor({
         </div>
       )}
       <EditorContent editor={editor} />
+      <Dialog open={linkOpen} onOpenChange={setLinkOpen}>
+        <DialogContent className="max-w-md">
+          <form onSubmit={applyLink} className="flex min-h-0 flex-col">
+            <DialogHeader>
+              <DialogTitle>{t('editor.link')}</DialogTitle>
+              <DialogDescription>{t('editor.linkPrompt')}</DialogDescription>
+            </DialogHeader>
+            <DialogBody>
+              <Input
+                value={linkValue}
+                onChange={(e) => setLinkValue(e.target.value)}
+                placeholder="https://"
+                aria-label={t('editor.link')}
+                autoFocus
+              />
+            </DialogBody>
+            <DialogFooter>
+              <Button type="button" variant="ghost" onClick={() => setLinkOpen(false)}>
+                {t('common.cancel')}
+              </Button>
+              <Button type="submit">{t('common.save')}</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

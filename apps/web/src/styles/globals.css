@@ -267,3 +267,24 @@
     width: 100%;
   }
 }
+
+/* Açılır pencereler (Faz 7): iletişim kutusu, menü ve bildirim aynı yüzey dilini kullanır. */
+.popup-surface {
+  border: 1px solid var(--border);
+  box-shadow:
+    0 0 0 1px color-mix(in oklab, var(--primary) 6%, transparent),
+    0 12px 32px -8px color-mix(in oklab, var(--foreground) 22%, transparent),
+    0 2px 6px color-mix(in oklab, var(--foreground) 8%, transparent);
+}
+.dark .popup-surface {
+  box-shadow:
+    0 0 0 1px color-mix(in oklab, var(--primary) 14%, transparent),
+    0 16px 40px -8px rgb(0 0 0 / 0.6);
+}
+/* Marka renkleri (logo ile aynı): mor → gök mavisi → camgöbeği. */
+.brand-bar {
+  display: block;
+  height: 3px;
+  flex-shrink: 0;
+  background: linear-gradient(90deg, #8b5cf6, #38bdf8 55%, #22d3ee);
+}

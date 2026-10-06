@@ -210,7 +210,8 @@
     "passwordValue": "Password value",
     "copyLogin": "Copy e-mail and password",
     "copied": "Copied.",
-    "shareOnce": "This password will not be shown again; hand it over now."
+    "shareOnce": "This password will not be shown again; hand it over now.",
+    "removeTitle": "Remove {{name}}?"
   },
   "profile": {
     "title": "Profile",

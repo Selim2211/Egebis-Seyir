@@ -13,6 +13,7 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { FormError, NativeSelect } from '@/components/form';
 import { PageHeading } from '@/components/layout/page-heading';
+import { ConfirmDialog } from '@/components/confirm-dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -525,10 +526,13 @@ function MemberRow({
       },
     );
 
+  const [confirmingRemove, setConfirmingRemove] = useState(false);
   const onRemove = () => {
-    if (!window.confirm(t('members.removeConfirm', { name: member.name }))) return;
     remove.mutate(member.userId, {
-      onSuccess: () => toast.success(t('members.removed')),
+      onSuccess: () => {
+        setConfirmingRemove(false);
+        toast.success(t('members.removed'));
+      },
       onError: (e) => toast.error(errorMessage(e)),
     });
   };
@@ -586,11 +590,20 @@ function MemberRow({
               size="icon"
               aria-label={`${t('members.remove')}: ${member.name}`}
               disabled={remove.isPending}
-              onClick={onRemove}
+              onClick={() => setConfirmingRemove(true)}
             >
               <UserMinus />
             </Button>
           )}
+          <ConfirmDialog
+            open={confirmingRemove}
+            onOpenChange={setConfirmingRemove}
+            title={t('members.removeTitle', { name: member.name })}
+            description={t('members.removeConfirm', { name: member.name })}
+            confirmLabel={t('members.remove')}
+            pending={remove.isPending}
+            onConfirm={onRemove}
+          />
         </td>
       )}
     </tr>

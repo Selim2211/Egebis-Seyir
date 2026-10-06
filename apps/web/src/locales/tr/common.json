@@ -210,7 +210,8 @@
     "passwordValue": "Şifre değeri",
     "copyLogin": "E-posta ve şifreyi kopyala",
     "copied": "Kopyalandı.",
-    "shareOnce": "Bu şifre bir daha gösterilmeyecek; şimdi kişiye ilet."
+    "shareOnce": "Bu şifre bir daha gösterilmeyecek; şimdi kişiye ilet.",
+    "removeTitle": "{{name}} çıkarılsın mı?"
   },
   "profile": {
     "title": "Profil",
