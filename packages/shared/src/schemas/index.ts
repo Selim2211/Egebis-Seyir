@@ -28,3 +28,4 @@ export * from './git';
 export * from './ai';
 export * from './reminder';
 export * from './form';
+export * from './goal';

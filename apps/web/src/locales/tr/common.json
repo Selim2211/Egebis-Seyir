@@ -33,7 +33,8 @@
     "openMenu": "Menüyü aç",
     "closeMenu": "Menüyü kapat",
     "comingSoon": "Sonraki adımda gelecek",
-    "workspace": "Workspace"
+    "workspace": "Workspace",
+    "goals": "Hedefler"
   },
   "spaces": {
     "emptyTitle": "Henüz Space yok",
@@ -379,7 +380,9 @@
     "REMINDER_LIMIT": "Bu görevde en fazla 10 bekleyen hatırlatıcı olabilir.",
     "FORM_DISABLED": "Bu form kapalı.",
     "FORM_FIELD_REQUIRED": "Bu alan zorunlu.",
-    "FORM_LIMIT": "Bir Space en fazla 20 form içerebilir."
+    "FORM_LIMIT": "Bir Space en fazla 20 form içerebilir.",
+    "GOAL_WRONG_KIND": "Bu işlem bu tür hedefte yapılamaz.",
+    "GOAL_LIMIT": "Çalışma alanı en fazla 200 hedef içerebilir."
   },
   "spaceRoles": {
     "PRODUCT_OWNER": "Product Owner",
@@ -1734,5 +1737,40 @@
       "assignee": "Atanacak kişi"
     },
     "deleteConfirm": "Formu sil"
+  },
+  "goals": {
+    "title": "Hedefler",
+    "subtitle": "Ekibin ulaşmak istediği sonuçları görev ya da sayıyla takip et.",
+    "add": "Hedef ekle",
+    "addTitle": "Hedef ekle",
+    "create": "Hedefi oluştur",
+    "created": "Hedef oluşturuldu.",
+    "empty": "Henüz hedef yok.",
+    "name": "Hedef adı",
+    "kind": "Tür",
+    "kinds": {
+      "TASKS": "Görev bazlı",
+      "NUMBER": "Sayısal"
+    },
+    "dueDate": "Bitiş tarihi",
+    "due": "Bitiş: {{date}}",
+    "owner": "Sahibi",
+    "color": "Renk",
+    "start": "Başlangıç",
+    "target": "Hedef",
+    "unit": "Birim",
+    "current": "Güncel değer",
+    "currentFor": "{{name}} güncel değeri",
+    "range": "{{start}} → {{target}} {{unit}}",
+    "noItems": "Bu hedefe henüz görev bağlanmadı.",
+    "hidden_one": "Görme yetkin olmayan {{count}} görev daha bağlı (ilerlemeye girmez).",
+    "hidden_other": "Görme yetkin olmayan {{count}} görev daha bağlı (ilerlemeye girmez).",
+    "unlink": "{{key}} görevini hedeften çıkar",
+    "addItem": "{{name}} hedefine görev ekle",
+    "addItemPlaceholder": "Görev ara ve ekle…",
+    "delete": "{{name}} hedefini sil",
+    "deleteTitle": "“{{name}}” silinsin mi?",
+    "deleteBody": "Hedef silinir; bağlı görevler etkilenmez.",
+    "deleteConfirm": "Hedefi sil"
   }
 }

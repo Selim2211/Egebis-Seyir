@@ -33,7 +33,8 @@
     "openMenu": "Open menu",
     "closeMenu": "Close menu",
     "comingSoon": "Coming in the next step",
-    "workspace": "Workspace"
+    "workspace": "Workspace",
+    "goals": "Goals"
   },
   "spaces": {
     "emptyTitle": "No spaces yet",
@@ -379,7 +380,9 @@
     "REMINDER_LIMIT": "At most 10 pending reminders per item.",
     "FORM_DISABLED": "This form is turned off.",
     "FORM_FIELD_REQUIRED": "This field is required.",
-    "FORM_LIMIT": "A space can have at most 20 forms."
+    "FORM_LIMIT": "A space can have at most 20 forms.",
+    "GOAL_WRONG_KIND": "This action is not available for this kind of goal.",
+    "GOAL_LIMIT": "A workspace can have at most 200 goals."
   },
   "spaceRoles": {
     "PRODUCT_OWNER": "Product Owner",
@@ -1734,5 +1737,40 @@
       "assignee": "Assignee"
     },
     "deleteConfirm": "Delete form"
+  },
+  "goals": {
+    "title": "Goals",
+    "subtitle": "Track the outcomes your team is after, by tasks or by a number.",
+    "add": "Add goal",
+    "addTitle": "Add goal",
+    "create": "Create goal",
+    "created": "Goal created.",
+    "empty": "No goals yet.",
+    "name": "Goal name",
+    "kind": "Type",
+    "kinds": {
+      "TASKS": "Task based",
+      "NUMBER": "Numeric"
+    },
+    "dueDate": "Due date",
+    "due": "Due {{date}}",
+    "owner": "Owner",
+    "color": "Color",
+    "start": "Start",
+    "target": "Target",
+    "unit": "Unit",
+    "current": "Current value",
+    "currentFor": "Current value of {{name}}",
+    "range": "{{start}} → {{target}} {{unit}}",
+    "noItems": "No tasks linked to this goal yet.",
+    "hidden_one": "{{count}} more linked task you cannot see (not counted).",
+    "hidden_other": "{{count}} more linked tasks you cannot see (not counted).",
+    "unlink": "Remove {{key}} from the goal",
+    "addItem": "Add a task to {{name}}",
+    "addItemPlaceholder": "Search a task to add…",
+    "delete": "Delete goal {{name}}",
+    "deleteTitle": "Delete “{{name}}”?",
+    "deleteBody": "The goal is deleted; linked tasks are not affected.",
+    "deleteConfirm": "Delete goal"
   }
 }

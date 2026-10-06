@@ -5,6 +5,7 @@ import {
   Inbox,
   ListTodo,
   Palette,
+  Target,
   Settings2,
   UserPlus,
   X,
@@ -106,6 +107,7 @@ export function Sidebar() {
         <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto p-2">
           <NavLink to="/" icon={House} label={t('nav.home')} />
           <NavLink to="/my-work" icon={ListTodo} label={t('nav.myWork')} />
+          <NavLink to="/goals" icon={Target} label={t('nav.goals')} />
           <NavLink to="/notifications" icon={Inbox} label={t('nav.inbox')} badge={unread} />
 
           <SidebarTree />

@@ -100,3 +100,5 @@ Güvenlik/yetki büyük ölçüde hazır (RBAC, oturum, CSRF, API token, audit).
 1. Dokümanlar Space içinde kalır.
 2. Mesajlaşma hem birebir mesaj (DM) hem yorumlar olarak olacak → 7.8 (son).
 3. ClickUp'tan sayılanlar yapılacak: tekrarlayan görev (7.1), hatırlatıcı (7.3), Form (7.4), Goals (7.9).
+
+7.9 Hedefler (Goals): tamamlandı (ADR-097).

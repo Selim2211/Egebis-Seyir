@@ -31,3 +31,4 @@ export * from './csv-import';
 export * from './webhook-url';
 export * from './git-events';
 export * from './recurrence';
+export * from './goal';

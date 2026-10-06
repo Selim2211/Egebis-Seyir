@@ -154,6 +154,7 @@ model User {
   notificationsCaused     Notification[]           @relation("NotificationActor")
   notificationPreferences NotificationPreference[]
   reminders               Reminder[]
+  goalsOwned              Goal[]
   retroItems              RetroItem[]
   retroVotes              RetroVote[]
   timeEntries             TimeEntry[]
@@ -253,6 +254,7 @@ model Workspace {
   notifications           Notification[]
   notificationPreferences NotificationPreference[]
   reminders               Reminder[]
+  goals                   Goal[]
 
   @@map("workspaces")
 }
@@ -594,6 +596,7 @@ model WorkItem {
 
   notifications Notification[]
   reminders     Reminder[]
+  goalLinks     GoalItem[]
 
   @@unique([workspaceId, keyPrefix, number])
   @@index([listId, rank])
@@ -917,6 +920,50 @@ model Notification {
 }
 
 /// Kullanıcının tür bazlı kanal tercihleri; satır yoksa ikisi de açıktır.
+enum GoalKind {
+  TASKS
+  NUMBER
+}
+
+/// Hedef (Faz 7.9, ADR-097): workspace düzeyinde; görev bazlı (bağlı görevlerin ilerlemesi) ya da sayısal.
+model Goal {
+  id           String    @id @default(uuid(7)) @db.Uuid
+  workspaceId  String    @db.Uuid
+  workspace    Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  name         String
+  description  String?
+  color        String    @default("#7C3AED")
+  kind         GoalKind
+  dueDate      DateTime? @db.Date
+  ownerId      String?   @db.Uuid
+  owner        User?     @relation(fields: [ownerId], references: [id], onDelete: SetNull)
+  /// Yalnızca NUMBER: başlangıç, güncel ve hedef değer.
+  startValue   Float?
+  currentValue Float?
+  targetValue  Float?
+  unit         String?
+  createdAt    DateTime  @default(now()) @db.Timestamptz
+  updatedAt    DateTime  @updatedAt @db.Timestamptz
+
+  items GoalItem[]
+
+  @@index([workspaceId])
+  @@map("goals")
+}
+
+model GoalItem {
+  goalId      String   @db.Uuid
+  goal        Goal     @relation(fields: [goalId], references: [id], onDelete: Cascade)
+  workItemId  String   @db.Uuid
+  workItem    WorkItem @relation(fields: [workItemId], references: [id], onDelete: Cascade)
+  workspaceId String   @db.Uuid
+  createdAt   DateTime @default(now()) @db.Timestamptz
+
+  @@id([goalId, workItemId])
+  @@index([workItemId])
+  @@map("goal_items")
+}
+
 /// Kişisel görev hatırlatıcısı (Faz 7.3): zamanı gelince bildirim ve e-posta üretilir.
 model Reminder {
   id          String    @id @default(uuid(7)) @db.Uuid
