@@ -13,6 +13,8 @@ export interface MailMessage {
   subject: string;
   text: string;
   html: string;
+  /** İsteğe bağlı ek başlıklar (ör. List-Unsubscribe). */
+  headers?: Record<string, string>;
 }
 
 export const escapeHtml = (s: string) =>

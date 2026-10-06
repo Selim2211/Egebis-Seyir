@@ -158,5 +158,11 @@ export function notificationMail(p: NotificationMailInput): MailMessage {
     subject: c.subject,
     text: `${c.line}\n\n${c.action}: ${p.url}\n\n${footer}`,
     html: layout(c.subject, [escapeHtml(c.line)], { label: c.action, url: p.url }, footer),
+    // Bildirim e-postaları tercih sayfasına tek tıkla çıkış bağlantısı taşır (yalnızca https).
+    ...(p.url.startsWith('https://') && {
+      headers: {
+        'List-Unsubscribe': `<${new URL(p.url).origin}/settings/notifications>`,
+      },
+    }),
   };
 }

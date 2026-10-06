@@ -46,7 +46,12 @@ export class MailService implements OnModuleInit {
       this.outbox.push(message);
       return;
     }
-    await this.transporter.sendMail({ from: this.from, ...message });
+    // Otomatik, işlemsel e-posta: yanıt otomatiği ve spam filtreleri için işaretlenir.
+    await this.transporter.sendMail({
+      from: this.from,
+      ...message,
+      headers: { 'Auto-Submitted': 'auto-generated', ...message.headers },
+    });
     this.logger.log(`E-posta gönderildi: ${message.subject}`);
   }
 }
