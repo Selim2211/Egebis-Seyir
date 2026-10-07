@@ -6,7 +6,8 @@ export default defineConfig({
   entry: ['src/index.ts'],
   format: ['esm', 'cjs'],
   dts: true,
-  clean: true,
+  // İzleme modunda dist silinmez: dev açılışında web, yeniden derleme bitmeden paketi bulamıyordu.
+  clean: !process.argv.includes('--watch'),
   sourcemap: true,
   noExternal: ['fractional-indexing'],
 });
