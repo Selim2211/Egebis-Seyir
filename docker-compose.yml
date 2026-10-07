@@ -1,6 +1,7 @@
 # Egebis Seyir — sunucu kurulumu (ADR-028, ADR-091).
 # Kurulum: .env.example'ı .env olarak kopyala, değerleri doldur, sonra:
 #   docker compose up -d --build
+# Varsayılan adres: http://localhost:8092 (HTTP_PORT ile değişir).
 # Ayrıntılar: docs/DEPLOY.md
 name: scrum-manager
 
@@ -9,8 +10,8 @@ x-api-env: &api-env
   PORT: 3000
   LOG_LEVEL: ${LOG_LEVEL:-info}
   DATABASE_URL: postgresql://${POSTGRES_USER:-scrum}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD gerekli}@postgres:5432/${POSTGRES_DB:-scrum}
-  APP_URL: ${APP_URL:?APP_URL gerekli}
-  COOKIE_SECURE: ${COOKIE_SECURE:-true}
+  APP_URL: ${APP_URL:-http://localhost:8092}
+  COOKIE_SECURE: ${COOKIE_SECURE:-false}
   TRUST_PROXY: 'true'
   AUTH_RATE_LIMIT: ${AUTH_RATE_LIMIT:-10}
   MAIL_TRANSPORT: smtp
@@ -90,9 +91,9 @@ services:
     environment:
       SITE_ADDRESS: ${SITE_ADDRESS:-:80}
     ports:
-      - '${HTTP_PORT:-80}:80'
-      - '${HTTPS_PORT:-443}:443'
-      - '${HTTPS_PORT:-443}:443/udp'
+      - '${HTTP_PORT:-8092}:80'
+      - '${HTTPS_PORT:-8443}:443'
+      - '${HTTPS_PORT:-8443}:443/udp'
     volumes:
       - caddy-data:/data
       - caddy-config:/config

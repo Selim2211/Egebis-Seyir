@@ -24,4 +24,4 @@ RUN pnpm --filter @scrum/shared build && pnpm --filter @scrum/web build
 FROM caddy:2-alpine AS runtime
 COPY docker/Caddyfile /etc/caddy/Caddyfile
 COPY --from=build /repo/apps/web/dist /srv
-EXPOSE 80 443
+EXPOSE 80

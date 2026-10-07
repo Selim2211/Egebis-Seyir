@@ -66,10 +66,13 @@ Diğer kullanıcılar Ayarlar → Üyeler'den e-posta ile davet edilir.
 ### Yalnızca iç ağ / HTTP ile deneme
 
 ```env
-APP_URL=http://192.168.1.50
+APP_URL=http://192.168.1.50:8092
 SITE_ADDRESS=:80
+HTTP_PORT=8092
 COOKIE_SECURE=false
 ```
+
+Uygulama varsayılan olarak **8092** portunda açılır (`http://sunucu-adresi:8092`); `HTTP_PORT` ile değiştirilir. Alan adı ve otomatik HTTPS için `SITE_ADDRESS=alanadi`, `HTTP_PORT=80`, `HTTPS_PORT=443`, `COOKIE_SECURE=true` yapın.
 
 ## 4. Güncelleme
 
