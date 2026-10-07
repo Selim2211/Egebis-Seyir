@@ -21,8 +21,11 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
 COPY tsconfig.base.json ./
 COPY packages/shared packages/shared
 COPY apps/api apps/api
+# prisma.config.ts DATABASE_URL ister; generate veritabanına bağlanmaz, yer tutucu yeterli.
+# Gerçek adres çalışma anında compose'dan gelir (ARG imajda kalıcı ortam değişkeni olmaz).
+ARG BUILD_DATABASE_URL=postgresql://build:build@localhost:5432/build
 RUN pnpm --filter @scrum/shared build \
- && pnpm --filter @scrum/api exec prisma generate \
+ && DATABASE_URL="$BUILD_DATABASE_URL" pnpm --filter @scrum/api exec prisma generate \
  && pnpm --filter @scrum/api build
 
 # Üretim bağımlılıklarıyla bağımsız klasör (workspace paketi @scrum/shared dahil).
