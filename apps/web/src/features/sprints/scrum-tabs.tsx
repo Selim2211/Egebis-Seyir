@@ -28,7 +28,7 @@ export function ScrumTabs({ spaceId, current }: { spaceId: string; current: Scru
           className={cn(
             'flex h-9 items-center border-b-2 px-2.5 text-sm whitespace-nowrap',
             tab.key === current
-              ? 'border-primary font-semibold'
+              ? 'border-primary text-primary font-semibold'
               : 'text-muted-foreground hover:text-foreground border-transparent',
           )}
         >

@@ -54,8 +54,8 @@ function HomePage() {
       <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6">
         <div className="flex flex-wrap items-start gap-3">
           <div className="min-w-0 flex-1">
-            <h1 className="text-2xl font-semibold tracking-tight">
-              {t('home.greeting', { name: firstName })}
+            <h1 className="text-3xl font-bold tracking-tight">
+              <span className="text-gradient">{t('home.greeting', { name: firstName })}</span>
             </h1>
             <p className="text-muted-foreground mt-1 text-sm">{t('home.subtitle')}</p>
           </div>
@@ -69,7 +69,7 @@ function HomePage() {
           )}
         </div>
 
-        <div className="mt-6 grid gap-5 lg:grid-cols-2">
+        <div className="stagger mt-7 grid gap-5 lg:grid-cols-2">
           <Card
             title={t('home.assigned')}
             action={
@@ -175,8 +175,11 @@ function Card({
   children: ReactNode;
 }) {
   return (
-    <section className="bg-card min-w-0 rounded-lg border" aria-label={title}>
-      <header className="flex items-center gap-2 border-b px-4 py-2.5">
+    <section
+      className="bg-card card-hover min-w-0 overflow-hidden rounded-lg border"
+      aria-label={title}
+    >
+      <header className="from-primary/[0.05] flex items-center gap-2 border-b bg-gradient-to-r to-transparent px-4 py-3">
         <h2 className="text-sm font-semibold">{title}</h2>
         {hint && <span className="text-muted-foreground text-xs">{hint}</span>}
         <span className="ml-auto">{action}</span>
@@ -208,7 +211,10 @@ function ItemList({
       {items.map((item) => {
         const overdue = dueBucket(item, item.status.category, today) === 'overdue';
         return (
-          <li key={item.id} className="flex items-center gap-2 px-4 py-2 text-sm">
+          <li
+            key={item.id}
+            className="hover:bg-accent/60 flex items-center gap-2 px-4 py-2 text-sm transition-colors"
+          >
             <WorkItemTypeIcon type={item.type} />
             <span className="text-muted-foreground shrink-0 font-mono text-xs">{item.key}</span>
             <ItemOpenLink itemKey={item.key} className="min-w-0 flex-1 truncate hover:underline">

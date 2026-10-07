@@ -96,18 +96,26 @@ export function BoardView({
           {statuses.map((status) => {
             const total = columnTotals(lanes, status.id);
             return (
-              <div
-                key={status.id}
-                className="bg-background sticky top-0 z-10 flex items-center gap-2 border-b py-2 text-sm"
-              >
-                <span className="size-2 rounded-full" style={{ background: status.color }} />
-                <h2 className="font-semibold">{status.name}</h2>
-                <WipCounter count={total.count} limit={status.wipLimit} />
-                {showPoints && (
-                  <span className="text-muted-foreground text-xs tabular-nums">
-                    {t('board.points', { points: total.points })}
-                  </span>
-                )}
+              <div key={status.id} className="bg-background sticky top-0 z-10 py-1.5 text-sm">
+                <div
+                  className="bg-card flex items-center gap-2 rounded-lg border border-t-[3px] px-2.5 py-2 shadow-xs"
+                  style={{ borderTopColor: status.color }}
+                >
+                  <span
+                    className="size-2.5 rounded-full"
+                    style={{
+                      background: status.color,
+                      boxShadow: `0 0 0 3px color-mix(in oklab, ${status.color} 20%, transparent)`,
+                    }}
+                  />
+                  <h2 className="font-semibold">{status.name}</h2>
+                  <WipCounter count={total.count} limit={status.wipLimit} />
+                  {showPoints && (
+                    <span className="text-muted-foreground text-xs tabular-nums">
+                      {t('board.points', { points: total.points })}
+                    </span>
+                  )}
+                </div>
               </div>
             );
           })}
@@ -241,9 +249,9 @@ function Cell({
       ref={setNodeRef}
       data-status-id={status.id}
       className={cn(
-        'flex min-h-24 flex-col gap-2 rounded-md py-2',
+        'bg-muted/40 flex min-h-24 flex-col gap-2 rounded-lg p-1.5 transition-colors duration-200 dark:bg-white/[0.02]',
         status.category === 'DONE' && 'bg-emerald-50/50 dark:bg-emerald-500/5',
-        isOver && 'bg-accent/60 ring-primary/40 ring-2',
+        isOver && 'bg-primary/[0.06] ring-primary/40 ring-2 ring-inset',
       )}
     >
       {items.map((item) => (

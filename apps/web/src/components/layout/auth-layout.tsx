@@ -11,10 +11,10 @@ export function AuthLayout({ children }: { children: ReactNode }) {
   const { t } = useTranslation();
   const { language, setLanguage } = useUiStore();
   return (
-    <div className="bg-background flex min-h-dvh flex-col">
+    <div className="auth-backdrop flex min-h-dvh flex-col">
       <main className="flex flex-1 items-center justify-center px-4 py-12">
-        <div className="w-full max-w-sm">
-          <BrandMark size={40} />
+        <div className="bg-card/80 animate-in fade-in slide-in-from-bottom-3 w-full max-w-sm rounded-2xl border p-7 shadow-lg backdrop-blur-xl duration-500 sm:p-8">
+          <BrandMark size={40} className="float-slow" />
           {children}
         </div>
       </main>
@@ -37,7 +37,7 @@ export function AuthLayout({ children }: { children: ReactNode }) {
 export function AuthHeading({ title, subtitle }: { title: string; subtitle?: ReactNode }) {
   return (
     <>
-      <h1 className="mt-5 text-[22px] font-semibold tracking-tight">{title}</h1>
+      <h1 className="mt-6 text-2xl font-bold tracking-tight">{title}</h1>
       {subtitle && <p className="text-muted-foreground mt-1.5 text-sm">{subtitle}</p>}
     </>
   );

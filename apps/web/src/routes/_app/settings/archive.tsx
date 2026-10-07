@@ -44,7 +44,7 @@ function ArchivePage() {
               className={cn(
                 '-mb-px flex h-9 items-center gap-1.5 border-b-2 px-3 text-sm',
                 tab === key
-                  ? 'border-primary font-semibold'
+                  ? 'border-primary text-primary font-semibold'
                   : 'text-muted-foreground border-transparent',
               )}
             >

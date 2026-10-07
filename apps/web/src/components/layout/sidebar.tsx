@@ -23,7 +23,7 @@ import { useUiStore } from '@/lib/ui-store';
 import { cn } from '@/lib/utils';
 
 const navItemClass =
-  'flex h-8 items-center gap-2 rounded-md px-2 text-sm text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground';
+  'group/nav relative flex h-8.5 items-center gap-2.5 rounded-lg px-2.5 text-sm text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground';
 
 function NavLink({
   to,
@@ -45,15 +45,21 @@ function NavLink({
       to={to}
       onClick={() => close(false)}
       className={navItemClass}
-      activeProps={{ className: 'bg-sidebar-accent text-sidebar-accent-foreground font-medium' }}
+      activeProps={{
+        className:
+          'bg-primary/10 !text-primary font-semibold before:absolute before:inset-y-2 before:left-0 before:w-[3px] before:rounded-r-full before:bg-primary dark:bg-primary/15',
+      }}
       activeOptions={{ exact }}
     >
-      <Icon className="size-4" aria-hidden />
+      <Icon
+        className="size-4 transition-transform duration-200 group-hover/nav:scale-110"
+        aria-hidden
+      />
       <span className="flex-1">{label}</span>
       {badge > 0 && (
         <span
           aria-label={`${badge}`}
-          className="bg-primary text-primary-foreground rounded-full px-1.5 text-[10px] leading-4 font-semibold tabular-nums"
+          className="bg-brand animate-in zoom-in-50 rounded-full px-1.5 text-[10px] leading-4 font-semibold text-white tabular-nums shadow-sm"
         >
           {badge > 99 ? '99+' : badge}
         </span>
@@ -76,22 +82,25 @@ export function Sidebar() {
     <>
       {/* Mobil: arka plan örtüsü */}
       <div
-        className={cn('fixed inset-0 z-40 bg-black/40 md:hidden', !sidebarOpen && 'hidden')}
+        className={cn(
+          'animate-in fade-in fixed inset-0 z-40 bg-black/40 backdrop-blur-[2px] md:hidden',
+          !sidebarOpen && 'hidden',
+        )}
         onClick={() => setSidebarOpen(false)}
         aria-hidden
       />
       <aside
         className={cn(
-          'border-sidebar-border bg-sidebar fixed inset-y-0 left-0 z-50 flex w-62 flex-col border-r max-md:transition-transform md:static md:translate-x-0',
+          'border-sidebar-border bg-sidebar fixed inset-y-0 left-0 z-50 flex w-62 flex-col border-r max-md:transition-transform max-md:duration-300 max-md:ease-[var(--ease-out)] md:static md:translate-x-0',
           sidebarOpen ? 'translate-x-0' : '-translate-x-full',
         )}
         aria-label={t('app.name')}
       >
-        <div className="flex h-14 shrink-0 items-center px-4">
+        <div className="flex h-15 shrink-0 items-center px-4">
           <BrandMark size={32} />
         </div>
         <div className="border-sidebar-border flex h-12 items-center gap-2 border-y px-3">
-          <div className="bg-primary text-primary-foreground flex size-6.5 shrink-0 items-center justify-center rounded-md text-xs font-bold">
+          <div className="bg-brand flex size-7 shrink-0 items-center justify-center rounded-lg text-xs font-bold text-white shadow-sm">
             {workspace.name.slice(0, 1).toLocaleUpperCase('tr')}
           </div>
           <div className="min-w-0 flex-1">

@@ -64,7 +64,7 @@ function MyWorkPage() {
                 className={cn(
                   'flex h-9 items-center border-b-2 px-3 text-sm',
                   scope === key
-                    ? 'border-primary font-semibold'
+                    ? 'border-primary text-primary font-semibold'
                     : 'text-muted-foreground hover:text-foreground border-transparent',
                 )}
               >

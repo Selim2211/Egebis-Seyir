@@ -33,7 +33,7 @@ function SubLink({
     <Link
       to={to}
       className="text-muted-foreground hover:bg-accent hover:text-foreground flex h-8 items-center gap-2 rounded-md px-2 text-sm whitespace-nowrap"
-      activeProps={{ className: 'bg-accent !text-foreground font-medium' }}
+      activeProps={{ className: 'bg-primary/10 !text-primary font-semibold' }}
     >
       <Icon className="size-4" aria-hidden />
       {label}

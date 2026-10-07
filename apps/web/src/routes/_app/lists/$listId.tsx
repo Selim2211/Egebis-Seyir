@@ -92,7 +92,7 @@ function ListPage() {
                   className={cn(
                     'flex h-9 items-center gap-1.5 border-b-2 px-2.5 text-sm',
                     selected
-                      ? 'border-primary font-semibold'
+                      ? 'border-primary text-primary font-semibold'
                       : 'text-muted-foreground hover:text-foreground border-transparent',
                   )}
                 >

@@ -492,7 +492,7 @@ function ScrumLink({
 }) {
   return (
     <div
-      className="text-sidebar-foreground hover:bg-sidebar-accent has-[[data-status=active]]:bg-sidebar-accent has-[[data-status=active]]:font-medium flex h-7.5 items-center gap-1 rounded-md pr-1 text-sm"
+      className="text-sidebar-foreground hover:bg-sidebar-accent has-[[data-status=active]]:bg-primary/10 has-[[data-status=active]]:text-primary has-[[data-status=active]]:font-semibold dark:has-[[data-status=active]]:bg-primary/15 transition-colors flex h-7.5 items-center gap-1 rounded-lg pr-1 text-sm"
       style={{ paddingLeft: 4 + 14 }}
     >
       <span className="w-5 shrink-0" aria-hidden />
@@ -786,7 +786,7 @@ function Row({
   const closeSidebar = useUiStore((s) => s.setSidebarOpen);
   return (
     <div
-      className="group/row text-sidebar-foreground hover:bg-sidebar-accent has-[[data-status=active]]:bg-sidebar-accent has-[[data-status=active]]:font-medium relative flex h-7.5 items-center gap-1 rounded-md pr-1 text-sm"
+      className="group/row text-sidebar-foreground hover:bg-sidebar-accent has-[[data-status=active]]:bg-primary/10 has-[[data-status=active]]:text-primary has-[[data-status=active]]:font-semibold dark:has-[[data-status=active]]:bg-primary/15 transition-colors relative flex h-7.5 items-center gap-1 rounded-lg pr-1 text-sm"
       style={{ paddingLeft: 4 + depth * 14 }}
     >
       {handle ? (

@@ -41,10 +41,10 @@ export function BoardCard({
   return (
     <div
       className={cn(
-        'bg-card rounded-md border p-2.5 text-sm shadow-xs',
+        'bg-card card-hover rounded-lg border p-3 text-sm shadow-xs',
         canMove && !overlay && 'cursor-grab active:cursor-grabbing',
         dragging && 'opacity-40',
-        overlay && 'rotate-1 shadow-lg',
+        overlay && 'ring-primary/30 scale-[1.02] rotate-2 shadow-lg ring-2',
       )}
     >
       <div className="flex items-center gap-1.5">

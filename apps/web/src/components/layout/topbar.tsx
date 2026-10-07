@@ -32,7 +32,7 @@ export function Topbar() {
   }, []);
 
   return (
-    <header className="flex h-12 shrink-0 items-center gap-2 border-b px-3">
+    <header className="bg-background/75 supports-[backdrop-filter]:bg-background/60 relative z-10 flex h-13 shrink-0 items-center gap-2 border-b px-3 backdrop-blur-md">
       <Button
         variant="ghost"
         size="icon"
@@ -47,11 +47,11 @@ export function Topbar() {
         type="button"
         onClick={() => setSearchOpen(true)}
         aria-keyshortcuts="Control+K /"
-        className="bg-muted/50 text-muted-foreground flex h-8 w-full max-w-md items-center gap-2 rounded-md border px-2.5 text-sm hover:bg-muted"
+        className="bg-muted/60 text-muted-foreground hover:bg-card hover:border-primary/30 hover:shadow-sm flex h-9 w-full max-w-md items-center gap-2 rounded-lg border px-3 text-sm"
       >
         <Search className="size-4" aria-hidden />
         <span className="flex-1 truncate text-left">{t('topbar.search')}</span>
-        <kbd className="bg-background hidden rounded border px-1.5 font-mono text-[10px] sm:inline">
+        <kbd className="bg-card text-muted-foreground hidden rounded-md border px-1.5 py-0.5 font-mono text-[10px] shadow-xs sm:inline">
           Ctrl K
         </kbd>
       </button>
@@ -66,13 +66,13 @@ export function Topbar() {
           aria-label={
             unread > 0 ? t('notifications.bellUnread', { count: unread }) : t('nav.inbox')
           }
-          className="hover:bg-accent relative flex size-8 items-center justify-center rounded-md"
+          className="hover:bg-accent relative flex size-9 items-center justify-center rounded-lg"
         >
           <Bell className="size-4" aria-hidden />
           {unread > 0 && (
             <span
               aria-hidden
-              className="bg-primary text-primary-foreground absolute -top-0.5 -right-0.5 min-w-4 rounded-full px-1 text-center text-[10px] leading-4 font-semibold tabular-nums"
+              className="bg-brand ring-background animate-in zoom-in-50 absolute top-0 right-0 min-w-4 rounded-full px-1 text-center text-[10px] leading-4 font-semibold text-white tabular-nums ring-2"
             >
               {unread > 99 ? '99+' : unread}
             </span>
