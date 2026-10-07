@@ -9,5 +9,5 @@ export default defineConfig({
   // İzleme modunda dist silinmez: dev açılışında web, yeniden derleme bitmeden paketi bulamıyordu.
   clean: !process.argv.includes('--watch'),
   sourcemap: true,
-  noExternal: ['fractional-indexing'],
+  deps: { alwaysBundle: ['fractional-indexing'], onlyBundle: false },
 });
