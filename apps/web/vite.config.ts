@@ -38,7 +38,14 @@ export default defineConfig({
       },
     },
   },
+  // Dev: tüm kaynaklar açılışta taranır. Aksi halde rota parçaları (autoCodeSplitting) ilk açıldıkça
+  // yeni bağımlılık bulunur ve Vite sayfayı baştan yükler (tıklamada uzun beyaz ekran).
+  optimizeDeps: { entries: ['index.html', 'src/**/*.tsx', '!src/**/*.spec.tsx'] },
   server: {
+    // Sık açılan dosyalar sunucu başlarken önceden dönüştürülür.
+    warmup: {
+      clientFiles: ['./src/main.tsx', './src/routes/**/*.tsx', './src/components/**/*.tsx'],
+    },
     port: 5173,
     strictPort: true,
     // Tarayıcı API'ye aynı origin üzerinden gider (cookie oturumu, CORS yok).

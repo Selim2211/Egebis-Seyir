@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { StructureActionsProvider } from '@/features/spaces/structure-actions';
+import { RouteProgress } from './route-progress';
 import { Sidebar } from './sidebar';
 import { Topbar } from './topbar';
 
@@ -7,6 +8,7 @@ import { Topbar } from './topbar';
 export function AppShell({ children }: { children: ReactNode }) {
   return (
     <StructureActionsProvider>
+      <RouteProgress />
       <div className="flex h-dvh overflow-hidden">
         <Sidebar />
         <div className="flex min-w-0 flex-1 flex-col">
