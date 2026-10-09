@@ -36,6 +36,7 @@ import {
 import { ClsService } from 'nestjs-cls';
 import type { AppClsStore } from '../../infra/cls/request-context';
 import { TenantPrismaService } from '../../infra/prisma/tenant-prisma.service';
+import { ActivityService } from '../activity/activity.service';
 import { forbidden, notFound } from '../spaces/space-errors';
 import { asJson, fail } from '../work-items/item-support';
 import { WorkItemsService } from '../work-items/work-items.service';
@@ -97,6 +98,7 @@ export class CsvService {
     private readonly tenant: TenantPrismaService,
     private readonly cls: ClsService<AppClsStore>,
     private readonly items: WorkItemsService,
+    private readonly activity: ActivityService,
   ) {}
 
   private get ctx() {
@@ -240,6 +242,14 @@ export class CsvService {
     }
     if (!input.mapping.title) throw fail(ERROR_CODES.IMPORT_TITLE_UNMAPPED);
     const result = await this.process(list, table, input.mapping, false);
+    await this.activity.record(this.tenant.db, {
+      workspaceId: this.ctx.workspaceId,
+      actorId: this.ctx.actorId,
+      entityType: 'list',
+      entityId: list.id,
+      action: 'list.imported',
+      changes: { name: list.name, created: result.created, updated: result.updated },
+    });
     return {
       created: result.created,
       updated: result.updated,

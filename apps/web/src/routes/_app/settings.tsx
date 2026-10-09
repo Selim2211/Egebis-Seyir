@@ -11,6 +11,7 @@ import {
   Users,
   type LucideIcon,
   Bell,
+  ScrollText,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useCan } from '@/features/workspace/queries';
@@ -53,6 +54,7 @@ function SettingsLayout() {
   const { t } = useTranslation();
   const canViewMembers = useCan(WORKSPACE_PERMISSIONS.MEMBERS_VIEW);
   const canEditWorkspace = useCan(WORKSPACE_PERMISSIONS.WORKSPACE_SETTINGS);
+  const canViewAudit = useCan(WORKSPACE_PERMISSIONS.AUDIT_VIEW);
 
   return (
     <div className="flex min-h-full flex-col lg:flex-row">
@@ -72,6 +74,9 @@ function SettingsLayout() {
         )}
         {canViewMembers && (
           <SubLink to="/settings/teams" icon={Users} label={t('settings.teams')} />
+        )}
+        {canViewAudit && (
+          <SubLink to="/settings/audit" icon={ScrollText} label={t('settings.audit')} />
         )}
         <SubLink to="/settings/archive" icon={Archive} label={t('settings.archive')} />
         <SectionLabel>{t('settings.accountSection')}</SectionLabel>

@@ -1,10 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import {
   ACTIVITY_PAGE_SIZE,
+  AUDIT_PAGE_SIZE,
   formatItemKey,
   type ActivityChange,
   type ActivityEvent,
   type ActivityResponse,
+  type AuditQuery,
+  type AuditResponse,
 } from '@scrum/shared';
 import { ClsService } from 'nestjs-cls';
 import { Prisma } from '../../generated/prisma/client';
@@ -89,6 +92,112 @@ export class ActivityFeedService {
       orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
     });
     return this.present(rows, size);
+  }
+
+  /**
+   * Denetim günlüğü (Faz 8.3, ADR-103): workspace'teki tüm kayıtlar; kim, ne zaman, neyi yaptı.
+   * Çağıran `workspace.audit.view` iznini denetler (Sahip/Yönetici).
+   */
+  async audit(query: AuditQuery): Promise<AuditResponse> {
+    const db = this.tenant.db;
+    const at = decodeCursor(query.before);
+    const to = query.to ? new Date(`${query.to}T23:59:59.999Z`) : undefined;
+    const where: Prisma.ActivityEventWhereInput = {
+      ...(query.actorId && { actorId: query.actorId }),
+      ...(query.entityType && { entityType: query.entityType }),
+      ...(query.action && { action: { startsWith: query.action } }),
+      ...((query.from || to) && {
+        createdAt: {
+          ...(query.from && { gte: new Date(`${query.from}T00:00:00.000Z`) }),
+          ...(to && { lte: to }),
+        },
+      }),
+      ...(at && { OR: [{ createdAt: { lt: at.at } }, { createdAt: at.at, id: { lt: at.id } }] }),
+    };
+    const rows = await db.activityEvent.findMany({
+      where,
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+      take: AUDIT_PAGE_SIZE + 1,
+    });
+    const base = await this.present(rows, AUDIT_PAGE_SIZE);
+    const page = rows.slice(0, AUDIT_PAGE_SIZE);
+
+    const idsOfType = (type: string) => [
+      ...new Set(page.filter((r) => r.entityType === type).map((r) => r.entityId)),
+    ];
+    const label = new Map<string, string>();
+    const put = (rowsFound: Array<{ id: string; name: string }>) =>
+      rowsFound.forEach((x) => label.set(x.id, x.name));
+    const [sprints, spaces, folders, lists, labels, docs, teams, users, invitations] =
+      await Promise.all([
+        db.sprint.findMany({
+          where: { id: { in: idsOfType('sprint') } },
+          select: { id: true, name: true },
+        }),
+        db.space.findMany({
+          where: { id: { in: idsOfType('space') } },
+          select: { id: true, name: true },
+        }),
+        db.folder.findMany({
+          where: { id: { in: idsOfType('folder') } },
+          select: { id: true, name: true },
+        }),
+        db.list.findMany({
+          where: { id: { in: idsOfType('list') } },
+          select: { id: true, name: true },
+        }),
+        db.label.findMany({
+          where: { id: { in: idsOfType('label') } },
+          select: { id: true, name: true },
+        }),
+        db.doc.findMany({
+          where: { id: { in: idsOfType('doc') } },
+          select: { id: true, title: true },
+        }),
+        db.team.findMany({
+          where: { id: { in: idsOfType('team') } },
+          select: { id: true, name: true },
+        }),
+        this.prisma.user.findMany({
+          where: { id: { in: idsOfType('member') } },
+          select: { id: true, name: true },
+        }),
+        db.invitation.findMany({
+          where: { id: { in: idsOfType('invitation') } },
+          select: { id: true, email: true },
+        }),
+      ]);
+    [sprints, spaces, folders, lists, labels, teams, users].forEach(put);
+    docs.forEach((d) => label.set(d.id, d.title));
+    invitations.forEach((i) => label.set(i.id, i.email));
+
+    const actorIds = await db.activityEvent.findMany({
+      where: { actorId: { not: null } },
+      distinct: ['actorId'],
+      select: { actorId: true },
+      take: 200,
+    });
+    const actors = await this.prisma.user.findMany({
+      where: { id: { in: actorIds.flatMap((a) => (a.actorId ? [a.actorId] : [])) } },
+      select: { id: true, name: true, avatarVersion: true },
+      orderBy: { name: 'asc' },
+    });
+
+    return {
+      events: base.events.map((event, index) => {
+        const row = page[index]!;
+        return {
+          ...event,
+          entityType: row.entityType,
+          entityId: row.entityId,
+          entityLabel: event.item
+            ? `${event.item.key} ${event.item.title}`
+            : (label.get(row.entityId) ?? null),
+        };
+      }),
+      next: base.next,
+      actors,
+    };
   }
 
   // ---------- Sunum ----------

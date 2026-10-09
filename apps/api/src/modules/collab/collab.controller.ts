@@ -20,20 +20,24 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
   ActivityResponseSchema,
+  AuditQuerySchema,
+  AuditResponseSchema,
   CommentRequestSchema,
   CommentsResponseSchema,
   CreatedSchema,
   MentionCandidatesSchema,
   SPACE_PERMISSIONS as S,
+  WORKSPACE_PERMISSIONS as W,
   ToggleReactionRequestSchema,
   type ActivityResponse,
+  type AuditResponse,
   type CommentsResponse,
   type Created,
   type MentionCandidates,
 } from '@scrum/shared';
 import type { Response } from 'express';
 import { createZodDto, ZodResponse } from 'nestjs-zod';
-import { RequireSpacePermission } from '../auth/decorators';
+import { RequirePermission, RequireSpacePermission } from '../auth/decorators';
 import { ActivityFeedService } from './activity-feed.service';
 import { AttachmentsService } from './attachments.service';
 import { CommentsService } from './comments.service';
@@ -43,6 +47,8 @@ class CommentRequestDto extends createZodDto(CommentRequestSchema) {}
 class ReactionDto extends createZodDto(ToggleReactionRequestSchema) {}
 class CandidatesDto extends createZodDto(MentionCandidatesSchema) {}
 class ActivityDto extends createZodDto(ActivityResponseSchema) {}
+class AuditQueryDto extends createZodDto(AuditQuerySchema) {}
+class AuditDto extends createZodDto(AuditResponseSchema) {}
 class CreatedDto extends createZodDto(CreatedSchema) {}
 
 const Uuid = (name: string) => Param(name, ParseUUIDPipe);
@@ -219,5 +225,13 @@ export class CollabController {
     @Query('limit') limit?: string,
   ): Promise<ActivityResponse> {
     return this.feed.recent(before, limit ? Number(limit) || undefined : undefined);
+  }
+
+  /** Denetim günlüğü: kim, ne zaman, ne yaptı (Faz 8.3, ADR-103). Yalnız Sahip/Yönetici. */
+  @Get('audit')
+  @RequirePermission(W.AUDIT_VIEW)
+  @ZodResponse({ type: AuditDto })
+  audit(@Query() query: AuditQueryDto): Promise<AuditResponse> {
+    return this.feed.audit(query);
   }
 }

@@ -47,3 +47,10 @@ export function todayDay(): string {
   const pad = (n: number) => String(n).padStart(2, '0');
   return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
 }
+
+/** 14 Eki 2026 15:42 */
+export function formatDateTime(iso: string): string {
+  return new Intl.DateTimeFormat(locale(), { dateStyle: 'medium', timeStyle: 'short' }).format(
+    new Date(iso),
+  );
+}

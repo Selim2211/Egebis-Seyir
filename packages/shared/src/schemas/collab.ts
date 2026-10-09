@@ -100,3 +100,51 @@ export const ActivityResponseSchema = z.object({
   next: z.string().nullable(),
 });
 export type ActivityResponse = z.infer<typeof ActivityResponseSchema>;
+
+// ---------- Denetim günlüğü (Faz 8.3, ADR-103) ----------
+
+export const AUDIT_ENTITY_TYPES = [
+  'workspace',
+  'member',
+  'invitation',
+  'space',
+  'folder',
+  'list',
+  'item',
+  'label',
+  'sprint',
+  'doc',
+  'team',
+] as const;
+export const AuditEntityTypeSchema = z.enum(AUDIT_ENTITY_TYPES);
+export type AuditEntityType = z.infer<typeof AuditEntityTypeSchema>;
+
+export const AUDIT_PAGE_SIZE = 50;
+
+export const AuditEventSchema = ActivityEventSchema.extend({
+  entityType: z.string(),
+  entityId: z.uuid(),
+  /** Nesnenin okunur adı (öğe: "MOB-12 Başlık"); silinmişse null. */
+  entityLabel: z.string().nullable(),
+});
+export type AuditEvent = z.infer<typeof AuditEventSchema>;
+
+/** GET /api/workspaces/:wid/audit?actorId&entityType&action&from&to&before */
+export const AuditQuerySchema = z.object({
+  actorId: z.uuid().optional(),
+  entityType: AuditEntityTypeSchema.optional(),
+  /** `sprint.` gibi önek ya da tam eylem adı. */
+  action: z.string().max(60).optional(),
+  from: z.iso.date().optional(),
+  to: z.iso.date().optional(),
+  before: z.string().max(200).optional(),
+});
+export type AuditQuery = z.infer<typeof AuditQuerySchema>;
+
+export const AuditResponseSchema = z.object({
+  events: z.array(AuditEventSchema),
+  next: z.string().nullable(),
+  /** Süzgeç seçenekleri: günlükte görünen kişiler. */
+  actors: z.array(person),
+});
+export type AuditResponse = z.infer<typeof AuditResponseSchema>;

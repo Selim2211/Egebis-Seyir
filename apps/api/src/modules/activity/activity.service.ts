@@ -21,7 +21,8 @@ export interface ActivityInput {
     | 'item'
     | 'label'
     | 'sprint'
-    | 'doc';
+    | 'doc'
+    | 'team';
   entityId: string;
   action: string;
   changes?: Prisma.InputJsonValue;

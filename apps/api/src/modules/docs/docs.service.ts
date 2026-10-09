@@ -246,7 +246,17 @@ export class DocsService {
       });
       if (result.count === 0) throw conflict(ERROR_CODES.DOC_CONFLICT);
       const fresh = await tx.doc.findFirstOrThrow({ where: { id: docId } });
-      await this.writeVersion(tx, fresh, actorId, false);
+      // Yeni sürüm açıldıysa denetim kaydı düşülür (10 dakikalık birleşen kayıtlar tek satır olur).
+      if (await this.writeVersion(tx, fresh, actorId, false)) {
+        await this.activity.record(tx, {
+          workspaceId: fresh.workspaceId,
+          actorId,
+          entityType: 'doc',
+          entityId: fresh.id,
+          action: 'doc.edited',
+          changes: { title: fresh.title },
+        });
+      }
       return fresh;
     });
     return { revision: updated.revision, updatedAt: updated.updatedAt.toISOString() };
@@ -256,7 +266,12 @@ export class DocsService {
    * Sürüm satırı yazar: aynı yazarın yakın kayıtları son sürümde birleşir, aksi halde yeni
    * sürüm açılır (ADR-069). `force` her zaman yeni sürüm açar (oluşturma, geri yükleme).
    */
-  private async writeVersion(tx: TenantTx, doc: Doc, actorId: string, force: boolean) {
+  private async writeVersion(
+    tx: TenantTx,
+    doc: Doc,
+    actorId: string,
+    force: boolean,
+  ): Promise<boolean> {
     const last = await tx.docVersion.findFirst({
       where: { docId: doc.id },
       orderBy: { version: 'desc' },
@@ -267,7 +282,7 @@ export class DocsService {
         where: { id: last.id },
         data: { title: doc.title, content: content ?? Prisma.DbNull },
       });
-      return;
+      return false;
     }
     await tx.docVersion.create({
       data: {
@@ -289,6 +304,7 @@ export class DocsService {
     if (stale.length > 0) {
       await tx.docVersion.deleteMany({ where: { id: { in: stale.map((s) => s.id) } } });
     }
+    return true;
   }
 
   // ---------- Taşıma ----------

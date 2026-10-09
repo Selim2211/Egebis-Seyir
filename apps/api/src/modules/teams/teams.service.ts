@@ -12,6 +12,7 @@ import { Prisma } from '../../generated/prisma/client';
 import type { AppClsStore } from '../../infra/cls/request-context';
 import { TenantPrismaService } from '../../infra/prisma/tenant-prisma.service';
 import { notFound } from '../spaces/space-errors';
+import { ActivityService } from '../activity/activity.service';
 import { fail } from '../work-items/item-support';
 
 /**
@@ -23,6 +24,7 @@ export class TeamsService {
   constructor(
     private readonly tenant: TenantPrismaService,
     private readonly cls: ClsService<AppClsStore>,
+    private readonly activity: ActivityService,
   ) {}
 
   private assertMember(): void {
@@ -80,6 +82,10 @@ export class TeamsService {
         },
         select: { id: true },
       });
+      await this.record(row.id, 'team.created', {
+        name: input.name.trim(),
+        members: memberIds.length,
+      });
       return { id: row.id };
     } catch (error) {
       throw this.mapConflict(error);
@@ -116,12 +122,32 @@ export class TeamsService {
     } catch (error) {
       throw this.mapConflict(error);
     }
+    await this.record(teamId, 'team.updated', {
+      ...(input.name !== undefined && { name: input.name.trim() }),
+      ...(memberIds && { members: memberIds.length }),
+    });
   }
 
   async remove(teamId: string): Promise<void> {
     this.assertMember();
+    const team = await this.tenant.db.team.findFirst({
+      where: { id: teamId },
+      select: { name: true },
+    });
     const result = await this.tenant.db.team.deleteMany({ where: { id: teamId } });
     if (result.count === 0) throw notFound();
+    await this.record(teamId, 'team.deleted', { name: team?.name ?? '' });
+  }
+
+  private record(teamId: string, action: string, changes: Prisma.InputJsonValue): Promise<void> {
+    return this.activity.record(this.tenant.db, {
+      workspaceId: this.cls.get('workspaceId'),
+      actorId: this.cls.get('userId')!,
+      entityType: 'team',
+      entityId: teamId,
+      action,
+      changes,
+    });
   }
 
   private mapConflict(error: unknown): unknown {

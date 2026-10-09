@@ -33,6 +33,7 @@ export const ACTIVITY_FIELDS = [
   'spaceId',
   'bulk',
   'recurrence',
+  'type',
 ] as const;
 export type ActivityField = (typeof ACTIVITY_FIELDS)[number];
 const isField = (field: string): field is ActivityField =>
