@@ -86,17 +86,16 @@ test.describe.serial('Yorum, ek, aktivite ve Ana sayfa', () => {
 
   test('dosya eklenir, resim önizlenir, yasaklı tür reddedilir, silinir', async ({ page }) => {
     await openItem(page);
-    await page.locator('input[type="file"]').first().setInputFiles({
+    await page.getByRole('region', { name: 'Ekler' }).locator('input[type="file"]').setInputFiles({
       name: 'ekran.png',
       mimeType: 'image/png',
       buffer: PNG_1X1,
     });
     await expect(page.getByRole('link', { name: 'ekran.png', exact: true })).toBeVisible();
     await expect(page.getByRole('link', { name: 'ekran.png önizle' })).toBeVisible();
-
     await page
+      .getByRole('region', { name: 'Ekler' })
       .locator('input[type="file"]')
-      .first()
       .setInputFiles({
         name: 'kurulum.exe',
         mimeType: 'application/octet-stream',
