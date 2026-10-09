@@ -129,6 +129,13 @@ export const MoveBacklogItemsRequestSchema = z.object({
 });
 export type MoveBacklogItemsRequest = z.infer<typeof MoveBacklogItemsRequestSchema>;
 
+/**
+ * POST /api/workspaces/:wid/items/:itemId/nest — öğeyi başka bir öğenin alt öğesi yapar (ADR-102).
+ * Tip kuralı izin vermezse alt öğesiz Task, Sub-task olur; Epic dışı üste geçen öğe sprint/backlog dışına çıkar.
+ */
+export const NestItemRequestSchema = z.object({ parentId: z.uuid() });
+export type NestItemRequest = z.infer<typeof NestItemRequestSchema>;
+
 // ---------- Sprint Review (Faz 2.4, ADR-065) ----------
 
 export const SprintScopeChangeSchema = z.object({

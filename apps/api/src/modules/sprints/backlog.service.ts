@@ -3,6 +3,7 @@ import {
   ERROR_CODES,
   formatItemKey,
   isSprintOpen,
+  planNest,
   ranksAfter,
   ranksBetween,
   SPACE_PERMISSIONS as S,
@@ -11,6 +12,7 @@ import {
   sprintMoveReason,
   type BacklogResponse,
   type MoveBacklogItemsRequest,
+  type NestItemRequest,
 } from '@scrum/shared';
 import { ClsService } from 'nestjs-cls';
 import type { Prisma } from '../../generated/prisma/client';
@@ -180,6 +182,66 @@ export class BacklogService {
         if (item.sprintId === input.sprintId) continue;
         await this.recordMembership(tx, item, target, workspaceId, actorId);
       }
+    });
+  }
+
+  /**
+   * Öğeyi başka bir öğenin alt öğesi yapar (sürükle-bırak, ADR-102). Üst öğe tipi değişmez; tip kuralı
+   * izin vermezse alt öğesiz Task, Sub-task olur. Epic dışı bir üste geçen öğe sprint ve backlog'dan
+   * çıkar (üst öğesiyle birlikte izlenir); aktif sprint'ten çıkış kapsam değişikliği olarak kaydedilir.
+   */
+  async nest(itemId: string, input: NestItemRequest): Promise<void> {
+    const { workspaceId, actorId } = this.ctx;
+    const db = this.tenant.db;
+    if (itemId === input.parentId) throw fail(ERROR_CODES.WORK_ITEM_PARENT_NOT_ALLOWED);
+    const item = await db.workItem.findFirst({
+      where: { id: itemId, ...countedItems },
+      include: {
+        parent: { select: { keyPrefix: true, number: true } },
+        sprint: { select: { id: true, name: true, status: true } },
+        _count: { select: { children: { where: { deletedAt: null } } } },
+      },
+    });
+    const parent = await db.workItem.findFirst({
+      where: { id: input.parentId, ...countedItems },
+      select: { id: true, type: true, keyPrefix: true, number: true, spaceId: true },
+    });
+    if (!item || !parent) throw notFound();
+    if (parent.spaceId !== item.spaceId) throw fail(ERROR_CODES.WORK_ITEM_PARENT_SPACE);
+    const plan = planNest({ type: item.type, hasChildren: item._count.children > 0 }, parent.type);
+    if (!plan.ok) throw fail(plan.code);
+    if (item.parentId === parent.id && plan.type === item.type) return;
+
+    const leavesSprint = parent.type !== 'EPIC' && item.sprintId !== null;
+    if (leavesSprint) {
+      if (item.sprint && !isSprintOpen(item.sprint.status))
+        throw conflict(ERROR_CODES.SPRINT_READONLY);
+      if (!this.can(S.SPRINT_PLAN)) throw forbidden(ERROR_CODES.FORBIDDEN);
+    }
+    const keyOf = (p: { keyPrefix: string; number: number } | null) =>
+      p ? formatItemKey(p.keyPrefix, p.number) : null;
+
+    await db.$transaction(async (tx) => {
+      await tx.workItem.update({
+        where: { id: item.id },
+        data: {
+          parentId: parent.id,
+          type: plan.type,
+          ...(parent.type === 'EPIC' ? {} : { sprintId: null, backlogRank: null }),
+        },
+      });
+      if (leavesSprint) await this.recordMembership(tx, item, null, workspaceId, actorId);
+      await this.activity.record(tx, {
+        workspaceId,
+        actorId,
+        entityType: 'item',
+        entityId: item.id,
+        action: 'item.updated',
+        changes: asJson({
+          parentId: { from: keyOf(item.parent), to: keyOf(parent) },
+          ...(plan.type !== item.type ? { type: { from: item.type, to: plan.type } } : {}),
+        }),
+      });
     });
   }
 

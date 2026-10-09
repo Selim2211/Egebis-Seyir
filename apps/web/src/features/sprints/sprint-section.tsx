@@ -1,6 +1,6 @@
 import type { SprintSummary, WorkItemRow } from '@scrum/shared';
 import type { ReactNode } from 'react';
-import { ChevronRight, MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
+import { ChevronRight, Copy, MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -13,6 +13,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { formatShortDate } from '@/lib/format';
 import { cn } from '@/lib/utils';
+import { containerId } from './backlog-dnd';
+import { DropContainerView, SortableRow } from './backlog-dnd-view';
 import { BacklogRow } from './backlog-row';
 
 /** Sprint bölümü: başlık (ad, tarih, hedef, toplamlar), menü ve öğe satırları (ADR-061). */
@@ -28,6 +30,8 @@ export function SprintSection({
   onMove,
   onEdit,
   onDelete,
+  onCopy,
+  dnd,
   actions,
 }: {
   sprint: SprintSummary;
@@ -41,6 +45,9 @@ export function SprintSection({
   onMove: (itemId: string, sprintId: string | null) => void;
   onEdit: () => void;
   onDelete: () => void;
+  onCopy: () => void;
+  /** Sürükle-bırak: izin ve alt öğe olarak vurgulanacak satır (ADR-102). */
+  dnd: { enabled: boolean; nestTarget: string | null };
   /** Başlat / Tamamla / İptal düğmeleri (SprintActions). */
   actions?: ReactNode;
 }) {
@@ -79,7 +86,7 @@ export function SprintSection({
           )}
         </span>
         {actions}
-        {canPlan && (
+        {(canPlan || items.length > 0) && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
@@ -92,11 +99,17 @@ export function SprintSection({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-44">
-              <DropdownMenuItem onSelect={onEdit}>
-                <Pencil />
-                {t('sprints.edit')}
+              <DropdownMenuItem onSelect={onCopy}>
+                <Copy />
+                {t('copyList.action')}
               </DropdownMenuItem>
-              {sprint.status === 'PLANNED' && (
+              {canPlan && (
+                <DropdownMenuItem onSelect={onEdit}>
+                  <Pencil />
+                  {t('sprints.edit')}
+                </DropdownMenuItem>
+              )}
+              {canPlan && sprint.status === 'PLANNED' && (
                 <>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem variant="destructive" onSelect={onDelete}>
@@ -116,24 +129,39 @@ export function SprintSection({
       )}
       {!collapsed && (
         <div className="border-t">
-          {loading ? (
-            <p className="text-muted-foreground px-4 py-3 text-sm">{t('common.loading')}</p>
-          ) : items.length === 0 ? (
-            <p className="text-muted-foreground px-4 py-6 text-center text-sm">
-              {t('sprints.empty')}
-            </p>
-          ) : (
-            items.map((item) => (
-              <BacklogRow
-                key={item.id}
-                item={item}
-                epicTitle={item.parentId ? epicTitles.get(item.parentId) : undefined}
-                targets={targets.filter((s) => s.id !== sprint.id)}
-                canPlan={canPlan}
-                onMove={(sprintId) => onMove(item.id, sprintId)}
-              />
-            ))
-          )}
+          <DropContainerView
+            id={containerId(sprint.id)}
+            itemIds={items.map((i) => i.id)}
+            enabled={dnd.enabled}
+          >
+            {loading ? (
+              <p className="text-muted-foreground px-4 py-3 text-sm">{t('common.loading')}</p>
+            ) : items.length === 0 ? (
+              <p className="text-muted-foreground px-4 py-6 text-center text-sm">
+                {t('sprints.empty')}
+              </p>
+            ) : (
+              items.map((item) => (
+                <SortableRow
+                  key={item.id}
+                  id={item.id}
+                  enabled={dnd.enabled}
+                  nestTarget={dnd.nestTarget === item.id}
+                >
+                  {(handle) => (
+                    <BacklogRow
+                      item={item}
+                      epicTitle={item.parentId ? epicTitles.get(item.parentId) : undefined}
+                      handle={handle}
+                      targets={targets.filter((s) => s.id !== sprint.id)}
+                      canPlan={canPlan}
+                      onMove={(sprintId) => onMove(item.id, sprintId)}
+                    />
+                  )}
+                </SortableRow>
+              ))
+            )}
+          </DropContainerView>
         </div>
       )}
     </section>

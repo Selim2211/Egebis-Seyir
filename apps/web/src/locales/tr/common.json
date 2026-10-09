@@ -884,7 +884,9 @@
     "clearSelection": "Seçimi temizle",
     "noResults": "Süzgece uyan öğe yok.",
     "empty": "Backlog boş. Listelere Story, Bug veya Task ekledikçe burada öncelik sırasıyla görünür.",
-    "reorderHint": "Sıralamayı değiştirmek için süzgeçleri temizle."
+    "reorderHint": "Sıralamayı değiştirmek için süzgeçleri temizle.",
+    "nested": "Alt öğe yapıldı",
+    "nestHint": "Bir satırı başka satırın üzerine sağa doğru bırakırsan alt öğesi olur."
   },
   "sprints": {
     "create": "Sprint oluştur",
@@ -946,7 +948,8 @@
     "scopeChangeAdd": "{{name}} aktif; {{count}} öğe eklemek kapsam değişikliği sayılır ve raporlarda görünür.",
     "scopeChangeRemove": "{{name}} aktif; {{count}} öğeyi çıkarmak kapsam değişikliği sayılır ve raporlarda görünür.",
     "scopeChangeConfirm": "Devam et",
-    "notReadyWarn": "{{count}} öğe Definition of Ready'ye uymuyor."
+    "notReadyWarn": "{{count}} öğe Definition of Ready'ye uymuyor.",
+    "treeEmpty": "Henüz sprint yok"
   },
   "board": {
     "title": "Sprint panosu",
@@ -1826,5 +1829,19 @@
     "deleteConfirm": "Ekibi sil",
     "saved": "Ekip kaydedildi.",
     "addTeam": "Ekibi ekle"
+  },
+  "copyList": {
+    "action": "Listeyi kopyala",
+    "copied_one": "1 öğe panoya kopyalandı",
+    "copied_other": "{{count}} öğe panoya kopyalandı",
+    "failed": "Panoya kopyalanamadı",
+    "key": "ID",
+    "title": "Başlık",
+    "type": "Tip",
+    "status": "Durum",
+    "assignees": "Atananlar",
+    "priority": "Öncelik",
+    "estimate": "Tahmin",
+    "due": "Bitiş"
   }
 }

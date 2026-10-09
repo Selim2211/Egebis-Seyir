@@ -36,3 +36,27 @@ export function checkParent(child: WorkItemType, parent: WorkItemType | null): P
     ? { ok: true }
     : { ok: false, code: ERROR_CODES.WORK_ITEM_PARENT_NOT_ALLOWED };
 }
+
+export type NestPlan =
+  | { ok: true; type: WorkItemType }
+  | { ok: false; code: typeof ERROR_CODES.WORK_ITEM_PARENT_NOT_ALLOWED };
+
+/**
+ * Bir öğe başka bir öğenin üzerine sürüklenince (ADR-102): tip kuralı izin veriyorsa olduğu gibi
+ * alt öğe olur; izin vermiyorsa ve öğe alt öğesiz bir Task ise Sub-task'a dönüşür (Task → Task/Bug).
+ * Üst öğenin tipi hiçbir zaman değişmez (hiyerarşi korunur).
+ */
+export function planNest(
+  child: { type: WorkItemType; hasChildren: boolean },
+  parentType: WorkItemType,
+): NestPlan {
+  if (checkParent(child.type, parentType).ok) return { ok: true, type: child.type };
+  if (
+    child.type === 'TASK' &&
+    !child.hasChildren &&
+    ALLOWED_PARENT_TYPES.SUBTASK.includes(parentType)
+  ) {
+    return { ok: true, type: 'SUBTASK' };
+  }
+  return { ok: false, code: ERROR_CODES.WORK_ITEM_PARENT_NOT_ALLOWED };
+}

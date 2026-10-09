@@ -7,7 +7,7 @@ import {
   type TreeSpace,
   WORKSPACE_PERMISSIONS as W,
 } from '@scrum/shared';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useRouterState } from '@tanstack/react-router';
 import {
   Archive,
@@ -49,6 +49,7 @@ import {
 import { useCan, useCurrentWorkspace } from '@/features/workspace/queries';
 import { useUiStore } from '@/lib/ui-store';
 import { cn } from '@/lib/utils';
+import { sprintsQuery } from '@/features/sprints/queries';
 import { useStructureActions } from './actions-context';
 import { ContainerLink } from './container-header';
 import { hierarchyQuery, useHierarchy, useMove } from './queries';
@@ -361,20 +362,87 @@ function SpaceNode({
   );
 }
 
-/** Space altındaki Scrum bağlantıları: Backlog ve sprint panosu (yalnızca Scrum açık Space'lerde). */
+/**
+ * Space altındaki Scrum bağlantıları: genişletilebilir "Backlog ve sprint'ler" (altında tüm sprint'ler,
+ * ClickUp gibi ağaç görünümü, Faz 8.1) ve Sprint panosu.
+ */
 function ScrumLinks({ spaceId }: { spaceId: string }) {
   const { t } = useTranslation();
   const closeSidebar = useUiStore((s) => s.setSidebarOpen);
+  const treeKey = `sprints:${spaceId}`;
+  const open = useUiStore((s) => s.expanded[treeKey] ?? false);
+  const setExpanded = useUiStore((s) => s.setExpanded);
+  const { id: workspaceId } = useCurrentWorkspace();
+  const sprints = useQuery({ ...sprintsQuery(workspaceId, spaceId), enabled: open });
+  const list = sprints.data?.sprints ?? [];
   return (
     <>
-      <ScrumLink
-        to="/spaces/$spaceId/backlog"
-        spaceId={spaceId}
-        onNavigate={() => closeSidebar(false)}
+      <div
+        className="text-sidebar-foreground hover:bg-sidebar-accent has-[[data-status=active]]:bg-primary/10 has-[[data-status=active]]:text-primary has-[[data-status=active]]:font-semibold dark:has-[[data-status=active]]:bg-primary/15 flex h-7.5 items-center gap-1 rounded-lg pr-1 text-sm transition-colors"
+        style={{ paddingLeft: 4 + 14 }}
       >
-        <ListOrdered className="text-muted-foreground size-4 shrink-0" aria-hidden />
-        <span className="truncate">{t('backlog.link')}</span>
-      </ScrumLink>
+        <button
+          type="button"
+          onClick={() => setExpanded(treeKey, !open)}
+          aria-expanded={open}
+          aria-label={t(open ? 'structure.collapse' : 'structure.expand', {
+            name: t('backlog.link'),
+          })}
+          className="text-muted-foreground hover:text-foreground flex size-5 shrink-0 items-center justify-center rounded"
+        >
+          <ChevronRight className={cn('size-3.5 transition-transform', open && 'rotate-90')} />
+        </button>
+        <Link
+          to="/spaces/$spaceId/backlog"
+          params={{ spaceId }}
+          onClick={() => closeSidebar(false)}
+          className="flex min-w-0 flex-1 items-center gap-1.5 self-stretch outline-none focus-visible:underline"
+        >
+          <ListOrdered className="text-muted-foreground size-4 shrink-0" aria-hidden />
+          <span className="truncate">{t('backlog.link')}</span>
+        </Link>
+      </div>
+      {open && (
+        <div role="group" aria-label={t('backlog.link')}>
+          {sprints.isPending && (
+            <p className="text-muted-foreground py-1 pl-14 text-xs">{t('common.loading')}</p>
+          )}
+          {!sprints.isPending && list.length === 0 && (
+            <p className="text-muted-foreground py-1 pl-14 text-xs">{t('sprints.treeEmpty')}</p>
+          )}
+          {list.map((sprint) => (
+            <div
+              key={sprint.id}
+              className="text-sidebar-foreground hover:bg-sidebar-accent flex h-7 items-center rounded-lg pr-1 text-sm transition-colors"
+              style={{ paddingLeft: 4 + 14 + 22 }}
+            >
+              <Link
+                to="/spaces/$spaceId/board"
+                params={{ spaceId }}
+                search={{ sprint: sprint.id }}
+                onClick={() => closeSidebar(false)}
+                className="flex min-w-0 flex-1 items-center gap-1.5 self-stretch outline-none focus-visible:underline"
+              >
+                <span
+                  aria-hidden
+                  className={cn(
+                    'size-2 shrink-0 rounded-full',
+                    sprint.status === 'ACTIVE'
+                      ? 'bg-status-done'
+                      : sprint.status === 'PLANNED'
+                        ? 'bg-status-active'
+                        : 'bg-status-not-started',
+                  )}
+                />
+                <span className="truncate">{sprint.name}</span>
+                <span className="text-muted-foreground ml-auto shrink-0 text-[11px] tabular-nums">
+                  {sprint.itemCount}
+                </span>
+              </Link>
+            </div>
+          ))}
+        </div>
+      )}
       <ScrumLink
         to="/spaces/$spaceId/board"
         spaceId={spaceId}

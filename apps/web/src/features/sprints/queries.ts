@@ -201,3 +201,12 @@ export function useRetro(sprintId: string) {
     }),
   };
 }
+
+/** Öğeyi başka öğenin alt öğesi yapar (sürükle-bırak ya da "Üst öğe seç", ADR-102). */
+export const useNestItem = () =>
+  useWorkspaceMutation((id, input: { itemId: string; parentId: string }) =>
+    apiRequest(`${ws(id)}/items/${input.itemId}/nest`, NoContent, {
+      method: 'POST',
+      body: { parentId: input.parentId },
+    }),
+  );

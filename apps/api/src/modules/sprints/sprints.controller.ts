@@ -21,6 +21,7 @@ import {
   RetroTaskCreatedSchema,
   CreateSprintRequestSchema,
   MoveBacklogItemsRequestSchema,
+  NestItemRequestSchema,
   SPACE_PERMISSIONS as S,
   SetReviewNotesRequestSchema,
   SprintBurndownSchema,
@@ -62,6 +63,7 @@ class CompleteSprintDto extends createZodDto(CompleteSprintRequestSchema) {}
 class SprintReviewDto extends createZodDto(SprintReviewSchema) {}
 class ReviewNotesDto extends createZodDto(SetReviewNotesRequestSchema) {}
 class MoveBacklogDto extends createZodDto(MoveBacklogItemsRequestSchema) {}
+class NestItemDto extends createZodDto(NestItemRequestSchema) {}
 
 const Uuid = (name: string) => Param(name, ParseUUIDPipe);
 const NO_CONTENT = HttpStatus.NO_CONTENT;
@@ -161,6 +163,14 @@ export class SprintsController {
   @HttpCode(NO_CONTENT)
   move(@Uuid('spaceId') spaceId: string, @Body() body: MoveBacklogDto): Promise<void> {
     return this.backlog.move(spaceId, body);
+  }
+
+  /** Öğeyi başka öğenin alt öğesi yap (sürükle-bırak, ADR-102). */
+  @Post('items/:itemId/nest')
+  @RequireSpacePermission(S.WORK_ITEM_WRITE)
+  @HttpCode(NO_CONTENT)
+  nest(@Uuid('itemId') itemId: string, @Body() body: NestItemDto): Promise<void> {
+    return this.backlog.nest(itemId, body);
   }
 
   @Get('sprints/:sprintId/burndown')

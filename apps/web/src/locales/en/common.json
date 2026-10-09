@@ -884,7 +884,9 @@
     "clearSelection": "Clear selection",
     "noResults": "No items match the filters.",
     "empty": "The Backlog is empty. Stories, Bugs and Tasks added to lists show up here in priority order.",
-    "reorderHint": "Clear the filters to change the order."
+    "reorderHint": "Clear the filters to change the order.",
+    "nested": "Made a sub-item",
+    "nestHint": "Drop a row onto another row, dragging to the right, to make it a sub-item."
   },
   "sprints": {
     "create": "Create sprint",
@@ -946,7 +948,8 @@
     "scopeChangeAdd": "{{name}} is active; adding {{count}} items counts as a scope change and shows in reports.",
     "scopeChangeRemove": "{{name}} is active; removing {{count}} items counts as a scope change and shows in reports.",
     "scopeChangeConfirm": "Continue",
-    "notReadyWarn": "{{count}} items do not meet the Definition of Ready."
+    "notReadyWarn": "{{count}} items do not meet the Definition of Ready.",
+    "treeEmpty": "No sprints yet"
   },
   "board": {
     "title": "Sprint board",
@@ -1826,5 +1829,19 @@
     "deleteConfirm": "Delete team",
     "saved": "Team saved.",
     "addTeam": "Add team"
+  },
+  "copyList": {
+    "action": "Copy list",
+    "copied_one": "1 item copied to clipboard",
+    "copied_other": "{{count}} items copied to clipboard",
+    "failed": "Could not copy to clipboard",
+    "key": "ID",
+    "title": "Title",
+    "type": "Type",
+    "status": "Status",
+    "assignees": "Assignees",
+    "priority": "Priority",
+    "estimate": "Estimate",
+    "due": "Due"
   }
 }
