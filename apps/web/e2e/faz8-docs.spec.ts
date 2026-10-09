@@ -113,4 +113,28 @@ test.describe.serial('Doküman görsel, geri al/yinele ve Word', () => {
     expect(bytes.subarray(0, 2).toString()).toBe('PK');
     expect(bytes.length).toBeGreaterThan(2000);
   });
+
+  test('metne bağlantı eklenir; yazdırma görünümü yalnızca sayfayı gösterir', async ({ page }) => {
+    await page.getByRole('complementary').getByRole('link', { name: 'Doküman Görsel' }).click();
+    await page.getByRole('complementary').getByRole('link', { name: 'Dokümanlar' }).click();
+    await page
+      .getByRole('list', { name: 'Sayfa ağacı' })
+      .getByRole('button', { name: 'Mimari notları', exact: true })
+      .click();
+
+    await body(page).getByText('Birinci cümle.').click({ clickCount: 3 });
+    await page.getByRole('button', { name: 'Bağlantı', exact: true }).click();
+    const dialog = page.getByRole('dialog', { name: 'Bağlantı' });
+    await dialog.getByRole('textbox').fill('https://example.com/dokuman');
+    await dialog.getByRole('button', { name: 'Kaydet' }).click();
+    const link = body(page).locator('a[href="https://example.com/dokuman"]');
+    await expect(link).toHaveText('Birinci cümle.');
+    await expect(page.getByText('Kaydedildi')).toBeVisible();
+
+    // Yazdırma/PDF: yalnızca sayfa gövdesi basılır, kenar çubuğu gizlenir.
+    await page.emulateMedia({ media: 'print' });
+    await expect(page.getByRole('complementary')).toBeHidden();
+    await expect(body(page)).toBeVisible();
+    await page.emulateMedia({ media: 'screen' });
+  });
 });

@@ -7,35 +7,35 @@
 
 ## 1. Hiyerarşi ve yapı
 
-| ClickUp fonksiyonu                                 | Seyir'de | ClickUp gibi çalışıyor mu              | Not                                            |
-| -------------------------------------------------- | -------- | -------------------------------------- | ---------------------------------------------- |
-| Workspace > Space > Folder > List > Task > Subtask | ✅       | Evet — E2E `faz1-spaces`, `faz1-items` | Ek olarak Epic/Story/Task/Bug/Sub-task tipleri |
-| Space/Folder/List oluştur, yeniden adlandır, taşı  | ✅       | Evet — E2E `faz1-spaces`               | Sol ağaçta sürükle-bırak                       |
-| Favoriler                                          | ✅       | Evet — E2E `faz1-spaces`               |                                                |
-| Arşiv ve çöp kutusu (geri al)                      | ✅       | Evet — E2E `faz1-items`, `faz1-spaces` |                                                |
-| Görevin birden çok List'te olması (multi-home)     | ❌       | —                                      | F9 (mimari değişiklik)                         |
-| Space/Sprint yedek alma ve geri yükleme (zip)      | ❌       | —                                      | **F8 (8.5)** — yönetici isteği                 |
+| ClickUp fonksiyonu                                 | Seyir'de | ClickUp gibi çalışıyor mu              | Not                                                                                      |
+| -------------------------------------------------- | -------- | -------------------------------------- | ---------------------------------------------------------------------------------------- |
+| Workspace > Space > Folder > List > Task > Subtask | ✅       | Evet — E2E `faz1-spaces`, `faz1-items` | Ek olarak Epic/Story/Task/Bug/Sub-task tipleri                                           |
+| Space/Folder/List oluştur, yeniden adlandır, taşı  | ✅       | Evet — E2E `faz1-spaces`               | Sol ağaçta sürükle-bırak                                                                 |
+| Favoriler                                          | ✅       | Evet — E2E `faz1-spaces`               |                                                                                          |
+| Arşiv ve çöp kutusu (geri al)                      | ✅       | Evet — E2E `faz1-items`, `faz1-spaces` |                                                                                          |
+| Görevin birden çok List'te olması (multi-home)     | ❌       | —                                      | F9 (mimari değişiklik)                                                                   |
+| Space/Sprint yedek alma ve geri yükleme (zip)      | ✅       | Evet — Int `backup`, E2E `faz8-backup` | Zip; Space yedeği yeni Space olarak, Sprint yedeği yeni sprint olarak yüklenir (ADR-105) |
 
 ## 2. Görevler
 
-| ClickUp fonksiyonu                                         | Seyir'de | ClickUp gibi çalışıyor mu                                                                | Not                                                    |
-| ---------------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------- | ------------------------------------------------------ |
-| Görev oluştur (hızlı ekleme), düzenle, sil                 | ✅       | Evet — E2E `faz1-items`                                                                  |                                                        |
-| Alt görev (subtask)                                        | ✅       | Evet — E2E `faz1-items`                                                                  |                                                        |
-| Sürükleyerek alt görev yapma (görevi görevin üstüne bırak) | ❌       | —                                                                                        | **F8 (8.2)** — hiyerarşi korunur                       |
-| Çoklu atanan, izleyici                                     | ✅       | Evet — E2E `faz7-teams` (çoklu atama), `faz1-detail` (izleyici)                          | Ekibi tek tıkla atama — E2E `faz7-teams`               |
-| Öncelik, durum, etiket, başlangıç/bitiş tarihi             | ✅       | Evet — E2E `faz1-items`, `faz1-detail`                                                   |                                                        |
-| Özel durumlar (iş akışı) Space bazında                     | ✅       | Evet — E2E `faz5-statuses`                                                               |                                                        |
-| Özel alanlar                                               | ✅       | Evet — E2E `faz5-fields`                                                                 |                                                        |
-| Checklist, kabul kriteri                                   | ✅       | Evet — E2E `faz5-templates` (checklist), `faz1-detail`, `faz2-readiness` (kabul kriteri) |                                                        |
-| Bağımlılık (blocks / waiting on), ilişki, kopya            | ✅       | Evet — E2E `faz1-detail`                                                                 | Gantt'ta oklar                                         |
-| Benzersiz görev ID ve URL ile açma (MOB-12)                | ✅       | Evet — E2E `faz1-detail`                                                                 | Space genelinde tek sayaç; **F8 (8.7)** kopyala menüsü |
-| Görev kopyalama (clone), taşıma                            | ✅       | Evet — Int `work-items`                                                                  |                                                        |
-| Tekrarlayan görev                                          | ✅       | Evet — E2E `faz7-recurrence`                                                             |                                                        |
-| Hatırlatıcı                                                | ✅       | Evet — E2E `faz7-reminders`                                                              |                                                        |
-| Toplu düzenleme (bulk edit)                                | ✅       | Evet — E2E `faz1-views`                                                                  |                                                        |
-| Şablonlar (görev, liste, doküman)                          | ✅       | Evet — E2E `faz5-templates`                                                              |                                                        |
-| Görev açıklamasında görsel                                 | ❌       | —                                                                                        | **F8 (8.6)**                                           |
+| ClickUp fonksiyonu                                         | Seyir'de | ClickUp gibi çalışıyor mu                                                                | Not                                                             |
+| ---------------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| Görev oluştur (hızlı ekleme), düzenle, sil                 | ✅       | Evet — E2E `faz1-items`                                                                  |                                                                 |
+| Alt görev (subtask)                                        | ✅       | Evet — E2E `faz1-items`                                                                  |                                                                 |
+| Sürükleyerek alt görev yapma (görevi görevin üstüne bırak) | ✅       | Evet — Int `backlog-nest`, E2E `faz8-backlog-dnd`                                        | Hiyerarşi korunur: Task → Sub-task, üst tip değişmez (ADR-102)  |
+| Çoklu atanan, izleyici                                     | ✅       | Evet — E2E `faz7-teams` (çoklu atama), `faz1-detail` (izleyici)                          | Ekibi tek tıkla atama — E2E `faz7-teams`                        |
+| Öncelik, durum, etiket, başlangıç/bitiş tarihi             | ✅       | Evet — E2E `faz1-items`, `faz1-detail`                                                   |                                                                 |
+| Özel durumlar (iş akışı) Space bazında                     | ✅       | Evet — E2E `faz5-statuses`                                                               |                                                                 |
+| Özel alanlar                                               | ✅       | Evet — E2E `faz5-fields`                                                                 |                                                                 |
+| Checklist, kabul kriteri                                   | ✅       | Evet — E2E `faz5-templates` (checklist), `faz1-detail`, `faz2-readiness` (kabul kriteri) |                                                                 |
+| Bağımlılık (blocks / waiting on), ilişki, kopya            | ✅       | Evet — E2E `faz1-detail`                                                                 | Gantt'ta oklar                                                  |
+| Benzersiz görev ID ve URL ile açma (MOB-12)                | ✅       | Evet — E2E `faz1-detail`, `faz8-backlog-dnd`                                             | Space genelinde tek sayaç; ID’ye tıklayınca bağlantı kopyalanır |
+| Görev kopyalama (clone), taşıma                            | ✅       | Evet — Int `work-items`                                                                  |                                                                 |
+| Tekrarlayan görev                                          | ✅       | Evet — E2E `faz7-recurrence`                                                             |                                                                 |
+| Hatırlatıcı                                                | ✅       | Evet — E2E `faz7-reminders`                                                              |                                                                 |
+| Toplu düzenleme (bulk edit)                                | ✅       | Evet — E2E `faz1-views`                                                                  |                                                                 |
+| Şablonlar (görev, liste, doküman)                          | ✅       | Evet — E2E `faz5-templates`                                                              |                                                                 |
+| Görev açıklamasında görsel                                 | ❌       | —                                                                                        | F9 (yalnız doküman sayfalarında var)                            |
 
 ## 3. Görünümler
 
@@ -53,18 +53,18 @@
 
 ## 4. Sprint / Agile
 
-| ClickUp fonksiyonu                                          | Seyir'de | ClickUp gibi çalışıyor mu                      | Not                                            |
-| ----------------------------------------------------------- | -------- | ---------------------------------------------- | ---------------------------------------------- |
-| Sprint oluştur, başlat, tamamla, iptal                      | ✅       | Evet — E2E `faz2-backlog`, `faz2-lifecycle`    |                                                |
-| Bitmeyen işleri sonraki sprinte devretme                    | ✅       | Evet — E2E `faz2-lifecycle`                    |                                                |
-| Sol menüde sprint ağacı (+ ile açılıp sprintler listelenir) | ❌       | —                                              | **F8 (8.1)** — yönetici isteği                 |
-| Sprint listesini panoya kopyalama                           | ❌       | —                                              | **F8 (8.1)**                                   |
-| Backlog → sprint taşıma (menü)                              | ✅       | Evet — E2E `faz2-backlog`                      |                                                |
-| Backlog ↔ sprint ↔ sprint sürükle-bırak                     | 🟡       | Kısmen — yalnız Planlama ekranında, tek sprint | **F8 (8.2)**                                   |
-| Sprint puanı, burndown, velocity                            | ✅       | Evet — E2E `faz2-reports`                      |                                                |
-| Sprint review, retrospektif                                 | ✅       | Evet — E2E `faz3-retro`                        |                                                |
-| Epic ilerleme, roadmap                                      | ✅       | Evet — E2E `faz3-epics`, `faz4-roadmap`        |                                                |
-| Sprint'i Excel'e aktarma / Excel'den alma (bağımlılıklarla) | ❌       | —                                              | **F8 (8.4)** — şu an yalnız List bazlı CSV var |
+| ClickUp fonksiyonu                                          | Seyir'de | ClickUp gibi çalışıyor mu                         | Not                                                                               |
+| ----------------------------------------------------------- | -------- | ------------------------------------------------- | --------------------------------------------------------------------------------- |
+| Sprint oluştur, başlat, tamamla, iptal                      | ✅       | Evet — E2E `faz2-backlog`, `faz2-lifecycle`       |                                                                                   |
+| Bitmeyen işleri sonraki sprinte devretme                    | ✅       | Evet — E2E `faz2-lifecycle`                       |                                                                                   |
+| Sol menüde sprint ağacı (+ ile açılıp sprintler listelenir) | ✅       | Evet — E2E `faz8-backlog-dnd`                     | Sprint’ler durum noktası ve öğe sayısıyla listelenir                              |
+| Sprint listesini panoya kopyalama                           | ✅       | Evet — E2E `faz8-backlog-dnd`, birim `copy-list`  | Sekmeyle ayrılmış metin; Excel’e yapışır                                          |
+| Backlog → sprint taşıma (menü)                              | ✅       | Evet — E2E `faz2-backlog`                         |                                                                                   |
+| Backlog ↔ sprint ↔ sprint sürükle-bırak                     | ✅       | Evet — E2E `faz8-backlog-dnd`, Int `backlog-nest` | Aktif sprint’e/sprint’ten taşımada onay istenir                                   |
+| Sprint puanı, burndown, velocity                            | ✅       | Evet — E2E `faz2-reports`                         |                                                                                   |
+| Sprint review, retrospektif                                 | ✅       | Evet — E2E `faz3-retro`                           |                                                                                   |
+| Epic ilerleme, roadmap                                      | ✅       | Evet — E2E `faz3-epics`, `faz4-roadmap`           |                                                                                   |
+| Sprint'i Excel'e aktarma / Excel'den alma (bağımlılıklarla) | ✅       | Evet — Int `sprint-excel`, E2E `faz8-excel`       | Öğeler, özellikler, alt öğeler ve bağımlılıklar; önizlemeli içe aktarma (ADR-104) |
 
 ## 5. Zaman
 
@@ -76,23 +76,23 @@
 
 ## 6. Dokümanlar (ClickUp Docs / Confluence)
 
-| ClickUp fonksiyonu                         | Seyir'de | ClickUp gibi çalışıyor mu           | Not                               |
-| ------------------------------------------ | -------- | ----------------------------------- | --------------------------------- |
-| Sayfa ağacı, alt sayfalar                  | ✅       | Evet — E2E `faz3-docs`              |                                   |
-| Başlık, liste, kod, alıntı, görev listesi  | ✅       | Evet — E2E `faz3-docs`, `faz7-docs` |                                   |
-| Tablo                                      | ✅       | Evet — E2E `faz3-docs`              |                                   |
-| Bağlantı (link)                            | ✅       | Doğrulanmadı                        |                                   |
-| Görsel (resim) ekleme / yapıştırma         | ❌       | —                                   | **F8 (8.6)** — yönetici isteği    |
-| Dosya eki                                  | ✅       | Evet — E2E `faz7-docs`              |                                   |
-| Undo / Redo                                | ✅       | Doğrulanmadı                        | **F8**: E2E ile kanıtlanacak      |
-| Sürüm listesi, eski sürüme dönme           | ✅       | Evet — E2E `faz3-docs`              | Sürümler arası fark (diff) da var |
-| PDF'e aktarma (yazdır)                     | ✅       | Doğrulanmadı                        | Tarayıcı yazdır → PDF             |
-| Word'e (.docx) aktarma                     | ❌       | —                                   | **F8 (8.6)** — yönetici isteği    |
-| Markdown'a aktarma                         | ✅       | Doğrulanmadı                        |                                   |
-| Dokümanı göreve bağlama, yorum, @bahsetme  | ✅       | Evet — E2E `faz3-doc-links`         |                                   |
-| Dokümanda arama                            | ✅       | Evet — E2E `faz7-docs`              |                                   |
-| Canlı ortak düzenleme (aynı anda iki kişi) | ❌       | —                                   | F9                                |
-| Salt okunur paylaşım linki, sayfa izinleri | ❌       | —                                   | F9 (güvenlik fazı)                |
+| ClickUp fonksiyonu                         | Seyir'de | ClickUp gibi çalışıyor mu                    | Not                                              |
+| ------------------------------------------ | -------- | -------------------------------------------- | ------------------------------------------------ |
+| Sayfa ağacı, alt sayfalar                  | ✅       | Evet — E2E `faz3-docs`                       |                                                  |
+| Başlık, liste, kod, alıntı, görev listesi  | ✅       | Evet — E2E `faz3-docs`, `faz7-docs`          |                                                  |
+| Tablo                                      | ✅       | Evet — E2E `faz3-docs`                       |                                                  |
+| Bağlantı (link)                            | ✅       | Evet — E2E `faz8-docs`                       |                                                  |
+| Görsel (resim) ekleme / yapıştırma         | ✅       | Evet — Int `docs`, `backup`, E2E `faz8-docs` | Araç çubuğu, yapıştırma, sürükle-bırak (ADR-106) |
+| Dosya eki                                  | ✅       | Evet — E2E `faz7-docs`                       |                                                  |
+| Undo / Redo                                | ✅       | Evet — E2E `faz8-docs`                       | Araç çubuğu ve Ctrl+Z / Ctrl+Shift+Z             |
+| Sürüm listesi, eski sürüme dönme           | ✅       | Evet — E2E `faz3-docs`                       | Sürümler arası fark (diff) da var                |
+| PDF'e aktarma (yazdır)                     | ✅       | Evet — E2E `faz8-docs` (yazdırma görünümü)   | Tarayıcı yazdır → PDF                            |
+| Word'e (.docx) aktarma                     | ✅       | Evet — E2E `faz8-docs`, birim `doc-docx`     | Başlık, liste, tablo, bağlantı ve görsel dahil   |
+| Markdown'a aktarma                         | ✅       | Evet — birim `doc-export`                    |                                                  |
+| Dokümanı göreve bağlama, yorum, @bahsetme  | ✅       | Evet — E2E `faz3-doc-links`                  |                                                  |
+| Dokümanda arama                            | ✅       | Evet — E2E `faz7-docs`                       |                                                  |
+| Canlı ortak düzenleme (aynı anda iki kişi) | ❌       | —                                            | F9                                               |
+| Salt okunur paylaşım linki, sayfa izinleri | ❌       | —                                            | F9 (güvenlik fazı)                               |
 
 ## 7. İş birliği ve iletişim
 
@@ -126,27 +126,27 @@
 
 ## 10. İçe / dışa aktarma
 
-| ClickUp fonksiyonu                        | Seyir'de | ClickUp gibi çalışıyor mu | Not                      |
-| ----------------------------------------- | -------- | ------------------------- | ------------------------ |
-| CSV dışa / içe aktarma (List)             | ✅       | Evet — E2E `faz5-csv`     |                          |
-| Excel (.xlsx) dışa / içe aktarma (Sprint) | ❌       | —                         | **F8 (8.4)**             |
-| Jira / Trello / ClickUp'tan içe aktarma   | ❌       | —                         | F9 (CSV ile kısmen olur) |
+| ClickUp fonksiyonu                        | Seyir'de | ClickUp gibi çalışıyor mu                   | Not                      |
+| ----------------------------------------- | -------- | ------------------------------------------- | ------------------------ |
+| CSV dışa / içe aktarma (List)             | ✅       | Evet — E2E `faz5-csv`                       |                          |
+| Excel (.xlsx) dışa / içe aktarma (Sprint) | ✅       | Evet — Int `sprint-excel`, E2E `faz8-excel` |                          |
+| Jira / Trello / ClickUp'tan içe aktarma   | ❌       | —                                           | F9 (CSV ile kısmen olur) |
 
 ## 11. Yönetim, güvenlik, log
 
-| ClickUp fonksiyonu                               | Seyir'de | ClickUp gibi çalışıyor mu                 | Not                                     |
-| ------------------------------------------------ | -------- | ----------------------------------------- | --------------------------------------- |
-| Roller (Sahip, Yönetici, Üye, Misafir)           | ✅       | Evet — Int `workspaces`                   |                                         |
-| Misafire yalnız seçili Space                     | ✅       | Evet — Int `spaces`                       |                                         |
-| Davet, yöneticinin doğrudan hesap açması         | ✅       | Evet — E2E `faz6-create-account`          |                                         |
-| Oturum listesi, uzaktan çıkış                    | ✅       | Evet — Int `auth`                         |                                         |
-| Görev bazında aktivite geçmişi                   | ✅       | Evet — E2E `faz1-collab`                  |                                         |
-| Workspace denetim logu (kim, ne zaman, ne yaptı) | 🟡       | Kısmen — kayıt tutuluyor, toplu ekran yok | **F8 (8.3)** — yönetici isteği (önemli) |
-| Özel roller, ayrıntılı izinler                   | ❌       | —                                         | F9 (güvenlik fazı)                      |
-| SSO (Google/Microsoft ile giriş)                 | ❌       | —                                         | F9                                      |
+| ClickUp fonksiyonu                               | Seyir'de | ClickUp gibi çalışıyor mu            | Not                                                          |
+| ------------------------------------------------ | -------- | ------------------------------------ | ------------------------------------------------------------ |
+| Roller (Sahip, Yönetici, Üye, Misafir)           | ✅       | Evet — Int `workspaces`              |                                                              |
+| Misafire yalnız seçili Space                     | ✅       | Evet — Int `spaces`                  |                                                              |
+| Davet, yöneticinin doğrudan hesap açması         | ✅       | Evet — E2E `faz6-create-account`     |                                                              |
+| Oturum listesi, uzaktan çıkış                    | ✅       | Evet — Int `auth`                    |                                                              |
+| Görev bazında aktivite geçmişi                   | ✅       | Evet — E2E `faz1-collab`             |                                                              |
+| Workspace denetim logu (kim, ne zaman, ne yaptı) | ✅       | Evet — Int `audit`, E2E `faz8-audit` | Kişi, tür, eylem ve tarihle süzülür; CSV indirilir (ADR-103) |
+| Özel roller, ayrıntılı izinler                   | ❌       | —                                    | F9 (güvenlik fazı)                                           |
+| SSO (Google/Microsoft ile giriş)                 | ❌       | —                                    | F9                                                           |
 
 ## Özet
 
-- Toplam 81 fonksiyon: ✅ Var 61 · 🟡 Kısmen 2 · ❌ Yok 18. Var olanlardan 57 tanesi otomatik testle kanıtlı, 4 tanesi henüz doğrulanmadı (Faz 8 içinde testlenecek).
-- **Faz 8'de yapılacaklar (yönetici istekleri):** sol menü sprint ağacı, sprint listesini kopyalama, tam sürükle-bırak (backlog ↔ sprint ↔ sprint), sürükleyerek alt görev, denetim logu ekranı, sprint Excel dışa/içe aktarma (bağımlılıklarla), Space/Sprint zip yedek ve geri yükleme, dokümana görsel, Word'e aktarma, Undo/Redo ve PDF'in testle kanıtlanması.
+- Toplam 85 fonksiyon: ✅ Var 74 · 🟡 Kısmen 0 · ❌ Yok 11. Var olan 74 fonksiyonun tamamı otomatik testle kanıtlıdır.
+- **Faz 8’de tamamlananlar (yönetici istekleri):** sol menü sprint ağacı, sprint listesini kopyalama, tam sürükle-bırak (backlog ↔ sprint ↔ sprint), sürükleyerek alt görev, denetim logu ekranı, sprint Excel dışa/içe aktarma (bağımlılıklarla), Space/Sprint zip yedek ve geri yükleme, dokümanda görsel, Word’e aktarma, Undo/Redo ve ID bağlantısı testle kanıtlandı.
 - **Faz 9 önerisi:** multi-home görev, Gantt'ta okla bağımlılık + baseline, canlı ortak düzenleme, paylaşım linki ve sayfa izinleri, grup sohbeti, takvim eşitleme, Jira/Trello içe aktarma, özel roller, SSO.
