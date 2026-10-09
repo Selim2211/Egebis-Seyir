@@ -365,6 +365,9 @@
     "TEMPLATE_INVALID": "Şablon uygulanamadı: eksik bilgi ya da bozuk şablon.",
     "AUTOMATION_LIMIT": "Bir Space’te en çok 30 otomasyon olabilir.",
     "AUTOMATION_INVALID": "Otomasyon geçersiz: durum, kişi, etiket veya alan değeri bu Space’e uymuyor.",
+    "BACKUP_INVALID": "Bu dosya geçerli bir Egebis Seyir yedeği değil ya da bozuk.",
+    "BACKUP_TOO_LARGE": "Yedek dosyası çok büyük.",
+    "BACKUP_VERSION_UNSUPPORTED": "Bu yedek daha yeni bir sürümle alınmış; bu sunucu onu geri yükleyemez.",
     "IMPORT_EMPTY": "CSV boş ya da yalnızca başlık satırı var.",
     "IMPORT_TOO_LARGE": "CSV en çok 500 satır içerebilir.",
     "IMPORT_TITLE_UNMAPPED": "Başlık sütununu eşle.",
@@ -1950,5 +1953,23 @@
     "issue": "{{sheet}} satır {{row}}: {{code}} {{detail}}",
     "apply": "İçe aktar",
     "done": "{{name}} içe aktarıldı: {{created}} yeni, {{updated}} güncellendi, {{links}} bağımlılık."
+  },
+  "backup": {
+    "title": "Yedek",
+    "description": "Bu Space’in tamamını (iş öğeleri, sprint’ler, dokümanlar, yorumlar, ekler, durumlar, etiketler) tek bir ZIP dosyasında indir.",
+    "download": "Space yedeğini indir (ZIP)",
+    "sprintDownload": "Sprint yedeğini indir (ZIP)",
+    "restoreSpaceTitle": "Yedekten Space geri yükle",
+    "restoreSpaceHint": "Daha önce aldığın bir Space yedeğinden yeni bir Space açar. Mevcut hiçbir şeyin üzerine yazılmaz.",
+    "restoreSpace": "Yedekten Space yükle…",
+    "restoreSpaceBody": "Yedek, yeni bir Space olarak açılır. Atananlar e-posta adresiyle eşleşir; bu workspace’te olmayan kişiler atanmamış kalır.",
+    "restoreSprint": "Yedekten sprint yükle…",
+    "restoreSprintBody": "Sprint yedeği bu Space’e yeni bir sprint olarak eklenir. Öğeler seçtiğin listede açılır.",
+    "file": "Yedek dosyası (.zip)",
+    "newKey": "Yeni Space anahtarı",
+    "newName": "Yeni Space adı (boşsa yedektekiyle aynı)",
+    "restoreAction": "Geri yükle",
+    "restored": "Space yedekten geri yüklendi.",
+    "sprintRestored": "Sprint yedekten geri yüklendi."
   }
 }

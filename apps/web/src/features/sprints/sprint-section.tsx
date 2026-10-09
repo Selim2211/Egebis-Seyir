@@ -1,6 +1,14 @@
 import type { SprintSummary, WorkItemRow } from '@scrum/shared';
 import type { ReactNode } from 'react';
-import { ChevronRight, Copy, FileSpreadsheet, MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
+import {
+  Archive,
+  ChevronRight,
+  Copy,
+  FileSpreadsheet,
+  MoreHorizontal,
+  Pencil,
+  Trash2,
+} from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -11,6 +19,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { sprintBackupUrl } from '@/features/backup/backup';
 import { useCurrentWorkspace } from '@/features/workspace/queries';
 import { formatShortDate } from '@/lib/format';
 import { cn } from '@/lib/utils';
@@ -114,6 +123,14 @@ export function SprintSection({
                   {t('sprintImport.exportSprint')}
                 </a>
               </DropdownMenuItem>
+              {canPlan && (
+                <DropdownMenuItem asChild>
+                  <a href={sprintBackupUrl(workspaceId, sprint.id)} download>
+                    <Archive />
+                    {t('backup.sprintDownload')}
+                  </a>
+                </DropdownMenuItem>
+              )}
               {canPlan && (
                 <DropdownMenuItem onSelect={onEdit}>
                   <Pencil />

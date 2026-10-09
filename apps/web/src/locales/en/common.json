@@ -365,6 +365,9 @@
     "TEMPLATE_INVALID": "The template could not be applied: missing input or broken template.",
     "AUTOMATION_LIMIT": "A Space can have at most 30 automations.",
     "AUTOMATION_INVALID": "The automation is invalid: a status, person, label or field value does not fit this Space.",
+    "BACKUP_INVALID": "This is not a valid Egebis Seyir backup, or it is damaged.",
+    "BACKUP_TOO_LARGE": "The backup file is too large.",
+    "BACKUP_VERSION_UNSUPPORTED": "This backup was made by a newer version; this server cannot restore it.",
     "IMPORT_EMPTY": "The CSV is empty or has only a header row.",
     "IMPORT_TOO_LARGE": "The CSV can have at most 500 rows.",
     "IMPORT_TITLE_UNMAPPED": "Map the title column.",
@@ -1950,5 +1953,23 @@
     "issue": "{{sheet}} row {{row}}: {{code}} {{detail}}",
     "apply": "Import",
     "done": "{{name}} imported: {{created}} new, {{updated}} updated, {{links}} dependencies."
+  },
+  "backup": {
+    "title": "Backup",
+    "description": "Download this whole Space (work items, sprints, docs, comments, attachments, statuses, labels) as a single ZIP file.",
+    "download": "Download Space backup (ZIP)",
+    "sprintDownload": "Download sprint backup (ZIP)",
+    "restoreSpaceTitle": "Restore a Space from backup",
+    "restoreSpaceHint": "Creates a new Space from a backup you made earlier. Nothing existing is overwritten.",
+    "restoreSpace": "Restore Space from backup…",
+    "restoreSpaceBody": "The backup is opened as a new Space. Assignees are matched by e-mail; people who are not in this workspace stay unassigned.",
+    "restoreSprint": "Restore sprint from backup…",
+    "restoreSprintBody": "The sprint backup is added to this Space as a new sprint. Items are created in the list you choose.",
+    "file": "Backup file (.zip)",
+    "newKey": "New Space key",
+    "newName": "New Space name (defaults to the backup’s)",
+    "restoreAction": "Restore",
+    "restored": "Space restored from backup.",
+    "sprintRestored": "Sprint restored from backup."
   }
 }

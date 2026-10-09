@@ -24,6 +24,7 @@ import {
 } from '@/features/spaces/queries';
 import { SpaceAvatar } from '@/features/spaces/space-avatar';
 import { ReadinessFields } from '@/features/spaces/readiness-fields';
+import { BackupSection } from '@/features/backup/backup';
 import { AutomationsSection } from '@/features/automations/automations-section';
 import { FormsSection } from '@/features/forms/forms-section';
 import { WebhooksSection } from '@/features/webhooks/webhooks-section';
@@ -83,6 +84,7 @@ function SpaceSettingsPage() {
       {canEdit && <AutomationsSection space={space} />}
       {canEdit && <FormsSection spaceId={spaceId} />}
       {canEdit && <WebhooksSection spaceId={spaceId} />}
+      {canEdit && <BackupSection spaceId={spaceId} />}
       {canEdit && <DangerZone space={space} />}
     </div>
   );

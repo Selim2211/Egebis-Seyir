@@ -6,6 +6,7 @@ export * from './space';
 export * from './work-item';
 export * from './collab';
 export * from './rich-text';
+export * from './backup';
 export * from './sprint';
 export * from './notification';
 export * from './reports';

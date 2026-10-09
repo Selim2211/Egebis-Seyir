@@ -20,7 +20,7 @@ import {
 } from '@scrum/shared';
 import { useQueries, useQuery } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
-import { ChevronDown, Copy, FileSpreadsheet, Plus, Search, Upload, X } from 'lucide-react';
+import { Archive, ChevronDown, Copy, FileSpreadsheet, Plus, Search, Upload, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -53,6 +53,7 @@ import {
 } from './queries';
 import { SprintActions } from './sprint-actions';
 import { SprintDialog } from './sprint-dialog';
+import { RestoreSprintDialog } from '@/features/backup/backup';
 import { SprintImportDialog } from './sprint-import-dialog';
 import { ScrumTabs } from './scrum-tabs';
 import { SprintSection } from './sprint-section';
@@ -96,6 +97,7 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
   const [dialog, setDialog] = useState<DialogState>(null);
   const [deleting, setDeleting] = useState<SprintSummary | null>(null);
   const [importing, setImporting] = useState(false);
+  const [restoring, setRestoring] = useState(false);
   // Aktif sprint'e ekleme/çıkarma kapsam değişikliğidir; onay istenir (brief §6.1.4).
   const [scopeChange, setScopeChange] = useState<{
     itemIds: string[];
@@ -269,6 +271,12 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
                     {t('sprintImport.exportBacklog')}
                   </a>
                 </DropdownMenuItem>
+                {canPlan && (
+                  <DropdownMenuItem onSelect={() => setRestoring(true)}>
+                    <Archive />
+                    {t('backup.restoreSprint')}
+                  </DropdownMenuItem>
+                )}
                 {canPlan && (
                   <DropdownMenuItem onSelect={() => setImporting(true)}>
                     <Upload />
@@ -489,6 +497,7 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
         </DragOverlay>
       </DndContext>
 
+      {restoring && <RestoreSprintDialog spaceId={spaceId} onClose={() => setRestoring(false)} />}
       {importing && (
         <SprintImportDialog open onOpenChange={setImporting} spaceId={spaceId} sprints={sprints} />
       )}

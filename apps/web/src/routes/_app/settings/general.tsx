@@ -4,6 +4,7 @@ import { type FormEvent, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { Field, FormError } from '@/components/form';
+import { RestoreSpaceSection } from '@/features/backup/backup';
 import { PageHeading } from '@/components/layout/page-heading';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -26,6 +27,9 @@ function GeneralSettingsPage() {
     <>
       <PageHeading title={t('generalSettings.title')} subtitle={t('generalSettings.subtitle')} />
       {data ? <SettingsForm initial={data} /> : <LoadingState />}
+      <div className="mt-5">
+        <RestoreSpaceSection />
+      </div>
     </>
   );
 }
