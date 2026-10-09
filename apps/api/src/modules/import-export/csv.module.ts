@@ -8,5 +8,6 @@ import { CsvService } from './csv.service';
   imports: [WorkItemsModule],
   controllers: [CsvController],
   providers: [CsvService],
+  exports: [CsvService],
 })
 export class CsvModule {}

@@ -164,3 +164,42 @@ export const SetReviewNotesRequestSchema = z.object({
   notes: z.string().trim().max(5000).nullable(),
 });
 export type SetReviewNotesRequest = z.infer<typeof SetReviewNotesRequestSchema>;
+
+// ---------- Excel dışa / içe aktarma (Faz 8.4, ADR-104) ----------
+
+export const SPRINT_IMPORT_MAX_BYTES = 5 * 1024 * 1024;
+export const XLSX_MIME = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+
+/** POST .../spaces/:spaceId/sprints/import (multipart) — dosya + bu alanlar. */
+export const SprintImportFieldsSchema = z.object({
+  /** Yeni öğelerin yazılacağı List. */
+  listId: z.uuid(),
+  /** Verilirse öğeler bu sprint'e eklenir; yoksa dosyadaki "Sprint" sayfasından yeni sprint açılır. */
+  sprintId: z.uuid().optional(),
+  /** `true`: yalnızca doğrula, yazma. */
+  dryRun: z.enum(['true', 'false']).default('false'),
+});
+export type SprintImportFields = z.infer<typeof SprintImportFieldsSchema>;
+
+export const SprintImportIssueSchema = z.object({
+  row: z.int(),
+  sheet: z.enum(['Items', 'Links', 'Sprint']),
+  code: z.string(),
+  field: z.string().nullable(),
+  detail: z.string().nullable(),
+});
+export type SprintImportIssue = z.infer<typeof SprintImportIssueSchema>;
+
+export const SprintImportResultSchema = z.object({
+  dryRun: z.boolean(),
+  /** Oluşturulan ya da seçilen sprint (önizlemede null). */
+  sprintId: z.uuid().nullable(),
+  sprintName: z.string().nullable(),
+  created: z.int(),
+  updated: z.int(),
+  /** Sprint'e eklenen öğe sayısı. */
+  inSprint: z.int(),
+  links: z.int(),
+  issues: z.array(SprintImportIssueSchema),
+});
+export type SprintImportResult = z.infer<typeof SprintImportResultSchema>;

@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Header,
   HttpCode,
   HttpStatus,
   Param,
@@ -11,7 +12,13 @@ import {
   Post,
   Put,
   Query,
+  Res,
+  StreamableFile,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import type { Response } from 'express';
 import {
   BacklogResponseSchema,
   CompleteSprintRequestSchema,
@@ -24,6 +31,10 @@ import {
   NestItemRequestSchema,
   SPACE_PERMISSIONS as S,
   SetReviewNotesRequestSchema,
+  SprintImportFieldsSchema,
+  SprintImportResultSchema,
+  XLSX_MIME,
+  type SprintImportResult,
   SprintBurndownSchema,
   SprintDetailSchema,
   SprintReviewSchema,
@@ -44,6 +55,7 @@ import { createZodDto, ZodResponse } from 'nestjs-zod';
 import { RequireSpacePermission } from '../auth/decorators';
 import { BacklogService } from './backlog.service';
 import { RetroService } from './retro.service';
+import { SprintExcelService } from './sprint-excel.service';
 import { SprintLifecycleService } from './sprint-lifecycle.service';
 import { SprintReportsService } from './sprint-reports.service';
 import { SprintsService } from './sprints.service';
@@ -63,10 +75,16 @@ class CompleteSprintDto extends createZodDto(CompleteSprintRequestSchema) {}
 class SprintReviewDto extends createZodDto(SprintReviewSchema) {}
 class ReviewNotesDto extends createZodDto(SetReviewNotesRequestSchema) {}
 class MoveBacklogDto extends createZodDto(MoveBacklogItemsRequestSchema) {}
+class SprintImportFieldsDto extends createZodDto(SprintImportFieldsSchema) {}
+class SprintImportResultDto extends createZodDto(SprintImportResultSchema) {}
 class NestItemDto extends createZodDto(NestItemRequestSchema) {}
 
 const Uuid = (name: string) => Param(name, ParseUUIDPipe);
 const NO_CONTENT = HttpStatus.NO_CONTENT;
+
+/** İndirilen dosya adı: Türkçe karakterler için RFC 5987 kodlaması. */
+const contentDisposition = (name: string) =>
+  `attachment; filename="export.xlsx"; filename*=UTF-8''${encodeURIComponent(name)}.xlsx`;
 
 /** Sprint'ler ve Product Backlog. Space izni guard'da çözülür (ADR-039). */
 @Controller('workspaces/:workspaceId')
@@ -74,6 +92,7 @@ export class SprintsController {
   constructor(
     private readonly sprints: SprintsService,
     private readonly backlog: BacklogService,
+    private readonly excel: SprintExcelService,
     private readonly lifecycle: SprintLifecycleService,
     private readonly reports: SprintReportsService,
     private readonly retro: RetroService,
@@ -171,6 +190,49 @@ export class SprintsController {
   @HttpCode(NO_CONTENT)
   nest(@Uuid('itemId') itemId: string, @Body() body: NestItemDto): Promise<void> {
     return this.backlog.nest(itemId, body);
+  }
+
+  // ---------- Excel (Faz 8.4, ADR-104) ----------
+
+  /** Sprint'i öğeleri, özellikleri ve bağımlılıklarıyla Excel olarak indirir. */
+  @Get('sprints/:sprintId/export.xlsx')
+  @RequireSpacePermission(S.SPACE_VIEW)
+  @Header('Content-Type', XLSX_MIME)
+  @Header('Cache-Control', 'private, no-store')
+  async exportSprint(
+    @Uuid('sprintId') sprintId: string,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<StreamableFile> {
+    const { name, file } = await this.excel.exportSprint(sprintId);
+    res.setHeader('Content-Disposition', contentDisposition(name));
+    return new StreamableFile(file);
+  }
+
+  @Get('spaces/:spaceId/backlog/export.xlsx')
+  @RequireSpacePermission(S.SPACE_VIEW)
+  @Header('Content-Type', XLSX_MIME)
+  @Header('Cache-Control', 'private, no-store')
+  async exportBacklog(
+    @Uuid('spaceId') spaceId: string,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<StreamableFile> {
+    const { name, file } = await this.excel.exportBacklog(spaceId);
+    res.setHeader('Content-Disposition', contentDisposition(name));
+    return new StreamableFile(file);
+  }
+
+  /** Excel'den içe aktar; `dryRun=true` yalnızca doğrular. */
+  @Post('spaces/:spaceId/sprints/import')
+  @HttpCode(HttpStatus.OK)
+  @RequireSpacePermission(S.SPACE_VIEW)
+  @UseInterceptors(FileInterceptor('file'))
+  @ZodResponse({ type: SprintImportResultDto })
+  importSprint(
+    @Uuid('spaceId') spaceId: string,
+    @Body() fields: SprintImportFieldsDto,
+    @UploadedFile() file: Express.Multer.File | undefined,
+  ): Promise<SprintImportResult> {
+    return this.excel.import(spaceId, file, fields);
   }
 
   @Get('sprints/:sprintId/burndown')

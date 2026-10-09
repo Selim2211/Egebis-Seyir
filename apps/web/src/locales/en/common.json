@@ -1932,5 +1932,23 @@
       "team_updated": "updated the team.",
       "team_deleted": "deleted the team."
     }
+  },
+  "sprintImport": {
+    "menu": "Excel",
+    "exportSprint": "Export to Excel",
+    "exportBacklog": "Export backlog to Excel",
+    "import": "Import from Excel…",
+    "title": "Import sprint from Excel",
+    "description": "Choose an .xlsx file you exported. Items, sub-items and dependencies come along; items whose ID already exists in this Space are updated, the rest are created.",
+    "file": "Excel file (.xlsx)",
+    "list": "List for new items",
+    "target": "Sprint",
+    "newSprint": "Create a new sprint from the file",
+    "checking": "Checking the file…",
+    "summary_one": "{{name}}: 1 item and {{links}} dependencies will be imported.",
+    "summary_other": "{{name}}: {{count}} items and {{links}} dependencies will be imported.",
+    "issue": "{{sheet}} row {{row}}: {{code}} {{detail}}",
+    "apply": "Import",
+    "done": "{{name}} imported: {{created}} new, {{updated}} updated, {{links}} dependencies."
   }
 }

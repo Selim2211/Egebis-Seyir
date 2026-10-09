@@ -34,6 +34,7 @@ import {
   type WorkItemType,
 } from '@scrum/shared';
 import { ClsService } from 'nestjs-cls';
+import type { Prisma } from '../../generated/prisma/client';
 import type { AppClsStore } from '../../infra/cls/request-context';
 import { TenantPrismaService } from '../../infra/prisma/tenant-prisma.service';
 import { ActivityService } from '../activity/activity.service';
@@ -66,6 +67,15 @@ interface ParsedRow {
   description?: string;
   externalId?: string;
   custom: Record<string, CustomFieldValue>;
+}
+
+export interface ImportOutcome {
+  valid: number;
+  created: number;
+  updated: number;
+  issues: ImportIssue[];
+  /** Dosyadaki ID değeri → öğe kimliği (yalnızca gerçek yazımda dolar). */
+  refs: Map<string, string>;
 }
 
 interface ExistingItem {
@@ -124,20 +134,32 @@ export class CsvService {
 
   async export(listId: string): Promise<ExportResponse> {
     const list = await this.loadList(listId);
+    return this.exportRows({ listId, deletedAt: null }, list.spaceId, { rank: 'asc' });
+  }
+
+  /**
+   * Verilen süzgeçle bulunan öğeleri CSV/Excel satırlarına çevirir (ilk satır başlık). List dışa
+   * aktarması ile Sprint/Backlog Excel dışa aktarması (Faz 8.4) aynı sütunları kullanır.
+   */
+  async exportRows(
+    where: Prisma.WorkItemWhereInput,
+    spaceId: string,
+    orderBy: Prisma.WorkItemOrderByWithRelationInput | Prisma.WorkItemOrderByWithRelationInput[],
+  ): Promise<ExportResponse> {
     const db = this.tenant.db;
     const [items, fields] = await Promise.all([
       db.workItem.findMany({
-        where: { listId, deletedAt: null },
+        where,
         include: {
           status: { select: { name: true } },
           assignees: { select: { user: { select: { email: true } } } },
           labels: { select: { label: { select: { name: true } } } },
           parent: { select: { keyPrefix: true, number: true } },
         },
-        orderBy: { rank: 'asc' },
+        orderBy,
         take: EXPORT_MAX_ROWS,
       }),
-      db.customField.findMany({ where: { spaceId: list.spaceId }, orderBy: { rank: 'asc' } }),
+      db.customField.findMany({ where: { spaceId }, orderBy: { rank: 'asc' } }),
     ]);
     const personFieldIds = fields.filter((f) => f.type === 'PERSON').map((f) => f.id);
     const personIds = [
@@ -270,9 +292,10 @@ export class CsvService {
     table: ImportTable,
     mapping: ImportMapping,
     dryRun: boolean,
-  ): Promise<{ valid: number; created: number; updated: number; issues: ImportIssue[] }> {
+  ): Promise<ImportOutcome> {
     const db = this.tenant.db;
     const { workspaceId } = this.ctx;
+    const refs = new Map<string, string>();
     const spaceId = list.spaceId;
     const issues: ImportIssue[] = [];
     const issue = (
@@ -284,7 +307,7 @@ export class CsvService {
 
     if (!mapping.title) {
       issue(1, 'TITLE_UNMAPPED');
-      return { valid: 0, created: 0, updated: 0, issues };
+      return { valid: 0, created: 0, updated: 0, issues, refs };
     }
 
     const [statuses, members, labels, fields, existing] = await Promise.all([
@@ -472,10 +495,14 @@ export class CsvService {
           if (match) {
             await this.update(match.id, row, labelIds);
             updated += 1;
+            if (row.externalId) refs.set(row.externalId, match.id);
           } else {
             const made = await this.create(list.id, row, type, parent?.id ?? null, labelIds);
             created += 1;
-            if (row.externalId) createdByExternal.set(row.externalId, { id: made, type });
+            if (row.externalId) {
+              createdByExternal.set(row.externalId, { id: made, type });
+              refs.set(row.externalId, made);
+            }
             existing.push({
               id: made,
               type,
@@ -495,7 +522,27 @@ export class CsvService {
     }
     for (const row of pending) issue(row.line, 'PARENT_NOT_FOUND', 'parent', row.parentRef ?? null);
     issues.sort((a, b) => a.row - b.row);
-    return { valid, created, updated, issues };
+    return { valid, created, updated, issues, refs };
+  }
+
+  /**
+   * Hazır bir tabloyu (ör. Excel) List'e yazar; başlıklar CSV dışa aktarmasıyla aynıdır (Faz 8.4).
+   * `refs`: dosyadaki ID değeri → öğe kimliği (üst öğe ve bağımlılık çözümü için).
+   */
+  async importTable(listId: string, table: ImportTable, dryRun: boolean) {
+    this.need(S.WORK_ITEM_WRITE);
+    const list = await this.loadList(listId);
+    if (table.rows.length > IMPORT_LIMITS.maxRows) {
+      throw fail(ERROR_CODES.IMPORT_TOO_LARGE, HttpStatus.UNPROCESSABLE_ENTITY);
+    }
+    const fields = await this.tenant.db.customField.findMany({
+      where: { spaceId: list.spaceId },
+      orderBy: { rank: 'asc' },
+      select: { id: true, name: true },
+    });
+    const mapping = suggestMapping(table.headers, fields);
+    if (!mapping.title) throw fail(ERROR_CODES.IMPORT_TITLE_UNMAPPED);
+    return { ...(await this.process(list, table, mapping, dryRun)), spaceId: list.spaceId };
   }
 
   private errorCode(error: unknown): string {

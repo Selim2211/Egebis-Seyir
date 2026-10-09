@@ -24,6 +24,6 @@ import { WorkItemsService } from './work-items.service';
     LabelsService,
     RecurrenceService,
   ],
-  exports: [WorkItemsService],
+  exports: [WorkItemsService, ItemDetailsService],
 })
 export class WorkItemsModule {}

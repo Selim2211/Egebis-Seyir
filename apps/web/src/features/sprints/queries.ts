@@ -6,6 +6,7 @@ import {
   RetroTaskCreatedSchema,
   SprintBurndownSchema,
   SprintDetailSchema,
+  SprintImportResultSchema,
   SprintReviewSchema,
   SprintsResponseSchema,
   VelocityResponseSchema,
@@ -14,6 +15,7 @@ import {
   type CreateRetroItemRequest,
   type CreateSprintRequest,
   type MoveBacklogItemsRequest,
+  type SprintImportResult,
   type UpdateSprintRequest,
 } from '@scrum/shared';
 import { queryOptions, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -209,4 +211,23 @@ export const useNestItem = () =>
       method: 'POST',
       body: { parentId: input.parentId },
     }),
+  );
+
+/** Excel'den sprint içe aktarma (Faz 8.4): `dryRun` yalnızca doğrular. */
+export const useImportSprint = (spaceId: string) =>
+  useWorkspaceMutation(
+    (
+      id,
+      input: { file: File; listId: string; sprintId?: string; dryRun: boolean },
+    ): Promise<SprintImportResult> => {
+      const form = new FormData();
+      form.append('listId', input.listId);
+      if (input.sprintId) form.append('sprintId', input.sprintId);
+      form.append('dryRun', String(input.dryRun));
+      form.append('file', input.file);
+      return apiRequest(`${ws(id)}/spaces/${spaceId}/sprints/import`, SprintImportResultSchema, {
+        method: 'POST',
+        body: form,
+      });
+    },
   );

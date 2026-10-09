@@ -20,13 +20,19 @@ import {
 } from '@scrum/shared';
 import { useQueries, useQuery } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
-import { Copy, Plus, Search, X } from 'lucide-react';
+import { ChevronDown, Copy, FileSpreadsheet, Plus, Search, Upload, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { NativeSelect } from '@/components/form';
 import { ConfirmDialog } from '@/components/confirm-dialog';
 import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { ContainerHeader, LoadingState, NotFoundState } from '@/features/spaces/container-header';
 import { spaceQuery } from '@/features/spaces/queries';
@@ -47,6 +53,7 @@ import {
 } from './queries';
 import { SprintActions } from './sprint-actions';
 import { SprintDialog } from './sprint-dialog';
+import { SprintImportDialog } from './sprint-import-dialog';
 import { ScrumTabs } from './scrum-tabs';
 import { SprintSection } from './sprint-section';
 
@@ -88,6 +95,7 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
   const [collapsed, setCollapsed] = useState<ReadonlySet<string>>(new Set());
   const [dialog, setDialog] = useState<DialogState>(null);
   const [deleting, setDeleting] = useState<SprintSummary | null>(null);
+  const [importing, setImporting] = useState(false);
   // Aktif sprint'e ekleme/çıkarma kapsam değişikliğidir; onay istenir (brief §6.1.4).
   const [scopeChange, setScopeChange] = useState<{
     itemIds: string[];
@@ -242,12 +250,40 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
         archived={space.data.archived}
         canUnarchive={perms.includes(S.SPACE_SETTINGS)}
         actions={
-          canPlan && (
-            <Button size="sm" onClick={() => setDialog({ kind: 'create' })}>
-              <Plus />
-              {t('sprints.create')}
-            </Button>
-          )
+          <>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <FileSpreadsheet />
+                  {t('sprintImport.menu')}
+                  <ChevronDown />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem asChild>
+                  <a
+                    href={`/api/workspaces/${workspaceId}/spaces/${spaceId}/backlog/export.xlsx`}
+                    download
+                  >
+                    <FileSpreadsheet />
+                    {t('sprintImport.exportBacklog')}
+                  </a>
+                </DropdownMenuItem>
+                {canPlan && (
+                  <DropdownMenuItem onSelect={() => setImporting(true)}>
+                    <Upload />
+                    {t('sprintImport.import')}
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+            {canPlan && (
+              <Button size="sm" onClick={() => setDialog({ kind: 'create' })}>
+                <Plus />
+                {t('sprints.create')}
+              </Button>
+            )}
+          </>
         }
       >
         <ScrumTabs spaceId={spaceId} current="backlog" />
@@ -453,6 +489,9 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
         </DragOverlay>
       </DndContext>
 
+      {importing && (
+        <SprintImportDialog open onOpenChange={setImporting} spaceId={spaceId} sprints={sprints} />
+      )}
       <SprintDialog
         open={dialog !== null}
         onOpenChange={(open) => !open && setDialog(null)}

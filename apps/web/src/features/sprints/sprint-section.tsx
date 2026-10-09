@@ -1,6 +1,6 @@
 import type { SprintSummary, WorkItemRow } from '@scrum/shared';
 import type { ReactNode } from 'react';
-import { ChevronRight, Copy, MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
+import { ChevronRight, Copy, FileSpreadsheet, MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -11,6 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { useCurrentWorkspace } from '@/features/workspace/queries';
 import { formatShortDate } from '@/lib/format';
 import { cn } from '@/lib/utils';
 import { containerId } from './backlog-dnd';
@@ -53,6 +54,7 @@ export function SprintSection({
 }) {
   const { t } = useTranslation();
   const active = sprint.status === 'ACTIVE';
+  const { id: workspaceId } = useCurrentWorkspace();
   return (
     <section
       className={cn('bg-card rounded-lg border', active && 'border-primary/40')}
@@ -102,6 +104,15 @@ export function SprintSection({
               <DropdownMenuItem onSelect={onCopy}>
                 <Copy />
                 {t('copyList.action')}
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <a
+                  href={`/api/workspaces/${workspaceId}/sprints/${sprint.id}/export.xlsx`}
+                  download
+                >
+                  <FileSpreadsheet />
+                  {t('sprintImport.exportSprint')}
+                </a>
               </DropdownMenuItem>
               {canPlan && (
                 <DropdownMenuItem onSelect={onEdit}>

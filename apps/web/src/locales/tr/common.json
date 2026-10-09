@@ -1932,5 +1932,23 @@
       "team_updated": "ekibi güncelledi.",
       "team_deleted": "ekibi sildi."
     }
+  },
+  "sprintImport": {
+    "menu": "Excel",
+    "exportSprint": "Excel’e aktar",
+    "exportBacklog": "Backlog’u Excel’e aktar",
+    "import": "Excel’den içe aktar…",
+    "title": "Excel’den sprint içe aktar",
+    "description": "Dışa aktardığın .xlsx dosyasını seç. Öğeler, alt öğeler ve bağımlılıklar birlikte gelir; anahtarı (ID) bu Space’te olan öğeler güncellenir, diğerleri yeni açılır.",
+    "file": "Excel dosyası (.xlsx)",
+    "list": "Yeni öğelerin açılacağı liste",
+    "target": "Sprint",
+    "newSprint": "Dosyadaki bilgiyle yeni sprint aç",
+    "checking": "Dosya kontrol ediliyor…",
+    "summary_one": "{{name}}: 1 öğe ve {{links}} bağımlılık içe aktarılacak.",
+    "summary_other": "{{name}}: {{count}} öğe ve {{links}} bağımlılık içe aktarılacak.",
+    "issue": "{{sheet}} satır {{row}}: {{code}} {{detail}}",
+    "apply": "İçe aktar",
+    "done": "{{name}} içe aktarıldı: {{created}} yeni, {{updated}} güncellendi, {{links}} bağımlılık."
   }
 }
