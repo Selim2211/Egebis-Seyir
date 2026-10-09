@@ -80,12 +80,12 @@ Güvenlik/yetki büyük ölçüde hazır (RBAC, oturum, CSRF, API token, audit).
 
 | #   | Adım                               | İçerik                                                                                                | Durum      |
 | --- | ---------------------------------- | ----------------------------------------------------------------------------------------------------- | ---------- |
-| 7.1 | Tekrarlayan görev                  | Tekrar kuralı (günlük/haftalık/aylık), tamamlanınca sonraki örneği üretme                             | Bekliyor   |
-| 7.2 | Gantt iyileştirme                  | Bağımlılık çizme, bağımlıyı otomatik kaydırma, baseline                                               | Bekliyor   |
-| 7.3 | Hatırlatıcı                        | Göreve hatırlatma zamanı, bildirim/e-posta                                                            | Bekliyor   |
-| 7.4 | Form görünümü                      | Space üyelerinin formla görev açması                                                                  | Bekliyor   |
+| 7.1 | Tekrarlayan görev                  | Tekrar kuralı (günlük/haftalık/aylık), tamamlanınca sonraki örneği üretme                             | ✅ Bitti   |
+| 7.2 | Gantt iyileştirme                  | Bağımlılık çizme, bağımlıyı otomatik kaydırma, baseline                                               | 🟡 Kısmen  |
+| 7.3 | Hatırlatıcı                        | Göreve hatırlatma zamanı, bildirim/e-posta                                                            | ✅ Bitti   |
+| 7.4 | Form görünümü                      | Space üyelerinin formla görev açması                                                                  | ✅ Bitti   |
 | 7.5 | Doküman arama + ekler + editör     | Docs FTS ve global arama, sayfaya dosya eki, görev listesi (slash menü ve satır içi görsel ertelendi) | Tamamlandı |
-| 7.6 | Doküman sürüm farkı + dışa aktarma | İki sürüm diff, PDF/Markdown                                                                          | Bekliyor   |
+| 7.6 | Doküman sürüm farkı + dışa aktarma | İki sürüm diff, PDF/Markdown                                                                          | ✅ Bitti   |
 | 7.7 | Ekip (grup) kavramı                | Kullanıcı grupları, gruba atama                                                                       | Tamamlandı |
 
 ## Açık kararlar (toplantıda)
