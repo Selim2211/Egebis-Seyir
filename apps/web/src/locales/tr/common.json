@@ -674,7 +674,8 @@
     "heading3": "Başlık 3",
     "table": "Tablo ekle / sil",
     "rule": "Ayırıcı çizgi",
-    "taskList": "Görev listesi"
+    "taskList": "Görev listesi",
+    "image": "Görsel ekle"
   },
   "severity": {
     "CRITICAL": "Kritik",
@@ -1195,7 +1196,11 @@
     "diff": "Sürüm farkı",
     "diffAdded": "Eklendi: ",
     "diffRemoved": "Silindi: ",
-    "diffSame": "Değişmedi: "
+    "diffSame": "Değişmedi: ",
+    "exportWord": "Word olarak indir",
+    "imageUploadFailed": "Görsel yüklenemedi.",
+    "exportFailed": "Dışa aktarma başarısız oldu.",
+    "insertImage": "Görsel ekle"
   },
   "retro": {
     "link": "Retrospektif",

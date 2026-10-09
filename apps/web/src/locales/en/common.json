@@ -674,7 +674,8 @@
     "heading3": "Heading 3",
     "table": "Insert / delete table",
     "rule": "Divider",
-    "taskList": "Task list"
+    "taskList": "Task list",
+    "image": "Insert image"
   },
   "severity": {
     "CRITICAL": "Critical",
@@ -1195,7 +1196,11 @@
     "diff": "Version diff",
     "diffAdded": "Added: ",
     "diffRemoved": "Removed: ",
-    "diffSame": "Unchanged: "
+    "diffSame": "Unchanged: ",
+    "exportWord": "Download as Word",
+    "imageUploadFailed": "Could not upload the image.",
+    "exportFailed": "Export failed.",
+    "insertImage": "Insert image"
   },
   "retro": {
     "link": "Retrospective",

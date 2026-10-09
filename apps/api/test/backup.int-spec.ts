@@ -175,6 +175,39 @@ describe('Space/Sprint yedek ve geri yükleme (gerçek veritabanı)', () => {
     expect(added.key).toBe('MOB2-4'); // 3 öğe geri yüklendi, sayaç kaldığı yerden sürer
   });
 
+  it('sayfadaki görseller geri yüklemede yeni sayfa ve ek kimliklerine bağlanır', async () => {
+    const { mob, doc } = await seed();
+    const attachment = (
+      await owner.upload(api(`/docs/${doc.id}/attachments`), PNG, 'sema.png').expect(201)
+    ).body as Created;
+    const src = `/api/workspaces/${ws}/docs/${doc.id}/attachments/${attachment.id}?preview=1`;
+    await owner
+      .patch(api(`/docs/${doc.id}`), {
+        revision: 1,
+        content: { type: 'doc', content: [{ type: 'image', attrs: { src, alt: 'Şema' } }] },
+      })
+      .expect(200);
+
+    const res = (
+      await restoreSpace(await download(`/spaces/${mob.id}/backup.zip`), { key: 'MOB3' })
+    ).body as RestoreResult;
+    const docs = (await owner.get(api(`/spaces/${res.spaceId}/docs`)).expect(200)).body as {
+      docs: Array<{ id: string; title: string }>;
+    };
+    const copy = docs.docs.find((d) => d.title === 'Mimari')!;
+    const full = (await owner.get(api(`/docs/${copy.id}`)).expect(200)).body as {
+      content: { content: Array<{ attrs: { src: string } }> };
+      attachments: Array<{ id: string }>;
+    };
+    const copied = full.content.content[0]!.attrs.src;
+    expect(copied).toBe(
+      `/api/workspaces/${ws}/docs/${copy.id}/attachments/${full.attachments[0]!.id}?preview=1`,
+    );
+    expect(copied).not.toBe(src);
+    const bytes = (await owner.download(copied).expect(200)).body as Buffer;
+    expect(bytes.equals(PNG)).toBe(true);
+  });
+
   it('Space geri yükleme: kullanılmış anahtar 409, Üye 403, bozuk dosya 422', async () => {
     const { mob } = await seed();
     const file = await download(`/spaces/${mob.id}/backup.zip`);

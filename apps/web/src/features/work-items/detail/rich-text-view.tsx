@@ -1,4 +1,4 @@
-import type { RichTextMark, RichTextNode } from '@scrum/shared';
+import { IMAGE_SRC_PATTERN, type RichTextMark, type RichTextNode } from '@scrum/shared';
 import type { ReactNode } from 'react';
 
 const SAFE_LINK = /^(https?:\/\/|mailto:)/i;
@@ -96,6 +96,19 @@ function renderNode(node: RichTextNode, key: number): ReactNode {
       return <td key={key}>{children}</td>;
     case 'horizontalRule':
       return <hr key={key} />;
+    case 'image': {
+      const src = str(node.attrs?.src);
+      // Sunucu yalnızca kendi ek adreslerini kabul eder; savunma amaçlı bir kez daha.
+      return IMAGE_SRC_PATTERN.test(src) ? (
+        <img
+          key={key}
+          src={src}
+          alt={str(node.attrs?.alt)}
+          loading="lazy"
+          className="max-w-full rounded-md"
+        />
+      ) : null;
+    }
     case 'hardBreak':
       return <br key={key} />;
     case 'mention':

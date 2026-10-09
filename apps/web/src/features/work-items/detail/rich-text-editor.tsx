@@ -1,4 +1,5 @@
 import type { RichTextDoc } from '@scrum/shared';
+import Image from '@tiptap/extension-image';
 import { TaskItem, TaskList } from '@tiptap/extension-list';
 import Placeholder from '@tiptap/extension-placeholder';
 import { TableKit } from '@tiptap/extension-table';
@@ -7,6 +8,7 @@ import StarterKit from '@tiptap/starter-kit';
 import {
   Bold,
   Code,
+  ImagePlus,
   Code2,
   ListChecks,
   Italic,
@@ -37,6 +39,11 @@ import { cn } from '@/lib/utils';
 
 const SAVE_DELAY_MS = 1500;
 
+/** Yalnızca sunucunun önizleyebildiği görsel türleri (PNG, JPEG, GIF). */
+const IMAGE_TYPES = new Set(['image/png', 'image/jpeg', 'image/gif']);
+const imageFiles = (list: FileList | null | undefined): File[] =>
+  Array.from(list ?? []).filter((f) => IMAGE_TYPES.has(f.type));
+
 type ToolName =
   | 'bold'
   | 'italic'
@@ -47,6 +54,7 @@ type ToolName =
   | 'heading1'
   | 'heading3'
   | 'table'
+  | 'image'
   | 'rule'
   | 'bulletList'
   | 'orderedList'
@@ -69,6 +77,7 @@ export function RichTextEditor({
   onSave,
   label,
   variant = 'compact',
+  onUploadImage,
 }: {
   value: RichTextDoc | null;
   editable: boolean;
@@ -76,12 +85,19 @@ export function RichTextEditor({
   onSave: (doc: RichTextDoc | null) => void;
   label: string;
   variant?: 'compact' | 'page';
+  /** Verilirse görsel eklenebilir (düğme, yapıştırma, sürükle-bırak); dönen değer görselin adresidir. */
+  onUploadImage?: (file: File) => Promise<string>;
 }) {
   const { t } = useTranslation();
   const [linkOpen, setLinkOpen] = useState(false);
   const [linkValue, setLinkValue] = useState('');
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const dirty = useRef(false);
+  const [fileInput, setFileInput] = useState<HTMLInputElement | null>(null);
+  const uploadRef = useRef(onUploadImage);
+  useEffect(() => {
+    uploadRef.current = onUploadImage;
+  });
   const onSaveRef = useRef(onSave);
   useEffect(() => {
     onSaveRef.current = onSave;
@@ -106,10 +122,26 @@ export function RichTextEditor({
             TableKit.configure({ table: { resizable: false } }),
             TaskList,
             TaskItem.configure({ nested: true }),
+            Image.configure({ inline: false, allowBase64: false }),
           ]
         : []),
     ],
     editorProps: {
+      // Panodan yapıştırılan ya da bırakılan görsel dosyaları yüklenip sayfaya eklenir.
+      handlePaste: (_view, event) => {
+        const files = imageFiles(event.clipboardData?.files);
+        if (files.length === 0 || !uploadRef.current) return false;
+        event.preventDefault();
+        void insertImages(files);
+        return true;
+      },
+      handleDrop: (_view, event) => {
+        const files = imageFiles(event.dataTransfer?.files);
+        if (files.length === 0 || !uploadRef.current) return false;
+        event.preventDefault();
+        void insertImages(files);
+        return true;
+      },
       attributes: {
         'aria-label': label,
         'aria-multiline': 'true',
@@ -128,6 +160,23 @@ export function RichTextEditor({
     onBlur: () => flush(),
   });
 
+  async function insertImages(files: File[]) {
+    const upload = uploadRef.current;
+    if (!upload || !editor) return;
+    for (const file of files) {
+      try {
+        const src = await upload(file);
+        editor
+          .chain()
+          .focus()
+          .setImage({ src, alt: file.name.replace(/\.[^.]+$/, '').slice(0, 200) })
+          .run();
+      } catch {
+        // Yükleme hatası çağıran tarafta (toast) gösterilir.
+      }
+    }
+  }
+
   function flush() {
     clearTimeout(timer.current);
     if (!editor || !dirty.current) return;
@@ -144,7 +193,7 @@ export function RichTextEditor({
   }, [editor, value]);
 
   useEffect(() => {
-    editor?.setEditable(editable);
+    editor?.setEditable(editable, false);
   }, [editor, editable]);
 
   // Sekme gizlenirken (kapatma, başka sekmeye geçme) bekleyen değişiklik hemen gönderilsin.
@@ -318,6 +367,8 @@ export function RichTextEditor({
                 editor.isActive('table'),
               )}
               {tool('rule', <Minus className="size-4" />, () => chain().setHorizontalRule().run())}
+              {onUploadImage &&
+                tool('image', <ImagePlus className="size-4" />, () => fileInput?.click())}
             </>
           )}
           <span className="bg-border mx-1 h-4 w-px" aria-hidden />
@@ -338,6 +389,18 @@ export function RichTextEditor({
         </div>
       )}
       <EditorContent editor={editor} />
+      <input
+        ref={setFileInput}
+        type="file"
+        accept="image/png,image/jpeg,image/gif"
+        multiple
+        hidden
+        data-testid="editor-image-input"
+        onChange={(e) => {
+          void insertImages(imageFiles(e.target.files));
+          e.target.value = '';
+        }}
+      />
       <Dialog open={linkOpen} onOpenChange={setLinkOpen}>
         <DialogContent className="max-w-md">
           <form onSubmit={applyLink} className="flex min-h-0 flex-col">

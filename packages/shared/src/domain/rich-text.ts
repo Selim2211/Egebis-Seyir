@@ -37,6 +37,8 @@ export const RICH_TEXT_NODES = [
   /** Görev listesi (onay kutulu madde, Faz 7.5). */
   'taskList',
   'taskItem',
+  /** Sayfaya gömülü görsel: yalnızca kendi ek adresi (Faz 8.6, ADR-106). */
+  'image',
   /** Yalnızca yorumlarda üretilir; `attrs.id` kullanıcı kimliğidir (ADR-055). */
   'mention',
 ] as const;
@@ -51,6 +53,9 @@ const labelOf = (node: RichTextNode): string =>
   typeof node.attrs?.label === 'string' ? node.attrs.label : '';
 const MAX_PLAIN_TEXT = 50_000;
 const SAFE_LINK = /^(https?:\/\/|mailto:)/i;
+/** Görsel kaynağı yalnızca bu workspace'in ek uçlarından biri olabilir; dış adres kabul edilmez. */
+export const IMAGE_SRC_PATTERN =
+  /^\/api\/workspaces\/[0-9a-f-]{36}\/(docs|items)\/[0-9a-f-]{36}\/attachments\/[0-9a-f-]{36}\?preview=1$/i;
 const BLOCK_NODES = new Set([
   'paragraph',
   'heading',
@@ -60,6 +65,7 @@ const BLOCK_NODES = new Set([
   'blockquote',
   'horizontalRule',
   'tableRow',
+  'image',
 ]);
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -78,6 +84,14 @@ function validNode(node: unknown, depth: number): node is RichTextNode {
     const id = attrs?.id;
     if (typeof id !== 'string' || id.length === 0 || id.length > 64) return false;
     if (attrs?.label !== undefined && typeof attrs.label !== 'string') return false;
+    if (content !== undefined) return false;
+  }
+  if (type === 'image') {
+    const src = attrs?.src;
+    if (typeof src !== 'string' || !IMAGE_SRC_PATTERN.test(src)) return false;
+    if (attrs?.alt !== undefined && attrs.alt !== null && typeof attrs.alt !== 'string')
+      return false;
+    if (typeof attrs?.alt === 'string' && attrs.alt.length > 300) return false;
     if (content !== undefined) return false;
   }
   if (type === 'taskItem' && attrs?.checked !== undefined && typeof attrs.checked !== 'boolean') {
@@ -120,6 +134,7 @@ export function richTextToPlain(doc: RichTextNode): string {
     if (node.type === 'text') parts.push(node.text ?? '');
     if (node.type === 'mention') parts.push(`@${labelOf(node)}`);
     if (node.type === 'hardBreak') parts.push('\n');
+    if (node.type === 'image' && typeof node.attrs?.alt === 'string') parts.push(node.attrs.alt);
     for (const child of node.content ?? []) walk(child);
     if (BLOCK_NODES.has(node.type)) parts.push('\n');
   };

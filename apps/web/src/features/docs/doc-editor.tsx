@@ -1,9 +1,10 @@
 import { docToMarkdown, type DocDetail, type RichTextDoc } from '@scrum/shared';
 import { useQueryClient } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
-import { AlertTriangle, FileDown, History, Printer, RotateCcw } from 'lucide-react';
+import { AlertTriangle, FileDown, FileText, History, Printer, RotateCcw } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Attachments } from '@/features/work-items/detail/attachments';
@@ -11,6 +12,8 @@ import { RichTextEditor } from '@/features/work-items/detail/rich-text-editor';
 import { useCurrentWorkspace } from '@/features/workspace/queries';
 import { relativeTime } from '@/lib/format';
 import { cn } from '@/lib/utils';
+import { useUploadAttachment } from '@/features/work-items/queries';
+import { docToDocxBlob, fetchDocxImage } from './doc-docx';
 import { useRestoreDoc } from './queries';
 import { Comments } from '@/features/work-items/detail/comments';
 import { DocLinks } from './doc-links';
@@ -44,6 +47,30 @@ export function DocEditor({
   const { id: workspaceId } = useCurrentWorkspace();
   const restore = useRestoreDoc(spaceId);
   const saver = useDocSaver(doc.id, doc.revision);
+  const upload = useUploadAttachment();
+  // Sayfaya görsel: dosya sayfanın eki olarak yüklenir, içerikte kendi adresiyle yer alır (ADR-106).
+  const uploadImage = async (file: File): Promise<string> => {
+    try {
+      const { id } = await upload.mutateAsync({ itemId: doc.id, file, scope: 'docs' });
+      return `/api/workspaces/${workspaceId}/docs/${doc.id}/attachments/${id}?preview=1`;
+    } catch (error) {
+      toast.error(t('docs.imageUploadFailed'));
+      throw error;
+    }
+  };
+  const downloadWord = async () => {
+    try {
+      const blob = await docToDocxBlob(doc.title, content, fetchDocxImage);
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${doc.title.replace(/[\\/:*?"<>|]+/g, '-').slice(0, 80) || 'sayfa'}.docx`;
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      toast.error(t('docs.exportFailed'));
+    }
+  };
   const [title, setTitle] = useState(doc.title);
   const [content, setContent] = useState<RichTextDoc | null>(doc.content);
   const titleTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
@@ -170,6 +197,14 @@ export function DocEditor({
           variant="outline"
           size="sm"
           className="mt-1.5 shrink-0 print:hidden"
+          onClick={() => void downloadWord()}
+        >
+          <FileText /> {t('docs.exportWord')}
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          className="mt-1.5 shrink-0 print:hidden"
           onClick={() => window.print()}
         >
           <Printer /> {t('docs.print')}
@@ -198,6 +233,7 @@ export function DocEditor({
 
       <RichTextEditor
         variant="page"
+        onUploadImage={editable ? uploadImage : undefined}
         value={content}
         editable={editable}
         label={t('docs.content')}

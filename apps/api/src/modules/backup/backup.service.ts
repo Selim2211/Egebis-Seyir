@@ -36,6 +36,16 @@ const MAX_JSON_BYTES = 120 * 1024 * 1024;
 const CHUNK = 500;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const KEY_PATTERN = /^[A-Z][A-Z0-9]{1,9}$/;
+/** Sayfa/açıklama içindeki görsel adresleri (ADR-106); geri yüklemede yeni kimliklere çevrilir. */
+const IMAGE_URL =
+  /\/api\/workspaces\/[0-9a-f-]{36}\/(docs|items)\/([0-9a-f-]{36})\/attachments\/([0-9a-f-]{36})\?preview=1/gi;
+/** İçeriğinde görsel adresi olabilecek alanlar: tablo → alan. */
+const IMAGE_FIELDS: Record<string, string> = {
+  doc: 'content',
+  docVersion: 'content',
+  workItem: 'description',
+  comment: 'body',
+};
 
 interface Manifest {
   format: string;
@@ -292,6 +302,35 @@ export class BackupService {
     return { manifest, data, files };
   }
 
+  /** Her satıra yeni kimlik verir; tablolar arası bağlar ve içerikteki görsel adresleri bunu kullanır. */
+  private seedIds(data: BackupData, maps: Map<string, Map<string, string>>): void {
+    for (const spec of TABLES) {
+      if (spec.noId) continue;
+      const own = maps.get(spec.name) ?? new Map<string, string>();
+      maps.set(spec.name, own);
+      for (const row of data.tables[spec.name] ?? []) own.set(String(row.id), randomUUID());
+    }
+  }
+
+  private rewriteImages(
+    value: unknown,
+    maps: Map<string, Map<string, string>>,
+    workspaceId: string,
+  ): unknown {
+    if (value === null || value === undefined) return value;
+    const text = JSON.stringify(value);
+    if (!text.includes('/attachments/')) return value;
+    return JSON.parse(
+      text.replace(IMAGE_URL, (match, kind: string, owner: string, attachment: string) => {
+        const newOwner = maps.get(kind === 'docs' ? 'doc' : 'workItem')?.get(owner);
+        const newAttachment = maps.get('attachment')?.get(attachment);
+        return newOwner && newAttachment
+          ? `/api/workspaces/${workspaceId}/${kind}/${newOwner}/attachments/${newAttachment}?preview=1`
+          : match;
+      }),
+    ) as unknown;
+  }
+
   /** Workspace üyelerinin e-posta → kullanıcı kimliği tablosu. */
   private async memberIds(emails: Iterable<string>): Promise<Map<string, string>> {
     const members = await this.tenant.db.membership.findMany({
@@ -323,6 +362,7 @@ export class BackupService {
       ['space', new Map([[String(data.space.id), spaceId]])],
     ]);
     const skipped: Record<string, number> = {};
+    this.seedIds(data, maps);
 
     try {
       await db.$transaction(
@@ -402,6 +442,7 @@ export class BackupService {
     const users = await this.memberIds(Object.values(manifest.users));
     const maps = new Map<string, Map<string, string>>([['space', new Map()]]);
     const skipped: Record<string, number> = {};
+    this.seedIds(data, maps);
 
     try {
       const sprintId = await db.$transaction(
@@ -513,7 +554,8 @@ export class BackupService {
     // Üst kayıtlar önce yazılsın (kendine işaret eden tablolar).
     const selfField = Object.entries(spec.refs).find(([, kind]) => kind === spec.name)?.[0];
     const ordered = selfField ? this.parentsFirst(rows, selfField) : rows;
-    if (!spec.noId) for (const row of rows) own.set(String(row.id), randomUUID());
+    if (!spec.noId)
+      for (const row of rows) if (!own.has(String(row.id))) own.set(String(row.id), randomUUID());
 
     const mapRef = (kind: string, value: unknown): string | null => {
       if (typeof value !== 'string') return null;
@@ -565,6 +607,10 @@ export class BackupService {
       if (spec.name === 'sprint' && context.sprintToPlanned && row.status === 'ACTIVE') {
         row.status = 'PLANNED';
         row.startedAt = null;
+      }
+      const imageField = IMAGE_FIELDS[spec.name];
+      if (imageField && row[imageField] !== undefined) {
+        row[imageField] = this.rewriteImages(row[imageField], maps, workspaceId);
       }
       if (spec.name === 'attachment') {
         row.storageKey = `${workspaceId}/${randomUUID()}`;

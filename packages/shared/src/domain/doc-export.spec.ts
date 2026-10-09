@@ -97,3 +97,13 @@ describe('satır farkı (Faz 7.6)', () => {
     expect(diffLines(['a'], [])).toEqual([{ type: 'del', text: 'a' }]);
   });
 });
+
+describe('docToMarkdown images (Faz 8.6)', () => {
+  it('writes an image as Markdown with its alt text', () => {
+    const doc = {
+      type: 'doc',
+      content: [{ type: 'image', attrs: { src: '/api/x?preview=1', alt: 'Şema' } }],
+    };
+    expect(docToMarkdown('Sayfa', doc)).toContain('![Şema](/api/x?preview=1)');
+  });
+});

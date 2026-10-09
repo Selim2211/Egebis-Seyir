@@ -88,6 +88,31 @@ describe('Doküman sayfaları (gerçek veritabanı)', () => {
   });
 
   describe('düzenleme ve eşzamanlılık', () => {
+    it('görsel düğümü yalnızca bu workspace ek adresini kabul eder', async () => {
+      const sp = await space();
+      const id = (await doc(sp.id, { title: 'Görsel' })).id;
+      const att = (
+        await owner
+          .upload(
+            api(`/docs/${id}/attachments`),
+            Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0]),
+            'a.png',
+          )
+          .expect(201)
+      ).body as Created;
+      const image = (src: string) => ({
+        type: 'doc',
+        content: [{ type: 'image', attrs: { src, alt: 'a' } }],
+      });
+      const ok = `/api/workspaces/${ws}/docs/${id}/attachments/${att.id}?preview=1`;
+      await save(id, { revision: 1, content: image(ok) }).expect(200);
+      expect((await detail(id)).content).toEqual(image(ok));
+      for (const bad of ['https://evil.example/x.png', 'data:image/png;base64,AAAA', `${ok}&x=1`]) {
+        const res = await save(id, { revision: 2, content: image(bad) });
+        expect(res.status).toBe(400);
+      }
+    });
+
     it('içerik ve başlık kaydedilir; her kayıt revision’ı artırır', async () => {
       const s = await space();
       const { id } = await doc(s.id, { title: 'Not' });

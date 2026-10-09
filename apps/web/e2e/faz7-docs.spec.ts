@@ -46,11 +46,14 @@ test.describe.serial('Doküman arama, ekler ve görev listesi', () => {
     await expect(page.getByText('Kaydedildi')).toBeVisible();
 
     // Ek yükleme.
-    await page.locator('input[type="file"]').setInputFiles({
-      name: 'sartname.pdf',
-      mimeType: 'application/pdf',
-      buffer: Buffer.from('%PDF-1.4\n%test\n'),
-    });
+    await page
+      .getByRole('region', { name: 'Ekler' })
+      .locator('input[type="file"]')
+      .setInputFiles({
+        name: 'sartname.pdf',
+        mimeType: 'application/pdf',
+        buffer: Buffer.from('%PDF-1.4\n%test\n'),
+      });
     await expect(page.getByRole('link', { name: 'sartname.pdf', exact: true })).toBeVisible();
 
     // Yenilemeden sonra kalıcı.

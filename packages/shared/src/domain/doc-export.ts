@@ -63,6 +63,12 @@ function blocks(nodes: RichTextNode[], indent = ''): string[] {
       case 'horizontalRule':
         out.push('---');
         break;
+      case 'image': {
+        const alt = typeof node.attrs?.alt === 'string' ? node.attrs.alt : '';
+        const src = typeof node.attrs?.src === 'string' ? node.attrs.src : '';
+        out.push(`${indent}![${alt}](${src})`);
+        break;
+      }
       case 'table': {
         const rows = (node.content ?? []).map((row) =>
           (row.content ?? []).map((cell) =>

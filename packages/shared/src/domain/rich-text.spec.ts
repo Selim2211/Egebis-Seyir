@@ -155,3 +155,35 @@ describe('görev listesi (Faz 7.5)', () => {
     );
   });
 });
+
+describe('image node (Faz 8.6)', () => {
+  const ws = '0191a3b2-0000-7000-8000-000000000001';
+  const id = '0191a3b2-0000-7000-8000-000000000002';
+  const att = '0191a3b2-0000-7000-8000-000000000003';
+  const src = `/api/workspaces/${ws}/docs/${id}/attachments/${att}?preview=1`;
+  const docWith = (attrs: Record<string, unknown>): RichTextNode => ({
+    type: 'doc',
+    content: [{ type: 'image', attrs }],
+  });
+
+  it('accepts only the workspace attachment endpoint as source', () => {
+    expect(isValidRichText(docWith({ src, alt: 'Ekran görüntüsü' }))).toBe(true);
+    expect(isValidRichText(docWith({ src: src.replace('/docs/', '/items/') }))).toBe(true);
+    for (const bad of [
+      'https://evil.example/x.png',
+      'data:image/png;base64,AAAA',
+      'javascript:alert(1)',
+      `${src}&x=1`,
+      src.replace('?preview=1', ''),
+      '//evil.example/api/workspaces/a/docs/b/attachments/c?preview=1',
+    ]) {
+      expect(isValidRichText(docWith({ src: bad }))).toBe(false);
+    }
+    expect(isValidRichText(docWith({}))).toBe(false);
+    expect(isValidRichText(docWith({ src, alt: 5 }))).toBe(false);
+  });
+
+  it('contributes its alt text to the plain text', () => {
+    expect(richTextToPlain(docWith({ src, alt: 'Mimari şema' }))).toBe('Mimari şema');
+  });
+});
