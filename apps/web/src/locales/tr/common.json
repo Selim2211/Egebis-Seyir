@@ -892,7 +892,8 @@
     "empty": "Backlog boş. Listelere Story, Bug veya Task ekledikçe burada öncelik sırasıyla görünür.",
     "reorderHint": "Sıralamayı değiştirmek için süzgeçleri temizle.",
     "nested": "Alt öğe yapıldı",
-    "nestHint": "Bir satırı başka satırın üzerine sağa doğru bırakırsan alt öğesi olur."
+    "nestHint": "Bir satırı başka satırın üzerine sağa doğru bırakırsan alt öğesi olur.",
+    "copyKeyLink": "{{key}} bağlantısını kopyala"
   },
   "sprints": {
     "create": "Sprint oluştur",

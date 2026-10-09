@@ -1,6 +1,7 @@
 import type { SprintSummary, WorkItemRow } from '@scrum/shared';
 import { ArrowRight, GripVertical, MoreHorizontal, Undo2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -77,7 +78,20 @@ export function BacklogRow({
         />
       )}
       <WorkItemTypeIcon type={item.type} />
-      <span className="text-muted-foreground shrink-0 font-mono text-xs">{item.key}</span>
+      <button
+        type="button"
+        title={t('detail.copyLink')}
+        aria-label={t('backlog.copyKeyLink', { key: item.key })}
+        onClick={() => {
+          navigator.clipboard.writeText(`${window.location.origin}/items/${item.key}`).then(
+            () => toast.success(t('detail.linkCopied')),
+            () => toast.error(t('copyList.failed')),
+          );
+        }}
+        className="text-muted-foreground hover:text-primary hover:bg-primary/10 shrink-0 cursor-copy rounded px-1 font-mono text-xs"
+      >
+        {item.key}
+      </button>
       <ItemOpenLink itemKey={item.key} className="min-w-0 flex-1 truncate hover:underline">
         {item.title}
       </ItemOpenLink>

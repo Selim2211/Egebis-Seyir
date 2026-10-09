@@ -111,4 +111,19 @@ test.describe.serial('Backlog sürükle-bırak ve sprint ağacı', () => {
     expect(lines[0]).toContain('ID\tBaşlık');
     expect(lines.some((l) => l.startsWith('DND-1\tBirinci iş'))).toBe(true);
   });
+
+  test('görev anahtarına tıklayınca bağlantı kopyalanır ve adres görevi açar', async ({
+    page,
+    context,
+  }) => {
+    await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+    await openBacklog(page);
+    const backlog = page.getByRole('region', { name: 'Backlog', exact: true });
+    await backlog.getByRole('button', { name: 'DND-1 bağlantısını kopyala' }).click();
+    await expect(page.getByText('Bağlantı kopyalandı.')).toBeVisible();
+    const url = await page.evaluate(() => navigator.clipboard.readText());
+    expect(url.endsWith('/items/DND-1')).toBe(true);
+    await page.goto(url);
+    await expect(page.getByRole('textbox', { name: 'Başlık' }).first()).toHaveValue('Birinci iş');
+  });
 });

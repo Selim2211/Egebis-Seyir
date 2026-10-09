@@ -892,7 +892,8 @@
     "empty": "The Backlog is empty. Stories, Bugs and Tasks added to lists show up here in priority order.",
     "reorderHint": "Clear the filters to change the order.",
     "nested": "Made a sub-item",
-    "nestHint": "Drop a row onto another row, dragging to the right, to make it a sub-item."
+    "nestHint": "Drop a row onto another row, dragging to the right, to make it a sub-item.",
+    "copyKeyLink": "Copy link to {{key}}"
   },
   "sprints": {
     "create": "Create sprint",
