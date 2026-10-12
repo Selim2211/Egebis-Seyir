@@ -392,7 +392,9 @@
     "GOAL_LIMIT": "A workspace can have at most 200 goals.",
     "MESSAGE_SELF": "You cannot message yourself.",
     "TEAM_NAME_TAKEN": "A team with this name already exists.",
-    "TEAM_LIMIT": "A workspace can have at most 100 teams."
+    "TEAM_LIMIT": "A workspace can have at most 100 teams.",
+    "WORK_ITEM_POINTS_FROM_SUBTASKS": "Points of an item with sub-tasks are the sum of its sub-tasks and cannot be edited.",
+    "WORK_ITEM_PERCENT_NOT_ALLOWED": "Completion cannot be set for this item (Epic, or calculated from sub-tasks)."
   },
   "spaceRoles": {
     "PRODUCT_OWNER": "Product Owner",
@@ -653,7 +655,10 @@
     "archivedBanner": "This item is archived and cannot be edited.",
     "updated": "Last updated: {{when}}",
     "epicTotals": "Totals",
-    "linkedDocs": "Docs"
+    "linkedDocs": "Docs",
+    "pointsFromSubtasks": "Sum of the sub-tasks; changes with them.",
+    "percentDone": "Completion",
+    "percentFromSubtasks": "Calculated from the sub-tasks."
   },
   "editor": {
     "toolbar": "Formatting",
@@ -1977,5 +1982,24 @@
     "restoreAction": "Restore",
     "restored": "Space restored from backup.",
     "sprintRestored": "Sprint restored from backup."
+  },
+  "priorityColors": {
+    "toggle": "Color by priority"
+  },
+  "sprintStats": {
+    "title": "{{name}} summary",
+    "toggle": "Toggle {{name}} summary",
+    "summary": "Summary · {{percent}}%",
+    "totalPoints": "total Story Points",
+    "donePoints": "{{done}} / {{total}} points done",
+    "percent": "Sprint completion",
+    "byPerson": "Breakdown by person",
+    "unassigned": "Unassigned",
+    "personPoints": "{{points}} pts",
+    "personPercent": "{{name}} completion",
+    "noItems": "No items in this sprint.",
+    "openBoard": "Open Kanban board",
+    "copyLink": "Copy link",
+    "exportJson": "Download as JSON"
   }
 }

@@ -3,7 +3,7 @@
 > Amaç: ClickUp'ta işimize yarayan her fonksiyon için iki soru: **(1) Seyir'de var mı? (2) Varsa ClickUp'taki gibi gerçekten çalışıyor mu?**
 > "Çalışıyor mu" sütunu iddia değil, kanıta dayanır: **E2E** = Playwright uçtan uca testi (tarayıcıda gerçek tıklama), **Int** = API entegrasyon testi (gerçek veritabanı), **Elle** = tarayıcıda elle denendi. Kanıtı olmayan satır "Doğrulanmadı" yazar.
 > Durum: ✅ var · 🟡 kısmen · ❌ yok · **F8** = bu fazda yapılıyor · **F9** = sonraki faz önerisi.
-> Son güncelleme: 2026-10-09.
+> Son güncelleme: 2026-10-12.
 
 ## 1. Hiyerarşi ve yapı
 
@@ -65,6 +65,14 @@
 | Sprint review, retrospektif                                 | ✅       | Evet — E2E `faz3-retro`                           |                                                                                   |
 | Epic ilerleme, roadmap                                      | ✅       | Evet — E2E `faz3-epics`, `faz4-roadmap`           |                                                                                   |
 | Sprint'i Excel'e aktarma / Excel'den alma (bağımlılıklarla) | ✅       | Evet — Int `sprint-excel`, E2E `faz8-excel`       | Öğeler, özellikler, alt öğeler ve bağımlılıklar; önizlemeli içe aktarma (ADR-104) |
+| Her göreve Story Point (1,2,3,5,8,13,21,34,55)              | ✅       | Evet — Int `story-points`, E2E `faz9-points`      | Task/Bug/Story/Sub-task'ta girilir; ölçek dışı değer reddedilir (ADR-107)         |
+| Alt görevi olan işin puanı = alt görev toplamı              | ✅       | Evet — Int `story-points`, E2E `faz9-points`      | Veritabanı tetikleyicisiyle; alt görev kalkınca puan yeniden elle girilir         |
+| Sprint toplam puanı ve kişilere dağılımı                    | ✅       | Evet — Int `story-points`, E2E `faz9-points`      | Sprint özeti: toplam, biten, kişi başına puan ve yüzde                            |
+| Atananın görev yüzdesi, sprint toplam yüzdesi               | ✅       | Evet — Int `story-points`, E2E `faz9-points`      | Puan ağırlıklı; alt görevli işte alt görevlerden türetilir                        |
+| Önceliğe göre renklendirme                                  | ✅       | Evet — E2E `faz9-points`                          | Board ve Backlog'da aç/kapa; tercih kullanıcıya özel                              |
+| Sprint başına Kanban panosu                                 | ✅       | Evet — E2E `faz2-board`, `faz9-points`            | Sprint panosu + sprint menüsünden doğrudan açma                                   |
+| Sprint'i JSON olarak dışa aktarma                           | ✅       | Evet — Int `story-points`, E2E `faz9-points`      | Özellikler, toplamlar, kişi dağılımı, öğeler, bağımlılıklar, bağlantılar          |
+| Görev ve sprint için kalıcı URL                             | ✅       | Evet — E2E `faz1-detail`, `faz9-points`           | `/items/MOB-12` ve `/sprints/<id>`; bağlantı kopyalama menüsü var                 |
 
 ## 5. Zaman
 
@@ -147,6 +155,7 @@
 
 ## Özet
 
-- Toplam 85 fonksiyon: ✅ Var 74 · 🟡 Kısmen 0 · ❌ Yok 11. Var olan 74 fonksiyonun tamamı otomatik testle kanıtlıdır.
+- Toplam 89 fonksiyon: ✅ Var 79 · 🟡 Kısmen 0 · ❌ Yok 10. Var olanlardan 79 tanesi otomatik testle kanıtlı, 0 tanesi kanıtsız (aşağıda).
 - **Faz 8’de tamamlananlar (yönetici istekleri):** sol menü sprint ağacı, sprint listesini kopyalama, tam sürükle-bırak (backlog ↔ sprint ↔ sprint), sürükleyerek alt görev, denetim logu ekranı, sprint Excel dışa/içe aktarma (bağımlılıklarla), Space/Sprint zip yedek ve geri yükleme, dokümanda görsel, Word’e aktarma, Undo/Redo ve ID bağlantısı testle kanıtlandı.
+- **Faz 9.1’de tamamlananlar (yönetici isteği, 11 madde):** her göreve Story Point (1–55), alt görev toplamı, atananın yüzdesi, sprint toplam puan/yüzde ve kişi dağılımı, önceliğe göre renk, sprint Kanban kısayolu, sprint JSON dışa aktarma, görev ve sprint URL’si.
 - **Faz 9 önerisi:** multi-home görev, Gantt'ta okla bağımlılık + baseline, canlı ortak düzenleme, paylaşım linki ve sayfa izinleri, grup sohbeti, takvim eşitleme, Jira/Trello içe aktarma, özel roller, SSO.

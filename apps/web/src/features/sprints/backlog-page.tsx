@@ -54,6 +54,7 @@ import {
 import { SprintActions } from './sprint-actions';
 import { SprintDialog } from './sprint-dialog';
 import { RestoreSprintDialog } from '@/features/backup/backup';
+import { PriorityColorToggle } from '@/features/work-items/priority-colors';
 import { SprintImportDialog } from './sprint-import-dialog';
 import { ScrumTabs } from './scrum-tabs';
 import { SprintSection } from './sprint-section';
@@ -253,6 +254,7 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
         canUnarchive={perms.includes(S.SPACE_SETTINGS)}
         actions={
           <>
+            <PriorityColorToggle />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm">

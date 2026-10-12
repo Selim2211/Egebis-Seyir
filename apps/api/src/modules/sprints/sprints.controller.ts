@@ -56,6 +56,7 @@ import { RequireSpacePermission } from '../auth/decorators';
 import { BacklogService } from './backlog.service';
 import { RetroService } from './retro.service';
 import { SprintExcelService } from './sprint-excel.service';
+import { SprintJsonService } from './sprint-json.service';
 import { SprintLifecycleService } from './sprint-lifecycle.service';
 import { SprintReportsService } from './sprint-reports.service';
 import { SprintsService } from './sprints.service';
@@ -93,6 +94,7 @@ export class SprintsController {
     private readonly sprints: SprintsService,
     private readonly backlog: BacklogService,
     private readonly excel: SprintExcelService,
+    private readonly json: SprintJsonService,
     private readonly lifecycle: SprintLifecycleService,
     private readonly reports: SprintReportsService,
     private readonly retro: RetroService,
@@ -206,6 +208,23 @@ export class SprintsController {
     const { name, file } = await this.excel.exportSprint(sprintId);
     res.setHeader('Content-Disposition', contentDisposition(name));
     return new StreamableFile(file);
+  }
+
+  /** Sprint'i JSON olarak indirir: özellikler, toplamlar, kişi dağılımı, öğeler, bağımlılıklar, bağlantılar. */
+  @Get('sprints/:sprintId/export.json')
+  @RequireSpacePermission(S.SPACE_VIEW)
+  @Header('Cache-Control', 'private, no-store')
+  async exportSprintJson(
+    @Uuid('sprintId') sprintId: string,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<StreamableFile> {
+    const { name, data } = await this.json.exportSprint(sprintId);
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="export.json"; filename*=UTF-8''${encodeURIComponent(name)}.json`,
+    );
+    return new StreamableFile(Buffer.from(JSON.stringify(data, null, 2), 'utf8'));
   }
 
   @Get('spaces/:spaceId/backlog/export.xlsx')

@@ -552,10 +552,12 @@ model WorkItem {
   reporter         User?        @relation("Reporter", fields: [reporterId], references: [id], onDelete: SetNull)
   startDate        DateTime?    @db.Date
   dueDate          DateTime?    @db.Date
-  /// Story Point (Epic/Story/Bug); T-shirt ölçeği sayıya eşlenir (ADR-045).
+  /// Story Point (her tip, ADR-107); T-shirt ölçeği sayıya eşlenir (ADR-045). Sub-task'ı olan görevde alt görevlerin toplamıdır (veritabanı tetikleyicisi).
   points           Float?
   /// Saat tahmini (Task/Sub-task).
   estimateHours    Float?
+  /// Atanan kişinin girdiği tamamlanma yüzdesi 0–100 (ADR-107).
+  percentDone      Int?
   completedAt      DateTime?    @db.Timestamptz
   /// List içinde kesirli sıralama anahtarı (ADR-014); migration'da COLLATE "C".
   rank             String

@@ -2,14 +2,23 @@ import { describe, expect, it } from 'vitest';
 import { WORK_ITEM_TYPES } from '../constants/work-item';
 import { checkEstimate, ESTIMATE_KIND, rollupHours } from './work-item-estimate';
 import { formatItemKey, parseItemKey } from './work-item-key';
-import { epicProgress, nextCompletedAt } from './work-item-progress';
+import { epicProgress, nextCompletedAt, ownPercent, weightedPercent } from './work-item-progress';
 
 describe('tahmin kuralları (ADR-045, brief §6.2.4)', () => {
-  it('Story Point yalnızca Epic/Story/Bug, saat yalnızca Task/Sub-task', () => {
+  it('Story Point her tipte girilir, saat yalnızca Task/Sub-task (ADR-107)', () => {
     for (const type of WORK_ITEM_TYPES) {
-      const points = ESTIMATE_KIND[type] === 'POINTS';
-      expect(checkEstimate(type, 'FIBONACCI', { points: 3 }).ok).toBe(points);
-      expect(checkEstimate(type, 'FIBONACCI', { estimateHours: 4 }).ok).toBe(!points);
+      const hours = ESTIMATE_KIND[type] === 'HOURS';
+      expect(checkEstimate(type, 'FIBONACCI', { points: 3 }).ok).toBe(true);
+      expect(checkEstimate(type, 'FIBONACCI', { estimateHours: 4 }).ok).toBe(hours);
+    }
+  });
+
+  it('Fibonacci ölçeği tam olarak 1,2,3,5,8,13,21,34,55', () => {
+    for (const n of [1, 2, 3, 5, 8, 13, 21, 34, 55]) {
+      expect(checkEstimate('TASK', 'FIBONACCI', { points: n }).ok).toBe(true);
+    }
+    for (const n of [0, 4, 6, 20, 35, 89]) {
+      expect(checkEstimate('TASK', 'FIBONACCI', { points: n }).ok).toBe(false);
     }
   });
 
@@ -108,5 +117,29 @@ describe('tamamlanma tarihi (brief §6.2.5)', () => {
 
   it('DONE içinde durum değişirse eski tarih korunur', () => {
     expect(nextCompletedAt('DONE', 'DONE', before, now)).toEqual(before);
+  });
+});
+
+describe('tamamlanma yüzdesi (ADR-107)', () => {
+  it('Done durumundaki öğe 100, diğerleri girilen yüzde (yoksa 0)', () => {
+    expect(ownPercent({ percentDone: 30, category: 'ACTIVE' })).toBe(30);
+    expect(ownPercent({ percentDone: null, category: 'NOT_STARTED' })).toBe(0);
+    expect(ownPercent({ percentDone: 10, category: 'DONE' })).toBe(100);
+  });
+
+  it('puan ağırlıklı ortalama; puan yoksa eşit ağırlık', () => {
+    expect(
+      weightedPercent([
+        { points: 8, percentDone: 50, category: 'ACTIVE' },
+        { points: 2, percentDone: null, category: 'DONE' },
+      ]),
+    ).toBe(60);
+    expect(
+      weightedPercent([
+        { points: null, percentDone: 40, category: 'ACTIVE' },
+        { points: null, percentDone: 0, category: 'NOT_STARTED' },
+      ]),
+    ).toBe(20);
+    expect(weightedPercent([])).toBe(0);
   });
 });

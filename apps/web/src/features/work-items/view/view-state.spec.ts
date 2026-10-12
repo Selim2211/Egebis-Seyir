@@ -46,6 +46,8 @@ const item = (over: Partial<WorkItemSummary>): WorkItemSummary => ({
   labelIds: [],
   points: null,
   estimateHours: null,
+  pointsLocked: false,
+  percentDone: null,
   startDate: null,
   dueDate: null,
   completedAt: null,

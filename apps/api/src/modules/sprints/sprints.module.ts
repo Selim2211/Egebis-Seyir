@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { WorkItemsModule } from '../work-items/work-items.module';
 import { CsvModule } from '../import-export/csv.module';
 import { SprintExcelService } from './sprint-excel.service';
+import { SprintJsonService } from './sprint-json.service';
 import { BacklogService } from './backlog.service';
 import { RetroService } from './retro.service';
 import { SprintLifecycleService } from './sprint-lifecycle.service';
@@ -15,6 +16,7 @@ import { SprintsService } from './sprints.service';
   controllers: [SprintsController],
   providers: [
     SprintExcelService,
+    SprintJsonService,
     SprintsService,
     BacklogService,
     SprintLifecycleService,

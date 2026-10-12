@@ -11,7 +11,9 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { UserAvatar } from '@/components/user-avatar';
 import { PriorityIcon, WorkItemTypeIcon } from '@/components/work-item/work-item-visuals';
+import { PercentBar } from '@/components/work-item/percent-bar';
 import { ItemOpenLink } from '@/features/work-items/detail/item-nav';
+import { priorityTint, usePriorityColors } from '@/features/work-items/priority-colors';
 import { cn } from '@/lib/utils';
 import type { BoardStatus } from './board-model';
 
@@ -38,10 +40,12 @@ export function BoardCard({
   overlay?: boolean;
 }) {
   const { t } = useTranslation();
+  const [colored] = usePriorityColors();
   return (
     <div
       className={cn(
         'bg-card card-hover rounded-lg border p-3 text-sm shadow-xs',
+        priorityTint(item.priority, colored),
         canMove && !overlay && 'cursor-grab active:cursor-grabbing',
         dragging && 'opacity-40',
         overlay && 'ring-primary/30 scale-[1.02] rotate-2 shadow-lg ring-2',
@@ -90,6 +94,12 @@ export function BoardCard({
       >
         {item.title}
       </ItemOpenLink>
+      {item.percentDone !== null && item.percentDone > 0 && (
+        <div className="mt-2 flex items-center gap-2">
+          <PercentBar value={item.percentDone} label={t('detail.percentDone')} className="flex-1" />
+          <span className="text-muted-foreground text-xs tabular-nums">{item.percentDone}%</span>
+        </div>
+      )}
       <div className="mt-2 flex items-center gap-2">
         <PriorityIcon priority={item.priority} />
         {item.points !== null && (

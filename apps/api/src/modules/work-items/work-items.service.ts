@@ -448,6 +448,25 @@ export class WorkItemsService {
       estimateHours: fields.estimateHours,
     });
     if (!estimate.ok) throw fail(estimate.code);
+    if (
+      (fields.points !== undefined && fields.points !== item.points) ||
+      (fields.percentDone !== undefined && fields.percentDone !== item.percentDone)
+    ) {
+      // Sub-task'ı olan görevin puanı ve yüzdesi alt görevlerden gelir (ADR-107).
+      const subtasks = await db.workItem.count({
+        where: { parentId: itemId, type: 'SUBTASK', deletedAt: null },
+      });
+      if (subtasks > 0) {
+        throw fail(
+          fields.points !== undefined && fields.points !== item.points
+            ? ERROR_CODES.WORK_ITEM_POINTS_FROM_SUBTASKS
+            : ERROR_CODES.WORK_ITEM_PERCENT_NOT_ALLOWED,
+        );
+      }
+    }
+    if (fields.percentDone != null && type === 'EPIC') {
+      throw fail(ERROR_CODES.WORK_ITEM_PERCENT_NOT_ALLOWED);
+    }
     this.validateDates(fields.startDate, fields.dueDate, item.startDate, item.dueDate);
     const rule = recurrence !== undefined ? recurrence : (item.recurrence as RecurrenceRule | null);
     if (rule) {
@@ -493,6 +512,7 @@ export class WorkItemsService {
       statusId: fields.statusId,
       points: fields.points,
       estimateHours: fields.estimateHours,
+      percentDone: fields.percentDone,
       ...typeFieldInput,
     };
     const changes = diff(
@@ -676,12 +696,18 @@ export class WorkItemsService {
     const actorId = this.ctx.actorId;
     const keys = Object.keys(fields).filter((k) => fields[k] !== undefined);
     const estimateKeys = ['points', 'estimateHours'];
-    const others = keys.filter((k) => k !== 'statusId' && !estimateKeys.includes(k));
+    const others = keys.filter(
+      (k) => k !== 'statusId' && k !== 'percentDone' && !estimateKeys.includes(k),
+    );
     if (others.length > 0 && !this.can(S.WORK_ITEM_WRITE)) throw forbidden(ERROR_CODES.FORBIDDEN);
     if (keys.some((k) => estimateKeys.includes(k)) && !this.can(S.ESTIMATE_WRITE)) {
       throw forbidden(ERROR_CODES.FORBIDDEN);
     }
-    if (keys.includes('statusId') && !this.can(S.WORK_ITEM_WRITE)) {
+    // Yüzdeyi atanan kişi (ya da yazma yetkisi olan) girer; durum için de geçerli "kendi işim" kuralı.
+    if (
+      (keys.includes('statusId') || keys.includes('percentDone')) &&
+      !this.can(S.WORK_ITEM_WRITE)
+    ) {
       const mine = item.reporterId === actorId || item.assignees.some((a) => a.userId === actorId);
       if (!(this.can(S.WORK_ITEM_STATUS_OWN) && mine)) throw forbidden(ERROR_CODES.FORBIDDEN);
     }

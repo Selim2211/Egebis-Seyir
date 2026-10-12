@@ -5,6 +5,7 @@ import {
   type SprintStatus,
 } from '../constants/sprint';
 import type { StatusCategory, WorkItemType } from '../constants/work-item';
+import { weightedPercent } from './work-item-progress';
 
 export type SprintIneligible = 'TYPE' | 'NESTED' | 'DONE';
 
@@ -104,4 +105,65 @@ export function averageVelocity(
   if (recent.length === 0) return null;
   const total = recent.reduce((sum, s) => sum + (s.completedPoints ?? 0), 0);
   return Math.round((total / recent.length) * 10) / 10;
+}
+
+export interface AssigneeStat {
+  /** Atanmamış işler için null. */
+  userId: string | null;
+  name: string | null;
+  itemCount: number;
+  points: number;
+  donePoints: number;
+  /** Puan ağırlıklı tamamlanma yüzdesi (0–100). */
+  percentDone: number;
+}
+
+const round1 = (n: number) => Math.round(n * 10) / 10;
+
+/**
+ * Sprint puanının kişilere dağılımı (ADR-107). Birden çok kişiye atanmış işin puanı eşit bölünür,
+ * böylece kişi toplamları sprint toplamına eşit kalır. Atanmamış işler tek satırda (userId null).
+ */
+export function sprintAssigneeBreakdown(
+  items: ReadonlyArray<{
+    points: number | null;
+    percentDone: number | null;
+    category: StatusCategory;
+    assignees: ReadonlyArray<{ id: string; name: string }>;
+  }>,
+): AssigneeStat[] {
+  type Bucket = {
+    userId: string | null;
+    name: string | null;
+    entries: Array<{ points: number | null; percentDone: number | null; category: StatusCategory }>;
+  };
+  const buckets = new Map<string | null, Bucket>();
+  for (const item of items) {
+    const owners = item.assignees.length > 0 ? item.assignees : [null];
+    for (const owner of owners) {
+      const key = owner?.id ?? null;
+      const bucket = buckets.get(key) ?? { userId: key, name: owner?.name ?? null, entries: [] };
+      bucket.entries.push({
+        points: item.points == null ? null : item.points / owners.length,
+        percentDone: item.percentDone,
+        category: item.category,
+      });
+      buckets.set(key, bucket);
+    }
+  }
+  return [...buckets.values()]
+    .map((b) => ({
+      userId: b.userId,
+      name: b.name,
+      itemCount: b.entries.length,
+      points: round1(b.entries.reduce((s, e) => s + (e.points ?? 0), 0)),
+      donePoints: round1(
+        b.entries.filter((e) => e.category === 'DONE').reduce((s, e) => s + (e.points ?? 0), 0),
+      ),
+      percentDone: weightedPercent(b.entries),
+    }))
+    .sort((a, b) => {
+      if ((a.userId === null) !== (b.userId === null)) return a.userId === null ? 1 : -1;
+      return b.points - a.points || (a.name ?? '').localeCompare(b.name ?? '');
+    });
 }

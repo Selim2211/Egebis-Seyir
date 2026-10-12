@@ -7,7 +7,10 @@ import {
 import type { WorkItemType } from '../constants/work-item';
 import { ERROR_CODES } from '../errors/codes';
 
-/** Hangi tip hangi tahmini taşır (ADR-045, brief §6.2.4). */
+/**
+ * Hangi tip hangi `ana` tahmini taşır (ADR-045, brief §6.2.4). Story Point her tipte girilebilir
+ * (ADR-107); saat yalnızca Task/Sub-task'ta tutulur.
+ */
 export const ESTIMATE_KIND: Record<WorkItemType, 'POINTS' | 'HOURS'> = {
   EPIC: 'POINTS',
   STORY: 'POINTS',
@@ -48,8 +51,7 @@ export function checkEstimate(
   estimate: { points?: number | null; estimateHours?: number | null },
 ): EstimateCheck {
   const { points, estimateHours } = estimate;
-  const kind = ESTIMATE_KIND[type];
-  if ((points != null && kind !== 'POINTS') || (estimateHours != null && kind !== 'HOURS')) {
+  if (estimateHours != null && ESTIMATE_KIND[type] !== 'HOURS') {
     return { ok: false, code: ERROR_CODES.WORK_ITEM_ESTIMATE_NOT_ALLOWED };
   }
   if (points != null && !isValidPoints(scale, points)) {

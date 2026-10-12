@@ -1,9 +1,10 @@
 import { SPACE_PERMISSIONS as S, sprintTotals } from '@scrum/shared';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
-import { Kanban } from 'lucide-react';
-import { useMemo } from 'react';
+import { BarChart3, Kanban, Link2 } from 'lucide-react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 import { NativeSelect } from '@/components/form';
 import { Button } from '@/components/ui/button';
 import { ContainerHeader, LoadingState, NotFoundState } from '@/features/spaces/container-header';
@@ -11,6 +12,8 @@ import { spaceQuery } from '@/features/spaces/queries';
 import { backlogQuery, sprintsQuery } from '@/features/sprints/queries';
 import { SprintActions } from '@/features/sprints/sprint-actions';
 import { ScrumTabs } from '@/features/sprints/scrum-tabs';
+import { SprintStats } from '@/features/sprints/sprint-stats';
+import { PriorityColorToggle } from '@/features/work-items/priority-colors';
 import { ItemPanel } from '@/features/work-items/detail/item-panel';
 import { ItemNavContext } from '@/features/work-items/detail/item-nav-context';
 import { useStatusGuard } from '@/features/work-items/status-guard';
@@ -43,6 +46,7 @@ export function SprintBoardPage({
   const space = useQuery(spaceQuery(workspaceId, spaceId));
   const backlog = useQuery(backlogQuery(workspaceId, spaceId));
 
+  const [showStats, setShowStats] = useState(false);
   const all = useQuery(sprintsQuery(workspaceId, spaceId));
   // Açık sprint'ler önce (aktif, sonra başlangıç sırasıyla planlılar), ardından geçmiş.
   const sprints = useMemo(() => {
@@ -138,7 +142,34 @@ export function SprintBoardPage({
               {t('board.progress', { done: totals.donePoints, total: totals.points })}
             </span>
             <SwimlanePicker value={lane} onChange={(next) => onSearch({ lane: next })} />
+            <PriorityColorToggle />
             <span className="ml-auto flex items-center gap-1">
+              <Button
+                size="sm"
+                variant={showStats ? 'secondary' : 'ghost'}
+                aria-expanded={showStats}
+                onClick={() => setShowStats((v) => !v)}
+                className="gap-1.5 tabular-nums"
+              >
+                <BarChart3 aria-hidden />
+                {t('sprintStats.summary', { percent: selected.percentDone })}
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="gap-1.5"
+                onClick={() => {
+                  navigator.clipboard
+                    .writeText(`${window.location.origin}/sprints/${selected.id}`)
+                    .then(
+                      () => toast.success(t('detail.linkCopied')),
+                      () => toast.error(t('copyList.failed')),
+                    );
+                }}
+              >
+                <Link2 aria-hidden />
+                {t('sprintStats.copyLink')}
+              </Button>
               <Button asChild size="sm" variant="ghost">
                 <Link
                   to="/spaces/$spaceId/review/$sprintId"
@@ -158,6 +189,7 @@ export function SprintBoardPage({
               />
             </span>
           </div>
+          {showStats && <SprintStats sprint={selected} />}
           {readOnly && (
             <p
               role="status"

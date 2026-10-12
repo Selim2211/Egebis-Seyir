@@ -12,6 +12,8 @@ const base: Omit<WorkItemSummary, 'id' | 'key' | 'title' | 'parentId'> = {
   labelIds: [],
   points: null,
   estimateHours: null,
+  pointsLocked: false,
+  percentDone: null,
   startDate: null,
   dueDate: null,
   completedAt: null,

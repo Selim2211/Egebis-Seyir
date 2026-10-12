@@ -1,4 +1,5 @@
 import {
+  PERCENT_DONE,
   BUG_SEVERITIES,
   ESTIMATE_KIND,
   FIBONACCI_SCALE,
@@ -103,6 +104,52 @@ function PointsInput({
         </option>
       ))}
     </NativeSelect>
+  );
+}
+
+/** Tamamlanma yüzdesi (0–100, 5'er adım); alt görevli işte alt görevlerden türetilir (ADR-107). */
+function PercentInput({
+  value,
+  disabled,
+  derived,
+  onChange,
+}: {
+  value: number | null;
+  disabled: boolean;
+  derived: boolean;
+  onChange: (value: number | null) => void;
+}) {
+  const { t } = useTranslation();
+  const [draft, setDraft] = useState<number | null>(null);
+  const current = draft ?? value ?? 0;
+  // Sürüklerken yalnızca ekran güncellenir; bırakınca (ya da klavyeyle) tek istek gider.
+  const commit = () => {
+    if (draft !== null && draft !== (value ?? 0)) onChange(draft);
+    setDraft(null);
+  };
+  return (
+    <div className="flex flex-col gap-1">
+      <div className="flex items-center gap-2">
+        <input
+          type="range"
+          min={PERCENT_DONE.min}
+          max={PERCENT_DONE.max}
+          step={PERCENT_DONE.step}
+          value={current}
+          disabled={disabled}
+          aria-label={t('detail.percentDone')}
+          onChange={(e) => setDraft(Number(e.target.value))}
+          onPointerUp={commit}
+          onKeyUp={commit}
+          onBlur={commit}
+          className="accent-primary h-1.5 w-32 cursor-pointer disabled:cursor-not-allowed"
+        />
+        <output className="w-10 text-sm tabular-nums">{current}%</output>
+      </div>
+      {derived && (
+        <p className="text-muted-foreground text-xs">{t('detail.percentFromSubtasks')}</p>
+      )}
+    </div>
   );
 }
 
@@ -274,15 +321,20 @@ export function Properties({
         <Reminders itemId={item.id} />
       </Row>
 
-      <Row label={t(kind === 'POINTS' ? 'detail.points' : 'detail.hours')}>
-        {kind === 'POINTS' ? (
-          <PointsInput
-            scale={space.estimationScale}
-            value={item.points}
-            disabled={!canEstimate}
-            onChange={(points) => save({ points })}
-          />
-        ) : (
+      <Row label={t('detail.points')}>
+        <PointsInput
+          scale={space.estimationScale}
+          value={item.points}
+          disabled={!canEstimate || item.pointsLocked}
+          onChange={(points) => save({ points })}
+        />
+        {item.pointsLocked && (
+          <p className="text-muted-foreground mt-1 text-xs">{t('detail.pointsFromSubtasks')}</p>
+        )}
+      </Row>
+
+      {kind === 'HOURS' && (
+        <Row label={t('detail.hours')}>
           <div className="flex items-center gap-2">
             <input
               type="number"
@@ -305,15 +357,26 @@ export function Properties({
               </span>
             )}
           </div>
-        )}
-        {kind === 'HOURS'
-          ? null
-          : item.rolledUpHours != null && (
-              <p className="text-muted-foreground mt-1 text-xs">
-                {t('detail.rolledUp', { hours: item.rolledUpHours })}
-              </p>
-            )}
-      </Row>
+        </Row>
+      )}
+      {kind !== 'HOURS' && item.rolledUpHours != null && (
+        <Row label={t('detail.hours')}>
+          <span className="text-muted-foreground text-xs">
+            {t('detail.rolledUp', { hours: item.rolledUpHours })}
+          </span>
+        </Row>
+      )}
+
+      {item.type !== 'EPIC' && (
+        <Row label={t('detail.percentDone')}>
+          <PercentInput
+            value={item.percentDone}
+            disabled={!canStatus || item.pointsLocked}
+            derived={item.pointsLocked}
+            onChange={(percentDone) => save({ percentDone })}
+          />
+        </Row>
+      )}
 
       <Row label={t('detail.labels')}>
         <LabelsPicker item={item} canWrite={canWrite} onSave={save} />

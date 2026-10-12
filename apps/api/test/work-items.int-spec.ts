@@ -149,15 +149,12 @@ describe('İş öğeleri (gerçek veritabanı)', () => {
       expect(res.body).toEqual({ code: 'WORK_ITEM_PARENT_SPACE' });
     });
 
-    it('Story Point yalnızca Story/Bug/Epic, saat yalnızca Task/Sub-task; ölçeğe uymalı', async () => {
+    it('Story Point her tipte, saat yalnızca Task/Sub-task; ölçeğe uymalı', async () => {
       const s = await space();
       await create(s.listId, { type: 'STORY', title: 'S', points: 5 });
       await create(s.listId, { type: 'TASK', title: 'T', estimateHours: 3.5 });
 
-      const taskPoints = await owner
-        .post(api(`/lists/${s.listId}/items`), { type: 'TASK', title: 'T', points: 3 })
-        .expect(422);
-      expect(taskPoints.body).toEqual({ code: 'WORK_ITEM_ESTIMATE_NOT_ALLOWED' });
+      await create(s.listId, { type: 'TASK', title: 'T2', points: 34 });
       const storyHours = await owner
         .post(api(`/lists/${s.listId}/items`), { type: 'STORY', title: 'S', estimateHours: 2 })
         .expect(422);

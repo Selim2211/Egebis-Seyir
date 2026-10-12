@@ -119,6 +119,7 @@ export const UpdateWorkItemRequestSchema = z
     dueDate: DateOnlySchema.nullable(),
     points,
     estimateHours: hours,
+    percentDone: z.int().min(0).max(100).nullable(),
     description: RichTextSchema.nullable(),
     force: z.boolean(),
     customFields: CustomFieldPatchSchema,
@@ -150,7 +151,11 @@ export const WorkItemSummarySchema = z.object({
   assignees: z.array(AssigneeSchema),
   labelIds: z.array(z.uuid()),
   points: z.number().nullable(),
+  /** Alt görevi (Sub-task) varsa puan onların toplamıdır ve elle değiştirilemez (ADR-107). */
+  pointsLocked: z.boolean(),
   estimateHours: z.number().nullable(),
+  /** Atanan kişinin girdiği tamamlanma yüzdesi (0–100); girilmemişse null (ADR-107). */
+  percentDone: z.int().min(0).max(100).nullable(),
   startDate: DateOnlySchema.nullable(),
   dueDate: DateOnlySchema.nullable(),
   completedAt: z.iso.datetime().nullable(),

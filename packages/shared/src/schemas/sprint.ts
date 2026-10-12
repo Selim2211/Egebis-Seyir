@@ -81,6 +81,19 @@ export const SprintSummarySchema = z.object({
   notReadyCount: z.int(),
   /** Tamamlanırken donmuş velocity (Done puanı); tamamlanmamış sprint'te null. */
   completedPoints: z.number().nullable(),
+  /** Sprint'in puan ağırlıklı toplam tamamlanma yüzdesi, 0–100 (ADR-107). */
+  percentDone: z.int(),
+  /** Puanın kişilere dağılımı; çok kişili işin puanı eşit bölünür (ADR-107). */
+  byAssignee: z.array(
+    z.object({
+      userId: z.uuid().nullable(),
+      name: z.string().nullable(),
+      itemCount: z.int(),
+      points: z.number(),
+      donePoints: z.number(),
+      percentDone: z.int(),
+    }),
+  ),
 });
 export type SprintSummary = z.infer<typeof SprintSummarySchema>;
 

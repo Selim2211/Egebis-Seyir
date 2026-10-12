@@ -3,6 +3,7 @@ import {
   averageVelocity,
   checkSprintDates,
   sprintDays,
+  sprintAssigneeBreakdown,
   sprintEligibility,
   sprintMoveReason,
   sprintTotals,
@@ -108,5 +109,25 @@ describe('averageVelocity', () => {
 
   it('bir ondalığa yuvarlar', () => {
     expect(averageVelocity([done('2026-09-01', 7), done('2026-10-01', 8)])).toBe(7.5);
+  });
+});
+
+describe('sprintAssigneeBreakdown (ADR-107)', () => {
+  const ayse = { id: 'a', name: 'Ayşe' };
+  const can = { id: 'c', name: 'Can' };
+
+  it('puanı kişilere dağıtır; çok kişili işin puanı eşit bölünür, atanmamış sonda', () => {
+    const rows = sprintAssigneeBreakdown([
+      { points: 8, percentDone: 50, category: 'ACTIVE', assignees: [ayse] },
+      { points: 5, percentDone: null, category: 'DONE', assignees: [ayse, can] },
+      { points: 3, percentDone: null, category: 'NOT_STARTED', assignees: [] },
+    ]);
+    expect(rows.map((r) => [r.userId, r.points, r.donePoints, r.percentDone])).toEqual([
+      ['a', 10.5, 2.5, 62],
+      ['c', 2.5, 2.5, 100],
+      [null, 3, 0, 0],
+    ]);
+    const total = rows.reduce((sum, r) => sum + r.points, 0);
+    expect(total).toBe(16);
   });
 });

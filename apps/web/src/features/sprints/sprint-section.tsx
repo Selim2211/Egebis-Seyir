@@ -1,15 +1,21 @@
 import type { SprintSummary, WorkItemRow } from '@scrum/shared';
-import type { ReactNode } from 'react';
+import { Link } from '@tanstack/react-router';
 import {
   Archive,
+  BarChart3,
   ChevronRight,
   Copy,
+  FileJson,
   FileSpreadsheet,
+  Kanban,
+  Link2,
   MoreHorizontal,
   Pencil,
   Trash2,
 } from 'lucide-react';
+import { type ReactNode, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -26,6 +32,7 @@ import { cn } from '@/lib/utils';
 import { containerId } from './backlog-dnd';
 import { DropContainerView, SortableRow } from './backlog-dnd-view';
 import { BacklogRow } from './backlog-row';
+import { SprintStats } from './sprint-stats';
 
 /** Sprint bölümü: başlık (ad, tarih, hedef, toplamlar), menü ve öğe satırları (ADR-061). */
 export function SprintSection({
@@ -64,6 +71,13 @@ export function SprintSection({
   const { t } = useTranslation();
   const active = sprint.status === 'ACTIVE';
   const { id: workspaceId } = useCurrentWorkspace();
+  const [showStats, setShowStats] = useState(false);
+  const copyLink = () => {
+    navigator.clipboard.writeText(`${window.location.origin}/sprints/${sprint.id}`).then(
+      () => toast.success(t('detail.linkCopied')),
+      () => toast.error(t('copyList.failed')),
+    );
+  };
   return (
     <section
       className={cn('bg-card rounded-lg border', active && 'border-primary/40')}
@@ -96,6 +110,19 @@ export function SprintSection({
             </span>
           )}
         </span>
+        <button
+          type="button"
+          onClick={() => setShowStats((v) => !v)}
+          aria-expanded={showStats}
+          aria-label={t('sprintStats.toggle', { name: sprint.name })}
+          className={cn(
+            'text-muted-foreground hover:bg-accent hover:text-foreground flex items-center gap-1 rounded px-1.5 py-0.5 text-xs tabular-nums',
+            showStats && 'bg-accent text-foreground',
+          )}
+        >
+          <BarChart3 className="size-3.5" aria-hidden />
+          {sprint.percentDone}%
+        </button>
         {actions}
         {(canPlan || items.length > 0) && (
           <DropdownMenu>
@@ -109,10 +136,24 @@ export function SprintSection({
                 <MoreHorizontal />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-44">
+            <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuItem onSelect={onCopy}>
                 <Copy />
                 {t('copyList.action')}
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link
+                  to="/spaces/$spaceId/board"
+                  params={{ spaceId: sprint.spaceId }}
+                  search={{ sprint: sprint.id }}
+                >
+                  <Kanban />
+                  {t('sprintStats.openBoard')}
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={copyLink}>
+                <Link2 />
+                {t('sprintStats.copyLink')}
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <a
@@ -121,6 +162,15 @@ export function SprintSection({
                 >
                   <FileSpreadsheet />
                   {t('sprintImport.exportSprint')}
+                </a>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <a
+                  href={`/api/workspaces/${workspaceId}/sprints/${sprint.id}/export.json`}
+                  download
+                >
+                  <FileJson />
+                  {t('sprintStats.exportJson')}
                 </a>
               </DropdownMenuItem>
               {canPlan && (
@@ -150,6 +200,7 @@ export function SprintSection({
           </DropdownMenu>
         )}
       </header>
+      {showStats && !collapsed && <SprintStats sprint={sprint} />}
       {sprint.goal && !collapsed && (
         <p className="text-muted-foreground px-4 pb-2 text-sm">
           <span className="font-medium">{t('sprints.goal')}:</span> {sprint.goal}

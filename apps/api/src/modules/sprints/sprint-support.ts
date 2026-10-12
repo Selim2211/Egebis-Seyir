@@ -5,8 +5,10 @@ import {
   appliesToReadiness,
   isSprintOpen,
   readinessOf,
+  sprintAssigneeBreakdown,
   sprintTotals,
   type SprintSummary,
+  weightedPercent,
 } from '@scrum/shared';
 import type { Sprint } from '../../generated/prisma/client';
 import type { TenantClient } from '../../infra/prisma/tenant-prisma.service';
@@ -46,8 +48,15 @@ export async function summarize(db: TenantClient, sprints: Sprint[]): Promise<Sp
       sprintId: true,
       type: true,
       points: true,
+      percentDone: true,
       dorChecked: true,
       status: { select: { category: true } },
+      assignees: { select: { user: { select: { id: true, name: true } } } },
+      // Sub-task'ı olan işin yüzdesi alt görevlerden türetilir (ADR-107).
+      children: {
+        where: { type: 'SUBTASK', deletedAt: null },
+        select: { points: true, percentDone: true, status: { select: { category: true } } },
+      },
     },
   });
   const spaces = await db.space.findMany({
@@ -58,6 +67,21 @@ export async function summarize(db: TenantClient, sprints: Sprint[]): Promise<Sp
   return sprints.map((sprint) => {
     const mine = items.filter((i) => i.sprintId === sprint.id);
     const own = mine.map((i) => ({ type: i.type, points: i.points, category: i.status.category }));
+    const progress = mine.map((i) => ({
+      points: i.points,
+      category: i.status.category,
+      assignees: i.assignees.map((a) => a.user),
+      percentDone:
+        i.children.length > 0
+          ? weightedPercent(
+              i.children.map((c) => ({
+                points: c.points,
+                percentDone: c.percentDone,
+                category: c.status.category,
+              })),
+            )
+          : i.percentDone,
+    }));
     const dorItems = dorBySpace.get(sprint.spaceId) ?? [];
     const notReadyCount =
       dorItems.length === 0
@@ -81,6 +105,8 @@ export async function summarize(db: TenantClient, sprints: Sprint[]): Promise<Sp
       completedAt: sprint.completedAt?.toISOString() ?? null,
       cancelledAt: sprint.cancelledAt?.toISOString() ?? null,
       completedPoints: sprint.completedPoints,
+      percentDone: weightedPercent(progress),
+      byAssignee: sprintAssigneeBreakdown(progress),
       notReadyCount,
       ...sprintTotals(own),
     };

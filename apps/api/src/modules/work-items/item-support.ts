@@ -6,6 +6,7 @@ import {
   readinessOf,
   type WorkItemRow,
   type WorkItemSummary,
+  weightedPercent,
 } from '@scrum/shared';
 import type { Prisma } from '../../generated/prisma/client';
 import type { TenantClient } from '../../infra/prisma/tenant-prisma.service';
@@ -19,6 +20,11 @@ export const summaryInclude = {
   assignees: { select: { user: { select: { id: true, name: true, avatarVersion: true } } } },
   labels: { select: { labelId: true } },
   _count: { select: { children: { where: { deletedAt: null, archivedAt: null } } } },
+  /** Sub-task'lar: puan toplamı ve yüzde bunlardan türetilir (ADR-107). */
+  children: {
+    where: { type: 'SUBTASK', deletedAt: null },
+    select: { points: true, percentDone: true, status: { select: { category: true } } },
+  },
 } satisfies Prisma.WorkItemInclude;
 
 export type SummaryRow = Prisma.WorkItemGetPayload<{ include: typeof summaryInclude }>;
@@ -32,6 +38,7 @@ export const toDate = (text: string | null | undefined): Date | null | undefined
   text == null ? text : new Date(`${text}T00:00:00.000Z`);
 
 export function toSummary(row: SummaryRow): WorkItemSummary {
+  const locked = row.children.length > 0;
   return {
     id: row.id,
     key: formatItemKey(row.keyPrefix, row.number),
@@ -45,7 +52,17 @@ export function toSummary(row: SummaryRow): WorkItemSummary {
     assignees: row.assignees.map((a) => a.user),
     labelIds: row.labels.map((l) => l.labelId),
     points: row.points,
+    pointsLocked: locked,
     estimateHours: row.estimateHours,
+    percentDone: locked
+      ? weightedPercent(
+          row.children.map((c) => ({
+            points: c.points,
+            percentDone: c.percentDone,
+            category: c.status.category,
+          })),
+        )
+      : row.percentDone,
     startDate: dateOnly(row.startDate),
     dueDate: dateOnly(row.dueDate),
     completedAt: row.completedAt?.toISOString() ?? null,

@@ -1,5 +1,5 @@
 /** Varsayılan story point ölçeği (brief §6.4). */
-export const FIBONACCI_SCALE = [1, 2, 3, 5, 8, 13, 21] as const;
+export const FIBONACCI_SCALE = [1, 2, 3, 5, 8, 13, 21, 34, 55] as const;
 
 /** T-shirt ölçeği. */
 export const TSHIRT_SCALE = ['XS', 'S', 'M', 'L', 'XL'] as const;

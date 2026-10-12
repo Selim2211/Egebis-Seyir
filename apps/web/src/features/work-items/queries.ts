@@ -121,6 +121,7 @@ export function useUpdateItem(listId: string) {
                       ...(body.estimateHours !== undefined && {
                         estimateHours: body.estimateHours,
                       }),
+                      ...(body.percentDone !== undefined && { percentDone: body.percentDone }),
                     }
                   : item,
               ),

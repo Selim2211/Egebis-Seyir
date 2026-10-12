@@ -65,3 +65,34 @@ export function epicStats(
   }
   return stats;
 }
+
+/** Kullanıcının girdiği yüzde sınırları (ADR-107). */
+export const PERCENT_DONE = { min: 0, max: 100, step: 5 } as const;
+
+export interface PercentInput {
+  points: number | null;
+  percentDone: number | null;
+  category: StatusCategory;
+}
+
+/** Tek öğenin etkin yüzdesi: Done → 100, aksi halde girilen yüzde (yoksa 0). */
+export function ownPercent(item: Pick<PercentInput, 'percentDone' | 'category'>): number {
+  return item.category === 'DONE' ? 100 : (item.percentDone ?? 0);
+}
+
+/**
+ * Puan ağırlıklı ortalama yüzde (0–100). Hiçbirinde puan yoksa her öğe eşit ağırlıktadır. Öğe yoksa 0.
+ * Alt öğeli görev için alt öğelerle, sprint için üst düzey öğelerle çağrılır (ADR-107).
+ */
+export function weightedPercent(items: ReadonlyArray<PercentInput>): number {
+  if (items.length === 0) return 0;
+  const weighted = items.some((i) => (i.points ?? 0) > 0);
+  let total = 0;
+  let done = 0;
+  for (const item of items) {
+    const weight = weighted ? (item.points ?? 0) : 1;
+    total += weight;
+    done += weight * ownPercent(item);
+  }
+  return total === 0 ? 0 : Math.round(done / total);
+}

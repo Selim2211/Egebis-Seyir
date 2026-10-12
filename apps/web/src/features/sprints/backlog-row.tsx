@@ -14,6 +14,7 @@ import { UserAvatar } from '@/components/user-avatar';
 import { WorkItemTypeIcon } from '@/components/work-item/work-item-visuals';
 import type { DragHandleProps } from '@/features/spaces/sortable';
 import { ItemOpenLink } from '@/features/work-items/detail/item-nav';
+import { priorityTint, usePriorityColors } from '@/features/work-items/priority-colors';
 import { cn } from '@/lib/utils';
 import { isUnestimated } from './backlog-filter';
 
@@ -46,11 +47,13 @@ export function BacklogRow({
   const unestimated = isUnestimated(item);
   const inSprint = item.sprintId !== null;
   const hasMenu = canPlan && (targets.length > 0 || inSprint);
+  const [colored] = usePriorityColors();
 
   return (
     <div
       className={cn(
         'group/item hover:bg-accent/40 flex items-center gap-2 border-b px-3 py-1.5 text-sm',
+        priorityTint(item.priority, colored),
         selected && 'bg-accent/60',
       )}
     >
@@ -106,6 +109,14 @@ export function BacklogRow({
           className="shrink-0 rounded bg-amber-100 px-1.5 py-0.5 text-xs font-medium text-amber-800 tabular-nums dark:bg-amber-500/20 dark:text-amber-300"
         >
           {t('readiness.dorBadge', { checked: item.dor.checked, total: item.dor.total })}
+        </span>
+      )}
+      {item.percentDone !== null && item.percentDone > 0 && item.percentDone < 100 && (
+        <span
+          title={t('detail.percentDone')}
+          className="text-muted-foreground shrink-0 text-xs tabular-nums"
+        >
+          {item.percentDone}%
         </span>
       )}
       <Estimate item={item} unestimated={unestimated} />

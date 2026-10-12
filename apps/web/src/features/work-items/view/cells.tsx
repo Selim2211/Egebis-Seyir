@@ -1,5 +1,4 @@
 import {
-  ESTIMATE_KIND,
   FIBONACCI_SCALE,
   PRIORITIES,
   TSHIRT_POINTS,
@@ -170,29 +169,12 @@ export function EstimateCell({
 }) {
   const { t } = useTranslation();
   const scale = ctx.space.estimationScale;
-  if (!editable || !ctx.canEstimate) {
+  if (!editable || !ctx.canEstimate || item.pointsLocked) {
     return <span className="text-muted-foreground text-xs">{estimateLabel(item, scale)}</span>;
   }
   const inputClass =
     'hover:border-input focus-visible:ring-ring/50 h-7 w-full rounded border border-transparent bg-transparent px-1 text-xs outline-none focus-visible:ring-[3px]';
 
-  if (ESTIMATE_KIND[item.type] === 'HOURS') {
-    return (
-      <input
-        type="number"
-        min={0}
-        step="0.25"
-        key={item.estimateHours ?? 'none'}
-        defaultValue={item.estimateHours ?? ''}
-        aria-label={t('detail.hours')}
-        onBlur={(e) => {
-          const next = e.target.value === '' ? null : Number(e.target.value);
-          if (next !== item.estimateHours) ctx.onPatch(item.id, { estimateHours: next });
-        }}
-        className={inputClass}
-      />
-    );
-  }
   if (scale === 'NUMBER') {
     return (
       <input

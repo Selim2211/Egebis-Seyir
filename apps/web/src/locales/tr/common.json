@@ -392,7 +392,9 @@
     "GOAL_LIMIT": "Çalışma alanı en fazla 200 hedef içerebilir.",
     "MESSAGE_SELF": "Kendinize mesaj gönderemezsiniz.",
     "TEAM_NAME_TAKEN": "Bu adla bir ekip zaten var.",
-    "TEAM_LIMIT": "Çalışma alanı en fazla 100 ekip içerebilir."
+    "TEAM_LIMIT": "Çalışma alanı en fazla 100 ekip içerebilir.",
+    "WORK_ITEM_POINTS_FROM_SUBTASKS": "Alt görevi olan işin puanı alt görevlerin toplamıdır; elle değiştirilemez.",
+    "WORK_ITEM_PERCENT_NOT_ALLOWED": "Bu iş için yüzde girilemez (Epic ya da alt görevlerden hesaplanan iş)."
   },
   "spaceRoles": {
     "PRODUCT_OWNER": "Product Owner",
@@ -653,7 +655,10 @@
     "archivedBanner": "Bu öğe arşivde; düzenlenemez.",
     "updated": "Son güncelleme: {{when}}",
     "epicTotals": "Toplam",
-    "linkedDocs": "Dokümanlar"
+    "linkedDocs": "Dokümanlar",
+    "pointsFromSubtasks": "Alt görevlerin toplamı; alt görevlerden değişir.",
+    "percentDone": "Tamamlanma",
+    "percentFromSubtasks": "Alt görevlerden hesaplanır."
   },
   "editor": {
     "toolbar": "Biçimlendirme",
@@ -1977,5 +1982,24 @@
     "restoreAction": "Geri yükle",
     "restored": "Space yedekten geri yüklendi.",
     "sprintRestored": "Sprint yedekten geri yüklendi."
+  },
+  "priorityColors": {
+    "toggle": "Önceliğe göre renklendir"
+  },
+  "sprintStats": {
+    "title": "{{name}} özeti",
+    "toggle": "{{name}} özetini aç/kapat",
+    "summary": "Özet · %{{percent}}",
+    "totalPoints": "toplam Story Point",
+    "donePoints": "{{done}} / {{total}} puan tamamlandı",
+    "percent": "Sprint tamamlanma yüzdesi",
+    "byPerson": "Kişilere göre dağılım",
+    "unassigned": "Atanmamış",
+    "personPoints": "{{points}} puan",
+    "personPercent": "{{name}} tamamlanma yüzdesi",
+    "noItems": "Sprint’te iş yok.",
+    "openBoard": "Kanban panosunu aç",
+    "copyLink": "Bağlantıyı kopyala",
+    "exportJson": "JSON olarak indir"
   }
 }
