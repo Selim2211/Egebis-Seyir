@@ -1,0 +1,595 @@
+{
+  "title": "Egebis Seyir Kullanıcı Kılavuzu",
+  "subtitle": "Sprint, Task ve Sub-Task oluşturma ve düzenleme — adım adım, görsellerle.",
+  "sections": [
+    {
+      "id": "baslangic",
+      "title": "Başlamadan önce: temel kavramlar",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Seyir, ekibin işlerini planladığı ve takip ettiği bir proje yönetimi uygulamasıdır. Bu kılavuz hiç kullanmamış biri için yazıldı: her adımda ekranın neresine bakacağını, kırmızı **numaralı işaretlerle** gösteriyoruz. Görseldeki numara, görselin altındaki listeyle birebir eşleşir."
+        },
+        {
+          "type": "p",
+          "text": "Önce üç kelimeyi bilmek yeterli:"
+        },
+        {
+          "type": "table",
+          "head": ["Kavram", "Ne demek?", "Örnek"],
+          "rows": [
+            [
+              "Space",
+              "Bir ürün veya ekip için ayrılmış çalışma alanı. Bütün işler bir Space içinde tutulur.",
+              "Mobil Uygulama"
+            ],
+            [
+              "Task (görev)",
+              "Yapılacak tek bir iş. Başlığı, sahibi, tarihi ve puanı vardır.",
+              "Giriş ekranını tasarla"
+            ],
+            [
+              "Sub-Task (alt görev)",
+              "Bir Task'ın küçük parçası. Tek başına var olamaz, her zaman bir üst göreve bağlıdır.",
+              "Form alanlarını çiz"
+            ],
+            [
+              "Sprint",
+              "Genellikle 1–2 hafta süren, hedefi ve tarihleri belli çalışma dönemi. Ekip o dönemde hangi işleri yapacağını seçer.",
+              "Sprint 1 (15–28 Ekim)"
+            ],
+            [
+              "Backlog",
+              "Henüz bir sprint'e alınmamış, öncelik sırasıyla bekleyen işlerin listesi.",
+              "—"
+            ]
+          ]
+        },
+        {
+          "type": "figure",
+          "image": "01-overview",
+          "alt": "Seyir ana ekranı ve işaretli bölümler",
+          "caption": "Ana ekran: soldaki menüden Space'e ve bölümlerine, üstteki çubuktan arama, yardım ve hesap menüsüne ulaşırsın.",
+          "legend": [
+            "**Space**: Çalıştığın proje alanı. Tıklayınca altındaki bölümler açılır.",
+            "**Backlog ve sprint'ler**: Sprint oluşturma ve planlama burada yapılır.",
+            "**Sprint panosu**: Sprint'teki işleri durum sütunlarında (Kanban) gösterir.",
+            "**Görevler**: Space'in iş listesi; Task ve Sub-Task'lar burada eklenir.",
+            "**Arama**: Görev, doküman veya kişi ara (kısayol: Ctrl + K).",
+            "**Yardım**: Bu kılavuzu her zaman buradan açabilirsin.",
+            "**Hesap menüsü**: Profil, dil (Türkçe/İngilizce), tema ve çıkış.",
+            "**Yeni iş ekleme satırı**: Başlığı yazıp Enter'a basarak yeni görev eklersin."
+          ]
+        },
+        {
+          "type": "tip",
+          "text": "Takıldığında üst çubuktaki **Yardım** düğmesine tıkla. Bu kılavuzun Word sürümünü de sayfanın sağ üstündeki **Word olarak indir** düğmesiyle alabilirsin."
+        }
+      ]
+    },
+    {
+      "id": "space-olustur",
+      "title": "1. Space (çalışma alanı) oluşturma",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Task ve Sprint oluşturmadan önce işlerin duracağı bir Space gerekir. Ekibin yöneticisi genellikle bunu senin için hazırlar; yine de nasıl yapıldığını bilmek faydalıdır."
+        },
+        {
+          "type": "steps",
+          "items": [
+            "Sol menüde **SPACE'LER** başlığının yanındaki **+** düğmesine (ya da en alttaki **Space oluştur** satırına) tıkla.",
+            "**Ad** alanına Space'in adını yaz (ör. Mobil Uygulama).",
+            "**Anahtar** alanını kontrol et. Bu 2–10 harflik kısa koddur; görev kimlikleri bununla başlar (MOB-1, MOB-2…). Ad yazınca otomatik önerilir.",
+            "İstersen renk ve ikon seç. **Çalışma modu** olarak **Scrum** seçersen Sprint ve Backlog özellikleri açık olur.",
+            "**Space oluştur** düğmesine bas."
+          ]
+        },
+        {
+          "type": "figure",
+          "image": "02-space-create",
+          "alt": "Yeni Space oluşturma penceresi",
+          "caption": "Yeni Space penceresi. Sprint kullanacaksan çalışma modunu Scrum bırak.",
+          "legend": [
+            "**Ad**: Space'in görünen adı.",
+            "**Anahtar**: Görev kimliklerinin başındaki kısa kod (MOB-1 gibi). Başka bir Space'te daha önce kullanılmamış olmalı; kısa ve anlaşılır seç.",
+            "**Space oluştur**: Kaydeder ve Space'i açar."
+          ]
+        },
+        {
+          "type": "note",
+          "text": "Space oluşturduğunda içinde otomatik olarak **Görevler** adlı bir liste gelir. Task'larını ilk etapta buraya ekleyeceksin."
+        }
+      ]
+    },
+    {
+      "id": "task-olustur",
+      "title": "2. Task oluşturma",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Task, yapılacak tek bir iştir. En hızlı yol, listenin altındaki ekleme satırını kullanmaktır."
+        },
+        {
+          "type": "steps",
+          "items": [
+            "Sol menüde Space'ini aç ve **Görevler** listesine tıkla.",
+            "Listenin altındaki satırda **Tip** kutusundan **Task**'ı seç.",
+            "Yandaki kutuya işin başlığını yaz (ör. *Giriş ekranını tasarla*). Başlık kısa ve net olsun: ne yapılacağı anlaşılmalı.",
+            "**Enter** tuşuna bas (veya **Ekle ↵** yazısına tıkla). Görev listeye düşer ve kimliği (MOB-1) verilir."
+          ]
+        },
+        {
+          "type": "figure",
+          "image": "10-task-create",
+          "alt": "Listede hızlı Task ekleme satırı",
+          "caption": "Görev ekleme satırı: tip seç, başlık yaz, Enter'a bas.",
+          "legend": [
+            "**Tip**: Eklenecek kaydın türü. Bu kılavuzda **Task** kullanıyoruz (diğerleri: Epic, Story, Bug).",
+            "**Başlık**: İşin adı. Birden fazla görev eklemek için her başlıktan sonra Enter'a basman yeter.",
+            "**Ekle ↵**: Enter'a basmak yerine buna da tıklayabilirsin."
+          ]
+        },
+        {
+          "type": "tip",
+          "text": "Peş peşe çok görev ekleyeceksen başlığı yaz, Enter'a bas, yenisini yaz, tekrar Enter. Ayrıntıları (tarih, kişi, puan) sonra tek tek girersin."
+        }
+      ]
+    },
+    {
+      "id": "task-duzenle",
+      "title": "3. Task düzenleme",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Bir görevin bütün ayrıntıları, başlığına tıklayınca sağdan açılan **detay panelinde** düzenlenir. Panelde **Kaydet düğmesi yoktur**: bir alanı değiştirdiğinde kendiliğinden kaydedilir."
+        },
+        {
+          "type": "steps",
+          "items": [
+            "Listede görevin **başlığına** tıkla. Detay paneli sağdan açılır. (Tam sayfa görmek için panelin üstündeki büyütme simgesini kullan.)",
+            "Değiştirmek istediğin alanı bul (aşağıdaki görselde işaretli) ve değerini seç ya da yaz.",
+            "İşin bitince paneli sağ üstteki **X** ile kapat. Başka bir şey yapman gerekmez."
+          ]
+        },
+        {
+          "type": "figure",
+          "image": "11-task-edit",
+          "alt": "Task detay paneli ve düzenlenebilir alanlar",
+          "caption": "Task detay paneli. Her işaretli satır tıklanıp değiştirilebilir.",
+          "legend": [
+            "**Başlık**: Üzerine tıklayıp adı değiştir.",
+            "**Durum**: İşin nerede olduğu (Backlog, Yapılacak, Devam ediyor, İncelemede…). Tıklayıp yenisini seç.",
+            "**Öncelik**: Acil, Yüksek, Normal veya Düşük. Önemli işleri öne çıkarır.",
+            "**Atanan**: İşi kimin yapacağı. Tıklayıp bir veya birden fazla kişi seç.",
+            "**Bitiş**: İşin bitmesi gereken tarih. Takvim simgesinden seç ya da tarihi yaz.",
+            "**Story Point**: İşin büyüklüğü. Yalnızca **1, 2, 3, 5, 8, 13, 21, 34, 55** değerlerinden biri seçilir.",
+            "**Tamamlanma**: İşin yüzde kaçı bitti? Kaydırıcıyı sürükle (%0–%100, 5'er adım).",
+            "**Açıklama**: İşin ayrıntıları. Yazdıkça otomatik kaydedilir."
+          ]
+        },
+        {
+          "type": "table",
+          "head": ["Alan", "Ne işe yarar?", "Nasıl değiştirilir?"],
+          "rows": [
+            [
+              "Durum",
+              "İşin aşamasını gösterir; Kanban panosunda hangi sütunda duracağını belirler.",
+              "Panelde ya da listede durum rozetine tıkla, yeni durumu seç."
+            ],
+            ["Öncelik", "Önemli işleri öne çıkarır.", "Rozete tıkla, öncelik seç."],
+            ["Atanan", "Sorumlu kişi(ler).", "Satıra tıklayıp bir veya birden fazla kişi seç."],
+            [
+              "Başlangıç / Bitiş",
+              "Planlanan tarihler. Bitiş tarihi geçmiş ve bitmemiş işler kırmızı uyarı alır.",
+              "Takvim kutusundan seç."
+            ],
+            [
+              "Story Point",
+              "Büyüklük tahmini; sprint toplamları buna göre hesaplanır.",
+              "Listeden bir değer seç (1–55)."
+            ],
+            ["Tahmin (saat)", "İsteğe bağlı süre tahmini.", "Saat sayısını yaz."],
+            [
+              "Tamamlanma",
+              "Yüzde kaçının bittiği; sprint ilerlemesine yansır.",
+              "Kaydırıcıyı sürükle."
+            ],
+            [
+              "Etiketler",
+              "İşleri gruplamak için serbest etiketler (ör. Tasarım).",
+              "Etiketler satırından seç veya yeni etiket yaz."
+            ]
+          ]
+        },
+        {
+          "type": "figure",
+          "image": "17-task-status",
+          "alt": "Listeden durum değiştirme menüsü",
+          "caption": "Durumu panele girmeden doğrudan listeden de değiştirebilirsin.",
+          "legend": [
+            "**Durum rozeti**: Tıklayınca durum listesi açılır.",
+            "**Yeni durum**: İstediğin durumu seç; görev anında güncellenir."
+          ]
+        },
+        {
+          "type": "steps",
+          "items": [
+            "**Kopyalama, arşivleme ve silme:** Listede görevin sağındaki **⋯** düğmesine tıkla. **Kopyala** aynı görevin bir kopyasını açar, **Arşivle** görevi ortadan kaldırır ama saklar, **Sil** çöp kutusuna gönderir.",
+            "**Yanlışlıkla sildiysen:** **Ayarlar → Arşiv ve çöp kutusu** sayfasında silinen görevi bulup **Geri getir**'e tıkla. Çöp kutusundakiler belli bir süre sonra kalıcı silinir."
+          ]
+        },
+        {
+          "type": "warn",
+          "text": "Story Point'te yalnızca 1, 2, 3, 5, 8, 13, 21, 34 ve 55 geçerlidir; başka bir sayı girilemez. Görevin **Sub-Task**'ı varsa puanı elle değiştiremezsin, çünkü puan alt görevlerin toplamıdır (bkz. Sub-Task düzenleme)."
+        }
+      ]
+    },
+    {
+      "id": "subtask-olustur",
+      "title": "4. Sub-Task (alt görev) oluşturma",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Büyük bir işi parçalara bölmek için Sub-Task kullanılır. Sub-Task her zaman bir üst göreve (Task, Story veya Bug) bağlıdır ve onun altında görünür."
+        },
+        {
+          "type": "steps",
+          "items": [
+            "**Görevler** listesinde üst görevin satırının sağındaki **⋯** düğmesine tıkla.",
+            "Açılan menüden **Alt öğe ekle**'yi seç. Görevin altında yeni bir ekleme satırı açılır.",
+            "Tip kutusunda **Sub-task** seçili gelir. Başlığı yaz (ör. *Form alanlarını çiz*) ve **Enter**'a bas.",
+            "Başka alt görevler için aynı satıra yazıp Enter'a basmaya devam et. Bitirince **Esc** tuşuyla satırı kapat."
+          ]
+        },
+        {
+          "type": "figure",
+          "image": "12-subtask-menu",
+          "alt": "Görev satırı menüsünde Alt öğe ekle seçeneği",
+          "caption": "Üst görevin ⋯ menüsünden Alt öğe ekle'yi seç.",
+          "legend": [
+            "**⋯ (işlemler)**: Görevin menüsünü açar.",
+            "**Alt öğe ekle**: Bu görevin altına Sub-Task eklemeni sağlar."
+          ]
+        },
+        {
+          "type": "figure",
+          "image": "13-subtask-create",
+          "alt": "Alt görev ekleme satırı",
+          "caption": "Alt görev ekleme satırı: tip Sub-task, başlığı yaz, Enter.",
+          "legend": [
+            "**Tip**: Burada Sub-task seçili olmalı.",
+            "**Başlık**: Alt görevin adı; Enter'a basınca eklenir.",
+            "**Ekle ↵**: Enter yerine buna da tıklayabilirsin."
+          ]
+        },
+        {
+          "type": "figure",
+          "image": "14-subtask-list",
+          "alt": "Üst görevin altında listelenen alt görevler",
+          "caption": "Eklenen alt görevler, üst görevin hemen altında girintili görünür.",
+          "legend": [
+            "**Aç/kapat oku**: Üst görevin alt görevlerini gösterir veya gizler.",
+            "**Birinci alt görev** (MOB-4).",
+            "**İkinci alt görev** (MOB-5)."
+          ]
+        },
+        {
+          "type": "tip",
+          "text": "Alt görevi üst görevin detay panelindeki **Alt öğeler** bölümünden de ekleyebilirsin. Backlog sayfasında bir satırı başka satırın üzerine, sağa doğru sürükleyip bırakırsan da o görev altına **alt görev** olur."
+        },
+        {
+          "type": "note",
+          "text": "Alt görevler sprint'e kendi başlarına girmez; bağlı oldukları üst görevle birlikte taşınırlar."
+        }
+      ]
+    },
+    {
+      "id": "subtask-duzenle",
+      "title": "5. Sub-Task düzenleme",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Alt görev de normal bir görev gibi düzenlenir: başlığına tıkla, detay panelinden durum, kişi, tarih, puan ve yüzdeyi değiştir. Farkı, değerlerin üst göreve yansımasıdır."
+        },
+        {
+          "type": "steps",
+          "items": [
+            "Alt görevin **başlığına** tıkla (listede ya da üst görevin **Alt öğeler** bölümünde).",
+            "**Story Point** değerini seç ve gerekiyorsa **Tamamlanma** kaydırıcısını ilerlet.",
+            "Üst göreve dönmek için başlığın üstündeki **üst görev bağlantısına** (ör. MOB-1) tıkla."
+          ]
+        },
+        {
+          "type": "figure",
+          "image": "15-subtask-edit",
+          "alt": "Alt görev detay sayfası",
+          "caption": "Alt görev sayfası: puan ve yüzde buradan girilir.",
+          "legend": [
+            "**Başlık**: Alt görevin adı; değiştirmek için tıkla.",
+            "**Üst görev bağlantısı**: Tıklayınca bağlı olduğu göreve gider.",
+            "**Story Point**: Alt görevin puanı (1–55).",
+            "**Tamamlanma**: Alt görevin yüzdesi."
+          ]
+        },
+        {
+          "type": "p",
+          "text": "Alt görevlere puan ve yüzde girdiğinde üst görev bunları kendisi hesaplar:"
+        },
+        {
+          "type": "figure",
+          "image": "16-task-rollup",
+          "alt": "Üst görevde alt görev toplamı",
+          "caption": "Üst görevin puanı alt görevlerin toplamıdır (2 + 3 = 5) ve elle değiştirilemez.",
+          "legend": [
+            "**Alt öğeler**: Görevin alt görevleri ve durumları.",
+            "**Story Point (kilitli)**: Alt görevlerin toplamı; liste pasif görünür.",
+            "**Açıklama notu**: \"Alt görevlerin toplamı\" uyarısı bu alanın otomatik hesaplandığını söyler."
+          ]
+        },
+        {
+          "type": "bullets",
+          "items": [
+            "**Puan:** Üst görevin puanı = alt görevlerin puanlarının toplamı. Alt görev ekledikçe, değiştirdikçe, sildikçe kendiliğinden güncellenir.",
+            "**Yüzde:** Üst görevin yüzdesi, alt görevlerin yüzdelerinin puana göre ağırlıklı ortalamasıdır. Durumu tamamlanmış (Done) olan alt görev %100 sayılır.",
+            "**Alt görevleri silersen:** Üst görevin son puanı kalır ve yeniden elle değiştirilebilir olur."
+          ]
+        },
+        {
+          "type": "warn",
+          "text": "Üst görevin puanını veya yüzdesini değiştirmek istiyorsan alt görevlerin değerlerini değiştir; üst görevde alan kilitlidir."
+        }
+      ]
+    },
+    {
+      "id": "sprint-olustur",
+      "title": "6. Sprint oluşturma",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Sprint, ekibin belirli bir süre içinde yapmayı seçtiği işlerin paketidir. Sprint'ler **Backlog ve sprint'ler** sayfasında oluşturulur. Bu sayfayı açmak için sol menüde Space'inin altındaki **Backlog ve sprint'ler** satırına tıkla."
+        },
+        {
+          "type": "figure",
+          "image": "20-backlog",
+          "alt": "Backlog ve sprint'ler sayfası",
+          "caption": "Backlog sayfası: henüz sprint'e alınmamış işler altta listelenir.",
+          "legend": [
+            "**Backlog ve sprint'ler**: Sol menüden bu sayfaya girersin.",
+            "**Sprint oluştur**: Yeni bir sprint başlatma penceresini açar.",
+            "**Backlog bölümü**: Sprint'e alınmamış tüm görevler öncelik sırasıyla burada durur."
+          ]
+        },
+        {
+          "type": "steps",
+          "items": [
+            "Sağ üstteki **Sprint oluştur** düğmesine tıkla.",
+            "**Ad** alanına sprint adını yaz (ör. Sprint 1).",
+            "**Sprint hedefi** alanına bu dönemde ne başarılacağını tek cümleyle yaz. (Bazı Space'lerde hedef zorunludur.)",
+            "**Başlangıç** ve **Bitiş** tarihlerini seç. Varsayılan olarak iki haftalık bir aralık gelir; bir sprint en fazla 8 hafta sürebilir.",
+            "İstersen **Kapasite notu** ekle (ör. 3 kişi, biri 2 gün izinli).",
+            "**Sprint oluştur** düğmesine bas. Sprint, Backlog'un üstünde **Planlandı** durumunda görünür."
+          ]
+        },
+        {
+          "type": "figure",
+          "image": "21-sprint-create",
+          "alt": "Yeni sprint oluşturma penceresi",
+          "caption": "Yeni sprint penceresi ve doldurulacak alanlar.",
+          "legend": [
+            "**Ad**: Sprint'in adı.",
+            "**Sprint hedefi**: Bu dönemin amacı; sprint başlığında herkes görür.",
+            "**Başlangıç**: İlk gün.",
+            "**Bitiş**: Son gün. Başlangıçtan önce olamaz; en fazla 8 hafta.",
+            "**Kapasite notu**: Ekibin o dönemki durumu (izin, toplantı vb.). İsteğe bağlı.",
+            "**Sprint oluştur**: Sprint'i kaydeder."
+          ]
+        },
+        {
+          "type": "table",
+          "head": ["Alan", "Zorunlu mu?", "Açıklama"],
+          "rows": [
+            ["Ad", "Evet", "Listelerde ve panolarda görünen isim."],
+            [
+              "Sprint hedefi",
+              "Space ayarına bağlı",
+              "Ekibin ortak amacı. Boş bırakırsan sprint'i başlatırken uyarı alırsın."
+            ],
+            [
+              "Başlangıç / Bitiş",
+              "Evet",
+              "Bitiş, başlangıçtan önce olamaz; süre en fazla 8 hafta."
+            ],
+            ["Kapasite notu", "Hayır", "Serbest not."]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sprint-is-ekle",
+      "title": "7. Sprint'e iş ekleme",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Sprint oluştu ama içi boş. Backlog'daki işleri sprint'e taşıyarak planlarsın. Üç yolu var; en kolayı menüdür."
+        },
+        {
+          "type": "steps",
+          "items": [
+            "**Backlog** bölümünde taşımak istediğin görevin sağındaki **⋯** düğmesine tıkla.",
+            "**\"Sprint 1 sprint'ine taşı\"** seçeneğine tıkla. Görev sprint'in altına geçer.",
+            "Aynı işlemi diğer görevler için tekrarla."
+          ]
+        },
+        {
+          "type": "figure",
+          "image": "22-sprint-move",
+          "alt": "Görevi sprint'e taşıma menüsü",
+          "caption": "Görevi sprint'e taşıma: ⋯ menüsünden sprint'i seç.",
+          "legend": [
+            "**⋯ (işlemler)**: Görevin menüsü.",
+            "**Sprint'ine taşı**: Görevi seçtiğin sprint'e alır. Geri almak için aynı menüde **Backlog'a geri al** vardır."
+          ]
+        },
+        {
+          "type": "bullets",
+          "items": [
+            "**Sürükleyerek:** Satırın solundaki tutamağı tutup sprint bölümüne bırak. Sprint'ten sprint'e ve sprint'ten Backlog'a da aynı şekilde taşınır.",
+            "**Toplu taşıma:** Satırların solundaki kutuları işaretle, çıkan çubuktan **Sprint'e taşı…** seç.",
+            "Sprint'e Task, Story ve Bug girer; Epic girmez. Alt görevler üstleriyle birlikte gelir."
+          ]
+        },
+        {
+          "type": "note",
+          "text": "Zaten **başlamış (Aktif)** bir sprint'e iş eklemek veya çıkarmak \"kapsam değişikliği\" sayılır. Seyir bunu sana sorar ve raporlarda gösterir."
+        }
+      ]
+    },
+    {
+      "id": "sprint-duzenle",
+      "title": "8. Sprint düzenleme ve yönetme",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Sprint'in ad, hedef, tarih veya kapasite bilgisini değiştirmek için sprint başlığındaki **⋯** menüsünü kullan."
+        },
+        {
+          "type": "steps",
+          "items": [
+            "Sprint başlığının sağındaki **⋯** düğmesine tıkla.",
+            "Menüden **Düzenle**'yi seç. \"Sprint'i düzenle\" penceresi açılır.",
+            "Değiştirmek istediğin alanı güncelle ve **Kaydet**'e bas."
+          ]
+        },
+        {
+          "type": "figure",
+          "image": "23-sprint-menu",
+          "alt": "Sprint menüsü",
+          "caption": "Sprint menüsü: panoyu aç, düzenle, dışa aktar veya sil.",
+          "legend": [
+            "**Kanban panosunu aç**: Sprint'teki işleri durum sütunlarında gösterir.",
+            "**Düzenle**: Sprint bilgilerini değiştirir.",
+            "**Sil**: Sprint'i siler (yalnızca **Planlandı** durumundayken). İçindeki işler Backlog'a döner."
+          ]
+        },
+        {
+          "type": "figure",
+          "image": "24-sprint-edit",
+          "alt": "Sprint düzenleme penceresi",
+          "caption": "Sprint düzenleme penceresi; oluşturma penceresiyle aynı alanlara sahiptir.",
+          "legend": [
+            "**Ad**: Adı değiştirir.",
+            "**Sprint hedefi**: Hedefi günceller.",
+            "**Bitiş**: Süreyi uzatır veya kısaltır. Aktif sprint'te tarihler kilitlidir.",
+            "**Kaydet**: Değişiklikleri uygular."
+          ]
+        },
+        {
+          "type": "p",
+          "text": "Sprint başlığında bir bakışta durumu görürsün ve sprint'in yaşam döngüsünü yönetirsin:"
+        },
+        {
+          "type": "figure",
+          "image": "25-sprint-header",
+          "alt": "Sprint başlığı ve özet paneli",
+          "caption": "Sprint başlığı: durum, toplam puan, yüzde ve kişilere göre dağılım.",
+          "legend": [
+            "**Sprint adı**: Başlıkta ad, tarih aralığı ve toplam puan görünür.",
+            "**Durum**: Planlandı, Aktif, Tamamlandı veya İptal.",
+            "**Yüzde düğmesi**: Tıklayınca özet paneli açılır/kapanır.",
+            "**Başlat**: Planlanan sprint'i başlatır. Aktif sprint'te bunun yerine **Tamamla** görünür.",
+            "**Özet paneli**: Toplam Story Point, biten puan, genel yüzde ve kişi bazında puan/yüzde dağılımı."
+          ]
+        },
+        {
+          "type": "bullets",
+          "items": [
+            "**Başlat:** Sprint'i aktif yapar. Hedef girilmemişse ya da sprint boşsa Seyir seni uyarır.",
+            "**Tamamla:** Bitmeyen işleri ne yapacağını sorar: **sonraki sprint'e devret** veya **Backlog'a gönder**. Biten puanlar ekibin hız (velocity) hesabına yazılır.",
+            "**İptal et:** Sprint'i iptal eder ve işleri Backlog'a döndürür. Bu işlem geri alınamaz.",
+            "**Sil:** Yalnızca Planlandı durumundaki sprint silinebilir."
+          ]
+        },
+        {
+          "type": "tip",
+          "text": "Sprint'i başka biriyle paylaşmak için menüden **Bağlantıyı kopyala**'yı seç; bağlantı doğrudan sprint panosunu açar. Rapor için **Excel'e aktar** veya **JSON olarak indir** seçeneklerini kullanabilirsin."
+        }
+      ]
+    },
+    {
+      "id": "kanban",
+      "title": "9. Sprint panosu (Kanban)",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Kanban, işlerin durum sütunlarında kartlar olarak izlendiği panodur. Sol menüdeki **Sprint panosu**'na tıklayarak ya da sprint menüsündeki **Kanban panosunu aç** ile görürsün. Her sprint'in kendi panosu vardır."
+        },
+        {
+          "type": "figure",
+          "image": "26-board",
+          "alt": "Sprint panosu (Kanban)",
+          "caption": "Sprint panosu: sütunlar durumları, kartlar görevleri gösterir.",
+          "legend": [
+            "**Sprint seçici**: Hangi sprint'in panosunu görmek istediğini seçersin.",
+            "**Kart**: Görev kimliği, başlığı, puanı ve yüzdesi. Kartı sürükleyip başka sütuna bırakınca **durum değişir**.",
+            "**Özet**: Toplam puan, yüzde ve kişi dağılımını açar.",
+            "**Başlat**: Planlı sprint'i başlatır."
+          ]
+        },
+        {
+          "type": "bullets",
+          "items": [
+            "Kart sürüklemeden değiştirmek için kartın **⋯** menüsünden **Durumu değiştir** de seçilebilir.",
+            "Karttaki **bayrak** önceliği, yanındaki sayı **Story Point**'i, ilerleme çubuğu **tamamlanma yüzdesini** gösterir.",
+            "Panonun üstündeki **Önceliğe göre renklendir** düğmesi kartları öncelik rengine boyar (Acil kırmızı, Yüksek turuncu…)."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ipuclari",
+      "title": "10. Kısa ipuçları ve sık sorulanlar",
+      "blocks": [
+        {
+          "type": "table",
+          "head": ["Ne yapmak istiyorsun?", "Nasıl?"],
+          "rows": [
+            [
+              "Bir görevi hızlıca bulmak",
+              "Üstteki aramaya tıkla ya da **Ctrl + K** bas, görev adını veya kimliğini (MOB-12) yaz."
+            ],
+            [
+              "Görevin bağlantısını paylaşmak",
+              "Görev detayında **⋯** menüsünden **Bağlantıyı kopyala**'yı seç (Backlog'da görev kimliğine tıklamak da kopyalar). Adres /items/MOB-12 biçimindedir."
+            ],
+            ["Görevi sadece kendime bakmak için bulmak", "Sol menüde **Bana atananlar**'a tıkla."],
+            ["Yanlış silinen görevi geri almak", "**Ayarlar → Arşiv ve çöp kutusu**."],
+            [
+              "Sprint'in toplam puanını görmek",
+              "Sprint başlığındaki yüzde düğmesine tıkla (Özet paneli)."
+            ],
+            ["Dili değiştirmek", "Sağ üstteki hesap menüsü → **Dil**."]
+          ]
+        },
+        {
+          "type": "p",
+          "text": "**Sık sorulan sorular**"
+        },
+        {
+          "type": "bullets",
+          "items": [
+            "**Story Point listesinde neden 4 yok?** Seyir standart Fibonacci ölçeğini (1, 2, 3, 5, 8, 13, 21, 34, 55) kullanır. İki puan arası bir sayı yerine yakın değeri seç.",
+            "**Üst görevin puanı neden değişmiyor?** Alt görevleri varsa puan onların toplamıdır. Alt görevlerin puanını değiştir.",
+            "**Sprint oluşturdum ama görmüyorum.** **Backlog ve sprint'ler** sayfasını aç; sprint Backlog'un üstünde durur. Sol menüdeki oku açarak da sprint listesini görebilirsin.",
+            "**Sub-Task'ı doğrudan sprint'e alamıyorum.** Alt görevler üstleriyle birlikte taşınır; üst görevi sprint'e taşı.",
+            "**Yaptığım değişiklik kaydedilmedi mi?** Seyir kendiliğinden kaydeder; ayrıca Kaydet düğmesi aramana gerek yok."
+          ]
+        },
+        {
+          "type": "note",
+          "text": "Hâlâ takıldığın bir yer olursa workspace yöneticine ulaş. Bu kılavuz uygulamayla birlikte güncellenir."
+        }
+      ]
+    }
+  ]
+}

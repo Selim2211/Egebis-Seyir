@@ -1,0 +1,591 @@
+{
+  "title": "Egebis Seyir User Guide",
+  "subtitle": "Creating and editing Sprints, Tasks and Sub-Tasks — step by step, with pictures.",
+  "sections": [
+    {
+      "id": "baslangic",
+      "title": "Before you start: the basics",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Seyir is a project management app where a team plans and tracks its work. This guide is written for someone who has never used it: at every step we point at the screen with red **numbered markers**. The number on the picture matches the list under the picture."
+        },
+        {
+          "type": "p",
+          "text": "You only need to know a few words first:"
+        },
+        {
+          "type": "table",
+          "head": ["Term", "What it means", "Example"],
+          "rows": [
+            [
+              "Space",
+              "A work area for one product or team. All work items live inside a Space.",
+              "Mobile App"
+            ],
+            [
+              "Task",
+              "One piece of work to do. It has a title, an owner, a date and points.",
+              "Design the sign-in screen"
+            ],
+            [
+              "Sub-Task",
+              "A small part of a Task. It cannot exist alone; it always belongs to a parent item.",
+              "Draw the form fields"
+            ],
+            [
+              "Sprint",
+              "A work period, usually 1–2 weeks, with a goal and dates. The team picks what to do in it.",
+              "Sprint 1 (Oct 15–28)"
+            ],
+            ["Backlog", "The list of work not yet in a sprint, ordered by priority.", "—"]
+          ]
+        },
+        {
+          "type": "figure",
+          "image": "01-overview",
+          "alt": "Seyir home screen with marked areas",
+          "caption": "Main screen: use the left menu for the Space and its sections, and the top bar for search, help and your account.",
+          "legend": [
+            "**Space**: The project area you work in. Click to open the sections below it.",
+            "**Backlog and sprints**: Sprints are created and planned here.",
+            "**Sprint board**: Shows the sprint's work in status columns (Kanban).",
+            "**Tasks**: The Space's work list; Tasks and Sub-Tasks are added here.",
+            "**Search**: Find a task, document or person (shortcut: Ctrl + K).",
+            "**Help**: Open this guide at any time.",
+            "**Account menu**: Profile, language, theme and sign out.",
+            "**New item row**: Type a title and press Enter to add a task."
+          ]
+        },
+        {
+          "type": "tip",
+          "text": "When you are stuck, click **Help** in the top bar. You can also get the Word version with **Download as Word** at the top right of the page."
+        }
+      ]
+    },
+    {
+      "id": "space-olustur",
+      "title": "1. Creating a Space",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Before you create Tasks and Sprints you need a Space to hold them. Your team lead usually prepares it for you, but it helps to know how it is done."
+        },
+        {
+          "type": "steps",
+          "items": [
+            "In the left menu click the **+** next to **SPACES** (or the **Create space** row at the bottom).",
+            "Type the Space's name in **Name** (e.g. Mobile App).",
+            "Check the **Key**. It is a short 2–10 letter code; item IDs start with it (MOB-1, MOB-2…). It is suggested automatically.",
+            "Optionally pick a colour and icon. Keep **Work mode** on **Scrum** to use Sprints and the Backlog.",
+            "Click **Create space**."
+          ]
+        },
+        {
+          "type": "figure",
+          "image": "02-space-create",
+          "alt": "New Space dialog",
+          "caption": "The new Space dialog. Keep the work mode on Scrum if you will use sprints.",
+          "legend": [
+            "**Name**: The Space's display name.",
+            "**Key**: The short code at the start of item IDs (like MOB-1). It must not be used by another Space; keep it short and clear.",
+            "**Create space**: Saves and opens the Space."
+          ]
+        },
+        {
+          "type": "note",
+          "text": "A list called **Tasks** is created automatically inside the new Space. You will add your first Tasks there."
+        }
+      ]
+    },
+    {
+      "id": "task-olustur",
+      "title": "2. Creating a Task",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "A Task is one piece of work to do. The fastest way to add one is the add row at the bottom of the list."
+        },
+        {
+          "type": "steps",
+          "items": [
+            "In the left menu open your Space and click the **Tasks** list.",
+            "In the row at the bottom choose **Task** in the **Type** box.",
+            "Type the work's title in the next box (e.g. *Design the sign-in screen*). Keep it short and clear: it should say what must be done.",
+            "Press **Enter** (or click **Add ↵**). The task drops into the list and receives its ID (MOB-1)."
+          ]
+        },
+        {
+          "type": "figure",
+          "image": "10-task-create",
+          "alt": "Quick add row for a Task",
+          "caption": "The add row: choose the type, type a title, press Enter.",
+          "legend": [
+            "**Type**: The kind of record to add. This guide uses **Task** (others: Epic, Story, Bug).",
+            "**Title**: The name of the work. To add several tasks, just press Enter after each title.",
+            "**Add ↵**: You can click this instead of pressing Enter."
+          ]
+        },
+        {
+          "type": "tip",
+          "text": "To add many tasks in a row, type a title, press Enter, type the next, press Enter again. Fill in details (date, person, points) afterwards."
+        }
+      ]
+    },
+    {
+      "id": "task-duzenle",
+      "title": "3. Editing a Task",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "All details of a task are edited in the **detail panel** that opens from the right when you click its title. The panel has **no Save button**: a field is saved automatically when you change it."
+        },
+        {
+          "type": "steps",
+          "items": [
+            "In the list click the task's **title**. The detail panel opens from the right. (Use the expand icon at the top of the panel for a full page.)",
+            "Find the field you want to change (marked in the picture below) and pick or type a value.",
+            "When you are done, close the panel with the **X** at the top right. Nothing else is needed."
+          ]
+        },
+        {
+          "type": "figure",
+          "image": "11-task-edit",
+          "alt": "Task detail panel and editable fields",
+          "caption": "The task detail panel. Every marked row can be clicked and changed.",
+          "legend": [
+            "**Title**: Click to rename.",
+            "**Status**: Where the work stands (Backlog, To do, In progress, In review…). Click and choose another.",
+            "**Priority**: Urgent, High, Normal or Low. Makes important work stand out.",
+            "**Assignee**: Who does the work. Click and pick one or more people.",
+            "**Due date**: When the work must be finished. Pick from the calendar or type a date.",
+            "**Story Point**: The size of the work. Only **1, 2, 3, 5, 8, 13, 21, 34, 55** can be chosen.",
+            "**Completion**: How much is done? Drag the slider (0–100%, in steps of 5).",
+            "**Description**: The details. Saved automatically as you type."
+          ]
+        },
+        {
+          "type": "table",
+          "head": ["Field", "What it is for", "How to change it"],
+          "rows": [
+            [
+              "Status",
+              "Shows the stage of the work; decides which column it sits in on the Kanban board.",
+              "Click the status badge in the panel or the list and choose a new status."
+            ],
+            ["Priority", "Makes important work stand out.", "Click the badge and pick a priority."],
+            [
+              "Assignee",
+              "The responsible person or people.",
+              "Click the row and pick one or more people."
+            ],
+            [
+              "Start / Due date",
+              "Planned dates. Unfinished work past its due date gets a red warning.",
+              "Pick from the date box."
+            ],
+            [
+              "Story Point",
+              "A size estimate; sprint totals are calculated from it.",
+              "Pick a value from the list (1–55)."
+            ],
+            ["Estimate (hours)", "An optional time estimate.", "Type the number of hours."],
+            [
+              "Completion",
+              "How much is finished; it feeds the sprint progress.",
+              "Drag the slider."
+            ],
+            [
+              "Labels",
+              "Free labels for grouping (e.g. Design).",
+              "Pick from the Labels row or type a new label."
+            ]
+          ]
+        },
+        {
+          "type": "figure",
+          "image": "17-task-status",
+          "alt": "Changing the status from the list",
+          "caption": "You can also change the status straight from the list without opening the panel.",
+          "legend": [
+            "**Status badge**: Click to open the status list.",
+            "**New status**: Pick the status you want; the task updates instantly."
+          ]
+        },
+        {
+          "type": "steps",
+          "items": [
+            "**Copy, archive and delete:** In the list click the **⋯** button at the right of the task. **Copy** makes a copy of the task, **Archive** hides it but keeps it, **Delete** sends it to the trash.",
+            "**If you deleted by mistake:** open **Settings → Archive and trash**, find the task and click **Restore**. Items in the trash are removed for good after a while."
+          ]
+        },
+        {
+          "type": "warn",
+          "text": "Only 1, 2, 3, 5, 8, 13, 21, 34 and 55 are valid Story Points; no other number can be entered. If the task has **Sub-Tasks** you cannot edit its points by hand, because its points are the sum of its sub-tasks (see Editing a Sub-Task)."
+        }
+      ]
+    },
+    {
+      "id": "subtask-olustur",
+      "title": "4. Creating a Sub-Task",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Use a Sub-Task to split a big piece of work into parts. A Sub-Task always belongs to a parent (Task, Story or Bug) and appears under it."
+        },
+        {
+          "type": "steps",
+          "items": [
+            "In the **Tasks** list click the **⋯** button at the right of the parent task's row.",
+            "Choose **Add sub-item** from the menu. A new add row opens under the task.",
+            "The type box is already on **Sub-task**. Type the title (e.g. *Draw the form fields*) and press **Enter**.",
+            "Keep typing and pressing Enter for more sub-tasks. When you are done, press **Esc** to close the row."
+          ]
+        },
+        {
+          "type": "figure",
+          "image": "12-subtask-menu",
+          "alt": "Add sub-item option in the task row menu",
+          "caption": "Choose Add sub-item from the parent's ⋯ menu.",
+          "legend": [
+            "**⋯ (actions)**: Opens the task's menu.",
+            "**Add sub-item**: Lets you add a Sub-Task under this task."
+          ]
+        },
+        {
+          "type": "figure",
+          "image": "13-subtask-create",
+          "alt": "Sub-task add row",
+          "caption": "The sub-task add row: type Sub-task, write the title, press Enter.",
+          "legend": [
+            "**Type**: This should be Sub-task.",
+            "**Title**: The sub-task's name; press Enter to add it.",
+            "**Add ↵**: You can click this instead of pressing Enter."
+          ]
+        },
+        {
+          "type": "figure",
+          "image": "14-subtask-list",
+          "alt": "Sub-tasks listed under the parent",
+          "caption": "Added sub-tasks appear indented right under the parent.",
+          "legend": [
+            "**Expand/collapse arrow**: Shows or hides the sub-tasks.",
+            "**First sub-task** (MOB-4).",
+            "**Second sub-task** (MOB-5)."
+          ]
+        },
+        {
+          "type": "tip",
+          "text": "You can also add sub-tasks from the **Sub-items** section in the parent's detail panel. On the Backlog page, dragging a row onto another row and dropping it a bit to the right also makes it a **sub-task** of that row."
+        },
+        {
+          "type": "note",
+          "text": "Sub-tasks do not enter a sprint on their own; they move together with their parent."
+        }
+      ]
+    },
+    {
+      "id": "subtask-duzenle",
+      "title": "5. Editing a Sub-Task",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "A sub-task is edited like any task: click its title and change the status, person, date, points and percentage in the detail panel. The difference is that its values flow up to the parent."
+        },
+        {
+          "type": "steps",
+          "items": [
+            "Click the sub-task's **title** (in the list or in the parent's **Sub-items** section).",
+            "Choose the **Story Point** value and, if needed, move the **Completion** slider.",
+            "To go back to the parent, click the **parent link** (e.g. MOB-1) above the title."
+          ]
+        },
+        {
+          "type": "figure",
+          "image": "15-subtask-edit",
+          "alt": "Sub-task detail page",
+          "caption": "The sub-task page: points and percentage are entered here.",
+          "legend": [
+            "**Title**: The sub-task's name; click to change.",
+            "**Parent link**: Takes you to the item it belongs to.",
+            "**Story Point**: The sub-task's points (1–55).",
+            "**Completion**: The sub-task's percentage."
+          ]
+        },
+        {
+          "type": "p",
+          "text": "When you enter points and percentages on sub-tasks, the parent calculates its own from them:"
+        },
+        {
+          "type": "figure",
+          "image": "16-task-rollup",
+          "alt": "Sub-task total on the parent",
+          "caption": "The parent's points are the sum of its sub-tasks (2 + 3 = 5) and cannot be edited by hand.",
+          "legend": [
+            "**Sub-items**: The task's sub-tasks and their statuses.",
+            "**Story Point (locked)**: The sum of the sub-tasks; the list is disabled.",
+            "**Explanation note**: \"Sum of the sub-tasks\" says this field is calculated automatically."
+          ]
+        },
+        {
+          "type": "bullets",
+          "items": [
+            "**Points:** The parent's points = the sum of its sub-tasks' points. It updates by itself when you add, change or delete sub-tasks.",
+            "**Percentage:** The parent's percentage is the point-weighted average of its sub-tasks' percentages. A sub-task in a finished (Done) status counts as 100%.",
+            "**If you delete the sub-tasks:** the parent keeps its last points and can be edited by hand again."
+          ]
+        },
+        {
+          "type": "warn",
+          "text": "To change a parent's points or percentage, change its sub-tasks' values; the field is locked on the parent."
+        }
+      ]
+    },
+    {
+      "id": "sprint-olustur",
+      "title": "6. Creating a Sprint",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "A sprint is the package of work the team chooses to do within a fixed time. Sprints are created on the **Backlog and sprints** page. To open it click **Backlog and sprints** under your Space in the left menu."
+        },
+        {
+          "type": "figure",
+          "image": "20-backlog",
+          "alt": "Backlog and sprints page",
+          "caption": "The Backlog page: work not yet in a sprint is listed below.",
+          "legend": [
+            "**Backlog and sprints**: Open this page from the left menu.",
+            "**Create sprint**: Opens the new sprint dialog.",
+            "**Backlog section**: All tasks not in a sprint, in priority order."
+          ]
+        },
+        {
+          "type": "steps",
+          "items": [
+            "Click **Create sprint** at the top right.",
+            "Type the sprint's name in **Name** (e.g. Sprint 1).",
+            "In **Sprint goal** write in one sentence what will be achieved. (In some Spaces the goal is required.)",
+            "Pick the **Start** and **End** dates. A two-week range is suggested; a sprint can last at most 8 weeks.",
+            "Optionally add a **Capacity note** (e.g. 3 people, one on leave for 2 days).",
+            "Click **Create sprint**. The sprint appears above the Backlog with the **Planned** status."
+          ]
+        },
+        {
+          "type": "figure",
+          "image": "21-sprint-create",
+          "alt": "New sprint dialog",
+          "caption": "The new sprint dialog and the fields to fill in.",
+          "legend": [
+            "**Name**: The sprint's name.",
+            "**Sprint goal**: The purpose of this period; everyone sees it on the sprint header.",
+            "**Start**: First day.",
+            "**End**: Last day. It cannot be before the start; 8 weeks at most.",
+            "**Capacity note**: The team's situation in that period (leave, meetings…). Optional.",
+            "**Create sprint**: Saves the sprint."
+          ]
+        },
+        {
+          "type": "table",
+          "head": ["Field", "Required?", "Description"],
+          "rows": [
+            ["Name", "Yes", "The name shown in lists and boards."],
+            [
+              "Sprint goal",
+              "Depends on the Space setting",
+              "The team's shared aim. If left empty you get a warning when starting the sprint."
+            ],
+            ["Start / End", "Yes", "End cannot be before start; at most 8 weeks."],
+            ["Capacity note", "No", "A free note."]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sprint-is-ekle",
+      "title": "7. Adding work to a sprint",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "The sprint exists but is empty. You plan it by moving work from the Backlog into it. There are three ways; the menu is the easiest."
+        },
+        {
+          "type": "steps",
+          "items": [
+            "In the **Backlog** section click the **⋯** button at the right of the task you want to move.",
+            "Click **\"Move to Sprint 1\"**. The task moves under the sprint.",
+            "Repeat for the other tasks."
+          ]
+        },
+        {
+          "type": "figure",
+          "image": "22-sprint-move",
+          "alt": "Menu to move a task into a sprint",
+          "caption": "Moving a task into a sprint: choose the sprint from the ⋯ menu.",
+          "legend": [
+            "**⋯ (actions)**: The task's menu.",
+            "**Move to sprint**: Puts the task into the sprint you choose. To undo it, the same menu has **Move back to Backlog**."
+          ]
+        },
+        {
+          "type": "bullets",
+          "items": [
+            "**By dragging:** grab the handle at the left of the row and drop it on a sprint section. Moving between sprints and from a sprint back to the Backlog works the same way.",
+            "**Bulk move:** tick the boxes at the left of the rows and choose **Move to sprint…** from the bar that appears.",
+            "Tasks, Stories and Bugs can enter a sprint; Epics cannot. Sub-tasks come with their parent."
+          ]
+        },
+        {
+          "type": "note",
+          "text": "Adding or removing work in a sprint that has **already started (Active)** counts as a \"scope change\". Seyir asks you and shows it in the reports."
+        }
+      ]
+    },
+    {
+      "id": "sprint-duzenle",
+      "title": "8. Editing and managing a sprint",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "To change a sprint's name, goal, dates or capacity use the **⋯** menu on the sprint header."
+        },
+        {
+          "type": "steps",
+          "items": [
+            "Click the **⋯** button at the right of the sprint header.",
+            "Choose **Edit** from the menu. The \"Edit sprint\" dialog opens.",
+            "Update the field you want to change and click **Save**."
+          ]
+        },
+        {
+          "type": "figure",
+          "image": "23-sprint-menu",
+          "alt": "Sprint menu",
+          "caption": "The sprint menu: open the board, edit, export or delete.",
+          "legend": [
+            "**Open Kanban board**: Shows the sprint's work in status columns.",
+            "**Edit**: Changes the sprint's details.",
+            "**Delete**: Deletes the sprint (only while it is **Planned**). Its work returns to the Backlog."
+          ]
+        },
+        {
+          "type": "figure",
+          "image": "24-sprint-edit",
+          "alt": "Edit sprint dialog",
+          "caption": "The edit dialog has the same fields as the create dialog.",
+          "legend": [
+            "**Name**: Changes the name.",
+            "**Sprint goal**: Updates the goal.",
+            "**End**: Extends or shortens the period. Dates are locked in an active sprint.",
+            "**Save**: Applies the changes."
+          ]
+        },
+        {
+          "type": "p",
+          "text": "On the sprint header you see its state at a glance and manage its life cycle:"
+        },
+        {
+          "type": "figure",
+          "image": "25-sprint-header",
+          "alt": "Sprint header and summary panel",
+          "caption": "The sprint header: status, total points, percentage and breakdown by person.",
+          "legend": [
+            "**Sprint name**: The header shows the name, date range and total points.",
+            "**Status**: Planned, Active, Completed or Cancelled.",
+            "**Percentage button**: Click to open or close the summary panel.",
+            "**Start**: Starts a planned sprint. In an active sprint **Complete** appears instead.",
+            "**Summary panel**: Total Story Points, done points, overall percentage and points/percentage per person."
+          ]
+        },
+        {
+          "type": "bullets",
+          "items": [
+            "**Start:** makes the sprint active. Seyir warns you if no goal is set or the sprint is empty.",
+            "**Complete:** asks what to do with unfinished work: **carry over to the next sprint** or **send to the Backlog**. Done points are recorded for the team's velocity.",
+            "**Cancel:** cancels the sprint and returns its work to the Backlog. This cannot be undone.",
+            "**Delete:** only a Planned sprint can be deleted."
+          ]
+        },
+        {
+          "type": "tip",
+          "text": "To share a sprint choose **Copy link** from the menu; the link opens the sprint board directly. For reports use **Export to Excel** or **Download as JSON**."
+        }
+      ]
+    },
+    {
+      "id": "kanban",
+      "title": "9. The sprint board (Kanban)",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Kanban is a board where work is tracked as cards in status columns. Open it by clicking **Sprint board** in the left menu or **Open Kanban board** in the sprint menu. Every sprint has its own board."
+        },
+        {
+          "type": "figure",
+          "image": "26-board",
+          "alt": "Sprint board (Kanban)",
+          "caption": "The sprint board: columns are statuses, cards are tasks.",
+          "legend": [
+            "**Sprint picker**: Choose which sprint's board to see.",
+            "**Card**: Task ID, title, points and percentage. Dragging a card to another column **changes its status**.",
+            "**Summary**: Opens the total points, percentage and breakdown by person.",
+            "**Start**: Starts a planned sprint."
+          ]
+        },
+        {
+          "type": "bullets",
+          "items": [
+            "To change a status without dragging, use **Change status** in the card's **⋯** menu.",
+            "The **flag** on a card is the priority, the number next to it is the **Story Point**, and the progress bar is the **completion percentage**.",
+            "The **Colour by priority** button above the board paints cards by priority (Urgent red, High orange…)."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ipuclari",
+      "title": "10. Quick tips and FAQ",
+      "blocks": [
+        {
+          "type": "table",
+          "head": ["What do you want to do?", "How?"],
+          "rows": [
+            [
+              "Find a task quickly",
+              "Click the search box or press **Ctrl + K**, then type the task name or ID (MOB-12)."
+            ],
+            [
+              "Share a task's link",
+              "In the task detail choose **Copy link** from the **⋯** menu (clicking the task ID in the Backlog also copies it). The address looks like /items/MOB-12."
+            ],
+            ["See only my own work", "Click **My work** in the left menu."],
+            ["Restore a deleted task", "**Settings → Archive and trash**."],
+            [
+              "See a sprint's total points",
+              "Click the percentage button on the sprint header (Summary panel)."
+            ],
+            ["Change the language", "Account menu at the top right → **Language**."]
+          ]
+        },
+        {
+          "type": "p",
+          "text": "**Frequently asked questions**"
+        },
+        {
+          "type": "bullets",
+          "items": [
+            "**Why is there no 4 in the Story Point list?** Seyir uses the standard Fibonacci scale (1, 2, 3, 5, 8, 13, 21, 34, 55). Choose the nearest value.",
+            "**Why can't I change the parent's points?** If it has sub-tasks, its points are their sum. Change the sub-tasks' points.",
+            "**I created a sprint but cannot see it.** Open **Backlog and sprints**; the sprint sits above the Backlog. You can also expand the arrow in the left menu to list sprints.",
+            "**I cannot put a Sub-Task straight into a sprint.** Sub-tasks move with their parent; move the parent to the sprint.",
+            "**Was my change not saved?** Seyir saves automatically; there is no Save button to look for."
+          ]
+        },
+        {
+          "type": "note",
+          "text": "If something is still unclear, contact your workspace admin. This guide is updated together with the app."
+        }
+      ]
+    }
+  ]
+}

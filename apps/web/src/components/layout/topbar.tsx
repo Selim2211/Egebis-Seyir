@@ -1,5 +1,5 @@
 import { Link } from '@tanstack/react-router';
-import { Bell, Menu, Search } from 'lucide-react';
+import { Bell, CircleHelp, Menu, Search } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
@@ -61,6 +61,15 @@ export function Topbar() {
       <div className="ml-auto flex items-center gap-1.5">
         <TimerIndicator />
         {import.meta.env.DEV && <ApiStatus />}
+        <Link
+          to="/help"
+          aria-label={t('topbar.help')}
+          title={t('topbar.help')}
+          className="hover:bg-accent flex h-9 items-center gap-1.5 rounded-lg px-2.5 text-sm"
+        >
+          <CircleHelp className="size-4" aria-hidden />
+          <span className="hidden sm:inline">{t('topbar.help')}</span>
+        </Link>
         <Link
           to="/notifications"
           aria-label={

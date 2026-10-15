@@ -47,7 +47,8 @@
     "search": "Görev, doküman veya kişi ara…",
     "quickCreate": "Hızlı oluştur (C)",
     "notifications": "Bildirimler",
-    "accountMenu": "Hesap menüsü"
+    "accountMenu": "Hesap menüsü",
+    "help": "Yardım"
   },
   "theme": {
     "light": "Açık",
@@ -69,7 +70,8 @@
     "preferences": "Tercihler",
     "language": "Dil",
     "theme": "Tema",
-    "logout": "Çıkış yap"
+    "logout": "Çıkış yap",
+    "help": "Yardım ve kılavuz"
   },
   "roles": {
     "OWNER": "Owner",
@@ -2001,5 +2003,13 @@
     "openBoard": "Kanban panosunu aç",
     "copyLink": "Bağlantıyı kopyala",
     "exportJson": "JSON olarak indir"
+  },
+  "help": {
+    "toc": "İçindekiler",
+    "downloadWord": "Word olarak indir",
+    "zoom": "Büyütmek için tıkla",
+    "tip": "İpucu",
+    "note": "Not",
+    "warn": "Dikkat"
   }
 }

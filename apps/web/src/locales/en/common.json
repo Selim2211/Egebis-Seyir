@@ -47,7 +47,8 @@
     "search": "Search tasks, docs or people…",
     "quickCreate": "Quick create (C)",
     "notifications": "Notifications",
-    "accountMenu": "Account menu"
+    "accountMenu": "Account menu",
+    "help": "Help"
   },
   "theme": {
     "light": "Light",
@@ -69,7 +70,8 @@
     "preferences": "Preferences",
     "language": "Language",
     "theme": "Theme",
-    "logout": "Sign out"
+    "logout": "Sign out",
+    "help": "Help and guide"
   },
   "roles": {
     "OWNER": "Owner",
@@ -2001,5 +2003,13 @@
     "openBoard": "Open Kanban board",
     "copyLink": "Copy link",
     "exportJson": "Download as JSON"
+  },
+  "help": {
+    "toc": "Contents",
+    "downloadWord": "Download as Word",
+    "zoom": "Click to enlarge",
+    "tip": "Tip",
+    "note": "Note",
+    "warn": "Warning"
   }
 }

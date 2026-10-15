@@ -1,5 +1,5 @@
 import { useNavigate } from '@tanstack/react-router';
-import { Languages, LogOut, Palette, Settings2, UserRound } from 'lucide-react';
+import { CircleHelp, Languages, LogOut, Palette, Settings2, UserRound } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { UserAvatar } from '@/components/user-avatar';
 import {
@@ -53,6 +53,10 @@ export function UserMenu() {
         <DropdownMenuItem onSelect={() => void navigate({ to: '/settings/profile' })}>
           <UserRound />
           {t('userMenu.profile')}
+        </DropdownMenuItem>
+        <DropdownMenuItem onSelect={() => void navigate({ to: '/help' })}>
+          <CircleHelp />
+          {t('userMenu.help')}
         </DropdownMenuItem>
         <DropdownMenuItem onSelect={() => void navigate({ to: '/settings/preferences' })}>
           <Settings2 />
