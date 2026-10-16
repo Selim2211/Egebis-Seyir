@@ -19,3 +19,4 @@ Thumbs.db
 data/
 apps/api/data/
 .tanstack/
+dev-server.log

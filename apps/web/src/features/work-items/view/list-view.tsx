@@ -24,7 +24,7 @@ export function ListView(props: ViewProps) {
           <SelectBox checked={allSelected} onChange={onSelectAll} label={t('view.selectAll')} />
           <span className="flex-1 pl-6">{t('items.columns.title')}</span>
           <span className="w-32">{t('items.columns.status')}</span>
-          <span className="w-8 text-center">{t('items.columns.priority')}</span>
+          <span className="w-20 text-center">{t('items.columns.priority')}</span>
           <span className="w-20">{t('items.columns.assignees')}</span>
           <span className="w-16">{t('items.columns.due')}</span>
           <span className="w-12 text-right">{t('items.columns.estimate')}</span>
@@ -141,7 +141,7 @@ function ItemRow({
       <div className="w-32 shrink-0">
         <StatusCell item={item} ctx={cells} />
       </div>
-      <div className="flex w-8 shrink-0 justify-center">
+      <div className="flex w-20 shrink-0 justify-center">
         <PriorityCell item={item} ctx={cells} />
       </div>
       <div className="w-20 shrink-0">
