@@ -396,7 +396,8 @@
     "TEAM_NAME_TAKEN": "Bu adla bir ekip zaten var.",
     "TEAM_LIMIT": "Çalışma alanı en fazla 100 ekip içerebilir.",
     "WORK_ITEM_POINTS_FROM_SUBTASKS": "Alt görevi olan işin puanı alt görevlerin toplamıdır; elle değiştirilemez.",
-    "WORK_ITEM_PERCENT_NOT_ALLOWED": "Bu iş için yüzde girilemez (Epic ya da alt görevlerden hesaplanan iş)."
+    "WORK_ITEM_PERCENT_NOT_ALLOWED": "Bu iş için yüzde girilemez (Epic ya da alt görevlerden hesaplanan iş).",
+    "WORK_ITEM_NOT_PROMOTABLE": "Yalnızca Task, Epic'e dönüştürülebilir."
   },
   "spaceRoles": {
     "PRODUCT_OWNER": "Product Owner",
@@ -2011,5 +2012,12 @@
     "tip": "İpucu",
     "note": "Not",
     "warn": "Dikkat"
+  },
+  "promoteEpic": {
+    "menu": "Epic'e dönüştür",
+    "title": "{{key}} Epic'e dönüştürülsün mü?",
+    "body": "Bu Task bir Epic olur. Epic; üst öğe, sprint, saat tahmini, tamamlanma yüzdesi ve tekrar taşımaz: Story'nin altındaysa oradan ayrılır, sprint'teyse sprint'ten çıkar, bu alanlar temizlenir. Sub-Task'ları Story'ye dönüşür ve Epic'in altında kalır. Bu işlem geri alınamaz.",
+    "confirm": "Epic'e dönüştür",
+    "done": "{{key}} artık bir Epic."
   }
 }

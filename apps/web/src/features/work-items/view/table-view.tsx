@@ -311,6 +311,7 @@ function ItemTableRow({
             canAddChild={props.canAddChild(item)}
             onAddChild={() => props.onAddChild(item.id)}
             onCopy={() => props.onCopy(item.id)}
+            onPromote={props.canPromote(item) ? () => props.onPromote(item) : undefined}
             onArchive={() => props.onArchive(item)}
             onDelete={() => props.onDelete(item)}
           />

@@ -1,5 +1,13 @@
 import type { WorkItemSummary } from '@scrum/shared';
-import { Archive, ChevronRight, Copy, CornerDownRight, MoreHorizontal, Trash2 } from 'lucide-react';
+import {
+  Archive,
+  ChevronRight,
+  Copy,
+  CornerDownRight,
+  MoreHorizontal,
+  Trash2,
+  Zap,
+} from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import {
@@ -18,6 +26,7 @@ export function RowMenu({
   canAddChild,
   onAddChild,
   onCopy,
+  onPromote,
   onArchive,
   onDelete,
   alwaysVisible,
@@ -26,6 +35,8 @@ export function RowMenu({
   canAddChild: boolean;
   onAddChild: () => void;
   onCopy: () => void;
+  /** Task'ı Epic'e dönüştür; yalnızca uygun öğelerde verilir. */
+  onPromote?: () => void;
   onArchive: () => void;
   onDelete: () => void;
   alwaysVisible?: boolean;
@@ -58,6 +69,12 @@ export function RowMenu({
           <Copy />
           {t('items.copy')}
         </DropdownMenuItem>
+        {onPromote && (
+          <DropdownMenuItem onSelect={onPromote}>
+            <Zap />
+            {t('promoteEpic.menu')}
+          </DropdownMenuItem>
+        )}
         <DropdownMenuSeparator />
         <DropdownMenuItem onSelect={onArchive}>
           <Archive />

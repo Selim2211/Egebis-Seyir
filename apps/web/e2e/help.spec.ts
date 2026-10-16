@@ -25,19 +25,19 @@ test.describe.serial('Yardım ve kullanıcı kılavuzu', () => {
     // Sprint, Task ve Sub-Task bölümleri içindekiler listesinde.
     const toc = page.getByRole('navigation', { name: 'İçindekiler' });
     for (const title of [
-      '2. Task oluşturma',
-      '3. Task düzenleme',
-      '4. Sub-Task (alt görev) oluşturma',
-      '5. Sub-Task düzenleme',
-      '6. Sprint oluşturma',
-      '8. Sprint düzenleme ve yönetme',
+      '3. Task oluşturma',
+      '4. Task düzenleme',
+      '5. Sub-Task oluşturma',
+      '6. Sub-Task düzenleme',
+      '7. Sprint oluşturma',
+      '9. Sprint düzenleme ve yönetme',
     ]) {
       await expect(toc.getByRole('link', { name: title })).toBeVisible();
     }
 
     // Bir bölüme git: görsel gerçekten yüklenir ve numaralı açıklama listesi vardır.
-    await toc.getByRole('link', { name: '6. Sprint oluşturma' }).click();
-    const figure = page.getByRole('figure').filter({ hasText: 'Yeni sprint penceresi' });
+    await toc.getByRole('link', { name: '7. Sprint oluşturma' }).click();
+    const figure = page.getByRole('figure').filter({ hasText: 'Yeni Sprint penceresi' });
     await figure.scrollIntoViewIfNeeded();
     const image = figure.getByRole('img');
     await expect(image).toBeVisible();
@@ -53,7 +53,7 @@ test.describe.serial('Yardım ve kullanıcı kılavuzu', () => {
   }) => {
     await page.goto('/help?section=sprint-duzenle');
     await expect(
-      page.getByRole('heading', { name: '8. Sprint düzenleme ve yönetme' }),
+      page.getByRole('heading', { name: '9. Sprint düzenleme ve yönetme' }),
     ).toBeInViewport();
 
     const download = page.getByRole('link', { name: 'Word olarak indir' });

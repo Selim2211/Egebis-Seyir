@@ -6,6 +6,7 @@ import {
   ChevronRight,
   Copy,
   CopyPlus,
+  Zap,
   Eye,
   EyeOff,
   Link2,
@@ -32,6 +33,7 @@ import { useCurrentWorkspace } from '@/features/workspace/queries';
 import { useErrorMessage } from '@/lib/use-error-message';
 import { cn } from '@/lib/utils';
 import { itemByKeyQuery, useCopyItem, useItemLifecycle, useWatchItem } from '../queries';
+import { PromoteEpicDialog } from '../promote-epic-dialog';
 import { Attachments } from './attachments';
 import { Checklists } from './checklists';
 import { ReadinessSection } from './readiness-section';
@@ -104,6 +106,8 @@ function Content({
   const watch = useWatchItem();
   const canWrite = space.permissions.includes(S.WORK_ITEM_WRITE) && !item.archived;
   const wide = variant === 'page';
+  const [promoting, setPromoting] = useState(false);
+  const canPromote = canWrite && space.scrumEnabled && item.type === 'TASK';
 
   const run = (action: 'archive' | 'unarchive' | 'delete' | 'restore', message?: string) =>
     lifecycle.mutate(
@@ -213,6 +217,12 @@ function Content({
                     <CopyPlus />
                     {t('items.copy')}
                   </DropdownMenuItem>
+                  {canPromote && (
+                    <DropdownMenuItem onSelect={() => setPromoting(true)}>
+                      <Zap />
+                      {t('promoteEpic.menu')}
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onSelect={() => run('archive', t('items.archived', { key: item.key }))}
@@ -323,6 +333,10 @@ function Content({
         <Copy className="mr-1 inline size-3" aria-hidden />
         {t('detail.updated', { when: new Date(item.updatedAt).toLocaleString() })}
       </p>
+      <PromoteEpicDialog
+        item={promoting ? { id: item.id, key: item.key } : null}
+        onClose={() => setPromoting(false)}
+      />
     </article>
   );
 }

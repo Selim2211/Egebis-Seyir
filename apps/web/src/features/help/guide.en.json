@@ -1,6 +1,6 @@
 {
   "title": "Egebis Seyir User Guide",
-  "subtitle": "Creating and editing Sprints, Tasks and Sub-Tasks — step by step, with pictures.",
+  "subtitle": "Creating and editing Epics, Tasks, Sub-Tasks and Sprints — step by step, with pictures.",
   "sections": [
     {
       "id": "baslangic",
@@ -24,6 +24,16 @@
               "Mobile App"
             ],
             [
+              "Epic",
+              "A big goal that gathers many Stories and Tasks under it. Optional.",
+              "User account management"
+            ],
+            [
+              "Story",
+              "A feature described from the user's point of view; part of an Epic.",
+              "A user can reset their password"
+            ],
+            [
               "Task",
               "One piece of work to do. It has a title, an owner, a date and points.",
               "Design the sign-in screen"
@@ -38,7 +48,12 @@
               "A work period, usually 1–2 weeks, with a goal and dates. The team picks what to do in it.",
               "Sprint 1 (Oct 15–28)"
             ],
-            ["Backlog", "The list of work not yet in a sprint, ordered by priority.", "—"]
+            ["Backlog", "The list of work not yet in a sprint, ordered by priority.", "—"],
+            [
+              "Story Point",
+              "A score for the size of a piece of work (1, 2, 3, 5, 8, 13, 21, 34, 55).",
+              "5"
+            ]
           ]
         },
         {
@@ -99,8 +114,129 @@
       ]
     },
     {
+      "id": "epic",
+      "title": "2. Epic: creating one and converting a Task into an Epic (optional)",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "An **Epic** is a big goal that gathers many Stories and Tasks under it (e.g. “User account management”). The hierarchy is: **Epic → Story → Task → Sub-Task**. Using Epics is **optional**: in a small team you can work with Tasks directly, without any Epic."
+        },
+        {
+          "type": "bullets",
+          "items": [
+            "An Epic does not enter a sprint; it stays as the umbrella. Stories, Tasks and Bugs are what go into a sprint.",
+            "An Epic's progress bar is calculated automatically from the status of the Stories under it.",
+            "An Epic has no parent, and unlike Tasks and Sub-Tasks it carries no hour estimate or percentage."
+          ]
+        },
+        {
+          "type": "p",
+          "text": "**A) Creating an Epic from scratch**"
+        },
+        {
+          "type": "steps",
+          "items": [
+            "In the left menu open your Space and click the **Tasks** list.",
+            "In the row at the bottom choose **Epic** in the **Type** box.",
+            "Type the title (e.g. “User account management”) and press **Enter**. The Epic is added to the list."
+          ]
+        },
+        {
+          "type": "figure",
+          "image": "09-epic-create",
+          "alt": "Add row for an Epic",
+          "caption": "To add an Epic choose Epic in the Type box, type a title, press Enter.",
+          "legend": [
+            "**Type**: This should be **Epic**.",
+            "**Title**: The Epic's name; a short phrase for the big goal.",
+            "**Add ↵**: You can click this instead of pressing Enter."
+          ]
+        },
+        {
+          "type": "p",
+          "text": "**B) Converting an existing Task into an Epic**"
+        },
+        {
+          "type": "p",
+          "text": "The project was split into Epics and Tasks, but looking at one Task you realise the work is far too big. You do not have to delete it and start over: you can **convert it into an Epic in a few clicks**."
+        },
+        {
+          "type": "steps",
+          "items": [
+            "Click the **⋯** button at the right of the Task's row. (The same option is in the **⋯** menu of the Task's detail panel.)",
+            "Choose **Convert to Epic** from the menu.",
+            "Read what will change in the dialog and click **Convert to Epic**.",
+            "The Task is now an Epic; it shows with the Epic icon in the list."
+          ]
+        },
+        {
+          "type": "figure",
+          "image": "18-epic-promote-menu",
+          "alt": "Convert to Epic option in the Task row menu",
+          "caption": "Choose Convert to Epic from the Task's ⋯ menu.",
+          "legend": [
+            "**⋯ (actions)**: Opens the Task's menu.",
+            "**Convert to Epic**: Makes this Task an Epic. Only shown on Tasks."
+          ]
+        },
+        {
+          "type": "figure",
+          "image": "19-epic-promote-dialog",
+          "alt": "Convert to Epic confirmation dialog",
+          "caption": "The confirmation dialog explains what happens.",
+          "legend": [
+            "**Question**: Shows which Task is being converted.",
+            "**Explanation**: Summarises what changes.",
+            "**Convert to Epic**: Confirms and converts."
+          ]
+        },
+        {
+          "type": "figure",
+          "image": "20-epic-result",
+          "alt": "The list after the conversion",
+          "caption": "After the conversion: there are two Epics; the converted Epic's Sub-Task is now a Story.",
+          "legend": [
+            "**Epic**: The Epic you created from scratch (purple bolt icon).",
+            "**Converted Epic**: It used to be a Task, now it is an Epic.",
+            "**Story**: It used to be a Sub-Task; it now sits under the Epic as a Story."
+          ]
+        },
+        {
+          "type": "table",
+          "head": ["What happens in the conversion?", "Description"],
+          "rows": [
+            [
+              "Type",
+              "Task → **Epic**. Title, description, people, labels, dates, comments, attachments and dependencies stay as they are."
+            ],
+            [
+              "Parent Story",
+              "If the Task is under a Story it is **detached** from it (an Epic has no parent)."
+            ],
+            [
+              "Sprint",
+              "If the Task is in a Sprint it **leaves the Sprint** (an Epic does not enter a Sprint). This is written to the Sprint history."
+            ],
+            [
+              "Sub-Tasks",
+              "A Sub-Task cannot sit under an Epic, so all of them **become Stories** under the Epic; their points are kept."
+            ],
+            ["Story Point", "Kept."],
+            [
+              "Hour estimate, Completion percentage, Recurrence",
+              "An Epic does not carry these, so they are **cleared**."
+            ]
+          ]
+        },
+        {
+          "type": "warn",
+          "text": "The conversion **cannot be undone**; you cannot turn the Epic back into a Task. Only a **Task** can be converted (not a Story, Bug or Sub-Task) and the Space's work mode must be **Scrum**. Converting a Task that is in an active Sprint needs the Sprint planning permission."
+        }
+      ]
+    },
+    {
       "id": "task-olustur",
-      "title": "2. Creating a Task",
+      "title": "3. Creating a Task",
       "blocks": [
         {
           "type": "p",
@@ -111,7 +247,7 @@
           "items": [
             "In the left menu open your Space and click the **Tasks** list.",
             "In the row at the bottom choose **Task** in the **Type** box.",
-            "Type the work's title in the next box (e.g. *Design the sign-in screen*). Keep it short and clear: it should say what must be done.",
+            "Type the work's title in the next box (e.g. “Design the sign-in screen”). Keep it short and clear: it should say what must be done.",
             "Press **Enter** (or click **Add ↵**). The task drops into the list and receives its ID (MOB-1)."
           ]
         },
@@ -134,7 +270,7 @@
     },
     {
       "id": "task-duzenle",
-      "title": "3. Editing a Task",
+      "title": "4. Editing a Task",
       "blocks": [
         {
           "type": "p",
@@ -220,6 +356,10 @@
           ]
         },
         {
+          "type": "tip",
+          "text": "If a Task has grown too big and has become an umbrella goal, use **Convert to Epic** in the same **⋯** menu (see the Epic section)."
+        },
+        {
           "type": "warn",
           "text": "Only 1, 2, 3, 5, 8, 13, 21, 34 and 55 are valid Story Points; no other number can be entered. If the task has **Sub-Tasks** you cannot edit its points by hand, because its points are the sum of its sub-tasks (see Editing a Sub-Task)."
         }
@@ -227,7 +367,7 @@
     },
     {
       "id": "subtask-olustur",
-      "title": "4. Creating a Sub-Task",
+      "title": "5. Creating a Sub-Task",
       "blocks": [
         {
           "type": "p",
@@ -238,7 +378,7 @@
           "items": [
             "In the **Tasks** list click the **⋯** button at the right of the parent task's row.",
             "Choose **Add sub-item** from the menu. A new add row opens under the task.",
-            "The type box is already on **Sub-task**. Type the title (e.g. *Draw the form fields*) and press **Enter**.",
+            "The type box is already on **Sub-task**. Type the title (e.g. “Draw the form fields”) and press **Enter**.",
             "Keep typing and pressing Enter for more sub-tasks. When you are done, press **Esc** to close the row."
           ]
         },
@@ -286,7 +426,7 @@
     },
     {
       "id": "subtask-duzenle",
-      "title": "5. Editing a Sub-Task",
+      "title": "6. Editing a Sub-Task",
       "blocks": [
         {
           "type": "p",
@@ -343,7 +483,7 @@
     },
     {
       "id": "sprint-olustur",
-      "title": "6. Creating a Sprint",
+      "title": "7. Creating a Sprint",
       "blocks": [
         {
           "type": "p",
@@ -403,7 +543,7 @@
     },
     {
       "id": "sprint-is-ekle",
-      "title": "7. Adding work to a sprint",
+      "title": "8. Adding work to a sprint",
       "blocks": [
         {
           "type": "p",
@@ -443,7 +583,7 @@
     },
     {
       "id": "sprint-duzenle",
-      "title": "8. Editing and managing a sprint",
+      "title": "9. Editing and managing a sprint",
       "blocks": [
         {
           "type": "p",
@@ -514,7 +654,7 @@
     },
     {
       "id": "kanban",
-      "title": "9. The sprint board (Kanban)",
+      "title": "10. The sprint board (Kanban)",
       "blocks": [
         {
           "type": "p",
@@ -544,7 +684,7 @@
     },
     {
       "id": "ipuclari",
-      "title": "10. Quick tips and FAQ",
+      "title": "11. Quick tips and FAQ",
       "blocks": [
         {
           "type": "table",
@@ -561,6 +701,10 @@
             ["See only my own work", "Click **My work** in the left menu."],
             ["Restore a deleted task", "**Settings → Archive and trash**."],
             [
+              "Turn a growing Task into an umbrella goal",
+              "The Task's **⋯** menu → **Convert to Epic**."
+            ],
+            [
               "See a sprint's total points",
               "Click the percentage button on the sprint header (Summary panel)."
             ],
@@ -574,6 +718,9 @@
         {
           "type": "bullets",
           "items": [
+            "**Do I have to use Epics?** No. Epics are optional; you can work with Tasks directly.",
+            "**I cannot see Convert to Epic.** It only appears on Tasks, in Spaces whose work mode is Scrum; it is not available on Stories, Bugs or Sub-Tasks. You also need write permission.",
+            "**Can I turn an Epic back into a Task?** No, the conversion cannot be undone. If you are unsure, copy the Task first and convert the copy.",
             "**Why is there no 4 in the Story Point list?** Seyir uses the standard Fibonacci scale (1, 2, 3, 5, 8, 13, 21, 34, 55). Choose the nearest value.",
             "**Why can't I change the parent's points?** If it has sub-tasks, its points are their sum. Change the sub-tasks' points.",
             "**I created a sprint but cannot see it.** Open **Backlog and sprints**; the sprint sits above the Backlog. You can also expand the arrow in the left menu to list sprints.",

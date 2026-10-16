@@ -145,6 +145,12 @@ export const useCopyItem = () =>
     }),
   );
 
+/** Task'ı Epic'e dönüştürür (isteğe bağlı, ADR-109). */
+export const usePromoteToEpic = () =>
+  useWorkspaceMutation((id, input: { itemId: string }) =>
+    apiRequest(`${ws(id)}/items/${input.itemId}/convert-to-epic`, NoContent, { method: 'POST' }),
+  );
+
 export const useMoveItem = () =>
   useWorkspaceMutation((id, input: { itemId: string; body: MoveItemRequest }) =>
     apiRequest(`${ws(id)}/items/${input.itemId}/move`, NoContent, {

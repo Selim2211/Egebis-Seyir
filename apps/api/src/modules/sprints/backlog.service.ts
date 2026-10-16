@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import {
+  checkTypeInSpace,
   ERROR_CODES,
   formatItemKey,
   isSprintOpen,
@@ -15,7 +16,7 @@ import {
   type NestItemRequest,
 } from '@scrum/shared';
 import { ClsService } from 'nestjs-cls';
-import type { Prisma } from '../../generated/prisma/client';
+import { Prisma } from '../../generated/prisma/client';
 import type { AppClsStore } from '../../infra/cls/request-context';
 import { TenantPrismaService } from '../../infra/prisma/tenant-prisma.service';
 import { ActivityService } from '../activity/activity.service';
@@ -240,6 +241,71 @@ export class BacklogService {
         changes: asJson({
           parentId: { from: keyOf(item.parent), to: keyOf(parent) },
           ...(plan.type !== item.type ? { type: { from: item.type, to: plan.type } } : {}),
+        }),
+      });
+    });
+  }
+
+  /**
+   * Task'ı Epic'e dönüştürür (isteğe bağlı, ADR-109). Epic üst öğe, sprint, saat tahmini, yüzde ve tekrar
+   * taşımaz; bu yüzden üst Story'den ayrılır, sprint'ten çıkar (üyelik geçmişine yazılır) ve bu alanlar
+   * temizlenir. Sub-Task'lar Epic'in altında geçerli olmadığından Story'ye dönüşür.
+   */
+  async promoteToEpic(itemId: string): Promise<void> {
+    const { workspaceId, actorId } = this.ctx;
+    const db = this.tenant.db;
+    const item = await db.workItem.findFirst({
+      where: { id: itemId, ...countedItems },
+      include: {
+        parent: { select: { keyPrefix: true, number: true } },
+        sprint: { select: { id: true, name: true, status: true } },
+        space: { select: { scrumEnabled: true } },
+        children: { where: { deletedAt: null }, select: { id: true, type: true } },
+      },
+    });
+    if (!item) throw notFound();
+    if (item.type !== 'TASK') throw fail(ERROR_CODES.WORK_ITEM_NOT_PROMOTABLE);
+    const inSpace = checkTypeInSpace('EPIC', item.space.scrumEnabled);
+    if (!inSpace.ok) throw fail(inSpace.code);
+    if (item.sprint) {
+      if (!isSprintOpen(item.sprint.status)) throw conflict(ERROR_CODES.SPRINT_READONLY);
+      if (!this.can(S.SPRINT_PLAN)) throw forbidden(ERROR_CODES.FORBIDDEN);
+    }
+    const subtasks = item.children.filter((c) => c.type === 'SUBTASK').map((c) => c.id);
+
+    await db.$transaction(async (tx) => {
+      await tx.workItem.update({
+        where: { id: item.id },
+        data: {
+          type: 'EPIC',
+          parentId: null,
+          sprintId: null,
+          backlogRank: null,
+          percentDone: null,
+          estimateHours: null,
+          recurrence: Prisma.JsonNull,
+        },
+      });
+      if (subtasks.length > 0) {
+        await tx.workItem.updateMany({ where: { id: { in: subtasks } }, data: { type: 'STORY' } });
+      }
+      if (item.sprint) await this.recordMembership(tx, item, null, workspaceId, actorId);
+      await this.activity.record(tx, {
+        workspaceId,
+        actorId,
+        entityType: 'item',
+        entityId: item.id,
+        action: 'item.updated',
+        changes: asJson({
+          type: { from: 'TASK', to: 'EPIC' },
+          ...(item.parent
+            ? {
+                parentId: {
+                  from: formatItemKey(item.parent.keyPrefix, item.parent.number),
+                  to: null,
+                },
+              }
+            : {}),
         }),
       });
     });

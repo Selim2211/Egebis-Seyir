@@ -186,6 +186,14 @@ export class SprintsController {
     return this.backlog.move(spaceId, body);
   }
 
+  /** Task'ı Epic'e dönüştür (isteğe bağlı, ADR-109). */
+  @Post('items/:itemId/convert-to-epic')
+  @RequireSpacePermission(S.WORK_ITEM_WRITE)
+  @HttpCode(NO_CONTENT)
+  promoteToEpic(@Uuid('itemId') itemId: string): Promise<void> {
+    return this.backlog.promoteToEpic(itemId);
+  }
+
   /** Öğeyi başka öğenin alt öğesi yap (sürükle-bırak, ADR-102). */
   @Post('items/:itemId/nest')
   @RequireSpacePermission(S.WORK_ITEM_WRITE)

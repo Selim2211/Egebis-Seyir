@@ -39,6 +39,9 @@ const SAMPLE = {
     task: 'Giriş ekranını tasarla',
     task2: 'Şifre sıfırlama akışı',
     task3: 'Profil sayfası',
+    epic: 'Kullanıcı hesabı yönetimi',
+    bigTask: 'Ödeme altyapısı',
+    bigSub: 'Ödeme sağlayıcısını seç',
     sub1: 'Form alanlarını çiz',
     sub2: 'Hata mesajlarını yaz',
     desc: 'Kullanıcı e-posta ve şifreyle giriş yapabilmeli.',
@@ -53,6 +56,9 @@ const SAMPLE = {
     task: 'Design the sign-in screen',
     task2: 'Password reset flow',
     task3: 'Profile page',
+    epic: 'User account management',
+    bigTask: 'Payment infrastructure',
+    bigSub: 'Choose the payment provider',
     sub1: 'Draw the form fields',
     sub2: 'Write the error messages',
     desc: 'Users must be able to sign in with e-mail and password.',
@@ -475,6 +481,65 @@ test.describe.serial('Kılavuz görselleri', () => {
       },
       { at: page.getByRole('button', { name: /^(Özet|Summary)/ }), n: 3, badge: 'b' },
       { at: page.getByRole('button', { name: t('sprints.start') }), n: 4, badge: 'b' },
+    ]);
+    // ---------- Epic ----------
+    await page
+      .getByRole('link', { name: /^(Görevler|Tasks)$/ })
+      .first()
+      .click();
+    await expect(quick).toBeVisible();
+    await page.getByLabel(t('items.type')).first().selectOption('EPIC');
+    await quick.fill(SAMPLE.epic);
+    await shot(page, '09-epic-create', [
+      { at: page.getByLabel(t('items.type')).first(), n: 1, badge: 'b' },
+      { at: quick, n: 2, badge: 'b' },
+      { at: page.getByRole('button', { name: t('items.addEnter') }), n: 3, badge: 'b' },
+    ]);
+    await quick.press('Enter');
+    await expect(page.getByText(t('items.created', { key: keyOf(6) }))).toBeAttached();
+
+    // ---------- Task'ı Epic'e dönüştürme ----------
+    await page.getByLabel(t('items.type')).first().selectOption('TASK');
+    await quick.fill(SAMPLE.bigTask);
+    await quick.press('Enter');
+    await expect(page.getByText(t('items.created', { key: keyOf(7) }))).toBeAttached();
+    await rowMenu(7).click();
+    await page.getByRole('menuitem', { name: t('items.addChild') }).click();
+    const bigChild = page.getByPlaceholder(t('items.quickCreateChild'));
+    await bigChild.fill(SAMPLE.bigSub);
+    await bigChild.press('Enter');
+    await expect(page.getByText(SAMPLE.bigSub)).toBeVisible();
+    await bigChild.press('Escape');
+
+    await rowMenu(7).click();
+    await shot(page, '18-epic-promote-menu', [
+      { at: rowMenu(7), n: 1, badge: 'l' },
+      { at: page.getByRole('menuitem', { name: t('promoteEpic.menu') }), n: 2, badge: 'l' },
+    ]);
+    await page.getByRole('menuitem', { name: t('promoteEpic.menu') }).click();
+    const promoteDialog = page.getByRole('alertdialog');
+    await expect(promoteDialog).toBeVisible();
+    await shot(
+      page,
+      '19-epic-promote-dialog',
+      [
+        { at: promoteDialog.getByRole('heading'), n: 1, badge: 'l' },
+        { at: promoteDialog.getByText(/Sub-Task/).first(), n: 2, badge: 'l' },
+        {
+          at: promoteDialog.getByRole('button', { name: t('promoteEpic.confirm') }),
+          n: 3,
+          badge: 'tr',
+        },
+      ],
+      promoteDialog,
+    );
+    await promoteDialog.getByRole('button', { name: t('promoteEpic.confirm') }).click();
+    await expect(page.getByText(t('promoteEpic.done', { key: keyOf(7) }))).toBeAttached();
+    await expect(page.getByRole('link', { name: SAMPLE.bigTask })).toBeVisible();
+    await shot(page, '20-epic-result', [
+      { at: page.getByRole('link', { name: SAMPLE.epic }), n: 1, badge: 'l' },
+      { at: page.getByRole('link', { name: SAMPLE.bigTask }), n: 2, badge: 'l' },
+      { at: page.getByRole('link', { name: SAMPLE.bigSub }), n: 3, badge: 'l' },
     ]);
   });
 });

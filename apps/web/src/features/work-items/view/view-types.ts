@@ -17,6 +17,9 @@ export interface ViewProps {
   canAddChild: (item: WorkItemSummary) => boolean;
   onAddChild: (itemId: string) => void;
   onCopy: (itemId: string) => void;
+  /** Task'ı Epic'e dönüştürme (yalnızca Scrum Space'inde Task için). */
+  canPromote: (item: WorkItemSummary) => boolean;
+  onPromote: (item: WorkItemSummary) => void;
   onArchive: (item: WorkItemSummary) => void;
   onDelete: (item: WorkItemSummary) => void;
   /** Alt öğe hızlı oluşturma satırının açık olduğu öğe. */

@@ -74,6 +74,7 @@
 | Sprint'i JSON olarak dışa aktarma                           | ✅       | Evet — Int `story-points`, E2E `faz9-points`      | Özellikler, toplamlar, kişi dağılımı, öğeler, bağımlılıklar, bağlantılar          |
 | Görev ve sprint için kalıcı URL                             | ✅       | Evet — E2E `faz1-detail`, `faz9-points`           | `/items/MOB-12` ve `/sprints/<id>`; bağlantı kopyalama menüsü var                 |
 | Uygulama içi yardım / görselli kullanıcı kılavuzu           | ✅       | Evet — E2E `help`, `guide-screenshots`            | Üst çubukta Yardım; TR/EN; Word olarak indirilebilir (ADR-108)                    |
+| Task'ı Epic'e dönüştürme (isteğe bağlı)                     | ✅       | Evet — Int `promote-epic`, E2E `epic-promote`     | Sub-Task'lar Story olur, sprint/üst Story bağı kopar; geri alınamaz (ADR-109)     |
 
 ## 5. Zaman
 

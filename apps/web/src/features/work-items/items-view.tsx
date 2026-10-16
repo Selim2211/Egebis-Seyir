@@ -9,6 +9,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { ConfirmDialog } from '@/components/confirm-dialog';
+import { PromoteEpicDialog } from './promote-epic-dialog';
 import { useMe } from '@/features/auth/queries';
 import { todayDay } from '@/lib/format';
 import { useErrorMessage } from '@/lib/use-error-message';
@@ -68,6 +69,7 @@ export function ItemsView({
   const [collapsedGroups, setCollapsedGroups] = useState<ReadonlySet<string>>(new Set());
   const [pickedIds, setPicked] = useState<ReadonlySet<string>>(new Set());
   const [addingUnder, setAddingUnder] = useState<string | null>(null);
+  const [promoting, setPromoting] = useState<{ id: string; key: string } | null>(null);
   const [bulkConfirm, setBulkConfirm] = useState<{
     count: number;
     resolve: (ok: boolean) => void;
@@ -200,6 +202,8 @@ export function ItemsView({
           onError: (error) => toast.error(errorMessage(error)),
         },
       ),
+    canPromote: (item: WorkItemSummary) => canWrite && space.scrumEnabled && item.type === 'TASK',
+    onPromote: (item) => setPromoting({ id: item.id, key: item.key }),
     onArchive: (item) => run(item.id, 'archive', t('items.archived', { key: item.key })),
     onDelete: (item) => run(item.id, 'delete', t('items.trashed', { key: item.key })),
     addingUnder,
@@ -283,6 +287,7 @@ export function ItemsView({
       )}
 
       {guard.dialog}
+      <PromoteEpicDialog item={promoting} onClose={() => setPromoting(null)} />
       <ConfirmDialog
         open={bulkConfirm !== null}
         onOpenChange={(open) => {
