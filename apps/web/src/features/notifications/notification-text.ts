@@ -12,7 +12,10 @@ export function describeNotification(n: Notification, t: TFunction): string {
     title: n.item?.title ?? '',
     sprint: n.sprint?.name ?? '',
     doc: n.doc?.title ?? '',
-    detail: n.detail ?? '',
+    detail:
+      n.type === 'BUG_STATUS' && n.detail
+        ? t(`bugStatus.${n.detail}` as 'bugStatus.RESOLVED')
+        : (n.detail ?? ''),
   });
 }
 

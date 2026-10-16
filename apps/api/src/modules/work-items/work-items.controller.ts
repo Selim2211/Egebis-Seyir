@@ -17,7 +17,11 @@ import {
   CreateChecklistEntryRequestSchema,
   CreateChecklistRequestSchema,
   CreateLinkRequestSchema,
+  BugsResponseSchema,
+  CreateBugRequestSchema,
   ItemAccessSchema,
+  SetBugAssigneeRequestSchema,
+  SetBugStatusRequestSchema,
   ItemSearchResponseSchema,
   PutItemAccessRequestSchema,
   MY_WORK_SCOPES,
@@ -46,6 +50,7 @@ import {
   type CreatedItem,
   type EpicsResponse,
   type Gantt,
+  type BugsResponse,
   type ItemAccess,
   type ItemSearchResponse,
   type MyWorkResponse,
@@ -60,6 +65,7 @@ import { createZodDto, ZodResponse, ZodValidationPipe } from 'nestjs-zod';
 import { z } from 'zod';
 import { ItemAccessService } from '../access/item-access.service';
 import { RequireSpacePermission } from '../auth/decorators';
+import { BugsService } from './bugs.service';
 import { EpicsService } from './epics.service';
 import { GanttService } from './gantt.service';
 import { ItemDetailsService } from './item-details.service';
@@ -94,6 +100,10 @@ class ItemSearchDto extends createZodDto(ItemSearchResponseSchema) {}
 class MyWorkDto extends createZodDto(MyWorkResponseSchema) {}
 class SearchDto extends createZodDto(SearchResponseSchema) {}
 class ItemAccessDto extends createZodDto(ItemAccessSchema) {}
+class BugsDto extends createZodDto(BugsResponseSchema) {}
+class CreateBugDto extends createZodDto(CreateBugRequestSchema) {}
+class SetBugAssigneeDto extends createZodDto(SetBugAssigneeRequestSchema) {}
+class SetBugStatusDto extends createZodDto(SetBugStatusRequestSchema) {}
 class PutItemAccessDto extends createZodDto(PutItemAccessRequestSchema) {}
 
 const ScopePipe = new ZodValidationPipe(z.enum(MY_WORK_SCOPES).default('assigned'));
@@ -114,6 +124,7 @@ export class WorkItemsController {
     private readonly gantt: GanttService,
 
     private readonly itemAccess: ItemAccessService,
+    private readonly bugService: BugsService,
   ) {}
 
   /** Görülebilen Space'lerde başlık, açıklama ve kimlik araması (ADR-053). */
@@ -199,6 +210,37 @@ export class WorkItemsController {
   @ZodResponse({ type: WorkItemDetailDto })
   byKey(@Param('key') key: string): Promise<WorkItemDetail> {
     return this.items.detailByKey(key);
+  }
+
+  // ---------- Bug ekranı (ADR-117) ----------
+
+  @Get('spaces/:spaceId/bugs')
+  @RequireSpacePermission(S.SPACE_VIEW)
+  @ZodResponse({ type: BugsDto })
+  bugs(@Uuid('spaceId') spaceId: string): Promise<BugsResponse> {
+    return this.bugService.list(spaceId);
+  }
+
+  @Post('spaces/:spaceId/bugs')
+  @RequireSpacePermission(S.BUG_REPORT)
+  @ZodResponse({ type: CreatedItemDto, status: HttpStatus.CREATED })
+  reportBug(@Uuid('spaceId') spaceId: string, @Body() body: CreateBugDto): Promise<CreatedItem> {
+    return this.bugService.create(spaceId, body);
+  }
+
+  @Put('items/:itemId/bug-assignee')
+  @RequireSpacePermission(S.BUG_ASSIGN)
+  @HttpCode(NO_CONTENT)
+  async assignBug(@Uuid('itemId') itemId: string, @Body() body: SetBugAssigneeDto): Promise<void> {
+    await this.bugService.setAssignee(itemId, body.userId);
+  }
+
+  /** Yetki serviste: Bug'ı atayan, yazma yetkisi olan ya da atanan kişi. */
+  @Put('items/:itemId/bug-status')
+  @RequireSpacePermission(S.SPACE_VIEW)
+  @HttpCode(NO_CONTENT)
+  async bugStatus(@Uuid('itemId') itemId: string, @Body() body: SetBugStatusDto): Promise<void> {
+    await this.bugService.setStatus(itemId, body.status);
   }
 
   /** Öğeye özel erişim (ADR-113): kişi/takım + rol, gizli öğe. */

@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { CustomFieldsModule } from '../custom-fields/custom-fields.module';
+import { BugsService } from './bugs.service';
 import { EpicsService } from './epics.service';
 import { GanttService } from './gantt.service';
 import { ItemDetailsService } from './item-details.service';
@@ -16,6 +17,7 @@ import { WorkItemsService } from './work-items.service';
   controllers: [WorkItemsController],
   providers: [
     WorkItemsService,
+    BugsService,
     EpicsService,
     GanttService,
     ItemTreeService,

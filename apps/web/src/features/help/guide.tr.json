@@ -19,8 +19,8 @@
           "head": ["Kavram", "Ne demek?", "Örnek"],
           "rows": [
             [
-              "Space",
-              "Bir ürün veya ekip için ayrılmış çalışma alanı. Bütün işler bir Space içinde tutulur.",
+              "Proje",
+              "Bir ürün veya ekip için ayrılmış çalışma alanı. Bütün işler bir Proje içinde tutulur.",
               "Mobil Uygulama"
             ],
             [
@@ -59,12 +59,12 @@
           "type": "figure",
           "image": "01-overview",
           "alt": "Seyir ana ekranı ve işaretli bölümler",
-          "caption": "Ana ekran: soldaki menüden Space'e ve bölümlerine, üstteki çubuktan arama, yardım ve hesap menüsüne ulaşırsın.",
+          "caption": "Ana ekran: soldaki menüden Projeye ve bölümlerine, üstteki çubuktan arama, yardım ve hesap menüsüne ulaşırsın.",
           "legend": [
-            "**Space**: Çalıştığın proje alanı. Tıklayınca altındaki bölümler açılır.",
+            "**Proje**: Çalıştığın proje alanı. Tıklayınca altındaki bölümler açılır.",
             "**Backlog ve sprint'ler**: Sprint oluşturma ve planlama burada yapılır.",
             "**Sprint panosu**: Sprint'teki işleri durum sütunlarında (Kanban) gösterir.",
-            "**Görevler**: Space'in iş listesi; Epic, Task ve Sub-Task'lar burada eklenir.",
+            "**Görevler**: Projenin iş listesi; Epic, Task ve Sub-Task'lar burada eklenir.",
             "**Arama**: Task, doküman veya kişi ara (kısayol: Ctrl + K).",
             "**Yardım**: Bu kılavuzu her zaman buradan açabilirsin.",
             "**Hesap menüsü**: Profil, dil (Türkçe/İngilizce), tema ve çıkış.",
@@ -79,36 +79,36 @@
     },
     {
       "id": "space-olustur",
-      "title": "1. Space oluşturma",
+      "title": "1. Proje oluşturma",
       "blocks": [
         {
           "type": "p",
-          "text": "Epic, Task ve Sprint oluşturmadan önce işlerin duracağı bir Space gerekir. Ekibin yöneticisi genellikle bunu senin için hazırlar; yine de nasıl yapıldığını bilmek faydalıdır."
+          "text": "Epic, Task ve Sprint oluşturmadan önce işlerin duracağı bir Proje gerekir. Ekibin yöneticisi genellikle bunu senin için hazırlar; yine de nasıl yapıldığını bilmek faydalıdır."
         },
         {
           "type": "steps",
           "items": [
-            "Sol menüde **SPACE'LER** başlığının yanındaki **+** düğmesine (ya da en alttaki **Space oluştur** satırına) tıkla.",
-            "**Ad** alanına Space'in adını yaz (ör. Mobil Uygulama).",
+            "Sol menüde **PROJE'LER** başlığının yanındaki **+** düğmesine (ya da en alttaki **Proje oluştur** satırına) tıkla.",
+            "**Ad** alanına Projenin adını yaz (ör. Mobil Uygulama).",
             "**Anahtar** alanını kontrol et. Bu 2–10 harflik kısa koddur; Task kimlikleri bununla başlar (MOB-1, MOB-2…). Ad yazınca otomatik önerilir.",
             "İstersen renk ve ikon seç. Sprint ve Backlog kullanacaksan **Çalışma modu**nu **Scrum**da bırak; sprintsiz, sürekli akışlı bir pano istiyorsan **Kanban**ı seç.",
-            "**Space oluştur** düğmesine bas."
+            "**Proje oluştur** düğmesine bas."
           ]
         },
         {
           "type": "figure",
           "image": "02-space-create",
-          "alt": "Yeni Space oluşturma penceresi",
-          "caption": "Yeni Space penceresi. Epic ve Sprint kullanacaksan çalışma modunu Scrum bırak.",
+          "alt": "Yeni Proje oluşturma penceresi",
+          "caption": "Yeni Proje penceresi. Epic ve Sprint kullanacaksan çalışma modunu Scrum bırak.",
           "legend": [
-            "**Ad**: Space'in görünen adı.",
-            "**Anahtar**: Task kimliklerinin başındaki kısa kod (MOB-1 gibi). Başka bir Space'te daha önce kullanılmamış olmalı; kısa ve anlaşılır seç.",
-            "**Space oluştur**: Kaydeder ve Space'i açar."
+            "**Ad**: Projenin görünen adı.",
+            "**Anahtar**: Task kimliklerinin başındaki kısa kod (MOB-1 gibi). Başka bir Projede daha önce kullanılmamış olmalı; kısa ve anlaşılır seç.",
+            "**Proje oluştur**: Kaydeder ve Projeyi açar."
           ]
         },
         {
           "type": "note",
-          "text": "Space oluşturduğunda içinde otomatik olarak **Görevler** adlı bir liste gelir. Epic ve Task'larını ilk etapta buraya ekleyeceksin."
+          "text": "Proje oluşturduğunda içinde otomatik olarak **Görevler** adlı bir liste gelir. Epic ve Task'larını ilk etapta buraya ekleyeceksin."
         }
       ]
     },
@@ -135,7 +135,7 @@
         {
           "type": "steps",
           "items": [
-            "Sol menüde Space'ini aç ve **Görevler** listesine tıkla.",
+            "Sol menüde Projesini aç ve **Görevler** listesine tıkla.",
             "Listenin altındaki satırda **Tip** kutusundan **Epic**'i seç.",
             "Başlığı yaz (ör. “Kullanıcı hesabı yönetimi”) ve **Enter**'a bas. Epic listeye eklenir."
           ]
@@ -153,7 +153,7 @@
         },
         {
           "type": "tip",
-          "text": "Epic'in altına Task eklemek için Epic satırının sağındaki **⋯** düğmesine tıkla, **Alt öğe ekle**'yi seç ve **Tip** kutusunda **Task**'ı bırak. Epic'in altına Bug da eklenebilir."
+          "text": "Epic'in altına Task eklemek için Epic satırının sağındaki **⋯** düğmesine tıkla, **Alt öğe ekle**'yi seç ve **Tip** kutusunda **Task**'ı bırak."
         },
         {
           "type": "p",
@@ -233,7 +233,7 @@
         },
         {
           "type": "warn",
-          "text": "Dönüşüm **geri alınamaz**; Epic'i tekrar Task'a çeviremezsin. Yalnızca **Task** dönüştürülebilir (Bug veya Sub-Task değil) ve Space'in çalışma modu **Scrum** olmalıdır. Aktif bir Sprint'teki Task'ı dönüştürmek için Sprint planlama yetkisi gerekir."
+          "text": "Dönüşüm **geri alınamaz**; Epic'i tekrar Task'a çeviremezsin. Yalnızca **Task** dönüştürülebilir (Bug veya Sub-Task değil) ve Projenin çalışma modu **Scrum** olmalıdır. Aktif bir Sprint'teki Task'ı dönüştürmek için Sprint planlama yetkisi gerekir."
         }
       ]
     },
@@ -248,7 +248,7 @@
         {
           "type": "steps",
           "items": [
-            "Sol menüde Space'ini aç ve **Görevler** listesine tıkla.",
+            "Sol menüde Projesini aç ve **Görevler** listesine tıkla.",
             "Listenin altındaki satırda **Tip** kutusundan **Task**'ı seç.",
             "Yandaki kutuya işin başlığını yaz (ör. “Giriş ekranını tasarla”). Başlık kısa ve net olsun: ne yapılacağı anlaşılmalı.",
             "**Enter** tuşuna bas (veya **Ekle ↵** yazısına tıkla). Task listeye düşer ve kimliği (MOB-1) verilir."
@@ -260,7 +260,7 @@
           "alt": "Listede hızlı Task ekleme satırı",
           "caption": "Task ekleme satırı: tip seç, başlık yaz, Enter'a bas.",
           "legend": [
-            "**Tip**: Eklenecek kaydın türü. Burada **Task** seçili (diğerleri: Epic, Bug).",
+            "**Tip**: Eklenecek kaydın türü. Burada **Task** seçili (diğeri: Epic; Bug’lar **Bugs** ekranından açılır).",
             "**Başlık**: İşin adı. Birden fazla Task eklemek için her başlıktan sonra Enter'a basman yeter.",
             "**Ekle ↵**: Enter'a basmak yerine buna da tıklayabilirsin."
           ]
@@ -481,12 +481,46 @@
       ]
     },
     {
-      "id": "sprint-olustur",
-      "title": "7. Sprint oluşturma",
+      "id": "surukle-birak",
+      "title": "7. Sürükleyerek Sub-Task yapma ve ayırma",
       "blocks": [
         {
           "type": "p",
-          "text": "Sprint, ekibin belirli bir süre içinde yapmayı seçtiği işlerin paketidir. Sprint'ler **Backlog ve sprint'ler** sayfasında oluşturulur. Bu sayfayı açmak için sol menüde Space'inin altındaki **Backlog ve sprint'ler** satırına tıkla."
+          "text": "Listede bir Task’ı başka bir Task’ın üstüne sürükleyerek onu Sub-Task yapabilir, bir Sub-Task’ı da sürükleyerek yeniden bağımsız Task yapabilirsin. Yalnızca Task ve Sub-Task taşınabilir."
+        },
+        {
+          "type": "steps",
+          "items": [
+            "Fareyi satırın üzerine getir; satırın en solunda **sürükleme tutamacı** (⋮⋮) belirir.",
+            "Tutamaçtan tutup Task’ı, altına koymak istediğin **Task**’ın satırının üstüne sürükle; hedef satır renklenir.",
+            "Bırakınca bir onay penceresi açılır: “HTK-2, HTK-1 öğesinin Sub-Task’ı olsun mu?”. **Sub-Task yap**’a tıkla.",
+            "Bir Sub-Task’ı ayırmak için onu sürüklemeye başla; ekranın altında ortada büyük **Ayır** alanı çıkar.",
+            "Sub-Task’ı **Ayır** alanına bırak ve onayla. Sub-Task ana Task’tan ayrılır ve bağımsız bir **Task** olur."
+          ]
+        },
+        {
+          "type": "figure",
+          "image": "28-dnd",
+          "alt": "Sürüklerken çıkan Ayır alanı",
+          "caption": "Bir Sub-Task sürüklenirken altta çıkan Ayır alanı.",
+          "legend": [
+            "**Sürüklenen öğe**: Fareyle taşınan kart.",
+            "**Ayır**: Buraya bırakılan Sub-Task bağımsız Task olur."
+          ]
+        },
+        {
+          "type": "note",
+          "text": "Alt görevi olan bir Task başka bir Task’ın altına alınamaz; önce Sub-Task’larını ayır."
+        }
+      ]
+    },
+    {
+      "id": "sprint-olustur",
+      "title": "8. Sprint oluşturma",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Sprint, ekibin belirli bir süre içinde yapmayı seçtiği işlerin paketidir. Sprint'ler **Backlog ve sprint'ler** sayfasında oluşturulur. Bu sayfayı açmak için sol menüde Projesinin altındaki **Backlog ve sprint'ler** satırına tıkla."
         },
         {
           "type": "figure",
@@ -504,7 +538,7 @@
           "items": [
             "Sağ üstteki **Sprint oluştur** düğmesine tıkla.",
             "**Ad** alanına Sprint adını yaz (ör. Sprint 1).",
-            "**Sprint hedefi** alanına bu dönemde ne başarılacağını tek cümleyle yaz. (Bazı Space'lerde hedef zorunludur.)",
+            "**Sprint hedefi** alanına bu dönemde ne başarılacağını tek cümleyle yaz. (Bazı Projelerde hedef zorunludur.)",
             "**Başlangıç** ve **Bitiş** tarihlerini seç. Varsayılan olarak iki haftalık bir aralık gelir; bir Sprint en fazla 8 hafta sürebilir.",
             "İstersen **Kapasite notu** ekle (ör. 3 kişi, biri 2 gün izinli).",
             "**Sprint oluştur** düğmesine bas. Sprint, Backlog'un üstünde **Planlandı** durumunda görünür."
@@ -531,7 +565,7 @@
             ["Ad", "Evet", "Listelerde ve panolarda görünen isim."],
             [
               "Sprint hedefi",
-              "Space ayarına bağlı",
+              "Proje ayarına bağlı",
               "Ekibin ortak amacı. Boş bırakırsan Sprint'i başlatırken uyarı alırsın."
             ],
             [
@@ -546,7 +580,7 @@
     },
     {
       "id": "sprint-is-ekle",
-      "title": "8. Sprint'e iş ekleme",
+      "title": "9. Sprint'e iş ekleme",
       "blocks": [
         {
           "type": "p",
@@ -586,7 +620,7 @@
     },
     {
       "id": "sprint-duzenle",
-      "title": "9. Sprint düzenleme ve yönetme",
+      "title": "10. Sprint düzenleme ve yönetme",
       "blocks": [
         {
           "type": "p",
@@ -657,7 +691,7 @@
     },
     {
       "id": "kanban",
-      "title": "10. Sprint panosu",
+      "title": "11. Sprint panosu",
       "blocks": [
         {
           "type": "p",
@@ -686,8 +720,44 @@
       ]
     },
     {
+      "id": "buglar",
+      "title": "12. Bug’lar: açma, atama ve durum",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Bug’lar görev listesinde görünmez; kendi ekranları vardır. Sprint panosunda (ve Kanban board’da) sağ üstteki kırmızı **Bugs** düğmesine tıklayınca açılır. Düğmedeki sayı açık Bug sayısıdır."
+        },
+        {
+          "type": "steps",
+          "items": [
+            "Kırmızı **Bugs** düğmesine tıkla. (Ya da **New → Bug**.)",
+            "**Bug aç**’a tıkla. **Sorun ne?**, **Önem**, **Öncelik**, **Tekrar adımları**, **Beklenen** ve **Gerçek sonuç**, **Ortam** alanlarını doldur; istersen ekran görüntüsü ekle.",
+            "**Bug’ı aç**’a tıkla. Bug’ı açan sen **Bug sahibi** olursun; Bug **Atanmadı** durumunda başlar ve atama yapacak kişilere (Product Owner, Scrum Master, Admin) bildirim ve e-posta gider.",
+            "Product Owner, Scrum Master veya Admin, satırdaki **Atanan** kutusundan Bug’ı birine atar. Durum **Atandı** olur; atanan kişiye bildirim ve e-posta gider.",
+            "Atanan kişi işe başlayınca durumu **İşleniyor**, bitirince **Çözüldü** yapar. Her değişiklikte Bug sahibine bildirim ve e-posta gider."
+          ]
+        },
+        {
+          "type": "figure",
+          "image": "27-bugs",
+          "alt": "Bug ekranı",
+          "caption": "Bug ekranı: durum sekmeleri, Bug sahibi ve atanan.",
+          "legend": [
+            "**Bugs**: Sprint panosundaki kırmızı **Bugs** düğmesiyle açılan ekran.",
+            "**Bug aç**: Yeni Bug formunu açar.",
+            "**Durum sekmeleri**: Atanmadı, Atandı, İşleniyor, Çözüldü.",
+            "**Atanan**: Bug’ı birine atar (yalnızca yetkisi olanlar)."
+          ]
+        },
+        {
+          "type": "tip",
+          "text": "Bug’a tıklayınca ayrıntıları yan panelde açılır; yorum ve dosya da oradan eklenir."
+        }
+      ]
+    },
+    {
       "id": "yeni-dugme",
-      "title": "11. Büyük New düğmesi",
+      "title": "13. Büyük New düğmesi",
       "blocks": [
         {
           "type": "p",
@@ -697,8 +767,8 @@
           "type": "steps",
           "items": [
             "**New**e tıkla (ya da yazı yazmıyorken klavyede **N**ye bas).",
-            "Ne oluşturacağını seç: **Task**, **Epic**, **Bug** veya **Space**.",
-            "Task, Epic ve Bug için küçük bir pencere açılır. **Başlığı** yaz; **Space** ve **List** seçimini kontrol et (baktığın Space/List hazır gelir).",
+            "Ne oluşturacağını seç: **Task**, **Epic** veya **Bug**. Yeni Proje sol menüdeki **Proje oluştur** düğmesiyle açılır.",
+            "Task ve Epic için küçük bir pencere açılır (Bug, Bug açma formunu açar). **Başlığı** yaz; **Proje** ve **List** seçimini kontrol et (baktığın Proje/List hazır gelir).",
             "İstersen hemen dosya eklemek için **Dosya ekle**ye tıkla.",
             "**Create**e tıkla. Yeni öğe ayrıntıları doldurman için açılır."
           ]
@@ -711,8 +781,7 @@
           "legend": [
             "**New**: Üst çubuktaki büyük düğme. Kısayol: N.",
             "**Task**: Sprint için bir iş parçası.",
-            "**Epic**: Birçok Task’ı toplayan büyük hedef.",
-            "**Space**: Yeni proje veya takım alanı."
+            "**Epic**: Birçok Task’ı toplayan büyük hedef."
           ]
         },
         {
@@ -723,11 +792,11 @@
     },
     {
       "id": "paylasim",
-      "title": "12. Task veya Epic üzerinde paylaşım ve yetkiler",
+      "title": "14. Task veya Epic üzerinde paylaşım ve yetkiler",
       "blocks": [
         {
           "type": "p",
-          "text": "Varsayılan olarak her öğe Space’inin erişimini izler. **Share** ile bir öğeye (ve altındaki her şeye) kişi ya da takım ekleyebilir veya öğeyi **Gizli** yapabilirsin."
+          "text": "Varsayılan olarak her öğe Projesinin erişimini izler. **Share** ile bir öğeye (ve altındaki her şeye) kişi ya da takım ekleyebilir veya öğeyi **Gizli** yapabilirsin."
         },
         {
           "type": "steps",
@@ -736,7 +805,7 @@
             "Birine yalnızca bu öğede daha fazla yetki vermek için **Kişi veya takım ekle** altından seç, bir rol seç (örneğin **Developer**) ve **Ekle**ye tıkla.",
             "Öğeyi gizlemek için **Gizli**yi aç. Onu ve altındaki her şeyi yalnızca listedekiler (ve Owner/Admin) görür.",
             "**Kaydet**e tıkla. Düğme artık **Shared** veya **Private** yazar.",
-            "Space kurallarına dönmek için **Share**i yeniden aç ve **Mirasa döndür**e tıkla."
+            "Proje kurallarına dönmek için **Share**i yeniden aç ve **Mirasa döndür**e tıkla."
           ]
         },
         {
@@ -757,13 +826,13 @@
         },
         {
           "type": "warn",
-          "text": "Birine kendi sahip olduğundan fazla yetki veremezsin. Özel bir Space’te olmayan biriyle öğe paylaşmak için önce onu o Space’e ekle."
+          "text": "Birine kendi sahip olduğundan fazla yetki veremezsin. Özel bir Projede olmayan biriyle öğe paylaşmak için önce onu o Projeye ekle."
         }
       ]
     },
     {
       "id": "roller",
-      "title": "13. Roller ve yetkiler (Ayarlar)",
+      "title": "15. Roller ve yetkiler (Ayarlar)",
       "blocks": [
         {
           "type": "p",
@@ -773,7 +842,7 @@
           "type": "steps",
           "items": [
             "**Ayarlar**ı aç ve **Roles**e tıkla.",
-            "**Space roles** (bir Space içindeki haklar) veya **Workspace roles** (tüm workspace’teki haklar) seç.",
+            "**Proje rolleri** (bir Proje içindeki haklar) veya **Workspace roles** (tüm workspace’teki haklar) seç.",
             "Bir rolü değiştirmek için kutuyu işaretle ya da kaldır. Her satır bir yetkidir.",
             "Kendi rolünü oluşturmak için **New role**a tıkla (örneğin **QA Engineer**). Mevcut bir rolden başlayabilirsin.",
             "Bir sütundaki **⋯** menüsüyle özel rolü yeniden adlandır, sil ya da hazır rolü varsayılana döndür."
@@ -785,7 +854,7 @@
           "alt": "Roller ve yetkiler tablosu",
           "caption": "Her rol için bir sütun içeren Roles sayfası.",
           "legend": [
-            "**Space roles / Workspace roles**: İki rol türü arasında geçiş yapar.",
+            "**Proje rolleri / Workspace roles**: İki rol türü arasında geçiş yapar.",
             "**New role**: Özel rol oluşturur.",
             "**Rol sütunu**: Her rol için bir sütun; sayı, rolü kaç kişinin kullandığını gösterir.",
             "**Onay kutusu**: O rol için bir yetkiyi açar veya kapatır."
@@ -799,7 +868,7 @@
     },
     {
       "id": "dosya",
-      "title": "14. Dosya ekleme",
+      "title": "16. Dosya ekleme",
       "blocks": [
         {
           "type": "p",
@@ -822,16 +891,16 @@
     },
     {
       "id": "kanban-space",
-      "title": "15. Tüm Space için Kanban board",
+      "title": "17. Tüm Proje için Kanban board",
       "blocks": [
         {
           "type": "p",
-          "text": "Her Space’in sol menüsünde bir **Kanban board** bağlantısı vardır. Space’in tüm listelerindeki açık öğeleri tek panoda gösterir. Sprintsiz, sürekli akış için Space oluştururken çalışma modu olarak **Kanban**ı seç."
+          "text": "Her Projenin sol menüsünde bir **Kanban board** bağlantısı vardır. Projenin tüm listelerindeki açık öğeleri tek panoda gösterir. Sprintsiz, sürekli akış için Proje oluştururken çalışma modu olarak **Kanban**ı seç."
         },
         {
           "type": "steps",
           "items": [
-            "Sol menüde Space’inin altındaki **Kanban board**a tıkla.",
+            "Sol menüde Projesinin altındaki **Kanban board**a tıkla.",
             "Her sütun bir durumdur. Durumu değiştirmek için kartı başka sütuna sürükle.",
             "Bir sütunun altındaki **Kart ekle**ye tıkla, başlığı yaz ve Enter’a bas; kart o durumda oluşur.",
             "Panoyu daraltmak için **Liste**, süzgeç kutusu ve **Yalnızca benimkiler**i kullan. **Satırlar** seçici kartları kişiye, Epic’e veya önceliğe göre gruplar.",
@@ -841,7 +910,7 @@
         {
           "type": "figure",
           "image": "25-kanban",
-          "alt": "Space Kanban board",
+          "alt": "Proje Kanban board",
           "caption": "Süzgeçleri ve Kart ekle düğmesiyle Kanban board.",
           "legend": [
             "**Liste**: Tek bir listeyi ya da tüm listeleri gösterir.",
@@ -857,7 +926,7 @@
     },
     {
       "id": "ipuclari",
-      "title": "16. Kısa ipuçları ve sık sorulanlar",
+      "title": "18. Kısa ipuçları ve sık sorulanlar",
       "blocks": [
         {
           "type": "table",
@@ -892,7 +961,7 @@
           "type": "bullets",
           "items": [
             "**Epic kullanmak zorunda mıyım?** Hayır. Epic isteğe bağlıdır; Task'larla doğrudan çalışabilirsin.",
-            "**Epic'e dönüştür seçeneğini göremiyorum.** Yalnızca Task'larda ve çalışma modu Scrum olan Space'lerde görünür; Bug ve Sub-Task'ta yoktur. Yazma yetkin de olmalı.",
+            "**Epic'e dönüştür seçeneğini göremiyorum.** Yalnızca Task'larda ve çalışma modu Scrum olan Projelerde görünür; Bug ve Sub-Task'ta yoktur. Yazma yetkin de olmalı.",
             "**Epic'i tekrar Task yapabilir miyim?** Hayır, dönüşüm geri alınamaz. Emin değilsen önce Task'ı kopyalayıp kopyayı dönüştür.",
             "**Story Point listesinde neden 4 yok?** Seyir standart Fibonacci ölçeğini (1, 2, 3, 5, 8, 13, 21, 34, 55) kullanır. İki puan arası bir sayı yerine yakın değeri seç.",
             "**Üst Task'ın puanı neden değişmiyor?** Sub-Task'ları varsa puan onların toplamıdır. Sub-Task'ların puanını değiştir.",

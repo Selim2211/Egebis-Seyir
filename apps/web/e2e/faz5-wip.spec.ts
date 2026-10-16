@@ -14,13 +14,13 @@ test.describe.serial('WIP limiti', () => {
 
     await page
       .getByRole('complementary')
-      .getByRole('button', { name: 'Space oluştur' })
+      .getByRole('button', { name: 'Proje oluştur' })
       .first()
       .click();
-    const dialog = page.getByRole('dialog', { name: 'Yeni Space oluştur' });
+    const dialog = page.getByRole('dialog', { name: 'Yeni Proje oluştur' });
     await dialog.getByLabel('Ad', { exact: true }).fill('WIP Testi');
     await dialog.getByLabel('Anahtar').fill('WIP');
-    await dialog.getByRole('button', { name: 'Space oluştur' }).click();
+    await dialog.getByRole('button', { name: 'Proje oluştur' }).click();
     await expect(page.getByRole('heading', { name: 'WIP Testi' })).toBeVisible();
     const spaceId = /spaces\/([^/?]+)/.exec(page.url())![1]!;
 

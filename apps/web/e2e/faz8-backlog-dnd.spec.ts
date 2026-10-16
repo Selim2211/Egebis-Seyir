@@ -31,13 +31,13 @@ test.describe.serial('Backlog sürükle-bırak ve sprint ağacı', () => {
     await page.mouse.up();
   };
 
-  test('Space, üç Task ve iki sprint hazırlanır', async ({ page }) => {
+  test('Proje, üç Task ve iki sprint hazırlanır', async ({ page }) => {
     const sidebar = page.getByRole('complementary');
-    await sidebar.getByRole('button', { name: 'Space oluştur' }).first().click();
-    const dialog = page.getByRole('dialog', { name: 'Yeni Space oluştur' });
+    await sidebar.getByRole('button', { name: 'Proje oluştur' }).first().click();
+    const dialog = page.getByRole('dialog', { name: 'Yeni Proje oluştur' });
     await dialog.getByLabel('Ad', { exact: true }).fill('Sürükle Denemesi');
     await dialog.getByLabel('Anahtar').fill('DND');
-    await dialog.getByRole('button', { name: 'Space oluştur' }).click();
+    await dialog.getByRole('button', { name: 'Proje oluştur' }).click();
     await expect(page.getByRole('heading', { name: 'Sürükle Denemesi' })).toBeVisible();
     await page.getByRole('link', { name: 'Görevler' }).first().click();
 

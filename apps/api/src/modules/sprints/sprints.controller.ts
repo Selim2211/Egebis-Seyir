@@ -202,6 +202,14 @@ export class SprintsController {
     return this.backlog.nest(itemId, body);
   }
 
+  /** Öğeyi üst öğesinden ayır; Sub-Task bağımsız Task olur (ADR-116). */
+  @Post('items/:itemId/unnest')
+  @RequireSpacePermission(S.WORK_ITEM_WRITE)
+  @HttpCode(NO_CONTENT)
+  unnest(@Uuid('itemId') itemId: string): Promise<void> {
+    return this.backlog.unnest(itemId);
+  }
+
   // ---------- Excel (Faz 8.4, ADR-104) ----------
 
   /** Sprint'i öğeleri, özellikleri ve bağımlılıklarıyla Excel olarak indirir. */

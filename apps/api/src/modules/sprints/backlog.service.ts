@@ -247,6 +247,39 @@ export class BacklogService {
   }
 
   /**
+   * Öğeyi üst öğesinden ayırır (sürükle-bırak "Ayır" alanı, ADR-116). Sub-Task bağımsız bir Task olur;
+   * Epic altındaki Task/Bug yalnızca Epic'ten ayrılır. Alt öğenin sprint'i yoktur; ayrılan öğe Backlog'a düşer.
+   */
+  async unnest(itemId: string): Promise<void> {
+    const { workspaceId, actorId } = this.ctx;
+    const db = this.tenant.db;
+    const item = await db.workItem.findFirst({
+      where: { id: itemId, ...countedItems },
+      include: { parent: { select: { keyPrefix: true, number: true } } },
+    });
+    if (!item) throw notFound();
+    if (!item.parentId) return;
+    const type = item.type === 'SUBTASK' ? 'TASK' : item.type;
+    await db.$transaction(async (tx) => {
+      await tx.workItem.update({ where: { id: item.id }, data: { parentId: null, type } });
+      await this.activity.record(tx, {
+        workspaceId,
+        actorId,
+        entityType: 'item',
+        entityId: item.id,
+        action: 'item.updated',
+        changes: asJson({
+          parentId: {
+            from: item.parent ? formatItemKey(item.parent.keyPrefix, item.parent.number) : null,
+            to: null,
+          },
+          ...(type !== item.type ? { type: { from: item.type, to: type } } : {}),
+        }),
+      });
+    });
+  }
+
+  /**
    * Task'ı Epic'e dönüştürür (isteğe bağlı, ADR-109). Epic üst öğe, sprint, saat tahmini, yüzde ve tekrar
    * taşımaz; bu yüzden üst öğesinden ayrılır, sprint'ten çıkar (üyelik geçmişine yazılır) ve bu alanlar
    * temizlenir. Sub-Task'lar Epic'in altında geçerli olmadığından Task'a dönüşür.

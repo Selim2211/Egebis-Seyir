@@ -1,0 +1,3 @@
+-- Bug bildirimleri (ADR-117).
+ALTER TYPE "NotificationType" ADD VALUE IF NOT EXISTS 'BUG_REPORTED';
+ALTER TYPE "NotificationType" ADD VALUE IF NOT EXISTS 'BUG_STATUS';

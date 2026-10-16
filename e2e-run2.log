@@ -1,0 +1,441 @@
+[WebServer] $ nest build -p tsconfig.e2e.json
+[WebServer] $ node dist-e2e/main.js
+Loaded Prisma config from prisma.config.ts.
+
+Prisma schema loaded from prisma\schema.prisma.
+Datasource "db": PostgreSQL database "scrum_e2e", schema "public" at "localhost:5432"
+
+42 migrations found in prisma/migrations
+
+
+No pending migrations to apply.
+Loaded Prisma config from prisma.config.ts.
+
+Script executed successfully.
+
+Running 138 tests using 1 worker
+
+  ok   1 [chromium] › e2e\bugs-dnd.spec.ts:34:3 › Bug ekranı ve sürükle-bırak › Proje ve iki Task hazırlanır; listede Bug seçeneği yok (4.8s)
+  ok   2 [chromium] › e2e\bugs-dnd.spec.ts:55:3 › Bug ekranı ve sürükle-bırak › Task başka Task üstüne sürüklenir, onaylanınca Sub-Task olur; Ayır ile geri Task olur (5.2s)
+  ok   3 [chromium] › e2e\bugs-dnd.spec.ts:85:3 › Bug ekranı ve sürükle-bırak › Sprint panosundaki kırmızı Bugs düğmesi; Bug açılır, atanır, çözülür; listede görünmez (5.4s)
+  ok   4 [chromium] › e2e\epic-promote.spec.ts:16:3 › Task'ı Epic'e dönüştürme › Task ve Sub-Task hazırlanır (3.8s)
+  ok   5 [chromium] › e2e\epic-promote.spec.ts:39:3 › Task'ı Epic'e dönüştürme › yalnızca Task satırında seçenek var; onaylayınca Epic olur, Sub-Task Task olur (6.1s)
+  x    6 [chromium] › e2e\faz1-auth.spec.ts:13:3 › Kimlik, workspace ve davet › ilk açılışta kurulum ekranı gelir ve Owner oluşturulur (5.6s)
+  -    7 [chromium] › e2e\faz1-auth.spec.ts:31:3 › Kimlik, workspace ve davet › Owner üye davet eder; davet e-postası gelir
+  -    8 [chromium] › e2e\faz1-auth.spec.ts:48:3 › Kimlik, workspace ve davet › davet bağlantısıyla hesap açılır; Member davet edemez
+  -    9 [chromium] › e2e\faz1-auth.spec.ts:75:3 › Kimlik, workspace ve davet › yanlış şifre hata verir; doğru şifreyle giriş yapılır
+  -   10 [chromium] › e2e\faz1-auth.spec.ts:85:3 › Kimlik, workspace ve davet › korumalı sayfa oturumsuz açılınca giriş sonrası geri döner
+  -   11 [chromium] › e2e\faz1-auth.spec.ts:93:3 › Kimlik, workspace ve davet › dil ve tema kullanıcı menüsünden değişir ve hesaba kaydedilir
+  -   12 [chromium] › e2e\faz1-auth.spec.ts:117:3 › Kimlik, workspace ve davet › bilinmeyen adres 404 gösterir
+  ok  13 [chromium] › e2e\faz1-collab.spec.ts:26:3 › Yorum, ek, aktivite ve Ana sayfa › Proje ve iş öğesi hazırlanır (3.8s)
+[WebServer] 20:09:55 [vite] (client) [console.warn] linkifyjs: already initialized - will not register custom scheme "http" until manual call of linkify.init(). Register all schemes and plugins before invoking linkify the first time.
+[WebServer] 20:09:55 [vite] (client) [console.warn] linkifyjs: already initialized - will not register custom scheme "https" until manual call of linkify.init(). Register all schemes and plugins before invoking linkify the first time.
+[WebServer] 20:09:55 [vite] (client) [console.warn] linkifyjs: already initialized - will not register custom scheme "mailto" until manual call of linkify.init(). Register all schemes and plugins before invoking linkify the first time.
+[WebServer] 20:09:55 [vite] (client) [console.warn] linkifyjs: already initialized - will not register custom scheme "http" until manual call of linkify.init(). Register all schemes and plugins before invoking linkify the first time.
+[WebServer] 20:09:55 [vite] (client) [console.warn] linkifyjs: already initialized - will not register custom scheme "https" until manual call of linkify.init(). Register all schemes and plugins before invoking linkify the first time.
+[WebServer] 20:09:55 [vite] (client) [console.warn] linkifyjs: already initialized - will not register custom scheme "mailto" until manual call of linkify.init(). Register all schemes and plugins before invoking linkify the first time.
+  ok  14 [chromium] › e2e\faz1-collab.spec.ts:41:3 › Yorum, ek, aktivite ve Ana sayfa › yorum yazılır, düzenlenir, tepki verilir ve silinir (5.6s)
+  ok  15 [chromium] › e2e\faz1-collab.spec.ts:87:3 › Yorum, ek, aktivite ve Ana sayfa › dosya eklenir, resim önizlenir, çalıştırılabilir dosya da eklenir, silinir (3.5s)
+  ok  16 [chromium] › e2e\faz1-collab.spec.ts:113:3 › Yorum, ek, aktivite ve Ana sayfa › aktivite sekmesi değişiklikleri okunur cümlelerle gösterir (3.7s)
+  ok  17 [chromium] › e2e\faz1-collab.spec.ts:123:3 › Yorum, ek, aktivite ve Ana sayfa › Ana sayfa: atananlar, favoriler ve son aktivite görünür (3.8s)
+  ok  18 [chromium] › e2e\faz1-collab.spec.ts:137:3 › Yorum, ek, aktivite ve Ana sayfa › profil fotoğrafı yüklenir ve kaldırılır (2.8s)
+  ok  19 [chromium] › e2e\faz1-detail.spec.ts:24:3 › Görev detayı › Proje ve iki iş öğesi hazırlanır (3.3s)
+  ok  20 [chromium] › e2e\faz1-detail.spec.ts:45:3 › Görev detayı › başlığa tıklayınca yan panel açılır; açıklama ve kabul kriteri kaydedilir (4.3s)
+  ok  21 [chromium] › e2e\faz1-detail.spec.ts:78:3 › Görev detayı › Task Sub-Task'lara bölünür (3.3s)
+  ok  22 [chromium] › e2e\faz1-detail.spec.ts:90:3 › Görev detayı › bağlantı eklenir; engelleyeni açık öğe başlatılırken uyarılır (5.6s)
+  ok  23 [chromium] › e2e\faz1-detail.spec.ts:116:3 › Görev detayı › tam sayfada özellikler düzenlenir ve izleme açılıp kapanır (3.5s)
+  ok  24 [chromium] › e2e\faz1-items.spec.ts:16:3 › İş öğeleri › Proje oluşturulur, listeye hızlı oluşturmayla Task eklenir (3.7s)
+  ok  25 [chromium] › e2e\faz1-items.spec.ts:43:3 › İş öğeleri › alt öğe eklenir; durum ve öncelik satır içinde değişir (5.1s)
+  ok  26 [chromium] › e2e\faz1-items.spec.ts:72:3 › İş öğeleri › açık alt öğesi olan Task Done'a çekilirken uyarılır (4.5s)
+  ok  27 [chromium] › e2e\faz1-items.spec.ts:88:3 › İş öğeleri › öğe silinir, "Geri al" ile döner; çöp kutusunda listelenir (4.9s)
+  ok  28 [chromium] › e2e\faz1-spaces.spec.ts:16:3 › Proje / Folder / List › Proje oluşturulur; anahtar addan önerilir, varsayılan liste ve durumlar gelir (3.0s)
+  ok  29 [chromium] › e2e\faz1-spaces.spec.ts:37:3 › Proje / Folder / List › Folder ve liste oluşturulur, liste yeniden adlandırılır ve favorilere eklenir (4.4s)
+  ok  30 [chromium] › e2e\faz1-spaces.spec.ts:68:3 › Proje / Folder / List › liste arşivlenir, geri alınır; silinen liste çöp kutusundan geri getirilir (5.0s)
+  ok  31 [chromium] › e2e\faz1-views.spec.ts:22:3 › Görünümler ve arama › Proje ve üç iş öğesi hazırlanır; C tuşu hızlı oluşturmaya odaklanır (4.0s)
+  ok  32 [chromium] › e2e\faz1-views.spec.ts:44:3 › Görünümler ve arama › durum değişir, Table görünümüne geçilir, sütun başlığından sıralanır (4.3s)
+  ok  33 [chromium] › e2e\faz1-views.spec.ts:64:3 › Görünümler ve arama › liste içi arama ve durum süzgeci adrese yazılır; gruplama başlık gösterir (3.4s)
+  ok  34 [chromium] › e2e\faz1-views.spec.ts:87:3 › Görünümler ve arama › toplu düzenleme: seçili öğelerin önceliği değişir (3.5s)
+  ok  35 [chromium] › e2e\faz1-views.spec.ts:101:3 › Görünümler ve arama › Benim işlerim: oluşturduklarım listelenir (2.6s)
+  ok  36 [chromium] › e2e\faz1-views.spec.ts:110:3 › Görünümler ve arama › global arama: Ctrl+K ile açılır, başlıkla bulur, Enter sonucu açar (3.1s)
+  ok  37 [chromium] › e2e\faz2-backlog.spec.ts:16:3 › Backlog ve sprint › Proje ve üç Task hazırlanır (3.4s)
+  ok  38 [chromium] › e2e\faz2-backlog.spec.ts:35:3 › Backlog ve sprint › Backlog öncelik sırasıyla listelenir, tahminsizler vurgulanır (3.1s)
+  ok  39 [chromium] › e2e\faz2-backlog.spec.ts:52:3 › Backlog ve sprint › sprint oluşturulur ve öğeler taşınır, geri alınır (5.2s)
+  ok  40 [chromium] › e2e\faz2-backlog.spec.ts:86:3 › Backlog ve sprint › boş sprint silinir (4.1s)
+  ok  41 [chromium] › e2e\faz2-board.spec.ts:23:3 › Board › Proje, iki Task ve sprint hazırlanır (4.9s)
+  ok  42 [chromium] › e2e\faz2-board.spec.ts:58:3 › Board › sprint panosu: kartlar ilk sütunda; menüyle ve sürükleyerek durum değişir (4.4s)
+  ok  43 [chromium] › e2e\faz2-board.spec.ts:89:3 › Board › satırlar önceliğe göre gruplanır; karta tıklayınca yan panel açılır (3.0s)
+  ok  44 [chromium] › e2e\faz2-board.spec.ts:101:3 › Board › List sayfasının Board sekmesi listedeki öğeleri gösterir (2.9s)
+  ok  45 [chromium] › e2e\faz2-lifecycle.spec.ts:30:3 › Sprint yaşam döngüsü › Proje, üç Task ve iki sprint hazırlanır (6.1s)
+  ok  46 [chromium] › e2e\faz2-lifecycle.spec.ts:53:3 › Sprint yaşam döngüsü › öğeler taşınıp Sprint 1 başlatılır; aktif varken ikinci sprint başlatılamaz (4.2s)
+  ok  47 [chromium] › e2e\faz2-lifecycle.spec.ts:82:3 › Sprint yaşam döngüsü › aktif sprint'e öğe eklemek kapsam değişikliği onayı ister (3.6s)
+  ok  48 [chromium] › e2e\faz2-lifecycle.spec.ts:94:3 › Sprint yaşam döngüsü › pano: bir öğe bitirilir; sprint tamamlanıp bitmeyenler devredilir (4.1s)
+  ok  49 [chromium] › e2e\faz2-lifecycle.spec.ts:121:3 › Sprint yaşam döngüsü › geçmiş sayfası sprintleri listeler; devredilenler Sprint 2’de (3.2s)
+  ok  50 [chromium] › e2e\faz2-lifecycle.spec.ts:135:3 › Sprint yaşam döngüsü › planlama: öğe sürüklenerek sprint ile Backlog arasında taşınır; sprint iptal edilir (4.1s)
+  ok  51 [chromium] › e2e\faz2-lifecycle.spec.ts:172:3 › Sprint yaşam döngüsü › sprint hedefi zorunluyken hedefsiz sprint başlamaz; Proje ayarı kapatılınca uyarıyla başlar (5.8s)
+  ok  52 [chromium] › e2e\faz2-notifications.spec.ts:43:3 › Bildirimler › boş kutu: rozet yok, boş durum görünür (2.1s)
+Loaded Prisma config from prisma.config.ts.
+
+Script executed successfully.
+  ok  53 [chromium] › e2e\faz2-notifications.spec.ts:53:3 › Bildirimler › bildirimler rozeti artırır; tıklayınca okundu olur ve öğeye gider (6.9s)
+  ok  54 [chromium] › e2e\faz2-notifications.spec.ts:92:3 › Bildirimler › tercih ekranı: anahtarlar kaydedilir ve yenilemeden sonra korunur (3.5s)
+  ok  55 [chromium] › e2e\faz2-readiness.spec.ts:27:3 › DoD, DoR ve Sprint Review › Proje, DoD/DoR maddeleri ve üç Task hazırlanır (4.6s)
+  ok  56 [chromium] › e2e\faz2-readiness.spec.ts:55:3 › DoD, DoR ve Sprint Review › öğede DoR işaretlenir; Backlog rozeti güncellenir (4.2s)
+  ok  57 [chromium] › e2e\faz2-readiness.spec.ts:74:3 › DoD, DoR ve Sprint Review › eksik DoD ile Done uyarır; DoD tamamlanınca uyarı çıkmaz (5.3s)
+  ok  58 [chromium] › e2e\faz2-readiness.spec.ts:100:3 › DoD, DoR ve Sprint Review › DoD zorunlu yapılınca eksik maddeyle Done engellenir (4.6s)
+  ok  59 [chromium] › e2e\faz2-readiness.spec.ts:116:3 › DoD, DoR ve Sprint Review › sprint tamamlanır; Review özeti ve demo notları görünür (6.6s)
+  ok  60 [chromium] › e2e\faz2-reports.spec.ts:42:3 › Raporlar › veri yokken boş durumlar görünür (4.2s)
+Loaded Prisma config from prisma.config.ts.
+
+Script executed successfully.
+Loaded Prisma config from prisma.config.ts.
+
+Script executed successfully.
+  ok  61 [chromium] › e2e\faz2-reports.spec.ts:56:3 › Raporlar › aktif sprint: başlangıç ve kalan puan; biten iş kalanı düşürür (10.5s)
+  ok  62 [chromium] › e2e\faz2-reports.spec.ts:119:3 › Raporlar › sprint tamamlanınca velocity taahhüt ve tamamlananı gösterir (4.6s)
+  ok  63 [chromium] › e2e\faz3-doc-links.spec.ts:16:3 › Doküman bağlantıları ve yorumları › görev bağlanır; görev sayfasında doküman görünür (6.1s)
+  ok  64 [chromium] › e2e\faz3-doc-links.spec.ts:51:3 › Doküman bağlantıları ve yorumları › sayfaya yorum yazılır; bağlantı kaldırılır (5.4s)
+  ok  65 [chromium] › e2e\faz3-docs.spec.ts:25:3 › Dokümanlar › ilk sayfa oluşturulur; başlık ve içerik otomatik kaydedilir (6.3s)
+  ok  66 [chromium] › e2e\faz3-docs.spec.ts:66:3 › Dokümanlar › tablo eklenir; alt sayfa ağaçta girintili görünür (6.2s)
+  ok  67 [chromium] › e2e\faz3-docs.spec.ts:88:3 › Dokümanlar › sürüm geçmişi içeriği önizler (3.4s)
+  ok  68 [chromium] › e2e\faz3-docs.spec.ts:105:3 › Dokümanlar › sayfa silinir; çöp kutusundan alt sayfalarıyla geri gelir (4.2s)
+Loaded Prisma config from prisma.config.ts.
+
+Script executed successfully.
+  ok  69 [chromium] › e2e\faz3-epics.spec.ts:30:3 › Epic detayı › Epic ve iki Task hazırlanır; Epic’ler sekmesi ilerlemeyi gösterir (5.6s)
+  ok  70 [chromium] › e2e\faz3-epics.spec.ts:76:3 › Epic detayı › Epic detayı toplam puanı ve ilerlemeyi gösterir (2.8s)
+  ok  71 [chromium] › e2e\faz3-retro.spec.ts:16:3 › Retrospektif › aktif sprint için retrospektif açılır; maddeler eklenir ve oylanır (5.5s)
+  ok  72 [chromium] › e2e\faz3-retro.spec.ts:60:3 › Retrospektif › aksiyon göreve çevrilir ve Backlog’da görünür (4.0s)
+Loaded Prisma config from prisma.config.ts.
+
+Script executed successfully.
+  ok  73 [chromium] › e2e\faz4-calendar.spec.ts:34:3 › Takvim görünümü › bitiş tarihli öğe günde görünür; başka güne sürüklenince tarihi değişir (6.9s)
+  ok  74 [chromium] › e2e\faz4-dashboard.spec.ts:23:3 › Pano › varsayılan widget’lar görünür; akış verisi gelir (3.9s)
+  ok  75 [chromium] › e2e\faz4-dashboard.spec.ts:53:3 › Pano › widget gizlenir, geri eklenir ve düzen kalıcıdır (4.7s)
+  ok  76 [chromium] › e2e\faz4-dashboard.spec.ts:69:3 › Pano › widget boyutu değişir ve yukarı taşınır (3.3s)
+  ok  77 [chromium] › e2e\faz4-dashboard.spec.ts:87:3 › Pano › akış CSV olarak indirilir (2.8s)
+Loaded Prisma config from prisma.config.ts.
+
+Script executed successfully.
+  ok  78 [chromium] › e2e\faz4-gantt.spec.ts:30:3 › Gantt › bağımlı işler okla bağlanır ve kritik yol işaretlenir (5.7s)
+  ok  79 [chromium] › e2e\faz4-gantt.spec.ts:73:3 › Gantt › çubuğu sürüklemek tarihleri kaydırır (3.1s)
+Loaded Prisma config from prisma.config.ts.
+
+Script executed successfully.
+  ok  80 [chromium] › e2e\faz4-roadmap.spec.ts:30:3 › Roadmap › tarihli Epic çubuk olur; tarihsiz Epic ayrı listelenir (5.6s)
+  ok  81 [chromium] › e2e\faz4-time.spec.ts:16:3 › Zaman takibi › elle süre girilir; geçersiz süre uyarı verir (4.8s)
+  ok  82 [chromium] › e2e\faz4-time.spec.ts:45:3 › Zaman takibi › sayaç üst çubukta çalışır ve durunca süre kaydedilir (3.6s)
+  ok  83 [chromium] › e2e\faz4-time.spec.ts:61:3 › Zaman takibi › zaman çizelgesi haftalık toplamı gösterir (2.7s)
+Loaded Prisma config from prisma.config.ts.
+
+Script executed successfully.
+  ok  84 [chromium] › e2e\faz4-workload.spec.ts:30:3 › İş yükü › atanan ve atanmamış açık işler kişi satırlarında toplanır (5.4s)
+  ok  85 [chromium] › e2e\faz5-automations.spec.ts:10:3 › Otomasyonlar › duruma geçince önceliği yükselten kural çalışır ve günlüğe yazılır (8.9s)
+  ok  86 [chromium] › e2e\faz5-csv.spec.ts:11:3 › CSV içe/dışa aktarma › liste CSV olarak indirilir; CSV eşlenip önizlenir ve içe aktarılır (5.1s)
+  ok  87 [chromium] › e2e\faz5-fields.spec.ts:10:3 › Özel alanlar › alan tanımlanır, işe değer girilir ve Table sütununda görünür (10.3s)
+  ok  88 [chromium] › e2e\faz5-statuses.spec.ts:10:3 › Özel durum akışı › durum eklenir, adlandırılır ve silinince işler taşınır (8.0s)
+  ok  89 [chromium] › e2e\faz5-templates.spec.ts:10:3 › Şablonlar › iş şablon olarak kaydedilir, Şablondan ekle ile yeni iş gelir (7.9s)
+  ok  90 [chromium] › e2e\faz5-templates.spec.ts:53:3 › Şablonlar › Proje şablonundan yeni Proje (4.7s)
+  ok  91 [chromium] › e2e\faz5-views.spec.ts:18:3 › Kayıtlı görünümler › süzgeç kaydedilir ve başka bir durumdayken tek tıkla uygulanır (5.5s)
+  ok  92 [chromium] › e2e\faz5-views.spec.ts:59:3 › Kayıtlı görünümler › görünüm silinir (5.2s)
+  ok  93 [chromium] › e2e\faz5-wip.spec.ts:10:3 › WIP limiti › sınır aşılınca Board sütunu uyarır (5.8s)
+  ok  94 [chromium] › e2e\faz6-ai.spec.ts:30:3 › Yapay zekâ önerileri › hikâye önerisi kabul kriteri listesi olarak eklenir (7.4s)
+  ok  95 [chromium] › e2e\faz6-api-tokens.spec.ts:10:3 › API erişimi › token oluşturulur, değeri bir kez görünür ve iptal edilir (3.8s)
+  ok  96 [chromium] › e2e\faz6-create-account.spec.ts:10:3 › Hesap oluşturma › yönetici hesap açar, üretilen şifreyle yeni kullanıcı giriş yapar (5.2s)
+  ok  97 [chromium] › e2e\faz6-git.spec.ts:11:3 › Git entegrasyonu › commit anahtarı geçen işe bağlanır (5.3s)
+  x   98 [chromium] › e2e\faz6-webhooks.spec.ts:28:3 › Webhook’lar › webhook eklenir; test olayı alıcıya ulaşır ve günlüğe yazılır (9.9s)
+[WebServer] 20:16:47 [vite] (client) [console.warn] linkifyjs: already initialized - will not register custom scheme "http" until manual call of linkify.init(). Register all schemes and plugins before invoking linkify the first time.
+[WebServer] 20:16:47 [vite] (client) [console.warn] linkifyjs: already initialized - will not register custom scheme "https" until manual call of linkify.init(). Register all schemes and plugins before invoking linkify the first time.
+[WebServer] 20:16:47 [vite] (client) [console.warn] linkifyjs: already initialized - will not register custom scheme "mailto" until manual call of linkify.init(). Register all schemes and plugins before invoking linkify the first time.
+[WebServer] 20:16:47 [vite] (client) [console.warn] linkifyjs: already initialized - will not register custom scheme "http" until manual call of linkify.init(). Register all schemes and plugins before invoking linkify the first time.
+[WebServer] 20:16:47 [vite] (client) [console.warn] linkifyjs: already initialized - will not register custom scheme "https" until manual call of linkify.init(). Register all schemes and plugins before invoking linkify the first time.
+[WebServer] 20:16:47 [vite] (client) [console.warn] linkifyjs: already initialized - will not register custom scheme "mailto" until manual call of linkify.init(). Register all schemes and plugins before invoking linkify the first time.
+[WebServer] 20:16:47 [vite] (client) [console.warn] linkifyjs: already initialized - will not register custom scheme "http" until manual call of linkify.init(). Register all schemes and plugins before invoking linkify the first time.
+[WebServer] 20:16:47 [vite] (client) [console.warn] linkifyjs: already initialized - will not register custom scheme "https" until manual call of linkify.init(). Register all schemes and plugins before invoking linkify the first time.
+[WebServer] 20:16:47 [vite] (client) [console.warn] linkifyjs: already initialized - will not register custom scheme "mailto" until manual call of linkify.init(). Register all schemes and plugins before invoking linkify the first time.
+[WebServer] 20:16:47 [vite] (client) [console.warn] linkifyjs: already initialized - will not register custom scheme "http" until manual call of linkify.init(). Register all schemes and plugins before invoking linkify the first time.
+[WebServer] 20:16:47 [vite] (client) [console.warn] linkifyjs: already initialized - will not register custom scheme "https" until manual call of linkify.init(). Register all schemes and plugins before invoking linkify the first time.
+[WebServer] 20:16:47 [vite] (client) [console.warn] linkifyjs: already initialized - will not register custom scheme "mailto" until manual call of linkify.init(). Register all schemes and plugins before invoking linkify the first time.
+  ok  99 [chromium] › e2e\faz7-docs.spec.ts:16:3 › Doküman arama, ekler ve görev listesi › sayfa oluşturulur; görev listesi ve ek eklenir; global arama sayfayı bulur (7.9s)
+  x  100 [chromium] › e2e\faz7-forms.spec.ts:16:3 › Formlar › form tanımlanır, doldurulur ve görev oluşur (11.5s)
+  ok 101 [chromium] › e2e\faz7-goals.spec.ts:16:3 › Hedefler › sayısal hedef oluşturulur ve güncel değer ilerlemeyi değiştirir (3.2s)
+  ok 102 [chromium] › e2e\faz7-goals.spec.ts:35:3 › Hedefler › görev bazlı hedefe görev bağlanır (5.1s)
+  ok 103 [chromium] › e2e\faz7-messages.spec.ts:10:3 › Mesajlar › yönetici bir kullanıcıya yazar; o rozeti görür, okur ve cevap verir (8.5s)
+[WebServer] (node:6368) DeprecationWarning: Calling client.query() when the client is already executing a query is deprecated and will be removed in pg@9.0. Use async/await or an external async flow control mechanism instead.
+[WebServer] (Use `node --trace-deprecation ...` to show where the warning was created)
+  ok 104 [chromium] › e2e\faz7-recurrence.spec.ts:16:3 › Tekrarlayan görev › haftalık tekrar kurulur; görev tamamlanınca bir sonraki hafta için yenisi doğar (6.5s)
+  ok 105 [chromium] › e2e\faz7-reminders.spec.ts:16:3 › Hatırlatıcılar › hatırlatıcı kurulur, listelenir ve silinir (5.7s)
+  ok 106 [chromium] › e2e\faz7-teams.spec.ts:10:3 › Ekipler › ekip oluşturulur ve göreve tek tıkla atanır (6.0s)
+  ok 107 [chromium] › e2e\faz8-audit.spec.ts:10:3 › Denetim günlüğü › Sahip günlüğü görür, türe göre süzer ve CSV indirir (3.9s)
+  ok 108 [chromium] › e2e\faz8-backlog-dnd.spec.ts:34:3 › Backlog sürükle-bırak ve sprint ağacı › Proje, üç Task ve iki sprint hazırlanır (7.1s)
+  ok 109 [chromium] › e2e\faz8-backlog-dnd.spec.ts:62:3 › Backlog sürükle-bırak ve sprint ağacı › sol menüde sprint ağacı açılır ve sprintler listelenir (3.2s)
+  ok 110 [chromium] › e2e\faz8-backlog-dnd.spec.ts:73:3 › Backlog sürükle-bırak ve sprint ağacı › öğe backlog → sprint 1 → sprint 2 → backlog sürüklenir (5.8s)
+  ok 111 [chromium] › e2e\faz8-backlog-dnd.spec.ts:90:3 › Backlog sürükle-bırak ve sprint ağacı › satırı başka satırın üzerine sağa bırakınca alt öğe (Sub-task) olur (5.1s)
+  ok 112 [chromium] › e2e\faz8-backlog-dnd.spec.ts:103:3 › Backlog sürükle-bırak ve sprint ağacı › sprint listesi panoya kopyalanır (3.6s)
+  ok 113 [chromium] › e2e\faz8-backlog-dnd.spec.ts:115:3 › Backlog sürükle-bırak ve sprint ağacı › görev anahtarına tıklayınca bağlantı kopyalanır ve adres görevi açar (4.5s)
+  ok 114 [chromium] › e2e\faz8-backup.spec.ts:28:3 › Proje yedek ve geri yükleme › kaynak Proje hazırlanır ve yedeği indirilir (5.6s)
+  x  115 [chromium] › e2e\faz8-backup.spec.ts:50:3 › Proje yedek ve geri yükleme › yedekten yeni Proje geri yüklenir (30.4s)
+  -  116 [chromium] › e2e\faz8-backup.spec.ts:67:3 › Proje yedek ve geri yükleme › kullanılmış anahtar anlaşılır hatayla reddedilir
+  ok 117 [chromium] › e2e\faz8-docs.spec.ts:24:3 › Doküman görsel, geri al/yinele ve Word › sayfa hazırlanır; yazı geri alınır ve yinelenir (7.9s)
+  ok 118 [chromium] › e2e\faz8-docs.spec.ts:62:3 › Doküman görsel, geri al/yinele ve Word › görsel eklenir, kaydedilir ve sayfa yenilenince görünür (5.7s)
+  ok 119 [chromium] › e2e\faz8-docs.spec.ts:98:3 › Doküman görsel, geri al/yinele ve Word › sayfa Word (.docx) olarak indirilir (3.2s)
+  ok 120 [chromium] › e2e\faz8-docs.spec.ts:117:3 › Doküman görsel, geri al/yinele ve Word › metne bağlantı eklenir; yazdırma görünümü yalnızca sayfayı gösterir (5.3s)
+  ok 121 [chromium] › e2e\faz8-excel.spec.ts:33:3 › Sprint Excel dışa/içe aktarma › kaynak Proje: iki Task ve sprint hazırlanır, Excel indirilir (7.0s)
+  ok 122 [chromium] › e2e\faz8-excel.spec.ts:65:3 › Sprint Excel dışa/içe aktarma › hedef Proje: Excel içe aktarılır, yeni sprint ve öğeler oluşur (5.2s)
+  ok 123 [chromium] › e2e\faz9-points.spec.ts:25:3 › Story Point, yüzde ve sprint özeti › Proje, iki Task ve iki alt görev hazırlanır (4.9s)
+  ok 124 [chromium] › e2e\faz9-points.spec.ts:54:3 › Story Point, yüzde ve sprint özeti › Task’a 1,2,3,5,8,13,21,34,55 puanı girilir; 4 seçeneği yoktur (3.0s)
+  ok 125 [chromium] › e2e\faz9-points.spec.ts:68:3 › Story Point, yüzde ve sprint özeti › alt görevlerin puanı üstte toplanır ve üst görevde elle değiştirilemez (4.8s)
+  ok 126 [chromium] › e2e\faz9-points.spec.ts:84:3 › Story Point, yüzde ve sprint özeti › atanan yüzdeyi girer; kalıcıdır (4.5s)
+  ok 127 [chromium] › e2e\faz9-points.spec.ts:99:3 › Story Point, yüzde ve sprint özeti › sprint özeti toplam puanı ve yüzdeyi gösterir; JSON indirilir; sprint bağlantısı açılır (7.1s)
+  ok 128 [chromium] › e2e\faz9-points.spec.ts:154:3 › Story Point, yüzde ve sprint özeti › menüden Kanban panosu açılır (4.2s)
+  ok 129 [chromium] › e2e\faz9-points.spec.ts:163:3 › Story Point, yüzde ve sprint özeti › önceliğe göre renklendirme açılıp kapanır (3.5s)
+  -  130 [chromium] › e2e\guide-screenshots.spec.ts:165:3 › Kılavuz görselleri › tüm görseller üretilir
+  x  131 [chromium] › e2e\help.spec.ts:16:3 › Yardım ve kullanıcı kılavuzu › üst çubuktaki Yardım düğmesi kılavuzu açar; içindekiler ve görseller çalışır (7.6s)
+  -  132 [chromium] › e2e\help.spec.ts:50:3 › Yardım ve kullanıcı kılavuzu › doğrudan bölüm adresi çalışır; Word indirme bağlantısı geçerlidir
+  -  133 [chromium] › e2e\help.spec.ts:66:3 › Yardım ve kullanıcı kılavuzu › hesap menüsünden de açılır; dil İngilizce olunca kılavuz İngilizce olur
+  x  134 [chromium] › e2e\item-access.spec.ts:16:3 › Öğe paylaşımı › Epic gizlenir, sayfa yenilenince Private kalır, sıfırlanınca Share olur (10.0s)
+  ok 135 [chromium] › e2e\item-attachments.spec.ts:16:3 › Dosya ekleme › Epic oluştururken dosya eklenir; Task detayına exe, zip ve Türkçe adlı dosya yüklenir (5.9s)
+  x  136 [chromium] › e2e\kanban.spec.ts:19:3 › Kanban board › Kanban Proje açılır; sütundan kart eklenir, sürüklenir, filtrelenir (7.7s)
+  ok 137 [chromium] › e2e\new-menu.spec.ts:16:3 › New menüsü › Proje açılır, New ile Epic ve Task oluşturulur (5.2s)
+  ok 138 [chromium] › e2e\roles.spec.ts:16:3 › Roller ve izinler › matris açılır, özel rol oluşturulup izni değiştirilir, silinir (5.4s)
+
+
+  1) [chromium] › e2e\faz1-auth.spec.ts:13:3 › Kimlik, workspace ve davet › ilk açılışta kurulum ekranı gelir ve Owner oluşturulur 
+
+    Error: expect(page).toHaveURL(expected) failed
+
+    Expected pattern: /\/setup$/
+    Received string:  "http://localhost:5174/login?redirect=%2F"
+    Timeout: 5000ms
+
+    Call log:
+      - Expect "toHaveURL" with timeout 5000ms
+        14 × locator resolved to <html lang="tr">…</html>
+           - unexpected value "http://localhost:5174/login?redirect=%2F"
+
+
+      13 |   test('ilk açılışta kurulum ekranı gelir ve Owner oluşturulur', async ({ page }) => {
+      14 |     await page.goto('/');
+    > 15 |     await expect(page).toHaveURL(/\/setup$/);
+         |                        ^
+      16 |
+      17 |     await page.getByLabel('Kurum / workspace adı').fill('E2E Kurumu');
+      18 |     await page.getByLabel('Ad soyad').fill(OWNER.name);
+        at C:\dev\scrum-manager\apps\web\e2e\faz1-auth.spec.ts:15:24
+
+    Error Context: test-results\faz1-auth-Kimlik-workspace-ca67e--gelir-ve-Owner-oluşturulur-chromium\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\faz1-auth-Kimlik-workspace-ca67e--gelir-ve-Owner-oluşturulur-chromium\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\faz1-auth-Kimlik-workspace-ca67e--gelir-ve-Owner-oluşturulur-chromium\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [chromium] › e2e\faz6-webhooks.spec.ts:28:3 › Webhook’lar › webhook eklenir; test olayı alıcıya ulaşır ve günlüğe yazılır 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByText('Gönderildi', { exact: true })
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByText('Gönderildi', { exact: true }) with timeout 5000ms
+      - waiting for getByText('Gönderildi', { exact: true })
+
+
+      52 |     await expect(page.getByText('Test olayı gönderildi')).toBeVisible();
+      53 |     await page.getByRole('button', { name: '“Ekip kanalı” teslimat günlüğü' }).click();
+    > 54 |     await expect(page.getByText('Gönderildi', { exact: true })).toBeVisible();
+         |                                                                 ^
+      55 |     await expect.poll(() => received.length).toBeGreaterThan(0);
+      56 |     expect(received[0]).toContain('ping:');
+      57 |   });
+        at C:\dev\scrum-manager\apps\web\e2e\faz6-webhooks.spec.ts:54:65
+
+    Error Context: test-results\faz6-webhooks-Webhook’lar--5f134-a-ulaşır-ve-günlüğe-yazılır-chromium\error-context.md
+
+    Error Context: test-results\faz6-webhooks-Webhook’lar--5f134-a-ulaşır-ve-günlüğe-yazılır-chromium\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\faz6-webhooks-Webhook’lar--5f134-a-ulaşır-ve-günlüğe-yazılır-chromium\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\faz6-webhooks-Webhook’lar--5f134-a-ulaşır-ve-günlüğe-yazılır-chromium\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) [chromium] › e2e\faz7-forms.spec.ts:16:3 › Formlar › form tanımlanır, doldurulur ve görev oluşur 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('link', { name: 'Giriş ekranı açılmıyor' })
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('link', { name: 'Giriş ekranı açılmıyor' }) with timeout 5000ms
+      - waiting for getByRole('link', { name: 'Giriş ekranı açılmıyor' })
+
+
+      48 |     await page.goto(page.url().replace(/\/forms.*/, ''));
+      49 |     await page.getByRole('link', { name: 'Görevler' }).first().click();
+    > 50 |     await expect(page.getByRole('link', { name: 'Giriş ekranı açılmıyor' })).toBeVisible();
+         |                                                                              ^
+      51 |   });
+      52 | });
+      53 |
+        at C:\dev\scrum-manager\apps\web\e2e\faz7-forms.spec.ts:50:78
+
+    Error Context: test-results\faz7-forms-Formlar-form-ta-584b5--doldurulur-ve-görev-oluşur-chromium\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\faz7-forms-Formlar-form-ta-584b5--doldurulur-ve-görev-oluşur-chromium\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\faz7-forms-Formlar-form-ta-584b5--doldurulur-ve-görev-oluşur-chromium\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4) [chromium] › e2e\faz8-backup.spec.ts:50:3 › Proje yedek ve geri yükleme › yedekten yeni Proje geri yüklenir 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.fill: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for getByRole('dialog', { name: 'Yedekten Proje yükle…' }).getByLabel(/Yeni Space adı/)
+
+
+      54 |     await dialog.getByLabel('Yedek dosyası (.zip)').setInputFiles(backupFile);
+      55 |     await dialog.getByLabel('Yeni Proje anahtarı').fill('BKP2');
+    > 56 |     await dialog.getByLabel(/Yeni Space adı/).fill('Yedek Kopya');
+         |                                               ^
+      57 |     await dialog.getByRole('button', { name: 'Geri yükle' }).click();
+      58 |     await expect(page.getByText('Proje yedekten geri yüklendi.')).toBeVisible();
+      59 |     await expect(page.getByRole('heading', { name: 'Yedek Kopya' })).toBeVisible();
+        at C:\dev\scrum-manager\apps\web\e2e\faz8-backup.spec.ts:56:47
+
+    Error Context: test-results\faz8-backup-Proje-yedek-ve-af627-en-yeni-Proje-geri-yüklenir-chromium\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\faz8-backup-Proje-yedek-ve-af627-en-yeni-Proje-geri-yüklenir-chromium\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\faz8-backup-Proje-yedek-ve-af627-en-yeni-Proje-geri-yüklenir-chromium\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  5) [chromium] › e2e\help.spec.ts:16:3 › Yardım ve kullanıcı kılavuzu › üst çubuktaki Yardım düğmesi kılavuzu açar; içindekiler ve görseller çalışır 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('navigation', { name: 'İçindekiler' }).getByRole('link', { name: '7. Sprint oluşturma' })
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('navigation', { name: 'İçindekiler' }).getByRole('link', { name: '7. Sprint oluşturma' }) with timeout 5000ms
+      - waiting for getByRole('navigation', { name: 'İçindekiler' }).getByRole('link', { name: '7. Sprint oluşturma' })
+
+
+      33 |       '9. Sprint düzenleme ve yönetme',
+      34 |     ]) {
+    > 35 |       await expect(toc.getByRole('link', { name: title })).toBeVisible();
+         |                                                            ^
+      36 |     }
+      37 |
+      38 |     // Bir bölüme git: görsel gerçekten yüklenir ve numaralı açıklama listesi vardır.
+        at C:\dev\scrum-manager\apps\web\e2e\help.spec.ts:35:60
+
+    Error Context: test-results\help-Yardım-ve-kullanıcı-k-a590c-ekiler-ve-görseller-çalışır-chromium\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\help-Yardım-ve-kullanıcı-k-a590c-ekiler-ve-görseller-çalışır-chromium\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\help-Yardım-ve-kullanıcı-k-a590c-ekiler-ve-görseller-çalışır-chromium\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  6) [chromium] › e2e\item-access.spec.ts:16:3 › Öğe paylaşımı › Epic gizlenir, sayfa yenilenince Private kalır, sıfırlanınca Share olur 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('dialog', { name: /Sharing & permissions/ }).getByText(/Space erişimini izler/)
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('dialog', { name: /Sharing & permissions/ }).getByText(/Space erişimini izler/) with timeout 5000ms
+      - waiting for getByRole('dialog', { name: /Sharing & permissions/ }).getByText(/Space erişimini izler/)
+
+
+      36 |     await share.click();
+      37 |     const sharing = page.getByRole('dialog', { name: /Sharing & permissions/ });
+    > 38 |     await expect(sharing.getByText(/Space erişimini izler/)).toBeVisible();
+         |                                                              ^
+      39 |     await sharing.getByRole('switch', { name: 'Gizli' }).click();
+      40 |     await sharing.getByRole('button', { name: 'Kaydet' }).click();
+      41 |     await expect(page.getByText('Paylaşım ayarları kaydedildi.')).toBeVisible();
+        at C:\dev\scrum-manager\apps\web\e2e\item-access.spec.ts:38:62
+
+    Error Context: test-results\item-access-Öğe-paylaşımı--fa326-lır-sıfırlanınca-Share-olur-chromium\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\item-access-Öğe-paylaşımı--fa326-lır-sıfırlanınca-Share-olur-chromium\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\item-access-Öğe-paylaşımı--fa326-lır-sıfırlanınca-Share-olur-chromium\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  7) [chromium] › e2e\kanban.spec.ts:19:3 › Kanban board › Kanban Proje açılır; sütundan kart eklenir, sürüklenir, filtrelenir 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('heading', { name: 'Akış' })
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('heading', { name: 'Akış' }) with timeout 5000ms
+      - waiting for getByRole('heading', { name: 'Akış' })
+
+
+      25 |     await space.getByRole('radio', { name: /Kanban/ }).check();
+      26 |     await space.getByRole('button', { name: 'Proje oluştur' }).click();
+    > 27 |     await expect(page.getByRole('heading', { name: 'Akış' })).toBeVisible();
+         |                                                               ^
+      28 |
+      29 |     // Sprint bağlantıları yok; Kanban board bağlantısı var.
+      30 |     await expect(sidebar.getByRole('link', { name: 'Backlog' })).toHaveCount(0);
+        at C:\dev\scrum-manager\apps\web\e2e\kanban.spec.ts:27:63
+
+    Error Context: test-results\kanban-Kanban-board-Kanban-99135-enir-sürüklenir-filtrelenir-chromium\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\kanban-Kanban-board-Kanban-99135-enir-sürüklenir-filtrelenir-chromium\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\kanban-Kanban-board-Kanban-99135-enir-sürüklenir-filtrelenir-chromium\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  7 failed
+    [chromium] › e2e\faz1-auth.spec.ts:13:3 › Kimlik, workspace ve davet › ilk açılışta kurulum ekranı gelir ve Owner oluşturulur 
+    [chromium] › e2e\faz6-webhooks.spec.ts:28:3 › Webhook’lar › webhook eklenir; test olayı alıcıya ulaşır ve günlüğe yazılır 
+    [chromium] › e2e\faz7-forms.spec.ts:16:3 › Formlar › form tanımlanır, doldurulur ve görev oluşur 
+    [chromium] › e2e\faz8-backup.spec.ts:50:3 › Proje yedek ve geri yükleme › yedekten yeni Proje geri yüklenir 
+    [chromium] › e2e\help.spec.ts:16:3 › Yardım ve kullanıcı kılavuzu › üst çubuktaki Yardım düğmesi kılavuzu açar; içindekiler ve görseller çalışır 
+    [chromium] › e2e\item-access.spec.ts:16:3 › Öğe paylaşımı › Epic gizlenir, sayfa yenilenince Private kalır, sıfırlanınca Share olur 
+    [chromium] › e2e\kanban.spec.ts:19:3 › Kanban board › Kanban Proje açılır; sütundan kart eklenir, sürüklenir, filtrelenir 
+  1 skipped
+  9 did not run
+  121 passed (11.8m)
+done

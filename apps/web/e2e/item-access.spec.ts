@@ -17,11 +17,11 @@ test.describe.serial('Öğe paylaşımı', () => {
     page,
   }) => {
     const sidebar = page.getByRole('complementary');
-    await sidebar.getByRole('button', { name: 'Space oluştur' }).first().click();
-    const space = page.getByRole('dialog', { name: 'Yeni Space oluştur' });
+    await sidebar.getByRole('button', { name: 'Proje oluştur' }).first().click();
+    const space = page.getByRole('dialog', { name: 'Yeni Proje oluştur' });
     await space.getByLabel('Ad', { exact: true }).fill('Paylaşım');
     await space.getByLabel('Anahtar').fill('PAY');
-    await space.getByRole('button', { name: 'Space oluştur' }).click();
+    await space.getByRole('button', { name: 'Proje oluştur' }).click();
     await expect(page.getByRole('heading', { name: 'Paylaşım' })).toBeVisible();
 
     await page.getByTestId('new-menu').click();
@@ -35,7 +35,7 @@ test.describe.serial('Öğe paylaşımı', () => {
     await expect(share).toHaveText(/Share/);
     await share.click();
     const sharing = page.getByRole('dialog', { name: /Sharing & permissions/ });
-    await expect(sharing.getByText(/Space erişimini izler/)).toBeVisible();
+    await expect(sharing.getByText(/Proje erişimini izler/)).toBeVisible();
     await sharing.getByRole('switch', { name: 'Gizli' }).click();
     await sharing.getByRole('button', { name: 'Kaydet' }).click();
     await expect(page.getByText('Paylaşım ayarları kaydedildi.')).toBeVisible();

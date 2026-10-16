@@ -14,11 +14,11 @@ test.describe('Denetim günlüğü', () => {
 
     // Günlükte görünecek bir eylem: yeni Space.
     const sidebar = page.getByRole('complementary');
-    await sidebar.getByRole('button', { name: 'Space oluştur' }).first().click();
-    const dialog = page.getByRole('dialog', { name: 'Yeni Space oluştur' });
+    await sidebar.getByRole('button', { name: 'Proje oluştur' }).first().click();
+    const dialog = page.getByRole('dialog', { name: 'Yeni Proje oluştur' });
     await dialog.getByLabel('Ad', { exact: true }).fill('Denetim Denemesi');
     await dialog.getByLabel('Anahtar').fill('AUD');
-    await dialog.getByRole('button', { name: 'Space oluştur' }).click();
+    await dialog.getByRole('button', { name: 'Proje oluştur' }).click();
     await expect(page.getByRole('heading', { name: 'Denetim Denemesi' })).toBeVisible();
 
     await page.goto('/settings/audit');
@@ -27,7 +27,7 @@ test.describe('Denetim günlüğü', () => {
     await expect(table.getByRole('columnheader', { name: 'Ne zaman' })).toBeVisible();
     const row = table.getByRole('row').filter({ hasText: 'Denetim Denemesi' }).first();
     await expect(row).toContainText('Zeynep Kaya');
-    await expect(row).toContainText('Space oluşturdu.');
+    await expect(row).toContainText('Proje oluşturdu.');
 
     await page.getByLabel('Tür').selectOption('sprint');
     await expect(table.getByRole('row').filter({ hasText: 'Denetim Denemesi' })).toHaveCount(0);

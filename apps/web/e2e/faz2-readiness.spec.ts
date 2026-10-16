@@ -24,15 +24,15 @@ test.describe.serial('DoD, DoR ve Sprint Review', () => {
     await page.getByRole('link', { name: 'Görevler' }).first().click();
   }
 
-  test('Space, DoD/DoR maddeleri ve üç Task hazırlanır', async ({ page }) => {
-    await sidebar(page).getByRole('button', { name: 'Space oluştur' }).first().click();
-    const dialog = page.getByRole('dialog', { name: 'Yeni Space oluştur' });
+  test('Proje, DoD/DoR maddeleri ve üç Task hazırlanır', async ({ page }) => {
+    await sidebar(page).getByRole('button', { name: 'Proje oluştur' }).first().click();
+    const dialog = page.getByRole('dialog', { name: 'Yeni Proje oluştur' });
     await dialog.getByLabel('Ad', { exact: true }).fill('Hazırlık Testi');
     await dialog.getByLabel('Anahtar').fill('HZR');
-    await dialog.getByRole('button', { name: 'Space oluştur' }).click();
+    await dialog.getByRole('button', { name: 'Proje oluştur' }).click();
     await expect(page.getByRole('heading', { name: 'Hazırlık Testi' })).toBeVisible();
 
-    await page.getByRole('link', { name: 'Space ayarları' }).click();
+    await page.getByRole('link', { name: 'Proje ayarları' }).click();
     await page
       .getByLabel('Definition of Ready maddeleri')
       .fill('Kabul kriteri yazıldı\nTahmin yapıldı');
@@ -99,7 +99,7 @@ test.describe.serial('DoD, DoR ve Sprint Review', () => {
 
   test('DoD zorunlu yapılınca eksik maddeyle Done engellenir', async ({ page }) => {
     await openSpace(page);
-    await page.getByRole('link', { name: 'Space ayarları' }).click();
+    await page.getByRole('link', { name: 'Proje ayarları' }).click();
     await page.getByRole('switch', { name: 'Done için zorunlu' }).click();
     await page.getByRole('button', { name: 'Kaydet', exact: true }).click();
     await expect(page.getByText('Değişiklikler kaydedildi.')).toBeVisible();

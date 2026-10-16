@@ -67,6 +67,14 @@ enum Priority {
   LOW
 }
 
+/// Bug iş akışı (ADR-117): atanmadı → atandı → işleniyor → çözüldü.
+enum BugStatus {
+  UNASSIGNED
+  ASSIGNED
+  IN_PROGRESS
+  RESOLVED
+}
+
 enum BugSeverity {
   CRITICAL
   MAJOR
@@ -578,6 +586,8 @@ model WorkItem {
   dorChecked       String[]        @default([])
   // Bug alanları
   severity         BugSeverity?
+  /// Yalnızca Bug: Bug ekranındaki iş akışı durumu (ADR-117).
+  bugStatus        BugStatus?
   stepsToReproduce String?
   expectedResult   String?
   actualResult     String?
@@ -909,6 +919,8 @@ enum NotificationType {
   SPRINT_COMPLETED
   AUTOMATION
   REMINDER
+  BUG_REPORTED
+  BUG_STATUS
 }
 
 /// Uygulama içi bildirim kutusu; alıcıya özeldir. data: { actorName, itemKey?, itemTitle?, sprintName? } anlık görüntüsü.

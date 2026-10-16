@@ -13,14 +13,14 @@ test.describe.serial('İş öğeleri', () => {
     await expect(page.getByRole('heading', { name: /Hoş geldin/ })).toBeVisible();
   });
 
-  test('Space oluşturulur, listeye hızlı oluşturmayla Task eklenir', async ({ page }) => {
+  test('Proje oluşturulur, listeye hızlı oluşturmayla Task eklenir', async ({ page }) => {
     const sidebar = page.getByRole('complementary');
     // Önceki spec'te Space yoksa oluştur.
     if ((await sidebar.getByRole('link', { name: 'Mobil Uygulama' }).count()) === 0) {
-      await sidebar.getByRole('button', { name: 'Space oluştur' }).first().click();
-      const dialog = page.getByRole('dialog', { name: 'Yeni Space oluştur' });
+      await sidebar.getByRole('button', { name: 'Proje oluştur' }).first().click();
+      const dialog = page.getByRole('dialog', { name: 'Yeni Proje oluştur' });
       await dialog.getByLabel('Ad', { exact: true }).fill('Mobil Uygulama');
-      await dialog.getByRole('button', { name: 'Space oluştur' }).click();
+      await dialog.getByRole('button', { name: 'Proje oluştur' }).click();
       await expect(page.getByRole('heading', { name: 'Mobil Uygulama' })).toBeVisible();
     }
     await sidebar.getByRole('link', { name: 'Mobil Uygulama' }).click();

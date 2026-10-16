@@ -19,8 +19,8 @@
           "head": ["Term", "What it means", "Example"],
           "rows": [
             [
-              "Space",
-              "A work area for one product or team. All work items live inside a Space.",
+              "Project",
+              "A work area for one product or team. All work items live inside a Project.",
               "Mobile App"
             ],
             [
@@ -55,12 +55,12 @@
           "type": "figure",
           "image": "01-overview",
           "alt": "Seyir home screen with marked areas",
-          "caption": "Main screen: use the left menu for the Space and its sections, and the top bar for search, help and your account.",
+          "caption": "Main screen: use the left menu for the Project and its sections, and the top bar for search, help and your account.",
           "legend": [
-            "**Space**: The project area you work in. Click to open the sections below it.",
+            "**Project**: The project area you work in. Click to open the sections below it.",
             "**Backlog and sprints**: Sprints are created and planned here.",
             "**Sprint board**: Shows the sprint's work in status columns (Kanban).",
-            "**Tasks**: The Space's work list; Tasks and Sub-Tasks are added here.",
+            "**Tasks**: The Project's work list; Tasks and Sub-Tasks are added here.",
             "**Search**: Find a task, document or person (shortcut: Ctrl + K).",
             "**Help**: Open this guide at any time.",
             "**Account menu**: Profile, language, theme and sign out.",
@@ -74,37 +74,37 @@
       ]
     },
     {
-      "id": "space-olustur",
-      "title": "1. Creating a Space",
+      "id": "project-olustur",
+      "title": "1. Creating a Project",
       "blocks": [
         {
           "type": "p",
-          "text": "Before you create Tasks and Sprints you need a Space to hold them. Your team lead usually prepares it for you, but it helps to know how it is done."
+          "text": "Before you create Tasks and Sprints you need a Project to hold them. Your team lead usually prepares it for you, but it helps to know how it is done."
         },
         {
           "type": "steps",
           "items": [
-            "In the left menu click the **+** next to **SPACES** (or the **Create space** row at the bottom).",
-            "Type the Space's name in **Name** (e.g. Mobile App).",
+            "In the left menu click the **+** next to **SPACES** (or the **Create project** row at the bottom).",
+            "Type the Project's name in **Name** (e.g. Mobile App).",
             "Check the **Key**. It is a short 2–10 letter code; item IDs start with it (MOB-1, MOB-2…). It is suggested automatically.",
             "Optionally pick a colour and icon. Keep **Work mode** on **Scrum** to use Sprints and the Backlog, or choose **Kanban** for a continuous-flow board without sprints.",
-            "Click **Create space**."
+            "Click **Create project**."
           ]
         },
         {
           "type": "figure",
           "image": "02-space-create",
-          "alt": "New Space dialog",
-          "caption": "The new Space dialog. Keep the work mode on Scrum if you will use sprints.",
+          "alt": "New Project dialog",
+          "caption": "The new Project dialog. Keep the work mode on Scrum if you will use sprints.",
           "legend": [
-            "**Name**: The Space's display name.",
-            "**Key**: The short code at the start of item IDs (like MOB-1). It must not be used by another Space; keep it short and clear.",
-            "**Create space**: Saves and opens the Space."
+            "**Name**: The Project's display name.",
+            "**Key**: The short code at the start of item IDs (like MOB-1). It must not be used by another Project; keep it short and clear.",
+            "**Create project**: Saves and opens the Project."
           ]
         },
         {
           "type": "note",
-          "text": "A list called **Tasks** is created automatically inside the new Space. You will add your first Tasks there."
+          "text": "A list called **Tasks** is created automatically inside the new Project. You will add your first Tasks there."
         }
       ]
     },
@@ -131,7 +131,7 @@
         {
           "type": "steps",
           "items": [
-            "In the left menu open your Space and click the **Tasks** list.",
+            "In the left menu open your Project and click the **Tasks** list.",
             "In the row at the bottom choose **Epic** in the **Type** box.",
             "Type the title (e.g. “User account management”) and press **Enter**. The Epic is added to the list."
           ]
@@ -149,7 +149,7 @@
         },
         {
           "type": "tip",
-          "text": "To add a Task under an Epic, click the **⋯** button at the right of the Epic's row, choose **Add sub-item** and leave **Type** on **Task**. A Bug can be added under an Epic too."
+          "text": "To add a Task under an Epic, click the **⋯** button at the right of the Epic's row, choose **Add sub-item** and leave **Type** on **Task**."
         },
         {
           "type": "p",
@@ -229,7 +229,7 @@
         },
         {
           "type": "warn",
-          "text": "The conversion **cannot be undone**; you cannot turn the Epic back into a Task. Only a **Task** can be converted (not a Bug or Sub-Task) and the Space's work mode must be **Scrum**. Converting a Task that is in an active Sprint needs the Sprint planning permission."
+          "text": "The conversion **cannot be undone**; you cannot turn the Epic back into a Task. Only a **Task** can be converted (not a Bug or Sub-Task) and the Project's work mode must be **Scrum**. Converting a Task that is in an active Sprint needs the Sprint planning permission."
         }
       ]
     },
@@ -244,7 +244,7 @@
         {
           "type": "steps",
           "items": [
-            "In the left menu open your Space and click the **Tasks** list.",
+            "In the left menu open your Project and click the **Tasks** list.",
             "In the row at the bottom choose **Task** in the **Type** box.",
             "Type the work's title in the next box (e.g. “Design the sign-in screen”). Keep it short and clear: it should say what must be done.",
             "Press **Enter** (or click **Add ↵**). The task drops into the list and receives its ID (MOB-1)."
@@ -256,7 +256,7 @@
           "alt": "Quick add row for a Task",
           "caption": "The add row: choose the type, type a title, press Enter.",
           "legend": [
-            "**Type**: The kind of record to add. This guide uses **Task** (others: Epic, Bug).",
+            "**Type**: The kind of record to add. This guide uses **Task** (the other is Epic; Bugs are reported from the **Bugs** screen).",
             "**Title**: The name of the work. To add several tasks, just press Enter after each title.",
             "**Add ↵**: You can click this instead of pressing Enter."
           ]
@@ -481,12 +481,46 @@
       ]
     },
     {
-      "id": "sprint-olustur",
-      "title": "7. Creating a Sprint",
+      "id": "surukle-birak",
+      "title": "7. Drag to make a Sub-Task or detach it",
       "blocks": [
         {
           "type": "p",
-          "text": "A sprint is the package of work the team chooses to do within a fixed time. Sprints are created on the **Backlog and sprints** page. To open it click **Backlog and sprints** under your Space in the left menu."
+          "text": "In the list you can drag a Task onto another Task to make it a Sub-Task, and drag a Sub-Task out to make it a standalone Task again. Only Tasks and Sub-Tasks can be moved."
+        },
+        {
+          "type": "steps",
+          "items": [
+            "Hover over a row; a **drag handle** (⋮⋮) appears at its far left.",
+            "Grab the handle and drag the Task onto the row of the **Task** it should go under; the target row is highlighted.",
+            "When you drop it a confirmation opens: “Make HTK-2 a Sub-Task of HTK-1?”. Click **Make Sub-Task**.",
+            "To detach a Sub-Task, start dragging it; a large **Detach** area appears at the bottom centre of the screen.",
+            "Drop the Sub-Task on **Detach** and confirm. It leaves its parent and becomes a standalone **Task**."
+          ]
+        },
+        {
+          "type": "figure",
+          "image": "28-dnd",
+          "alt": "The Detach area while dragging",
+          "caption": "The Detach area that appears while dragging a Sub-Task.",
+          "legend": [
+            "**Dragged item**: The card you move with the mouse.",
+            "**Detach**: A Sub-Task dropped here becomes a standalone Task."
+          ]
+        },
+        {
+          "type": "note",
+          "text": "A Task that has Sub-Tasks cannot be moved under another Task; detach its Sub-Tasks first."
+        }
+      ]
+    },
+    {
+      "id": "sprint-olustur",
+      "title": "8. Creating a Sprint",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "A sprint is the package of work the team chooses to do within a fixed time. Sprints are created on the **Backlog and sprints** page. To open it click **Backlog and sprints** under your Project in the left menu."
         },
         {
           "type": "figure",
@@ -504,7 +538,7 @@
           "items": [
             "Click **Create sprint** at the top right.",
             "Type the sprint's name in **Name** (e.g. Sprint 1).",
-            "In **Sprint goal** write in one sentence what will be achieved. (In some Spaces the goal is required.)",
+            "In **Sprint goal** write in one sentence what will be achieved. (In some Projects the goal is required.)",
             "Pick the **Start** and **End** dates. A two-week range is suggested; a sprint can last at most 8 weeks.",
             "Optionally add a **Capacity note** (e.g. 3 people, one on leave for 2 days).",
             "Click **Create sprint**. The sprint appears above the Backlog with the **Planned** status."
@@ -531,7 +565,7 @@
             ["Name", "Yes", "The name shown in lists and boards."],
             [
               "Sprint goal",
-              "Depends on the Space setting",
+              "Depends on the Project setting",
               "The team's shared aim. If left empty you get a warning when starting the sprint."
             ],
             ["Start / End", "Yes", "End cannot be before start; at most 8 weeks."],
@@ -542,7 +576,7 @@
     },
     {
       "id": "sprint-is-ekle",
-      "title": "8. Adding work to a sprint",
+      "title": "9. Adding work to a sprint",
       "blocks": [
         {
           "type": "p",
@@ -582,7 +616,7 @@
     },
     {
       "id": "sprint-duzenle",
-      "title": "9. Editing and managing a sprint",
+      "title": "10. Editing and managing a sprint",
       "blocks": [
         {
           "type": "p",
@@ -653,7 +687,7 @@
     },
     {
       "id": "kanban",
-      "title": "10. The sprint board",
+      "title": "11. The sprint board",
       "blocks": [
         {
           "type": "p",
@@ -682,8 +716,44 @@
       ]
     },
     {
+      "id": "buglar",
+      "title": "12. Bugs: reporting, assigning and status",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Bugs are not shown in the task list; they have their own screen. Open it with the red **Bugs** button at the top right of the sprint board (and the Kanban board). The number on the button is the count of open bugs."
+        },
+        {
+          "type": "steps",
+          "items": [
+            "Click the red **Bugs** button. (Or **New → Bug**.)",
+            "Click **Report a bug**. Fill in **What is wrong?**, **Severity**, **Priority**, **Steps to reproduce**, **Expected** and **Actual result**, **Environment**; add screenshots if you like.",
+            "Click **Report bug**. You become the **bug owner**; the bug starts as **Unassigned** and the people who assign bugs (Product Owner, Scrum Master, Admin) get a notification and an e-mail.",
+            "A Product Owner, Scrum Master or Admin assigns the bug in the **Assignee** box on its row. The status becomes **Assigned**; the assignee gets a notification and an e-mail.",
+            "The assignee sets the status to **In progress** when they start and **Resolved** when done. The bug owner is notified by e-mail at every change."
+          ]
+        },
+        {
+          "type": "figure",
+          "image": "27-bugs",
+          "alt": "The Bugs screen",
+          "caption": "The Bugs screen: status tabs, bug owner and assignee.",
+          "legend": [
+            "**Bugs**: The screen opened by the red **Bugs** button on the sprint board.",
+            "**Report a bug**: Opens the new bug form.",
+            "**Status tabs**: Unassigned, Assigned, In progress, Resolved.",
+            "**Assignee**: Assigns the bug to someone (only people allowed to)."
+          ]
+        },
+        {
+          "type": "tip",
+          "text": "Click a bug to open its details in the side panel; add comments and files there."
+        }
+      ]
+    },
+    {
       "id": "yeni-dugme",
-      "title": "11. The big New button",
+      "title": "13. The big New button",
       "blocks": [
         {
           "type": "p",
@@ -693,8 +763,8 @@
           "type": "steps",
           "items": [
             "Click **New** (or press **N** on the keyboard when you are not typing).",
-            "Pick what you want to create: **Task**, **Epic**, **Bug** or **Space**.",
-            "For Task, Epic and Bug a small window opens. Type the **Title** and check the **Space** and **List** (the one you are looking at is preselected).",
+            "Pick what you want to create: **Task**, **Epic** or **Bug**. New Projects are created with the **Create project** button in the left menu.",
+            "For Task and Epic a small window opens (Bug opens the bug report form). Type the **Title** and check the **Project** and **List** (the one you are looking at is preselected).",
             "Optionally click **Attach files** to add any files right away.",
             "Click **Create**. The new item opens so you can fill in the details."
           ]
@@ -707,8 +777,7 @@
           "legend": [
             "**New**: The big button in the top bar. Shortcut: N.",
             "**Task**: A piece of work for the sprint.",
-            "**Epic**: A big goal that groups many Tasks.",
-            "**Space**: A new project or team area."
+            "**Epic**: A big goal that groups many Tasks."
           ]
         },
         {
@@ -719,11 +788,11 @@
     },
     {
       "id": "paylasim",
-      "title": "12. Sharing and permissions on a Task or Epic",
+      "title": "14. Sharing and permissions on a Task or Epic",
       "blocks": [
         {
           "type": "p",
-          "text": "By default every item follows the access of its Space. With **Share** you can add people or teams to one item (and everything under it) or make it **Private**."
+          "text": "By default every item follows the access of its Project. With **Share** you can add people or teams to one item (and everything under it) or make it **Private**."
         },
         {
           "type": "steps",
@@ -732,7 +801,7 @@
             "To give someone more rights on this item only, choose them under **Add a person or team**, pick a role (for example **Developer**) and click **Add**.",
             "To hide the item, switch on **Private**. Only the people listed (and Owners and Admins) will see it and everything under it.",
             "Click **Save**. The button now says **Shared** or **Private**.",
-            "To go back to the Space rules, open **Share** again and click **Reset to inherited**."
+            "To go back to the Project rules, open **Share** again and click **Reset to inherited**."
           ]
         },
         {
@@ -753,13 +822,13 @@
         },
         {
           "type": "warn",
-          "text": "You cannot give someone more rights than you have yourself. To share an item with someone who is not in a private Space, first add them to that Space."
+          "text": "You cannot give someone more rights than you have yourself. To share an item with someone who is not in a private Project, first add them to that Project."
         }
       ]
     },
     {
       "id": "roller",
-      "title": "13. Roles and permissions (Settings)",
+      "title": "15. Roles and permissions (Settings)",
       "blocks": [
         {
           "type": "p",
@@ -769,7 +838,7 @@
           "type": "steps",
           "items": [
             "Open **Settings** and click **Roles**.",
-            "Choose **Space roles** (rights inside a Space) or **Workspace roles** (rights in the whole workspace).",
+            "Choose **Project roles** (rights inside a Project) or **Workspace roles** (rights in the whole workspace).",
             "Tick or untick a box to change a role. Each row is one permission.",
             "Click **New role** to create your own role (for example **QA Engineer**). You can start from an existing role.",
             "Use the **⋯** menu on a column to rename or delete a custom role, or reset a built-in role to its defaults."
@@ -781,7 +850,7 @@
           "alt": "The roles and permissions table",
           "caption": "The Roles page with one column per role.",
           "legend": [
-            "**Space roles / Workspace roles**: Switches between the two kinds of roles.",
+            "**Project roles / Workspace roles**: Switches between the two kinds of roles.",
             "**New role**: Creates a custom role.",
             "**Role column**: One column per role; the number shows how many people use it.",
             "**Check box**: Turns one permission on or off for that role."
@@ -795,7 +864,7 @@
     },
     {
       "id": "dosya",
-      "title": "14. Attaching files",
+      "title": "16. Attaching files",
       "blocks": [
         {
           "type": "p",
@@ -817,17 +886,17 @@
       ]
     },
     {
-      "id": "kanban-space",
-      "title": "15. The Kanban board for a whole Space",
+      "id": "kanban-project",
+      "title": "17. The Kanban board for a whole Project",
       "blocks": [
         {
           "type": "p",
-          "text": "Every Space has a **Kanban board** link in the left menu. It shows the open items of all the Space’s lists in one board. Choose **Kanban** as the work mode when you create a Space for a sprint-free, continuous flow."
+          "text": "Every Project has a **Kanban board** link in the left menu. It shows the open items of all the Project’s lists in one board. Choose **Kanban** as the work mode when you create a Project for a sprint-free, continuous flow."
         },
         {
           "type": "steps",
           "items": [
-            "In the left menu click **Kanban board** under your Space.",
+            "In the left menu click **Kanban board** under your Project.",
             "Each column is a status. Drag a card to another column to change its status.",
             "Click **Add card** at the bottom of a column, type a title and press Enter to create a card in that status.",
             "Use the **List**, filter box and **Only mine** to narrow the board. The **Rows** picker groups cards by assignee, Epic or priority.",
@@ -837,7 +906,7 @@
         {
           "type": "figure",
           "image": "25-kanban",
-          "alt": "The Space Kanban board",
+          "alt": "The Project Kanban board",
           "caption": "The Kanban board with its filters and the Add card button.",
           "legend": [
             "**List**: Show one list or all lists.",
@@ -853,7 +922,7 @@
     },
     {
       "id": "ipuclari",
-      "title": "16. Quick tips and FAQ",
+      "title": "18. Quick tips and FAQ",
       "blocks": [
         {
           "type": "table",
@@ -888,7 +957,7 @@
           "type": "bullets",
           "items": [
             "**Do I have to use Epics?** No. Epics are optional; you can work with Tasks directly.",
-            "**I cannot see Convert to Epic.** It only appears on Tasks, in Spaces whose work mode is Scrum; it is not available on Bugs or Sub-Tasks. You also need write permission.",
+            "**I cannot see Convert to Epic.** It only appears on Tasks, in Projects whose work mode is Scrum; it is not available on Bugs or Sub-Tasks. You also need write permission.",
             "**Can I turn an Epic back into a Task?** No, the conversion cannot be undone. If you are unsure, copy the Task first and convert the copy.",
             "**Why is there no 4 in the Story Point list?** Seyir uses the standard Fibonacci scale (1, 2, 3, 5, 8, 13, 21, 34, 55). Choose the nearest value.",
             "**Why can't I change the parent's points?** If it has sub-tasks, its points are their sum. Change the sub-tasks' points.",

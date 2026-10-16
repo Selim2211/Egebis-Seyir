@@ -16,14 +16,14 @@ test.describe.serial('Kanban board', () => {
     await expect(page.getByRole('heading', { name: /Hoş geldin/ })).toBeVisible();
   });
 
-  test('Kanban Space açılır; sütundan kart eklenir, sürüklenir, filtrelenir', async ({ page }) => {
+  test('Kanban Proje açılır; sütundan kart eklenir, sürüklenir, filtrelenir', async ({ page }) => {
     const sidebar = page.getByRole('complementary');
-    await sidebar.getByRole('button', { name: 'Space oluştur' }).first().click();
-    const space = page.getByRole('dialog', { name: 'Yeni Space oluştur' });
+    await sidebar.getByRole('button', { name: 'Proje oluştur' }).first().click();
+    const space = page.getByRole('dialog', { name: 'Yeni Proje oluştur' });
     await space.getByLabel('Ad', { exact: true }).fill('Akış');
-    await space.getByLabel('Anahtar').fill('AKS');
+    await space.getByLabel('Anahtar').fill('KNB');
     await space.getByRole('radio', { name: /Kanban/ }).check();
-    await space.getByRole('button', { name: 'Space oluştur' }).click();
+    await space.getByRole('button', { name: 'Proje oluştur' }).click();
     await expect(page.getByRole('heading', { name: 'Akış' })).toBeVisible();
 
     // Sprint bağlantıları yok; Kanban board bağlantısı var.
@@ -37,7 +37,7 @@ test.describe.serial('Kanban board', () => {
       const input = page.getByLabel('Yeni kart başlığı');
       await input.fill(title);
       await input.press('Enter');
-      await expect(page.getByText(/AKS-\d+ oluşturuldu\./).last()).toBeVisible();
+      await expect(page.getByText(/KNB-\d+ oluşturuldu\./).last()).toBeVisible();
       await input.press('Escape');
     };
     await addIn(0, 'Giriş ekranı');

@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 import { ensureOwner, login, OWNER } from './accounts';
 
 /** Faz 1.2 akışı: Space oluştur → Folder/List → favori → arşiv/çöp → geri getir (taslak 1, 7). */
-test.describe.serial('Space / Folder / List', () => {
+test.describe.serial('Proje / Folder / List', () => {
   test.beforeAll(async ({ request }) => {
     await ensureOwner(request);
   });
@@ -13,22 +13,22 @@ test.describe.serial('Space / Folder / List', () => {
     await expect(page.getByRole('heading', { name: /Hoş geldin/ })).toBeVisible();
   });
 
-  test('Space oluşturulur; anahtar addan önerilir, varsayılan liste ve durumlar gelir', async ({
+  test('Proje oluşturulur; anahtar addan önerilir, varsayılan liste ve durumlar gelir', async ({
     page,
   }) => {
     const sidebar = page.getByRole('complementary');
-    await sidebar.getByRole('button', { name: 'Space oluştur' }).first().click();
+    await sidebar.getByRole('button', { name: 'Proje oluştur' }).first().click();
 
-    const dialog = page.getByRole('dialog', { name: 'Yeni Space oluştur' });
+    const dialog = page.getByRole('dialog', { name: 'Yeni Proje oluştur' });
     await dialog.getByLabel('Ad', { exact: true }).fill('Kurumsal Site');
     await expect(dialog.getByLabel('Anahtar')).toHaveValue('KUR');
-    await dialog.getByRole('button', { name: 'Space oluştur' }).click();
+    await dialog.getByRole('button', { name: 'Proje oluştur' }).click();
 
     await expect(page.getByText('Kurumsal Site oluşturuldu.')).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Kurumsal Site' })).toBeVisible();
     await expect(page.getByRole('link', { name: 'Görevler' }).first()).toBeVisible();
 
-    await page.getByRole('link', { name: 'Space ayarları' }).click();
+    await page.getByRole('link', { name: 'Proje ayarları' }).click();
     for (const status of ['Backlog', 'Yapılacak', 'Devam ediyor', 'İncelemede', 'Tamamlandı']) {
       await expect(page.getByRole('textbox', { name: `“${status}” adı` })).toBeVisible();
     }

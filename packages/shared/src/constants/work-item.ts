@@ -15,6 +15,10 @@ export type StatusCategory = (typeof STATUS_CATEGORIES)[number];
 
 /** Bug önem dereceleri (brief §5.4). */
 export const BUG_SEVERITIES = ['CRITICAL', 'MAJOR', 'MINOR', 'TRIVIAL'] as const;
+
+/** Bug iş akışı durumları (ADR-117). */
+export const BUG_STATUSES = ['UNASSIGNED', 'ASSIGNED', 'IN_PROGRESS', 'RESOLVED'] as const;
+export type BugStatus = (typeof BUG_STATUSES)[number];
 export type BugSeverity = (typeof BUG_SEVERITIES)[number];
 
 /** Epic T-shirt boyutları (brief §4.2). */

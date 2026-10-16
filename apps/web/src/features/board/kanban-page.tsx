@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { NativeSelect } from '@/components/form';
 import { useMe } from '@/features/auth/queries';
+import { BugsButton } from '@/features/bugs/bugs-page';
 import { ContainerHeader, LoadingState, NotFoundState } from '@/features/spaces/container-header';
 import { hierarchyQuery, spaceQuery } from '@/features/spaces/queries';
 import { ItemNavContext } from '@/features/work-items/detail/item-nav-context';
@@ -111,6 +112,7 @@ export function KanbanPage({
         name={space.data.name}
         archived={space.data.archived}
         canUnarchive={space.data.permissions.includes(S.SPACE_SETTINGS)}
+        actions={<BugsButton spaceId={spaceId} />}
       />
       <div className="flex flex-wrap items-center gap-x-3 gap-y-2 px-4 py-3 sm:px-6">
         <h2 className="text-lg font-semibold">{t('kanban.title')}</h2>

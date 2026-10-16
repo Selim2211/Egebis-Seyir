@@ -13,13 +13,13 @@ test.describe.serial('New menüsü', () => {
     await expect(page.getByRole('heading', { name: /Hoş geldin/ })).toBeVisible();
   });
 
-  test('Space açılır, New ile Epic ve Task oluşturulur', async ({ page }) => {
+  test('Proje açılır, New ile Epic ve Task oluşturulur', async ({ page }) => {
     const sidebar = page.getByRole('complementary');
-    await sidebar.getByRole('button', { name: 'Space oluştur' }).first().click();
-    const space = page.getByRole('dialog', { name: 'Yeni Space oluştur' });
+    await sidebar.getByRole('button', { name: 'Proje oluştur' }).first().click();
+    const space = page.getByRole('dialog', { name: 'Yeni Proje oluştur' });
     await space.getByLabel('Ad', { exact: true }).fill('Yeni Menü');
     await space.getByLabel('Anahtar').fill('NMN');
-    await space.getByRole('button', { name: 'Space oluştur' }).click();
+    await space.getByRole('button', { name: 'Proje oluştur' }).click();
     await expect(page.getByRole('heading', { name: 'Yeni Menü' })).toBeVisible();
 
     const button = page.getByTestId('new-menu');

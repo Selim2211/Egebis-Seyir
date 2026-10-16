@@ -43,6 +43,7 @@ export function toSummary(row: SummaryRow): WorkItemSummary {
     id: row.id,
     key: formatItemKey(row.keyPrefix, row.number),
     type: row.type,
+    bugStatus: row.bugStatus,
     title: row.title,
     listId: row.listId,
     parentId: row.parentId,

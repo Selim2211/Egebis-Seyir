@@ -25,4 +25,10 @@ export interface ViewProps {
   /** Alt öğe hızlı oluşturma satırının açık olduğu öğe. */
   addingUnder: string | null;
   renderAddChild: (item: WorkItemSummary) => React.ReactNode;
+  /** Sürükle-bırak (ADR-116): Task/Sub-Task sürüklenebilir; Task'ın üstüne bırakınca alt görev olur. */
+  canDrag?: (item: WorkItemSummary) => boolean;
+  canDropOn?: (dragged: WorkItemSummary, target: WorkItemSummary) => boolean;
+  onNest?: (dragged: WorkItemSummary, target: WorkItemSummary) => void;
+  /** "Ayır" alanına bırakılan alt öğe üst öğesinden ayrılır. */
+  onUnnest?: (dragged: WorkItemSummary) => void;
 }

@@ -21,13 +21,13 @@ test.describe.serial('Görev detayı', () => {
 
   const panel = (page: Page) => page.getByRole('dialog');
 
-  test('Space ve iki iş öğesi hazırlanır', async ({ page }) => {
+  test('Proje ve iki iş öğesi hazırlanır', async ({ page }) => {
     const sidebar = page.getByRole('complementary');
-    await sidebar.getByRole('button', { name: 'Space oluştur' }).first().click();
-    const dialog = page.getByRole('dialog', { name: 'Yeni Space oluştur' });
+    await sidebar.getByRole('button', { name: 'Proje oluştur' }).first().click();
+    const dialog = page.getByRole('dialog', { name: 'Yeni Proje oluştur' });
     await dialog.getByLabel('Ad', { exact: true }).fill('Detay Testi');
     await expect(dialog.getByLabel('Anahtar')).toHaveValue('DET');
-    await dialog.getByRole('button', { name: 'Space oluştur' }).click();
+    await dialog.getByRole('button', { name: 'Proje oluştur' }).click();
     await expect(page.getByRole('heading', { name: 'Detay Testi' })).toBeVisible();
 
     await openList(page);

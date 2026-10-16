@@ -15,11 +15,11 @@ test.describe.serial('Retrospektif', () => {
 
   test('aktif sprint için retrospektif açılır; maddeler eklenir ve oylanır', async ({ page }) => {
     const sidebar = page.getByRole('complementary');
-    await sidebar.getByRole('button', { name: 'Space oluştur' }).first().click();
-    const dialog = page.getByRole('dialog', { name: 'Yeni Space oluştur' });
+    await sidebar.getByRole('button', { name: 'Proje oluştur' }).first().click();
+    const dialog = page.getByRole('dialog', { name: 'Yeni Proje oluştur' });
     await dialog.getByLabel('Ad', { exact: true }).fill('Retro Testi');
     await dialog.getByLabel('Anahtar').fill('RTR');
-    await dialog.getByRole('button', { name: 'Space oluştur' }).click();
+    await dialog.getByRole('button', { name: 'Proje oluştur' }).click();
     await expect(page.getByRole('heading', { name: 'Retro Testi' })).toBeVisible();
 
     await page.getByRole('link', { name: "Backlog ve sprint'ler" }).first().click();

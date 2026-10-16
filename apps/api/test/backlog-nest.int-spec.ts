@@ -12,6 +12,7 @@ import { Client, createTestApp, resetState, setupOwner, type TestContext } from 
 
 /** Faz 8.2 (ADR-102): sprint ↔ sprint taşıma ve sürükleyerek alt öğe yapma. */
 describe('Backlog sürükle-bırak: sprint arası taşıma ve alt öğe (gerçek veritabanı)', () => {
+  // ADR-116: ayırma testi dosyanın sonunda.
   let ctx: TestContext;
   let owner: Client;
   let ws: string;
@@ -119,5 +120,19 @@ describe('Backlog sürükle-bırak: sprint arası taşıma ve alt öğe (gerçek
     const res = await nest(a.id, b.id).expect(422);
     expect(res.body).toEqual({ code: 'WORK_ITEM_PARENT_NOT_ALLOWED' });
     await nest(a.id, a.id).expect(422);
+  });
+
+  it('ayır: Sub-Task bağımsız Task olur, Epic altındaki Task yalnızca ayrılır', async () => {
+    const s = await space();
+    const epic = await item(s.listId, { type: 'EPIC', title: 'E' });
+    const task = await item(s.listId, { type: 'TASK', title: 'T', parentId: epic.id });
+    const sub = await item(s.listId, { type: 'SUBTASK', title: 'S', parentId: task.id });
+
+    await owner.post(api(`/items/${sub.id}/unnest`)).expect(204);
+    expect(await detail(sub.id)).toMatchObject({ type: 'TASK', parentId: null });
+    await owner.post(api(`/items/${task.id}/unnest`)).expect(204);
+    expect(await detail(task.id)).toMatchObject({ type: 'TASK', parentId: null });
+    // Üstü olmayan öğede değişiklik yok.
+    await owner.post(api(`/items/${task.id}/unnest`)).expect(204);
   });
 });

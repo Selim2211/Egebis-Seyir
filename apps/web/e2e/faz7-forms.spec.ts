@@ -15,11 +15,11 @@ test.describe.serial('Formlar', () => {
 
   test('form tanımlanır, doldurulur ve görev oluşur', async ({ page }) => {
     const sidebar = page.getByRole('complementary');
-    await sidebar.getByRole('button', { name: 'Space oluştur' }).first().click();
-    const dialog = page.getByRole('dialog', { name: 'Yeni Space oluştur' });
+    await sidebar.getByRole('button', { name: 'Proje oluştur' }).first().click();
+    const dialog = page.getByRole('dialog', { name: 'Yeni Proje oluştur' });
     await dialog.getByLabel('Ad', { exact: true }).fill('Form Testi');
     await dialog.getByLabel('Anahtar').fill('FRM');
-    await dialog.getByRole('button', { name: 'Space oluştur' }).click();
+    await dialog.getByRole('button', { name: 'Proje oluştur' }).click();
     await expect(page.getByRole('heading', { name: 'Form Testi' })).toBeVisible();
 
     // Space ayarlarında form tanımla.
@@ -27,7 +27,7 @@ test.describe.serial('Formlar', () => {
     await page.getByRole('button', { name: 'Form ekle' }).click();
     const editor = page.getByRole('dialog', { name: 'Form ekle' });
     await editor.getByLabel('Form adı').fill('Hata bildir');
-    await editor.getByLabel('Açılacak tip').selectOption('BUG');
+    await editor.getByLabel('Açılacak tip').selectOption('TASK');
     await editor.getByRole('checkbox', { name: 'Açıklama' }).check();
     await editor.getByRole('checkbox', { name: 'Zorunlu' }).first().check();
     await editor.getByRole('button', { name: 'Kaydet', exact: true }).click();

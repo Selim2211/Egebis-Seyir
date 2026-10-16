@@ -22,13 +22,13 @@ test.describe.serial('Story Point, yüzde ve sprint özeti', () => {
     await page.getByRole('link', { name: "Backlog ve sprint'ler" }).first().click();
   };
 
-  test('Space, iki Task ve iki alt görev hazırlanır', async ({ page }) => {
+  test('Proje, iki Task ve iki alt görev hazırlanır', async ({ page }) => {
     const sidebar = page.getByRole('complementary');
-    await sidebar.getByRole('button', { name: 'Space oluştur' }).first().click();
-    const dialog = page.getByRole('dialog', { name: 'Yeni Space oluştur' });
+    await sidebar.getByRole('button', { name: 'Proje oluştur' }).first().click();
+    const dialog = page.getByRole('dialog', { name: 'Yeni Proje oluştur' });
     await dialog.getByLabel('Ad', { exact: true }).fill('Puan Denemesi');
     await dialog.getByLabel('Anahtar').fill('PTS');
-    await dialog.getByRole('button', { name: 'Space oluştur' }).click();
+    await dialog.getByRole('button', { name: 'Proje oluştur' }).click();
     await expect(page.getByRole('heading', { name: 'Puan Denemesi' })).toBeVisible();
     await page.getByRole('link', { name: 'Görevler' }).first().click();
 

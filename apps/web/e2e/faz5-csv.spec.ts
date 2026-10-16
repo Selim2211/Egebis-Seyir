@@ -15,13 +15,13 @@ test.describe.serial('CSV içe/dışa aktarma', () => {
 
     await page
       .getByRole('complementary')
-      .getByRole('button', { name: 'Space oluştur' })
+      .getByRole('button', { name: 'Proje oluştur' })
       .first()
       .click();
-    const dialog = page.getByRole('dialog', { name: 'Yeni Space oluştur' });
+    const dialog = page.getByRole('dialog', { name: 'Yeni Proje oluştur' });
     await dialog.getByLabel('Ad', { exact: true }).fill('CSV Testi');
     await dialog.getByLabel('Anahtar').fill('CSV');
-    await dialog.getByRole('button', { name: 'Space oluştur' }).click();
+    await dialog.getByRole('button', { name: 'Proje oluştur' }).click();
     await expect(page.getByRole('heading', { name: 'CSV Testi' })).toBeVisible();
 
     await page.getByRole('link', { name: 'Görevler' }).first().click();

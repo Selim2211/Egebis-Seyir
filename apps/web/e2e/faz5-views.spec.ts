@@ -17,11 +17,11 @@ test.describe.serial('Kayıtlı görünümler', () => {
 
   test('süzgeç kaydedilir ve başka bir durumdayken tek tıkla uygulanır', async ({ page }) => {
     const sidebar = page.getByRole('complementary');
-    await sidebar.getByRole('button', { name: 'Space oluştur' }).first().click();
-    const dialog = page.getByRole('dialog', { name: 'Yeni Space oluştur' });
+    await sidebar.getByRole('button', { name: 'Proje oluştur' }).first().click();
+    const dialog = page.getByRole('dialog', { name: 'Yeni Proje oluştur' });
     await dialog.getByLabel('Ad', { exact: true }).fill('Görünüm Testi');
     await dialog.getByLabel('Anahtar').fill('GRN');
-    await dialog.getByRole('button', { name: 'Space oluştur' }).click();
+    await dialog.getByRole('button', { name: 'Proje oluştur' }).click();
     await expect(page.getByRole('heading', { name: 'Görünüm Testi' })).toBeVisible();
     spaceUrl = page.url();
 

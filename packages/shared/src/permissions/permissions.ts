@@ -32,6 +32,10 @@ export const SPACE_PERMISSIONS = {
   WORK_ITEM_WRITE: 'workItem.write',
   /** Öğenin erişimini yönetme: kişi/takım ekleme, gizli yapma (ADR-113). */
   WORK_ITEM_ACCESS: 'workItem.access.manage',
+  /** Bug açma (Bug ekranı, ADR-117). */
+  BUG_REPORT: 'bug.report',
+  /** Bug'ı birine atama (ADR-117). */
+  BUG_ASSIGN: 'bug.assign',
   /** Kendine atanmış görevin durumunu değiştirme. */
   WORK_ITEM_STATUS_OWN: 'workItem.status.own',
   /** Story point / tahmin girme. */

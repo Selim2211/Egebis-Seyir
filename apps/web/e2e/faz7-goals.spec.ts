@@ -34,11 +34,11 @@ test.describe.serial('Hedefler', () => {
 
   test('görev bazlı hedefe görev bağlanır', async ({ page }) => {
     const sidebar = page.getByRole('complementary');
-    await sidebar.getByRole('button', { name: 'Space oluştur' }).first().click();
-    const space = page.getByRole('dialog', { name: 'Yeni Space oluştur' });
+    await sidebar.getByRole('button', { name: 'Proje oluştur' }).first().click();
+    const space = page.getByRole('dialog', { name: 'Yeni Proje oluştur' });
     await space.getByLabel('Ad', { exact: true }).fill('Hedef Testi');
     await space.getByLabel('Anahtar').fill('HDF');
-    await space.getByRole('button', { name: 'Space oluştur' }).click();
+    await space.getByRole('button', { name: 'Proje oluştur' }).click();
     await expect(page.getByRole('heading', { name: 'Hedef Testi' })).toBeVisible();
     await page.getByRole('link', { name: 'Görevler' }).first().click();
     const quick = page.getByRole('textbox', { name: 'Başlık' });

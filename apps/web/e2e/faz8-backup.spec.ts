@@ -2,7 +2,7 @@ import { expect, test, type Page } from '@playwright/test';
 import { ensureOwner, login, OWNER } from './accounts';
 
 /** Faz 8.5: Space yedeği ZIP olarak alınır ve yeni Space olarak geri yüklenir. */
-test.describe.serial('Space yedek ve geri yükleme', () => {
+test.describe.serial('Proje yedek ve geri yükleme', () => {
   let backupFile = '';
 
   test.beforeAll(async ({ request }) => {
@@ -17,15 +17,15 @@ test.describe.serial('Space yedek ve geri yükleme', () => {
 
   const createSpace = async (page: Page, name: string, key: string) => {
     const sidebar = page.getByRole('complementary');
-    await sidebar.getByRole('button', { name: 'Space oluştur' }).first().click();
-    const dialog = page.getByRole('dialog', { name: 'Yeni Space oluştur' });
+    await sidebar.getByRole('button', { name: 'Proje oluştur' }).first().click();
+    const dialog = page.getByRole('dialog', { name: 'Yeni Proje oluştur' });
     await dialog.getByLabel('Ad', { exact: true }).fill(name);
     await dialog.getByLabel('Anahtar').fill(key);
-    await dialog.getByRole('button', { name: 'Space oluştur' }).click();
+    await dialog.getByRole('button', { name: 'Proje oluştur' }).click();
     await expect(page.getByRole('heading', { name })).toBeVisible();
   };
 
-  test('kaynak Space hazırlanır ve yedeği indirilir', async ({ page }) => {
+  test('kaynak Proje hazırlanır ve yedeği indirilir', async ({ page }) => {
     await createSpace(page, 'Yedek Kaynak', 'BKP');
     await page.getByRole('link', { name: 'Görevler' }).first().click();
     const quick = page.getByRole('textbox', { name: 'Başlık' });
@@ -38,24 +38,24 @@ test.describe.serial('Space yedek ve geri yükleme', () => {
 
     await page.goto('/');
     await page.getByRole('link', { name: 'Yedek Kaynak' }).first().click();
-    await page.getByRole('link', { name: 'Space ayarları' }).click();
+    await page.getByRole('link', { name: 'Proje ayarları' }).click();
     const download = page.waitForEvent('download');
-    await page.getByRole('link', { name: 'Space yedeğini indir (ZIP)' }).click();
+    await page.getByRole('link', { name: 'Proje yedeğini indir (ZIP)' }).click();
     const file = await download;
     expect(file.suggestedFilename()).toMatch(/\.zip$/);
     backupFile = test.info().outputPath('yedek.zip');
     await file.saveAs(backupFile);
   });
 
-  test('yedekten yeni Space geri yüklenir', async ({ page }) => {
+  test('yedekten yeni Proje geri yüklenir', async ({ page }) => {
     await page.goto('/settings/general');
-    await page.getByRole('button', { name: 'Yedekten Space yükle…' }).click();
-    const dialog = page.getByRole('dialog', { name: 'Yedekten Space yükle…' });
+    await page.getByRole('button', { name: 'Yedekten Proje yükle…' }).click();
+    const dialog = page.getByRole('dialog', { name: 'Yedekten Proje yükle…' });
     await dialog.getByLabel('Yedek dosyası (.zip)').setInputFiles(backupFile);
-    await dialog.getByLabel('Yeni Space anahtarı').fill('BKP2');
-    await dialog.getByLabel(/Yeni Space adı/).fill('Yedek Kopya');
+    await dialog.getByLabel('Yeni Proje anahtarı').fill('BKP2');
+    await dialog.getByLabel(/Yeni Proje adı/).fill('Yedek Kopya');
     await dialog.getByRole('button', { name: 'Geri yükle' }).click();
-    await expect(page.getByText('Space yedekten geri yüklendi.')).toBeVisible();
+    await expect(page.getByText('Proje yedekten geri yüklendi.')).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Yedek Kopya' })).toBeVisible();
 
     await page.getByRole('link', { name: 'Görevler' }).first().click();
@@ -66,10 +66,10 @@ test.describe.serial('Space yedek ve geri yükleme', () => {
 
   test('kullanılmış anahtar anlaşılır hatayla reddedilir', async ({ page }) => {
     await page.goto('/settings/general');
-    await page.getByRole('button', { name: 'Yedekten Space yükle…' }).click();
-    const dialog = page.getByRole('dialog', { name: 'Yedekten Space yükle…' });
+    await page.getByRole('button', { name: 'Yedekten Proje yükle…' }).click();
+    const dialog = page.getByRole('dialog', { name: 'Yedekten Proje yükle…' });
     await dialog.getByLabel('Yedek dosyası (.zip)').setInputFiles(backupFile);
-    await dialog.getByLabel('Yeni Space anahtarı').fill('BKP');
+    await dialog.getByLabel('Yeni Proje anahtarı').fill('BKP');
     await dialog.getByRole('button', { name: 'Geri yükle' }).click();
     await expect(dialog.getByRole('alert')).toBeVisible();
   });

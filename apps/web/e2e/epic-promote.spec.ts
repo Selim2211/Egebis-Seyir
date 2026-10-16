@@ -13,13 +13,13 @@ test.describe.serial("Task'ı Epic'e dönüştürme", () => {
     await expect(page.getByRole('heading', { name: /Hoş geldin/ })).toBeVisible();
   });
 
-  test('Task, Sub-Task ve Bug hazırlanır', async ({ page }) => {
+  test('Task ve Sub-Task hazırlanır', async ({ page }) => {
     const sidebar = page.getByRole('complementary');
-    await sidebar.getByRole('button', { name: 'Space oluştur' }).first().click();
-    const dialog = page.getByRole('dialog', { name: 'Yeni Space oluştur' });
+    await sidebar.getByRole('button', { name: 'Proje oluştur' }).first().click();
+    const dialog = page.getByRole('dialog', { name: 'Yeni Proje oluştur' });
     await dialog.getByLabel('Ad', { exact: true }).fill('Epic Denemesi');
     await dialog.getByLabel('Anahtar').fill('EPD');
-    await dialog.getByRole('button', { name: 'Space oluştur' }).click();
+    await dialog.getByRole('button', { name: 'Proje oluştur' }).click();
     await expect(page.getByRole('heading', { name: 'Epic Denemesi' })).toBeVisible();
     await page.getByRole('link', { name: 'Görevler' }).first().click();
 
@@ -28,11 +28,6 @@ test.describe.serial("Task'ı Epic'e dönüştürme", () => {
     await quick.fill('Büyük iş');
     await quick.press('Enter');
     await expect(page.getByText('EPD-1 oluşturuldu.')).toBeVisible();
-    await page.getByLabel('Tip').first().selectOption('BUG');
-    await quick.fill('Bir Bug');
-    await quick.press('Enter');
-    await expect(page.getByText('EPD-2 oluşturuldu.')).toBeVisible();
-
     await page.getByRole('button', { name: 'EPD-1 için işlemler' }).click();
     await page.getByRole('menuitem', { name: 'Alt öğe ekle' }).click();
     const child = page.getByPlaceholder(/Alt öğe ekle/);
@@ -48,7 +43,7 @@ test.describe.serial("Task'ı Epic'e dönüştürme", () => {
     await page.getByRole('link', { name: 'Epic Denemesi' }).first().click();
     await page.getByRole('link', { name: 'Görevler' }).first().click();
 
-    // Bug'da seçenek yok.
+    // Sub-Task'ta seçenek yok.
     await page.getByRole('button', { name: 'EPD-2 için işlemler' }).click();
     await expect(page.getByRole('menuitem', { name: "Epic'e dönüştür" })).toHaveCount(0);
     await page.keyboard.press('Escape');
@@ -69,7 +64,7 @@ test.describe.serial("Task'ı Epic'e dönüştürme", () => {
     await expect(page.getByRole('img', { name: 'Epic' })).toHaveCount(1);
     await expect(page.getByRole('img', { name: 'Sub-task' })).toHaveCount(0);
 
-    await page.goto('/items/EPD-3');
+    await page.goto('/items/EPD-2');
     await expect(page.getByRole('img', { name: 'Task' }).first()).toBeVisible();
     await expect(page.getByRole('link', { name: 'EPD-1' }).first()).toBeVisible();
   });

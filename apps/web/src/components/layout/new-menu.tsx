@@ -1,22 +1,7 @@
 import { listName } from '@/lib/default-names';
-import {
-  SPACE_PERMISSIONS as S,
-  type TreeSpace,
-  WORKSPACE_PERMISSIONS as W,
-  type WorkItemType,
-} from '@scrum/shared';
+import { SPACE_PERMISSIONS as S, type TreeSpace, type WorkItemType } from '@scrum/shared';
 import { useNavigate, useRouterState } from '@tanstack/react-router';
-import {
-  Bug,
-  CheckSquare,
-  ChevronDown,
-  FolderKanban,
-  Layers,
-  Paperclip,
-  Plus,
-  X,
-  Zap,
-} from 'lucide-react';
+import { Bug, CheckSquare, ChevronDown, FolderKanban, Paperclip, Plus, X, Zap } from 'lucide-react';
 import { type FormEvent, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -36,12 +21,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { CreateSpaceDialog } from '@/features/spaces/create-space-dialog';
 import { useHierarchy } from '@/features/spaces/queries';
 import { creatableTypes } from '@/features/work-items/item-tree';
 import { useCreateItem, useUploadAttachment } from '@/features/work-items/queries';
 import { useErrorMessage } from '@/lib/use-error-message';
-import { useCan } from '@/features/workspace/queries';
 
 const ITEM_ICONS = { EPIC: Zap, TASK: CheckSquare, BUG: Bug } as const;
 const MENU_TYPES = ['TASK', 'EPIC', 'BUG'] as const;
@@ -58,17 +41,20 @@ function writableSpaces(spaces: TreeSpace[] | undefined) {
 }
 
 /**
- * Üst çubuktaki büyük "+ New" düğmesi: Task / Epic / Bug / Space oluşturma tek yerden.
+ * Üst çubuktaki büyük "+ New" düğmesi: Task / Epic / Bug oluşturma tek yerden.
  * Kısayol: N (metin girişi dışında).
  */
 export function NewMenu() {
   const { t } = useTranslation();
   const { data } = useHierarchy();
-  const canCreateSpace = useCan(W.SPACE_CREATE);
   const targets = writableSpaces(data?.spaces);
   const [menuOpen, setMenuOpen] = useState(false);
   const [itemType, setItemType] = useState<WorkItemType | null>(null);
-  const [spaceOpen, setSpaceOpen] = useState(false);
+  const navigate = useNavigate();
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
+  const openSpace = /^\/spaces\/([0-9a-f-]{36})/.exec(pathname)?.[1];
+  const currentSpaceId =
+    targets.find((target) => target.space.id === openSpace)?.space.id ?? targets[0]?.space.id ?? '';
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -84,7 +70,7 @@ export function NewMenu() {
     return () => document.removeEventListener('keydown', onKey);
   }, []);
 
-  if (targets.length === 0 && !canCreateSpace) return null;
+  if (targets.length === 0) return null;
 
   return (
     <>
@@ -110,7 +96,15 @@ export function NewMenu() {
                 <DropdownMenuItem
                   key={type}
                   className="gap-3 py-2.5 text-base"
-                  onSelect={() => setItemType(type)}
+                  onSelect={() =>
+                    type === 'BUG'
+                      ? void navigate({
+                          to: '/spaces/$spaceId/bugs',
+                          params: { spaceId: currentSpaceId },
+                          search: { report: true },
+                        })
+                      : setItemType(type)
+                  }
                 >
                   <Icon className="text-primary size-5" aria-hidden />
                   <span className="flex flex-col">
@@ -122,18 +116,6 @@ export function NewMenu() {
                 </DropdownMenuItem>
               );
             })}
-          {canCreateSpace && (
-            <DropdownMenuItem
-              className="gap-3 py-2.5 text-base"
-              onSelect={() => setSpaceOpen(true)}
-            >
-              <Layers className="text-primary size-5" aria-hidden />
-              <span className="flex flex-col">
-                <span className="font-medium">{t('newMenu.SPACE')}</span>
-                <span className="text-muted-foreground text-xs">{t('newMenu.SPACEHint')}</span>
-              </span>
-            </DropdownMenuItem>
-          )}
         </DropdownMenuContent>
       </DropdownMenu>
 
@@ -142,7 +124,6 @@ export function NewMenu() {
         onOpenChange={(open) => !open && setItemType(null)}
         targets={targets}
       />
-      <CreateSpaceDialog open={spaceOpen} onOpenChange={setSpaceOpen} />
     </>
   );
 }

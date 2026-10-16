@@ -17,11 +17,11 @@ test.describe.serial('Dosya ekleme', () => {
     page,
   }) => {
     const sidebar = page.getByRole('complementary');
-    await sidebar.getByRole('button', { name: 'Space oluştur' }).first().click();
-    const space = page.getByRole('dialog', { name: 'Yeni Space oluştur' });
+    await sidebar.getByRole('button', { name: 'Proje oluştur' }).first().click();
+    const space = page.getByRole('dialog', { name: 'Yeni Proje oluştur' });
     await space.getByLabel('Ad', { exact: true }).fill('Ekler');
     await space.getByLabel('Anahtar').fill('EKL');
-    await space.getByRole('button', { name: 'Space oluştur' }).click();
+    await space.getByRole('button', { name: 'Proje oluştur' }).click();
     await expect(page.getByRole('heading', { name: 'Ekler' })).toBeVisible();
 
     // Epic: oluştururken dosya seç.

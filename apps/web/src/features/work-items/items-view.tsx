@@ -17,7 +17,14 @@ import { useErrorMessage } from '@/lib/use-error-message';
 import { useUiStore } from '@/lib/ui-store';
 import { cn } from '@/lib/utils';
 import { creatableTypes } from './item-tree';
-import { type ItemAction, useCopyItem, useItemLifecycle, useUpdateItem } from './queries';
+import {
+  type ItemAction,
+  useCopyItem,
+  useItemLifecycle,
+  useUnnestItem,
+  useUpdateItem,
+} from './queries';
+import { useNestItem } from '@/features/sprints/queries';
 import { QuickCreate } from './quick-create';
 import { QUICK_CREATE_INPUT_ID } from './quick-create-id';
 import { useStatusGuard } from './status-guard';
@@ -71,6 +78,13 @@ export function ItemsView({
   const [pickedIds, setPicked] = useState<ReadonlySet<string>>(new Set());
   const [addingUnder, setAddingUnder] = useState<string | null>(null);
   const [promoting, setPromoting] = useState<{ id: string; key: string } | null>(null);
+  const [moving, setMoving] = useState<
+    | { kind: 'nest'; item: WorkItemSummary; target: WorkItemSummary }
+    | { kind: 'unnest'; item: WorkItemSummary }
+    | null
+  >(null);
+  const nest = useNestItem();
+  const unnest = useUnnestItem();
   const [bulkConfirm, setBulkConfirm] = useState<{
     count: number;
     resolve: (ok: boolean) => void;
@@ -93,9 +107,11 @@ export function ItemsView({
     }),
     [space.statuses, data.labels],
   );
+  // Bug'lar listede gösterilmez; Sprint panosundaki Bugs ekranında yönetilir (ADR-117).
+  const listItems = useMemo(() => data.items.filter((item) => item.type !== 'BUG'), [data.items]);
   const rows = useMemo(
-    () => buildViewRows(data.items, search, ctx, collapsedItems, collapsedGroups),
-    [data.items, search, ctx, collapsedItems, collapsedGroups],
+    () => buildViewRows(listItems, search, ctx, collapsedItems, collapsedGroups),
+    [listItems, search, ctx, collapsedItems, collapsedGroups],
   );
   const visibleItems = useMemo(() => itemsOf(rows), [rows]);
   const filtered = activeFilterCount(search) > 0;
@@ -208,6 +224,15 @@ export function ItemsView({
     onArchive: (item) => run(item.id, 'archive', t('items.archived', { key: item.key })),
     onDelete: (item) => run(item.id, 'delete', t('items.trashed', { key: item.key })),
     addingUnder,
+    canDrag: (item) => canWrite && (item.type === 'TASK' || item.type === 'SUBTASK'),
+    // Task (alt görevi olmayan) veya Sub-Task, başka bir Task'ın üstüne bırakılabilir.
+    canDropOn: (dragged, target) =>
+      target.type === 'TASK' &&
+      target.id !== dragged.parentId &&
+      (dragged.type === 'SUBTASK' || dragged.childCount === 0) &&
+      !isAncestor(listItems, dragged.id, target.id),
+    onNest: (item, target) => setMoving({ kind: 'nest', item, target }),
+    onUnnest: (item) => setMoving({ kind: 'unnest', item }),
     renderAddChild: (item) => (
       <QuickCreate
         listId={listId}
@@ -227,7 +252,7 @@ export function ItemsView({
         <ViewToolbar
           space={space}
           customFields={customFields}
-          items={data.items}
+          items={listItems}
           labels={data.labels}
           search={search}
           isTable={isTable}
@@ -290,6 +315,48 @@ export function ItemsView({
       {guard.dialog}
       <PromoteEpicDialog item={promoting} onClose={() => setPromoting(null)} />
       <ConfirmDialog
+        open={moving !== null}
+        onOpenChange={(open) => !open && setMoving(null)}
+        title={
+          moving?.kind === 'nest'
+            ? t('dnd.nestTitle', { key: moving.item.key, target: moving.target.key })
+            : t('dnd.unnestTitle', { key: moving?.item.key ?? '' })
+        }
+        description={
+          moving?.kind === 'nest'
+            ? t('dnd.nestBody', { title: moving.item.title, target: moving.target.title })
+            : t('dnd.unnestBody', { title: moving?.item.title ?? '' })
+        }
+        confirmLabel={t(moving?.kind === 'nest' ? 'dnd.nestConfirm' : 'dnd.unnestConfirm')}
+        pending={nest.isPending || unnest.isPending}
+        onConfirm={() => {
+          if (!moving) return;
+          const done = (message: string) => {
+            toast.success(message);
+            setMoving(null);
+          };
+          const failed = (error: unknown) => {
+            toast.error(errorMessage(error));
+            setMoving(null);
+          };
+          if (moving.kind === 'nest') {
+            nest.mutate(
+              { itemId: moving.item.id, parentId: moving.target.id },
+              {
+                onSuccess: () =>
+                  done(t('dnd.nested', { key: moving.item.key, target: moving.target.key })),
+                onError: failed,
+              },
+            );
+          } else {
+            unnest.mutate(moving.item.id, {
+              onSuccess: () => done(t('dnd.unnested', { key: moving.item.key })),
+              onError: failed,
+            });
+          }
+        }}
+      />
+      <ConfirmDialog
         open={bulkConfirm !== null}
         onOpenChange={(open) => {
           if (!open) {
@@ -320,4 +387,19 @@ function EmptyState({ canWrite }: { canWrite: boolean }) {
       </p>
     </div>
   );
+}
+
+/** `ancestorId`, `itemId`'nin üst zincirinde mi (bir öğe kendi altına taşınamaz). */
+function isAncestor(
+  items: readonly WorkItemSummary[],
+  ancestorId: string,
+  itemId: string,
+): boolean {
+  const parents = new Map(items.map((i) => [i.id, i.parentId]));
+  let current = parents.get(itemId) ?? null;
+  while (current) {
+    if (current === ancestorId) return true;
+    current = parents.get(current) ?? null;
+  }
+  return false;
 }

@@ -23,13 +23,13 @@ test.describe.serial('Yorum, ek, aktivite ve Ana sayfa', () => {
     await page.goto('/items/IMP-1');
   }
 
-  test('Space ve iş öğesi hazırlanır', async ({ page }) => {
+  test('Proje ve iş öğesi hazırlanır', async ({ page }) => {
     const sidebar = page.getByRole('complementary');
-    await sidebar.getByRole('button', { name: 'Space oluştur' }).first().click();
-    const dialog = page.getByRole('dialog', { name: 'Yeni Space oluştur' });
+    await sidebar.getByRole('button', { name: 'Proje oluştur' }).first().click();
+    const dialog = page.getByRole('dialog', { name: 'Yeni Proje oluştur' });
     await dialog.getByLabel('Ad', { exact: true }).fill('İşbirliği');
     await dialog.getByLabel('Anahtar').fill('IMP');
-    await dialog.getByRole('button', { name: 'Space oluştur' }).click();
+    await dialog.getByRole('button', { name: 'Proje oluştur' }).click();
     await expect(page.getByRole('heading', { name: 'İşbirliği' })).toBeVisible();
     await page.getByRole('link', { name: 'Görevler' }).first().click();
     const quick = page.getByRole('textbox', { name: 'Başlık' });

@@ -1,0 +1,57 @@
+[33m(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vitest.int.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.[39m
+
+ RUN  v5.0.3 C:/dev/scrum-manager/apps/api
+
+Loaded Prisma config from prisma.config.ts.
+
+Prisma schema loaded from prisma\schema.prisma.
+Datasource "db": PostgreSQL database "scrum_test", schema "public" at "localhost:5432"
+
+42 migrations found in prisma/migrations
+
+
+No pending migrations to apply.
+(node:13268) DeprecationWarning: Calling client.query() when the client is already executing a query is deprecated and will be removed in pg@9.0. Use async/await or an external async flow control mechanism instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+ ❯ test/notifications.int-spec.ts (16 tests | 1 failed) 22273ms
+   ❯ Bildirimler (gerçek veritabanı) (16)
+     ❯ tercihler (tür × kanal) (4)
+       × varsayılan olarak tüm türler ve kanallar açık 1386ms
+(node:21644) DeprecationWarning: Calling client.query() when the client is already executing a query is deprecated and will be removed in pg@9.0. Use async/await or an external async flow control mechanism instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:12060) DeprecationWarning: Calling client.query() when the client is already executing a query is deprecated and will be removed in pg@9.0. Use async/await or an external async flow control mechanism instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:5404) DeprecationWarning: Calling client.query() when the client is already executing a query is deprecated and will be removed in pg@9.0. Use async/await or an external async flow control mechanism instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/notifications.int-spec.ts > Bildirimler (gerçek veritabanı) > tercihler (tür × kanal) > varsayılan olarak tüm türler ve kanallar açık
+AssertionError: expected [ { type: 'ASSIGNED', …(2) }, …(9) ] to have a length of 8 but got 10
+
+- Expected
++ Received
+
+- 8
++ 10
+
+ ❯ test/notifications.int-spec.ts:289:33
+    287|       const prefs = (await elif.get(api('/notifications/preferences'))…
+    288|         .body as NotificationPreferences;
+    289|       expect(prefs.preferences).toHaveLength(10);
+       |                                 ^
+    290|       expect(prefs.preferences.every((p) => p.inApp && p.email)).toBe(…
+    291|     });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 50 passed (51)
+      Tests  1 failed | 383 passed (384)
+   Start at  19:52:28
+   Duration  532.67s (tests 76%, import 24%)
+
+done

@@ -15,11 +15,11 @@ test.describe.serial('Zaman takibi', () => {
 
   test('elle süre girilir; geçersiz süre uyarı verir', async ({ page }) => {
     const sidebar = page.getByRole('complementary');
-    await sidebar.getByRole('button', { name: 'Space oluştur' }).first().click();
-    const dialog = page.getByRole('dialog', { name: 'Yeni Space oluştur' });
+    await sidebar.getByRole('button', { name: 'Proje oluştur' }).first().click();
+    const dialog = page.getByRole('dialog', { name: 'Yeni Proje oluştur' });
     await dialog.getByLabel('Ad', { exact: true }).fill('Zaman Testi');
     await dialog.getByLabel('Anahtar').fill('ZMN');
-    await dialog.getByRole('button', { name: 'Space oluştur' }).click();
+    await dialog.getByRole('button', { name: 'Proje oluştur' }).click();
     await expect(page.getByRole('heading', { name: 'Zaman Testi' })).toBeVisible();
 
     await page.getByRole('link', { name: 'Görevler' }).first().click();

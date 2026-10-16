@@ -27,13 +27,13 @@ test.describe.serial('Sprint yaşam döngüsü', () => {
     await expect(page.getByRole('region', { name })).toBeVisible();
   }
 
-  test('Space, üç Task ve iki sprint hazırlanır', async ({ page }) => {
+  test('Proje, üç Task ve iki sprint hazırlanır', async ({ page }) => {
     const sidebar = page.getByRole('complementary');
-    await sidebar.getByRole('button', { name: 'Space oluştur' }).first().click();
-    const dialog = page.getByRole('dialog', { name: 'Yeni Space oluştur' });
+    await sidebar.getByRole('button', { name: 'Proje oluştur' }).first().click();
+    const dialog = page.getByRole('dialog', { name: 'Yeni Proje oluştur' });
     await dialog.getByLabel('Ad', { exact: true }).fill('Döngü Testi');
     await dialog.getByLabel('Anahtar').fill('DNG');
-    await dialog.getByRole('button', { name: 'Space oluştur' }).click();
+    await dialog.getByRole('button', { name: 'Proje oluştur' }).click();
     await expect(page.getByRole('heading', { name: 'Döngü Testi' })).toBeVisible();
     await page.getByRole('link', { name: 'Görevler' }).first().click();
 
@@ -169,7 +169,7 @@ test.describe.serial('Sprint yaşam döngüsü', () => {
     await expect(page.getByText('Sprint 2 iptal edildi.')).toBeVisible();
   });
 
-  test('sprint hedefi zorunluyken hedefsiz sprint başlamaz; Space ayarı kapatılınca uyarıyla başlar', async ({
+  test('sprint hedefi zorunluyken hedefsiz sprint başlamaz; Proje ayarı kapatılınca uyarıyla başlar', async ({
     page,
   }) => {
     await openBacklog(page);
@@ -191,7 +191,7 @@ test.describe.serial('Sprint yaşam döngüsü', () => {
       .getByRole('complementary')
       .getByRole('button', { name: 'Döngü Testi için işlemler' })
       .click();
-    await page.getByRole('menuitem', { name: 'Space ayarları' }).click();
+    await page.getByRole('menuitem', { name: 'Proje ayarları' }).click();
     await page.getByRole('switch', { name: 'Sprint hedefi zorunlu' }).click();
     await page.getByRole('button', { name: 'Kaydet', exact: true }).click();
     await expect(page.getByText('Değişiklikler kaydedildi.')).toBeVisible();

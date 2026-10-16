@@ -34,13 +34,13 @@ test.describe.serial('Yapay zekâ önerileri', () => {
 
     await page
       .getByRole('complementary')
-      .getByRole('button', { name: 'Space oluştur' })
+      .getByRole('button', { name: 'Proje oluştur' })
       .first()
       .click();
-    const dialog = page.getByRole('dialog', { name: 'Yeni Space oluştur' });
+    const dialog = page.getByRole('dialog', { name: 'Yeni Proje oluştur' });
     await dialog.getByLabel('Ad', { exact: true }).fill('YZ Testi');
     await dialog.getByLabel('Anahtar').fill('YZT');
-    await dialog.getByRole('button', { name: 'Space oluştur' }).click();
+    await dialog.getByRole('button', { name: 'Proje oluştur' }).click();
     await expect(page.getByRole('heading', { name: 'YZ Testi' })).toBeVisible();
     await page.getByRole('link', { name: 'Görevler' }).first().click();
     await page.getByLabel('Tip').first().selectOption('TASK');

@@ -28,7 +28,8 @@ function copy(p: NotificationMailInput): Copy {
   const key = p.item?.key ?? '';
   const title = p.item?.title ?? '';
   const sprint = p.sprintName ?? '';
-  const detail = p.detail ?? '';
+  const detail =
+    p.type === 'BUG_STATUS' ? bugStatusLabel(p.detail ?? '', p.locale) : (p.detail ?? '');
   if (p.docTitle !== undefined && p.type === 'MENTIONED') {
     return p.locale === 'en'
       ? {
@@ -92,6 +93,18 @@ function copy(p: NotificationMailInput): Copy {
           line: `${who} completed ${sprint}.`,
           action: 'Open review',
         };
+      case 'BUG_REPORTED':
+        return {
+          subject: `New bug ${key}: ${title}`,
+          line: `${who} reported a bug: “${title}” (${key}). It is waiting to be assigned.`,
+          action: 'Open bug',
+        };
+      case 'BUG_STATUS':
+        return {
+          subject: `Bug ${key}: ${detail}`,
+          line: `${who} set the bug “${title}” (${key}) to ${detail}.`,
+          action: 'Open bug',
+        };
     }
   }
   switch (p.type) {
@@ -143,6 +156,18 @@ function copy(p: NotificationMailInput): Copy {
         line: `${who}, ${sprint} sprint'ini tamamladı.`,
         action: 'Özeti aç',
       };
+    case 'BUG_REPORTED':
+      return {
+        subject: `Yeni bug ${key}: ${title}`,
+        line: `${who} bir bug açtı: “${title}” (${key}). Atanmayı bekliyor.`,
+        action: "Bug'ı aç",
+      };
+    case 'BUG_STATUS':
+      return {
+        subject: `Bug ${key}: ${detail}`,
+        line: `${who}, “${title}” (${key}) bug'ının durumunu “${detail}” yaptı.`,
+        action: "Bug'ı aç",
+      };
   }
 }
 
@@ -165,4 +190,15 @@ export function notificationMail(p: NotificationMailInput): MailMessage {
       },
     }),
   };
+}
+
+const BUG_STATUS_LABELS: Record<string, { tr: string; en: string }> = {
+  UNASSIGNED: { tr: 'Atanmadı', en: 'Unassigned' },
+  ASSIGNED: { tr: 'Atandı', en: 'Assigned' },
+  IN_PROGRESS: { tr: 'İşleniyor', en: 'In progress' },
+  RESOLVED: { tr: 'Çözüldü', en: 'Resolved' },
+};
+function bugStatusLabel(status: string, locale: Locale): string {
+  const label = BUG_STATUS_LABELS[status];
+  return label ? label[locale === 'en' ? 'en' : 'tr'] : status;
 }

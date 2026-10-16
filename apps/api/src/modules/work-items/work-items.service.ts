@@ -28,6 +28,7 @@ import {
   type WorkItemDetail,
   type WorkItemsResponse,
   type WorkItemType,
+  type StatusCategory,
 } from '@scrum/shared';
 import { ClsService } from 'nestjs-cls';
 import { Prisma } from '../../generated/prisma/client';
@@ -39,6 +40,7 @@ import { AutomationEvents } from '../../infra/events/automation-events';
 import { CustomFieldsService } from '../custom-fields/custom-fields.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { toAttachmentDto } from '../collab/attachments.service';
+import { bugStatusFor } from './bug-status';
 import { archivedParent, forbidden, notFound } from '../spaces/space-errors';
 import {
   asJson,
@@ -387,6 +389,10 @@ export class WorkItemsService {
           completedAt: status.category === 'DONE' ? new Date() : null,
           rank: rankBetween(last?.rank ?? null, null),
           severity: input.severity,
+          bugStatus:
+            input.type === 'BUG'
+              ? bugStatusFor(status.category, input.assigneeIds.length > 0)
+              : null,
           stepsToReproduce: input.stepsToReproduce,
           expectedResult: input.expectedResult,
           actualResult: input.actualResult,
@@ -458,6 +464,15 @@ export class WorkItemsService {
     const type = item.type;
 
     this.authorize(item, fields);
+    // Bug'ı yalnızca `bug.assign` izni olan atar (ADR-117).
+    if (
+      type === 'BUG' &&
+      fields.assigneeIds !== undefined &&
+      !this.can(S.BUG_ASSIGN) &&
+      !this.cls.get('automationChain')?.length
+    ) {
+      throw forbidden(ERROR_CODES.FORBIDDEN);
+    }
     if (customPatch && !this.can(S.WORK_ITEM_WRITE) && !this.cls.get('automationChain')?.length) {
       throw forbidden(ERROR_CODES.FORBIDDEN);
     }
@@ -515,6 +530,7 @@ export class WorkItemsService {
 
     let completedAt: Date | null | undefined;
     let nextStatusName: string | undefined;
+    let nextCategory: StatusCategory | undefined;
     if (fields.statusId !== undefined && fields.statusId !== item.statusId) {
       const next = await db.status.findFirst({
         where: { id: fields.statusId, spaceId: item.spaceId, archivedAt: null },
@@ -527,6 +543,7 @@ export class WorkItemsService {
       if (to === 'ACTIVE' && from === 'NOT_STARTED' && !force) await this.assertNotBlocked(item.id);
       completedAt = nextCompletedAt(from, to, item.completedAt, new Date());
       nextStatusName = next.name;
+      nextCategory = next.category;
     }
 
     const scalars = {
@@ -608,6 +625,11 @@ export class WorkItemsService {
           descriptionText: description === null ? null : richTextToPlain(description),
         }),
       };
+      // Bug: pano durumu ve atanan değişince Bug durumu eşitlenir (ADR-117).
+      if (type === 'BUG' && (nextCategory || assignees)) {
+        const assigned = (fields.assigneeIds ?? item.assignees.map((a) => a.userId)).length > 0;
+        data.bugStatus = bugStatusFor(nextCategory ?? item.status.category, assigned);
+      }
       if (Object.keys(data).length > 0) await tx.workItem.update({ where: { id: itemId }, data });
       if (assignees) {
         await tx.workItemAssignee.deleteMany({ where: { workItemId: itemId } });

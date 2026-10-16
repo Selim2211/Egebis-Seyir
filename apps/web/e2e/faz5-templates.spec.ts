@@ -14,13 +14,13 @@ test.describe.serial('Şablonlar', () => {
 
     await page
       .getByRole('complementary')
-      .getByRole('button', { name: 'Space oluştur' })
+      .getByRole('button', { name: 'Proje oluştur' })
       .first()
       .click();
-    const dialog = page.getByRole('dialog', { name: 'Yeni Space oluştur' });
+    const dialog = page.getByRole('dialog', { name: 'Yeni Proje oluştur' });
     await dialog.getByLabel('Ad', { exact: true }).fill('Şablon Testi');
     await dialog.getByLabel('Anahtar').fill('SBL');
-    await dialog.getByRole('button', { name: 'Space oluştur' }).click();
+    await dialog.getByRole('button', { name: 'Proje oluştur' }).click();
     await expect(page.getByRole('heading', { name: 'Şablon Testi' })).toBeVisible();
     const spaceId = /spaces\/([^/?]+)/.exec(page.url())![1]!;
 
@@ -50,25 +50,25 @@ test.describe.serial('Şablonlar', () => {
     await expect(page.getByRole('link', { name: 'Sürüm kontrol listesi' })).toHaveCount(2);
   });
 
-  test('Space şablonundan yeni Space', async ({ page }) => {
+  test('Proje şablonundan yeni Proje', async ({ page }) => {
     await page.goto('/login');
     await login(page, OWNER.email, OWNER.password);
     await page.getByRole('complementary').getByRole('link', { name: 'Şablon Testi' }).click();
-    await page.getByRole('link', { name: 'Space ayarları' }).click();
-    await page.getByRole('textbox', { name: 'Space şablonu adı' }).fill('Ekip şablonu');
-    await page.getByRole('button', { name: 'Bu Space’i şablon yap' }).click();
+    await page.getByRole('link', { name: 'Proje ayarları' }).click();
+    await page.getByRole('textbox', { name: 'Proje şablonu adı' }).fill('Ekip şablonu');
+    await page.getByRole('button', { name: 'Bu Projeyi şablon yap' }).click();
     await expect(page.getByText('Şablon kaydedildi.')).toBeVisible();
 
     await page
       .getByRole('complementary')
-      .getByRole('button', { name: 'Space oluştur' })
+      .getByRole('button', { name: 'Proje oluştur' })
       .first()
       .click();
-    const dialog = page.getByRole('dialog', { name: 'Yeni Space oluştur' });
+    const dialog = page.getByRole('dialog', { name: 'Yeni Proje oluştur' });
     await dialog.getByLabel('Şablondan başla').selectOption({ label: 'Ekip şablonu' });
-    await dialog.getByLabel('Ad', { exact: true }).fill('Şablonlu Space');
+    await dialog.getByLabel('Ad', { exact: true }).fill('Şablonlu Proje');
     await dialog.getByLabel('Anahtar').fill('SBS');
-    await dialog.getByRole('button', { name: 'Space oluştur' }).click();
-    await expect(page.getByRole('heading', { name: 'Şablonlu Space' })).toBeVisible();
+    await dialog.getByRole('button', { name: 'Proje oluştur' }).click();
+    await expect(page.getByRole('heading', { name: 'Şablonlu Proje' })).toBeVisible();
   });
 });

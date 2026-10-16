@@ -30,7 +30,10 @@ export function QuickCreate({
   const { t } = useTranslation();
   const errorMessage = useErrorMessage();
   const create = useCreateItem();
-  const types = creatableTypes(scrumEnabled, parent?.type ?? null);
+  // Bug'lar Sprint panosundaki Bugs ekranından açılır (ADR-117).
+  const types: WorkItemType[] = creatableTypes(scrumEnabled, parent?.type ?? null).filter(
+    (type) => type !== 'BUG',
+  );
   const [type, setType] = useState<WorkItemType>(types.includes('TASK') ? 'TASK' : types[0]!);
   const [title, setTitle] = useState('');
   const input = useRef<HTMLInputElement>(null);

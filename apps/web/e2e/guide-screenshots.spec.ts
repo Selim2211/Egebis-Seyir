@@ -46,6 +46,7 @@ const SAMPLE = {
     sub2: 'Hata mesajlarını yaz',
     desc: 'Kullanıcı e-posta ve şifreyle giriş yapabilmeli.',
     label: 'Tasarım',
+    bug: 'Giriş butonu çalışmıyor',
   },
   en: {
     space: 'Mobile App',
@@ -63,6 +64,7 @@ const SAMPLE = {
     sub2: 'Write the error messages',
     desc: 'Users must be able to sign in with e-mail and password.',
     label: 'Design',
+    bug: 'Sign-in button does nothing',
   },
 }[LANG];
 
@@ -542,6 +544,54 @@ test.describe.serial('Kılavuz görselleri', () => {
       { at: page.getByRole('link', { name: SAMPLE.bigSub }), n: 3, badge: 'l' },
     ]);
 
+    // ---------- Sürükle-bırak: Ayır alanı ----------
+    {
+      const row = page.locator(`[data-item-row="${keyOf(8)}"]`);
+      await row.hover();
+      const handle = page.getByRole('button', { name: t('dnd.handle', { key: keyOf(8) }) });
+      const box = (await handle.boundingBox())!;
+      await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+      await page.mouse.down();
+      await page.mouse.move(box.x + 60, box.y + 120, { steps: 8 });
+      await page.mouse.move(760, 470, { steps: 8 });
+      const zone = page.getByTestId('detach-zone');
+      await expect(zone).toBeVisible();
+      await shot(page, '28-dnd', [
+        { at: page.locator('[data-dnd-overlay]'), n: 1, badge: 'tl' },
+        { at: zone, n: 2, badge: 'tr' },
+      ]);
+      await page.keyboard.press('Escape');
+      await page.mouse.up();
+    }
+
+    // ---------- Bug ekranı ----------
+    await page.goto('/');
+    await sidebar.getByRole('link', { name: SAMPLE.space }).first().click();
+    await sidebar
+      .getByRole('link', { name: t('board.link') })
+      .first()
+      .click();
+    await page.getByTestId('bugs-button').click();
+    await page.getByRole('button', { name: t('bugs.report') }).click();
+    const bugForm = page.getByRole('dialog', { name: t('bugs.reportTitle') });
+    await bugForm.getByLabel(t('bugs.form.title')).fill(SAMPLE.bug);
+    await bugForm.getByLabel(t('bugs.form.severity')).selectOption('CRITICAL');
+    await bugForm.getByLabel(t('bugs.form.environment')).fill('Chrome 140, Windows 11');
+    await bugForm.getByRole('button', { name: t('bugs.submit') }).click();
+    await expect(page.getByRole('row', { name: new RegExp(SAMPLE.bug) })).toBeVisible();
+    await shot(page, '27-bugs', [
+      { at: page.getByRole('heading', { name: t('bugs.title'), level: 2 }), n: 1, badge: 'l' },
+      { at: page.getByRole('button', { name: t('bugs.report') }), n: 2, badge: 'l' },
+      { at: page.getByRole('tablist', { name: t('bugs.filter') }), n: 3, badge: 'tl' },
+      {
+        at: page
+          .getByRole('combobox', { name: new RegExp(t('bugs.assignFor', { key: '' }).trim()) })
+          .first(),
+        n: 4,
+        badge: 'b',
+      },
+    ]);
+
     // ---------- "New" menüsü ----------
     await page.getByTestId('new-menu').click();
     await shot(page, '22-new-menu', [
@@ -554,11 +604,6 @@ test.describe.serial('Kılavuz görselleri', () => {
       {
         at: page.getByRole('menuitem', { name: new RegExp('^' + t('newMenu.EPIC')) }),
         n: 3,
-        badge: 'r',
-      },
-      {
-        at: page.getByRole('menuitem', { name: new RegExp('^' + t('newMenu.SPACE')) }),
-        n: 4,
         badge: 'r',
       },
     ]);

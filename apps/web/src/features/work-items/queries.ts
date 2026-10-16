@@ -145,6 +145,12 @@ export const useCopyItem = () =>
     }),
   );
 
+/** Öğeyi üst öğesinden ayırır; Sub-Task bağımsız Task olur (ADR-116). */
+export const useUnnestItem = () =>
+  useWorkspaceMutation((id, itemId: string) =>
+    apiRequest(`${ws(id)}/items/${itemId}/unnest`, NoContent, { method: 'POST' }),
+  );
+
 /** Task'ı Epic'e dönüştürür (isteğe bağlı, ADR-109). */
 export const usePromoteToEpic = () =>
   useWorkspaceMutation((id, input: { itemId: string }) =>

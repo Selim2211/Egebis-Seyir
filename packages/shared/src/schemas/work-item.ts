@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import {
   BUG_SEVERITIES,
+  BUG_STATUSES,
   PRIORITIES,
   STATUS_CATEGORIES,
   TSHIRT_SIZES,
@@ -137,6 +138,8 @@ export type UpdateWorkItemRequest = z.infer<typeof UpdateWorkItemRequestSchema>;
 // ---------- Okuma ----------
 
 export const WorkItemSummarySchema = z.object({
+  /** Yalnızca Bug: iş akışı durumu (ADR-117). */
+  bugStatus: z.enum(BUG_STATUSES).nullable().optional(),
   id: z.uuid(),
   /** Okunabilir ID, ör. MOB-142 (ADR-033). */
   key: z.string(),

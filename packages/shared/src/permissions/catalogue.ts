@@ -26,6 +26,8 @@ export const PERMISSION_CATALOGUE: readonly PermissionEntry[] = [
   { scope: 'SPACE', group: 'items', key: S.WORK_ITEM_ACCESS },
   { scope: 'SPACE', group: 'items', key: S.ESTIMATE_WRITE },
   { scope: 'SPACE', group: 'items', key: S.COMMENT_WRITE },
+  { scope: 'SPACE', group: 'bugs', key: S.BUG_REPORT },
+  { scope: 'SPACE', group: 'bugs', key: S.BUG_ASSIGN },
   { scope: 'SPACE', group: 'sprints', key: S.BACKLOG_RANK },
   { scope: 'SPACE', group: 'sprints', key: S.SPRINT_PLAN },
   { scope: 'SPACE', group: 'sprints', key: S.SPRINT_START },
