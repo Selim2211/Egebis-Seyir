@@ -32,3 +32,4 @@ export * from './form';
 export * from './goal';
 export * from './message';
 export * from './team';
+export * from './role';

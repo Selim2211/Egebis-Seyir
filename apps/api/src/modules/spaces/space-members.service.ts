@@ -1,13 +1,9 @@
-import { Injectable } from '@nestjs/common';
-import {
-  checkSpaceRole,
-  type SpaceMember,
-  type SpaceRole,
-  type WorkspaceRole,
-} from '@scrum/shared';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { checkSpaceRole, ERROR_CODES, type SpaceMember } from '@scrum/shared';
 import { ClsService } from 'nestjs-cls';
 import { RoleScope } from '../../generated/prisma/client';
 import type { AppClsStore } from '../../infra/cls/request-context';
+import { roleTier } from '../access/role-tier';
 import { TenantPrismaService } from '../../infra/prisma/tenant-prisma.service';
 import { ActivityService } from '../activity/activity.service';
 import { forbidden, notFound } from './space-errors';
@@ -34,37 +30,38 @@ export class SpaceMembersService {
     });
     const memberships = await db.membership.findMany({
       where: { userId: { in: members.map((m) => m.userId) } },
-      select: { userId: true, role: { select: { key: true } } },
+      select: { userId: true, role: { select: { key: true, baseKey: true } } },
     });
-    const workspaceRoles = new Map(memberships.map((m) => [m.userId, m.role.key]));
+    const workspaceRoles = new Map(memberships.map((m) => [m.userId, roleTier(m.role)]));
     return members.map((m) => ({
       userId: m.user.id,
       name: m.user.name,
       title: m.user.title,
       avatarVersion: m.user.avatarVersion,
-      role: m.role.key as SpaceRole,
-      workspaceRole: (workspaceRoles.get(m.userId) ?? 'GUEST') as WorkspaceRole,
+      role: m.role.key,
+      workspaceRole: workspaceRoles.get(m.userId) ?? 'GUEST',
     }));
   }
 
   /** Üye ekler veya Scrum rolünü değiştirir. */
-  async put(spaceId: string, userId: string, role: SpaceRole): Promise<void> {
+  async put(spaceId: string, userId: string, role: string): Promise<void> {
     const workspaceId = this.cls.get('workspaceId')!;
     const db = this.tenant.db;
     await this.ensureSpace(spaceId);
 
     const membership = await db.membership.findFirst({
       where: { userId },
-      select: { role: { select: { key: true } } },
+      select: { role: { select: { key: true, baseKey: true } } },
     });
     if (!membership) throw notFound();
-    const check = checkSpaceRole(membership.role.key as WorkspaceRole, role);
+    const check = checkSpaceRole(roleTier(membership.role), role);
     if (!check.ok) throw forbidden(check.code);
 
-    const spaceRole = await db.role.findFirstOrThrow({
+    const spaceRole = await db.role.findFirst({
       where: { scope: RoleScope.SPACE, key: role },
       select: { id: true },
     });
+    if (!spaceRole) throw new NotFoundException({ code: ERROR_CODES.ROLE_NOT_FOUND });
     await db.$transaction(async (tx) => {
       const existing = await tx.spaceMember.findFirst({
         where: { spaceId, userId },

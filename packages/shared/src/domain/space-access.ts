@@ -1,5 +1,5 @@
 import { ERROR_CODES } from '../errors/codes';
-import { ALL_SPACE_PERMISSIONS, type SpaceRole, type WorkspaceRole } from '../permissions/roles';
+import { ALL_SPACE_PERMISSIONS, type WorkspaceRole } from '../permissions/roles';
 
 export interface SpaceAccessInput {
   workspaceRole: WorkspaceRole;
@@ -29,7 +29,7 @@ export type SpaceRoleCheck =
   { ok: true } | { ok: false; code: typeof ERROR_CODES.GUEST_STAKEHOLDER_ONLY };
 
 /** Guest bir Space'e yalnızca Stakeholder olarak eklenebilir (ADR-035). */
-export function checkSpaceRole(workspaceRole: WorkspaceRole, spaceRole: SpaceRole): SpaceRoleCheck {
+export function checkSpaceRole(workspaceRole: WorkspaceRole, spaceRole: string): SpaceRoleCheck {
   if (workspaceRole === 'GUEST' && spaceRole !== 'STAKEHOLDER') {
     return { ok: false, code: ERROR_CODES.GUEST_STAKEHOLDER_ONLY };
   }

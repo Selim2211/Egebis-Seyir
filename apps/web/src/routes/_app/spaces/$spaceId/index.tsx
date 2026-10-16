@@ -1,5 +1,6 @@
 import { SPACE_PERMISSIONS as S } from '@scrum/shared';
 import { useQuery } from '@tanstack/react-query';
+import { useRoleLabel } from '@/features/roles/queries';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { Folder, FolderPlus, List, ListOrdered, ListPlus, Lock, Settings2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -19,6 +20,7 @@ export const Route = createFileRoute('/_app/spaces/$spaceId/')({
 /** Space ana sayfası (brief §10 madde 4). Backlog bağlantısı Scrum açık Space'lerde görünür. */
 function SpacePage() {
   const { t } = useTranslation();
+  const roleLabel = useRoleLabel();
   const { spaceId } = Route.useParams();
   const { id: workspaceId } = useCurrentWorkspace();
   const actions = useStructureActions();
@@ -170,7 +172,9 @@ function SpacePage() {
                     avatarVersion={m.avatarVersion}
                   />
                   <span className="min-w-0 flex-1 truncate">{m.name}</span>
-                  <span className="text-muted-foreground text-xs">{t(`spaceRoles.${m.role}`)}</span>
+                  <span className="text-muted-foreground text-xs">
+                    {roleLabel('SPACE', m.role)}
+                  </span>
                 </li>
               ))}
             </ul>

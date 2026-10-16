@@ -105,7 +105,8 @@
     "OWNER": "Her şeyi yönetir; workspace'i silebilir.",
     "ADMIN": "Üyeleri ve ayarları yönetir.",
     "MEMBER": "Space oluşturur ve atandığı Space'lerde çalışır.",
-    "GUEST": "Yalnızca paylaşılan Space'leri görür ve yorum yapar."
+    "GUEST": "Yalnızca paylaşılan Space'leri görür ve yorum yapar.",
+    "custom": "Özel roller, Ayarlar → Roles içinde belirlenen izinleri izler."
   },
   "auth": {
     "email": "E-posta",
@@ -188,7 +189,8 @@
     "api": "API erişimi",
     "integrations": "Entegrasyonlar",
     "teams": "Ekipler",
-    "audit": "Denetim günlüğü"
+    "audit": "Denetim günlüğü",
+    "roles": "Roles"
   },
   "members": {
     "title": "Üyeler",
@@ -418,7 +420,13 @@
     "TEAM_LIMIT": "Çalışma alanı en fazla 100 ekip içerebilir.",
     "WORK_ITEM_POINTS_FROM_SUBTASKS": "Alt görevi olan işin puanı alt görevlerin toplamıdır; elle değiştirilemez.",
     "WORK_ITEM_PERCENT_NOT_ALLOWED": "Bu iş için yüzde girilemez (Epic ya da alt görevlerden hesaplanan iş).",
-    "WORK_ITEM_NOT_PROMOTABLE": "Yalnızca Task, Epic'e dönüştürülebilir."
+    "WORK_ITEM_NOT_PROMOTABLE": "Yalnızca Task, Epic'e dönüştürülebilir.",
+    "ROLE_NOT_FOUND": "Bu rol artık yok.",
+    "ROLE_LOCKED": "Bu rol kilitli, değiştirilemez.",
+    "ROLE_INVALID_PERMISSIONS": "İzin listesi geçerli değil.",
+    "ROLE_GUARDRAIL": "Bu değişikliğe izin verilmiyor: insanları dışarıda bırakır veya gerekli bir izni kaldırır.",
+    "ROLE_IN_USE": "Bu rolü hâlâ kullananlar var. Taşınacakları bir rol seç.",
+    "ROLE_NAME_TAKEN": "Bu adda bir özel rol zaten var."
   },
   "spaceRoles": {
     "PRODUCT_OWNER": "Product Owner",
@@ -2052,5 +2060,73 @@
       "inReview": "İncelemede",
       "done": "Tamamlandı"
     }
+  },
+  "rolesPage": {
+    "title": "Roles and permissions",
+    "subtitle": "Her rolün neler yapabileceğini belirle. Değişiklikler anında geçerli olur.",
+    "scope": {
+      "SPACE": "Space roles",
+      "WORKSPACE": "Workspace roles"
+    },
+    "scopeHelp": {
+      "SPACE": "Space rolleri tek bir Space içinde geçerlidir (Product Owner, Developer…). Owner ve Admin her Space'te tüm izinlere sahiptir.",
+      "WORKSPACE": "Workspace rolleri tüm workspace için geçerlidir. Özel roller, işaretlediğin izinlerle Member gibi davranır."
+    },
+    "permission": "İzin",
+    "newRole": "New role",
+    "newRoleTitle": "New role · {{scope}}",
+    "name": "Ad",
+    "description": "Açıklama",
+    "startFrom": "Şuradan başla",
+    "startEmpty": "En az izinle",
+    "startHint": "Sonra tablodan izinleri işaretleyip kaldırabilirsin.",
+    "create": "Create role",
+    "created": "Rol oluşturuldu.",
+    "rename": "Yeniden adlandır",
+    "reset": "Varsayılana döndür",
+    "resetDone": "{{name}} varsayılan izinlerine döndürüldü.",
+    "delete": "Delete role",
+    "deleteTitle": "{{name}} silinsin mi?",
+    "deleteBody": "Bu rolü kullanan yok. Rol kaldırılacak.",
+    "deleteInUse": "Bu rolü {{count}} kişi kullanıyor. Onlara verilecek yeni rolü seç.",
+    "reassignTo": "Şu role taşı",
+    "deleted": "Rol silindi.",
+    "actions": "{{name}} için işlemler",
+    "members_one": "{{count}} kişi",
+    "members_other": "{{count}} kişi",
+    "locked": "Kilitli",
+    "custom": "Özel"
+  },
+  "permissionGroups": {
+    "workspace": "Workspace",
+    "people": "Kişiler",
+    "spaces": "Space",
+    "space": "Space",
+    "items": "İş öğeleri",
+    "sprints": "Backlog ve sprint",
+    "content": "Rapor ve doküman"
+  },
+  "permissions": {
+    "workspace.delete": "Workspace silme",
+    "workspace.settings": "Workspace ayarlarını ve rolleri değiştirme",
+    "workspace.audit.view": "Denetim günlüğünü görme",
+    "workspace.members.view": "Üye listesini görme",
+    "workspace.members.manage": "Üye davet etme, çıkarma ve rol değiştirme",
+    "space.create": "Space oluşturma",
+    "space.view": "Space'i ve içeriğini görme",
+    "space.settings": "Space ayarları, üyeler ve durumları değiştirme",
+    "space.lists.manage": "Folder ve List oluşturma/yönetme",
+    "workItem.write": "İş öğesi oluşturma ve düzenleme",
+    "workItem.status.own": "Kendi iş öğesinin durumunu değiştirme",
+    "estimate.write": "Tahmin ve Story Point girme",
+    "comment.write": "Yorum yazma",
+    "backlog.rank": "Backlog sıralama",
+    "sprint.plan": "Sprint planlama",
+    "sprint.start": "Sprint başlatma",
+    "sprint.complete": "Sprint tamamlama",
+    "sprint.cancel": "Sprint iptal etme",
+    "report.view": "Raporları görme",
+    "doc.view": "Dokümanları görme",
+    "doc.write": "Doküman oluşturma ve düzenleme"
   }
 }

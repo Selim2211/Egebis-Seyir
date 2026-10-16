@@ -9,14 +9,10 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import {
-  ERROR_CODES,
-  type Permission,
-  type SpacePermission,
-  type WorkspaceRole,
-} from '@scrum/shared';
+import { ERROR_CODES, type Permission, type SpacePermission } from '@scrum/shared';
 import { ClsService } from 'nestjs-cls';
 import type { AppClsStore } from '../../infra/cls/request-context';
+import { roleTier } from '../access/role-tier';
 import { PrismaService } from '../../infra/prisma/prisma.service';
 import { safeEqual } from '../../infra/security/tokens';
 import { type AuthedRequest, CSRF_COOKIE, CSRF_HEADER, SESSION_COOKIE } from './auth.constants';
@@ -126,13 +122,13 @@ export class WorkspaceAccessGuard implements CanActivate {
     const membership = /^[0-9a-f-]{36}$/i.test(workspaceId)
       ? await this.prisma.membership.findUnique({
           where: { workspaceId_userId: { workspaceId, userId: req.user.id } },
-          include: { role: { select: { key: true, permissions: true } } },
+          include: { role: { select: { key: true, baseKey: true, permissions: true } } },
         })
       : null;
     if (!membership) throw new NotFoundException({ code: ERROR_CODES.NOT_FOUND });
 
     this.cls.set('workspaceId', workspaceId);
-    this.cls.set('workspaceRole', membership.role.key as WorkspaceRole);
+    this.cls.set('workspaceRole', roleTier(membership.role));
     this.cls.set('permissions', membership.role.permissions);
     return true;
   }

@@ -16,6 +16,7 @@ import {
 import { ClsService } from 'nestjs-cls';
 import { RoleScope } from '../../generated/prisma/client';
 import type { AppClsStore } from '../../infra/cls/request-context';
+import { roleTier } from '../access/role-tier';
 import { PrismaService } from '../../infra/prisma/prisma.service';
 import { TenantPrismaService } from '../../infra/prisma/tenant-prisma.service';
 import { hashPassword } from '../../infra/security/password';
@@ -150,7 +151,7 @@ export class MembersService {
   }
 
   /** Rol değiştirir (`newRole`) veya üyeyi çıkarır (`null`). Owner kuralları shared'dadır. */
-  async change(targetUserId: string, newRole: WorkspaceRole | null): Promise<void> {
+  async change(targetUserId: string, newRole: string | null): Promise<void> {
     const workspaceId = this.cls.get('workspaceId')!;
     const actorRole = this.cls.get('workspaceRole')!;
     const actorId = this.cls.get('userId')!;
@@ -158,16 +159,24 @@ export class MembersService {
     await this.tenant.db.$transaction(async (tx) => {
       const target = await tx.membership.findFirst({
         where: { userId: targetUserId },
-        include: { role: { select: { key: true } } },
+        include: { role: { select: { key: true, baseKey: true } } },
       });
       if (!target) throw new NotFoundException({ code: ERROR_CODES.NOT_FOUND });
 
-      const targetRole = target.role.key as WorkspaceRole;
-      if (newRole === targetRole) return;
+      const targetRole = roleTier(target.role);
+      if (newRole === target.role.key) return;
+      const nextRole =
+        newRole === null
+          ? null
+          : await tx.role.findFirst({ where: { scope: RoleScope.WORKSPACE, key: newRole } });
+      if (newRole !== null && !nextRole) {
+        throw new NotFoundException({ code: ERROR_CODES.ROLE_NOT_FOUND });
+      }
+      const newTier = nextRole ? roleTier(nextRole) : null;
       const ownerCount = await tx.membership.count({
         where: { role: { scope: RoleScope.WORKSPACE, key: 'OWNER' } },
       });
-      const check = checkMemberChange({ actorRole, targetRole, newRole, ownerCount });
+      const check = checkMemberChange({ actorRole, targetRole, newRole: newTier, ownerCount });
       if (!check.ok) throw new ForbiddenException({ code: check.code });
 
       if (newRole === null) {
@@ -176,11 +185,8 @@ export class MembersService {
         await tx.favorite.deleteMany({ where: { userId: targetUserId } });
         await tx.workItemAssignee.deleteMany({ where: { userId: targetUserId } });
       } else {
-        const role = await tx.role.findFirstOrThrow({
-          where: { scope: RoleScope.WORKSPACE, key: newRole },
-        });
-        await tx.membership.update({ where: { id: target.id }, data: { roleId: role.id } });
-        if (newRole === 'GUEST') {
+        await tx.membership.update({ where: { id: target.id }, data: { roleId: nextRole!.id } });
+        if (newTier === 'GUEST') {
           // Guest Space'lerde yalnızca Stakeholder olabilir (ADR-035, ADR-043).
           const stakeholder = await tx.role.findFirstOrThrow({
             where: { scope: RoleScope.SPACE, key: 'STAKEHOLDER' },
@@ -197,7 +203,7 @@ export class MembersService {
         entityType: 'member',
         entityId: targetUserId,
         action: newRole === null ? 'member.removed' : 'member.role_changed',
-        changes: { role: { from: targetRole, to: newRole } },
+        changes: { role: { from: target.role.key, to: newRole } },
       });
     });
   }

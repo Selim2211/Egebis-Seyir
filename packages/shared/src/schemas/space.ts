@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { ESTIMATION_SCALES, SPRINT_LENGTH_WEEKS } from '../constants/estimation';
 import { SPACE_ICONS, SPACE_KEY_PATTERN } from '../constants/space';
 import { STATUS_CATEGORIES } from '../constants/work-item';
-import { SPACE_ROLES, WORKSPACE_ROLES } from '../permissions/roles';
+import { RoleKeySchema } from './role';
 
 /** Space, Folder ve List adları. */
 export const ContainerNameSchema = z.string().trim().min(1).max(80);
@@ -35,7 +35,7 @@ const spaceFields = {
 
 export const SpaceMemberInputSchema = z.object({
   userId: z.uuid(),
-  role: z.enum(SPACE_ROLES),
+  role: RoleKeySchema,
 });
 export type SpaceMemberInput = z.infer<typeof SpaceMemberInputSchema>;
 
@@ -95,7 +95,7 @@ export const SpaceDetailSchema = z.object({
   dodEnforced: z.boolean(),
   estimationScale: z.enum(ESTIMATION_SCALES),
   archived: z.boolean(),
-  myRole: z.enum(SPACE_ROLES).nullable(),
+  myRole: RoleKeySchema.nullable(),
   statuses: z.array(StatusSchema),
   createdAt: z.iso.datetime(),
 });
@@ -207,8 +207,8 @@ export const SpaceMemberSchema = z.object({
   name: z.string(),
   title: z.string().nullable(),
   avatarVersion: z.string().nullable(),
-  role: z.enum(SPACE_ROLES),
-  workspaceRole: z.enum(WORKSPACE_ROLES),
+  role: RoleKeySchema,
+  workspaceRole: RoleKeySchema,
 });
 export type SpaceMember = z.infer<typeof SpaceMemberSchema>;
 
@@ -217,7 +217,7 @@ export const SpaceMembersResponseSchema = z.object({ members: z.array(SpaceMembe
 export type SpaceMembersResponse = z.infer<typeof SpaceMembersResponseSchema>;
 
 /** PUT .../spaces/:spaceId/members/:userId — ekler veya rolünü değiştirir. */
-export const PutSpaceMemberRequestSchema = z.object({ role: z.enum(SPACE_ROLES) });
+export const PutSpaceMemberRequestSchema = z.object({ role: RoleKeySchema });
 export type PutSpaceMemberRequest = z.infer<typeof PutSpaceMemberRequestSchema>;
 
 // ---------- Arşiv ve çöp kutusu (ADR-041) ----------

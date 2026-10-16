@@ -1,5 +1,10 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { type InvitationPreview, PasswordSchema, PersonNameSchema } from '@scrum/shared';
+import {
+  type InvitationPreview,
+  isCustomRoleKey,
+  PasswordSchema,
+  PersonNameSchema,
+} from '@scrum/shared';
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import { Clock, Lock, LinkIcon } from 'lucide-react';
@@ -46,7 +51,10 @@ function InvitePage() {
       <p className="text-muted-foreground mt-2 text-sm">
         <Trans
           i18nKey="auth.invite.invitedBy"
-          values={{ name: inv.invitedBy, role: t(`roles.${inv.role}`) }}
+          values={{
+            name: inv.invitedBy,
+            role: t(`roles.${isCustomRoleKey(inv.role) ? 'MEMBER' : inv.role}` as 'roles.MEMBER'),
+          }}
           components={[<strong key="b" className="text-foreground" />]}
         />
       </p>

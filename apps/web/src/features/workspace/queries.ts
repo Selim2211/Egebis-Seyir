@@ -9,7 +9,6 @@ import {
   MembersResponseSchema,
   type MyWorkspace,
   type Permission,
-  type WorkspaceRole,
 } from '@scrum/shared';
 import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { meQuery, useMe } from '@/features/auth/queries';
@@ -84,7 +83,7 @@ export const useRevokeInvitation = () =>
   );
 
 export const useChangeMemberRole = () =>
-  useWorkspaceMutation((id, input: { userId: string; role: WorkspaceRole }) =>
+  useWorkspaceMutation((id, input: { userId: string; role: string }) =>
     apiRequest(`${ws(id)}/members/${input.userId}`, NoContent, {
       method: 'PATCH',
       body: { role: input.role },

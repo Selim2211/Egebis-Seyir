@@ -1,10 +1,10 @@
 import {
   checkMemberChange,
   EmailSchema,
+  isCustomRoleKey,
   type Member,
   WORKSPACE_PERMISSIONS,
   WORKSPACE_ROLES,
-  type WorkspaceRole,
 } from '@scrum/shared';
 import { createFileRoute } from '@tanstack/react-router';
 import { Clock, Copy, Mail, Send, UserMinus, UserPlus } from 'lucide-react';
@@ -19,6 +19,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { UserAvatar } from '@/components/user-avatar';
 import { useMe } from '@/features/auth/queries';
+import { useAssignableWorkspaceRoles, useRoleLabel, workspaceTier } from '@/features/roles/queries';
 import { useHierarchy } from '@/features/spaces/queries';
 import { SpaceAvatar } from '@/features/spaces/space-avatar';
 import {
@@ -40,8 +41,6 @@ export const Route = createFileRoute('/_app/settings/members')({
   component: MembersPage,
 });
 
-const INVITABLE_ROLES = ['MEMBER', 'ADMIN', 'GUEST'] as const;
-
 function MembersPage() {
   const { t } = useTranslation();
   const canManage = useCan(WORKSPACE_PERMISSIONS.MEMBERS_MANAGE);
@@ -62,7 +61,9 @@ function CreateAccountForm() {
   const create = useCreateMember();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [role, setRole] = useState<(typeof INVITABLE_ROLES)[number]>('MEMBER');
+  const invitable = useAssignableWorkspaceRoles();
+  const roleLabel = useRoleLabel();
+  const [role, setRole] = useState('MEMBER');
   const [password, setPassword] = useState('');
   const [spaceIds, setSpaceIds] = useState<string[]>([]);
   const [spacesMissing, setSpacesMissing] = useState(false);
@@ -140,14 +141,10 @@ function CreateAccountForm() {
           </div>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="create-role">{t('members.role')}</Label>
-            <NativeSelect
-              id="create-role"
-              value={role}
-              onChange={(e) => setRole(e.target.value as typeof role)}
-            >
-              {INVITABLE_ROLES.map((r) => (
+            <NativeSelect id="create-role" value={role} onChange={(e) => setRole(e.target.value)}>
+              {invitable.map((r) => (
                 <option key={r} value={r}>
-                  {t(`roles.${r}`)}
+                  {roleLabel('WORKSPACE', r)}
                 </option>
               ))}
             </NativeSelect>
@@ -233,7 +230,9 @@ function InviteForm() {
   const { t } = useTranslation();
   const invite = useInvite();
   const [emails, setEmails] = useState('');
-  const [role, setRole] = useState<(typeof INVITABLE_ROLES)[number]>('MEMBER');
+  const invitable = useAssignableWorkspaceRoles();
+  const roleLabel = useRoleLabel();
+  const [role, setRole] = useState('MEMBER');
   const [invalid, setInvalid] = useState<string[]>([]);
   const [spaceIds, setSpaceIds] = useState<string[]>([]);
   const [spacesMissing, setSpacesMissing] = useState(false);
@@ -285,14 +284,10 @@ function InviteForm() {
         </div>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="invite-role">{t('members.role')}</Label>
-          <NativeSelect
-            id="invite-role"
-            value={role}
-            onChange={(e) => setRole(e.target.value as typeof role)}
-          >
-            {INVITABLE_ROLES.map((r) => (
+          <NativeSelect id="invite-role" value={role} onChange={(e) => setRole(e.target.value)}>
+            {invitable.map((r) => (
               <option key={r} value={r}>
-                {t(`roles.${r}`)}
+                {roleLabel('WORKSPACE', r)}
               </option>
             ))}
           </NativeSelect>
@@ -308,7 +303,7 @@ function InviteForm() {
             {t('members.invalidEmails', { emails: invalid.join(', ') })}
           </span>
         ) : (
-          `${t('members.inviteHint')} ${t(`roleHelp.${role}`)}`
+          `${t('members.inviteHint')} ${isCustomRoleKey(role) ? t('roleHelp.custom') : t(`roleHelp.${role}` as 'roleHelp.MEMBER')}`
         )}
       </p>
       {guest && (
@@ -387,6 +382,7 @@ function GuestSpaces({
 
 function PendingInvitations() {
   const { t } = useTranslation();
+  const roleLabel = useRoleLabel();
   const { data } = useInvitations(true);
   const resend = useResendInvitation();
   const revoke = useRevokeInvitation();
@@ -409,7 +405,7 @@ function PendingInvitations() {
             <span className="font-medium">{inv.email}</span>
             <span className="text-muted-foreground text-xs">
               {t('members.pendingRow', {
-                role: t(`roles.${inv.role}`),
+                role: roleLabel('WORKSPACE', inv.role),
                 invitedBy: inv.invitedBy,
                 date: formatDate(inv.expiresAt),
               })}
@@ -507,6 +503,8 @@ function MemberRow({
   const { t } = useTranslation();
   const { user } = useMe();
   const { role: actorRole } = useCurrentWorkspace();
+  const invitable = useAssignableWorkspaceRoles();
+  const roleLabel = useRoleLabel();
   const changeRole = useChangeMemberRole();
   const remove = useRemoveMember();
   const errorMessage = useErrorMessage();
@@ -514,10 +512,15 @@ function MemberRow({
   const ownerCount = members.filter((m) => m.role === 'OWNER').length;
 
   /** Owner kuralları arayüzde de uygulanır; asıl kontrol API'de (shared/domain/members). */
-  const allowed = (newRole: WorkspaceRole | null) =>
-    checkMemberChange({ actorRole, targetRole: member.role, newRole, ownerCount }).ok;
+  const allowed = (newRole: string | null) =>
+    checkMemberChange({
+      actorRole: workspaceTier(actorRole),
+      targetRole: workspaceTier(member.role),
+      newRole: newRole === null ? null : workspaceTier(newRole),
+      ownerCount,
+    }).ok;
 
-  const onRoleChange = (role: WorkspaceRole) =>
+  const onRoleChange = (role: string) =>
     changeRole.mutate(
       { userId: member.userId, role },
       {
@@ -566,17 +569,17 @@ function MemberRow({
             disabled={
               changeRole.isPending || !allowed(member.role === 'OWNER' ? 'ADMIN' : member.role)
             }
-            onChange={(e) => onRoleChange(e.target.value as WorkspaceRole)}
+            onChange={(e) => onRoleChange(e.target.value)}
             className="h-8"
           >
-            {WORKSPACE_ROLES.map((r) => (
+            {[...WORKSPACE_ROLES, ...invitable.filter((r) => isCustomRoleKey(r))].map((r) => (
               <option key={r} value={r} disabled={r !== member.role && !allowed(r)}>
-                {t(`roles.${r}`)}
+                {roleLabel('WORKSPACE', r)}
               </option>
             ))}
           </NativeSelect>
         ) : (
-          t(`roles.${member.role}`)
+          roleLabel('WORKSPACE', member.role)
         )}
       </td>
       <td className="text-muted-foreground px-4 py-2.5 text-xs">

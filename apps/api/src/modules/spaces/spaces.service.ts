@@ -1,9 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import {
   checkSpaceRole,
   compareRank,
   DEFAULT_LIST_NAME,
   DEFAULT_STATUSES,
+  ERROR_CODES,
   rankBetween,
   rankForPlacement,
   ranksAfter,
@@ -17,11 +18,11 @@ import {
   type SpaceRole,
   type TreeSpace,
   type UpdateSpaceRequest,
-  type WorkspaceRole,
 } from '@scrum/shared';
 import { ClsService } from 'nestjs-cls';
 import { RoleScope } from '../../generated/prisma/client';
 import type { AppClsStore } from '../../infra/cls/request-context';
+import { roleTier } from '../access/role-tier';
 import { TenantPrismaService } from '../../infra/prisma/tenant-prisma.service';
 import { SpaceAccessService } from '../access/space-access.service';
 import { ActivityService } from '../activity/activity.service';
@@ -173,7 +174,7 @@ export class SpacesService {
             workspaceId,
             spaceId: space.id,
             userId: m.userId,
-            roleId: roleIds[m.role],
+            roleId: this.roleIdFor(roleIds, m.role),
           })),
         });
         await this.activity.record(tx, {
@@ -306,9 +307,9 @@ export class SpacesService {
   private async validateMembers(members: SpaceMemberInput[]): Promise<SpaceMemberInput[]> {
     const memberships = await this.tenant.db.membership.findMany({
       where: { userId: { in: members.map((m) => m.userId) } },
-      select: { userId: true, role: { select: { key: true } } },
+      select: { userId: true, role: { select: { key: true, baseKey: true } } },
     });
-    const roles = new Map(memberships.map((m) => [m.userId, m.role.key as WorkspaceRole]));
+    const roles = new Map(memberships.map((m) => [m.userId, roleTier(m.role)]));
     for (const m of members) {
       const workspaceRole = roles.get(m.userId);
       if (!workspaceRole) throw notFound();
@@ -318,11 +319,17 @@ export class SpacesService {
     return members;
   }
 
-  async spaceRoleIds(): Promise<Record<SpaceRole, string>> {
+  private roleIdFor(roleIds: Record<string, string>, key: string): string {
+    const id = roleIds[key];
+    if (!id) throw new NotFoundException({ code: ERROR_CODES.ROLE_NOT_FOUND });
+    return id;
+  }
+
+  async spaceRoleIds(): Promise<Record<string, string>> {
     const roles = await this.tenant.db.role.findMany({
       where: { scope: RoleScope.SPACE },
       select: { id: true, key: true },
     });
-    return Object.fromEntries(roles.map((r) => [r.key, r.id])) as Record<SpaceRole, string>;
+    return Object.fromEntries(roles.map((r) => [r.key, r.id]));
   }
 }

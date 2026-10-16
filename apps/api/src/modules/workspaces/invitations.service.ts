@@ -69,11 +69,7 @@ export class InvitationsService {
   }
 
   /** Davet gönderir. Aynı e-postaya bekleyen davet varsa yenisiyle değiştirilir. */
-  async create(
-    emails: string[],
-    role: Exclude<WorkspaceRole, 'OWNER'>,
-    spaceIds: string[] = [],
-  ): Promise<void> {
+  async create(emails: string[], role: string, spaceIds: string[] = []): Promise<void> {
     const workspaceId = this.cls.get('workspaceId')!;
     const actorId = this.cls.get('userId')!;
     const unique = [...new Set(emails)];
@@ -151,7 +147,7 @@ export class InvitationsService {
         expiresAt: new Date(Date.now() + INVITATION_TTL_DAYS * DAY),
       },
     });
-    await this.sendMail(invitation.email, token, invitation.role.key as WorkspaceRole);
+    await this.sendMail(invitation.email, token, invitation.role.key);
   }
 
   async revoke(invitationId: string): Promise<void> {
@@ -181,7 +177,7 @@ export class InvitationsService {
       workspaceName: inv.workspace.name,
       invitedBy: inv.invitedBy.name,
       email: inv.email,
-      role: inv.role.key as WorkspaceRole,
+      role: inv.role.key,
       expiresAt: inv.expiresAt.toISOString(),
       accountExists,
     };
@@ -298,7 +294,7 @@ export class InvitationsService {
     return inv;
   }
 
-  private async sendMail(email: string, token: string, role: WorkspaceRole): Promise<void> {
+  private async sendMail(email: string, token: string, role: string): Promise<void> {
     const workspaceId = this.cls.get('workspaceId')!;
     const [workspace, inviter] = await Promise.all([
       this.prisma.workspace.findUniqueOrThrow({

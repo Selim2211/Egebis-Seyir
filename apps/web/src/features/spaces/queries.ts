@@ -8,7 +8,6 @@ import {
   FolderDetailSchema,
   HierarchyResponseSchema,
   ListDetailSchema,
-  type SpaceRole,
   SpaceDetailSchema,
   SpaceMembersResponseSchema,
   type TreeSpace,
@@ -210,7 +209,7 @@ export const useFavorite = () =>
   );
 
 export const usePutSpaceMember = () =>
-  useWorkspaceMutation((id, input: { spaceId: string; userId: string; role: SpaceRole }) =>
+  useWorkspaceMutation((id, input: { spaceId: string; userId: string; role: string }) =>
     apiRequest(`${ws(id)}/spaces/${input.spaceId}/members/${input.userId}`, NoContent, {
       method: 'PUT',
       body: { role: input.role },

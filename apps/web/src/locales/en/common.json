@@ -105,7 +105,8 @@
     "OWNER": "Manages everything; can delete the workspace.",
     "ADMIN": "Manages members and settings.",
     "MEMBER": "Creates spaces and works in the spaces they belong to.",
-    "GUEST": "Sees only shared spaces and can comment."
+    "GUEST": "Sees only shared spaces and can comment.",
+    "custom": "Custom roles follow the permissions set in Settings → Roles."
   },
   "auth": {
     "email": "Email",
@@ -188,7 +189,8 @@
     "api": "API access",
     "integrations": "Integrations",
     "teams": "Teams",
-    "audit": "Audit log"
+    "audit": "Audit log",
+    "roles": "Roles"
   },
   "members": {
     "title": "Members",
@@ -418,7 +420,13 @@
     "TEAM_LIMIT": "A workspace can have at most 100 teams.",
     "WORK_ITEM_POINTS_FROM_SUBTASKS": "Points of an item with sub-tasks are the sum of its sub-tasks and cannot be edited.",
     "WORK_ITEM_PERCENT_NOT_ALLOWED": "Completion cannot be set for this item (Epic, or calculated from sub-tasks).",
-    "WORK_ITEM_NOT_PROMOTABLE": "Only a Task can be converted to an Epic."
+    "WORK_ITEM_NOT_PROMOTABLE": "Only a Task can be converted to an Epic.",
+    "ROLE_NOT_FOUND": "That role no longer exists.",
+    "ROLE_LOCKED": "This role is locked and cannot be changed.",
+    "ROLE_INVALID_PERMISSIONS": "The permission list is not valid.",
+    "ROLE_GUARDRAIL": "This change is not allowed: it would lock people out or remove a required permission.",
+    "ROLE_IN_USE": "People still use this role. Choose a role to move them to.",
+    "ROLE_NAME_TAKEN": "A custom role with this name already exists."
   },
   "spaceRoles": {
     "PRODUCT_OWNER": "Product Owner",
@@ -2052,5 +2060,73 @@
       "inReview": "In Review",
       "done": "Done"
     }
+  },
+  "rolesPage": {
+    "title": "Roles and permissions",
+    "subtitle": "Decide what each role can do. Changes apply immediately.",
+    "scope": {
+      "SPACE": "Space roles",
+      "WORKSPACE": "Workspace roles"
+    },
+    "scopeHelp": {
+      "SPACE": "Space roles apply inside one Space (Product Owner, Developer…). Owners and Admins always have every Space permission.",
+      "WORKSPACE": "Workspace roles apply to the whole workspace. Custom roles behave like a Member with the permissions you tick."
+    },
+    "permission": "Permission",
+    "newRole": "New role",
+    "newRoleTitle": "New role · {{scope}}",
+    "name": "Name",
+    "description": "Description",
+    "startFrom": "Start from",
+    "startEmpty": "Minimum permissions",
+    "startHint": "You can tick or untick permissions in the table afterwards.",
+    "create": "Create role",
+    "created": "Role created.",
+    "rename": "Rename",
+    "reset": "Reset to default",
+    "resetDone": "{{name}} was reset to its default permissions.",
+    "delete": "Delete role",
+    "deleteTitle": "Delete {{name}}?",
+    "deleteBody": "No one uses this role. It will be removed.",
+    "deleteInUse": "{{count}} people use this role. Choose the role they get instead.",
+    "reassignTo": "Move them to",
+    "deleted": "Role deleted.",
+    "actions": "Actions for {{name}}",
+    "members_one": "{{count}} person",
+    "members_other": "{{count}} people",
+    "locked": "Locked",
+    "custom": "Custom"
+  },
+  "permissionGroups": {
+    "workspace": "Workspace",
+    "people": "People",
+    "spaces": "Spaces",
+    "space": "Space",
+    "items": "Work items",
+    "sprints": "Backlog and sprints",
+    "content": "Reports and docs"
+  },
+  "permissions": {
+    "workspace.delete": "Delete the workspace",
+    "workspace.settings": "Change workspace settings and roles",
+    "workspace.audit.view": "View the audit log",
+    "workspace.members.view": "See the member list",
+    "workspace.members.manage": "Invite, remove and change members",
+    "space.create": "Create Spaces",
+    "space.view": "View the Space and its content",
+    "space.settings": "Change Space settings, members and statuses",
+    "space.lists.manage": "Create and manage Folders and Lists",
+    "workItem.write": "Create and edit work items",
+    "workItem.status.own": "Change the status of own work items",
+    "estimate.write": "Enter estimates and Story Points",
+    "comment.write": "Comment",
+    "backlog.rank": "Order the backlog",
+    "sprint.plan": "Plan sprints",
+    "sprint.start": "Start sprints",
+    "sprint.complete": "Complete sprints",
+    "sprint.cancel": "Cancel sprints",
+    "report.view": "View reports",
+    "doc.view": "View docs",
+    "doc.write": "Create and edit docs"
   }
 }

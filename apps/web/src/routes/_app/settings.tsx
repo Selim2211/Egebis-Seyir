@@ -12,6 +12,7 @@ import {
   type LucideIcon,
   Bell,
   ScrollText,
+  ShieldCheck,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useCan } from '@/features/workspace/queries';
@@ -74,6 +75,9 @@ function SettingsLayout() {
         )}
         {canViewMembers && (
           <SubLink to="/settings/teams" icon={Users} label={t('settings.teams')} />
+        )}
+        {canViewMembers && (
+          <SubLink to="/settings/roles" icon={ShieldCheck} label={t('settings.roles')} />
         )}
         {canViewAudit && (
           <SubLink to="/settings/audit" icon={ScrollText} label={t('settings.audit')} />

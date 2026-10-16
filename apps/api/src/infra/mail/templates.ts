@@ -46,13 +46,13 @@ export function invitationMail(p: {
   locale: Locale;
   workspaceName: string;
   inviterName: string;
-  role: WorkspaceRole;
+  role: string;
   url: string;
   expiresInDays: number;
 }): MailMessage {
   const ws = escapeHtml(p.workspaceName);
   const inviter = escapeHtml(p.inviterName);
-  const role = ROLE_LABEL[p.role];
+  const role = ROLE_LABEL[p.role as WorkspaceRole] ?? p.role;
   if (p.locale === 'en') {
     return {
       to: p.to,

@@ -1,7 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import {
   DEFAULT_SPACE_ROLE_PERMISSIONS,
   DEFAULT_WORKSPACE_ROLE_PERMISSIONS,
+  ERROR_CODES,
   type MeResponse,
   type MyWorkspace,
   type User,
@@ -43,13 +44,14 @@ export class AccessService {
 
   async workspaceRoleId(
     workspaceId: string,
-    role: WorkspaceRole,
+    role: string,
     db: Tx | PrismaService = this.prisma,
   ): Promise<string> {
-    const found = await db.role.findUniqueOrThrow({
+    const found = await db.role.findUnique({
       where: { workspaceId_scope_key: { workspaceId, scope: RoleScope.WORKSPACE, key: role } },
       select: { id: true },
     });
+    if (!found) throw new NotFoundException({ code: ERROR_CODES.ROLE_NOT_FOUND });
     return found.id;
   }
 

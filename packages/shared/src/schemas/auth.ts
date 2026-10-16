@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { WORKSPACE_ROLES } from '../permissions/roles';
+import { RoleKeySchema } from './role';
 
 export const LOCALES = ['tr', 'en'] as const;
 export type Locale = (typeof LOCALES)[number];
@@ -32,7 +32,7 @@ export type User = z.infer<typeof UserSchema>;
 export const MyWorkspaceSchema = z.object({
   id: z.uuid(),
   name: z.string(),
-  role: z.enum(WORKSPACE_ROLES),
+  role: RoleKeySchema,
   permissions: z.array(z.string()),
 });
 export type MyWorkspace = z.infer<typeof MyWorkspaceSchema>;

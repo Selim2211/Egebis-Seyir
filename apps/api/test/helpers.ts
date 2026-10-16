@@ -78,8 +78,8 @@ export class Client {
         res.on('end', () => callback(null, Buffer.concat(chunks)));
       });
   }
-  delete(path: string) {
-    return this.agent.delete(path).set('x-csrf-token', this.csrf);
+  delete(path: string, body?: object) {
+    return this.agent.delete(path).set('x-csrf-token', this.csrf).send(body);
   }
   /** CSRF başlığı olmadan (saldırı senaryosu). */
   postWithoutCsrf(path: string, body?: object) {
@@ -123,7 +123,7 @@ export async function inviteAndAccept(
   owner: Client,
   workspaceId: string,
   person: { email: string; name: string; password: string },
-  role: 'ADMIN' | 'MEMBER' | 'GUEST' = 'MEMBER',
+  role: string = 'MEMBER',
   spaceIds?: string[],
 ): Promise<Client> {
   await owner

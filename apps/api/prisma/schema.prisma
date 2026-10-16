@@ -275,6 +275,9 @@ model Role {
   key         String
   /// Özel roller (F2) için görünen ad; sistem rollerinin adı arayüzde çevrilir.
   name        String?
+  /// Özel WORKSPACE rolünün yetki katmanı (ADMIN | MEMBER); sistem rollerinde null (ADR-112).
+  baseKey     String?
+  description String?
   permissions String[]
   isSystem    Boolean   @default(true)
   createdAt   DateTime  @default(now()) @db.Timestamptz

@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { InvitationsService } from './invitations.service';
 import { MembersService } from './members.service';
+import { RolesController } from './roles.controller';
+import { RolesService } from './roles.service';
 import { WorkspaceSettingsService } from './settings.service';
 import {
   InvitationsController,
@@ -15,7 +17,8 @@ import {
     InvitationsController,
     WorkspaceSettingsController,
     PublicInvitationsController,
+    RolesController,
   ],
-  providers: [MembersService, InvitationsService, WorkspaceSettingsService],
+  providers: [MembersService, InvitationsService, WorkspaceSettingsService, RolesService],
 })
 export class WorkspacesModule {}

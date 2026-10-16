@@ -4,6 +4,7 @@ import { ClsService } from 'nestjs-cls';
 import { RoleScope } from '../../generated/prisma/client';
 import type { AppClsStore } from '../../infra/cls/request-context';
 import { TenantPrismaService } from '../../infra/prisma/tenant-prisma.service';
+import { roleTier } from './role-tier';
 
 /** Rota parametreleri: Space bunlardan birinden çözülür. */
 export interface SpaceRouteParams {
@@ -93,7 +94,7 @@ export class SpaceAccessService {
       }),
       db.membership.findMany({
         where: { userId: { in: userIds } },
-        select: { userId: true, role: { select: { key: true } } },
+        select: { userId: true, role: { select: { key: true, baseKey: true } } },
       }),
       db.spaceMember.findMany({
         where: { spaceId, userId: { in: userIds } },
@@ -107,7 +108,7 @@ export class SpaceAccessService {
         .filter(
           (m) =>
             spacePermissions({
-              workspaceRole: m.role.key as WorkspaceRole,
+              workspaceRole: roleTier(m.role),
               isPrivate: space.isPrivate,
               memberPermissions: memberPerms.get(m.userId) ?? null,
               stakeholderPermissions: stakeholder.permissions,

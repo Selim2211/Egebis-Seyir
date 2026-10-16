@@ -1,9 +1,4 @@
-import {
-  SPACE_PERMISSIONS as S,
-  SPACE_ROLES,
-  type SpaceDetail,
-  type SpaceRole,
-} from '@scrum/shared';
+import { SPACE_PERMISSIONS as S, type SpaceDetail } from '@scrum/shared';
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { Archive, ArrowLeft, Plus, Trash2, UserMinus } from 'lucide-react';
@@ -12,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { FormError, NativeSelect } from '@/components/form';
 import { Button } from '@/components/ui/button';
+import { useRoleLabel, useSpaceRoleKeys } from '@/features/roles/queries';
 import { UserAvatar } from '@/components/user-avatar';
 import { useStructureActions } from '@/features/spaces/actions-context';
 import { LoadingState, NotFoundState } from '@/features/spaces/container-header';
@@ -201,6 +197,8 @@ function GeneralSummary({ space }: { space: SpaceDetail }) {
 
 function MembersSection({ spaceId, canEdit }: { spaceId: string; canEdit: boolean }) {
   const { t } = useTranslation();
+  const roleLabel = useRoleLabel();
+  const spaceRoleKeys = useSpaceRoleKeys();
   const errorMessage = useErrorMessage();
   const { data } = useSpaceMembers(spaceId);
   const workspaceMembers = useMembers(canEdit).data?.members ?? [];
@@ -233,7 +231,7 @@ function MembersSection({ spaceId, canEdit }: { spaceId: string; canEdit: boolea
             <span className="min-w-0 flex-1">
               <span className="block truncate text-sm font-medium">{m.name}</span>
               <span className="text-muted-foreground block text-xs">
-                {t(`roles.${m.workspaceRole}`)}
+                {roleLabel('WORKSPACE', m.workspaceRole)}
               </span>
             </span>
             {canEdit ? (
@@ -243,19 +241,16 @@ function MembersSection({ spaceId, canEdit }: { spaceId: string; canEdit: boolea
                   value={m.role}
                   className="h-8"
                   onChange={(e) =>
-                    put.mutate(
-                      { spaceId, userId: m.userId, role: e.target.value as SpaceRole },
-                      { onError },
-                    )
+                    put.mutate({ spaceId, userId: m.userId, role: e.target.value }, { onError })
                   }
                 >
-                  {SPACE_ROLES.filter(
-                    (r) => m.workspaceRole !== 'GUEST' || r === 'STAKEHOLDER',
-                  ).map((r) => (
-                    <option key={r} value={r}>
-                      {t(`spaceRoles.${r}`)}
-                    </option>
-                  ))}
+                  {spaceRoleKeys
+                    .filter((r) => m.workspaceRole !== 'GUEST' || r === 'STAKEHOLDER')
+                    .map((r) => (
+                      <option key={r} value={r}>
+                        {roleLabel('SPACE', r)}
+                      </option>
+                    ))}
                 </NativeSelect>
                 <Button
                   variant="ghost"
@@ -268,7 +263,7 @@ function MembersSection({ spaceId, canEdit }: { spaceId: string; canEdit: boolea
                 </Button>
               </>
             ) : (
-              <span className="text-muted-foreground text-sm">{t(`spaceRoles.${m.role}`)}</span>
+              <span className="text-muted-foreground text-sm">{roleLabel('SPACE', m.role)}</span>
             )}
           </li>
         ))}
@@ -287,7 +282,7 @@ function MembersSection({ spaceId, canEdit }: { spaceId: string; canEdit: boolea
             <option value="">{t('spaceForm.chooseMember')}</option>
             {candidates.map((c) => (
               <option key={c.userId} value={c.userId}>
-                {c.name} · {t(`roles.${c.role}`)}
+                {c.name} · {roleLabel('WORKSPACE', c.role)}
               </option>
             ))}
           </NativeSelect>

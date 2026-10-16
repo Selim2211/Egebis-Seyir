@@ -1,4 +1,4 @@
-import { SPACE_ROLES, type SpaceRole, suggestSpaceKey } from '@scrum/shared';
+import { suggestSpaceKey } from '@scrum/shared';
 import { useNavigate } from '@tanstack/react-router';
 import { Plus, X } from 'lucide-react';
 import { type FormEvent, useState } from 'react';
@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/dialog';
 import { UserAvatar } from '@/components/user-avatar';
 import { useMe } from '@/features/auth/queries';
+import { useRoleLabel, useSpaceRoleKeys } from '@/features/roles/queries';
 import { useCreateSpaceFromTemplate, useSpaceTemplates } from '@/features/templates/queries';
 import { useMembers } from '@/features/workspace/queries';
 import { useCreateSpace } from './queries';
@@ -59,7 +60,7 @@ function CreateSpaceForm({ onDone }: { onDone: () => void }) {
   const [values, setValues] = useState<SpaceFormValues>(EMPTY_SPACE);
   const [keyEdited, setKeyEdited] = useState(false);
   const [errors, setErrors] = useState<SpaceFormErrors>({});
-  const [members, setMembers] = useState<Array<{ userId: string; role: SpaceRole }>>([
+  const [members, setMembers] = useState<Array<{ userId: string; role: string }>>([
     { userId: user.id, role: 'PRODUCT_OWNER' },
   ]);
 
@@ -129,10 +130,12 @@ function MemberPicker({
   members,
   onChange,
 }: {
-  members: Array<{ userId: string; role: SpaceRole }>;
-  onChange: (members: Array<{ userId: string; role: SpaceRole }>) => void;
+  members: Array<{ userId: string; role: string }>;
+  onChange: (members: Array<{ userId: string; role: string }>) => void;
 }) {
   const { t } = useTranslation();
+  const roleLabel = useRoleLabel();
+  const spaceRoleKeys = useSpaceRoleKeys();
   const { data } = useMembers();
   const all = data?.members ?? [];
   const byId = new Map(all.map((m) => [m.userId, m]));
@@ -167,16 +170,18 @@ function MemberPicker({
                 onChange={(e) =>
                   onChange(
                     members.map((x) =>
-                      x.userId === m.userId ? { ...x, role: e.target.value as SpaceRole } : x,
+                      x.userId === m.userId ? { ...x, role: e.target.value } : x,
                     ),
                   )
                 }
               >
-                {SPACE_ROLES.filter((r) => !guest || r === 'STAKEHOLDER').map((r) => (
-                  <option key={r} value={r}>
-                    {t(`spaceRoles.${r}`)}
-                  </option>
-                ))}
+                {spaceRoleKeys
+                  .filter((r) => !guest || r === 'STAKEHOLDER')
+                  .map((r) => (
+                    <option key={r} value={r}>
+                      {roleLabel('SPACE', r)}
+                    </option>
+                  ))}
               </NativeSelect>
               <Button
                 type="button"
@@ -203,7 +208,7 @@ function MemberPicker({
             <option value="">{t('spaceForm.chooseMember')}</option>
             {candidates.map((c) => (
               <option key={c.userId} value={c.userId}>
-                {c.name} · {t(`roles.${c.role}`)}
+                {c.name} · {roleLabel('WORKSPACE', c.role)}
               </option>
             ))}
           </NativeSelect>
