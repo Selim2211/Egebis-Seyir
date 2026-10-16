@@ -38,21 +38,37 @@ describe('yükleme doğrulaması (ADR-056)', () => {
   });
 
   it('geçerli dosyaları kabul eder', () => {
-    expect(upload('foto.png', PNG)).toEqual({ ok: true, mime: 'image/png' });
-    expect(upload('not.txt', TEXT)).toEqual({ ok: true, mime: 'text/plain' });
-    expect(upload('arsiv.zip', TEXT)).toEqual({ ok: true, mime: 'application/zip' });
+    expect(upload('foto.png', PNG)).toEqual({ ok: true, mime: 'image/png', mismatch: false });
+    expect(upload('not.txt', TEXT)).toEqual({ ok: true, mime: 'text/plain', mismatch: false });
+    expect(upload('arsiv.zip', TEXT)).toEqual({
+      ok: true,
+      mime: 'application/zip',
+      mismatch: false,
+    });
   });
 
-  it('çalıştırılabilir ve komut dosyalarını reddeder (büyük/küçük harf duyarsız)', () => {
-    for (const name of ['kurulum.exe', 'a.BAT', 'x.ps1', 'araç.sh', 'çift.pdf.exe']) {
-      expect(upload(name, TEXT)).toEqual({ ok: false, code: 'ATTACHMENT_TYPE_BLOCKED' });
+  it('her dosya türünü kabul eder; tanınmayanlar octet-stream olur (ADR-114)', () => {
+    for (const name of ['kurulum.exe', 'a.BAT', 'x.ps1', 'araç.sh', 'çift.pdf.exe', 'model.dwg']) {
+      expect(upload(name, TEXT)).toEqual({
+        ok: true,
+        mime: 'application/octet-stream',
+        mismatch: false,
+      });
     }
   });
 
-  it('uzantısı resim/PDF olup içeriği başka olan dosyayı reddeder', () => {
-    expect(upload('sahte.png', TEXT)).toEqual({ ok: false, code: 'ATTACHMENT_INVALID' });
-    expect(upload('sahte.pdf', PNG)).toEqual({ ok: false, code: 'ATTACHMENT_INVALID' });
-    expect(upload('gercek.jpg', JPEG).ok).toBe(true);
+  it('uzantısı resim/PDF olup içeriği başka olan dosya reddedilmez, türü içerikten alınır', () => {
+    expect(upload('sahte.png', TEXT)).toEqual({
+      ok: true,
+      mime: 'application/octet-stream',
+      mismatch: true,
+    });
+    expect(upload('jpeg-ama-png.png', JPEG)).toEqual({
+      ok: true,
+      mime: 'image/jpeg',
+      mismatch: true,
+    });
+    expect(upload('gercek.jpg', JPEG)).toEqual({ ok: true, mime: 'image/jpeg', mismatch: false });
   });
 
   it('boyut ve ad sınırları', () => {

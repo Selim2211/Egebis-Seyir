@@ -42,7 +42,7 @@ export const EnvSchema = z.object({
   /** Dosya ekleri ve profil fotoğrafları (ADR-056); Docker'da kalıcı volume olmalı. */
   UPLOAD_DIR: z.string().default('./data/uploads'),
   /** Dosya başına en çok MB (ADR-056). */
-  MAX_UPLOAD_MB: z.coerce.number().positive().default(25),
+  MAX_UPLOAD_MB: z.coerce.number().positive().default(100),
 });
 export type Env = z.infer<typeof EnvSchema>;
 

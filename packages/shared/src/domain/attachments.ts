@@ -1,39 +1,9 @@
 import { ERROR_CODES } from '../errors/codes';
 
 /** Dosya ekleri (ADR-056). */
-export const MAX_UPLOAD_MB_DEFAULT = 25;
+export const MAX_UPLOAD_MB_DEFAULT = 100;
 export const MAX_ATTACHMENTS_PER_ITEM = 50;
 export const MAX_AVATAR_BYTES = 2 * 1024 * 1024;
-
-/** Çalıştırılabilir veya komut dosyası uzantıları reddedilir. */
-export const BLOCKED_EXTENSIONS = [
-  'exe',
-  'dll',
-  'bat',
-  'cmd',
-  'com',
-  'scr',
-  'msi',
-  'msp',
-  'ps1',
-  'psm1',
-  'vbs',
-  'vbe',
-  'jse',
-  'wsf',
-  'jar',
-  'sh',
-  'bash',
-  'app',
-  'apk',
-  'deb',
-  'rpm',
-  'lnk',
-  'reg',
-  'cpl',
-  'hta',
-  'pif',
-] as const;
 
 /** Uzantıdan türetilen MIME türleri; listede olmayan uzantı `application/octet-stream` olur. */
 const MIME_BY_EXTENSION: Record<string, string> = {
@@ -100,17 +70,21 @@ export function sniffMime(bytes: Uint8Array): string | null {
 }
 
 export type UploadCheck =
-  | { ok: true; mime: string }
+  | {
+      ok: true;
+      mime: string;
+      /** Uzantı resim/PDF diyor ama içerik başka; dosya kabul edilir, önizlenmez (ADR-114). */
+      mismatch: boolean;
+    }
   | {
       ok: false;
-      code:
-        | typeof ERROR_CODES.ATTACHMENT_TYPE_BLOCKED
-        | typeof ERROR_CODES.ATTACHMENT_TOO_LARGE
-        | typeof ERROR_CODES.ATTACHMENT_INVALID;
+      code: typeof ERROR_CODES.ATTACHMENT_TOO_LARGE | typeof ERROR_CODES.ATTACHMENT_INVALID;
     };
 
 /**
- * Yüklemeyi doğrular (ADR-056): boyut, yasaklı uzantı ve — resim/PDF uzantılıysa — içerik imzası.
+ * Yüklemeyi doğrular (ADR-056, ADR-114): yalnızca ad ve boyut. Her dosya türü kabul edilir;
+ * tanınmayan türler `application/octet-stream` olarak saklanır ve hep indirilir, tarayıcıda açılmaz.
+ * Uzantı resim/PDF olup içerik farklıysa reddedilmez; türü içerikten alınır (tanınmazsa octet-stream).
  * `header`: dosyanın ilk baytları.
  */
 export function checkUpload(input: {
@@ -124,16 +98,14 @@ export function checkUpload(input: {
     return { ok: false, code: ERROR_CODES.ATTACHMENT_INVALID };
   }
   if (size > maxBytes) return { ok: false, code: ERROR_CODES.ATTACHMENT_TOO_LARGE };
-  const extension = extensionOf(fileName);
-  if ((BLOCKED_EXTENSIONS as readonly string[]).includes(extension)) {
-    return { ok: false, code: ERROR_CODES.ATTACHMENT_TYPE_BLOCKED };
+  const byName = mimeFromFileName(fileName);
+  if (isPreviewable(byName)) {
+    const sniffed = sniffMime(header);
+    if (sniffed !== byName) {
+      return { ok: true, mime: sniffed ?? 'application/octet-stream', mismatch: true };
+    }
   }
-  const mime = mimeFromFileName(fileName);
-  if (isPreviewable(mime) && sniffMime(header) !== mime) {
-    // Uzantı resim/PDF diyor ama içerik başka: uzantı sahtekârlığı.
-    return { ok: false, code: ERROR_CODES.ATTACHMENT_INVALID };
-  }
-  return { ok: true, mime };
+  return { ok: true, mime: byName, mismatch: false };
 }
 
 /** Profil fotoğrafı: yalnızca PNG/JPEG/WebP, en çok 2 MB (ADR-059). */

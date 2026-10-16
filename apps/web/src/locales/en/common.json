@@ -61,7 +61,9 @@
       "EPIC": "New Epic",
       "BUG": "New Bug",
       "SUBTASK": "New Sub-Task"
-    }
+    },
+    "attach": "Attach files",
+    "removeFile": "Remove {{name}}"
   },
   "topbar": {
     "search": "Search tasks, docs or people…",
@@ -823,7 +825,9 @@
   "attachments": {
     "title": "Attachments",
     "add": "Add file",
-    "dropHint": "Drop files here or click \"Add file\".",
+    "dropHint": "Drop files here, paste, or click to browse",
+    "anyFormat": "Any file format · up to 100 MB each",
+    "uploading": "Uploading {{done}}/{{total}}…",
     "preview": "Preview {{name}}",
     "download": "Download {{name}}",
     "delete": "Delete attachment {{name}}"

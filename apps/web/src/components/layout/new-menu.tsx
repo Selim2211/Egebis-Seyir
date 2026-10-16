@@ -6,8 +6,18 @@ import {
   type WorkItemType,
 } from '@scrum/shared';
 import { useNavigate, useParams } from '@tanstack/react-router';
-import { Bug, CheckSquare, ChevronDown, FolderKanban, Layers, Plus, Zap } from 'lucide-react';
-import { type FormEvent, useEffect, useState } from 'react';
+import {
+  Bug,
+  CheckSquare,
+  ChevronDown,
+  FolderKanban,
+  Layers,
+  Paperclip,
+  Plus,
+  X,
+  Zap,
+} from 'lucide-react';
+import { type FormEvent, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { FormError, SelectField, Field } from '@/components/form';
@@ -29,7 +39,8 @@ import {
 import { CreateSpaceDialog } from '@/features/spaces/create-space-dialog';
 import { useHierarchy } from '@/features/spaces/queries';
 import { creatableTypes } from '@/features/work-items/item-tree';
-import { useCreateItem } from '@/features/work-items/queries';
+import { useCreateItem, useUploadAttachment } from '@/features/work-items/queries';
+import { useErrorMessage } from '@/lib/use-error-message';
 import { useCan } from '@/features/workspace/queries';
 
 const ITEM_ICONS = { EPIC: Zap, TASK: CheckSquare, BUG: Bug } as const;
@@ -166,6 +177,10 @@ function NewItemForm({
   const { t } = useTranslation();
   const navigate = useNavigate();
   const create = useCreateItem();
+  const upload = useUploadAttachment();
+  const errorMessage = useErrorMessage();
+  const [files, setFiles] = useState<File[]>([]);
+  const fileInput = useRef<HTMLInputElement>(null);
   const params: { spaceId?: string; listId?: string } = useParams({ strict: false });
   // Açık olan Space/List varsayılan hedeftir; yoksa ilk Space.
   const current =
@@ -191,10 +206,20 @@ function NewItemForm({
     create.mutate(
       { listId, body: { type: effectiveType, title: value, parentId: null } },
       {
-        onSuccess: ({ key }) => {
-          toast.success(t('items.created', { key }));
-          onDone();
-          void navigate({ to: '/items/$key', params: { key } });
+        onSuccess: ({ id, key }) => {
+          void (async () => {
+            // Seçilen dosyalar öğe oluşunca sırayla yüklenir; hata bir dosyada kalır.
+            for (const file of files) {
+              try {
+                await upload.mutateAsync({ itemId: id, file });
+              } catch (uploadError) {
+                toast.error(`${file.name}: ${errorMessage(uploadError)}`);
+              }
+            }
+            toast.success(t('items.created', { key }));
+            onDone();
+            void navigate({ to: '/items/$key', params: { key } });
+          })();
         },
         onError: setError,
       },
@@ -245,13 +270,58 @@ function NewItemForm({
             ))}
           </SelectField>
         </div>
+        <div className="flex flex-col gap-2">
+          <input
+            ref={fileInput}
+            type="file"
+            multiple
+            hidden
+            data-testid="new-item-files"
+            onChange={(e) => {
+              const picked = Array.from(e.target.files ?? []);
+              setFiles((prev) => [...prev, ...picked]);
+              e.target.value = '';
+            }}
+          />
+          <Button
+            type="button"
+            variant="outline"
+            className="w-fit"
+            onClick={() => fileInput.current?.click()}
+          >
+            <Paperclip aria-hidden /> {t('newMenu.attach')}
+          </Button>
+          {files.length > 0 && (
+            <ul className="flex flex-wrap gap-1.5">
+              {files.map((file, index) => (
+                <li
+                  key={`${file.name}-${index}`}
+                  className="bg-muted flex items-center gap-1 rounded-md py-0.5 pr-1 pl-2 text-xs"
+                >
+                  <span className="max-w-48 truncate">{file.name}</span>
+                  <button
+                    type="button"
+                    aria-label={t('newMenu.removeFile', { name: file.name })}
+                    onClick={() => setFiles((prev) => prev.filter((_, i) => i !== index))}
+                  >
+                    <X className="size-3" aria-hidden />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
         <FormError error={error} />
       </DialogBody>
       <DialogFooter>
         <Button type="button" variant="ghost" onClick={onDone}>
           {t('common.cancel')}
         </Button>
-        <Button type="submit" size="lg" disabled={create.isPending || !title.trim()}>
+        <Button
+          type="submit"
+          size="lg"
+          disabled={create.isPending || upload.isPending || !title.trim()}
+        >
           <Plus aria-hidden /> {t('newMenu.create')}
         </Button>
       </DialogFooter>

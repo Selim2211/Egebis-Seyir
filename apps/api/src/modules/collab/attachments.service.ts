@@ -29,6 +29,16 @@ const ownerWhere = (owner: Owner) =>
 /** Multer'ın `originalname` değeri latin1 çözülür; UTF-8 adı geri kazanır. */
 const decodeName = (name: string) => Buffer.from(name, 'latin1').toString('utf8');
 
+/** RFC 6266/5987: ASCII yedek ad + UTF-8 ad; `'()*` karakterleri de yüzde-kodlanır. */
+const contentDisposition = (inline: boolean, name: string) => {
+  const ascii = name.replace(/[^ -~]/g, '_').replace(/["%;\\]/g, '_');
+  const encoded = encodeURIComponent(name).replace(
+    /['()*]/g,
+    (c) => '%' + c.charCodeAt(0).toString(16).toUpperCase(),
+  );
+  return `${inline ? 'inline' : 'attachment'}; filename="${ascii}"; filename*=UTF-8''${encoded}`;
+};
+
 export const toAttachmentDto = (row: {
   id: string;
   fileName: string;
@@ -154,7 +164,7 @@ export class AttachmentsService {
     const file = new StreamableFile(this.storage.open(row.storageKey), {
       type: row.mimeType,
       length: row.size,
-      disposition: `${inline ? 'inline' : 'attachment'}; filename*=UTF-8''${encodeURIComponent(name)}`,
+      disposition: contentDisposition(inline, name),
     });
     return { file, csp: row.mimeType === 'application/pdf' ? null : "default-src 'none'; sandbox" };
   }

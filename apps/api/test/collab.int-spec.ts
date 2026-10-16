@@ -290,17 +290,21 @@ describe('Yorum, ek, aktivite ve profil fotoğrafı (gerçek veritabanı)', () =
       expect(csv.headers['content-disposition']).toContain('attachment');
     });
 
-    it('yasaklı uzantı, sahte içerik, boş ve büyük dosya reddedilir', async () => {
+    it('her tür kabul edilir (exe, sahte png); yalnızca indirilir. Büyük dosya reddedilir', async () => {
       const { itemId } = await makeItem();
       const upload = (buf: Buffer, name: string) =>
         owner.upload(api(`/items/${itemId}/attachments`), buf, name);
 
-      expect((await upload(Buffer.from('MZ'), 'kurulum.exe').expect(422)).body).toEqual({
-        code: 'ATTACHMENT_TYPE_BLOCKED',
-      });
-      expect((await upload(Buffer.from('düz metin'), 'sahte.png').expect(422)).body).toEqual({
-        code: 'ATTACHMENT_INVALID',
-      });
+      const exe = (await upload(Buffer.from('MZ'), 'kurulum.exe').expect(201)).body as Created;
+      const fake = (await upload(Buffer.from('düz metin'), 'sahte.png').expect(201))
+        .body as Created;
+      for (const id of [exe.id, fake.id]) {
+        const res = await owner
+          .get(api(`/items/${itemId}/attachments/${id}?preview=1`))
+          .expect(200);
+        expect(res.headers['content-disposition']).toContain('attachment');
+        expect(res.headers['content-type']).toContain('application/octet-stream');
+      }
       // Test ortamında sınır 1 MB.
       const big = Buffer.alloc(1024 * 1024 + 1, 1);
       expect((await upload(big, 'buyuk.zip').expect(413)).body).toEqual({
@@ -308,7 +312,7 @@ describe('Yorum, ek, aktivite ve profil fotoğrafı (gerçek veritabanı)', () =
       });
       await owner.post(api(`/items/${itemId}/attachments`)).expect(400);
       const detail = (await owner.get(api(`/items/${itemId}`)).expect(200)).body as WorkItemDetail;
-      expect(detail.attachments).toEqual([]);
+      expect(detail.attachments).toHaveLength(2);
     });
 
     it('silinince dosya da gider; yetki: Stakeholder indirir ama yükleyemez/silemez', async () => {

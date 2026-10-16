@@ -61,7 +61,9 @@
       "EPIC": "New Epic",
       "BUG": "New Bug",
       "SUBTASK": "New Sub-Task"
-    }
+    },
+    "attach": "Dosya ekle",
+    "removeFile": "{{name}} kaldır"
   },
   "topbar": {
     "search": "Görev, doküman veya kişi ara…",
@@ -823,7 +825,9 @@
   "attachments": {
     "title": "Ekler",
     "add": "Dosya ekle",
-    "dropHint": "Dosyaları buraya sürükle veya \"Dosya ekle\"ye tıkla.",
+    "dropHint": "Dosyaları buraya sürükle, yapıştır veya göz atmak için tıkla",
+    "anyFormat": "Her dosya türü · dosya başına en çok 100 MB",
+    "uploading": "Yükleniyor {{done}}/{{total}}…",
     "preview": "{{name}} önizle",
     "download": "{{name}} indir",
     "delete": "{{name}} ekini sil"

@@ -11,7 +11,7 @@
 
 	# İstek gövdesi üst sınırı: dosya ekleri (MAX_UPLOAD_MB) + pay.
 	request_body {
-		max_size 64MB
+		max_size 128MB
 	}
 
 	header {

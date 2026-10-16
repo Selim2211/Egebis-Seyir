@@ -1,6 +1,6 @@
 import { type Attachment, MAX_ATTACHMENTS_PER_ITEM } from '@scrum/shared';
 import { Download, FileText, Paperclip, Trash2, Upload } from 'lucide-react';
-import { type DragEvent, useRef, useState } from 'react';
+import { type DragEvent, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -41,21 +41,42 @@ export function Attachments({
   const remove = useDeleteAttachment();
   const input = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
-
-  if (attachments.length === 0 && !canWrite) return null;
+  const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
+  const root = useRef<HTMLElement>(null);
 
   const send = (files: FileList | File[]) => {
     // Dosyalar sırayla yüklenir; hata bir dosyada kalır, diğerleri devam eder.
+    const list = Array.from(files);
     void (async () => {
-      for (const file of Array.from(files)) {
+      setProgress({ done: 0, total: list.length });
+      for (const [index, file] of list.entries()) {
         try {
           await upload.mutateAsync({ itemId, file, scope });
         } catch (error) {
           toast.error(`${file.name}: ${errorMessage(error)}`);
         }
+        setProgress({ done: index + 1, total: list.length });
       }
+      setProgress(null);
     })();
   };
+
+  // Panodan yapıştırma (ekran görüntüsü, kopyalanan dosya): yalnızca bu bölüm sayfadayken.
+  useEffect(() => {
+    if (!canWrite) return;
+    const onPaste = (e: ClipboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (target?.closest('input, textarea, [contenteditable="true"]')) return;
+      const files = Array.from(e.clipboardData?.files ?? []);
+      if (files.length === 0 || !root.current) return;
+      e.preventDefault();
+      send(files);
+    };
+    document.addEventListener('paste', onPaste);
+    return () => document.removeEventListener('paste', onPaste);
+  });
+
+  if (attachments.length === 0 && !canWrite) return null;
 
   const onDrop = (e: DragEvent) => {
     e.preventDefault();
@@ -65,6 +86,7 @@ export function Attachments({
 
   return (
     <section
+      ref={root}
       aria-labelledby="attachments-title"
       onDragOver={(e) => {
         if (canWrite) {
@@ -107,11 +129,28 @@ export function Attachments({
         )}
       </div>
 
-      {attachments.length === 0 ? (
-        <p className="text-muted-foreground rounded-md border border-dashed px-3 py-4 text-center text-sm">
-          {t('attachments.dropHint')}
+      {progress && (
+        <p role="status" className="text-primary mb-1 text-xs font-medium">
+          {t('attachments.uploading', { done: progress.done, total: progress.total })}
         </p>
-      ) : (
+      )}
+
+      {canWrite && attachments.length < MAX_ATTACHMENTS_PER_ITEM && (
+        <button
+          type="button"
+          onClick={() => input.current?.click()}
+          className={cn(
+            'text-muted-foreground hover:border-primary hover:text-foreground mb-2 flex w-full flex-col items-center gap-1 rounded-lg border-2 border-dashed px-3 py-4 text-sm transition-colors',
+            dragging && 'border-primary bg-primary/5 text-foreground',
+          )}
+        >
+          <Upload className="size-5" aria-hidden />
+          <span className="font-medium">{t('attachments.dropHint')}</span>
+          <span className="text-xs">{t('attachments.anyFormat')}</span>
+        </button>
+      )}
+
+      {attachments.length === 0 ? null : (
         <ul className="grid gap-2 sm:grid-cols-2">
           {attachments.map((a) => {
             const isImage = a.previewable && a.mimeType.startsWith('image/');
