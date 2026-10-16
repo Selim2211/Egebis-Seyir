@@ -1,3 +1,5 @@
+import { listName } from '@/lib/default-names';
+import { statusName } from '@/lib/default-names';
 import { MY_WORK_SCOPES, type MyWorkScope, type WorkItemRow } from '@scrum/shared';
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
@@ -148,13 +150,13 @@ function Row({ item, overdue }: { item: WorkItemRow; overdue: boolean }) {
       >
         <SpaceAvatar space={{ ...item.space, icon: null }} size={16} />
         <span className="truncate">
-          {item.space.name} › {item.list.name}
+          {item.space.name} › {listName(item.list.name)}
         </span>
       </Link>
       <div className="w-32 shrink-0">
         <StatusBadge
           category={item.status.category}
-          label={item.status.name}
+          label={statusName(item.status.name)}
           color={item.status.color}
         />
       </div>

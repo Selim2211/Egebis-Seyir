@@ -1,3 +1,4 @@
+import { statusName } from '@/lib/default-names';
 import {
   AUTOMATION_ACTION_TYPES,
   type Automation,
@@ -363,7 +364,7 @@ function AutomationDialog({
                     <option value="">{t('automations.any')}</option>
                     {space.statuses.map((s) => (
                       <option key={s.id} value={s.id}>
-                        {s.name}
+                        {statusName(s.name)}
                       </option>
                     ))}
                   </NativeSelect>
@@ -578,7 +579,7 @@ function ActionEditor({
         >
           {space.statuses.map((s) => (
             <option key={s.id} value={s.id}>
-              {s.name}
+              {statusName(s.name)}
             </option>
           ))}
         </NativeSelect>

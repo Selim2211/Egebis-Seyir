@@ -1,7 +1,7 @@
 import type { WorkItemType } from '../constants/work-item';
 
-/** DoD/DoR yalnızca puanla tahmin edilen Story ve Bug için geçerlidir (brief §6.3). */
-export const READINESS_TYPES = ['STORY', 'BUG'] as const;
+/** DoD/DoR yalnızca puanla tahmin edilen Task ve Bug için geçerlidir (brief §6.3, ADR-110). */
+export const READINESS_TYPES = ['TASK', 'BUG'] as const;
 
 export const MAX_READINESS_ITEMS = 20;
 export const MAX_READINESS_TEXT = 200;

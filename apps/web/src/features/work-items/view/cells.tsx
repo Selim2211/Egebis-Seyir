@@ -1,3 +1,4 @@
+import { statusName } from '@/lib/default-names';
 import {
   FIBONACCI_SCALE,
   PRIORITIES,
@@ -35,7 +36,9 @@ export function StatusCell({ item, ctx }: { item: WorkItemSummary; ctx: CellCont
   const { t } = useTranslation();
   const status = ctx.space.statuses.find((s) => s.id === item.statusId);
   if (!status) return null;
-  const badge = <StatusBadge category={status.category} label={status.name} color={status.color} />;
+  const badge = (
+    <StatusBadge category={status.category} label={statusName(status.name)} color={status.color} />
+  );
   if (!ctx.canChangeStatus(item)) return badge;
   return (
     <DropdownMenu>
@@ -56,7 +59,7 @@ export function StatusCell({ item, ctx }: { item: WorkItemSummary; ctx: CellCont
           {ctx.space.statuses.map((s) => (
             <DropdownMenuRadioItem key={s.id} value={s.id}>
               <span className="size-2 rounded-full" style={{ background: s.color }} />
-              {s.name}
+              {statusName(s.name)}
             </DropdownMenuRadioItem>
           ))}
         </DropdownMenuRadioGroup>

@@ -43,7 +43,7 @@ test.describe.serial('Yapay zekâ önerileri', () => {
     await dialog.getByRole('button', { name: 'Space oluştur' }).click();
     await expect(page.getByRole('heading', { name: 'YZ Testi' })).toBeVisible();
     await page.getByRole('link', { name: 'Görevler' }).first().click();
-    await page.getByLabel('Tip').first().selectOption('STORY');
+    await page.getByLabel('Tip').first().selectOption('TASK');
     const quick = page.getByRole('textbox', { name: 'Başlık' });
     await quick.fill('Sepete ürün ekle');
     await quick.press('Enter');

@@ -10,7 +10,7 @@ import { RecurrenceService } from './recurrence.service';
 import { WorkItemsController } from './work-items.controller';
 import { WorkItemsService } from './work-items.service';
 
-/** İş öğeleri: Epic/Story/Task/Sub-task/Bug, etiketler, taşıma/kopyalama, arşiv/çöp (Faz 1.3). */
+/** İş öğeleri: Epic/Task/Sub-task/Bug, etiketler, taşıma/kopyalama, arşiv/çöp (Faz 1.3). */
 @Module({
   imports: [CustomFieldsModule],
   controllers: [WorkItemsController],

@@ -7,10 +7,9 @@ import { ERROR_CODES } from '../errors/codes';
  */
 export const ALLOWED_PARENT_TYPES: Record<WorkItemType, readonly WorkItemType[]> = {
   EPIC: [],
-  STORY: ['EPIC'],
-  TASK: ['STORY'],
-  SUBTASK: ['TASK', 'STORY', 'BUG'],
-  BUG: ['STORY', 'EPIC'],
+  TASK: ['EPIC'],
+  SUBTASK: ['TASK', 'BUG'],
+  BUG: ['EPIC', 'TASK'],
 };
 
 /** Üst öğesiz (bağımsız) var olamayan tipler. Sub-task her zaman bir üst öğeye bağlıdır. */

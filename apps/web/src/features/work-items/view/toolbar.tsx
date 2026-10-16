@@ -1,3 +1,4 @@
+import { statusName } from '@/lib/default-names';
 import {
   PRIORITIES,
   WORK_ITEM_TYPES,
@@ -187,7 +188,7 @@ export function ViewToolbar({
           label: (
             <>
               <span className="size-2 rounded-full" style={{ background: s.color }} />
-              {s.name}
+              {statusName(s.name)}
             </>
           ),
         }))}

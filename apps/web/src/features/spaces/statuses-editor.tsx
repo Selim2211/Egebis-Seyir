@@ -1,3 +1,4 @@
+import { statusName } from '@/lib/default-names';
 import {
   type CreateStatusRequest,
   MAX_STATUSES,
@@ -125,7 +126,9 @@ function StatusRow({
     return (
       <li className="flex items-center gap-3 py-2">
         <span className="size-2.5 rounded-full" style={{ background: status.color }} aria-hidden />
-        <span className="min-w-0 flex-1 truncate text-sm font-medium">{status.name}</span>
+        <span className="min-w-0 flex-1 truncate text-sm font-medium">
+          {statusName(status.name)}
+        </span>
         <span className="text-muted-foreground text-xs">
           {t(`statusCategory.${status.category}`)}
         </span>
@@ -316,7 +319,7 @@ function DeleteStatusDialog({
             <NativeSelect value={moveTo} onChange={(e) => setMoveTo(e.target.value)}>
               {others.map((s) => (
                 <option key={s.id} value={s.id}>
-                  {s.name}
+                  {statusName(s.name)}
                 </option>
               ))}
             </NativeSelect>

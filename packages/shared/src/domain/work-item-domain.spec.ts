@@ -32,16 +32,16 @@ describe('tahmin kuralları (ADR-045, brief §6.2.4)', () => {
   });
 
   it('puan ölçeğe uymalı', () => {
-    expect(checkEstimate('STORY', 'FIBONACCI', { points: 8 }).ok).toBe(true);
-    expect(checkEstimate('STORY', 'FIBONACCI', { points: 4 })).toEqual({
+    expect(checkEstimate('TASK', 'FIBONACCI', { points: 8 }).ok).toBe(true);
+    expect(checkEstimate('TASK', 'FIBONACCI', { points: 4 })).toEqual({
       ok: false,
       code: 'WORK_ITEM_ESTIMATE_INVALID',
     });
-    expect(checkEstimate('STORY', 'TSHIRT', { points: 5 }).ok).toBe(true);
-    expect(checkEstimate('STORY', 'TSHIRT', { points: 13 }).ok).toBe(false);
-    expect(checkEstimate('STORY', 'NUMBER', { points: 0.5 }).ok).toBe(true);
-    expect(checkEstimate('STORY', 'NUMBER', { points: 1001 }).ok).toBe(false);
-    expect(checkEstimate('STORY', 'NUMBER', { points: Number.NaN }).ok).toBe(false);
+    expect(checkEstimate('TASK', 'TSHIRT', { points: 5 }).ok).toBe(true);
+    expect(checkEstimate('TASK', 'TSHIRT', { points: 13 }).ok).toBe(false);
+    expect(checkEstimate('TASK', 'NUMBER', { points: 0.5 }).ok).toBe(true);
+    expect(checkEstimate('TASK', 'NUMBER', { points: 1001 }).ok).toBe(false);
+    expect(checkEstimate('TASK', 'NUMBER', { points: Number.NaN }).ok).toBe(false);
   });
 
   it('saat negatif veya aşırı büyük olamaz', () => {

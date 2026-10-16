@@ -119,7 +119,7 @@ describe('Gantt, bağımlılık ve kritik yol (gerçek veritabanı)', () => {
     const story = (
       await owner
         .post(api(`/lists/${s.listId}/items`), {
-          type: 'STORY',
+          type: 'TASK',
           title: 'S',
           parentId: epic.id,
           points: 5,

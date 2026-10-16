@@ -42,19 +42,19 @@ describe("Task'ı Epic'e dönüştürme (ADR-109)", () => {
     ({ owner, workspaceId: ws } = await setupOwner(ctx));
   });
 
-  it("Story altındaki, sprint'teki Task Epic olur; alt görevleri Story'ye döner, uyumsuz alanlar temizlenir", async () => {
+  it("Epic altındaki Task Epic olur; Sub-Task'ları Task'a döner, uyumsuz alanlar temizlenir", async () => {
     const s = await space();
-    const story = await create(s.listId, { type: 'STORY', title: 'Üst Story' });
+    const parentEpic = await create(s.listId, { type: 'EPIC', title: 'Üst Epic' });
     const task = await create(s.listId, {
       type: 'TASK',
       title: 'Çok kapsamlı iş',
-      parentId: story.id,
+      parentId: parentEpic.id,
       estimateHours: 12,
     });
     await owner.patch(api(`/items/${task.id}`), { percentDone: 20 }).expect(204);
     const a = await create(s.listId, { type: 'SUBTASK', title: 'A', parentId: task.id, points: 2 });
     const b = await create(s.listId, { type: 'SUBTASK', title: 'B', parentId: task.id, points: 3 });
-    // Task Story'nin altında olduğu için sprint'e önce üst düzey bir Task olarak girer.
+    // Sprint'e üst düzey bir Task girer.
     const loose = await create(s.listId, { type: 'TASK', title: 'Sprint işi', estimateHours: 4 });
     const sprint = (
       await owner
@@ -80,12 +80,12 @@ describe("Task'ı Epic'e dönüştürme (ADR-109)", () => {
     expect(epic.ancestors).toEqual([]);
     expect(epic.children.map((c) => [c.key, c.type]).sort()).toEqual(
       [
-        [a.key, 'STORY'],
-        [b.key, 'STORY'],
+        [a.key, 'TASK'],
+        [b.key, 'TASK'],
       ].sort(),
     );
     // Epic'e dönüşen eski Task'ın üstü artık yok.
-    expect((await detail(story.id)).children).toHaveLength(0);
+    expect((await detail(parentEpic.id)).children).toHaveLength(0);
 
     // Sprint'teki Task da dönüştürülebilir; sprint'ten çıkar ve üyelik geçmişine yazılır.
     await promote(loose.id).expect(204);
@@ -98,7 +98,7 @@ describe("Task'ı Epic'e dönüştürme (ADR-109)", () => {
 
   it('yalnızca Task dönüştürülebilir; basit liste Space’inde Epic olmaz', async () => {
     const s = await space();
-    const story = await create(s.listId, { type: 'STORY', title: 'S' });
+    const story = await create(s.listId, { type: 'BUG', title: 'S' });
     const res = await promote(story.id).expect(422);
     expect(res.body).toEqual({ code: 'WORK_ITEM_NOT_PROMOTABLE' });
 

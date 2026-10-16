@@ -40,7 +40,7 @@ export interface EpicStats {
   unestimatedCount: number;
 }
 
-/** Epic özeti: doğrudan alt öğelerin (Story/Task/Bug) puan ve adet toplamları (brief §5.7). */
+/** Epic özeti: doğrudan alt öğelerin (Task/Bug) puan ve adet toplamları (brief §5.7). */
 export function epicStats(
   children: ReadonlyArray<{ points: number | null; category: StatusCategory }>,
 ): EpicStats {

@@ -24,7 +24,7 @@ test.describe.serial('DoD, DoR ve Sprint Review', () => {
     await page.getByRole('link', { name: 'Görevler' }).first().click();
   }
 
-  test('Space, DoD/DoR maddeleri ve üç Story hazırlanır', async ({ page }) => {
+  test('Space, DoD/DoR maddeleri ve üç Task hazırlanır', async ({ page }) => {
     await sidebar(page).getByRole('button', { name: 'Space oluştur' }).first().click();
     const dialog = page.getByRole('dialog', { name: 'Yeni Space oluştur' });
     await dialog.getByLabel('Ad', { exact: true }).fill('Hazırlık Testi');
@@ -44,7 +44,7 @@ test.describe.serial('DoD, DoR ve Sprint Review', () => {
 
     await openList(page);
     const quick = page.getByRole('textbox', { name: 'Başlık' });
-    await page.getByLabel('Tip').first().selectOption('STORY');
+    await page.getByLabel('Tip').first().selectOption('TASK');
     for (const [index, title] of ['Ödeme', 'Rapor', 'Kargo'].entries()) {
       await quick.fill(title);
       await quick.press('Enter');

@@ -78,8 +78,8 @@ describe('Sprint yaşam döngüsü (gerçek veritabanı)', () => {
   /** İki öğeli aktif sprint: biri (5 puan) Done, diğeri (3 puan) devam ediyor. */
   async function activeSprint() {
     const s = await space();
-    const done = await item(s.listId, { type: 'STORY', title: 'Biten', points: 5 });
-    const open = await item(s.listId, { type: 'STORY', title: 'Süren', points: 3 });
+    const done = await item(s.listId, { type: 'TASK', title: 'Biten', points: 5 });
+    const open = await item(s.listId, { type: 'TASK', title: 'Süren', points: 3 });
     const { id } = await sprint(s.id);
     await move(s.id, { itemIds: [done.id, open.id], sprintId: id }).expect(204);
     await start(id).expect(204);
@@ -213,7 +213,7 @@ describe('Sprint yaşam döngüsü (gerçek veritabanı)', () => {
 
     it("tüm işler bittiyse Backlog'a dönen bir şey yoktur", async () => {
       const s = await space();
-      const a = await item(s.listId, { type: 'STORY', title: 'A', points: 8 });
+      const a = await item(s.listId, { type: 'TASK', title: 'A', points: 8 });
       const { id } = await sprint(s.id);
       await move(s.id, { itemIds: [a.id], sprintId: id }).expect(204);
       await start(id).expect(204);

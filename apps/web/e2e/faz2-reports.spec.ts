@@ -57,7 +57,7 @@ test.describe.serial('Raporlar', () => {
     await page.getByRole('complementary').getByRole('link', { name: 'Rapor Testi' }).click();
     await page.getByRole('link', { name: 'Görevler' }).first().click();
     const quick = page.getByRole('textbox', { name: 'Başlık' });
-    await page.getByLabel('Tip').first().selectOption('STORY');
+    await page.getByLabel('Tip').first().selectOption('TASK');
     for (const [index, title] of ['Giriş ekranı', 'Çıkış ekranı'].entries()) {
       await quick.fill(title);
       await quick.press('Enter');

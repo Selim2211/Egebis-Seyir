@@ -8,7 +8,7 @@ const row = (over: Partial<WorkItemRow>) =>
   ({
     key: 'MOB-1',
     title: 'Giriş',
-    type: 'STORY',
+    type: 'TASK',
     status: { name: 'Yapılacak' },
     assignees: [{ name: 'Elif Demir' }, { name: 'Can Ak' }],
     priority: 'HIGH',
@@ -36,7 +36,7 @@ describe('itemsToTsv', () => {
     );
     expect(tsv.split('\n')).toEqual([
       'key\ttitle\ttype\tstatus\tassignees\tpriority\testimate\tdue',
-      'MOB-1\tGiriş\tSTORY\tYapılacak\tElif Demir, Can Ak\tHIGH\t5\t2026-10-20',
+      'MOB-1\tGiriş\tTASK\tYapılacak\tElif Demir, Can Ak\tHIGH\t5\t2026-10-20',
       'MOB-2\tGiriş\tTASK\tYapılacak\t\tHIGH\t3 h\t',
     ]);
   });

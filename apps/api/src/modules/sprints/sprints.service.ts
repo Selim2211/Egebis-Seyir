@@ -27,7 +27,7 @@ import {
 } from '../work-items/item-support';
 import { assertOpen, conflict, countedItems, loadScrumSpace, summarize } from './sprint-support';
 
-/** Epic > Story > Task > Sub-task en fazla bu kadar iner. */
+/** Epic > Task > Sub-task en fazla bu kadar iner. */
 const MAX_TREE_DEPTH = 4;
 
 /** Sprint oluşturma, düzenleme, silme ve okuma (Faz 2.1, ADR-061). Başlat/tamamla: 2.3. */

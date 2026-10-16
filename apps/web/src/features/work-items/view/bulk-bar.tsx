@@ -1,3 +1,4 @@
+import { statusName } from '@/lib/default-names';
 import {
   PRIORITIES,
   type BulkUpdateRequest,
@@ -83,7 +84,7 @@ export function BulkBar({
           {space.statuses.map((s) => (
             <DropdownMenuItem key={s.id} onSelect={() => apply({ statusId: s.id })}>
               <span className="size-2 rounded-full" style={{ background: s.color }} />
-              {s.name}
+              {statusName(s.name)}
             </DropdownMenuItem>
           ))}
         </DropdownMenuContent>

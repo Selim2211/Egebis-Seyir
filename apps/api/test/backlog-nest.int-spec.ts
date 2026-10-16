@@ -62,7 +62,7 @@ describe('Backlog sürükle-bırak: sprint arası taşıma ve alt öğe (gerçek
 
   it("öğe bir sprint'ten diğerine doğrudan taşınır", async () => {
     const s = await space();
-    const a = await item(s.listId, { type: 'STORY', title: 'Giriş' });
+    const a = await item(s.listId, { type: 'TASK', title: 'Giriş' });
     const one = await sprint(s.id, 'Sprint 1');
     const two = await sprint(s.id, 'Sprint 2');
     await owner
@@ -94,10 +94,10 @@ describe('Backlog sürükle-bırak: sprint arası taşıma ve alt öğe (gerçek
     expect(changes.type).toMatchObject({ from: 'TASK', to: 'SUBTASK' });
   });
 
-  it("Story, Epic altına girince sprint'te kalır; Story altına giren Task sprint'ten çıkar", async () => {
+  it("Task, Epic altına girince sprint'te kalır; Task altına giren Task Sub-Task olur ve sprint'ten çıkar", async () => {
     const s = await space();
     const epic = await item(s.listId, { type: 'EPIC', title: 'Ödeme' });
-    const story = await item(s.listId, { type: 'STORY', title: 'Kartla ödeme' });
+    const story = await item(s.listId, { type: 'TASK', title: 'Kartla ödeme' });
     const task = await item(s.listId, { type: 'TASK', title: 'Form' });
     const one = await sprint(s.id, 'Sprint 1');
     await owner
@@ -108,14 +108,14 @@ describe('Backlog sürükle-bırak: sprint arası taşıma ve alt öğe (gerçek
     await nest(task.id, story.id).expect(204);
 
     expect((await detail(story.id)).parentId).toBe(epic.id);
-    expect((await detail(task.id)).type).toBe('TASK');
+    expect((await detail(task.id)).type).toBe('SUBTASK');
     expect(await sprintKeys(one.id)).toEqual([story.key]);
   });
 
   it('kurala uymayan bırakma reddedilir', async () => {
     const s = await space();
-    const a = await item(s.listId, { type: 'STORY', title: 'A' });
-    const b = await item(s.listId, { type: 'STORY', title: 'B' });
+    const a = await item(s.listId, { type: 'EPIC', title: 'A' });
+    const b = await item(s.listId, { type: 'TASK', title: 'B' });
     const res = await nest(a.id, b.id).expect(422);
     expect(res.body).toEqual({ code: 'WORK_ITEM_PARENT_NOT_ALLOWED' });
     await nest(a.id, a.id).expect(422);

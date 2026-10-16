@@ -13,7 +13,7 @@ test.describe.serial('Backlog ve sprint', () => {
     await expect(page.getByRole('heading', { name: /Hoş geldin/ })).toBeVisible();
   });
 
-  test('Space ve üç Story hazırlanır', async ({ page }) => {
+  test('Space ve üç Task hazırlanır', async ({ page }) => {
     const sidebar = page.getByRole('complementary');
     await sidebar.getByRole('button', { name: 'Space oluştur' }).first().click();
     const dialog = page.getByRole('dialog', { name: 'Yeni Space oluştur' });
@@ -24,7 +24,7 @@ test.describe.serial('Backlog ve sprint', () => {
     await page.getByRole('link', { name: 'Görevler' }).first().click();
 
     const quick = page.getByRole('textbox', { name: 'Başlık' });
-    await page.getByLabel('Tip').first().selectOption('STORY');
+    await page.getByLabel('Tip').first().selectOption('TASK');
     for (const [index, title] of ['Giriş ekranı', 'Ödeme akışı', 'Raporlar'].entries()) {
       await quick.fill(title);
       await quick.press('Enter');

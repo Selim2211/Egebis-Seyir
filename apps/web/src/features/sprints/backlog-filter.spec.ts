@@ -6,7 +6,7 @@ const row = (over: Partial<WorkItemRow>): WorkItemRow =>
   ({
     id: over.key ?? 'x',
     key: 'MOB-1',
-    type: 'STORY',
+    type: 'TASK',
     title: 'Giriş ekranı',
     parentId: null,
     points: null,
@@ -39,11 +39,13 @@ describe('filterBacklog', () => {
     expect(keys(filterBacklog(items, { ...NO_FILTER, epic: 'none' }))).toEqual(['MOB-3', 'MOB-4']);
   });
 
-  it('tahminsiz: puansız Story/Bug; Task sayılmaz', () => {
+  it('tahminsiz: puansız Task/Bug; Sub-Task sayılmaz', () => {
     expect(keys(filterBacklog(items, { ...NO_FILTER, unestimated: true }))).toEqual([
       'MOB-2',
+      'MOB-3',
       'MOB-4',
     ]);
-    expect(isUnestimated(items[2]!)).toBe(false);
+    expect(isUnestimated(items[0]!)).toBe(false);
+    expect(isUnestimated(row({ type: 'SUBTASK', parentId: 'p1' }))).toBe(false);
   });
 });

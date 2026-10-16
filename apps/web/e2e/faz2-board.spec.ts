@@ -20,7 +20,7 @@ test.describe.serial('Board', () => {
     await page.getByRole('complementary').getByRole('link', { name: 'Pano Denemesi' }).click();
   }
 
-  test('Space, iki Story ve sprint hazırlanır', async ({ page }) => {
+  test('Space, iki Task ve sprint hazırlanır', async ({ page }) => {
     const sidebar = page.getByRole('complementary');
     await sidebar.getByRole('button', { name: 'Space oluştur' }).first().click();
     const dialog = page.getByRole('dialog', { name: 'Yeni Space oluştur' });
@@ -31,7 +31,7 @@ test.describe.serial('Board', () => {
     await page.getByRole('link', { name: 'Görevler' }).first().click();
 
     const quick = page.getByRole('textbox', { name: 'Başlık' });
-    await page.getByLabel('Tip').first().selectOption('STORY');
+    await page.getByLabel('Tip').first().selectOption('TASK');
     for (const [index, title] of ['Sepet', 'Kargo takibi'].entries()) {
       await quick.fill(title);
       await quick.press('Enter');

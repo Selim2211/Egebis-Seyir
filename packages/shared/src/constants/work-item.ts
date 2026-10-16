@@ -1,5 +1,5 @@
 /** İş öğesi tipleri (brief §4.2). */
-export const WORK_ITEM_TYPES = ['EPIC', 'STORY', 'TASK', 'SUBTASK', 'BUG'] as const;
+export const WORK_ITEM_TYPES = ['EPIC', 'TASK', 'SUBTASK', 'BUG'] as const;
 export type WorkItemType = (typeof WORK_ITEM_TYPES)[number];
 
 /** Öncelikler (brief §5.4). Sıra: en yüksekten en düşüğe. */

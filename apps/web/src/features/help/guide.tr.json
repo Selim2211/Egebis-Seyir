@@ -25,13 +25,8 @@
             ],
             [
               "Epic",
-              "Birçok Story ve Task'ı çatısı altında toplayan büyük hedef. İsteğe bağlıdır.",
+              "Birçok Task'ı çatısı altında toplayan büyük hedef. İsteğe bağlıdır.",
               "Kullanıcı hesabı yönetimi"
-            ],
-            [
-              "Story",
-              "Kullanıcının gözünden anlatılan bir özellik; Epic'in parçasıdır.",
-              "Kullanıcı şifresini sıfırlayabilir"
             ],
             [
               "Task",
@@ -123,13 +118,13 @@
       "blocks": [
         {
           "type": "p",
-          "text": "**Epic**, birçok Story ve Task'ı çatısı altında toplayan büyük bir hedeftir (ör. “Kullanıcı hesabı yönetimi”). Hiyerarşi şöyledir: **Epic → Story → Task → Sub-Task**. Epic kullanmak **isteğe bağlıdır**: küçük bir ekipseniz Epic açmadan doğrudan Task'larla çalışabilirsin."
+          "text": "**Epic**, birçok Task'ı çatısı altında toplayan büyük bir hedeftir (ör. “Kullanıcı hesabı yönetimi”). Hiyerarşi şöyledir: **Epic → Task → Sub-Task**. Epic kullanmak **isteğe bağlıdır**: küçük bir ekipseniz Epic açmadan doğrudan Task'larla çalışabilirsin."
         },
         {
           "type": "bullets",
           "items": [
-            "Epic sprint'e girmez; çatı olarak kalır. Sprint'e Story, Task ve Bug alınır.",
-            "Epic'in ilerleme çubuğu, altındaki Story'lerin durumundan otomatik hesaplanır.",
+            "Epic sprint'e girmez; çatı olarak kalır. Sprint'e Task ve Bug alınır.",
+            "Epic'in ilerleme çubuğu, altındaki Task'ların durumundan otomatik hesaplanır.",
             "Epic'in üst öğesi olmaz; Task ve Sub-Task'ların aksine saat tahmini ve yüzde taşımaz."
           ]
         },
@@ -155,6 +150,10 @@
             "**Başlık**: Epic'in adı; büyük hedefi anlatan kısa bir ifade.",
             "**Ekle ↵**: Enter yerine buna da tıklayabilirsin."
           ]
+        },
+        {
+          "type": "tip",
+          "text": "Epic'in altına Task eklemek için Epic satırının sağındaki **⋯** düğmesine tıkla, **Alt öğe ekle**'yi seç ve **Tip** kutusunda **Task**'ı bırak. Epic'in altına Bug da eklenebilir."
         },
         {
           "type": "p",
@@ -198,11 +197,11 @@
           "type": "figure",
           "image": "20-epic-result",
           "alt": "Dönüşümden sonra liste",
-          "caption": "Dönüşüm sonrası: iki Epic var; dönüşen Epic'in Sub-Task'ı artık Story.",
+          "caption": "Dönüşüm sonrası: iki Epic var; dönüşen Epic'in Sub-Task'ı artık Task.",
           "legend": [
             "**Epic**: Baştan oluşturduğun Epic (mor şimşek simgesi).",
             "**Dönüşen Epic**: Eskiden Task'tı, şimdi Epic.",
-            "**Story**: Eskiden Sub-Task'tı; Epic'in altında Story olarak durur."
+            "**Task**: Eskiden Sub-Task'tı; Epic'in altında Task olarak durur."
           ]
         },
         {
@@ -214,8 +213,8 @@
               "Task → **Epic**. Başlık, açıklama, kişiler, etiketler, tarihler, yorumlar, ekler ve bağımlılıklar aynen kalır."
             ],
             [
-              "Üst Story",
-              "Task bir Story'nin altındaysa **oradan ayrılır** (Epic'in üst öğesi olmaz)."
+              "Üst Epic",
+              "Task bir Epic'in altındaysa **oradan ayrılır** (Epic'in üst öğesi olmaz)."
             ],
             [
               "Sprint",
@@ -223,7 +222,7 @@
             ],
             [
               "Sub-Task'lar",
-              "Epic'in altında Sub-Task olamayacağı için hepsi **Story'ye dönüşür** ve Epic'in altında kalır; puanları korunur."
+              "Epic'in altında Sub-Task olamayacağı için hepsi **Task'a dönüşür** ve Epic'in altında kalır; puanları korunur."
             ],
             ["Story Point", "Korunur."],
             [
@@ -234,7 +233,7 @@
         },
         {
           "type": "warn",
-          "text": "Dönüşüm **geri alınamaz**; Epic'i tekrar Task'a çeviremezsin. Yalnızca **Task** dönüştürülebilir (Story, Bug veya Sub-Task değil) ve Space'in çalışma modu **Scrum** olmalıdır. Aktif bir Sprint'teki Task'ı dönüştürmek için Sprint planlama yetkisi gerekir."
+          "text": "Dönüşüm **geri alınamaz**; Epic'i tekrar Task'a çeviremezsin. Yalnızca **Task** dönüştürülebilir (Bug veya Sub-Task değil) ve Space'in çalışma modu **Scrum** olmalıdır. Aktif bir Sprint'teki Task'ı dönüştürmek için Sprint planlama yetkisi gerekir."
         }
       ]
     },
@@ -261,7 +260,7 @@
           "alt": "Listede hızlı Task ekleme satırı",
           "caption": "Task ekleme satırı: tip seç, başlık yaz, Enter'a bas.",
           "legend": [
-            "**Tip**: Eklenecek kaydın türü. Burada **Task** seçili (diğerleri: Epic, Story, Bug).",
+            "**Tip**: Eklenecek kaydın türü. Burada **Task** seçili (diğerleri: Epic, Bug).",
             "**Başlık**: İşin adı. Birden fazla Task eklemek için her başlıktan sonra Enter'a basman yeter.",
             "**Ekle ↵**: Enter'a basmak yerine buna da tıklayabilirsin."
           ]
@@ -371,7 +370,7 @@
       "blocks": [
         {
           "type": "p",
-          "text": "Büyük bir işi parçalara bölmek için Sub-Task kullanılır. Sub-Task her zaman bir üst öğeye (Task, Story veya Bug) bağlıdır ve onun altında görünür."
+          "text": "Büyük bir işi parçalara bölmek için Sub-Task kullanılır. Sub-Task her zaman bir üst öğeye (Task veya Bug) bağlıdır ve onun altında görünür."
         },
         {
           "type": "steps",
@@ -576,7 +575,7 @@
           "items": [
             "**Sürükleyerek:** Satırın solundaki tutamağı tutup Sprint bölümüne bırak. Sprint'ten Sprint'e ve Sprint'ten Backlog'a da aynı şekilde taşınır.",
             "**Toplu taşıma:** Satırların solundaki kutuları işaretle, çıkan çubuktan **Sprint'e taşı…** seç.",
-            "Sprint'e Task, Story ve Bug girer; Epic girmez. Sub-Task'lar üstleriyle birlikte gelir."
+            "Sprint'e Task ve Bug girer; Epic girmez. Sub-Task'lar üstleriyle birlikte gelir."
           ]
         },
         {
@@ -723,7 +722,7 @@
           "type": "bullets",
           "items": [
             "**Epic kullanmak zorunda mıyım?** Hayır. Epic isteğe bağlıdır; Task'larla doğrudan çalışabilirsin.",
-            "**Epic'e dönüştür seçeneğini göremiyorum.** Yalnızca Task'larda ve çalışma modu Scrum olan Space'lerde görünür; Story, Bug ve Sub-Task'ta yoktur. Yazma yetkin de olmalı.",
+            "**Epic'e dönüştür seçeneğini göremiyorum.** Yalnızca Task'larda ve çalışma modu Scrum olan Space'lerde görünür; Bug ve Sub-Task'ta yoktur. Yazma yetkin de olmalı.",
             "**Epic'i tekrar Task yapabilir miyim?** Hayır, dönüşüm geri alınamaz. Emin değilsen önce Task'ı kopyalayıp kopyayı dönüştür.",
             "**Story Point listesinde neden 4 yok?** Seyir standart Fibonacci ölçeğini (1, 2, 3, 5, 8, 13, 21, 34, 55) kullanır. İki puan arası bir sayı yerine yakın değeri seç.",
             "**Üst Task'ın puanı neden değişmiyor?** Sub-Task'ları varsa puan onların toplamıdır. Sub-Task'ların puanını değiştir.",

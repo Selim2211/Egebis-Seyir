@@ -228,7 +228,7 @@ function SplitResult({ item, data }: { item: WorkItemDetail; data: AiSplitSugges
     try {
       const made = await create.mutateAsync({
         listId: item.listId,
-        body: { type: 'STORY', title: story.title, parentId: item.id },
+        body: { type: 'TASK', title: story.title, parentId: item.id },
       });
       if (story.description.trim()) {
         await update.mutateAsync({

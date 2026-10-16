@@ -77,7 +77,7 @@ export const SprintSummarySchema = z.object({
   doneItemCount: z.int(),
   donePoints: z.number(),
   unestimatedCount: z.int(),
-  /** Definition of Ready'ye uymayan Story/Bug sayısı (Space'te DoR maddesi varsa), ADR-065. */
+  /** Definition of Ready'ye uymayan Task/Bug sayısı (Space'te DoR maddesi varsa), ADR-065. */
   notReadyCount: z.int(),
   /** Tamamlanırken donmuş velocity (Done puanı); tamamlanmamış sprint'te null. */
   completedPoints: z.number().nullable(),

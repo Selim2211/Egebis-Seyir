@@ -54,8 +54,8 @@ describe('Epic detayı ve Epic listesi (gerçek veritabanı)', () => {
           return created;
         },
       );
-    const a = await child('STORY', 5, 'DONE');
-    await child('STORY', 3, 'ACTIVE');
+    const a = await child('TASK', 5, 'DONE');
+    await child('TASK', 3, 'ACTIVE');
     await child('BUG', 2, null);
     return { s, epic, a };
   }

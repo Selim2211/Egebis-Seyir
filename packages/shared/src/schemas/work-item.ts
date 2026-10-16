@@ -144,7 +144,7 @@ export const WorkItemSummarySchema = z.object({
   title: z.string(),
   listId: z.uuid(),
   parentId: z.uuid().nullable(),
-  /** Bulunduğu sprint (yalnızca üst düzey Story/Bug/Task, ADR-061). */
+  /** Bulunduğu sprint (yalnızca üst düzey Task/Bug, ADR-061). */
   sprintId: z.uuid().nullable(),
   statusId: z.uuid(),
   priority: PrioritySchema,
@@ -247,7 +247,7 @@ export type ItemLink = z.infer<typeof LinkSchema>;
 /** GET /api/workspaces/:wid/items/:itemId ve /items/key/:key */
 const ReadinessEntrySchema = z.object({ text: z.string(), checked: z.boolean() });
 
-/** DoD/DoR maddeleri ve işaret durumu (Story/Bug); diğer tiplerde boş listeler (ADR-065). */
+/** DoD/DoR maddeleri ve işaret durumu (Task/Bug); diğer tiplerde boş listeler (ADR-065). */
 export const ReadinessSchema = z.object({
   dor: z.array(ReadinessEntrySchema),
   dod: z.array(ReadinessEntrySchema),
@@ -378,7 +378,7 @@ export type CreateLinkRequest = z.infer<typeof CreateLinkRequestSchema>;
 
 export const SPLIT_MAX_TASKS = 30;
 
-/** POST .../items/:itemId/split — Story'yi Task'lara böler (ADR-051). */
+/** POST .../items/:itemId/split — Task'ı Sub-Task'lara böler (ADR-051). */
 export const SplitItemRequestSchema = z.object({
   titles: z.array(Title).min(1).max(SPLIT_MAX_TASKS),
 });
@@ -422,7 +422,7 @@ const rowContext = {
 /** Birden çok List'ten gelen öğe satırı: özet + bulunduğu yer ve durum bilgisi. */
 export const WorkItemRowSchema = WorkItemSummarySchema.extend({
   ...rowContext,
-  /** Definition of Ready durumu (Story/Bug ve Space'te DoR maddesi varsa), aksi halde null (ADR-065). */
+  /** Definition of Ready durumu (Task/Bug ve Space'te DoR maddesi varsa), aksi halde null (ADR-065). */
   dor: z.object({ checked: z.int(), total: z.int() }).nullable(),
 });
 export type WorkItemRow = z.infer<typeof WorkItemRowSchema>;

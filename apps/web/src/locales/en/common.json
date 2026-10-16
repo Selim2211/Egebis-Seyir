@@ -43,6 +43,26 @@
     "create": "Create space",
     "emptyBodyNoCreate": "Spaces you are added to will appear here."
   },
+  "newMenu": {
+    "button": "New",
+    "TASK": "Task",
+    "TASKHint": "A piece of work for the sprint",
+    "EPIC": "Epic",
+    "EPICHint": "A big goal that groups many Tasks",
+    "BUG": "Bug",
+    "BUGHint": "Something that is broken",
+    "SPACE": "Space",
+    "SPACEHint": "A new project or team area",
+    "space": "Space",
+    "list": "List",
+    "create": "Create",
+    "dialog": {
+      "TASK": "New Task",
+      "EPIC": "New Epic",
+      "BUG": "New Bug",
+      "SUBTASK": "New Sub-Task"
+    }
+  },
   "topbar": {
     "search": "Search tasks, docs or people…",
     "quickCreate": "Quick create (C)",
@@ -265,7 +285,6 @@
   },
   "workItemType": {
     "EPIC": "Epic",
-    "STORY": "Story",
     "TASK": "Task",
     "SUBTASK": "Sub-task",
     "BUG": "Bug"
@@ -310,7 +329,7 @@
     "GUEST_SPACES_REQUIRED": "Choose at least one Space for a guest invitation.",
     "CONTAINER_ARCHIVED": "You cannot add to an archived item.",
     "WORK_ITEM_PARENT_SPACE": "The parent must be in the same Space.",
-    "WORK_ITEM_ESTIMATE_NOT_ALLOWED": "Story Points apply to Epics, Stories and Bugs; hour estimates to Tasks and Sub-tasks.",
+    "WORK_ITEM_ESTIMATE_NOT_ALLOWED": "Hour estimates apply to Tasks and Sub-tasks only.",
     "WORK_ITEM_ESTIMATE_INVALID": "The estimate does not match this Space's scale.",
     "WORK_ITEM_FIELD_NOT_ALLOWED": "This field is not available for this work item type.",
     "WORK_ITEM_OPEN_CHILDREN": "There are open sub-items.",
@@ -320,7 +339,7 @@
     "WORK_ITEM_BLOCKED": "This item is blocked by an unfinished item.",
     "WORK_ITEM_LINK_SELF": "An item cannot be linked to itself.",
     "WORK_ITEM_LINK_EXISTS": "This link already exists.",
-    "WORK_ITEM_SPLIT_NOT_ALLOWED": "Only a Story can be split into Tasks.",
+    "WORK_ITEM_SPLIT_NOT_ALLOWED": "Only a Task can be split into Sub-Tasks.",
     "CHECKLIST_LIMIT": "An item can have at most 20 checklists.",
     "COMMENT_FORBIDDEN": "You cannot change this comment.",
     "REACTION_INVALID": "Invalid reaction.",
@@ -333,7 +352,7 @@
     "SPRINT_READONLY": "A completed or cancelled sprint cannot be changed.",
     "SPRINT_NOT_PLANNED": "Only planned sprints can be deleted.",
     "SPRINT_DATES_LOCKED": "The dates of an active sprint cannot be changed.",
-    "SPRINT_ITEM_NOT_ELIGIBLE": "Only top-level Stories, Bugs and Tasks can join a sprint; completed items cannot.",
+    "SPRINT_ITEM_NOT_ELIGIBLE": "Only top-level Tasks and Bugs can join a sprint; completed items cannot.",
     "SPRINT_ACTIVE_EXISTS": "This Space already has an active sprint; complete it first.",
     "SPRINT_GOAL_REQUIRED": "A sprint goal is required to start the sprint.",
     "SPRINT_NOT_ACTIVE": "Only an active sprint can be completed.",
@@ -341,7 +360,7 @@
     "SPRINT_NEXT_INVALID": "The carry-over sprint must be planned and in the same Space.",
     "DOD_INCOMPLETE": "The Definition of Done is incomplete.",
     "DOD_ENFORCED": "The Definition of Done is required in this Space; check every item before moving to Done.",
-    "READINESS_NOT_APPLICABLE": "Definition of Ready/Done only applies to Stories and Bugs.",
+    "READINESS_NOT_APPLICABLE": "Definition of Ready/Done only applies to Tasks and Bugs.",
     "DOC_CONFLICT": "This page was changed elsewhere. Your text was not overwritten; reload the page and continue.",
     "DOC_PARENT_INVALID": "The page cannot be moved under this parent (cycle or too deep).",
     "DOC_DELETED": "The page is in the trash; restore it first.",
@@ -505,7 +524,7 @@
       "calendar": "Calendar"
     },
     "emptyTitle": "No work items in this list yet",
-    "emptyBody": "Creating Epics, Stories, Tasks, Sub-tasks and Bugs comes in the next step (1.3).",
+    "emptyBody": "Creating Epics, Tasks, Sub-tasks and Bugs comes in the next step (1.3).",
     "createItem": "Create work item"
   },
   "spaceSettings": {
@@ -602,15 +621,15 @@
     "deleteEntry": "Delete item {{name}}",
     "checklistProgress": "{{done}} of {{total}} done",
     "subItems": "Sub-items",
-    "split": "Split into Tasks",
-    "splitHelp": "Each line becomes a Task (up to {{max}}). The Story stays unchanged.",
+    "split": "Split into Sub-Tasks",
+    "splitHelp": "Each line becomes a Sub-Task (up to {{max}}). The Task stays unchanged.",
     "splitPlaceholder": "API endpoint\nUI form\nTests",
-    "splitTitles": "Task titles",
-    "splitCount_one": "{{count}} Task will be created",
-    "splitCount_other": "{{count}} Tasks will be created",
+    "splitTitles": "Sub-Task titles",
+    "splitCount_one": "{{count}} Sub-Task will be created",
+    "splitCount_other": "{{count}} Sub-Tasks will be created",
     "splitSubmit": "Split",
-    "splitDone_one": "{{count}} Task created.",
-    "splitDone_other": "{{count}} Tasks created.",
+    "splitDone_one": "{{count}} Sub-Task created.",
+    "splitDone_other": "{{count}} Sub-Tasks created.",
     "links": "Linked items",
     "addLink": "Add link",
     "noLinks": "No links.",
@@ -897,7 +916,7 @@
     "moveSelected": "Move to sprint…",
     "clearSelection": "Clear selection",
     "noResults": "No items match the filters.",
-    "empty": "The Backlog is empty. Stories, Bugs and Tasks added to lists show up here in priority order.",
+    "empty": "The Backlog is empty. Tasks and Bugs added to lists show up here in priority order.",
     "reorderHint": "Clear the filters to change the order.",
     "nested": "Made a sub-item",
     "nestHint": "Drop a row onto another row, dragging to the right, to make it a sub-item.",
@@ -1029,7 +1048,7 @@
     "dodPlaceholder": "Code reviewed\nTests passing\nDocumentation updated",
     "help": "One item per line, at most {{max}}. Editing an item resets its checkmarks.",
     "dodEnforced": "Required for Done",
-    "dodEnforcedHelp": "When on, a Story/Bug cannot move to Done until all DoD items are checked; when off you only get a warning."
+    "dodEnforcedHelp": "When on, a Task/Bug cannot move to Done until all DoD items are checked; when off you only get a warning."
   },
   "review": {
     "title": "{{name}} · Review",
@@ -1695,8 +1714,8 @@
     "title": "AI",
     "assist": "AI",
     "summarize": "Summarize item",
-    "suggestStory": "Suggest story and acceptance criteria",
-    "splitEpic": "Split Epic into Stories",
+    "suggestStory": "Suggest description and acceptance criteria",
+    "splitEpic": "Split Epic into Tasks",
     "result": "AI suggestion",
     "disclaimer": "A suggestion; review it before saving.",
     "addDescription": "Add to description",
@@ -1704,7 +1723,7 @@
     "criteriaTitle": "Acceptance criteria (suggested)",
     "added": "Added",
     "create": "Create",
-    "createStory": "Create story “{{title}}”",
+    "createStory": "Create Task “{{title}}”",
     "storyCreated": "{{key}} created."
   },
   "recurrence": {
@@ -2016,8 +2035,18 @@
   "promoteEpic": {
     "menu": "Convert to Epic",
     "title": "Convert {{key}} to an Epic?",
-    "body": "This Task becomes an Epic. An Epic has no parent, sprint, hour estimate, completion percentage or recurrence: if it sits under a Story it is detached, if it is in a sprint it leaves the sprint, and those fields are cleared. Its Sub-Tasks become Stories and stay under the Epic. This cannot be undone.",
+    "body": "This Task becomes an Epic. An Epic has no parent, sprint, hour estimate, completion percentage or recurrence: if it sits under an Epic it is detached, if it is in a sprint it leaves the sprint, and those fields are cleared. Its Sub-Tasks become Tasks and stay under the Epic. This cannot be undone.",
     "confirm": "Convert to Epic",
     "done": "{{key}} is now an Epic."
+  },
+  "defaultNames": {
+    "list": "Tasks",
+    "status": {
+      "backlog": "Backlog",
+      "todo": "To Do",
+      "inProgress": "In Progress",
+      "inReview": "In Review",
+      "done": "Done"
+    }
   }
 }

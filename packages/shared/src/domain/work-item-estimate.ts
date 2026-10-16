@@ -13,7 +13,6 @@ import { ERROR_CODES } from '../errors/codes';
  */
 export const ESTIMATE_KIND: Record<WorkItemType, 'POINTS' | 'HOURS'> = {
   EPIC: 'POINTS',
-  STORY: 'POINTS',
   BUG: 'POINTS',
   TASK: 'HOURS',
   SUBTASK: 'HOURS',

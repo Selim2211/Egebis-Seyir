@@ -801,7 +801,7 @@ export class WorkItemsService {
 
   /**
    * Done'a çekilirken eksik DoD maddesi varsa: Space ayarı açıksa engel, kapalıysa `force` ile
-   * geçilebilen uyarı (brief §6.3, ADR-065). Yalnızca Story/Bug için geçerli.
+   * geçilebilen uyarı (brief §6.3, ADR-065). Yalnızca Task/Bug için geçerli.
    */
   private assertDefinitionOfDone(
     item: {

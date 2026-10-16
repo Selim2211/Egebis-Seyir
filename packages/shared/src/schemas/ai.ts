@@ -14,7 +14,7 @@ export const AiStorySuggestionSchema = z.object({
 });
 export type AiStorySuggestion = z.infer<typeof AiStorySuggestionSchema>;
 
-/** POST .../items/:itemId/ai/split-epic: Epic'i Story'lere bölme önerisi. */
+/** POST .../items/:itemId/ai/split-epic: Epic'i Task'lara bölme önerisi. */
 export const AiSplitSuggestionSchema = z.object({
   stories: z
     .array(

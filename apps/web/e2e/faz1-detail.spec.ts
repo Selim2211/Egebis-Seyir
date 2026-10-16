@@ -32,7 +32,7 @@ test.describe.serial('Görev detayı', () => {
 
     await openList(page);
     const quick = page.getByRole('textbox', { name: 'Başlık' });
-    await page.getByLabel('Tip').first().selectOption('STORY');
+    await page.getByLabel('Tip').first().selectOption('TASK');
     await quick.fill('Sipariş akışı');
     await quick.press('Enter');
     await expect(page.getByText('DET-1 oluşturuldu.')).toBeVisible();
@@ -75,14 +75,14 @@ test.describe.serial('Görev detayı', () => {
     await expect(panel(page).getByRole('checkbox', { name: /Given sepet dolu/ })).toBeChecked();
   });
 
-  test("Story Task'lara bölünür", async ({ page }) => {
+  test("Task Sub-Task'lara bölünür", async ({ page }) => {
     await page.goto('/items/DET-1');
-    await page.getByRole('button', { name: "Task'lara böl" }).click();
+    await page.getByRole('button', { name: "Sub-Task'lara böl" }).click();
     await page
-      .getByRole('textbox', { name: 'Task başlıkları' })
+      .getByRole('textbox', { name: 'Sub-Task başlıkları' })
       .fill('API uç noktası\nArayüz formu');
     await page.getByRole('button', { name: 'Böl', exact: true }).click();
-    await expect(page.getByText('2 Task oluşturuldu.')).toBeVisible();
+    await expect(page.getByText('2 Sub-Task oluşturuldu.')).toBeVisible();
     await expect(page.getByRole('link', { name: /API uç noktası/ })).toBeVisible();
     await expect(page.getByRole('link', { name: /Arayüz formu/ })).toBeVisible();
   });

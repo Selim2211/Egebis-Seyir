@@ -46,7 +46,7 @@ describe('Denetim günlüğü (gerçek veritabanı)', () => {
     const tree = (await owner.get(api('/hierarchy')).expect(200)).body as HierarchyResponse;
     const listId = tree.spaces.find((s) => s.id === space.id)!.lists[0]!.id;
     const item = (
-      await owner.post(api(`/lists/${listId}/items`), { type: 'STORY', title: 'Giriş' }).expect(201)
+      await owner.post(api(`/lists/${listId}/items`), { type: 'TASK', title: 'Giriş' }).expect(201)
     ).body as CreatedItem;
     await owner
       .post(api(`/spaces/${space.id}/sprints`), {

@@ -29,12 +29,11 @@ describe('Space çalışma modu (ADR-044)', () => {
     for (const type of WORK_ITEM_TYPES) expect(checkTypeInSpace(type, true).ok).toBe(true);
   });
 
-  it('basit listede Epic ve Story yok', () => {
+  it('basit listede Epic yok', () => {
     expect(checkTypeInSpace('EPIC', false)).toEqual({
       ok: false,
       code: 'WORK_ITEM_TYPE_NOT_ALLOWED',
     });
-    expect(checkTypeInSpace('STORY', false).ok).toBe(false);
     for (const type of ['TASK', 'SUBTASK', 'BUG'] as const) {
       expect(checkTypeInSpace(type, false).ok).toBe(true);
     }

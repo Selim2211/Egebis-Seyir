@@ -41,7 +41,7 @@ describe('matchesConditions', () => {
   });
   it('tip, öncelik ve etiket kısıtları VE ile uygulanır', () => {
     expect(matchesConditions({ types: ['TASK', 'BUG'] }, subject)).toBe(true);
-    expect(matchesConditions({ types: ['STORY'] }, subject)).toBe(false);
+    expect(matchesConditions({ types: ['EPIC'] }, subject)).toBe(false);
     expect(matchesConditions({ priorities: ['LOW'] }, subject)).toBe(false);
     expect(matchesConditions({ labelIds: ['a', 'b'] }, subject)).toBe(true);
     expect(matchesConditions({ labelIds: ['b'] }, subject)).toBe(false);

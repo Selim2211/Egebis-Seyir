@@ -1,3 +1,4 @@
+import { listName } from '@/lib/default-names';
 import {
   type FavoriteType,
   type HierarchyResponse,
@@ -717,9 +718,9 @@ function ListNodes({
           depth={depth}
           target={{ type: 'LIST', id: list.id }}
           icon={<List className="text-muted-foreground size-3.75" aria-hidden />}
-          label={list.name}
+          label={listName(list.name)}
           handle={handle}
-          menuLabel={t('structure.more', { name: list.name })}
+          menuLabel={t('structure.more', { name: listName(list.name) })}
           menu={
             <>
               {canManage && (

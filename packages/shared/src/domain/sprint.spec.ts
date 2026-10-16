@@ -10,12 +10,11 @@ import {
 } from './sprint';
 
 describe('sprintEligibility (ADR-061)', () => {
-  const base = { type: 'STORY', parentType: null, category: 'NOT_STARTED' } as const;
+  const base = { type: 'TASK', parentType: null, category: 'NOT_STARTED' } as const;
 
-  it('üst düzey Story, Bug ve Task girer; Epic altındakiler de', () => {
+  it('üst düzey Task ve Bug girer; Epic altındakiler de', () => {
     expect(sprintEligibility(base)).toBeNull();
     expect(sprintEligibility({ ...base, type: 'BUG' })).toBeNull();
-    expect(sprintEligibility({ ...base, type: 'TASK' })).toBeNull();
     expect(sprintEligibility({ ...base, parentType: 'EPIC' })).toBeNull();
   });
 
@@ -24,8 +23,8 @@ describe('sprintEligibility (ADR-061)', () => {
     expect(sprintEligibility({ ...base, type: 'SUBTASK', parentType: 'TASK' })).toBe('TYPE');
   });
 
-  it("Story'nin altındaki Task üstünü izler, ayrı girmez", () => {
-    expect(sprintEligibility({ ...base, type: 'TASK', parentType: 'STORY' })).toBe('NESTED');
+  it("Task'ın altındaki Bug üstünü izler, ayrı girmez", () => {
+    expect(sprintEligibility({ ...base, type: 'BUG', parentType: 'TASK' })).toBe('NESTED');
   });
 
   it('tamamlanmış öğe girmez', () => {
@@ -58,12 +57,12 @@ describe('sprintMoveReason', () => {
 });
 
 describe('sprintTotals', () => {
-  it('puanları, biteni ve tahminsiz Story/Bug sayısını toplar', () => {
+  it('puanları, biteni ve tahminsiz Task/Bug sayısını toplar', () => {
     const totals = sprintTotals([
-      { type: 'STORY', points: 5, category: 'DONE' },
-      { type: 'STORY', points: 3, category: 'ACTIVE' },
+      { type: 'TASK', points: 5, category: 'DONE' },
+      { type: 'TASK', points: 3, category: 'ACTIVE' },
       { type: 'BUG', points: null, category: 'NOT_STARTED' },
-      { type: 'TASK', points: null, category: 'NOT_STARTED' }, // Task saat tahminli, vurgulanmaz
+      { type: 'EPIC', points: null, category: 'NOT_STARTED' }, // Epic tahminsiz sayılmaz
     ]);
     expect(totals).toEqual({
       itemCount: 4,

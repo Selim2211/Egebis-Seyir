@@ -13,7 +13,7 @@ test.describe.serial('İş öğeleri', () => {
     await expect(page.getByRole('heading', { name: /Hoş geldin/ })).toBeVisible();
   });
 
-  test('Space oluşturulur, listeye hızlı oluşturmayla Story ve Task eklenir', async ({ page }) => {
+  test('Space oluşturulur, listeye hızlı oluşturmayla Task eklenir', async ({ page }) => {
     const sidebar = page.getByRole('complementary');
     // Önceki spec'te Space yoksa oluştur.
     if ((await sidebar.getByRole('link', { name: 'Mobil Uygulama' }).count()) === 0) {
@@ -28,7 +28,7 @@ test.describe.serial('İş öğeleri', () => {
     await expect(page.getByText('Bu listede henüz iş öğesi yok')).toBeVisible();
 
     const quick = page.getByRole('textbox', { name: 'Başlık' });
-    await page.getByLabel('Tip').first().selectOption('STORY');
+    await page.getByLabel('Tip').first().selectOption('TASK');
     await quick.fill('Giriş ekranı');
     await quick.press('Enter');
     await expect(page.getByText('MOB-1 oluşturuldu.')).toBeVisible();
@@ -69,7 +69,7 @@ test.describe.serial('İş öğeleri', () => {
     ).toHaveAttribute('aria-label', 'Acil');
   });
 
-  test("açık alt öğesi olan Story Done'a çekilirken uyarılır", async ({ page }) => {
+  test("açık alt öğesi olan Task Done'a çekilirken uyarılır", async ({ page }) => {
     await page.goto('/');
     const sidebar = page.getByRole('complementary');
     await sidebar.getByRole('link', { name: 'Mobil Uygulama' }).click();

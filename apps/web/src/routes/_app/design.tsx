@@ -66,7 +66,7 @@ function DesignSystemPage() {
       <section className="rounded-lg border bg-card">
         <h2 className="border-b px-4 py-3 text-sm font-medium">{t('design.sample')}</h2>
         <div className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-accent/50">
-          <WorkItemTypeIcon type="STORY" />
+          <WorkItemTypeIcon type="TASK" />
           <span className="font-mono text-xs text-muted-foreground">MOB-142</span>
           <span className="min-w-0 flex-1 truncate">{t('design.sampleTitle')}</span>
           <StatusBadge category="ACTIVE" />

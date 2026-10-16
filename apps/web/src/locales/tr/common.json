@@ -43,6 +43,26 @@
     "create": "Space oluştur",
     "emptyBodyNoCreate": "Bir Space'e eklendiğinde burada görünecek."
   },
+  "newMenu": {
+    "button": "New",
+    "TASK": "Task",
+    "TASKHint": "Sprint için bir iş parçası",
+    "EPIC": "Epic",
+    "EPICHint": "Birçok Task'ı toplayan büyük hedef",
+    "BUG": "Bug",
+    "BUGHint": "Bozuk çalışan bir şey",
+    "SPACE": "Space",
+    "SPACEHint": "Yeni proje veya takım alanı",
+    "space": "Space",
+    "list": "List",
+    "create": "Create",
+    "dialog": {
+      "TASK": "New Task",
+      "EPIC": "New Epic",
+      "BUG": "New Bug",
+      "SUBTASK": "New Sub-Task"
+    }
+  },
   "topbar": {
     "search": "Görev, doküman veya kişi ara…",
     "quickCreate": "Hızlı oluştur (C)",
@@ -265,7 +285,6 @@
   },
   "workItemType": {
     "EPIC": "Epic",
-    "STORY": "Story",
     "TASK": "Task",
     "SUBTASK": "Sub-task",
     "BUG": "Bug"
@@ -310,7 +329,7 @@
     "GUEST_SPACES_REQUIRED": "Guest daveti için en az bir Space seç.",
     "CONTAINER_ARCHIVED": "Arşivdeki bir öğeye ekleme yapılamaz.",
     "WORK_ITEM_PARENT_SPACE": "Üst öğe aynı Space'te olmalı.",
-    "WORK_ITEM_ESTIMATE_NOT_ALLOWED": "Story Point yalnızca Epic, Story ve Bug için; saat tahmini Task ve Sub-task için girilir.",
+    "WORK_ITEM_ESTIMATE_NOT_ALLOWED": "Saat tahmini yalnızca Task ve Sub-task için girilir.",
     "WORK_ITEM_ESTIMATE_INVALID": "Tahmin bu Space'in ölçeğine uymuyor.",
     "WORK_ITEM_FIELD_NOT_ALLOWED": "Bu alan bu iş öğesi tipinde kullanılamaz.",
     "WORK_ITEM_OPEN_CHILDREN": "Açık alt öğeler var.",
@@ -320,7 +339,7 @@
     "WORK_ITEM_BLOCKED": "Bu öğe, bitmemiş bir öğe tarafından engelleniyor.",
     "WORK_ITEM_LINK_SELF": "Bir öğe kendisine bağlanamaz.",
     "WORK_ITEM_LINK_EXISTS": "Bu bağlantı zaten var.",
-    "WORK_ITEM_SPLIT_NOT_ALLOWED": "Yalnızca Story Task'lara bölünebilir.",
+    "WORK_ITEM_SPLIT_NOT_ALLOWED": "Yalnızca Task, Sub-Task'lara bölünebilir.",
     "CHECKLIST_LIMIT": "Bir öğeye en çok 20 checklist eklenebilir.",
     "COMMENT_FORBIDDEN": "Bu yorumu değiştirme yetkin yok.",
     "REACTION_INVALID": "Geçersiz tepki.",
@@ -333,7 +352,7 @@
     "SPRINT_READONLY": "Tamamlanmış veya iptal edilmiş sprint değiştirilemez.",
     "SPRINT_NOT_PLANNED": "Yalnızca planlanmış sprint silinebilir.",
     "SPRINT_DATES_LOCKED": "Aktif sprint'in tarihleri değiştirilemez.",
-    "SPRINT_ITEM_NOT_ELIGIBLE": "Yalnızca üst düzey Story, Bug ve Task'lar sprint'e alınabilir; tamamlananlar alınamaz.",
+    "SPRINT_ITEM_NOT_ELIGIBLE": "Yalnızca üst düzey Task ve Bug'lar sprint'e alınabilir; tamamlananlar alınamaz.",
     "SPRINT_ACTIVE_EXISTS": "Bu Space'te zaten aktif bir sprint var; önce onu tamamla.",
     "SPRINT_GOAL_REQUIRED": "Sprint'i başlatmak için sprint hedefi gerekli.",
     "SPRINT_NOT_ACTIVE": "Yalnızca aktif sprint tamamlanabilir.",
@@ -341,7 +360,7 @@
     "SPRINT_NEXT_INVALID": "Devredilecek sprint planlı ve aynı Space'te olmalı.",
     "DOD_INCOMPLETE": "Definition of Done maddeleri tamamlanmamış.",
     "DOD_ENFORCED": "Bu Space'te Definition of Done zorunlu; tüm maddeleri işaretlemeden Done'a geçilemez.",
-    "READINESS_NOT_APPLICABLE": "Definition of Ready/Done yalnızca Story ve Bug için geçerli.",
+    "READINESS_NOT_APPLICABLE": "Definition of Ready/Done yalnızca Task ve Bug için geçerli.",
     "DOC_CONFLICT": "Bu sayfa başka bir yerde değiştirildi. Yazdıkların üzerine yazılmadı; sayfayı yenileyip devam et.",
     "DOC_PARENT_INVALID": "Sayfa bu üst sayfanın altına taşınamaz (döngü ya da çok derin).",
     "DOC_DELETED": "Sayfa çöp kutusunda; önce geri getir.",
@@ -505,7 +524,7 @@
       "calendar": "Takvim"
     },
     "emptyTitle": "Bu listede henüz iş öğesi yok",
-    "emptyBody": "Epic, Story, Task, Sub-task ve Bug oluşturma bir sonraki adımda (1.3) gelecek.",
+    "emptyBody": "Epic, Task, Sub-task ve Bug oluşturma bir sonraki adımda (1.3) gelecek.",
     "createItem": "İş öğesi oluştur"
   },
   "spaceSettings": {
@@ -602,15 +621,15 @@
     "deleteEntry": "{{name}} maddesini sil",
     "checklistProgress": "{{done}} / {{total}} tamamlandı",
     "subItems": "Alt öğeler",
-    "split": "Task'lara böl",
-    "splitHelp": "Her satır bir Task olur (en çok {{max}}). Story değişmez.",
+    "split": "Sub-Task'lara böl",
+    "splitHelp": "Her satır bir Sub-Task olur (en çok {{max}}). Task değişmez.",
     "splitPlaceholder": "API uç noktası\nArayüz formu\nTestler",
-    "splitTitles": "Task başlıkları",
-    "splitCount_one": "{{count}} Task oluşturulacak",
-    "splitCount_other": "{{count}} Task oluşturulacak",
+    "splitTitles": "Sub-Task başlıkları",
+    "splitCount_one": "{{count}} Sub-Task oluşturulacak",
+    "splitCount_other": "{{count}} Sub-Task oluşturulacak",
     "splitSubmit": "Böl",
-    "splitDone_one": "{{count}} Task oluşturuldu.",
-    "splitDone_other": "{{count}} Task oluşturuldu.",
+    "splitDone_one": "{{count}} Sub-Task oluşturuldu.",
+    "splitDone_other": "{{count}} Sub-Task oluşturuldu.",
     "links": "Bağlantılı öğeler",
     "addLink": "Bağlantı ekle",
     "noLinks": "Bağlantı yok.",
@@ -897,7 +916,7 @@
     "moveSelected": "Sprint'e taşı…",
     "clearSelection": "Seçimi temizle",
     "noResults": "Süzgece uyan öğe yok.",
-    "empty": "Backlog boş. Listelere Story, Bug veya Task ekledikçe burada öncelik sırasıyla görünür.",
+    "empty": "Backlog boş. Listelere Task veya Bug ekledikçe burada öncelik sırasıyla görünür.",
     "reorderHint": "Sıralamayı değiştirmek için süzgeçleri temizle.",
     "nested": "Alt öğe yapıldı",
     "nestHint": "Bir satırı başka satırın üzerine sağa doğru bırakırsan alt öğesi olur.",
@@ -1029,7 +1048,7 @@
     "dodPlaceholder": "Kod gözden geçirildi\nTestler geçti\nDokümantasyon güncellendi",
     "help": "Her satır bir madde, en çok {{max}}. Maddeyi değiştirirsen işaretleri sıfırlanır.",
     "dodEnforced": "Done için zorunlu",
-    "dodEnforcedHelp": "Açıkken DoD maddeleri tamamlanmadan Story/Bug Done'a geçemez; kapalıyken yalnızca uyarı çıkar."
+    "dodEnforcedHelp": "Açıkken DoD maddeleri tamamlanmadan Task/Bug Done'a geçemez; kapalıyken yalnızca uyarı çıkar."
   },
   "review": {
     "title": "{{name}} · Review",
@@ -1695,8 +1714,8 @@
     "title": "Yapay zekâ",
     "assist": "Yapay zekâ",
     "summarize": "İşi özetle",
-    "suggestStory": "Hikâye ve kabul kriteri öner",
-    "splitEpic": "Epic’i Story’lere böl",
+    "suggestStory": "Açıklama ve kabul kriteri öner",
+    "splitEpic": "Epic’i Task'lara böl",
     "result": "Yapay zekâ önerisi",
     "disclaimer": "Öneri; kaydetmeden önce kontrol et.",
     "addDescription": "Açıklamaya ekle",
@@ -1704,7 +1723,7 @@
     "criteriaTitle": "Kabul kriterleri (öneri)",
     "added": "Eklendi",
     "create": "Oluştur",
-    "createStory": "“{{title}}” hikâyesini oluştur",
+    "createStory": "“{{title}}” Task’ını oluştur",
     "storyCreated": "{{key}} oluşturuldu."
   },
   "recurrence": {
@@ -2016,8 +2035,18 @@
   "promoteEpic": {
     "menu": "Epic'e dönüştür",
     "title": "{{key}} Epic'e dönüştürülsün mü?",
-    "body": "Bu Task bir Epic olur. Epic; üst öğe, sprint, saat tahmini, tamamlanma yüzdesi ve tekrar taşımaz: Story'nin altındaysa oradan ayrılır, sprint'teyse sprint'ten çıkar, bu alanlar temizlenir. Sub-Task'ları Story'ye dönüşür ve Epic'in altında kalır. Bu işlem geri alınamaz.",
+    "body": "Bu Task bir Epic olur. Epic; üst öğe, sprint, saat tahmini, tamamlanma yüzdesi ve tekrar taşımaz: bir Epic'in altındaysa oradan ayrılır, sprint'teyse sprint'ten çıkar, bu alanlar temizlenir. Sub-Task'ları Task'a dönüşür ve Epic'in altında kalır. Bu işlem geri alınamaz.",
     "confirm": "Epic'e dönüştür",
     "done": "{{key}} artık bir Epic."
+  },
+  "defaultNames": {
+    "list": "Görevler",
+    "status": {
+      "backlog": "Backlog",
+      "todo": "Yapılacak",
+      "inProgress": "Devam ediyor",
+      "inReview": "İncelemede",
+      "done": "Tamamlandı"
+    }
   }
 }

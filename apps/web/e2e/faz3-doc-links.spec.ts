@@ -24,7 +24,7 @@ test.describe.serial('Doküman bağlantıları ve yorumları', () => {
 
     await page.getByRole('link', { name: 'Görevler' }).first().click();
     const quick = page.getByRole('textbox', { name: 'Başlık' });
-    await page.getByLabel('Tip').first().selectOption('STORY');
+    await page.getByLabel('Tip').first().selectOption('TASK');
     await quick.fill('Parola sıfırlama');
     await quick.press('Enter');
     await expect(page.getByText('BGL-1 oluşturuldu.')).toBeVisible();

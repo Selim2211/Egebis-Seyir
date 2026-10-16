@@ -27,7 +27,7 @@ test.describe.serial('Sprint yaşam döngüsü', () => {
     await expect(page.getByRole('region', { name })).toBeVisible();
   }
 
-  test('Space, üç Story ve iki sprint hazırlanır', async ({ page }) => {
+  test('Space, üç Task ve iki sprint hazırlanır', async ({ page }) => {
     const sidebar = page.getByRole('complementary');
     await sidebar.getByRole('button', { name: 'Space oluştur' }).first().click();
     const dialog = page.getByRole('dialog', { name: 'Yeni Space oluştur' });
@@ -38,7 +38,7 @@ test.describe.serial('Sprint yaşam döngüsü', () => {
     await page.getByRole('link', { name: 'Görevler' }).first().click();
 
     const quick = page.getByRole('textbox', { name: 'Başlık' });
-    await page.getByLabel('Tip').first().selectOption('STORY');
+    await page.getByLabel('Tip').first().selectOption('TASK');
     for (const [index, title] of ['Alfa', 'Beta', 'Gama'].entries()) {
       await quick.fill(title);
       await quick.press('Enter');

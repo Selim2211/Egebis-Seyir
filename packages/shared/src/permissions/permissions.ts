@@ -28,7 +28,7 @@ export const SPACE_PERMISSIONS = {
   LIST_MANAGE: 'space.lists.manage',
   /** Product Backlog sıralama/önceliklendirme. */
   BACKLOG_RANK: 'backlog.rank',
-  /** Epic/Story/Task/Sub-task/Bug oluşturma ve düzenleme. */
+  /** Epic/Task/Sub-task/Bug oluşturma ve düzenleme. */
   WORK_ITEM_WRITE: 'workItem.write',
   /** Kendine atanmış görevin durumunu değiştirme. */
   WORK_ITEM_STATUS_OWN: 'workItem.status.own',

@@ -55,7 +55,6 @@ enum StatusCategory {
 
 enum WorkItemType {
   EPIC
-  STORY
   TASK
   SUBTASK
   BUG

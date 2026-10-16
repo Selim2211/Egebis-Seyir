@@ -112,7 +112,7 @@ describe('Yapay zekâ destekli öneriler (sahte model sunucusu)', () => {
 
   it('hikâye ve kabul kriteri önerisi: kod çitli JSON çözülür', async () => {
     const s = await setup();
-    const id = await s.add({ type: 'STORY', title: 'Kullanıcı giriş yapabilmeli' });
+    const id = await s.add({ type: 'TASK', title: 'Kullanıcı giriş yapabilmeli' });
     reply.text =
       '```json\n{"description":"Bir kullanıcı olarak giriş yapmak istiyorum","acceptanceCriteria":["Given geçerli şifre When giriş Then panel açılır","Hatalı şifrede uyarı çıkar"]}\n```';
     const res = (await owner.post(api(`/items/${id}/ai/suggest-story`), {}).expect(200))
@@ -126,7 +126,7 @@ describe('Yapay zekâ destekli öneriler (sahte model sunucusu)', () => {
   it('Epic bölme önerisi yalnızca Epic için; diğer tipler 422', async () => {
     const s = await setup();
     const epic = await s.add({ type: 'EPIC', title: 'Ödeme sistemi' });
-    const story = await s.add({ type: 'STORY', title: 'Tek hikaye' });
+    const story = await s.add({ type: 'TASK', title: 'Tek hikaye' });
     reply.text =
       '{"stories":[{"title":"Kart ile ödeme","description":"Kart bilgileri alınır"},{"title":"Havale","description":"IBAN gösterilir"}]}';
     const res = (await owner.post(api(`/items/${epic}/ai/split-epic`), {}).expect(200))
@@ -139,7 +139,7 @@ describe('Yapay zekâ destekli öneriler (sahte model sunucusu)', () => {
 
   it('model hatası ve bozuk JSON 502 AI_FAILED; model çağrısı yapılan istek sayılır', async () => {
     const s = await setup();
-    const id = await s.add({ type: 'STORY', title: 'Hikaye' });
+    const id = await s.add({ type: 'TASK', title: 'Hikaye' });
     reply = { status: 500, text: 'x' };
     const down = await owner.post(api(`/items/${id}/ai/suggest-story`), {}).expect(502);
     expect(down.body).toEqual({ code: 'AI_FAILED' });
@@ -160,7 +160,7 @@ describe('Yapay zekâ destekli öneriler (sahte model sunucusu)', () => {
 
   it('yetki: Stakeholder özetleyebilir ama öneri üretemez; görünmeyen iş 404', async () => {
     const s = await setup();
-    const id = await s.add({ type: 'STORY', title: 'Hikaye' });
+    const id = await s.add({ type: 'TASK', title: 'Hikaye' });
     const elif = await inviteAndAccept(ctx, owner, ws, ELIF);
     const elifId = (await ctx.prisma.user.findUniqueOrThrow({ where: { email: ELIF.email } })).id;
     await owner

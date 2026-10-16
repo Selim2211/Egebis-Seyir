@@ -14,7 +14,7 @@ let n = 0;
 const item = (over: Partial<WorkItemSummary>): WorkItemSummary => ({
   id: `i${++n}`,
   key: `MOB-${n}`,
-  type: 'STORY',
+  type: 'TASK',
   title: 'T',
   listId: 'l',
   parentId: null,

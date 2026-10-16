@@ -12,7 +12,7 @@ export const SPRINT_ITEM_REASONS = [
 export type SprintItemReason = (typeof SPRINT_ITEM_REASONS)[number];
 
 /** Sprint'e doğrudan girebilen tipler; Epic girmez, Sub-task üstünü izler (ADR-061). */
-export const SPRINT_ITEM_TYPES = ['STORY', 'BUG', 'TASK'] as const;
+export const SPRINT_ITEM_TYPES = ['BUG', 'TASK'] as const;
 
 /** Bir sprint en çok 8 hafta sürebilir (brief §5.6: 1-4 hafta önerilir, ayarlanabilir). */
 export const MAX_SPRINT_DAYS = 56;

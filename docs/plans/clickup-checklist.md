@@ -9,7 +9,7 @@
 
 | ClickUp fonksiyonu                                 | Seyir'de | ClickUp gibi çalışıyor mu              | Not                                                                                      |
 | -------------------------------------------------- | -------- | -------------------------------------- | ---------------------------------------------------------------------------------------- |
-| Workspace > Space > Folder > List > Task > Subtask | ✅       | Evet — E2E `faz1-spaces`, `faz1-items` | Ek olarak Epic/Story/Task/Bug/Sub-task tipleri                                           |
+| Workspace > Space > Folder > List > Task > Subtask | ✅       | Evet — E2E `faz1-spaces`, `faz1-items` | Ek olarak Epic/Task/Bug/Sub-task tipleri                                                 |
 | Space/Folder/List oluştur, yeniden adlandır, taşı  | ✅       | Evet — E2E `faz1-spaces`               | Sol ağaçta sürükle-bırak                                                                 |
 | Favoriler                                          | ✅       | Evet — E2E `faz1-spaces`               |                                                                                          |
 | Arşiv ve çöp kutusu (geri al)                      | ✅       | Evet — E2E `faz1-items`, `faz1-spaces` |                                                                                          |
@@ -65,7 +65,7 @@
 | Sprint review, retrospektif                                 | ✅       | Evet — E2E `faz3-retro`                           |                                                                                   |
 | Epic ilerleme, roadmap                                      | ✅       | Evet — E2E `faz3-epics`, `faz4-roadmap`           |                                                                                   |
 | Sprint'i Excel'e aktarma / Excel'den alma (bağımlılıklarla) | ✅       | Evet — Int `sprint-excel`, E2E `faz8-excel`       | Öğeler, özellikler, alt öğeler ve bağımlılıklar; önizlemeli içe aktarma (ADR-104) |
-| Her göreve Story Point (1,2,3,5,8,13,21,34,55)              | ✅       | Evet — Int `story-points`, E2E `faz9-points`      | Task/Bug/Story/Sub-task'ta girilir; ölçek dışı değer reddedilir (ADR-107)         |
+| Her göreve Story Point (1,2,3,5,8,13,21,34,55)              | ✅       | Evet — Int `story-points`, E2E `faz9-points`      | Task/Bug/Sub-task'ta girilir; ölçek dışı değer reddedilir (ADR-107)               |
 | Alt görevi olan işin puanı = alt görev toplamı              | ✅       | Evet — Int `story-points`, E2E `faz9-points`      | Veritabanı tetikleyicisiyle; alt görev kalkınca puan yeniden elle girilir         |
 | Sprint toplam puanı ve kişilere dağılımı                    | ✅       | Evet — Int `story-points`, E2E `faz9-points`      | Sprint özeti: toplam, biten, kişi başına puan ve yüzde                            |
 | Atananın görev yüzdesi, sprint toplam yüzdesi               | ✅       | Evet — Int `story-points`, E2E `faz9-points`      | Puan ağırlıklı; alt görevli işte alt görevlerden türetilir                        |
@@ -74,7 +74,7 @@
 | Sprint'i JSON olarak dışa aktarma                           | ✅       | Evet — Int `story-points`, E2E `faz9-points`      | Özellikler, toplamlar, kişi dağılımı, öğeler, bağımlılıklar, bağlantılar          |
 | Görev ve sprint için kalıcı URL                             | ✅       | Evet — E2E `faz1-detail`, `faz9-points`           | `/items/MOB-12` ve `/sprints/<id>`; bağlantı kopyalama menüsü var                 |
 | Uygulama içi yardım / görselli kullanıcı kılavuzu           | ✅       | Evet — E2E `help`, `guide-screenshots`            | Üst çubukta Yardım; TR/EN; Word olarak indirilebilir (ADR-108)                    |
-| Task'ı Epic'e dönüştürme (isteğe bağlı)                     | ✅       | Evet — Int `promote-epic`, E2E `epic-promote`     | Sub-Task'lar Story olur, sprint/üst Story bağı kopar; geri alınamaz (ADR-109)     |
+| Task'ı Epic'e dönüştürme (isteğe bağlı)                     | ✅       | Evet — Int `promote-epic`, E2E `epic-promote`     | Sub-Task'lar Task olur, sprint/üst Epic bağı kopar; geri alınamaz (ADR-109)       |
 
 ## 5. Zaman
 

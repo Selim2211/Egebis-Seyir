@@ -1,3 +1,4 @@
+import { statusName } from '@/lib/default-names';
 import type { WorkItemSummary } from '@scrum/shared';
 import { MoreHorizontal } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -80,7 +81,7 @@ export function BoardCard({
                 {statuses.map((s) => (
                   <DropdownMenuRadioItem key={s.id} value={s.id}>
                     <span className="size-2 rounded-full" style={{ background: s.color }} />
-                    {s.name}
+                    {statusName(s.name)}
                   </DropdownMenuRadioItem>
                 ))}
               </DropdownMenuRadioGroup>

@@ -73,12 +73,12 @@ describe('CSV içe/dışa aktarma (gerçek veritabanı)', () => {
     const story = (
       (
         await owner
-          .post(api(`/lists/${s.listId}/items`), { type: 'STORY', title: 'Üst hikaye', points: 5 })
+          .post(api(`/lists/${s.listId}/items`), { type: 'TASK', title: 'Üst hikaye', points: 5 })
           .expect(201)
       ).body as Created
     ).id;
     await owner
-      .post(api(`/lists/${s.listId}/items`), { type: 'TASK', title: '=1+1', parentId: story })
+      .post(api(`/lists/${s.listId}/items`), { type: 'SUBTASK', title: '=1+1', parentId: story })
       .expect(201);
     await owner.patch(api(`/items/${story}`), { customFields: { [field]: 'Acme' } }).expect(204);
 
@@ -140,7 +140,7 @@ describe('CSV içe/dışa aktarma (gerçek veritabanı)', () => {
     const csv = [
       'ID,Tip,Başlık,Durum,Öncelik,Atanan,Etiketler,Puan,Bitiş,Üst,Risk,Açıklama',
       'A1,Hikaye,Ödeme akışı,Devam ediyor,Acil,elif@example.com,"acil; ödeme",5,15.12.2026,,Yüksek,"Satır 1\nSatır 2"',
-      'A2,Görev,Form tasarla,,,,,,,A1,,',
+      'A2,Alt görev,Form tasarla,,,,,,,A1,,',
     ].join('\r\n');
     const mapping = {
       externalId: 'ID',
@@ -167,7 +167,7 @@ describe('CSV içe/dışa aktarma (gerçek veritabanı)', () => {
     const [story, task] = items;
     expect(story).toMatchObject({
       title: 'Ödeme akışı',
-      type: 'STORY',
+      type: 'TASK',
       priority: 'URGENT',
       points: 5,
       externalSource: 'csv',
@@ -184,7 +184,7 @@ describe('CSV içe/dışa aktarma (gerçek veritabanı)', () => {
       [field]: risk.fields[0]!.options.find((o) => o.label === 'Yüksek')!.id,
     });
     expect(task!.parentId).toBe(story!.id);
-    expect(task!.type).toBe('TASK');
+    expect(task!.type).toBe('SUBTASK');
   });
 
   it('aynı dış kimlikle yeniden içe aktarma günceller, çoğaltmaz', async () => {

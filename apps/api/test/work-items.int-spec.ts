@@ -59,14 +59,14 @@ describe('İş öğeleri (gerçek veritabanı)', () => {
   describe('oluşturma ve okunabilir ID (ADR-033, ADR-044)', () => {
     it("ID'ler Space sayacıyla artar; öğe ilk durumla, oluşturanı bildiren olarak açılır", async () => {
       const s = await space();
-      const a = await create(s.listId, { type: 'STORY', title: 'Giriş ekranı' });
+      const a = await create(s.listId, { type: 'TASK', title: 'Giriş ekranı' });
       const b = await create(s.listId, { type: 'TASK', title: 'API' });
       expect([a.key, b.key]).toEqual(['MOB-1', 'MOB-2']);
 
       const detail = await item(a.id);
       expect(detail).toMatchObject({
         key: 'MOB-1',
-        type: 'STORY',
+        type: 'TASK',
         title: 'Giriş ekranı',
         priority: 'NORMAL',
         statusId: s.statuses[0]!.id,
@@ -110,7 +110,7 @@ describe('İş öğeleri (gerçek veritabanı)', () => {
   });
 
   describe('hiyerarşi ve tipe özel kurallar (brief §6.2)', () => {
-    it('Story → Epic, Task → Story, Sub-task → Task bağlanır; bozuk bağ reddedilir', async () => {
+    it('Task → Epic, Sub-task → Task bağlanır; bozuk bağ reddedilir', async () => {
       const s = await space();
       const epic = await create(s.listId, {
         type: 'EPIC',
@@ -118,12 +118,11 @@ describe('İş öğeleri (gerçek veritabanı)', () => {
         goal: 'Hedef',
         tshirtSize: 'L',
       });
-      const story = await create(s.listId, { type: 'STORY', title: 'S', parentId: epic.id });
-      const task = await create(s.listId, { type: 'TASK', title: 'T', parentId: story.id });
+      const task = await create(s.listId, { type: 'TASK', title: 'T', parentId: epic.id });
       await create(s.listId, { type: 'SUBTASK', title: 'ST', parentId: task.id });
 
       const bad = await owner
-        .post(api(`/lists/${s.listId}/items`), { type: 'TASK', title: 'X', parentId: epic.id })
+        .post(api(`/lists/${s.listId}/items`), { type: 'SUBTASK', title: 'X', parentId: epic.id })
         .expect(422);
       expect(bad.body).toEqual({ code: 'WORK_ITEM_PARENT_NOT_ALLOWED' });
       const orphan = await owner
@@ -132,10 +131,11 @@ describe('İş öğeleri (gerçek veritabanı)', () => {
       expect(orphan.body).toEqual({ code: 'WORK_ITEM_PARENT_REQUIRED' });
 
       const detail = await item(task.id);
-      expect(detail.ancestors.map((a) => a.key)).toEqual(['MOB-1', 'MOB-2']);
+      expect(detail.ancestors.map((a) => a.key)).toEqual(['MOB-1']);
       expect(detail.children.map((c) => c.type)).toEqual(['SUBTASK']);
       // Üst öğe değiştirirken de kural geçerli.
-      const res = await owner.patch(api(`/items/${task.id}`), { parentId: epic.id }).expect(422);
+      const other = await create(s.listId, { type: 'TASK', title: 'Y' });
+      const res = await owner.patch(api(`/items/${task.id}`), { parentId: other.id }).expect(422);
       expect(res.body).toEqual({ code: 'WORK_ITEM_PARENT_NOT_ALLOWED' });
     });
 
@@ -144,28 +144,28 @@ describe('İş öğeleri (gerçek veritabanı)', () => {
       const b = await space({ name: 'Web', key: 'WEB' });
       const epic = await create(a.listId, { type: 'EPIC', title: 'E' });
       const res = await owner
-        .post(api(`/lists/${b.listId}/items`), { type: 'STORY', title: 'S', parentId: epic.id })
+        .post(api(`/lists/${b.listId}/items`), { type: 'TASK', title: 'S', parentId: epic.id })
         .expect(422);
       expect(res.body).toEqual({ code: 'WORK_ITEM_PARENT_SPACE' });
     });
 
     it('Story Point her tipte, saat yalnızca Task/Sub-task; ölçeğe uymalı', async () => {
       const s = await space();
-      await create(s.listId, { type: 'STORY', title: 'S', points: 5 });
+      await create(s.listId, { type: 'TASK', title: 'S', points: 5 });
       await create(s.listId, { type: 'TASK', title: 'T', estimateHours: 3.5 });
 
       await create(s.listId, { type: 'TASK', title: 'T2', points: 34 });
       const storyHours = await owner
-        .post(api(`/lists/${s.listId}/items`), { type: 'STORY', title: 'S', estimateHours: 2 })
+        .post(api(`/lists/${s.listId}/items`), { type: 'EPIC', title: 'S', estimateHours: 2 })
         .expect(422);
       expect(storyHours.body).toEqual({ code: 'WORK_ITEM_ESTIMATE_NOT_ALLOWED' });
       const notFibonacci = await owner
-        .post(api(`/lists/${s.listId}/items`), { type: 'STORY', title: 'S', points: 4 })
+        .post(api(`/lists/${s.listId}/items`), { type: 'TASK', title: 'S', points: 4 })
         .expect(422);
       expect(notFibonacci.body).toEqual({ code: 'WORK_ITEM_ESTIMATE_INVALID' });
     });
 
-    it("Bug alanları yalnızca Bug'da; basit liste Space'inde Epic/Story yok", async () => {
+    it("Bug alanları yalnızca Bug'da; basit liste Space'inde Epic yok", async () => {
       const s = await space();
       await create(s.listId, {
         type: 'BUG',
@@ -212,18 +212,28 @@ describe('İş öğeleri (gerçek veritabanı)', () => {
       const done = s.statuses.find((x) => x.category === 'DONE')!;
       const epic = await create(s.listId, { type: 'EPIC', title: 'E' });
       const s1 = await create(s.listId, {
-        type: 'STORY',
+        type: 'TASK',
         title: 'S1',
         parentId: epic.id,
         points: 8,
       });
-      await create(s.listId, { type: 'STORY', title: 'S2', parentId: epic.id, points: 2 });
+      await create(s.listId, { type: 'TASK', title: 'S2', parentId: epic.id, points: 2 });
       await owner.patch(api(`/items/${s1.id}`), { statusId: done.id }).expect(204);
       expect((await item(epic.id)).progress).toBe(80);
 
-      const story = await create(s.listId, { type: 'STORY', title: 'S3' });
-      await create(s.listId, { type: 'TASK', title: 'T1', parentId: story.id, estimateHours: 2 });
-      await create(s.listId, { type: 'TASK', title: 'T2', parentId: story.id, estimateHours: 3.5 });
+      const story = await create(s.listId, { type: 'TASK', title: 'S3' });
+      await create(s.listId, {
+        type: 'SUBTASK',
+        title: 'T1',
+        parentId: story.id,
+        estimateHours: 2,
+      });
+      await create(s.listId, {
+        type: 'SUBTASK',
+        title: 'T2',
+        parentId: story.id,
+        estimateHours: 3.5,
+      });
       expect((await item(story.id)).rolledUpHours).toBe(5.5);
       expect((await item(story.id)).progress).toBeNull();
     });
@@ -255,8 +265,8 @@ describe('İş öğeleri (gerçek veritabanı)', () => {
     it("açık alt öğesi olan öğe Done'a çekilirken uyarılır; force ile geçer", async () => {
       const s = await space();
       const done = s.statuses.find((x) => x.category === 'DONE')!;
-      const story = await create(s.listId, { type: 'STORY', title: 'S' });
-      await create(s.listId, { type: 'TASK', title: 'T', parentId: story.id });
+      const story = await create(s.listId, { type: 'TASK', title: 'S' });
+      await create(s.listId, { type: 'SUBTASK', title: 'T', parentId: story.id });
 
       const res = await owner.patch(api(`/items/${story.id}`), { statusId: done.id }).expect(409);
       expect(res.body).toEqual({ code: 'WORK_ITEM_OPEN_CHILDREN', details: { count: 1 } });
@@ -388,8 +398,8 @@ describe('İş öğeleri (gerçek veritabanı)', () => {
         .post(api(`/spaces/${b.id}/labels`), { name: 'Acil', color: '#BE123C' })
         .expect(201);
 
-      const story = await create(a.listId, { type: 'STORY', title: 'S', labelIds: [label] });
-      const task = await create(a.listId, { type: 'TASK', title: 'T', parentId: story.id });
+      const story = await create(a.listId, { type: 'TASK', title: 'S', labelIds: [label] });
+      const task = await create(a.listId, { type: 'SUBTASK', title: 'T', parentId: story.id });
       await owner.patch(api(`/items/${task.id}`), { statusId: done.id }).expect(204);
 
       await owner
@@ -430,8 +440,8 @@ describe('İş öğeleri (gerçek veritabanı)', () => {
     it('kopya yeni ID alır, başlangıç durumuna döner; alt öğeler isteğe bağlı kopyalanır', async () => {
       const s = await space();
       const done = s.statuses.find((x) => x.category === 'DONE')!;
-      const story = await create(s.listId, { type: 'STORY', title: 'S', points: 3 });
-      const task = await create(s.listId, { type: 'TASK', title: 'T', parentId: story.id });
+      const story = await create(s.listId, { type: 'TASK', title: 'S', points: 3 });
+      const task = await create(s.listId, { type: 'SUBTASK', title: 'T', parentId: story.id });
       await owner.patch(api(`/items/${story.id}`), { statusId: done.id, force: true }).expect(204);
       await owner.patch(api(`/items/${task.id}`), { statusId: done.id }).expect(204);
 
@@ -460,8 +470,8 @@ describe('İş öğeleri (gerçek veritabanı)', () => {
   describe('arşiv, çöp kutusu ve toplu düzenleme', () => {
     it('silme alt öğelerle birlikte; geri getirme hepsini döndürür; çöp listesinde yalnızca kök', async () => {
       const s = await space();
-      const story = await create(s.listId, { type: 'STORY', title: 'S' });
-      const task = await create(s.listId, { type: 'TASK', title: 'T', parentId: story.id });
+      const story = await create(s.listId, { type: 'TASK', title: 'S' });
+      const task = await create(s.listId, { type: 'SUBTASK', title: 'T', parentId: story.id });
 
       await owner.delete(api(`/items/${story.id}`)).expect(204);
       expect((await itemsOf(s.listId)).items).toEqual([]);

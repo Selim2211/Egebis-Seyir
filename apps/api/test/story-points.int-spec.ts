@@ -61,7 +61,7 @@ describe('Story Point, alt görev toplamı ve yüzde (ADR-107)', () => {
 
   it('her tipte yalnızca 1,2,3,5,8,13,21,34,55 girilir', async () => {
     const s = await space();
-    for (const type of ['TASK', 'STORY', 'BUG'] as const) {
+    for (const type of ['TASK', 'TASK', 'BUG'] as const) {
       for (const points of [1, 2, 3, 5, 8, 13, 21, 34, 55]) {
         await create(s.listId, { type, title: `${type} ${points}`, points });
       }
@@ -106,13 +106,11 @@ describe('Story Point, alt görev toplamı ve yüzde (ADR-107)', () => {
 
   it('Task başka Task’ın altına alt görev yapılınca üst puanı toplar', async () => {
     const s = await space();
-    const story = await create(s.listId, { type: 'STORY', title: 'S', points: 13 });
-    const a = await create(s.listId, { type: 'TASK', title: 'A', parentId: story.id, points: 5 });
+    const parent = await create(s.listId, { type: 'TASK', title: 'P', points: 13 });
     const b = await create(s.listId, { type: 'TASK', title: 'B', points: 8 });
-    await owner.post(api(`/items/${b.id}/nest`), { parentId: a.id }).expect(204);
+    await owner.post(api(`/items/${b.id}/nest`), { parentId: parent.id }).expect(204);
     expect((await detail(b.id)).type).toBe('SUBTASK');
-    expect(await detail(a.id)).toMatchObject({ points: 8, pointsLocked: true });
-    expect((await detail(story.id)).points).toBe(13);
+    expect(await detail(parent.id)).toMatchObject({ points: 8, pointsLocked: true });
   });
 
   it('atanan yüzdeyi girer; 0–100 dışı reddedilir; alt görevliden türetilir', async () => {
@@ -159,7 +157,7 @@ describe('Story Point, alt görev toplamı ve yüzde (ADR-107)', () => {
         .expect(201)
     ).body as Created;
     const a = await create(s.listId, {
-      type: 'STORY',
+      type: 'TASK',
       title: 'A',
       points: 8,
       assigneeIds: [elif.id],

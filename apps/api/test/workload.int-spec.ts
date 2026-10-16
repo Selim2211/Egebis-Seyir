@@ -61,9 +61,9 @@ describe('Kişi bazlı iş yükü (gerçek veritabanı)', () => {
   it('açık işler kişi başına toplanır; biten, Epic ve atanmamışlar doğru sayılır', async () => {
     const s = await space();
     const done = s.statuses.find((x) => x.category === 'DONE')!.id;
-    await item(s.listId, { type: 'STORY', title: 'Açık', points: 5, assigneeIds: [ownerId] });
+    await item(s.listId, { type: 'TASK', title: 'Açık', points: 5, assigneeIds: [ownerId] });
     const finished = await item(s.listId, {
-      type: 'STORY',
+      type: 'TASK',
       title: 'Biten',
       points: 8,
       assigneeIds: [ownerId],
@@ -115,7 +115,7 @@ describe('Kişi bazlı iş yükü (gerçek veritabanı)', () => {
     const elifId = (await ctx.prisma.user.findUniqueOrThrow({ where: { email: ELIF.email } })).id;
     await owner.put(api(`/spaces/${s.id}/members/${elifId}`), { role: 'DEVELOPER' }).expect(204);
     await item(s.listId, {
-      type: 'STORY',
+      type: 'TASK',
       title: 'Ortak',
       points: 5,
       assigneeIds: [ownerId, elifId],
@@ -129,12 +129,12 @@ describe('Kişi bazlı iş yükü (gerçek veritabanı)', () => {
   it('sprint süzgeci yalnızca o sprint işlerini sayar; yabancı sprint 404', async () => {
     const s = await space();
     const inSprint = await item(s.listId, {
-      type: 'STORY',
+      type: 'TASK',
       title: 'S1',
       points: 3,
       assigneeIds: [ownerId],
     });
-    await item(s.listId, { type: 'STORY', title: 'Dışarıda', points: 8, assigneeIds: [ownerId] });
+    await item(s.listId, { type: 'TASK', title: 'Dışarıda', points: 8, assigneeIds: [ownerId] });
     const { id: sprintId } = (
       await owner
         .post(api(`/spaces/${s.id}/sprints`), {

@@ -11,7 +11,7 @@ export type SprintIneligible = 'TYPE' | 'NESTED' | 'DONE';
 
 /**
  * Öğe sprint'e/backlog'a girebilir mi? (ADR-061, ADR-062)
- * Yalnızca üst düzey Story/Bug/Task: üst öğesi yok ya da Epic. Tamamlanmış öğe girmez.
+ * Yalnızca üst düzey Task/Bug: üst öğesi yok ya da Epic. Tamamlanmış öğe girmez.
  */
 export function sprintEligibility(item: {
   type: WorkItemType;
@@ -55,7 +55,7 @@ export interface SprintTotals {
   points: number;
   doneItemCount: number;
   donePoints: number;
-  /** Puanı girilmemiş Story/Bug sayısı (brief §5.5 vurgu). */
+  /** Puanı girilmemiş Task/Bug sayısı (brief §5.5 vurgu). */
   unestimatedCount: number;
 }
 
@@ -77,7 +77,7 @@ export function sprintTotals(
       totals.doneItemCount += 1;
       totals.donePoints += points;
     }
-    if ((item.type === 'STORY' || item.type === 'BUG') && item.points === null) {
+    if ((item.type === 'TASK' || item.type === 'BUG') && item.points === null) {
       totals.unestimatedCount += 1;
     }
   }

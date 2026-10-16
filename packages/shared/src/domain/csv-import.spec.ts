@@ -69,7 +69,7 @@ describe('suggestMapping', () => {
 
 describe('değer ayrıştırıcıları', () => {
   it('tip ve öncelik TR/EN adlarını tanır', () => {
-    expect(parseType('Hikaye')).toBe('STORY');
+    expect(parseType('Hikaye')).toBe('TASK'); // Story tipi yok (ADR-110)
     expect(parseType('alt görev')).toBe('SUBTASK');
     expect(parseType('Hata')).toBe('BUG');
     expect(parseType('bilinmeyen')).toBeNull();

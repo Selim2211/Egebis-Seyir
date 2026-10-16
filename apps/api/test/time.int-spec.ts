@@ -93,8 +93,8 @@ describe('Zaman takibi (gerçek veritabanı)', () => {
 
     it('üst öğenin toplamı alt öğeleri de içerir', async () => {
       const s = await space();
-      const story = await item(s.listId, { type: 'STORY', title: 'S' });
-      const task = await item(s.listId, { type: 'TASK', title: 'T', parentId: story.id });
+      const story = await item(s.listId, { type: 'TASK', title: 'S' });
+      const task = await item(s.listId, { type: 'BUG', title: 'T', parentId: story.id });
       const sub = await item(s.listId, { type: 'SUBTASK', title: 'ST', parentId: task.id });
       await log(story.id, { day: TODAY, minutes: 10 }).expect(201);
       await log(task.id, { day: TODAY, minutes: 20 }).expect(201);

@@ -1,3 +1,4 @@
+import { listName } from '@/lib/default-names';
 import { SPACE_PERMISSIONS as S } from '@scrum/shared';
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
@@ -61,7 +62,7 @@ function ListPage() {
       <ContainerHeader
         type="LIST"
         id={list.id}
-        name={list.name}
+        name={listName(list.name)}
         crumb={{ space: list.space, folder: list.folder }}
         archived={list.archived}
         canUnarchive={!!treeSpace?.permissions.includes(S.LIST_MANAGE)}
@@ -106,7 +107,7 @@ function ListPage() {
             <DataMenu
               listId={list.id}
               spaceId={list.space.id}
-              listName={list.name}
+              listName={listName(list.name)}
               canImport={(space?.permissions ?? treeSpace?.permissions ?? []).includes(
                 S.WORK_ITEM_WRITE,
               )}

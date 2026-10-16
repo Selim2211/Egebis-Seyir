@@ -61,13 +61,13 @@ describe('Şablonlar (gerçek veritabanı)', () => {
       .findFirstOrThrow({ where: { spaceId: s.id, name: 'Acil' } })
       .then((l) => l.id);
     const story = await addItem(s.listId, {
-      type: 'STORY',
+      type: 'TASK',
       title: 'Giriş akışı',
       priority: 'HIGH',
       points: 5,
       labelIds: [labelId],
     });
-    await addItem(s.listId, { type: 'TASK', title: 'Form', parentId: story });
+    await addItem(s.listId, { type: 'SUBTASK', title: 'Form', parentId: story });
     await owner
       .patch(api(`/items/${story}`), {
         description: {
@@ -112,7 +112,7 @@ describe('Şablonlar (gerçek veritabanı)', () => {
     });
     expect(copy).toMatchObject({
       title: 'Kayıt akışı',
-      type: 'STORY',
+      type: 'TASK',
       priority: 'HIGH',
       points: 5,
     });
@@ -126,7 +126,7 @@ describe('Şablonlar (gerçek veritabanı)', () => {
 
   it('List şablonu: öğeleriyle yeni List oluşturur', async () => {
     const s = await space();
-    await addItem(s.listId, { type: 'STORY', title: 'Birinci' });
+    await addItem(s.listId, { type: 'TASK', title: 'Birinci' });
     await addItem(s.listId, { type: 'TASK', title: 'İkinci' });
     const tpl = (
       await saveTemplate(s.id, {

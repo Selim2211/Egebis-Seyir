@@ -47,7 +47,7 @@ describe('Bildirimler (gerçek veritabanı)', () => {
   const item = async (listId: string, body: Record<string, unknown> = {}, client = owner) =>
     (
       await client
-        .post(api(`/lists/${listId}/items`), { type: 'STORY', title: 'Ödeme', ...body })
+        .post(api(`/lists/${listId}/items`), { type: 'TASK', title: 'Ödeme', ...body })
         .expect(201)
     ).body as CreatedItem;
   const inbox = async (client: Client, query = '') =>

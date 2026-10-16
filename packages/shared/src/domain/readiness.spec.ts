@@ -4,10 +4,10 @@ import { appliesToReadiness, normalizeChecked, readinessOf } from './readiness';
 describe('readiness', () => {
   const items = ['Kod gözden geçirildi', 'Testler geçti', 'Dokümantasyon güncellendi'];
 
-  it('yalnızca Story ve Bug için geçerli', () => {
-    expect(appliesToReadiness('STORY')).toBe(true);
+  it('yalnızca Task ve Bug için geçerli', () => {
+    expect(appliesToReadiness('TASK')).toBe(true);
     expect(appliesToReadiness('BUG')).toBe(true);
-    expect(appliesToReadiness('TASK')).toBe(false);
+    expect(appliesToReadiness('SUBTASK')).toBe(false);
     expect(appliesToReadiness('EPIC')).toBe(false);
   });
 

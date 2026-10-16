@@ -1,3 +1,4 @@
+import { statusName } from '@/lib/default-names';
 import {
   SPACE_PERMISSIONS as S,
   type SpaceDetail,
@@ -84,7 +85,7 @@ export function ItemsView({
       statuses: new Map(
         space.statuses.map((s, order) => [
           s.id,
-          { name: s.name, color: s.color, category: s.category, order },
+          { name: statusName(s.name), color: s.color, category: s.category, order },
         ]),
       ),
       labels: new Map(data.labels.map((l) => [l.id, { name: l.name }])),

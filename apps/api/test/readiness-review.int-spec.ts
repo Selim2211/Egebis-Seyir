@@ -58,11 +58,11 @@ describe('DoD/DoR ve Sprint Review (gerçek veritabanı)', () => {
   });
 
   describe('Definition of Done (brief §6.3, ADR-065)', () => {
-    it('Space maddeleri ayarlanır; Story detayında işaretsiz görünür, Task için boştur', async () => {
+    it('Space maddeleri ayarlanır; Task detayında işaretsiz görünür, Epic için boştur', async () => {
       const s = await space();
       await owner.patch(api(`/spaces/${s.id}`), { dodItems: DOD, dorItems: DOR }).expect(204);
-      const story = await item(s.listId, { type: 'STORY', title: 'A' });
-      const task = await item(s.listId, { type: 'TASK', title: 'B' });
+      const story = await item(s.listId, { type: 'TASK', title: 'A' });
+      const task = await item(s.listId, { type: 'EPIC', title: 'B' });
 
       expect((await detail(story.id)).readiness).toEqual({
         dod: DOD.map((text) => ({ text, checked: false })),
@@ -82,11 +82,11 @@ describe('DoD/DoR ve Sprint Review (gerçek veritabanı)', () => {
         .expect(400);
     });
 
-    it('işaretler yalnızca Space maddeleriyle sınırlanır; Task’a işaret konamaz', async () => {
+    it('işaretler yalnızca Space maddeleriyle sınırlanır; Epic’e işaret konamaz', async () => {
       const s = await space();
       await owner.patch(api(`/spaces/${s.id}`), { dodItems: DOD }).expect(204);
-      const story = await item(s.listId, { type: 'STORY', title: 'A' });
-      const task = await item(s.listId, { type: 'TASK', title: 'B' });
+      const story = await item(s.listId, { type: 'TASK', title: 'A' });
+      const task = await item(s.listId, { type: 'EPIC', title: 'B' });
 
       await owner
         .put(api(`/items/${story.id}/dod`), { checked: ['Testler geçti', 'Uydurma'] })
@@ -100,7 +100,7 @@ describe('DoD/DoR ve Sprint Review (gerçek veritabanı)', () => {
     it('Space maddesi yeniden yazılırsa eski işaret düşer', async () => {
       const s = await space();
       await owner.patch(api(`/spaces/${s.id}`), { dodItems: DOD }).expect(204);
-      const story = await item(s.listId, { type: 'STORY', title: 'A' });
+      const story = await item(s.listId, { type: 'TASK', title: 'A' });
       await owner.put(api(`/items/${story.id}/dod`), { checked: DOD }).expect(204);
 
       await owner
@@ -112,23 +112,23 @@ describe('DoD/DoR ve Sprint Review (gerçek veritabanı)', () => {
     it('eksik DoD ile Done uyarıdır: force ile geçer; tamamlanınca uyarı yok', async () => {
       const s = await space();
       await owner.patch(api(`/spaces/${s.id}`), { dodItems: DOD }).expect(204);
-      const story = await item(s.listId, { type: 'STORY', title: 'A' });
+      const story = await item(s.listId, { type: 'TASK', title: 'A' });
       const doneId = done(s);
 
       const warn = await owner.patch(api(`/items/${story.id}`), { statusId: doneId }).expect(409);
       expect(warn.body).toMatchObject({ code: 'DOD_INCOMPLETE', details: { count: 2 } });
       await owner.patch(api(`/items/${story.id}`), { statusId: doneId, force: true }).expect(204);
 
-      const second = await item(s.listId, { type: 'STORY', title: 'B' });
+      const second = await item(s.listId, { type: 'TASK', title: 'B' });
       await owner.put(api(`/items/${second.id}/dod`), { checked: DOD }).expect(204);
       await owner.patch(api(`/items/${second.id}`), { statusId: doneId }).expect(204);
     });
 
-    it('Space ayarıyla zorunlu: force da geçmez; Task etkilenmez', async () => {
+    it('Space ayarıyla zorunlu: force da geçmez; Epic etkilenmez', async () => {
       const s = await space();
       await owner.patch(api(`/spaces/${s.id}`), { dodItems: DOD, dodEnforced: true }).expect(204);
-      const story = await item(s.listId, { type: 'STORY', title: 'A' });
-      const task = await item(s.listId, { type: 'TASK', title: 'B' });
+      const story = await item(s.listId, { type: 'TASK', title: 'A' });
+      const task = await item(s.listId, { type: 'EPIC', title: 'B' });
       const doneId = done(s);
 
       const blocked = await owner
@@ -143,14 +143,14 @@ describe('DoD/DoR ve Sprint Review (gerçek veritabanı)', () => {
 
     it('DoD tanımsızsa hiçbir engel yoktur', async () => {
       const s = await space();
-      const story = await item(s.listId, { type: 'STORY', title: 'A' });
+      const story = await item(s.listId, { type: 'TASK', title: 'A' });
       await owner.patch(api(`/items/${story.id}`), { statusId: done(s) }).expect(204);
     });
 
     it('işaretleme yetkisi: Stakeholder değiştiremez', async () => {
       const s = await space();
       await owner.patch(api(`/spaces/${s.id}`), { dodItems: DOD }).expect(204);
-      const story = await item(s.listId, { type: 'STORY', title: 'A' });
+      const story = await item(s.listId, { type: 'TASK', title: 'A' });
       const elif = await inviteAndAccept(ctx, owner, ws, ELIF);
       await elif.put(api(`/items/${story.id}/dod`), { checked: DOD }).expect(403);
     });
@@ -159,24 +159,24 @@ describe('DoD/DoR ve Sprint Review (gerçek veritabanı)', () => {
   describe('Definition of Ready (brief §6.3)', () => {
     it('Backlog satırları DoR durumunu taşır; madde yoksa null', async () => {
       const s = await space();
-      const a = await item(s.listId, { type: 'STORY', title: 'A' });
-      const t = await item(s.listId, { type: 'TASK', title: 'T' });
+      const a = await item(s.listId, { type: 'TASK', title: 'A' });
+      const t = await item(s.listId, { type: 'BUG', title: 'T' });
       expect((await backlog(s.id)).items.map((i) => i.dor)).toEqual([null, null]);
 
       await owner.patch(api(`/spaces/${s.id}`), { dorItems: DOR }).expect(204);
       await owner.put(api(`/items/${a.id}/dor`), { checked: [DOR[0]!, DOR[1]!] }).expect(204);
       const rows = (await backlog(s.id)).items;
       expect(rows.find((r) => r.id === a.id)!.dor).toEqual({ checked: 2, total: 3 });
-      expect(rows.find((r) => r.id === t.id)!.dor).toBeNull(); // Task'a uygulanmaz
+      expect(rows.find((r) => r.id === t.id)!.dor).toEqual({ checked: 0, total: 3 }); // Bug için de geçerli
     });
   });
 
   describe('sprint özeti (DoR)', () => {
-    it('hazır olmayan Story sayısını verir', async () => {
+    it('hazır olmayan Task sayısını verir', async () => {
       const s = await space();
       await owner.patch(api(`/spaces/${s.id}`), { dorItems: DOR }).expect(204);
-      const a = await item(s.listId, { type: 'STORY', title: 'A' });
-      const b = await item(s.listId, { type: 'STORY', title: 'B' });
+      const a = await item(s.listId, { type: 'TASK', title: 'A' });
+      const b = await item(s.listId, { type: 'TASK', title: 'B' });
       const { id } = (
         await owner
           .post(api(`/spaces/${s.id}/sprints`), {
@@ -205,9 +205,9 @@ describe('DoD/DoR ve Sprint Review (gerçek veritabanı)', () => {
   describe('Sprint Review (brief §5.6)', () => {
     async function finishedSprint() {
       const s = await space();
-      const a = await item(s.listId, { type: 'STORY', title: 'Biten', points: 5 });
-      const b = await item(s.listId, { type: 'STORY', title: 'Süren', points: 3 });
-      const c = await item(s.listId, { type: 'STORY', title: 'Sonradan', points: 2 });
+      const a = await item(s.listId, { type: 'TASK', title: 'Biten', points: 5 });
+      const b = await item(s.listId, { type: 'TASK', title: 'Süren', points: 3 });
+      const c = await item(s.listId, { type: 'TASK', title: 'Sonradan', points: 2 });
       const { id } = (
         await owner
           .post(api(`/spaces/${s.id}/sprints`), {

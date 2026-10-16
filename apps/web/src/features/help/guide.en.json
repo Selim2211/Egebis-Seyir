@@ -25,13 +25,8 @@
             ],
             [
               "Epic",
-              "A big goal that gathers many Stories and Tasks under it. Optional.",
+              "A big goal that gathers many Tasks under it. Optional.",
               "User account management"
-            ],
-            [
-              "Story",
-              "A feature described from the user's point of view; part of an Epic.",
-              "A user can reset their password"
             ],
             [
               "Task",
@@ -119,13 +114,13 @@
       "blocks": [
         {
           "type": "p",
-          "text": "An **Epic** is a big goal that gathers many Stories and Tasks under it (e.g. “User account management”). The hierarchy is: **Epic → Story → Task → Sub-Task**. Using Epics is **optional**: in a small team you can work with Tasks directly, without any Epic."
+          "text": "An **Epic** is a big goal that gathers many Tasks under it (e.g. “User account management”). The hierarchy is: **Epic → Task → Sub-Task**. Using Epics is **optional**: in a small team you can work with Tasks directly, without any Epic."
         },
         {
           "type": "bullets",
           "items": [
-            "An Epic does not enter a sprint; it stays as the umbrella. Stories, Tasks and Bugs are what go into a sprint.",
-            "An Epic's progress bar is calculated automatically from the status of the Stories under it.",
+            "An Epic does not enter a sprint; it stays as the umbrella. Tasks and Bugs are what go into a sprint.",
+            "An Epic's progress bar is calculated automatically from the status of the Tasks under it.",
             "An Epic has no parent, and unlike Tasks and Sub-Tasks it carries no hour estimate or percentage."
           ]
         },
@@ -151,6 +146,10 @@
             "**Title**: The Epic's name; a short phrase for the big goal.",
             "**Add ↵**: You can click this instead of pressing Enter."
           ]
+        },
+        {
+          "type": "tip",
+          "text": "To add a Task under an Epic, click the **⋯** button at the right of the Epic's row, choose **Add sub-item** and leave **Type** on **Task**. A Bug can be added under an Epic too."
         },
         {
           "type": "p",
@@ -194,11 +193,11 @@
           "type": "figure",
           "image": "20-epic-result",
           "alt": "The list after the conversion",
-          "caption": "After the conversion: there are two Epics; the converted Epic's Sub-Task is now a Story.",
+          "caption": "After the conversion: there are two Epics; the converted Epic's Sub-Task is now a Task.",
           "legend": [
             "**Epic**: The Epic you created from scratch (purple bolt icon).",
             "**Converted Epic**: It used to be a Task, now it is an Epic.",
-            "**Story**: It used to be a Sub-Task; it now sits under the Epic as a Story."
+            "**Task**: It used to be a Sub-Task; it now sits under the Epic as a Task."
           ]
         },
         {
@@ -210,8 +209,8 @@
               "Task → **Epic**. Title, description, people, labels, dates, comments, attachments and dependencies stay as they are."
             ],
             [
-              "Parent Story",
-              "If the Task is under a Story it is **detached** from it (an Epic has no parent)."
+              "Parent Epic",
+              "If the Task is under an Epic it is **detached** from it (an Epic has no parent)."
             ],
             [
               "Sprint",
@@ -219,7 +218,7 @@
             ],
             [
               "Sub-Tasks",
-              "A Sub-Task cannot sit under an Epic, so all of them **become Stories** under the Epic; their points are kept."
+              "A Sub-Task cannot sit under an Epic, so all of them **become Tasks** under the Epic; their points are kept."
             ],
             ["Story Point", "Kept."],
             [
@@ -230,7 +229,7 @@
         },
         {
           "type": "warn",
-          "text": "The conversion **cannot be undone**; you cannot turn the Epic back into a Task. Only a **Task** can be converted (not a Story, Bug or Sub-Task) and the Space's work mode must be **Scrum**. Converting a Task that is in an active Sprint needs the Sprint planning permission."
+          "text": "The conversion **cannot be undone**; you cannot turn the Epic back into a Task. Only a **Task** can be converted (not a Bug or Sub-Task) and the Space's work mode must be **Scrum**. Converting a Task that is in an active Sprint needs the Sprint planning permission."
         }
       ]
     },
@@ -257,7 +256,7 @@
           "alt": "Quick add row for a Task",
           "caption": "The add row: choose the type, type a title, press Enter.",
           "legend": [
-            "**Type**: The kind of record to add. This guide uses **Task** (others: Epic, Story, Bug).",
+            "**Type**: The kind of record to add. This guide uses **Task** (others: Epic, Bug).",
             "**Title**: The name of the work. To add several tasks, just press Enter after each title.",
             "**Add ↵**: You can click this instead of pressing Enter."
           ]
@@ -371,7 +370,7 @@
       "blocks": [
         {
           "type": "p",
-          "text": "Use a Sub-Task to split a big piece of work into parts. A Sub-Task always belongs to a parent (Task, Story or Bug) and appears under it."
+          "text": "Use a Sub-Task to split a big piece of work into parts. A Sub-Task always belongs to a parent (Task or Bug) and appears under it."
         },
         {
           "type": "steps",
@@ -572,7 +571,7 @@
           "items": [
             "**By dragging:** grab the handle at the left of the row and drop it on a sprint section. Moving between sprints and from a sprint back to the Backlog works the same way.",
             "**Bulk move:** tick the boxes at the left of the rows and choose **Move to sprint…** from the bar that appears.",
-            "Tasks, Stories and Bugs can enter a sprint; Epics cannot. Sub-tasks come with their parent."
+            "Tasks and Bugs can enter a sprint; Epics cannot. Sub-tasks come with their parent."
           ]
         },
         {
@@ -719,7 +718,7 @@
           "type": "bullets",
           "items": [
             "**Do I have to use Epics?** No. Epics are optional; you can work with Tasks directly.",
-            "**I cannot see Convert to Epic.** It only appears on Tasks, in Spaces whose work mode is Scrum; it is not available on Stories, Bugs or Sub-Tasks. You also need write permission.",
+            "**I cannot see Convert to Epic.** It only appears on Tasks, in Spaces whose work mode is Scrum; it is not available on Bugs or Sub-Tasks. You also need write permission.",
             "**Can I turn an Epic back into a Task?** No, the conversion cannot be undone. If you are unsure, copy the Task first and convert the copy.",
             "**Why is there no 4 in the Story Point list?** Seyir uses the standard Fibonacci scale (1, 2, 3, 5, 8, 13, 21, 34, 55). Choose the nearest value.",
             "**Why can't I change the parent's points?** If it has sub-tasks, its points are their sum. Change the sub-tasks' points.",

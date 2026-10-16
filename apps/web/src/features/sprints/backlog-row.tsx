@@ -172,7 +172,7 @@ export function BacklogRow({
   );
 }
 
-/** Story/Bug: puan (yoksa vurgulu "?"); Task: saat tahmini. */
+/** Task/Bug: puan (yoksa vurgulu "?"); Task: saat tahmini. */
 function Estimate({ item, unestimated }: { item: WorkItemRow; unestimated: boolean }) {
   const { t } = useTranslation();
   if (unestimated) {

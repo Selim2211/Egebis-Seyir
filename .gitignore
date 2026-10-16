@@ -20,3 +20,6 @@ data/
 apps/api/data/
 .tanstack/
 dev-server.log
+
+# graphify
+graphify-out/

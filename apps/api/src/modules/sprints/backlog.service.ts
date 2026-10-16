@@ -26,7 +26,7 @@ import { assertOpen, conflict, countedItems, loadScrumSpace, summarize } from '.
 
 const BACKLOG_LIMIT = 5000;
 
-/** Sprint'e girebilen kayıtlar: üst düzey Story/Bug/Task (ADR-061). */
+/** Sprint'e girebilen kayıtlar: üst düzey Task/Bug (ADR-061). */
 const eligibleShape = (spaceId: string): Prisma.WorkItemWhereInput => ({
   spaceId,
   type: { in: [...SPRINT_ITEM_TYPES] },
@@ -248,8 +248,8 @@ export class BacklogService {
 
   /**
    * Task'ı Epic'e dönüştürür (isteğe bağlı, ADR-109). Epic üst öğe, sprint, saat tahmini, yüzde ve tekrar
-   * taşımaz; bu yüzden üst Story'den ayrılır, sprint'ten çıkar (üyelik geçmişine yazılır) ve bu alanlar
-   * temizlenir. Sub-Task'lar Epic'in altında geçerli olmadığından Story'ye dönüşür.
+   * taşımaz; bu yüzden üst öğesinden ayrılır, sprint'ten çıkar (üyelik geçmişine yazılır) ve bu alanlar
+   * temizlenir. Sub-Task'lar Epic'in altında geçerli olmadığından Task'a dönüşür.
    */
   async promoteToEpic(itemId: string): Promise<void> {
     const { workspaceId, actorId } = this.ctx;
@@ -287,7 +287,7 @@ export class BacklogService {
         },
       });
       if (subtasks.length > 0) {
-        await tx.workItem.updateMany({ where: { id: { in: subtasks } }, data: { type: 'STORY' } });
+        await tx.workItem.updateMany({ where: { id: { in: subtasks } }, data: { type: 'TASK' } });
       }
       if (item.sprint) await this.recordMembership(tx, item, null, workspaceId, actorId);
       await this.activity.record(tx, {

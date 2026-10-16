@@ -74,13 +74,13 @@ describe('Space/Sprint yedek ve geri yükleme (gerçek veritabanı)', () => {
         .expect(201)
     ).body as Created;
     const story = await item(mob.listId, {
-      type: 'STORY',
+      type: 'TASK',
       title: 'Kartla ödeme',
       points: 5,
       assigneeIds: [elifId],
       labelIds: [label.id],
     });
-    const task = await item(mob.listId, { type: 'TASK', title: 'Form', parentId: story.id });
+    const task = await item(mob.listId, { type: 'SUBTASK', title: 'Form', parentId: story.id });
     const other = await item(mob.listId, { type: 'TASK', title: 'Servis', estimateHours: 3 });
     await owner
       .post(api(`/items/${other.id}/links`), { targetId: story.id, relation: 'BLOCKS' })

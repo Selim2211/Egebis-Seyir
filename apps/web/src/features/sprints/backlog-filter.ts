@@ -4,7 +4,7 @@ export interface BacklogFilter {
   q: string;
   /** '' = hepsi, 'none' = Epic'siz, aksi halde Epic id'si. */
   epic: string;
-  /** Yalnızca puanı girilmemiş Story/Bug (brief §5.5). */
+  /** Yalnızca puanı girilmemiş Task/Bug (brief §5.5). */
   unestimated: boolean;
 }
 
@@ -15,7 +15,7 @@ export const isFiltered = (f: BacklogFilter): boolean =>
 
 /** Puan bekleyen öğe: Story ve Bug puanla tahmin edilir, Task saatle (brief §6.2.4). */
 export const isUnestimated = (item: Pick<WorkItemRow, 'type' | 'points'>): boolean =>
-  (item.type === 'STORY' || item.type === 'BUG') && item.points === null;
+  (item.type === 'TASK' || item.type === 'BUG') && item.points === null;
 
 /** İstemci tarafı süzme; sıra korunur. */
 export function filterBacklog(items: WorkItemRow[], filter: BacklogFilter): WorkItemRow[] {

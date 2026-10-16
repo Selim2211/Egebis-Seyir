@@ -54,7 +54,7 @@ describe('Doküman bağlantıları ve yorumları (gerçek veritabanı)', () => {
   const doc = async (spaceId: string, title = 'PRD') =>
     (await owner.post(api(`/spaces/${spaceId}/docs`), { title }).expect(201)).body as Created;
   const item = async (listId: string, title = 'Giriş') =>
-    (await owner.post(api(`/lists/${listId}/items`), { type: 'STORY', title }).expect(201))
+    (await owner.post(api(`/lists/${listId}/items`), { type: 'TASK', title }).expect(201))
       .body as CreatedItem;
   const detail = async (id: string, client = owner) =>
     (await client.get(api(`/docs/${id}`)).expect(200)).body as DocDetail;
@@ -86,7 +86,7 @@ describe('Doküman bağlantıları ve yorumları (gerçek veritabanı)', () => {
 
       const page = await detail(d.id);
       expect(page.links).toEqual([
-        expect.objectContaining({ id: story.id, key: 'MOB-1', title: 'Giriş', type: 'STORY' }),
+        expect.objectContaining({ id: story.id, key: 'MOB-1', title: 'Giriş', type: 'TASK' }),
       ]);
       const task = (await owner.get(api(`/items/${story.id}`)).expect(200)).body as WorkItemDetail;
       expect(task.docs).toEqual([{ id: d.id, title: 'PRD', spaceId: s.id }]);

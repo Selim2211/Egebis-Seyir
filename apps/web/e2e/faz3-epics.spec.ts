@@ -27,7 +27,7 @@ test.describe.serial('Epic detayı', () => {
     await expect(page.getByRole('heading', { name: /Hoş geldin/ })).toBeVisible();
   });
 
-  test('Epic ve iki Story hazırlanır; Epic’ler sekmesi ilerlemeyi gösterir', async ({ page }) => {
+  test('Epic ve iki Task hazırlanır; Epic’ler sekmesi ilerlemeyi gösterir', async ({ page }) => {
     const sidebar = page.getByRole('complementary');
     await sidebar.getByRole('button', { name: 'Space oluştur' }).first().click();
     const dialog = page.getByRole('dialog', { name: 'Yeni Space oluştur' });
@@ -43,7 +43,7 @@ test.describe.serial('Epic detayı', () => {
     await quick.fill('Ödeme altyapısı');
     await quick.press('Enter');
     await expect(page.getByText('EPC-1 oluşturuldu.')).toBeVisible();
-    await type.selectOption('STORY');
+    await type.selectOption('TASK');
     for (const [index, title] of ['Kart girişi', 'Fatura'].entries()) {
       await quick.fill(title);
       await quick.press('Enter');

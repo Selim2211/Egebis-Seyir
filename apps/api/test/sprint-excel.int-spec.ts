@@ -66,14 +66,14 @@ describe('Sprint Excel dışa/içe aktarma (gerçek veritabanı)', () => {
   const seed = async () => {
     const mob = await space('MOB');
     const story = await item(mob.listId, {
-      type: 'STORY',
+      type: 'TASK',
       title: 'Kartla ödeme',
       points: 5,
       priority: 'HIGH',
       startDate: '2026-10-05',
       dueDate: '2026-10-09',
     });
-    const task = await item(mob.listId, { type: 'TASK', title: 'Form', parentId: story.id });
+    const task = await item(mob.listId, { type: 'SUBTASK', title: 'Form', parentId: story.id });
     const other = await item(mob.listId, { type: 'TASK', title: 'Servis', estimateHours: 3 });
     await owner
       .post(api(`/items/${other.id}/links`), { targetId: story.id, relation: 'BLOCKS' })
@@ -150,7 +150,7 @@ describe('Sprint Excel dışa/içe aktarma (gerçek veritabanı)', () => {
 
     const full = (await owner.get(api(`/items/${story.id}`)).expect(200)).body as WorkItemDetail;
     expect(full.links.map((l) => [l.relation, l.item.title])).toEqual([['BLOCKED_BY', 'Servis']]);
-    expect(full.children.map((c) => [c.title, c.type])).toEqual([['Form', 'TASK']]);
+    expect(full.children.map((c) => [c.title, c.type])).toEqual([['Form', 'SUBTASK']]);
   });
 
   it("aynı Space'e içe aktarma anahtarı eşleşen öğeleri günceller", async () => {
@@ -181,7 +181,7 @@ describe('Sprint Excel dışa/içe aktarma (gerçek veritabanı)', () => {
 
   it("backlog dışa aktarma: sprint'te olmayan açık öğeler", async () => {
     const mob = await space('MOB');
-    const a = await item(mob.listId, { type: 'STORY', title: 'Bekleyen' });
+    const a = await item(mob.listId, { type: 'TASK', title: 'Bekleyen' });
     const buffer = (await owner.download(api(`/spaces/${mob.id}/backlog/export.xlsx`)).expect(200))
       .body as Buffer;
     const wb = await load(buffer);

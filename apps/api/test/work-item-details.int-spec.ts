@@ -112,7 +112,7 @@ describe('Görev detayı (gerçek veritabanı)', () => {
   describe('kabul kriterleri ve checklist (ADR-049)', () => {
     it('kabul kriteri maddeleri ilk eklemede listeyi oluşturur; işaretlenir, silinir', async () => {
       const s = await space();
-      const t = await create(s.listId, { type: 'STORY', title: 'S' });
+      const t = await create(s.listId, { type: 'TASK', title: 'S' });
       const entry = (
         (
           await owner
@@ -146,7 +146,7 @@ describe('Görev detayı (gerçek veritabanı)', () => {
 
     it('adlı checklist: oluştur, yeniden adlandır, madde ekle, sil; kabul listesi silinemez; sınır 20', async () => {
       const s = await space();
-      const t = await create(s.listId, { type: 'STORY', title: 'S' });
+      const t = await create(s.listId, { type: 'TASK', title: 'S' });
       await owner
         .post(api(`/items/${t.id}/checklists/acceptance/entries`), { text: 'k' })
         .expect(201);
@@ -184,7 +184,7 @@ describe('Görev detayı (gerçek veritabanı)', () => {
 
     it('kopyada checklist gelir, maddeler işaretsizdir', async () => {
       const s = await space();
-      const t = await create(s.listId, { type: 'STORY', title: 'S' });
+      const t = await create(s.listId, { type: 'TASK', title: 'S' });
       const e = (
         (
           await owner
@@ -313,9 +313,9 @@ describe('Görev detayı (gerçek veritabanı)', () => {
       expect(await item(u.id, elif)).toMatchObject({ watching: true });
     });
 
-    it("Story birden çok Task'a bölünür; Story değişmez, Task'lar altında açılır", async () => {
+    it("Task birden çok Sub-Task'a bölünür; Task değişmez, Sub-Task'lar altında açılır", async () => {
       const s = await space();
-      const story = await create(s.listId, { type: 'STORY', title: 'Giriş', points: 5 });
+      const story = await create(s.listId, { type: 'TASK', title: 'Giriş', points: 5 });
       const res = await owner
         .post(api(`/items/${story.id}/split`), { titles: ['API', 'Arayüz', 'Test'] })
         .expect(201);
@@ -325,18 +325,18 @@ describe('Görev detayı (gerçek veritabanı)', () => {
       const detail = await item(story.id);
       expect(detail).toMatchObject({ points: 5, childCount: 3 });
       expect(detail.children.map((c) => [c.title, c.type])).toEqual([
-        ['API', 'TASK'],
-        ['Arayüz', 'TASK'],
-        ['Test', 'TASK'],
+        ['API', 'SUBTASK'],
+        ['Arayüz', 'SUBTASK'],
+        ['Test', 'SUBTASK'],
       ]);
     });
 
-    it('yalnızca Story bölünebilir; başlık listesi boş olamaz', async () => {
+    it('yalnızca Task bölünebilir; başlık listesi boş olamaz', async () => {
       const s = await space();
-      const task = await create(s.listId, { type: 'TASK', title: 'T' });
-      const res = await owner.post(api(`/items/${task.id}/split`), { titles: ['x'] }).expect(422);
+      const bug = await create(s.listId, { type: 'BUG', title: 'T' });
+      const res = await owner.post(api(`/items/${bug.id}/split`), { titles: ['x'] }).expect(422);
       expect(res.body).toEqual({ code: 'WORK_ITEM_SPLIT_NOT_ALLOWED' });
-      const story = await create(s.listId, { type: 'STORY', title: 'S' });
+      const story = await create(s.listId, { type: 'TASK', title: 'S' });
       await owner.post(api(`/items/${story.id}/split`), { titles: [] }).expect(400);
     });
   });

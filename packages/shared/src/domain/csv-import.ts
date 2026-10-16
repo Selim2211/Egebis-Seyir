@@ -143,9 +143,10 @@ export function suggestMapping(
 
 const TYPE_NAMES: Record<string, WorkItemType> = {
   epic: 'EPIC',
-  story: 'STORY',
-  hikaye: 'STORY',
-  'user story': 'STORY',
+  // Story tipi kaldırıldı (ADR-110): dış araçlardan gelen Story satırları Task olur.
+  story: 'TASK',
+  hikaye: 'TASK',
+  'user story': 'TASK',
   task: 'TASK',
   gorev: 'TASK',
   subtask: 'SUBTASK',

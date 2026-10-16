@@ -2,20 +2,17 @@ import { describe, expect, it } from 'vitest';
 import { WORK_ITEM_TYPES, type WorkItemType } from '../constants/work-item';
 import { checkParent, planNest } from './hierarchy';
 
-// Brief §6.2.1: Story → Epic veya bağımsız; Task → Story veya bağımsız;
-// Sub-task → Task/Story/Bug altında; Bug bağımsız veya Story/Epic'e bağlı.
+// ADR-110: hiyerarşi Epic → Task → Sub-task. Task bağımsız veya Epic'e bağlı;
+// Sub-task Task/Bug altında; Bug bağımsız veya Epic/Task'a bağlı.
 const allowed: Array<[WorkItemType, WorkItemType | null]> = [
   ['EPIC', null],
-  ['STORY', null],
-  ['STORY', 'EPIC'],
   ['TASK', null],
-  ['TASK', 'STORY'],
+  ['TASK', 'EPIC'],
   ['SUBTASK', 'TASK'],
-  ['SUBTASK', 'STORY'],
   ['SUBTASK', 'BUG'],
   ['BUG', null],
-  ['BUG', 'STORY'],
   ['BUG', 'EPIC'],
+  ['BUG', 'TASK'],
 ];
 
 describe('checkParent', () => {
@@ -56,9 +53,9 @@ describe('planNest', () => {
   const leaf = (type: WorkItemType) => ({ type, hasChildren: false });
 
   it('keeps the type when the hierarchy already allows the parent', () => {
-    expect(planNest(leaf('STORY'), 'EPIC')).toEqual({ ok: true, type: 'STORY' });
-    expect(planNest(leaf('TASK'), 'STORY')).toEqual({ ok: true, type: 'TASK' });
-    expect(planNest(leaf('BUG'), 'STORY')).toEqual({ ok: true, type: 'BUG' });
+    expect(planNest(leaf('TASK'), 'EPIC')).toEqual({ ok: true, type: 'TASK' });
+    expect(planNest(leaf('BUG'), 'EPIC')).toEqual({ ok: true, type: 'BUG' });
+    expect(planNest(leaf('BUG'), 'TASK')).toEqual({ ok: true, type: 'BUG' });
   });
 
   it('turns a childless Task into a Sub-task under a Task or Bug', () => {
@@ -68,8 +65,8 @@ describe('planNest', () => {
 
   it('refuses when the Task has its own sub-tasks or the types cannot nest', () => {
     expect(planNest({ type: 'TASK', hasChildren: true }, 'TASK').ok).toBe(false);
-    expect(planNest(leaf('STORY'), 'STORY').ok).toBe(false);
-    expect(planNest(leaf('EPIC'), 'STORY').ok).toBe(false);
-    expect(planNest(leaf('BUG'), 'TASK').ok).toBe(false);
+    expect(planNest(leaf('EPIC'), 'TASK').ok).toBe(false);
+    expect(planNest(leaf('EPIC'), 'EPIC').ok).toBe(false);
+    expect(planNest(leaf('BUG'), 'BUG').ok).toBe(false);
   });
 });

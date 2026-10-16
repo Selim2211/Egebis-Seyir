@@ -34,7 +34,7 @@ export function checkTypeFields(
 export type TypeInSpaceCheck =
   { ok: true } | { ok: false; code: typeof ERROR_CODES.WORK_ITEM_TYPE_NOT_ALLOWED };
 
-/** Basit liste modundaki Space'lerde Epic ve Story kullanılamaz (ADR-044). */
+/** Basit liste modundaki Space'lerde Epic kullanılamaz (ADR-044). */
 export function checkTypeInSpace(type: WorkItemType, scrumEnabled: boolean): TypeInSpaceCheck {
   return scrumEnabled || SIMPLE_MODE_TYPES.includes(type)
     ? { ok: true }

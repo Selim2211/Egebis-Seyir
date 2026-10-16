@@ -29,7 +29,7 @@ test.describe.serial('Space yedek ve geri yükleme', () => {
     await createSpace(page, 'Yedek Kaynak', 'BKP');
     await page.getByRole('link', { name: 'Görevler' }).first().click();
     const quick = page.getByRole('textbox', { name: 'Başlık' });
-    await page.getByLabel('Tip').first().selectOption('STORY');
+    await page.getByLabel('Tip').first().selectOption('TASK');
     for (const [index, title] of ['Yedeklenecek hikâye', 'İkinci hikâye'].entries()) {
       await quick.fill(title);
       await quick.press('Enter');

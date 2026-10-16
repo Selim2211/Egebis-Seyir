@@ -170,9 +170,9 @@ describe('Sprint ve Product Backlog (gerçek veritabanı)', () => {
   });
 
   describe('Product Backlog (ADR-062)', () => {
-    it('Story/Bug/Task öncelik sırasıyla listelenir; yeni öğe en alta gelir', async () => {
+    it('Task/Bug öncelik sırasıyla listelenir; yeni öğe en alta gelir', async () => {
       const s = await space();
-      const a = await item(s.listId, { type: 'STORY', title: 'A', points: 5 });
+      const a = await item(s.listId, { type: 'TASK', title: 'A', points: 5 });
       const b = await item(s.listId, { type: 'BUG', title: 'B' });
       expect(keys(await backlog(s.id))).toEqual([a.key, b.key]);
       const c = await item(s.listId, { type: 'TASK', title: 'C' });
@@ -182,9 +182,9 @@ describe('Sprint ve Product Backlog (gerçek veritabanı)', () => {
     it('Epic, alt öğeler ve tamamlananlar görünmez; Epic filtre için ayrıca döner', async () => {
       const s = await space();
       const epic = await item(s.listId, { type: 'EPIC', title: 'Ödeme', color: '#7C3AED' });
-      const story = await item(s.listId, { type: 'STORY', title: 'Kart ekle', parentId: epic.id });
-      await item(s.listId, { type: 'TASK', title: 'API', parentId: story.id });
-      const done = await item(s.listId, { type: 'STORY', title: 'Biten' });
+      const story = await item(s.listId, { type: 'TASK', title: 'Kart ekle', parentId: epic.id });
+      await item(s.listId, { type: 'SUBTASK', title: 'API', parentId: story.id });
+      const done = await item(s.listId, { type: 'TASK', title: 'Biten' });
       const doneStatus = s.statuses.find((x) => x.category === 'DONE')!;
       await owner.patch(api(`/items/${done.id}`), { statusId: doneStatus.id }).expect(204);
 
@@ -197,9 +197,9 @@ describe('Sprint ve Product Backlog (gerçek veritabanı)', () => {
     it('sıra mevcut öğelerin arasına sürüklenerek değişir', async () => {
       const s = await space();
       const [a, b, c] = [
-        await item(s.listId, { type: 'STORY', title: 'A' }),
-        await item(s.listId, { type: 'STORY', title: 'B' }),
-        await item(s.listId, { type: 'STORY', title: 'C' }),
+        await item(s.listId, { type: 'TASK', title: 'A' }),
+        await item(s.listId, { type: 'TASK', title: 'B' }),
+        await item(s.listId, { type: 'TASK', title: 'C' }),
       ] as const;
       await backlog(s.id); // sıraları atar
 
@@ -215,8 +215,8 @@ describe('Sprint ve Product Backlog (gerçek veritabanı)', () => {
   describe('Backlog ↔ sprint (ADR-061, ADR-062)', () => {
     it("sprint'e taşınır, öncelik sırası korunur; toplamlar ve geçmiş yazılır", async () => {
       const s = await space();
-      const a = await item(s.listId, { type: 'STORY', title: 'A', points: 5 });
-      const b = await item(s.listId, { type: 'STORY', title: 'B', points: 3 });
+      const a = await item(s.listId, { type: 'TASK', title: 'A', points: 5 });
+      const b = await item(s.listId, { type: 'TASK', title: 'B', points: 3 });
       const c = await item(s.listId, { type: 'BUG', title: 'C' });
       const { id } = await sprint(s.id);
 
@@ -236,7 +236,7 @@ describe('Sprint ve Product Backlog (gerçek veritabanı)', () => {
 
     it("aktif sprint'e ekleme ve çıkarma scope change olarak kaydedilir", async () => {
       const s = await space();
-      const a = await item(s.listId, { type: 'STORY', title: 'A', points: 2 });
+      const a = await item(s.listId, { type: 'TASK', title: 'A', points: 2 });
       const { id } = await sprint(s.id);
       await ctx.prisma.sprint.update({ where: { id }, data: { status: 'ACTIVE' } });
 
@@ -255,7 +255,7 @@ describe('Sprint ve Product Backlog (gerçek veritabanı)', () => {
 
     it("sprint'ler arası taşımada eski sprint'ten çıkar, yenisine eklenir; aktivite yazılır", async () => {
       const s = await space();
-      const a = await item(s.listId, { type: 'STORY', title: 'A', points: 2 });
+      const a = await item(s.listId, { type: 'TASK', title: 'A', points: 2 });
       const one = await sprint(s.id);
       const two = await sprint(s.id, {
         name: 'Sprint 2',
@@ -279,9 +279,9 @@ describe('Sprint ve Product Backlog (gerçek veritabanı)', () => {
 
     it('Board için ağaç istenince alt öğeler üstlerinin hemen arkasında gelir', async () => {
       const s = await space();
-      const a = await item(s.listId, { type: 'STORY', title: 'A' });
-      const b = await item(s.listId, { type: 'STORY', title: 'B' });
-      const task = await item(s.listId, { type: 'TASK', title: 'A-task', parentId: a.id });
+      const a = await item(s.listId, { type: 'TASK', title: 'A' });
+      const b = await item(s.listId, { type: 'TASK', title: 'B' });
+      const task = await item(s.listId, { type: 'BUG', title: 'A-bug', parentId: a.id });
       const sub = await item(s.listId, { type: 'SUBTASK', title: 'A-sub', parentId: task.id });
       const { id } = await sprint(s.id);
       await move(s.id, { itemIds: [a.id, b.id], sprintId: id }).expect(204);
@@ -294,7 +294,7 @@ describe('Sprint ve Product Backlog (gerçek veritabanı)', () => {
 
     it("sprint silinince öğeleri Backlog'a döner", async () => {
       const s = await space();
-      const a = await item(s.listId, { type: 'STORY', title: 'A' });
+      const a = await item(s.listId, { type: 'TASK', title: 'A' });
       const { id } = await sprint(s.id);
       await move(s.id, { itemIds: [a.id], sprintId: id }).expect(204);
       expect(keys(await backlog(s.id))).toEqual([]);
@@ -303,13 +303,13 @@ describe('Sprint ve Product Backlog (gerçek veritabanı)', () => {
       expect(keys(await backlog(s.id))).toEqual([a.key]);
     });
 
-    it('uygun olmayan öğe taşınamaz: Epic, Sub-task, Story altındaki Task, tamamlanmış', async () => {
+    it('uygun olmayan öğe taşınamaz: Epic, Sub-task, Task altındaki Bug, tamamlanmış', async () => {
       const s = await space();
       const epic = await item(s.listId, { type: 'EPIC', title: 'E' });
-      const story = await item(s.listId, { type: 'STORY', title: 'S' });
-      const task = await item(s.listId, { type: 'TASK', title: 'T', parentId: story.id });
-      const sub = await item(s.listId, { type: 'SUBTASK', title: 'ST', parentId: task.id });
-      const done = await item(s.listId, { type: 'STORY', title: 'D' });
+      const story = await item(s.listId, { type: 'TASK', title: 'S' });
+      const task = await item(s.listId, { type: 'BUG', title: 'T', parentId: story.id });
+      const sub = await item(s.listId, { type: 'SUBTASK', title: 'ST', parentId: story.id });
+      const done = await item(s.listId, { type: 'TASK', title: 'D' });
       const doneStatus = s.statuses.find((x) => x.category === 'DONE')!;
       await owner.patch(api(`/items/${done.id}`), { statusId: doneStatus.id }).expect(204);
       const { id } = await sprint(s.id);
@@ -322,7 +322,7 @@ describe('Sprint ve Product Backlog (gerçek veritabanı)', () => {
 
     it("tamamlanmış sprint'e öğe taşınamaz", async () => {
       const s = await space();
-      const a = await item(s.listId, { type: 'STORY', title: 'A' });
+      const a = await item(s.listId, { type: 'TASK', title: 'A' });
       const { id } = await sprint(s.id);
       await ctx.prisma.sprint.update({ where: { id }, data: { status: 'COMPLETED' } });
       const res = await move(s.id, { itemIds: [a.id], sprintId: id }).expect(409);
@@ -332,10 +332,10 @@ describe('Sprint ve Product Backlog (gerçek veritabanı)', () => {
     it("başka Space'in öğesi veya sprint'i bulunamaz (404)", async () => {
       const s = await space();
       const other = await space({ key: 'WEB', name: 'Web' });
-      const a = await item(other.listId, { type: 'STORY', title: 'A' });
+      const a = await item(other.listId, { type: 'TASK', title: 'A' });
       const { id } = await sprint(s.id);
       await move(s.id, { itemIds: [a.id], sprintId: id }).expect(404);
-      const b = await item(s.listId, { type: 'STORY', title: 'B' });
+      const b = await item(s.listId, { type: 'TASK', title: 'B' });
       const foreign = await sprint(other.id);
       await move(s.id, { itemIds: [b.id], sprintId: foreign.id }).expect(404);
     });
@@ -344,8 +344,8 @@ describe('Sprint ve Product Backlog (gerçek veritabanı)', () => {
   describe('yetkiler (brief §7.2)', () => {
     it('sprint planlama SM/PO ister; sıralama yalnızca PO; Developer ikisini de yapamaz', async () => {
       const s = await space();
-      const a = await item(s.listId, { type: 'STORY', title: 'A' });
-      const b = await item(s.listId, { type: 'STORY', title: 'B' });
+      const a = await item(s.listId, { type: 'TASK', title: 'A' });
+      const b = await item(s.listId, { type: 'TASK', title: 'B' });
       const { id } = await sprint(s.id);
       const elif = await inviteAndAccept(ctx, owner, ws, ELIF);
       const elifId = (await ctx.prisma.user.findUniqueOrThrow({ where: { email: ELIF.email } })).id;

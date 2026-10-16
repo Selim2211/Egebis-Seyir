@@ -1,3 +1,4 @@
+import { statusName } from '@/lib/default-names';
 import {
   DndContext,
   type DragEndEvent,
@@ -69,7 +70,9 @@ export function BoardView({
       const count = columnTotals(lanes, target).count;
       // WIP limiti engellemez; aşıldıysa yalnızca uyarır (ADR-080).
       if (column && wipState(count + 1, column.wipLimit) === 'over') {
-        toast.warning(t('board.wipExceeded', { status: column.name, limit: column.wipLimit }));
+        toast.warning(
+          t('board.wipExceeded', { status: statusName(column.name), limit: column.wipLimit }),
+        );
       }
       onStatus(item.id, target);
     }
@@ -108,7 +111,7 @@ export function BoardView({
                       boxShadow: `0 0 0 3px color-mix(in oklab, ${status.color} 20%, transparent)`,
                     }}
                   />
-                  <h2 className="font-semibold">{status.name}</h2>
+                  <h2 className="font-semibold">{statusName(status.name)}</h2>
                   <WipCounter count={total.count} limit={status.wipLimit} />
                   {showPoints && (
                     <span className="text-muted-foreground text-xs tabular-nums">

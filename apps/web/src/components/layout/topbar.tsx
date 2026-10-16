@@ -8,6 +8,7 @@ import { TimerIndicator } from '@/features/time/timer-indicator';
 import { SearchDialog } from '@/features/search/search-dialog';
 import { useUiStore } from '@/lib/ui-store';
 import { ApiStatus } from './api-status';
+import { NewMenu } from './new-menu';
 import { UserMenu } from './user-menu';
 
 export function Topbar() {
@@ -42,6 +43,8 @@ export function Topbar() {
       >
         <Menu />
       </Button>
+
+      <NewMenu />
 
       <button
         type="button"

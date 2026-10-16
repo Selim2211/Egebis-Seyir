@@ -265,17 +265,17 @@ export class ItemDetailsService {
     }
   }
 
-  // ---------- Task'lara böl (ADR-051) ----------
+  // ---------- Sub-Task'lara böl (ADR-051, ADR-110) ----------
 
   async split(itemId: string, titles: string[]): Promise<SplitItemResponse> {
     const { workspaceId, actorId } = this.ctx;
-    const story = await this.activeItem(itemId);
-    if (story.type !== 'STORY') throw fail(ERROR_CODES.WORK_ITEM_SPLIT_NOT_ALLOWED);
-    const status = await this.items.resolveStatus(story.spaceId, undefined);
+    const parent = await this.activeItem(itemId);
+    if (parent.type !== 'TASK') throw fail(ERROR_CODES.WORK_ITEM_SPLIT_NOT_ALLOWED);
+    const status = await this.items.resolveStatus(parent.spaceId, undefined);
 
     return this.tenant.db.$transaction(async (tx) => {
       const last = await tx.workItem.findFirst({
-        where: { listId: story.listId, deletedAt: null },
+        where: { listId: parent.listId, deletedAt: null },
         orderBy: { rank: 'desc' },
         select: { rank: true },
       });
@@ -283,18 +283,18 @@ export class ItemDetailsService {
       const created: SplitItemResponse['items'] = [];
       for (const title of titles) {
         const counter = await tx.space.update({
-          where: { id: story.spaceId },
+          where: { id: parent.spaceId },
           data: { itemCounter: { increment: 1 } },
           select: { itemCounter: true, key: true },
         });
         rank = rankBetween(rank, null);
-        const task = await tx.workItem.create({
+        const subtask = await tx.workItem.create({
           data: {
             workspaceId,
-            spaceId: story.spaceId,
-            listId: story.listId,
-            parentId: story.id,
-            type: 'TASK',
+            spaceId: parent.spaceId,
+            listId: parent.listId,
+            parentId: parent.id,
+            type: 'SUBTASK',
             keyPrefix: counter.key,
             number: counter.itemCounter,
             title,
@@ -304,22 +304,22 @@ export class ItemDetailsService {
             watchers: { create: [{ workspaceId, userId: actorId }] },
           },
         });
-        const key = formatItemKey(task.keyPrefix, task.number);
-        created.push({ id: task.id, key });
+        const key = formatItemKey(subtask.keyPrefix, subtask.number);
+        created.push({ id: subtask.id, key });
         await this.activity.record(tx, {
           workspaceId,
           actorId,
           entityType: 'item',
-          entityId: task.id,
+          entityId: subtask.id,
           action: 'item.created',
-          changes: { key, type: 'TASK', title, splitFrom: story.id },
+          changes: { key, type: 'SUBTASK', title, splitFrom: parent.id },
         });
       }
       await this.activity.record(tx, {
         workspaceId,
         actorId,
         entityType: 'item',
-        entityId: story.id,
+        entityId: parent.id,
         action: 'item.split',
         changes: { keys: created.map((c) => c.key) },
       });

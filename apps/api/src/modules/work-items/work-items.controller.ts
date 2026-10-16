@@ -155,7 +155,7 @@ export class WorkItemsController {
     return this.items.create(listId, body);
   }
 
-  /** DoR işaretleri (Story/Bug). */
+  /** DoR işaretleri (Task/Bug). */
   @Put('items/:itemId/dor')
   @RequireSpacePermission(S.WORK_ITEM_WRITE)
   @HttpCode(NO_CONTENT)
@@ -163,7 +163,7 @@ export class WorkItemsController {
     return this.items.setReadiness(itemId, 'dor', body.checked);
   }
 
-  /** DoD işaretleri (Story/Bug). */
+  /** DoD işaretleri (Task/Bug). */
   @Put('items/:itemId/dod')
   @RequireSpacePermission(S.WORK_ITEM_WRITE)
   @HttpCode(NO_CONTENT)

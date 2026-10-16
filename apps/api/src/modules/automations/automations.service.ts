@@ -32,7 +32,7 @@ import { WorkItemsService } from '../work-items/work-items.service';
 type Action = z.infer<typeof AutomationActionSchema>;
 type Outcome = 'OK' | 'SKIPPED' | 'FAILED';
 
-const CHILD_TYPES: readonly WorkItemType[] = ['SUBTASK', 'TASK', 'STORY', 'BUG'];
+const CHILD_TYPES: readonly WorkItemType[] = ['SUBTASK', 'TASK', 'BUG'];
 
 /** Hata nesnesinden günlüğe yazılacak kısa metin (iş kuralı kodu varsa o). */
 function describeError(error: unknown): string {

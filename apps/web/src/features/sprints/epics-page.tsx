@@ -1,3 +1,4 @@
+import { statusName } from '@/lib/default-names';
 import { SPACE_PERMISSIONS as S } from '@scrum/shared';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
@@ -60,7 +61,7 @@ export function EpicsPage({ spaceId }: { spaceId: string }) {
                     {status && (
                       <StatusBadge
                         category={status.category}
-                        label={status.name}
+                        label={statusName(status.name)}
                         color={status.color}
                       />
                     )}

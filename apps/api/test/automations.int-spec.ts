@@ -190,8 +190,8 @@ describe('Otomasyonlar (gerçek veritabanı)', () => {
         actions: [{ type: 'SET_STATUS', statusId: s.statuses['Tamamlandı'] }],
       }).expect(201)
     ).body as Created;
-    const story = await addItem(s.listId, { type: 'STORY', title: 'Üst' });
-    await addItem(s.listId, { type: 'TASK', title: 'Açık alt', parentId: story });
+    const story = await addItem(s.listId, { type: 'TASK', title: 'Üst' });
+    await addItem(s.listId, { type: 'SUBTASK', title: 'Açık alt', parentId: story });
     await owner.patch(api(`/items/${story}`), { statusId: s.statuses['İncelemede'] }).expect(204);
 
     expect((await item(story)).statusId).toBe(s.statuses['İncelemede']);

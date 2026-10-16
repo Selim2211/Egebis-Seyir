@@ -198,7 +198,7 @@ export class AiService {
     if (item.type !== 'EPIC') throw fail(ERROR_CODES.AI_NOT_APPLICABLE);
     const lang = LANGUAGE[await this.locale()];
     const answer = await this.complete(
-      `You are a product owner coach. Split the Epic into 3-8 independent, valuable user stories that are small enough for one sprint. Do not repeat existing children. Reply in ${lang}. Output ONLY a JSON object: {"stories": [{"title": string (max 120 chars), "description": string (1-2 sentences)}]}. ${SAFETY}`,
+      `You are a product owner coach. Split the Epic into 3-8 independent, valuable Tasks that are small enough for one sprint. Do not repeat existing children. Reply in ${lang}. Output ONLY a JSON object: {"stories": [{"title": string (max 120 chars), "description": string (1-2 sentences)}]}. ${SAFETY}`,
       `<item>\n${text}\n</item>`,
       1500,
     );

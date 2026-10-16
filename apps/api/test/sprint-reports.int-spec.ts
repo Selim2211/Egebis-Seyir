@@ -34,7 +34,7 @@ describe('Sprint raporları: burndown ve velocity (gerçek veritabanı)', () => 
   const item = async (listId: string, points: number) =>
     (
       await owner
-        .post(api(`/lists/${listId}/items`), { type: 'STORY', title: `Hikaye ${points}`, points })
+        .post(api(`/lists/${listId}/items`), { type: 'TASK', title: `Hikaye ${points}`, points })
         .expect(201)
     ).body as CreatedItem;
   const sprint = async (spaceId: string, name = 'Sprint 1') =>

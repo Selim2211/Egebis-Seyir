@@ -6,7 +6,7 @@ export const FORM_FIELD_KEYS = ['description', 'priority', 'dueDate', 'assignee'
 export type FormFieldKey = (typeof FORM_FIELD_KEYS)[number];
 export const MAX_FORMS_PER_SPACE = 20;
 /** Formla açılabilen iş öğesi tipleri. */
-export const FORM_ITEM_TYPES = ['TASK', 'STORY', 'BUG'] as const;
+export const FORM_ITEM_TYPES = ['TASK', 'BUG'] as const;
 
 export const FormFieldSchema = z.object({
   key: z.enum(FORM_FIELD_KEYS),

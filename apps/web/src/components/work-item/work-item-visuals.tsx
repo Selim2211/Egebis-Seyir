@@ -1,6 +1,5 @@
 import type { Priority, StatusCategory, WorkItemType } from '@scrum/shared';
 import {
-  Bookmark,
   Bug,
   CircleCheck,
   CircleDashed,
@@ -21,7 +20,6 @@ import { cn } from '@/lib/utils';
 
 const TYPE_VISUALS: Record<WorkItemType, { icon: LucideIcon; className: string }> = {
   EPIC: { icon: Zap, className: 'text-type-epic' },
-  STORY: { icon: Bookmark, className: 'text-type-story' },
   TASK: { icon: SquareCheckBig, className: 'text-type-task' },
   SUBTASK: { icon: CornerDownRight, className: 'text-type-subtask' },
   BUG: { icon: Bug, className: 'text-type-bug' },

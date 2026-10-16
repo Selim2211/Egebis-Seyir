@@ -1,3 +1,4 @@
+import { statusName } from '@/lib/default-names';
 import { SPLIT_MAX_TASKS, type SpaceDetail, type WorkItemDetail } from '@scrum/shared';
 import { Scissors } from 'lucide-react';
 import { type FormEvent, useState } from 'react';
@@ -51,7 +52,7 @@ export function SubItems({
             {done}/{item.children.length}
           </span>
         )}
-        {canWrite && item.type === 'STORY' && (
+        {canWrite && item.type === 'TASK' && (
           <Button variant="ghost" size="sm" className="ml-auto" onClick={() => setSplitting(true)}>
             <Scissors />
             {t('detail.split')}
@@ -81,7 +82,7 @@ export function SubItems({
                   {status && (
                     <StatusBadge
                       category={status.category}
-                      label={status.name}
+                      label={statusName(status.name)}
                       color={status.color}
                     />
                   )}

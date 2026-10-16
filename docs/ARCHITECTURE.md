@@ -34,23 +34,23 @@ docs/         DECISIONS.md, ARCHITECTURE.md
 
 ## 3. Backend modülleri (`apps/api/src/modules/`)
 
-| Modül           | Sorumluluk                                                                                                                                   |
-| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| `auth`          | Kayıt, giriş/çıkış, oturumlar, şifre sıfırlama                                                                                               |
-| `users`         | Profil, kişisel tercihler                                                                                                                    |
-| `workspaces`    | Workspace, üyelik, davet, workspace rolleri                                                                                                  |
-| `access`        | İzinler, roller, policy fonksiyonları, guard                                                                                                 |
-| `spaces`        | Space/Folder/List, favoriler, Space üyeleri + Scrum rolleri, ayarlar (tahmin ölçeği, sprint süresi, DoD/DoR, durumlar)                       |
-| `work-items`    | Epic/Story/Task/Sub-task/Bug CRUD, hiyerarşi, okunabilir ID, bağımlılık, checklist, kabul kriteri, etiket, izleyici, toplu işlem, çöp kutusu |
-| `backlog`       | Product Backlog sıralama (rank)                                                                                                              |
-| `sprints`       | Yaşam döngüsü, planning, scope change, devir, review özeti                                                                                   |
-| `comments`      | Yorum, tepki, mention                                                                                                                        |
-| `attachments`   | Dosya yükleme/indirme (StorageService)                                                                                                       |
-| `activity`      | Olay kaydı, aktivite akışları                                                                                                                |
-| `notifications` | Uygulama içi + e-posta bildirimleri, tercihler                                                                                               |
-| `search`        | Global arama                                                                                                                                 |
-| `reports`       | Burndown, velocity                                                                                                                           |
-| `docs`          | Doküman sayfaları, hiyerarşi, sürümler, iş öğesi bağlantıları                                                                                |
+| Modül           | Sorumluluk                                                                                                                             |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `auth`          | Kayıt, giriş/çıkış, oturumlar, şifre sıfırlama                                                                                         |
+| `users`         | Profil, kişisel tercihler                                                                                                              |
+| `workspaces`    | Workspace, üyelik, davet, workspace rolleri                                                                                            |
+| `access`        | İzinler, roller, policy fonksiyonları, guard                                                                                           |
+| `spaces`        | Space/Folder/List, favoriler, Space üyeleri + Scrum rolleri, ayarlar (tahmin ölçeği, sprint süresi, DoD/DoR, durumlar)                 |
+| `work-items`    | Epic/Task/Sub-task/Bug CRUD, hiyerarşi, okunabilir ID, bağımlılık, checklist, kabul kriteri, etiket, izleyici, toplu işlem, çöp kutusu |
+| `backlog`       | Product Backlog sıralama (rank)                                                                                                        |
+| `sprints`       | Yaşam döngüsü, planning, scope change, devir, review özeti                                                                             |
+| `comments`      | Yorum, tepki, mention                                                                                                                  |
+| `attachments`   | Dosya yükleme/indirme (StorageService)                                                                                                 |
+| `activity`      | Olay kaydı, aktivite akışları                                                                                                          |
+| `notifications` | Uygulama içi + e-posta bildirimleri, tercihler                                                                                         |
+| `search`        | Global arama                                                                                                                           |
+| `reports`       | Burndown, velocity                                                                                                                     |
+| `docs`          | Doküman sayfaları, hiyerarşi, sürümler, iş öğesi bağlantıları                                                                          |
 
 Altyapı (`apps/api/src/infra/`): `config`, `prisma`, `queue` (pg-boss), `mail`, `storage`, `cls` (istek bağlamı), `logger`.
 

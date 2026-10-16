@@ -267,7 +267,7 @@ export class SprintExcelService {
       sprintName = info.name;
     }
 
-    // Eklenebilen (Story/Bug/Task, üst düzey, bitmemiş) öğeler sprint'e alınır.
+    // Eklenebilen (Task/Bug, üst düzey, bitmemiş) öğeler sprint'e alınır.
     const ids = [...outcome.refs.values()];
     const found = await db.workItem.findMany({
       where: { id: { in: ids }, spaceId, ...countedItems },

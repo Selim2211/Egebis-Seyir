@@ -1,3 +1,4 @@
+import { statusName } from '@/lib/default-names';
 import { WORKSPACE_PERMISSIONS, type WorkItemRow } from '@scrum/shared';
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
@@ -227,7 +228,7 @@ function ItemList({
             ) : (
               <StatusBadge
                 category={item.status.category}
-                label={item.status.name}
+                label={statusName(item.status.name)}
                 color={item.status.color}
               />
             )}

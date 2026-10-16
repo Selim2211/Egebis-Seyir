@@ -30,11 +30,11 @@ test.describe.serial('Sprint Excel dışa/içe aktarma', () => {
     await page.getByRole('link', { name: "Backlog ve sprint'ler" }).first().click();
   };
 
-  test('kaynak Space: iki Story ve sprint hazırlanır, Excel indirilir', async ({ page }) => {
+  test('kaynak Space: iki Task ve sprint hazırlanır, Excel indirilir', async ({ page }) => {
     await createSpace(page, 'Excel Kaynak', 'XLS');
     await page.getByRole('link', { name: 'Görevler' }).first().click();
     const quick = page.getByRole('textbox', { name: 'Başlık' });
-    await page.getByLabel('Tip').first().selectOption('STORY');
+    await page.getByLabel('Tip').first().selectOption('TASK');
     for (const [index, title] of ['Ödeme ekranı', 'Fatura listesi'].entries()) {
       await quick.fill(title);
       await quick.press('Enter');

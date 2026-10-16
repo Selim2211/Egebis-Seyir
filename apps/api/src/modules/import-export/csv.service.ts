@@ -45,7 +45,7 @@ import { WorkItemsService } from '../work-items/work-items.service';
 const EXPORT_MAX_ROWS = 5000;
 const IMPORT_SOURCE = 'csv';
 const KEY_PATTERN = /^([A-Za-z][A-Za-z0-9]*)-(\d+)$/;
-const CHILD_TYPES: readonly WorkItemType[] = ['SUBTASK', 'TASK', 'STORY', 'BUG'];
+const CHILD_TYPES: readonly WorkItemType[] = ['SUBTASK', 'TASK', 'BUG'];
 const TRUE_WORDS = new Set(['1', 'true', 'yes', 'evet', 'x', '✓', 'e']);
 const DEFAULT_LABEL_COLOR = '#64748B';
 

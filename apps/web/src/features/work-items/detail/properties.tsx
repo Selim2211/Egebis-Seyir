@@ -1,3 +1,4 @@
+import { statusName } from '@/lib/default-names';
 import {
   PERCENT_DONE,
   BUG_SEVERITIES,
@@ -224,7 +225,11 @@ export function Properties({
                 aria-label={t('items.changeStatus', { key: item.key })}
                 className="focus-visible:ring-ring/50 rounded-md outline-none focus-visible:ring-[3px]"
               >
-                <StatusBadge category={status.category} label={status.name} color={status.color} />
+                <StatusBadge
+                  category={status.category}
+                  label={statusName(status.name)}
+                  color={status.color}
+                />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start">
@@ -235,7 +240,7 @@ export function Properties({
                 {space.statuses.map((s) => (
                   <DropdownMenuRadioItem key={s.id} value={s.id}>
                     <span className="size-2 rounded-full" style={{ background: s.color }} />
-                    {s.name}
+                    {statusName(s.name)}
                   </DropdownMenuRadioItem>
                 ))}
               </DropdownMenuRadioGroup>
@@ -243,7 +248,11 @@ export function Properties({
           </DropdownMenu>
         ) : (
           status && (
-            <StatusBadge category={status.category} label={status.name} color={status.color} />
+            <StatusBadge
+              category={status.category}
+              label={statusName(status.name)}
+              color={status.color}
+            />
           )
         )}
         {guard.dialog}
