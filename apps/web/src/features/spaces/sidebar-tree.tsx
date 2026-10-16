@@ -165,14 +165,15 @@ export function SidebarTree() {
             )}
           </SortableGroup>
           {canCreateSpace && (
-            <button
-              type="button"
+            <Button
+              variant="cta"
+              size="lg"
+              className="mx-1 mt-2 w-[calc(100%-0.5rem)]"
               onClick={() => actions.open({ kind: 'createSpace' })}
-              className="text-muted-foreground hover:bg-sidebar-accent flex h-7.5 items-center gap-1.5 rounded-md pr-2 pl-6 text-sm font-medium"
             >
-              <Plus className="size-3.5" aria-hidden />
+              <Plus className="size-4.5" aria-hidden />
               {t('spaces.create')}
-            </button>
+            </Button>
           )}
         </>
       ) : (
@@ -184,9 +185,9 @@ export function SidebarTree() {
           </p>
           {canCreateSpace && (
             <Button
-              size="sm"
-              variant="secondary"
-              className="mt-2"
+              size="lg"
+              variant="cta"
+              className="mt-3 w-full"
               onClick={() => actions.open({ kind: 'createSpace' })}
             >
               <Plus />

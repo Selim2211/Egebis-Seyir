@@ -87,7 +87,7 @@
             "In the left menu click the **+** next to **SPACES** (or the **Create space** row at the bottom).",
             "Type the Space's name in **Name** (e.g. Mobile App).",
             "Check the **Key**. It is a short 2–10 letter code; item IDs start with it (MOB-1, MOB-2…). It is suggested automatically.",
-            "Optionally pick a colour and icon. Keep **Work mode** on **Scrum** to use Sprints and the Backlog.",
+            "Optionally pick a colour and icon. Keep **Work mode** on **Scrum** to use Sprints and the Backlog, or choose **Kanban** for a continuous-flow board without sprints.",
             "Click **Create space**."
           ]
         },
@@ -653,7 +653,7 @@
     },
     {
       "id": "kanban",
-      "title": "10. The sprint board (Kanban)",
+      "title": "10. The sprint board",
       "blocks": [
         {
           "type": "p",
@@ -682,8 +682,178 @@
       ]
     },
     {
+      "id": "yeni-dugme",
+      "title": "11. The big New button",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "The **New** button at the top of every page is the quickest way to start something. You do not have to open a list first."
+        },
+        {
+          "type": "steps",
+          "items": [
+            "Click **New** (or press **N** on the keyboard when you are not typing).",
+            "Pick what you want to create: **Task**, **Epic**, **Bug** or **Space**.",
+            "For Task, Epic and Bug a small window opens. Type the **Title** and check the **Space** and **List** (the one you are looking at is preselected).",
+            "Optionally click **Attach files** to add any files right away.",
+            "Click **Create**. The new item opens so you can fill in the details."
+          ]
+        },
+        {
+          "type": "figure",
+          "image": "22-new-menu",
+          "alt": "The New menu",
+          "caption": "The New menu opened from the top bar.",
+          "legend": [
+            "**New**: The big button in the top bar. Shortcut: N.",
+            "**Task**: A piece of work for the sprint.",
+            "**Epic**: A big goal that groups many Tasks.",
+            "**Space**: A new project or team area."
+          ]
+        },
+        {
+          "type": "tip",
+          "text": "Sub-Tasks are created from inside a Task (**⋯ → Add sub-item**), because they always belong to a parent."
+        }
+      ]
+    },
+    {
+      "id": "paylasim",
+      "title": "12. Sharing and permissions on a Task or Epic",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "By default every item follows the access of its Space. With **Share** you can add people or teams to one item (and everything under it) or make it **Private**."
+        },
+        {
+          "type": "steps",
+          "items": [
+            "Open the Task or Epic and click the big **Share** button at the top right.",
+            "To give someone more rights on this item only, choose them under **Add a person or team**, pick a role (for example **Developer**) and click **Add**.",
+            "To hide the item, switch on **Private**. Only the people listed (and Owners and Admins) will see it and everything under it.",
+            "Click **Save**. The button now says **Shared** or **Private**.",
+            "To go back to the Space rules, open **Share** again and click **Reset to inherited**."
+          ]
+        },
+        {
+          "type": "figure",
+          "image": "23-share",
+          "alt": "The Sharing and permissions window",
+          "caption": "The Sharing and permissions window of an Epic.",
+          "legend": [
+            "**Private**: Hides the item and everything under it from people who are not listed.",
+            "**Add a person or team**: Choose who gets access.",
+            "**Add**: Puts the person on the list with the selected role.",
+            "**Save**: Applies the settings."
+          ]
+        },
+        {
+          "type": "note",
+          "text": "Sub-Tasks and child Tasks **inherit** the settings of the item above them. A child can have its own settings, and then those win."
+        },
+        {
+          "type": "warn",
+          "text": "You cannot give someone more rights than you have yourself. To share an item with someone who is not in a private Space, first add them to that Space."
+        }
+      ]
+    },
+    {
+      "id": "roller",
+      "title": "13. Roles and permissions (Settings)",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Administrators decide what each role can do in **Settings → Roles**. Changes apply immediately."
+        },
+        {
+          "type": "steps",
+          "items": [
+            "Open **Settings** and click **Roles**.",
+            "Choose **Space roles** (rights inside a Space) or **Workspace roles** (rights in the whole workspace).",
+            "Tick or untick a box to change a role. Each row is one permission.",
+            "Click **New role** to create your own role (for example **QA Engineer**). You can start from an existing role.",
+            "Use the **⋯** menu on a column to rename or delete a custom role, or reset a built-in role to its defaults."
+          ]
+        },
+        {
+          "type": "figure",
+          "image": "24-roles",
+          "alt": "The roles and permissions table",
+          "caption": "The Roles page with one column per role.",
+          "legend": [
+            "**Space roles / Workspace roles**: Switches between the two kinds of roles.",
+            "**New role**: Creates a custom role.",
+            "**Role column**: One column per role; the number shows how many people use it.",
+            "**Check box**: Turns one permission on or off for that role."
+          ]
+        },
+        {
+          "type": "tip",
+          "text": "Owners always keep every right, and a role cannot lose the permissions the workspace needs to keep running (for example Admins keep member and settings management)."
+        }
+      ]
+    },
+    {
+      "id": "dosya",
+      "title": "14. Attaching files",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "You can attach files to any Task, Epic, Sub-Task or Bug, and to docs."
+        },
+        {
+          "type": "bullets",
+          "items": [
+            "**Any file format** is accepted, up to **100 MB** each and 50 files per item.",
+            "Drag files onto the **Attachments** area, **paste** a screenshot from the clipboard, or click the area to browse.",
+            "You can also attach files in the **New** window while you create an item.",
+            "Images and PDFs open in a preview. Every other file (Office, zip, video, programs…) is downloaded, never opened in the browser."
+          ]
+        },
+        {
+          "type": "note",
+          "text": "Programs and scripts (like .exe) can be attached too, but they are only downloaded. Open them only if you trust the sender."
+        }
+      ]
+    },
+    {
+      "id": "kanban-space",
+      "title": "15. The Kanban board for a whole Space",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Every Space has a **Kanban board** link in the left menu. It shows the open items of all the Space’s lists in one board. Choose **Kanban** as the work mode when you create a Space for a sprint-free, continuous flow."
+        },
+        {
+          "type": "steps",
+          "items": [
+            "In the left menu click **Kanban board** under your Space.",
+            "Each column is a status. Drag a card to another column to change its status.",
+            "Click **Add card** at the bottom of a column, type a title and press Enter to create a card in that status.",
+            "Use the **List**, filter box and **Only mine** to narrow the board. The **Rows** picker groups cards by assignee, Epic or priority.",
+            "A column with a limit shows a warning when it is full; the board never blocks you."
+          ]
+        },
+        {
+          "type": "figure",
+          "image": "25-kanban",
+          "alt": "The Space Kanban board",
+          "caption": "The Kanban board with its filters and the Add card button.",
+          "legend": [
+            "**List**: Show one list or all lists.",
+            "**Filter cards**: Narrow the board by title or ID.",
+            "**Kanban board**: Opens this board from the left menu. Use **Add card** at the bottom of a column to add cards."
+          ]
+        },
+        {
+          "type": "tip",
+          "text": "Click a card’s title to open it in a side panel without leaving the board."
+        }
+      ]
+    },
+    {
       "id": "ipuclari",
-      "title": "11. Quick tips and FAQ",
+      "title": "16. Quick tips and FAQ",
       "blocks": [
         {
           "type": "table",

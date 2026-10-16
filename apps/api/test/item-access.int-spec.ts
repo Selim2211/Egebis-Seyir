@@ -151,6 +151,7 @@ describe('Öğe bazlı erişim: miras, ekleme, gizli öğe (ADR-113)', () => {
       `/lists/${s.listId}/items`,
       `/spaces/${s.id}/backlog`,
       `/spaces/${s.id}/epics`,
+      `/spaces/${s.id}/kanban`,
       `/spaces/${s.id}/gantt`,
       `/search?q=Gizli`,
       `/items/search?q=Gizli`,

@@ -52,7 +52,7 @@ test.describe.serial('Yapay zekâ önerileri', () => {
 
     await page.goto(`${listUrl}?item=YZT-1`);
     await page.getByRole('button', { name: 'Yapay zekâ', exact: true }).click();
-    await page.getByRole('menuitem', { name: 'Hikâye ve kabul kriteri öner' }).click();
+    await page.getByRole('menuitem', { name: 'Açıklama ve kabul kriteri öner' }).click();
     const result = page.getByRole('region', { name: 'Yapay zekâ önerisi' });
     await expect(result.getByText('Stok yoksa uyarı çıkar')).toBeVisible();
 

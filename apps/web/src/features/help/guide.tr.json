@@ -91,7 +91,7 @@
             "Sol menüde **SPACE'LER** başlığının yanındaki **+** düğmesine (ya da en alttaki **Space oluştur** satırına) tıkla.",
             "**Ad** alanına Space'in adını yaz (ör. Mobil Uygulama).",
             "**Anahtar** alanını kontrol et. Bu 2–10 harflik kısa koddur; Task kimlikleri bununla başlar (MOB-1, MOB-2…). Ad yazınca otomatik önerilir.",
-            "İstersen renk ve ikon seç. **Çalışma modu** olarak **Scrum** seçersen Epic, Sprint ve Backlog özellikleri açık olur.",
+            "İstersen renk ve ikon seç. Sprint ve Backlog kullanacaksan **Çalışma modu**nu **Scrum**da bırak; sprintsiz, sürekli akışlı bir pano istiyorsan **Kanban**ı seç.",
             "**Space oluştur** düğmesine bas."
           ]
         },
@@ -657,7 +657,7 @@
     },
     {
       "id": "kanban",
-      "title": "10. Sprint panosu (Kanban)",
+      "title": "10. Sprint panosu",
       "blocks": [
         {
           "type": "p",
@@ -686,8 +686,178 @@
       ]
     },
     {
+      "id": "yeni-dugme",
+      "title": "11. Büyük New düğmesi",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Her sayfanın üstündeki **New** düğmesi, bir şeye başlamanın en hızlı yoludur. Önce bir liste açman gerekmez."
+        },
+        {
+          "type": "steps",
+          "items": [
+            "**New**e tıkla (ya da yazı yazmıyorken klavyede **N**ye bas).",
+            "Ne oluşturacağını seç: **Task**, **Epic**, **Bug** veya **Space**.",
+            "Task, Epic ve Bug için küçük bir pencere açılır. **Başlığı** yaz; **Space** ve **List** seçimini kontrol et (baktığın Space/List hazır gelir).",
+            "İstersen hemen dosya eklemek için **Dosya ekle**ye tıkla.",
+            "**Create**e tıkla. Yeni öğe ayrıntıları doldurman için açılır."
+          ]
+        },
+        {
+          "type": "figure",
+          "image": "22-new-menu",
+          "alt": "New menüsü",
+          "caption": "Üst çubuktan açılan New menüsü.",
+          "legend": [
+            "**New**: Üst çubuktaki büyük düğme. Kısayol: N.",
+            "**Task**: Sprint için bir iş parçası.",
+            "**Epic**: Birçok Task’ı toplayan büyük hedef.",
+            "**Space**: Yeni proje veya takım alanı."
+          ]
+        },
+        {
+          "type": "tip",
+          "text": "Sub-Task’lar bir Task’ın içinden oluşturulur (**⋯ → Alt öğe ekle**), çünkü her zaman bir üst öğeye bağlıdırlar."
+        }
+      ]
+    },
+    {
+      "id": "paylasim",
+      "title": "12. Task veya Epic üzerinde paylaşım ve yetkiler",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Varsayılan olarak her öğe Space’inin erişimini izler. **Share** ile bir öğeye (ve altındaki her şeye) kişi ya da takım ekleyebilir veya öğeyi **Gizli** yapabilirsin."
+        },
+        {
+          "type": "steps",
+          "items": [
+            "Task veya Epic’i aç ve sağ üstteki büyük **Share** düğmesine tıkla.",
+            "Birine yalnızca bu öğede daha fazla yetki vermek için **Kişi veya takım ekle** altından seç, bir rol seç (örneğin **Developer**) ve **Ekle**ye tıkla.",
+            "Öğeyi gizlemek için **Gizli**yi aç. Onu ve altındaki her şeyi yalnızca listedekiler (ve Owner/Admin) görür.",
+            "**Kaydet**e tıkla. Düğme artık **Shared** veya **Private** yazar.",
+            "Space kurallarına dönmek için **Share**i yeniden aç ve **Mirasa döndür**e tıkla."
+          ]
+        },
+        {
+          "type": "figure",
+          "image": "23-share",
+          "alt": "Sharing and permissions penceresi",
+          "caption": "Bir Epic’in Sharing and permissions penceresi.",
+          "legend": [
+            "**Gizli**: Öğeyi ve altındaki her şeyi listede olmayanlardan gizler.",
+            "**Kişi veya takım ekle**: Kimin erişeceğini seç.",
+            "**Ekle**: Kişiyi seçilen rolle listeye koyar.",
+            "**Kaydet**: Ayarları uygular."
+          ]
+        },
+        {
+          "type": "note",
+          "text": "Sub-Task’lar ve alt Task’lar, üstlerindeki öğenin ayarlarını **miras alır**. Bir alt öğe kendi ayarlarını açabilir; o zaman onunki geçerlidir."
+        },
+        {
+          "type": "warn",
+          "text": "Birine kendi sahip olduğundan fazla yetki veremezsin. Özel bir Space’te olmayan biriyle öğe paylaşmak için önce onu o Space’e ekle."
+        }
+      ]
+    },
+    {
+      "id": "roller",
+      "title": "13. Roller ve yetkiler (Ayarlar)",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Yöneticiler, her rolün neler yapabileceğini **Ayarlar → Roles** içinde belirler. Değişiklikler anında geçerli olur."
+        },
+        {
+          "type": "steps",
+          "items": [
+            "**Ayarlar**ı aç ve **Roles**e tıkla.",
+            "**Space roles** (bir Space içindeki haklar) veya **Workspace roles** (tüm workspace’teki haklar) seç.",
+            "Bir rolü değiştirmek için kutuyu işaretle ya da kaldır. Her satır bir yetkidir.",
+            "Kendi rolünü oluşturmak için **New role**a tıkla (örneğin **QA Engineer**). Mevcut bir rolden başlayabilirsin.",
+            "Bir sütundaki **⋯** menüsüyle özel rolü yeniden adlandır, sil ya da hazır rolü varsayılana döndür."
+          ]
+        },
+        {
+          "type": "figure",
+          "image": "24-roles",
+          "alt": "Roller ve yetkiler tablosu",
+          "caption": "Her rol için bir sütun içeren Roles sayfası.",
+          "legend": [
+            "**Space roles / Workspace roles**: İki rol türü arasında geçiş yapar.",
+            "**New role**: Özel rol oluşturur.",
+            "**Rol sütunu**: Her rol için bir sütun; sayı, rolü kaç kişinin kullandığını gösterir.",
+            "**Onay kutusu**: O rol için bir yetkiyi açar veya kapatır."
+          ]
+        },
+        {
+          "type": "tip",
+          "text": "Owner her zaman tüm haklara sahiptir ve bir rol, workspace’in çalışmaya devam etmesi için gereken yetkileri kaybedemez (örneğin Admin, üye ve ayar yönetimini korur)."
+        }
+      ]
+    },
+    {
+      "id": "dosya",
+      "title": "14. Dosya ekleme",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Her Task, Epic, Sub-Task veya Bug’a ve dokümanlara dosya ekleyebilirsin."
+        },
+        {
+          "type": "bullets",
+          "items": [
+            "**Her dosya türü** kabul edilir; dosya başına en çok **100 MB**, öğe başına 50 dosya.",
+            "Dosyaları **Ekler** alanına sürükle, panodan ekran görüntüsü **yapıştır** ya da alana tıklayıp göz at.",
+            "Öğe oluştururken **New** penceresinde de dosya ekleyebilirsin.",
+            "Resim ve PDF’ler önizlemeyle açılır. Diğer her dosya (Office, zip, video, program…) indirilir; tarayıcıda açılmaz."
+          ]
+        },
+        {
+          "type": "note",
+          "text": "Program ve betikler (.exe gibi) de eklenebilir ama yalnızca indirilir. Göndereni tanımıyorsan açma."
+        }
+      ]
+    },
+    {
+      "id": "kanban-space",
+      "title": "15. Tüm Space için Kanban board",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Her Space’in sol menüsünde bir **Kanban board** bağlantısı vardır. Space’in tüm listelerindeki açık öğeleri tek panoda gösterir. Sprintsiz, sürekli akış için Space oluştururken çalışma modu olarak **Kanban**ı seç."
+        },
+        {
+          "type": "steps",
+          "items": [
+            "Sol menüde Space’inin altındaki **Kanban board**a tıkla.",
+            "Her sütun bir durumdur. Durumu değiştirmek için kartı başka sütuna sürükle.",
+            "Bir sütunun altındaki **Kart ekle**ye tıkla, başlığı yaz ve Enter’a bas; kart o durumda oluşur.",
+            "Panoyu daraltmak için **Liste**, süzgeç kutusu ve **Yalnızca benimkiler**i kullan. **Satırlar** seçici kartları kişiye, Epic’e veya önceliğe göre gruplar.",
+            "Limiti olan bir sütun dolunca uyarı verir; pano seni asla engellemez."
+          ]
+        },
+        {
+          "type": "figure",
+          "image": "25-kanban",
+          "alt": "Space Kanban board",
+          "caption": "Süzgeçleri ve Kart ekle düğmesiyle Kanban board.",
+          "legend": [
+            "**Liste**: Tek bir listeyi ya da tüm listeleri gösterir.",
+            "**Kartları süz**: Panoyu başlığa veya ID’ye göre daraltır.",
+            "**Kanban board**: Bu panoyu sol menüden açar. Kart eklemek için sütunun altındaki **Kart ekle**yi kullan."
+          ]
+        },
+        {
+          "type": "tip",
+          "text": "Panodan çıkmadan bir kartı yan panelde açmak için başlığına tıkla."
+        }
+      ]
+    },
+    {
       "id": "ipuclari",
-      "title": "11. Kısa ipuçları ve sık sorulanlar",
+      "title": "16. Kısa ipuçları ve sık sorulanlar",
       "blocks": [
         {
           "type": "table",

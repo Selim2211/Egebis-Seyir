@@ -84,7 +84,9 @@ test.describe.serial('Yorum, ek, aktivite ve Ana sayfa', () => {
     await expect(page.getByText('İlk yorumum (düzeltildi)')).toHaveCount(0);
   });
 
-  test('dosya eklenir, resim önizlenir, yasaklı tür reddedilir, silinir', async ({ page }) => {
+  test('dosya eklenir, resim önizlenir, çalıştırılabilir dosya da eklenir, silinir', async ({
+    page,
+  }) => {
     await openItem(page);
     await page.getByRole('region', { name: 'Ekler' }).locator('input[type="file"]').setInputFiles({
       name: 'ekran.png',
@@ -101,7 +103,8 @@ test.describe.serial('Yorum, ek, aktivite ve Ana sayfa', () => {
         mimeType: 'application/octet-stream',
         buffer: Buffer.from('MZ'),
       });
-    await expect(page.getByText(/güvenlik nedeniyle izin verilmiyor/)).toBeVisible();
+    // Her tür kabul edilir (ADR-114); çalıştırılabilir dosya yalnızca indirilir.
+    await expect(page.getByRole('link', { name: 'kurulum.exe', exact: true })).toBeVisible();
 
     await page.getByRole('button', { name: 'ekran.png ekini sil' }).click();
     await expect(page.getByRole('link', { name: 'ekran.png', exact: true })).toHaveCount(0);

@@ -35,7 +35,8 @@ test.describe.serial('New menüsü', () => {
     await expect(page.getByText('NMN-1 oluşturuldu.')).toBeVisible();
     await expect(page).toHaveURL(/\/items\/NMN-1/);
 
-    // Kısayol: N
+    // Kısayol: N (odak sayfada olsun).
+    await page.locator('body').click({ position: { x: 5, y: 5 } });
     await page.keyboard.press('n');
     await page.getByRole('menuitem', { name: /^Task/ }).click();
     await page.getByRole('dialog', { name: 'New Task' }).getByLabel('Başlık').fill('Küçük iş');

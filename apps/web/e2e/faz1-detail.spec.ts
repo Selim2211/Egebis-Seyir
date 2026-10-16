@@ -94,7 +94,9 @@ test.describe.serial('Görev detayı', () => {
     await page.getByRole('textbox', { name: /Başlık veya/ }).fill('Sipariş');
     await page.getByRole('button', { name: /DET-1/ }).click();
     await expect(
-      page.getByRole('region', { name: 'Bağlantılı öğeler' }).getByText('Engelliyor'),
+      page
+        .getByRole('region', { name: 'Bağlantılı öğeler' })
+        .locator('p', { hasText: 'Engelliyor' }),
     ).toBeVisible();
 
     await page.goto('/items/DET-1');
@@ -112,7 +114,8 @@ test.describe.serial('Görev detayı', () => {
   });
 
   test('tam sayfada özellikler düzenlenir ve izleme açılıp kapanır', async ({ page }) => {
-    await page.goto('/items/DET-1');
+    // DET-1 alt görevleri olduğundan puanı alt görevlerden gelir (ADR-107); düzenlenebilir olan DET-2 kullanılır.
+    await page.goto('/items/DET-2');
     await page.getByLabel('Bitiş').fill('2026-12-31');
     await expect(page.getByLabel('Bitiş')).toHaveValue('2026-12-31');
     await page.getByLabel('Story Point').selectOption('5');

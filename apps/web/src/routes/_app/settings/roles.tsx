@@ -406,16 +406,13 @@ function DeleteRoleDialog({
             variant="destructive"
             disabled={remove.isPending || (inUse && !reassign)}
             onClick={() =>
-              remove.mutate(
-                { roleId: role.id, reassignToRoleId: inUse ? reassign : undefined },
-                {
-                  onSuccess: () => {
-                    toast.success(t('rolesPage.deleted'));
-                    onClose();
-                  },
-                  onError: (error) => toast.error(errorMessage(error)),
-                },
-              )
+              // Rol silinince bu pencereyi taşıyan sütun da kalkar; bu yüzden mutate geri çağrıları değil söz kullanılır.
+              void remove
+                .mutateAsync({ roleId: role.id, reassignToRoleId: inUse ? reassign : undefined })
+                .then(
+                  () => toast.success(t('rolesPage.deleted')),
+                  (error: unknown) => toast.error(errorMessage(error)),
+                )
             }
           >
             {t('rolesPage.delete')}

@@ -4,6 +4,7 @@ import { type FormEvent, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { NativeSelect } from '@/components/form';
+import { Button } from '@/components/ui/button';
 import { useErrorMessage } from '@/lib/use-error-message';
 import { creatableTypes } from './item-tree';
 import { useCreateItem } from './queries';
@@ -83,13 +84,9 @@ export function QuickCreate({
         className="placeholder:text-muted-foreground h-8 min-w-0 flex-1 bg-transparent text-sm outline-none"
       />
       {title.trim() && (
-        <button
-          type="submit"
-          disabled={create.isPending}
-          className="text-primary text-xs font-medium whitespace-nowrap hover:underline"
-        >
+        <Button type="submit" size="sm" disabled={create.isPending}>
           {t('items.addEnter')}
-        </button>
+        </Button>
       )}
     </form>
   );

@@ -5,7 +5,7 @@ import {
   WORKSPACE_PERMISSIONS as W,
   type WorkItemType,
 } from '@scrum/shared';
-import { useNavigate, useParams } from '@tanstack/react-router';
+import { useNavigate, useRouterState } from '@tanstack/react-router';
 import {
   Bug,
   CheckSquare,
@@ -181,12 +181,22 @@ function NewItemForm({
   const errorMessage = useErrorMessage();
   const [files, setFiles] = useState<File[]>([]);
   const fileInput = useRef<HTMLInputElement>(null);
-  const params: { spaceId?: string; listId?: string } = useParams({ strict: false });
+  // Açık sayfanın Space/List'i varsayılan hedeftir (adresten okunur; üst çubuk rota dışındadır).
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
+  const open = /^\/(spaces|lists)\/([0-9a-f-]{36})/.exec(pathname);
+  const itemKey = /^\/items\/([A-Za-z][A-Za-z0-9]*)-\d+/.exec(pathname)?.[1]?.toUpperCase();
+  const params: { spaceId?: string; listId?: string; spaceKey?: string } = {
+    spaceId: open?.[1] === 'spaces' ? open[2] : undefined,
+    listId: open?.[1] === 'lists' ? open[2] : undefined,
+    spaceKey: itemKey,
+  };
   // Açık olan Space/List varsayılan hedeftir; yoksa ilk Space.
   const current =
     targets.find(
       (target) =>
-        target.space.id === params.spaceId || target.lists.some((l) => l.id === params.listId),
+        target.space.id === params.spaceId ||
+        target.space.key === params.spaceKey ||
+        target.lists.some((l) => l.id === params.listId),
     ) ?? targets[0]!;
   const [spaceId, setSpaceId] = useState(current.space.id);
   const entry = targets.find((target) => target.space.id === spaceId) ?? targets[0]!;

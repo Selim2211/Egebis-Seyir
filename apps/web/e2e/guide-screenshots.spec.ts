@@ -541,6 +541,76 @@ test.describe.serial('Kılavuz görselleri', () => {
       { at: page.getByRole('link', { name: SAMPLE.bigTask }), n: 2, badge: 'l' },
       { at: page.getByRole('link', { name: SAMPLE.bigSub }), n: 3, badge: 'l' },
     ]);
+
+    // ---------- "New" menüsü ----------
+    await page.getByTestId('new-menu').click();
+    await shot(page, '22-new-menu', [
+      { at: page.getByTestId('new-menu'), n: 1, badge: 'tr' },
+      {
+        at: page.getByRole('menuitem', { name: new RegExp('^' + t('newMenu.TASK')) }),
+        n: 2,
+        badge: 'r',
+      },
+      {
+        at: page.getByRole('menuitem', { name: new RegExp('^' + t('newMenu.EPIC')) }),
+        n: 3,
+        badge: 'r',
+      },
+      {
+        at: page.getByRole('menuitem', { name: new RegExp('^' + t('newMenu.SPACE')) }),
+        n: 4,
+        badge: 'r',
+      },
+    ]);
+    await page.keyboard.press('Escape');
+
+    // ---------- Share: paylaşım ve gizli öğe ----------
+    await page.goto(`/items/${keyOf(6)}`);
+    await page.getByTestId('share-button').click();
+    const shareDialog = page.getByRole('dialog', {
+      name: new RegExp(t('share.title', { key: keyOf(6) }).slice(0, 12)),
+    });
+    await expect(shareDialog.getByRole('switch', { name: t('share.private') })).toBeVisible();
+    await shot(
+      page,
+      '23-share',
+      [
+        { at: shareDialog.getByRole('switch', { name: t('share.private') }), n: 1, badge: 'l' },
+        { at: shareDialog.getByLabel(t('share.add')), n: 2, badge: 'b' },
+        { at: shareDialog.getByRole('button', { name: t('share.addButton') }), n: 3, badge: 'br' },
+        { at: shareDialog.getByRole('button', { name: t('common.save') }), n: 4, badge: 'tr' },
+      ],
+      shareDialog,
+    );
+    await page.keyboard.press('Escape');
+
+    // ---------- Ayarlar → Roles ----------
+    await page.goto('/settings/roles');
+    await expect(page.getByRole('heading', { name: t('rolesPage.title') })).toBeVisible();
+    await shot(page, '24-roles', [
+      { at: page.getByRole('tab', { name: t('rolesPage.scope.SPACE') }), n: 1, badge: 'tl' },
+      { at: page.getByRole('button', { name: t('rolesPage.newRole') }), n: 2, badge: 'bl' },
+      { at: page.getByRole('columnheader', { name: /Developer/ }), n: 3, badge: 't' },
+      {
+        at: page.getByRole('checkbox', { name: 'DEVELOPER: workItem.write' }).first(),
+        n: 4,
+        badge: 'r',
+      },
+    ]);
+
+    // ---------- Kanban board ----------
+    await page.goto('/');
+    await sidebar.getByRole('link', { name: SAMPLE.space }).first().click();
+    await sidebar
+      .getByRole('link', { name: t('kanban.link') })
+      .first()
+      .click();
+    await expect(page.getByRole('heading', { name: t('kanban.title'), level: 2 })).toBeVisible();
+    await shot(page, '25-kanban', [
+      { at: page.getByRole('combobox', { name: t('kanban.list') }), n: 1, badge: 'b' },
+      { at: page.getByRole('textbox', { name: t('kanban.search') }), n: 2, badge: 'b' },
+      { at: sidebar.getByRole('link', { name: t('kanban.link') }).first(), n: 3, badge: 'r' },
+    ]);
   });
 });
 
