@@ -98,6 +98,30 @@ export class WorkItemsService {
     };
   }
 
+  /** Space'in tüm listelerindeki açık öğeler (Kanban panosu, ADR-115). */
+  async listSpace(spaceId: string): Promise<WorkItemsResponse> {
+    const db = this.tenant.db;
+    const [items, labels] = await Promise.all([
+      db.workItem.findMany({
+        where: {
+          spaceId,
+          deletedAt: null,
+          archivedAt: null,
+          list: { deletedAt: null, archivedAt: null },
+          space: { deletedAt: null },
+        },
+        include: summaryInclude,
+        orderBy: [{ rank: 'asc' }, { id: 'asc' }],
+        take: LIST_LIMIT,
+      }),
+      db.label.findMany({ where: { spaceId }, orderBy: { name: 'asc' } }),
+    ]);
+    return {
+      items: items.map(toSummary),
+      labels: labels.map(({ id, name, color }) => ({ id, name, color })),
+    };
+  }
+
   async detail(itemId: string): Promise<WorkItemDetail> {
     const item = await this.tenant.db.workItem.findFirst({
       where: { id: itemId, deletedAt: null, list: { deletedAt: null }, space: { deletedAt: null } },

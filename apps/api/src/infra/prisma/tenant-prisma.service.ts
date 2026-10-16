@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ClsService } from 'nestjs-cls';
 import type { AppClsStore } from '../cls/request-context';
 import { PrismaService } from './prisma.service';
+import { hideItemsArgs, loadHiddenRoots } from './item-visibility';
 import { scopeArgs, TENANT_MODELS, TenantScopeError } from './tenant-scope';
 
 function createTenantClient(prisma: PrismaService, cls: ClsService<AppClsStore>) {
@@ -9,13 +10,19 @@ function createTenantClient(prisma: PrismaService, cls: ClsService<AppClsStore>)
     name: 'tenant-scope',
     query: {
       $allModels: {
-        $allOperations({ model, operation, args, query }) {
+        async $allOperations({ model, operation, args, query }) {
           if (!TENANT_MODELS.has(model)) return query(args);
           const workspaceId = cls.get('workspaceId');
           if (!workspaceId) {
             throw new TenantScopeError(`${model}.${operation}: istek bağlamında workspace yok`);
           }
-          return query(scopeArgs(model, operation, args, workspaceId) as typeof args);
+          const scoped = scopeArgs(model, operation, args, workspaceId);
+          // Gizli öğeler (ADR-113): kullanıcının göremediği köklerin altındaki öğeler hiç dönmez.
+          const final =
+            model === 'WorkItem'
+              ? hideItemsArgs(operation, scoped, await loadHiddenRoots(prisma, cls))
+              : scoped;
+          return query(final as typeof args);
         },
       },
     },

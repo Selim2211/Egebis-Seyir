@@ -12,6 +12,7 @@ import { Reflector } from '@nestjs/core';
 import { ERROR_CODES, type Permission, type SpacePermission } from '@scrum/shared';
 import { ClsService } from 'nestjs-cls';
 import type { AppClsStore } from '../../infra/cls/request-context';
+import { ItemAccessService } from '../access/item-access.service';
 import { roleTier } from '../access/role-tier';
 import { PrismaService } from '../../infra/prisma/prisma.service';
 import { safeEqual } from '../../infra/security/tokens';
@@ -25,6 +26,8 @@ const cookie = (req: AuthedRequest, name: string): string | undefined => {
   const value = (req.cookies as Record<string, unknown> | undefined)?.[name];
   return typeof value === 'string' && value.length > 0 ? value : undefined;
 };
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /** 1) Oturum: cookie → kullanıcı. @Public olmayan uçlarda oturum zorunlu. */
 @Injectable()
@@ -169,6 +172,7 @@ export class SpacePermissionGuard implements CanActivate {
     private readonly reflector: Reflector,
     private readonly cls: ClsService<AppClsStore>,
     private readonly spaces: SpaceAccessService,
+    private readonly items: ItemAccessService,
   ) {}
 
   async canActivate(ctx: ExecutionContext): Promise<boolean> {
@@ -187,8 +191,22 @@ export class SpacePermissionGuard implements CanActivate {
     if (!spaceId || !permissions) throw new NotFoundException({ code: ERROR_CODES.NOT_FOUND });
 
     this.cls.set('spaceId', spaceId);
-    this.cls.set('spacePermissions', permissions);
-    if (!permissions.includes(required)) {
+    // Öğe bazlı erişim (ADR-113): öğe rotalarında etkin izinler, öğedeki ekleme/kısıtlamayı içerir.
+    let effective: readonly string[] = permissions;
+    const itemId = typeof req.params?.itemId === 'string' ? req.params.itemId : null;
+    if (itemId && UUID.test(itemId)) {
+      const forItem = await this.items.permissionsForItem(itemId, permissions);
+      if (!forItem) throw new NotFoundException({ code: ERROR_CODES.NOT_FOUND });
+      effective = forItem;
+    } else if (!permissions.includes(required)) {
+      // Üst öğe verilerek öğe oluşturma: üst öğedeki erişim rolü yazma izni verebilir.
+      const parentId = (req.body as { parentId?: unknown } | undefined)?.parentId;
+      if (typeof parentId === 'string' && UUID.test(parentId)) {
+        effective = (await this.items.permissionsForItem(parentId, permissions)) ?? permissions;
+      }
+    }
+    this.cls.set('spacePermissions', effective);
+    if (!effective.includes(required)) {
       throw new ForbiddenException({ code: ERROR_CODES.FORBIDDEN });
     }
     return true;

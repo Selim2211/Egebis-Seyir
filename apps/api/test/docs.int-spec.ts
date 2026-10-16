@@ -333,13 +333,15 @@ describe('Doküman sayfaları (gerçek veritabanı)', () => {
       const { id } = await doc(s.id, { title: 'Ekli sayfa' });
       const pdf = Buffer.from('%PDF-1.4\n%test\n');
       await owner.upload(api(`/docs/${id}/attachments`), pdf, 'sartname.pdf').expect(201);
+      // Her tür kabul edilir; çalıştırılabilir dosya önizlenmez (ADR-114).
       await owner
         .upload(api(`/docs/${id}/attachments`), Buffer.from('MZ'), 'kurulum.exe')
-        .expect(422);
+        .expect(201);
 
       const page = await detail(id);
       expect(page.attachments.map((a) => [a.fileName, a.previewable])).toEqual([
         ['sartname.pdf', true],
+        ['kurulum.exe', false],
       ]);
       const attId = page.attachments[0]!.id;
       const dl = await owner.download(api(`/docs/${id}/attachments/${attId}`)).expect(200);
@@ -355,7 +357,7 @@ describe('Doküman sayfaları (gerçek veritabanı)', () => {
       await elif.delete(api(`/docs/${id}/attachments/${attId}`)).expect(403);
 
       await owner.delete(api(`/docs/${id}/attachments/${attId}`)).expect(204);
-      expect((await detail(id)).attachments).toEqual([]);
+      expect((await detail(id)).attachments.map((a) => a.fileName)).toEqual(['kurulum.exe']);
       await owner.delete(api(`/docs/${id}/attachments/${attId}`)).expect(404);
 
       // Silinen sayfaya ek yüklenemez.

@@ -17,6 +17,8 @@ export const TENANT_MODELS: ReadonlySet<string> = new Set([
   'Favorite',
   'WorkItem',
   'WorkItemAssignee',
+  'WorkItemAccess',
+  'WorkItemAccessEntry',
   'WorkItemLabel',
   'Label',
   'Checklist',

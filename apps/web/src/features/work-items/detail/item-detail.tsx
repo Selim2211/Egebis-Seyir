@@ -10,6 +10,8 @@ import {
   Eye,
   EyeOff,
   Link2,
+  Lock,
+  Share2,
   MoreHorizontal,
   Maximize2,
   Trash2,
@@ -33,6 +35,8 @@ import { useCurrentWorkspace } from '@/features/workspace/queries';
 import { useErrorMessage } from '@/lib/use-error-message';
 import { cn } from '@/lib/utils';
 import { itemByKeyQuery, useCopyItem, useItemLifecycle, useWatchItem } from '../queries';
+import { accessState, ShareDialog } from '../access/share-dialog';
+import { useItemAccess } from '../access/queries';
 import { PromoteEpicDialog } from '../promote-epic-dialog';
 import { Attachments } from './attachments';
 import { Checklists } from './checklists';
@@ -107,6 +111,10 @@ function Content({
   const canWrite = space.permissions.includes(S.WORK_ITEM_WRITE) && !item.archived;
   const wide = variant === 'page';
   const [promoting, setPromoting] = useState(false);
+  const [sharing, setSharing] = useState(false);
+  const canShare = space.permissions.includes(S.WORK_ITEM_ACCESS) && !item.archived;
+  const access = useItemAccess(item.id, true);
+  const shareState = accessState(access.data);
   const canPromote = canWrite && space.scrumEnabled && item.type === 'TASK';
 
   const run = (action: 'archive' | 'unarchive' | 'delete' | 'restore', message?: string) =>
@@ -184,6 +192,20 @@ function Content({
             </span>
             <span className="text-muted-foreground text-xs">{item.watcherCount}</span>
           </Button>
+
+          {(canShare || shareState !== 'inherited') && (
+            <Button
+              variant={shareState === 'private' ? 'outline' : 'cta'}
+              size="lg"
+              className="font-semibold"
+              disabled={!canShare}
+              onClick={() => setSharing(true)}
+              data-testid="share-button"
+            >
+              {shareState === 'private' ? <Lock aria-hidden /> : <Share2 aria-hidden />}
+              {t(`share.button.${shareState}` as 'share.button.inherited')}
+            </Button>
+          )}
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -333,6 +355,7 @@ function Content({
         <Copy className="mr-1 inline size-3" aria-hidden />
         {t('detail.updated', { when: new Date(item.updatedAt).toLocaleString() })}
       </p>
+      <ShareDialog itemId={item.id} itemKey={item.key} open={sharing} onOpenChange={setSharing} />
       <PromoteEpicDialog
         item={promoting ? { id: item.id, key: item.key } : null}
         onClose={() => setPromoting(false)}

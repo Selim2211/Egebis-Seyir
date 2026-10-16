@@ -41,7 +41,13 @@ const TEAM_WORK = [
   S.DOC_WRITE,
   S.LIST_MANAGE,
 ] as const;
-const SPRINT_LEAD = [S.SPRINT_PLAN, S.SPRINT_START, S.SPRINT_COMPLETE, S.SPACE_SETTINGS] as const;
+const SPRINT_LEAD = [
+  S.SPRINT_PLAN,
+  S.SPRINT_START,
+  S.SPRINT_COMPLETE,
+  S.SPACE_SETTINGS,
+  S.WORK_ITEM_ACCESS,
+] as const;
 
 /**
  * Varsayılan Space (Scrum) rol matrisi (brief §7.2). Brief bunu başlangıç önerisi

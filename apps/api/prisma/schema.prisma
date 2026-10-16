@@ -167,8 +167,8 @@ model User {
   docsCreated             Doc[]                    @relation("DocCreator")
   docsUpdated             Doc[]                    @relation("DocUpdater")
   docVersions             DocVersion[]             @relation("DocVersionAuthor")
-  templates       Template[]
-  apiTokens       ApiToken[]
+  templates               Template[]
+  apiTokens               ApiToken[]
 
   @@map("users")
 }
@@ -282,9 +282,10 @@ model Role {
   isSystem    Boolean   @default(true)
   createdAt   DateTime  @default(now()) @db.Timestamptz
 
-  memberships  Membership[]
-  invitations  Invitation[]
-  spaceMembers SpaceMember[]
+  memberships   Membership[]
+  invitations   Invitation[]
+  spaceMembers  SpaceMember[]
+  accessEntries WorkItemAccessEntry[]
 
   @@unique([workspaceId, scope, key])
   @@map("roles")
@@ -523,17 +524,21 @@ model Favorite {
 // ---------- İş öğeleri (Faz 1.3, ADR-044) ----------
 
 model WorkItem {
-  id               String       @id @default(uuid(7)) @db.Uuid
-  workspaceId      String       @db.Uuid
-  workspace        Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  spaceId          String       @db.Uuid
-  space            Space        @relation(fields: [spaceId], references: [id], onDelete: Cascade)
-  listId           String       @db.Uuid
-  list             List         @relation(fields: [listId], references: [id], onDelete: Cascade)
+  id               String          @id @default(uuid(7)) @db.Uuid
+  workspaceId      String          @db.Uuid
+  workspace        Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  spaceId          String          @db.Uuid
+  space            Space           @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  listId           String          @db.Uuid
+  list             List            @relation(fields: [listId], references: [id], onDelete: Cascade)
   /// Üst öğe aynı Space'tedir; alt ağaç birlikte silinir.
-  parentId         String?      @db.Uuid
-  parent           WorkItem?    @relation("Tree", fields: [parentId], references: [id], onDelete: Cascade)
-  children         WorkItem[]   @relation("Tree")
+  parentId         String?         @db.Uuid
+  parent           WorkItem?       @relation("Tree", fields: [parentId], references: [id], onDelete: Cascade)
+  children         WorkItem[]      @relation("Tree")
+  /// Öğeye özel erişim kaydı (ADR-113); yoksa Space erişimi geçerlidir.
+  access           WorkItemAccess?
+  /// En yakın "özel erişimli" üst öğe (kendisi dahil); DB tetikleyicileri tutar (ADR-113).
+  accessRootId     String?         @db.Uuid
   type             WorkItemType
   /// Okunabilir ID = keyPrefix-number; ömür boyu sabit (ADR-033).
   keyPrefix        String
@@ -543,34 +548,34 @@ model WorkItem {
   description      Json?
   descriptionText  String?
   /// Özel alan değerleri: alan kimliği → değer (ADR-082).
-  customFields     Json         @default("{}")
+  customFields     Json            @default("{}")
   /// Tekrar kuralı {freq, interval}; tamamlanınca yeni örnek üretilir ve kural ona geçer (Faz 7.1).
   recurrence       Json?
   gitLinks         GitLink[]
-  statusId         String       @db.Uuid
-  status           Status       @relation(fields: [statusId], references: [id])
-  priority         Priority     @default(NORMAL)
-  reporterId       String?      @db.Uuid
-  reporter         User?        @relation("Reporter", fields: [reporterId], references: [id], onDelete: SetNull)
-  startDate        DateTime?    @db.Date
-  dueDate          DateTime?    @db.Date
+  statusId         String          @db.Uuid
+  status           Status          @relation(fields: [statusId], references: [id])
+  priority         Priority        @default(NORMAL)
+  reporterId       String?         @db.Uuid
+  reporter         User?           @relation("Reporter", fields: [reporterId], references: [id], onDelete: SetNull)
+  startDate        DateTime?       @db.Date
+  dueDate          DateTime?       @db.Date
   /// Story Point (her tip, ADR-107); T-shirt ölçeği sayıya eşlenir (ADR-045). Sub-task'ı olan görevde alt görevlerin toplamıdır (veritabanı tetikleyicisi).
   points           Float?
   /// Saat tahmini (Task/Sub-task).
   estimateHours    Float?
   /// Atanan kişinin girdiği tamamlanma yüzdesi 0–100 (ADR-107).
   percentDone      Int?
-  completedAt      DateTime?    @db.Timestamptz
+  completedAt      DateTime?       @db.Timestamptz
   /// List içinde kesirli sıralama anahtarı (ADR-014); migration'da COLLATE "C".
   rank             String
   /// Sprint (yalnızca üst düzey Story/Bug/Task, ADR-061); sprint silinirse boşalır.
-  sprintId         String?      @db.Uuid
-  sprint           Sprint?      @relation(fields: [sprintId], references: [id], onDelete: SetNull)
+  sprintId         String?         @db.Uuid
+  sprint           Sprint?         @relation(fields: [sprintId], references: [id], onDelete: SetNull)
   /// Space genelinde öncelik sırası (ADR-062); boşsa ilk okumada atanır, migration'da COLLATE "C".
   backlogRank      String?
   /// İşaretli DoD/DoR madde metinleri (Story/Bug); Space maddesi değişirse işaret kendiliğinden düşer.
-  dodChecked       String[]     @default([])
-  dorChecked       String[]     @default([])
+  dodChecked       String[]        @default([])
+  dorChecked       String[]        @default([])
   // Bug alanları
   severity         BugSeverity?
   stepsToReproduce String?
@@ -585,11 +590,11 @@ model WorkItem {
   /// ClickUp içe aktarma (Faz 5).
   externalSource   String?
   externalId       String?
-  archivedAt       DateTime?    @db.Timestamptz
-  deletedAt        DateTime?    @db.Timestamptz
-  deletedById      String?      @db.Uuid
-  createdAt        DateTime     @default(now()) @db.Timestamptz
-  updatedAt        DateTime     @updatedAt @db.Timestamptz
+  archivedAt       DateTime?       @db.Timestamptz
+  deletedAt        DateTime?       @db.Timestamptz
+  deletedById      String?         @db.Uuid
+  createdAt        DateTime        @default(now()) @db.Timestamptz
+  updatedAt        DateTime        @updatedAt @db.Timestamptz
 
   assignees    WorkItemAssignee[]
   labels       WorkItemLabel[]
@@ -615,6 +620,7 @@ model WorkItem {
   @@index([sprintId])
   @@index([spaceId])
   @@index([parentId])
+  @@index([workspaceId, accessRootId])
   @@index([statusId])
   @@index([workspaceId, externalSource, externalId])
   @@map("work_items")
@@ -939,18 +945,18 @@ enum GoalKind {
 /// Birebir mesajlaşma (Faz 7.8, ADR-098): iki kullanıcı arasındaki tek konuşma. `userLowId < userHighId`
 /// sıralaması aynı çiftin iki ayrı konuşma açmasını engeller.
 model Conversation {
-  id            String    @id @default(uuid(7)) @db.Uuid
-  workspaceId   String    @db.Uuid
-  workspace     Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  userLowId     String    @db.Uuid
-  userLow       User      @relation("ConversationLow", fields: [userLowId], references: [id], onDelete: Cascade)
-  userHighId    String    @db.Uuid
-  userHigh      User      @relation("ConversationHigh", fields: [userHighId], references: [id], onDelete: Cascade)
+  id             String    @id @default(uuid(7)) @db.Uuid
+  workspaceId    String    @db.Uuid
+  workspace      Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  userLowId      String    @db.Uuid
+  userLow        User      @relation("ConversationLow", fields: [userLowId], references: [id], onDelete: Cascade)
+  userHighId     String    @db.Uuid
+  userHigh       User      @relation("ConversationHigh", fields: [userHighId], references: [id], onDelete: Cascade)
   /// Her tarafın en son okuduğu an; okunmamış sayısı bundan sonrasına bakar.
   lastReadLowAt  DateTime? @db.Timestamptz
   lastReadHighAt DateTime? @db.Timestamptz
-  lastMessageAt DateTime? @db.Timestamptz
-  createdAt     DateTime  @default(now()) @db.Timestamptz
+  lastMessageAt  DateTime? @db.Timestamptz
+  createdAt      DateTime  @default(now()) @db.Timestamptz
 
   messages Message[]
 
@@ -986,7 +992,8 @@ model Team {
   color       String    @default("#2563EB")
   createdAt   DateTime  @default(now()) @db.Timestamptz
 
-  members TeamMember[]
+  members       TeamMember[]
+  accessEntries WorkItemAccessEntry[]
 
   @@unique([workspaceId, name])
   @@map("teams")
@@ -1107,7 +1114,7 @@ model Doc {
   updatedAt   DateTime  @updatedAt @db.Timestamptz
   deletedAt   DateTime? @db.Timestamptz
 
-  versions DocVersion[]
+  versions    DocVersion[]
   comments    Comment[]
   links       DocItemLink[]
   attachments Attachment[]
@@ -1482,11 +1489,11 @@ model GitIntegration {
 
 /// İş öğesine bağlı commit veya PR/MR.
 model GitLink {
-  id          String       @id @default(uuid(7)) @db.Uuid
-  workspaceId String       @db.Uuid
-  workspace   Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  workItemId  String       @db.Uuid
-  workItem    WorkItem     @relation(fields: [workItemId], references: [id], onDelete: Cascade)
+  id          String        @id @default(uuid(7)) @db.Uuid
+  workspaceId String        @db.Uuid
+  workspace   Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  workItemId  String        @db.Uuid
+  workItem    WorkItem      @relation(fields: [workItemId], references: [id], onDelete: Cascade)
   provider    GitProvider
   kind        GitLinkKind
   repo        String
@@ -1495,10 +1502,45 @@ model GitLink {
   url         String?
   state       GitLinkState?
   author      String?
-  createdAt   DateTime     @default(now()) @db.Timestamptz
-  updatedAt   DateTime     @updatedAt @db.Timestamptz
+  createdAt   DateTime      @default(now()) @db.Timestamptz
+  updatedAt   DateTime      @updatedAt @db.Timestamptz
 
   @@unique([workItemId, provider, kind, repo, externalId])
   @@index([workItemId])
   @@map("git_links")
+}
+
+/// Öğeye özel erişim (ADR-113): alt öğeler en yakın kaydı miras alır.
+model WorkItemAccess {
+  itemId      String   @id @db.Uuid
+  item        WorkItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  workspaceId String   @db.Uuid
+  /// true: yalnızca listedekiler (+ Owner/Admin + oluşturan) görür; false: Space erişimine ekleme yapar.
+  isPrivate   Boolean  @default(false)
+  createdById String?  @db.Uuid
+  createdAt   DateTime @default(now()) @db.Timestamptz
+
+  entries WorkItemAccessEntry[]
+
+  @@map("work_item_access")
+}
+
+model WorkItemAccessEntry {
+  id          String         @id @default(uuid(7)) @db.Uuid
+  workspaceId String         @db.Uuid
+  itemId      String         @db.Uuid
+  access      WorkItemAccess @relation(fields: [itemId], references: [itemId], onDelete: Cascade)
+  /// Kişi ya da takım: tam olarak biri dolu (CHECK).
+  userId      String?        @db.Uuid
+  teamId      String?        @db.Uuid
+  team        Team?          @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  roleId      String         @db.Uuid
+  role        Role           @relation(fields: [roleId], references: [id])
+  createdAt   DateTime       @default(now()) @db.Timestamptz
+
+  @@unique([itemId, userId])
+  @@unique([itemId, teamId])
+  @@index([workspaceId, userId])
+  @@index([workspaceId, teamId])
+  @@map("work_item_access_entries")
 }

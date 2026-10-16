@@ -426,7 +426,9 @@
     "ROLE_INVALID_PERMISSIONS": "İzin listesi geçerli değil.",
     "ROLE_GUARDRAIL": "Bu değişikliğe izin verilmiyor: insanları dışarıda bırakır veya gerekli bir izni kaldırır.",
     "ROLE_IN_USE": "Bu rolü hâlâ kullananlar var. Taşınacakları bir rol seç.",
-    "ROLE_NAME_TAKEN": "Bu adda bir özel rol zaten var."
+    "ROLE_NAME_TAKEN": "Bu adda bir özel rol zaten var.",
+    "ITEM_ACCESS_ESCALATION": "Birine kendi sahip olduğundan fazla yetki veremezsin.",
+    "ITEM_ACCESS_INVALID": "Bu kişi veya takım öğeye eklenemez."
   },
   "spaceRoles": {
     "PRODUCT_OWNER": "Product Owner",
@@ -460,8 +462,8 @@
     "mode": "Çalışma modu",
     "modeScrum": "Scrum",
     "modeScrumHelp": "Sprint, Epic, Product Backlog ve Scrum rolleri açık.",
-    "modeSimple": "Basit liste",
-    "modeSimpleHelp": "Yalnızca listeler ve görevler; Scrum özellikleri kapalı.",
+    "modeSimple": "Kanban",
+    "modeSimpleHelp": "Panoda sürekli akış: sprint ve Scrum özellikleri yok. Listeler, görevler ve Space geneli Kanban board.",
     "sprintLength": "Sprint süresi",
     "weeks_one": "{{count}} hafta",
     "weeks_other": "{{count}} hafta",
@@ -2127,6 +2129,49 @@
     "sprint.cancel": "Sprint iptal etme",
     "report.view": "Raporları görme",
     "doc.view": "Dokümanları görme",
-    "doc.write": "Doküman oluşturma ve düzenleme"
+    "doc.write": "Doküman oluşturma ve düzenleme",
+    "workItem.access.manage": "İş öğesine kimin erişeceğini yönetme"
+  },
+  "share": {
+    "title": "Sharing & permissions · {{key}}",
+    "subtitle": "Bu öğeyi kimin görüp üzerinde çalışabileceğini seç. Altındaki her şey aynı ayarı izler.",
+    "button": {
+      "inherited": "Share",
+      "custom": "Shared",
+      "private": "Private"
+    },
+    "stateSpace": "Bu öğe Space erişimini izler: Space'e erişimi olan herkes görür.",
+    "stateInherited": "{{key}} · {{title}} öğesinden miras alınıyor. Burada değiştirirsen bu öğe kendi ayarlarını alır.",
+    "overrideHint": "Kaydedince bu öğe ve altındakiler için ayrı ayarlar oluşur.",
+    "state": {
+      "custom": "Özel erişim: aşağıdaki kişiler, Space rollerine ek olarak bu öğede ve altındaki her şeyde seçilen rolü alır.",
+      "private": "Gizli: bu öğeyi ve altındaki her şeyi yalnızca aşağıdaki kişiler (ve Owner/Admin) görür."
+    },
+    "private": "Gizli",
+    "privateHelp": "Bu öğeyi ve altındaki her şeyi listede olmayan herkesten gizle.",
+    "people": "Kişiler ve takımlar",
+    "empty": "Henüz kimse eklenmedi. Herkes kendi Space rolünü korur.",
+    "emptyPrivate": "Kimse eklenmedi. Yalnızca sen ile Owner ve Admin görür.",
+    "add": "Kişi veya takım ekle",
+    "choose": "Kişi veya takım seç…",
+    "team": "Takım",
+    "newRole": "Yeni kişi için rol",
+    "addButton": "Ekle",
+    "roleFor": "{{name}} için rol",
+    "remove": "{{name}} kaldır",
+    "saved": "Paylaşım ayarları kaydedildi.",
+    "reset": "Paylaşım sıfırlandı: öğe yeniden Space'i izliyor.",
+    "resetButton": "Mirasa döndür"
+  },
+  "kanban": {
+    "link": "Kanban board",
+    "title": "Kanban board",
+    "list": "Liste",
+    "allLists": "Tüm listeler",
+    "search": "Kartları süz…",
+    "mine": "Yalnızca benimkiler",
+    "addCard": "Kart ekle",
+    "addCardTitle": "Yeni kart başlığı",
+    "addCardPlaceholder": "Kart başlığı, sonra Enter"
   }
 }

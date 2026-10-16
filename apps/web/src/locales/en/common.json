@@ -426,7 +426,9 @@
     "ROLE_INVALID_PERMISSIONS": "The permission list is not valid.",
     "ROLE_GUARDRAIL": "This change is not allowed: it would lock people out or remove a required permission.",
     "ROLE_IN_USE": "People still use this role. Choose a role to move them to.",
-    "ROLE_NAME_TAKEN": "A custom role with this name already exists."
+    "ROLE_NAME_TAKEN": "A custom role with this name already exists.",
+    "ITEM_ACCESS_ESCALATION": "You cannot give someone more permissions than you have.",
+    "ITEM_ACCESS_INVALID": "That person or team cannot be added to this item."
   },
   "spaceRoles": {
     "PRODUCT_OWNER": "Product Owner",
@@ -460,8 +462,8 @@
     "mode": "Work mode",
     "modeScrum": "Scrum",
     "modeScrumHelp": "Sprints, Epics, Product Backlog and Scrum roles enabled.",
-    "modeSimple": "Simple list",
-    "modeSimpleHelp": "Lists and tasks only; Scrum features off.",
+    "modeSimple": "Kanban",
+    "modeSimpleHelp": "Continuous flow on a board: no sprints and no Scrum features. Lists, tasks and a Space-wide Kanban board.",
     "sprintLength": "Sprint length",
     "weeks_one": "{{count}} week",
     "weeks_other": "{{count}} weeks",
@@ -2127,6 +2129,49 @@
     "sprint.cancel": "Cancel sprints",
     "report.view": "View reports",
     "doc.view": "View docs",
-    "doc.write": "Create and edit docs"
+    "doc.write": "Create and edit docs",
+    "workItem.access.manage": "Manage who can access a work item"
+  },
+  "share": {
+    "title": "Sharing & permissions · {{key}}",
+    "subtitle": "Choose who can see and work on this item. Everything under it follows the same settings.",
+    "button": {
+      "inherited": "Share",
+      "custom": "Shared",
+      "private": "Private"
+    },
+    "stateSpace": "This item follows the Space access: everyone with access to the Space sees it.",
+    "stateInherited": "Inherited from {{key}} · {{title}}. Changing it here gives this item its own settings.",
+    "overrideHint": "Saving creates separate settings for this item and the items under it.",
+    "state": {
+      "custom": "Custom access: the people below get the chosen role on this item and everything under it, on top of their Space role.",
+      "private": "Private: only the people below (and Owners and Admins) can see this item and everything under it."
+    },
+    "private": "Private",
+    "privateHelp": "Hide this item and everything under it from everyone who is not listed.",
+    "people": "People and teams",
+    "empty": "Nobody added yet. Everyone keeps their Space role.",
+    "emptyPrivate": "Nobody added. Only you and the Owners and Admins can see it.",
+    "add": "Add a person or team",
+    "choose": "Choose a person or team…",
+    "team": "Team",
+    "newRole": "Role for the new person",
+    "addButton": "Add",
+    "roleFor": "Role for {{name}}",
+    "remove": "Remove {{name}}",
+    "saved": "Sharing settings saved.",
+    "reset": "Sharing reset: the item follows the Space again.",
+    "resetButton": "Reset to inherited"
+  },
+  "kanban": {
+    "link": "Kanban board",
+    "title": "Kanban board",
+    "list": "List",
+    "allLists": "All lists",
+    "search": "Filter cards…",
+    "mine": "Only mine",
+    "addCard": "Add card",
+    "addCardTitle": "New card title",
+    "addCardPlaceholder": "Card title, then Enter"
   }
 }

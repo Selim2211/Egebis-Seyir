@@ -1,0 +1,56 @@
+[33m(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vitest.int.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.[39m
+
+ RUN  v5.0.3 C:/dev/scrum-manager/apps/api
+
+Loaded Prisma config from prisma.config.ts.
+
+Prisma schema loaded from prisma\schema.prisma.
+Datasource "db": PostgreSQL database "scrum_test", schema "public" at "localhost:5432"
+
+40 migrations found in prisma/migrations
+
+
+No pending migrations to apply.
+(node:23172) DeprecationWarning: Calling client.query() when the client is already executing a query is deprecated and will be removed in pg@9.0. Use async/await or an external async flow control mechanism instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+ ❯ test/docs.int-spec.ts (19 tests | 1 failed) 27421ms
+   ❯ Doküman sayfaları (gerçek veritabanı) (19)
+     ❯ yetki (brief §7) (4)
+       × sayfaya dosya eklenir, indirilir, silinir; yetki ve görünürlük korunur 1505ms
+(node:17660) DeprecationWarning: Calling client.query() when the client is already executing a query is deprecated and will be removed in pg@9.0. Use async/await or an external async flow control mechanism instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:4404) DeprecationWarning: Calling client.query() when the client is already executing a query is deprecated and will be removed in pg@9.0. Use async/await or an external async flow control mechanism instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:15656) DeprecationWarning: Calling client.query() when the client is already executing a query is deprecated and will be removed in pg@9.0. Use async/await or an external async flow control mechanism instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/docs.int-spec.ts > Doküman sayfaları (gerçek veritabanı) > yetki (brief §7) > sayfaya dosya eklenir, indirilir, silinir; yetki ve görünürlük korunur
+Error: expected 422 "Unprocessable Entity", got 201 "Created"
+ ❯ test/docs.int-spec.ts:338:10
+    336|       await owner
+    337|         .upload(api(`/docs/${id}/attachments`), Buffer.from('MZ'), 'ku…
+    338|         .expect(422);
+       |          ^
+    339|
+    340|       const page = await detail(id);
+ ❯ Test._assertStatus ../../node_modules/.pnpm/supertest@7.3.0_supports-color@8.1.1/node_modules/supertest/lib/test.js:376:14
+ ❯ ../../node_modules/.pnpm/supertest@7.3.0_supports-color@8.1.1/node_modules/supertest/lib/test.js:432:13
+ ❯ Test._assertFunction ../../node_modules/.pnpm/supertest@7.3.0_supports-color@8.1.1/node_modules/supertest/lib/test.js:409:13
+ ❯ Test.assert ../../node_modules/.pnpm/supertest@7.3.0_supports-color@8.1.1/node_modules/supertest/lib/test.js:274:23
+ ❯ localAssert ../../node_modules/.pnpm/supertest@7.3.0_supports-color@8.1.1/node_modules/supertest/lib/test.js:196:38
+ ❯ Server.<anonymous> ../../node_modules/.pnpm/supertest@7.3.0_supports-color@8.1.1/node_modules/supertest/lib/test.js:203:13
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 49 passed (50)
+      Tests  1 failed | 378 passed (379)
+   Start at  16:02:30
+   Duration  631.59s (tests 78%, import 22%)
+
+done

@@ -30,6 +30,8 @@ export const SPACE_PERMISSIONS = {
   BACKLOG_RANK: 'backlog.rank',
   /** Epic/Task/Sub-task/Bug oluşturma ve düzenleme. */
   WORK_ITEM_WRITE: 'workItem.write',
+  /** Öğenin erişimini yönetme: kişi/takım ekleme, gizli yapma (ADR-113). */
+  WORK_ITEM_ACCESS: 'workItem.access.manage',
   /** Kendine atanmış görevin durumunu değiştirme. */
   WORK_ITEM_STATUS_OWN: 'workItem.status.own',
   /** Story point / tahmin girme. */

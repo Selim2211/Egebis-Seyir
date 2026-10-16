@@ -17,7 +17,9 @@ import {
   CreateChecklistEntryRequestSchema,
   CreateChecklistRequestSchema,
   CreateLinkRequestSchema,
+  ItemAccessSchema,
   ItemSearchResponseSchema,
+  PutItemAccessRequestSchema,
   MY_WORK_SCOPES,
   MyWorkResponseSchema,
   SearchResponseSchema,
@@ -44,6 +46,7 @@ import {
   type CreatedItem,
   type EpicsResponse,
   type Gantt,
+  type ItemAccess,
   type ItemSearchResponse,
   type MyWorkResponse,
   type MyWorkScope,
@@ -55,6 +58,7 @@ import {
 } from '@scrum/shared';
 import { createZodDto, ZodResponse, ZodValidationPipe } from 'nestjs-zod';
 import { z } from 'zod';
+import { ItemAccessService } from '../access/item-access.service';
 import { RequireSpacePermission } from '../auth/decorators';
 import { EpicsService } from './epics.service';
 import { GanttService } from './gantt.service';
@@ -89,6 +93,8 @@ class SplitItemResponseDto extends createZodDto(SplitItemResponseSchema) {}
 class ItemSearchDto extends createZodDto(ItemSearchResponseSchema) {}
 class MyWorkDto extends createZodDto(MyWorkResponseSchema) {}
 class SearchDto extends createZodDto(SearchResponseSchema) {}
+class ItemAccessDto extends createZodDto(ItemAccessSchema) {}
+class PutItemAccessDto extends createZodDto(PutItemAccessRequestSchema) {}
 
 const ScopePipe = new ZodValidationPipe(z.enum(MY_WORK_SCOPES).default('assigned'));
 
@@ -106,6 +112,8 @@ export class WorkItemsController {
     private readonly queries: ItemQueriesService,
     private readonly epics: EpicsService,
     private readonly gantt: GanttService,
+
+    private readonly itemAccess: ItemAccessService,
   ) {}
 
   /** Görülebilen Space'lerde başlık, açıklama ve kimlik araması (ADR-053). */
@@ -148,6 +156,14 @@ export class WorkItemsController {
     return this.items.list(listId);
   }
 
+  /** Space geneli Kanban panosu için tüm listelerin öğeleri. */
+  @Get('spaces/:spaceId/kanban')
+  @RequireSpacePermission(S.SPACE_VIEW)
+  @ZodResponse({ type: WorkItemsDto })
+  kanban(@Uuid('spaceId') spaceId: string): Promise<WorkItemsResponse> {
+    return this.items.listSpace(spaceId);
+  }
+
   @Post('lists/:listId/items')
   @RequireSpacePermission(S.WORK_ITEM_WRITE)
   @ZodResponse({ type: CreatedItemDto, status: HttpStatus.CREATED })
@@ -183,6 +199,28 @@ export class WorkItemsController {
   @ZodResponse({ type: WorkItemDetailDto })
   byKey(@Param('key') key: string): Promise<WorkItemDetail> {
     return this.items.detailByKey(key);
+  }
+
+  /** Öğeye özel erişim (ADR-113): kişi/takım + rol, gizli öğe. */
+  @Get('items/:itemId/access')
+  @RequireSpacePermission(S.SPACE_VIEW)
+  @ZodResponse({ type: ItemAccessDto })
+  access(@Uuid('itemId') itemId: string): Promise<ItemAccess> {
+    return this.itemAccess.get(itemId);
+  }
+
+  @Put('items/:itemId/access')
+  @RequireSpacePermission(S.WORK_ITEM_ACCESS)
+  @HttpCode(NO_CONTENT)
+  async putAccess(@Uuid('itemId') itemId: string, @Body() body: PutItemAccessDto): Promise<void> {
+    await this.itemAccess.put(itemId, body);
+  }
+
+  @Delete('items/:itemId/access')
+  @RequireSpacePermission(S.WORK_ITEM_ACCESS)
+  @HttpCode(NO_CONTENT)
+  async clearAccess(@Uuid('itemId') itemId: string): Promise<void> {
+    await this.itemAccess.clear(itemId);
   }
 
   @Get('items/:itemId')

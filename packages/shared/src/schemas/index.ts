@@ -33,3 +33,4 @@ export * from './goal';
 export * from './message';
 export * from './team';
 export * from './role';
+export * from './item-access';

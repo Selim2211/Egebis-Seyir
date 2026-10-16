@@ -12,6 +12,7 @@ import {
 import { ClsService } from 'nestjs-cls';
 import { Prisma } from '../../generated/prisma/client';
 import type { AppClsStore } from '../../infra/cls/request-context';
+import { loadHiddenRoots } from '../../infra/prisma/item-visibility';
 import { PrismaService } from '../../infra/prisma/prisma.service';
 import { TenantPrismaService } from '../../infra/prisma/tenant-prisma.service';
 import { SpaceAccessService } from '../access/space-access.service';
@@ -73,6 +74,7 @@ export class ActivityFeedService {
     if (spaceIds.length === 0) return { events: [], next: null };
     const size = Math.min(Math.max(limit, 1), ACTIVITY_PAGE_SIZE);
     const at = decodeCursor(cursor);
+    const hidden = [...(await loadHiddenRoots(this.prisma, this.cls))];
 
     const hits = await this.prisma.$queryRaw<Array<{ id: string }>>(Prisma.sql`
       SELECT e."id"
@@ -83,6 +85,7 @@ export class ActivityFeedService {
         AND e."entityType" = 'item'
         AND w."spaceId" = ANY(${spaceIds}::uuid[])
         AND w."deletedAt" IS NULL
+        AND (w."accessRootId" IS NULL OR w."accessRootId" <> ALL(${hidden}::uuid[]))
         ${at ? Prisma.sql`AND (e."createdAt" < ${at.at} OR (e."createdAt" = ${at.at} AND e."id" < ${at.id}::uuid))` : Prisma.empty}
       ORDER BY e."createdAt" DESC, e."id" DESC
       LIMIT ${size + 1}

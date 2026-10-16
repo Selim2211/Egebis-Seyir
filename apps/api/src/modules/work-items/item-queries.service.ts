@@ -10,6 +10,7 @@ import {
 import { ClsService } from 'nestjs-cls';
 import { Prisma } from '../../generated/prisma/client';
 import type { AppClsStore } from '../../infra/cls/request-context';
+import { loadHiddenRoots } from '../../infra/prisma/item-visibility';
 import { PrismaService } from '../../infra/prisma/prisma.service';
 import { TenantPrismaService } from '../../infra/prisma/tenant-prisma.service';
 import { SpaceAccessService } from '../access/space-access.service';
@@ -78,6 +79,7 @@ export class ItemQueriesService {
       ? Prisma.sql`(w."keyPrefix" = ${key.prefix} AND w."number" = ${key.number})`
       : Prisma.sql`FALSE`;
 
+    const hidden = [...(await loadHiddenRoots(this.prisma, this.cls))];
     const hits = await this.prisma.$queryRaw<Array<{ id: string }>>(Prisma.sql`
       SELECT w."id"
       FROM "work_items" w
@@ -87,6 +89,7 @@ export class ItemQueriesService {
         AND w."spaceId" = ANY(${spaceIds}::uuid[])
         AND w."deletedAt" IS NULL
         AND w."archivedAt" IS NULL
+        AND (w."accessRootId" IS NULL OR w."accessRootId" <> ALL(${hidden}::uuid[]))
         AND (${keyMatch} OR w."title" ILIKE ${contains} OR ${textMatch})
       ORDER BY
         CASE WHEN ${keyMatch} THEN 0 WHEN w."title" ILIKE ${startsWith} THEN 1 WHEN w."title" ILIKE ${contains} THEN 2 ELSE 3 END,

@@ -319,6 +319,7 @@ function SpaceNode({
       {open && (
         <div role="group" aria-label={space.name}>
           {space.scrumEnabled && <ScrumLinks spaceId={space.id} />}
+          <KanbanLink spaceId={space.id} />
           <DocsLink spaceId={space.id} />
           <FormsLink spaceId={space.id} />
           <TimesheetLink spaceId={space.id} />
@@ -456,6 +457,22 @@ function ScrumLinks({ spaceId }: { spaceId: string }) {
   );
 }
 
+/** Space geneli Kanban panosu (ADR-115). */
+function KanbanLink({ spaceId }: { spaceId: string }) {
+  const { t } = useTranslation();
+  const closeSidebar = useUiStore((s) => s.setSidebarOpen);
+  return (
+    <ScrumLink
+      to="/spaces/$spaceId/kanban"
+      spaceId={spaceId}
+      onNavigate={() => closeSidebar(false)}
+    >
+      <Kanban className="text-muted-foreground size-4 shrink-0" aria-hidden />
+      <span className="truncate">{t('kanban.link')}</span>
+    </ScrumLink>
+  );
+}
+
 /** Space panosu (Faz 4.6). */
 function DashboardLink({ spaceId }: { spaceId: string }) {
   const { t } = useTranslation();
@@ -549,6 +566,7 @@ function ScrumLink({
   to:
     | '/spaces/$spaceId/backlog'
     | '/spaces/$spaceId/board'
+    | '/spaces/$spaceId/kanban'
     | '/spaces/$spaceId/docs'
     | '/spaces/$spaceId/forms'
     | '/spaces/$spaceId/timesheet'

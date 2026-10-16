@@ -23,6 +23,7 @@ export const PERMISSION_CATALOGUE: readonly PermissionEntry[] = [
   { scope: 'SPACE', group: 'space', key: S.LIST_MANAGE },
   { scope: 'SPACE', group: 'items', key: S.WORK_ITEM_WRITE },
   { scope: 'SPACE', group: 'items', key: S.WORK_ITEM_STATUS_OWN },
+  { scope: 'SPACE', group: 'items', key: S.WORK_ITEM_ACCESS },
   { scope: 'SPACE', group: 'items', key: S.ESTIMATE_WRITE },
   { scope: 'SPACE', group: 'items', key: S.COMMENT_WRITE },
   { scope: 'SPACE', group: 'sprints', key: S.BACKLOG_RANK },

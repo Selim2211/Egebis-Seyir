@@ -11,6 +11,7 @@ import {
   useSensors,
 } from '@dnd-kit/core';
 import { type WipState, type WorkItemSummary, wipState } from '@scrum/shared';
+import { Plus } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -41,6 +42,7 @@ export function BoardView({
   canMove,
   onStatus,
   showPoints,
+  onAddCard,
 }: {
   items: readonly WorkItemSummary[];
   statuses: readonly BoardStatus[];
@@ -50,6 +52,8 @@ export function BoardView({
   onStatus: (itemId: string, statusId: string) => void;
   /** Sütun başlığında toplam puan gösterilsin mi (sprint panosu). */
   showPoints?: boolean;
+  /** Verilirse her sütunun altında "Add card" kutusu çıkar (Kanban panosu). */
+  onAddCard?: (statusId: string, title: string) => void;
 }) {
   const { t } = useTranslation();
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
@@ -134,6 +138,10 @@ export function BoardView({
               activeId={activeId}
             />
           ))}
+          {onAddCard &&
+            statuses.map((status) => (
+              <AddCard key={`add-${status.id}`} onAdd={(title) => onAddCard(status.id, title)} />
+            ))}
         </div>
       </div>
       <DragOverlay>
@@ -294,6 +302,53 @@ function DraggableCard({
         onStatus={onStatus}
         dragging={dragging}
       />
+    </div>
+  );
+}
+
+/** Sütunun altında hızlı kart ekleme: tıkla, başlığı yaz, Enter. Esc vazgeçer. */
+function AddCard({ onAdd }: { onAdd: (title: string) => void }) {
+  const { t } = useTranslation();
+  const [open, setOpen] = useState(false);
+  const [title, setTitle] = useState('');
+  const submit = () => {
+    const value = title.trim();
+    if (!value) return;
+    onAdd(value);
+    setTitle('');
+  };
+  return (
+    <div className="py-2">
+      {open ? (
+        <input
+          autoFocus
+          value={title}
+          maxLength={500}
+          aria-label={t('kanban.addCardTitle')}
+          placeholder={t('kanban.addCardPlaceholder')}
+          onChange={(e) => setTitle(e.target.value)}
+          onBlur={() => {
+            if (!title.trim()) setOpen(false);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') submit();
+            if (e.key === 'Escape') {
+              setTitle('');
+              setOpen(false);
+            }
+          }}
+          className="border-primary/40 bg-card h-9 w-full rounded-lg border px-2.5 text-sm shadow-xs outline-none focus-visible:ring-4 focus-visible:ring-primary/15"
+        />
+      ) : (
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className="text-muted-foreground hover:border-primary hover:text-foreground flex h-9 w-full items-center justify-center gap-1.5 rounded-lg border-2 border-dashed text-sm transition-colors"
+        >
+          <Plus className="size-4" aria-hidden />
+          {t('kanban.addCard')}
+        </button>
+      )}
     </div>
   );
 }
