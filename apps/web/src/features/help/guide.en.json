@@ -501,10 +501,10 @@
         {
           "type": "figure",
           "image": "28-dnd",
-          "alt": "The Detach area while dragging",
-          "caption": "The Detach area that appears while dragging a Sub-Task.",
+          "alt": "Dragging a Task over a target Task, with the Detach area",
+          "caption": "The dragged row follows the cursor; the target Task turns purple and the Detach area appears at the bottom.",
           "legend": [
-            "**Dragged item**: The card you move with the mouse.",
+            "**Dragged row**: Shows what happens when you drop it (here: Sub-Task under MOB-3).",
             "**Detach**: A Sub-Task dropped here becomes a standalone Task."
           ]
         },

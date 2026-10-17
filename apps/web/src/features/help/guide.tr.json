@@ -501,10 +501,10 @@
         {
           "type": "figure",
           "image": "28-dnd",
-          "alt": "Sürüklerken çıkan Ayır alanı",
-          "caption": "Bir Sub-Task sürüklenirken altta çıkan Ayır alanı.",
+          "alt": "Bir Task sürüklenirken hedef Task ve Ayır alanı",
+          "caption": "Taşınan satır imleçle gelir; hedef Task mor renklenir, altta Ayır alanı çıkar.",
           "legend": [
-            "**Sürüklenen öğe**: Fareyle taşınan kart.",
+            "**Sürüklenen satır**: Altında bırakınca ne olacağı yazar (burada MOB-3 altına Sub-Task).",
             "**Ayır**: Buraya bırakılan Sub-Task bağımsız Task olur."
           ]
         },
