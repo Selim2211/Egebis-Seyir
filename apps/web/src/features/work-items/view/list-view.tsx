@@ -1,7 +1,11 @@
 import {
+  defaultDropAnimationSideEffects,
   DndContext,
   type DragEndEvent,
   DragOverlay,
+  type DragStartEvent,
+  type DropAnimation,
+  KeyboardSensor,
   PointerSensor,
   pointerWithin,
   useDraggable,
@@ -10,10 +14,12 @@ import {
   useSensors,
 } from '@dnd-kit/core';
 import type { WorkItemSummary } from '@scrum/shared';
-import { ChevronRight, CornerDownRight, GripVertical, Unlink } from 'lucide-react';
-import { useState } from 'react';
+import { Ban, ChevronRight, CornerDownRight, GripVertical, Unlink } from 'lucide-react';
+import { type PointerEventHandler, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
-import { WorkItemTypeIcon } from '@/components/work-item/work-item-visuals';
+import { StatusBadge, WorkItemTypeIcon } from '@/components/work-item/work-item-visuals';
+import { statusName } from '@/lib/default-names';
 import { cn } from '@/lib/utils';
 import { ItemOpenLink } from '../detail/item-nav';
 import { AssigneeStack, DueCell, EstimateCell, PriorityCell, StatusCell } from './cells';
@@ -23,40 +29,69 @@ import type { ViewProps } from './view-types';
 import { VirtualRows } from './virtual-rows';
 import type { ViewRow } from './view-state';
 
+/** Sürüklenen öğenin şu an neyin üstünde olduğu: hedef Task, Ayır alanı veya geçersiz satır. */
+type DragIntent =
+  { kind: 'nest'; target: WorkItemSummary } | { kind: 'blocked' } | { kind: 'detach' } | null;
+
+/** Geçersiz yere bırakınca satır yerine süzülerek geri döner (masaüstü klasörü gibi). */
+const RETURN_ANIMATION: DropAnimation = {
+  duration: 220,
+  easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)',
+  sideEffects: defaultDropAnimationSideEffects({ styles: { active: { opacity: '0' } } }),
+};
+
 /** List görünümü: hiyerarşik veya gruplu satırlar, satır içi durum/öncelik, sanal kaydırma. */
 export function ListView(props: ViewProps) {
   const { t } = useTranslation();
   const { rows, allSelected, onSelectAll } = props;
   const hasItems = rows.some((r) => r.kind === 'item');
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(KeyboardSensor),
+  );
   const [dragging, setDragging] = useState<WorkItemSummary | null>(null);
+  const [ghostWidth, setGhostWidth] = useState<number>(0);
+  const [overId, setOverId] = useState<string | null>(null);
   const byId = new Map(
     rows.flatMap((r) => (r.kind === 'item' ? [[r.item.id, r.item] as const] : [])),
   );
 
-  const onDragEnd = ({ active, over }: DragEndEvent) => {
+  const intentFor = (id: string | null): DragIntent => {
+    if (!dragging || !id) return null;
+    if (id === DETACH_ZONE) return dragging.parentId ? { kind: 'detach' } : null;
+    const target = byId.get(id.replace(DROP_PREFIX, ''));
+    if (!target || target.id === dragging.id) return null;
+    return props.canDropOn?.(dragging, target) ? { kind: 'nest', target } : { kind: 'blocked' };
+  };
+  const intent = intentFor(overId);
+
+  const reset = () => {
     setDragging(null);
-    const item = byId.get(String(active.id));
-    if (!item || !over) return;
-    if (over.id === DETACH_ZONE) {
-      if (item.parentId) props.onUnnest?.(item);
-      return;
-    }
-    const target = byId.get(String(over.id).replace(DROP_PREFIX, ''));
-    if (target && target.id !== item.id && props.canDropOn?.(item, target)) {
-      props.onNest?.(item, target);
-    }
+    setOverId(null);
+  };
+  const onDragStart = ({ active }: DragStartEvent) => {
+    setDragging(byId.get(String(active.id)) ?? null);
+    setGhostWidth(active.rect.current.initial?.width ?? 0);
+  };
+  const onDragEnd = ({ over }: DragEndEvent) => {
+    const item = dragging;
+    const result = intentFor(over ? String(over.id) : null);
+    reset();
+    if (!item || !result) return;
+    if (result.kind === 'detach') props.onUnnest?.(item);
+    if (result.kind === 'nest') props.onNest?.(item, result.target);
   };
 
   return (
     <DndContext
       sensors={sensors}
       collisionDetection={pointerWithin}
-      onDragStart={({ active }) => setDragging(byId.get(String(active.id)) ?? null)}
+      onDragStart={onDragStart}
+      onDragOver={({ over }) => setOverId(over ? String(over.id) : null)}
       onDragEnd={onDragEnd}
-      onDragCancel={() => setDragging(null)}
+      onDragCancel={reset}
     >
-      <div>
+      <div className={cn(dragging && 'select-none')}>
         {hasItems && (
           <div className="text-muted-foreground hidden items-center gap-3 border-b px-3 py-1.5 text-[11px] font-semibold tracking-wide uppercase md:flex">
             <SelectBox checked={allSelected} onChange={onSelectAll} label={t('view.selectAll')} />
@@ -77,43 +112,123 @@ export function ListView(props: ViewProps) {
         />
       </div>
       {dragging?.parentId && <DetachZone />}
-      <DragOverlay dropAnimation={null}>
-        {dragging && (
-          <div
-            data-dnd-overlay
-            className="bg-card border-primary flex w-max max-w-md items-center gap-2 rounded-lg border-2 px-3 py-2 text-sm shadow-xl"
-          >
-            <WorkItemTypeIcon type={dragging.type} />
-            <span className="text-muted-foreground font-mono text-xs">{dragging.key}</span>
-            <span className="truncate font-medium">{dragging.title}</span>
-          </div>
-        )}
-      </DragOverlay>
+      {/* Geçerli bir hedefe bırakınca onay penceresi açılır; geri dönüş animasyonu yalnızca iptalde. */}
+      {createPortal(
+        <DragOverlay
+          dropAnimation={intent && intent.kind !== 'blocked' ? null : RETURN_ANIMATION}
+          zIndex={TOP_LAYER}
+        >
+          {dragging && (
+            <DragGhost item={dragging} width={ghostWidth} intent={intent} props={props} />
+          )}
+        </DragOverlay>,
+        document.body,
+      )}
     </DndContext>
   );
 }
 
+/** Bildirim baloncuklarının (sonner) da üstünde kalır. */
+const TOP_LAYER = 1000000001;
 const DETACH_ZONE = '__detach';
 const DROP_PREFIX = 'drop:';
 
-/** Sürükleme sırasında altta ortada çıkan "Ayır" alanı: alt öğe bırakılınca bağımsız Task olur. */
+/** İmlece yapışan, havaya kaldırılmış satır kopyası; altında bırakınca ne olacağı yazar. */
+function DragGhost({
+  item,
+  width,
+  intent,
+  props,
+}: {
+  item: WorkItemSummary;
+  width: number;
+  intent: DragIntent;
+  props: ViewProps;
+}) {
+  const { t } = useTranslation();
+  const status = props.cells.space.statuses.find((s) => s.id === item.statusId);
+  return (
+    <div
+      data-dnd-overlay
+      className={cn(
+        'dnd-lift bg-card/95 ring-primary/30 overflow-hidden rounded-xl shadow-2xl ring-1 backdrop-blur',
+        intent?.kind === 'blocked' ? 'cursor-not-allowed' : 'cursor-grabbing',
+      )}
+      style={{ width: width ? Math.min(Math.max(width, 320), 720) : undefined }}
+    >
+      <div className="flex items-center gap-2 px-3 py-2.5 text-sm">
+        <GripVertical className="text-primary size-4 shrink-0" aria-hidden />
+        <WorkItemTypeIcon type={item.type} />
+        <span className="text-muted-foreground shrink-0 font-mono text-xs">{item.key}</span>
+        <span className="min-w-0 flex-1 truncate font-medium">{item.title}</span>
+        {item.childCount > 0 && (
+          <span className="text-muted-foreground shrink-0 text-xs">
+            <CornerDownRight className="mr-0.5 inline size-3" aria-hidden />
+            {item.childCount}
+          </span>
+        )}
+        {status && (
+          <StatusBadge
+            category={status.category}
+            label={statusName(status.name)}
+            color={status.color}
+          />
+        )}
+      </div>
+      {intent && (
+        <div
+          data-testid="dnd-intent"
+          className={cn(
+            'flex items-center gap-1.5 border-t px-3 py-1.5 text-xs font-semibold',
+            intent.kind === 'blocked'
+              ? 'bg-muted text-muted-foreground'
+              : 'bg-primary text-primary-foreground',
+          )}
+        >
+          {intent.kind === 'nest' && (
+            <>
+              <CornerDownRight className="size-3.5" aria-hidden />
+              {t('dnd.moveUnder', { key: intent.target.key })}
+            </>
+          )}
+          {intent.kind === 'detach' && (
+            <>
+              <Unlink className="size-3.5" aria-hidden />
+              {t('dnd.detachShort')}
+            </>
+          )}
+          {intent.kind === 'blocked' && (
+            <>
+              <Ban className="size-3.5" aria-hidden />
+              {t('dnd.cannotDrop')}
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** Sürükleme sırasında ekranın altında ortada çıkan "Ayır" alanı: alt öğe bırakılınca bağımsız Task olur. */
 function DetachZone() {
   const { t } = useTranslation();
   const { setNodeRef, isOver } = useDroppable({ id: DETACH_ZONE });
-  return (
+  // Portal: kaydırma/animasyon kapsayıcıları fixed konumu bozmasın, alan hep ekranın altında dursun.
+  return createPortal(
     <div
       ref={setNodeRef}
       data-testid="detach-zone"
       className={cn(
-        'fixed bottom-8 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2 rounded-2xl border-2 border-dashed px-8 py-5 text-base font-semibold shadow-2xl transition-colors',
+        'dnd-rise fixed bottom-4 left-1/2 z-[1000000000] flex -translate-x-1/2 items-center gap-2.5 rounded-full border-2 border-dashed px-7 py-3.5 text-sm font-semibold shadow-2xl backdrop-blur transition-all duration-150',
         isOver
-          ? 'border-primary bg-primary text-primary-foreground'
-          : 'border-primary/60 bg-card text-primary',
+          ? 'border-primary bg-primary text-primary-foreground scale-105'
+          : 'border-primary/50 bg-card/90 text-primary',
       )}
     >
-      <Unlink className="size-5" aria-hidden />
+      <Unlink className="size-4.5" aria-hidden />
       {t('dnd.detach')}
-    </div>
+    </div>,
+    document.body,
   );
 }
 
@@ -175,37 +290,63 @@ function ItemRow({
     attributes,
     isDragging,
   } = useDraggable({ id: item.id, disabled: !draggable });
-  const droppable =
-    dragging !== null && dragging.id !== item.id && (props.canDropOn?.(dragging, item) ?? false);
+  // Sürükleme sırasında her satır hedef olur; geçersiz olanlar "bırakılamaz" der.
+  const target = dragging !== null && dragging.id !== item.id;
+  const valid = target && (props.canDropOn?.(dragging, item) ?? false);
   const { setNodeRef: dropRef, isOver } = useDroppable({
     id: DROP_PREFIX + item.id,
-    disabled: !droppable,
+    disabled: !target,
   });
   const status = cells.space.statuses.find((s) => s.id === item.statusId);
   const done = status?.category === 'DONE';
   const collapsed = collapsedItems.has(item.id);
   const itemLabels = item.labelIds.flatMap((id) => labels.get(id) ?? []);
+  const nestHere = isOver && valid;
 
   return (
     <div
-      ref={dropRef}
+      ref={(node) => {
+        dropRef(node);
+        dragRef(node);
+      }}
+      // Satırın tamamı tutulup taşınır; klavye ile sürükleme yalnızca tutamaçtan.
+      onPointerDown={draggable ? (listeners?.onPointerDown as PointerEventHandler) : undefined}
       data-item-row={item.key}
+      data-drop-state={nestHere ? 'nest' : isOver && target ? 'blocked' : undefined}
       className={cn(
-        'group/item hover:bg-accent/50 relative flex flex-wrap items-center gap-x-3 gap-y-1 border-b px-3 py-2 md:flex-nowrap md:py-1.5',
+        'group/item relative flex flex-wrap items-center gap-x-3 gap-y-1 border-b px-3 py-2 transition-[background-color,opacity] duration-150 md:flex-nowrap md:py-1.5',
+        !dragging && 'hover:bg-accent/50',
         selected.has(item.id) && 'bg-primary/5',
-        isDragging && 'opacity-40',
-        isOver && 'bg-primary/10 ring-primary ring-2 ring-inset',
+        draggable && !dragging && 'cursor-grab',
+        // Taşınan satırın yerinde boş, kesik çizgili bir yuva kalır.
+        isDragging &&
+          'border-primary/40 bg-primary/[0.04] rounded-lg border-2 border-dashed [&>*]:invisible',
+        target && !valid && 'opacity-45',
+        nestHere && 'bg-primary/10 ring-primary ring-2 ring-inset',
       )}
       style={{ paddingLeft: 12 + depth * 20 }}
     >
+      {nestHere && (
+        <>
+          <span className="bg-primary absolute inset-y-1 left-0 w-1 rounded-r-full" aria-hidden />
+          <span
+            className="border-primary/60 pointer-events-none absolute right-3 bottom-0.5 h-0 border-t-2 border-dashed"
+            style={{ left: 12 + (depth + 1) * 20 + 28 }}
+            aria-hidden
+          />
+          <span className="dnd-rise bg-primary text-primary-foreground pointer-events-none absolute top-1/2 right-12 z-10 flex -translate-y-1/2 items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold shadow-md">
+            <CornerDownRight className="size-3.5" aria-hidden />
+            {t('dnd.dropHint')}
+          </span>
+        </>
+      )}
       {draggable && (
         <button
           type="button"
-          ref={dragRef}
           {...listeners}
           {...attributes}
           aria-label={t('dnd.handle', { key: item.key })}
-          className="text-muted-foreground hover:text-foreground absolute top-1/2 left-0 flex h-7 w-4 -translate-y-1/2 cursor-grab items-center justify-center opacity-0 group-hover/item:opacity-100 focus-visible:opacity-100 active:cursor-grabbing"
+          className="text-muted-foreground hover:text-foreground absolute top-1/2 left-0 flex h-7 w-4 -translate-y-1/2 cursor-grab items-center justify-center opacity-40 group-hover/item:opacity-100 focus-visible:opacity-100 active:cursor-grabbing"
         >
           <GripVertical className="size-3.5" aria-hidden />
         </button>

@@ -2192,7 +2192,11 @@
     "unnestTitle": "Detach {{key}}?",
     "unnestBody": "“{{title}}” will be detached from its parent and become a standalone Task.",
     "unnestConfirm": "Detach",
-    "unnested": "{{key}} is now a standalone Task."
+    "unnested": "{{key}} is now a standalone Task.",
+    "detachShort": "Detach — becomes a standalone Task",
+    "moveUnder": "Move under {{key}} as Sub-Task",
+    "cannotDrop": "Can't drop here",
+    "dropHint": "Drop as Sub-Task"
   },
   "bugs": {
     "button": "Bugs",

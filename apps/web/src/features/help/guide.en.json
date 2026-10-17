@@ -491,10 +491,10 @@
         {
           "type": "steps",
           "items": [
-            "Hover over a row; a **drag handle** (⋮⋮) appears at its far left.",
-            "Grab the handle and drag the Task onto the row of the **Task** it should go under; the target row is highlighted.",
+            "Press and hold anywhere empty on a Task row and move the mouse: the row lifts up like a folder on your desktop and follows the cursor, leaving a dashed empty slot behind.",
+            "Bring it over the **Task** it should go under: the target row turns purple and the dragged row reads “Move under HTK-1 as Sub-Task”. Epic and Bug rows fade out; you can’t drop on them.",
             "When you drop it a confirmation opens: “Make HTK-2 a Sub-Task of HTK-1?”. Click **Make Sub-Task**.",
-            "To detach a Sub-Task, start dragging it; a large **Detach** area appears at the bottom centre of the screen.",
+            "To detach a Sub-Task, start dragging it; a **Detach** area appears at the very bottom centre of the screen.",
             "Drop the Sub-Task on **Detach** and confirm. It leaves its parent and becomes a standalone **Task**."
           ]
         },

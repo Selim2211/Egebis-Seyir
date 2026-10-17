@@ -2192,7 +2192,11 @@
     "unnestTitle": "{{key}} ayrılsın mı?",
     "unnestBody": "“{{title}}” üst öğesinden ayrılıp bağımsız bir Task olacak.",
     "unnestConfirm": "Ayır",
-    "unnested": "{{key}} artık bağımsız bir Task."
+    "unnested": "{{key}} artık bağımsız bir Task.",
+    "detachShort": "Ayır — bağımsız Task olur",
+    "moveUnder": "{{key}} altına Sub-Task olarak taşı",
+    "cannotDrop": "Buraya bırakılamaz",
+    "dropHint": "Sub-Task olarak bırak"
   },
   "bugs": {
     "button": "Bugs",

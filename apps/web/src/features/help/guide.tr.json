@@ -491,10 +491,10 @@
         {
           "type": "steps",
           "items": [
-            "Fareyi satırın üzerine getir; satırın en solunda **sürükleme tutamacı** (⋮⋮) belirir.",
-            "Tutamaçtan tutup Task’ı, altına koymak istediğin **Task**’ın satırının üstüne sürükle; hedef satır renklenir.",
+            "Task satırının herhangi bir boş yerine basılı tut ve fareyi hareket ettir: satır, masaüstündeki bir klasör gibi havaya kalkıp imleçle gelir; eski yerinde kesik çizgili boş bir yuva kalır.",
+            "Satırı, altına koymak istediğin **Task**’ın üstüne getir: hedef satır mor renklenir, taşıdığın satırın altında “HTK-1 altına Sub-Task olarak taşı” yazar. Epic ve Bug satırları soluklaşır; onlara bırakılamaz.",
             "Bırakınca bir onay penceresi açılır: “HTK-2, HTK-1 öğesinin Sub-Task’ı olsun mu?”. **Sub-Task yap**’a tıkla.",
-            "Bir Sub-Task’ı ayırmak için onu sürüklemeye başla; ekranın altında ortada büyük **Ayır** alanı çıkar.",
+            "Bir Sub-Task’ı ayırmak için onu sürüklemeye başla; ekranın en altında ortada **Ayır** alanı çıkar.",
             "Sub-Task’ı **Ayır** alanına bırak ve onayla. Sub-Task ana Task’tan ayrılır ve bağımsız bir **Task** olur."
           ]
         },

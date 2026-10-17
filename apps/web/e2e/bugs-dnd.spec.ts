@@ -19,16 +19,12 @@ test.describe.serial('Bug ekranı ve sürükle-bırak', () => {
     await page.getByRole('link', { name: 'Görevler' }).first().click();
   };
 
-  async function drag(page: Page, from: string, to: { x: number; y: number }) {
-    const row = page.locator(`[data-item-row="${from}"]`);
-    await row.hover();
-    const handle = page.getByRole('button', { name: `${from} öğesini sürükle` });
-    const box = (await handle.boundingBox())!;
-    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  /** Satırı başlığın sağındaki boş yerden tutup taşır (tutamaç gerekmez). */
+  async function pickUp(page: Page, from: string) {
+    const box = (await page.locator(`[data-item-row="${from}"]`).boundingBox())!;
+    await page.mouse.move(box.x + box.width * 0.4, box.y + box.height / 2);
     await page.mouse.down();
-    await page.mouse.move(box.x + 30, box.y + 30, { steps: 5 });
-    await page.mouse.move(to.x, to.y, { steps: 15 });
-    await page.mouse.up();
+    await page.mouse.move(box.x + box.width * 0.4 + 20, box.y + 30, { steps: 5 });
   }
 
   test('Proje ve iki Task hazırlanır; listede Bug seçeneği yok', async ({ page }) => {
@@ -57,7 +53,18 @@ test.describe.serial('Bug ekranı ve sürükle-bırak', () => {
   }) => {
     await openList(page);
     const target = (await page.locator('[data-item-row="HTK-1"]').boundingBox())!;
-    await drag(page, 'HTK-2', { x: target.x + target.width / 2, y: target.y + target.height / 2 });
+    await pickUp(page, 'HTK-2');
+    await page.mouse.move(target.x + target.width * 0.4, target.y + target.height / 2, {
+      steps: 15,
+    });
+    // Taşınan satır imleçle gelir ve bırakınca ne olacağını söyler; hedef vurgulanır.
+    await expect(page.locator('[data-dnd-overlay]')).toContainText('Küçük iş');
+    await expect(page.getByTestId('dnd-intent')).toHaveText('HTK-1 altına Sub-Task olarak taşı');
+    await expect(page.locator('[data-item-row="HTK-1"]')).toHaveAttribute(
+      'data-drop-state',
+      'nest',
+    );
+    await page.mouse.up();
     const confirm = page.getByRole('alertdialog');
     await expect(confirm).toContainText('Sub-Task');
     await confirm.getByRole('button', { name: 'Sub-Task yap' }).click();
@@ -65,17 +72,14 @@ test.describe.serial('Bug ekranı ve sürükle-bırak', () => {
     await expect(page.getByRole('img', { name: 'Sub-task' })).toHaveCount(1);
 
     // Sürüklerken altta "Ayır" alanı çıkar; oraya bırakınca bağımsız Task olur.
-    const row = page.locator('[data-item-row="HTK-2"]');
-    await row.hover();
-    const handle = page.getByRole('button', { name: 'HTK-2 öğesini sürükle' });
-    const box = (await handle.boundingBox())!;
-    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-    await page.mouse.down();
-    await page.mouse.move(box.x + 30, box.y + 30, { steps: 5 });
+    await pickUp(page, 'HTK-2');
     const zone = page.getByTestId('detach-zone');
     await expect(zone).toBeVisible();
     const z = (await zone.boundingBox())!;
+    // Ayır alanı ekranın en altında, listenin üstünü kapatmaz.
+    expect(z.y + z.height).toBeGreaterThan(page.viewportSize()!.height - 40);
     await page.mouse.move(z.x + z.width / 2, z.y + z.height / 2, { steps: 15 });
+    await expect(page.getByTestId('dnd-intent')).toHaveText('Ayır — bağımsız Task olur');
     await page.mouse.up();
     await page.getByRole('alertdialog').getByRole('button', { name: 'Ayır' }).click();
     await expect(page.getByText('HTK-2 artık bağımsız bir Task.')).toBeVisible();
