@@ -1020,3 +1020,10 @@
 
 - **Tarih:** 2026-10-18 · **Durum:** Kabul (istek: Space'in adı Proje olsun, ClickUp ile aynı olmasın; yalnızca ad değişsin; New menüsünden Space oluşturma çıksın).
 - **Karar:** Arayüz metinlerinde "Space" → TR **Proje** (ekleriyle: Projede, Projeyi, Projeler…), EN **Project**. Kod, API, veritabanı ve izin anahtarları (`space.*`) değişmedi. Kılavuz metinleri de aynı adı kullanır. "New" menüsünde artık yalnızca Task, Epic ve Bug var; yeni Proje sol menüdeki **Proje oluştur** düğmesiyle açılır.
+
+## ADR-119 — Ayarlar → Genel: "Test e-postası gönder" (Faz 11.2)
+
+- **Tarih:** 2026-10-20 · **Durum:** Kabul (sunucuda e-posta gitmiyordu; nedeni görünmüyordu).
+- **Karar:** `POST workspaces/:id/settings/mail-test` (`workspace.settings` izni): yöneticinin **kendi** adresine test e-postası yollar. Normal e-postalardan farkı: kuyruğu (pg-boss) **atlar** ve SMTP'ye doğrudan bağlanır; böylece hata, 5 kez yeniden deneyen kuyrukta günlüğe gömülmez, çağırana döner. Yanıt her zaman 200: `{ ok, to, server, code, detail }` (`server` = `host:port`; şifre hiçbir zaman dönmez). SMTP bağlantısı 10 sn, soket 15 sn zaman aşımlıdır (engelli port dakikalarca asılı kalmasın). `SMTP_USER` var ama `SMTP_PASS` boşsa sunucuya gitmeden `SMTP_PASS_EMPTY` döner. Arayüz hata koduna göre Türkçe/İngilizce ipucu gösterir (`SMTP_PASS_EMPTY`, `EAUTH` Gmail uygulama şifresi, `ETIMEDOUT/ECONNREFUSED` port engeli, `ENOTFOUND` ad çözümü, `EENVELOPE` gönderen adresi) ve sunucunun ham cevabını altına yazar.
+- **Alternatifler:** Kuyruk hatalarını arayüzde listelemek (pg-boss iş tablosunu açmak gerekir); yalnızca günlüğü okumak (yönetici sunucuya girmek zorunda kalır).
+- **Bilinen sınırlar:** yalnızca SMTP gönderimini sınar; alıcı tarafındaki spam filtresi görünmez. Test mesajı `MAIL_TRANSPORT=memory` iken bellekte kalır.

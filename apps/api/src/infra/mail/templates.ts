@@ -41,6 +41,37 @@ ${body}
 </td></tr></table></body></html>`;
 }
 
+export function testMail(p: { to: string; locale: Locale; url: string }): MailMessage {
+  if (p.locale === 'en') {
+    return {
+      to: p.to,
+      subject: 'Egebis Seyir test email',
+      text: `Email delivery works. This message was sent from Settings → General.\n\n${p.url}`,
+      html: layout(
+        'Email delivery works',
+        [
+          'This test message was sent from <strong>Settings → General</strong>. If you can read it, invitations, password resets and notifications will reach people too.',
+        ],
+        { label: 'Open Egebis Seyir', url: p.url },
+        'You received this because you pressed the test button. No action is needed.',
+      ),
+    };
+  }
+  return {
+    to: p.to,
+    subject: 'Egebis Seyir test e-postası',
+    text: `E-posta gönderimi çalışıyor. Bu ileti Ayarlar → Genel sayfasından gönderildi.\n\n${p.url}`,
+    html: layout(
+      'E-posta gönderimi çalışıyor',
+      [
+        'Bu test iletisi <strong>Ayarlar → Genel</strong> sayfasından gönderildi. Bunu okuyabiliyorsan davet, şifre sıfırlama ve bildirim e-postaları da kişilere ulaşır.',
+      ],
+      { label: 'Egebis Seyir’i aç', url: p.url },
+      'Test düğmesine bastığın için aldın. Yapman gereken bir şey yok.',
+    ),
+  };
+}
+
 export function invitationMail(p: {
   to: string;
   locale: Locale;

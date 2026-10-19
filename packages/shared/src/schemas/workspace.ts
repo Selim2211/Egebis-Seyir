@@ -106,3 +106,17 @@ export const CreatedMemberSchema = z.object({
   existingAccount: z.boolean(),
 });
 export type CreatedMember = z.infer<typeof CreatedMemberSchema>;
+
+/** POST /api/workspaces/:workspaceId/settings/mail-test — gönderim sonucu (her zaman 200; hata `ok:false` ile). */
+export const MailTestResultSchema = z.object({
+  ok: z.boolean(),
+  /** Test e-postasının gittiği adres (isteği yapanın kendi adresi). */
+  to: z.string(),
+  /** Kullanılan sunucu, `host:port`; şifre hiçbir zaman dönmez. */
+  server: z.string().nullable(),
+  /** Hata varsa nodemailer/SMTP kodu (ör. EAUTH, ETIMEDOUT). */
+  code: z.string().nullable(),
+  /** Hata varsa sunucunun/ağın verdiği ham ileti. */
+  detail: z.string().nullable(),
+});
+export type MailTestResult = z.infer<typeof MailTestResultSchema>;

@@ -110,14 +110,14 @@ docker compose start api web
 
 ## 6. Sorun giderme
 
-| Belirti                                 | Kontrol                                                                                   |
-| --------------------------------------- | ----------------------------------------------------------------------------------------- |
-| Sayfa açılmıyor                         | `docker compose ps`, `docker compose logs web`; 80/443 portları açık mı, DNS doğru mu     |
-| Giriş yapınca hemen tekrar giriş ekranı | HTTP kullanılıyorsa `COOKIE_SECURE=false`; `APP_URL` tarayıcıdaki adresle aynı mı         |
-| `api` başlamıyor                        | `docker compose logs api` — "Geçersiz ortam değişkenleri" ise `.env` değerlerini düzeltin |
-| `migrate` hata verdi                    | `docker compose logs migrate`; veritabanı şifresi ve bağlantısı                           |
-| E-posta gitmiyor                        | SMTP bilgileri; `docker compose logs api` içinde mail hataları                            |
-| Sertifika alınamadı                     | Alan adı sunucuyu gösteriyor mu, 80 portu internetten erişilebilir mi                     |
+| Belirti                                 | Kontrol                                                                                          |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| Sayfa açılmıyor                         | `docker compose ps`, `docker compose logs web`; 80/443 portları açık mı, DNS doğru mu            |
+| Giriş yapınca hemen tekrar giriş ekranı | HTTP kullanılıyorsa `COOKIE_SECURE=false`; `APP_URL` tarayıcıdaki adresle aynı mı                |
+| `api` başlamıyor                        | `docker compose logs api` — "Geçersiz ortam değişkenleri" ise `.env` değerlerini düzeltin        |
+| `migrate` hata verdi                    | `docker compose logs migrate`; veritabanı şifresi ve bağlantısı                                  |
+| E-posta gitmiyor                        | Ayarlar → Genel → **Test e-postası gönder** (nedeni ekranda gösterir); `docker compose logs api` |
+| Sertifika alınamadı                     | Alan adı sunucuyu gösteriyor mu, 80 portu internetten erişilebilir mi                            |
 
 Sağlık kontrolü: `curl -s http://localhost/api/health` (veya alan adıyla) → `{"status":"ok","db":"up",...}`.
 

@@ -2239,5 +2239,25 @@
     "ASSIGNED": "Atandı",
     "IN_PROGRESS": "İşleniyor",
     "RESOLVED": "Çözüldü"
+  },
+  "mailTest": {
+    "title": "E-posta gönderimi",
+    "help": "Davet, şifre sıfırlama ve bildirim e-postalarının çalışıp çalışmadığını dene. Test e-postası senin adresine gider; çalışmıyorsa nedeni burada görünür.",
+    "send": "Test e-postası gönder",
+    "sending": "Gönderiliyor…",
+    "okTitle": "Test e-postası {{to}} adresine gönderildi.",
+    "okBody": "Birkaç saniye içinde gelen kutuna düşer; gelmezse Spam klasörüne bak.",
+    "failTitle": "E-posta gönderilemedi.",
+    "server": "Sunucu",
+    "code": "Hata kodu",
+    "detail": "Sunucunun cevabı",
+    "hint": {
+      "passEmpty": "SMTP şifresi boş. Sunucudaki .env dosyasında SMTP_PASS değerini gir (Gmail için 16 harfli “Uygulama şifresi”), sonra API’yi yeniden başlat: docker compose up -d.",
+      "auth": "Kullanıcı adı ya da şifre reddedildi. Gmail’de normal şifre çalışmaz; 2 adımlı doğrulamayı açıp 16 harfli, boşluksuz bir “Uygulama şifresi” üret ve SMTP_PASS olarak gir.",
+      "network": "SMTP sunucusuna bağlanılamadı. Sunucunun dışarıya 587 (ya da 465) portunu açtığından ve SMTP_HOST/SMTP_PORT değerlerinin doğru olduğundan emin ol; bazı barındırıcılar bu portu kapatır.",
+      "host": "SMTP sunucu adı çözülemedi. SMTP_HOST yazımını ve sunucunun DNS erişimini kontrol et.",
+      "rejected": "Sunucu gönderen ya da alıcı adresini reddetti. MAIL_FROM, SMTP_USER ile aynı hesaba ait olmalı.",
+      "other": "Ayrıntı için aşağıdaki sunucu cevabına ve API günlüğüne bak: docker compose logs api."
+    }
   }
 }

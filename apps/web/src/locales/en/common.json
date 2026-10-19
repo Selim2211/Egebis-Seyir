@@ -2239,5 +2239,25 @@
     "ASSIGNED": "Assigned",
     "IN_PROGRESS": "In progress",
     "RESOLVED": "Resolved"
+  },
+  "mailTest": {
+    "title": "Email delivery",
+    "help": "Check that invitation, password reset and notification emails work. The test email goes to your own address; if it fails, the reason is shown here.",
+    "send": "Send test email",
+    "sending": "Sending…",
+    "okTitle": "Test email sent to {{to}}.",
+    "okBody": "It should arrive within seconds; if not, check your Spam folder.",
+    "failTitle": "The email could not be sent.",
+    "server": "Server",
+    "code": "Error code",
+    "detail": "Server response",
+    "hint": {
+      "passEmpty": "The SMTP password is empty. Set SMTP_PASS in the server’s .env file (for Gmail, a 16-letter “App password”), then restart the API: docker compose up -d.",
+      "auth": "The username or password was rejected. Gmail does not accept your normal password; turn on 2-step verification, create a 16-letter App password without spaces and use it as SMTP_PASS.",
+      "network": "Could not reach the SMTP server. Make sure the server can send out on port 587 (or 465) and that SMTP_HOST/SMTP_PORT are correct; some hosts block this port.",
+      "host": "The SMTP host name could not be resolved. Check the SMTP_HOST spelling and the server’s DNS access.",
+      "rejected": "The server rejected the sender or recipient address. MAIL_FROM must belong to the same account as SMTP_USER.",
+      "other": "See the server response below and the API log for details: docker compose logs api."
+    }
   }
 }

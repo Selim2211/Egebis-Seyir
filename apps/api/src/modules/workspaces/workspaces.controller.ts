@@ -21,6 +21,7 @@ import {
   type CreatedMember,
   InvitationPreviewSchema,
   InvitationsResponseSchema,
+  MailTestResultSchema,
   MembersResponseSchema,
   UpdateMemberRequestSchema,
   UpdateWorkspaceSettingsRequestSchema,
@@ -29,13 +30,20 @@ import {
   type AcceptInvitationResponse,
   type InvitationPreview,
   type InvitationsResponse,
+  type MailTestResult,
   type MembersResponse,
   type WorkspaceSettings,
 } from '@scrum/shared';
 import type { Request, Response } from 'express';
 import { createZodDto, ZodResponse } from 'nestjs-zod';
 import type { AuthUser } from '../auth/auth.constants';
-import { AuthRateLimit, OptionalUser, Public, RequirePermission } from '../auth/decorators';
+import {
+  AuthRateLimit,
+  CurrentUser,
+  OptionalUser,
+  Public,
+  RequirePermission,
+} from '../auth/decorators';
 import { SessionService } from '../auth/session.service';
 import { InvitationsService } from './invitations.service';
 import { MembersService } from './members.service';
@@ -50,6 +58,7 @@ class AcceptInvitationDto extends createZodDto(AcceptInvitationRequestSchema) {}
 class AcceptInvitationResponseDto extends createZodDto(AcceptInvitationResponseSchema) {}
 class CreateMemberDto extends createZodDto(CreateMemberRequestSchema) {}
 class CreatedMemberDto extends createZodDto(CreatedMemberSchema) {}
+class MailTestResultDto extends createZodDto(MailTestResultSchema) {}
 class WorkspaceSettingsDto extends createZodDto(WorkspaceSettingsSchema) {}
 class UpdateWorkspaceSettingsDto extends createZodDto(UpdateWorkspaceSettingsRequestSchema) {}
 
@@ -139,6 +148,14 @@ export class WorkspaceSettingsController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async update(@Body() body: UpdateWorkspaceSettingsDto): Promise<void> {
     await this.settings.update(body);
+  }
+
+  /** Test e-postası: kuyruğu atlar, sonucu ve hata nedenini döner (her zaman 200). */
+  @Post('mail-test')
+  @RequirePermission(W.WORKSPACE_SETTINGS)
+  @ZodResponse({ type: MailTestResultDto, status: HttpStatus.OK })
+  mailTest(@CurrentUser() user: AuthUser): Promise<MailTestResult> {
+    return this.settings.sendTestMail(user);
   }
 }
 

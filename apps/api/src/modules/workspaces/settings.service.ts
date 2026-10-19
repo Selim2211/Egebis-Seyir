@@ -1,14 +1,21 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import {
   WORKSPACE_PERMISSIONS as W,
+  type Locale,
+  type MailTestResult,
   type UpdateWorkspaceSettingsRequest,
   type WorkspaceSettings,
 } from '@scrum/shared';
 import { ClsService } from 'nestjs-cls';
 import { RoleScope } from '../../generated/prisma/client';
+import type { Env } from '../../infra/config/env';
 import type { AppClsStore } from '../../infra/cls/request-context';
+import { MailService } from '../../infra/mail/mail.service';
+import { testMail } from '../../infra/mail/templates';
 import { TenantPrismaService } from '../../infra/prisma/tenant-prisma.service';
 import { ActivityService } from '../activity/activity.service';
+import type { AuthUser } from '../auth/auth.constants';
 
 /** Workspace genel ayarları (brief §5.20). */
 @Injectable()
@@ -17,7 +24,21 @@ export class WorkspaceSettingsService {
     private readonly tenant: TenantPrismaService,
     private readonly cls: ClsService<AppClsStore>,
     private readonly activity: ActivityService,
+    private readonly mail: MailService,
+    private readonly config: ConfigService<Env, true>,
   ) {}
+
+  /** Yöneticinin kendi adresine doğrudan test e-postası yollar; hata nedenini döner (ADR-119). */
+  async sendTestMail(user: AuthUser): Promise<MailTestResult> {
+    const outcome = await this.mail.sendTest(
+      testMail({
+        to: user.email,
+        locale: user.locale as Locale,
+        url: this.config.get('APP_URL', { infer: true }),
+      }),
+    );
+    return { ...outcome, to: user.email };
+  }
 
   async get(): Promise<WorkspaceSettings> {
     const [workspace, member] = await Promise.all([
