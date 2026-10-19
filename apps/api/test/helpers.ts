@@ -27,7 +27,9 @@ export async function createTestApp(): Promise<TestContext> {
 
 /** Her testten önce temiz veritabanı ve boş posta kutusu. */
 export async function resetState(ctx: TestContext): Promise<void> {
-  await ctx.prisma.$executeRawUnsafe('TRUNCATE TABLE users, workspaces RESTART IDENTITY CASCADE');
+  await ctx.prisma.$executeRawUnsafe(
+    'TRUNCATE TABLE users, workspaces, mail_settings RESTART IDENTITY CASCADE',
+  );
   ctx.mail.outbox.length = 0;
 }
 

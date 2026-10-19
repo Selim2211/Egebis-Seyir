@@ -9,6 +9,7 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  Put,
   Req,
   Res,
 } from '@nestjs/common';
@@ -21,8 +22,10 @@ import {
   type CreatedMember,
   InvitationPreviewSchema,
   InvitationsResponseSchema,
+  MailSettingsSchema,
   MailTestResultSchema,
   MembersResponseSchema,
+  UpdateMailSettingsRequestSchema,
   UpdateMemberRequestSchema,
   UpdateWorkspaceSettingsRequestSchema,
   WorkspaceSettingsSchema,
@@ -30,6 +33,7 @@ import {
   type AcceptInvitationResponse,
   type InvitationPreview,
   type InvitationsResponse,
+  type MailSettings,
   type MailTestResult,
   type MembersResponse,
   type WorkspaceSettings,
@@ -58,6 +62,8 @@ class AcceptInvitationDto extends createZodDto(AcceptInvitationRequestSchema) {}
 class AcceptInvitationResponseDto extends createZodDto(AcceptInvitationResponseSchema) {}
 class CreateMemberDto extends createZodDto(CreateMemberRequestSchema) {}
 class CreatedMemberDto extends createZodDto(CreatedMemberSchema) {}
+class MailSettingsDto extends createZodDto(MailSettingsSchema) {}
+class UpdateMailSettingsDto extends createZodDto(UpdateMailSettingsRequestSchema) {}
 class MailTestResultDto extends createZodDto(MailTestResultSchema) {}
 class WorkspaceSettingsDto extends createZodDto(WorkspaceSettingsSchema) {}
 class UpdateWorkspaceSettingsDto extends createZodDto(UpdateWorkspaceSettingsRequestSchema) {}
@@ -148,6 +154,29 @@ export class WorkspaceSettingsController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async update(@Body() body: UpdateWorkspaceSettingsDto): Promise<void> {
     await this.settings.update(body);
+  }
+
+  /** SMTP ayarı (ADR-120): şifre dönmez, yalnızca kayıtlı olup olmadığı. */
+  @Get('mail')
+  @RequirePermission(W.WORKSPACE_SETTINGS)
+  @ZodResponse({ type: MailSettingsDto })
+  getMail(): Promise<MailSettings> {
+    return this.settings.getMail();
+  }
+
+  @Put('mail')
+  @RequirePermission(W.WORKSPACE_SETTINGS)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async updateMail(@Body() body: UpdateMailSettingsDto): Promise<void> {
+    await this.settings.updateMail(body);
+  }
+
+  /** Kaydedilmiş uygulama ayarını siler; sunucu .env değerlerine dönülür. */
+  @Delete('mail')
+  @RequirePermission(W.WORKSPACE_SETTINGS)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async resetMail(): Promise<void> {
+    await this.settings.resetMail();
   }
 
   /** Test e-postası: kuyruğu atlar, sonucu ve hata nedenini döner (her zaman 200). */

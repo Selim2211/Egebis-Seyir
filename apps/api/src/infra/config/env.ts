@@ -39,6 +39,9 @@ export const EnvSchema = z.object({
   /** Kullanıcı başına dakikada en çok istek. */
   AI_RATE_LIMIT: z.coerce.number().int().positive().default(10),
 
+  /** SMTP şifresi gibi gizli ayarların şifreleme anahtarının kaynağı (ADR-120). Boşsa UPLOAD_DIR/.secrets altında üretilir. */
+  SETTINGS_SECRET: z.string().min(16).optional(),
+
   /** Dosya ekleri ve profil fotoğrafları (ADR-056); Docker'da kalıcı volume olmalı. */
   UPLOAD_DIR: z.string().default('./data/uploads'),
   /** Dosya başına en çok MB (ADR-056). */

@@ -1556,3 +1556,20 @@ model WorkItemAccessEntry {
   @@index([workspaceId, teamId])
   @@map("work_item_access_entries")
 }
+
+/// Uygulama içinden girilen SMTP ayarı (ADR-120). Sunucu başına tek satır (id = 1); yoksa .env değerleri kullanılır.
+/// Şifre AES-256-GCM ile şifreli saklanır; anahtar veritabanında değil sunucu diskinde tutulur.
+model MailSettings {
+  id            Int      @id @default(1)
+  host          String
+  port          Int
+  secure        Boolean  @default(false)
+  username      String?
+  passwordEnc   String?
+  /// Gönderen: `Ad <adres@ornek.com>` ya da yalnızca adres.
+  fromAddress   String
+  updatedById   String?  @db.Uuid
+  updatedAt     DateTime @updatedAt @db.Timestamptz
+
+  @@map("mail_settings")
+}

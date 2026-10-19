@@ -3,7 +3,9 @@ import { ConfigService } from '@nestjs/config';
 import {
   WORKSPACE_PERMISSIONS as W,
   type Locale,
+  type MailSettings,
   type MailTestResult,
+  type UpdateMailSettingsRequest,
   type UpdateWorkspaceSettingsRequest,
   type WorkspaceSettings,
 } from '@scrum/shared';
@@ -11,6 +13,7 @@ import { ClsService } from 'nestjs-cls';
 import { RoleScope } from '../../generated/prisma/client';
 import type { Env } from '../../infra/config/env';
 import type { AppClsStore } from '../../infra/cls/request-context';
+import { MailSettingsService } from '../../infra/mail/mail-settings.service';
 import { MailService } from '../../infra/mail/mail.service';
 import { testMail } from '../../infra/mail/templates';
 import { TenantPrismaService } from '../../infra/prisma/tenant-prisma.service';
@@ -25,8 +28,50 @@ export class WorkspaceSettingsService {
     private readonly cls: ClsService<AppClsStore>,
     private readonly activity: ActivityService,
     private readonly mail: MailService,
+    private readonly mailSettings: MailSettingsService,
     private readonly config: ConfigService<Env, true>,
   ) {}
+
+  getMail(): Promise<MailSettings> {
+    return this.mailSettings.view();
+  }
+
+  /** SMTP ayarını kaydeder (şifre şifreli). Etkinlik kaydına şifre değil yalnızca değişen alanlar yazılır (ADR-120). */
+  async updateMail(input: UpdateMailSettingsRequest): Promise<void> {
+    const workspaceId = this.cls.get('workspaceId')!;
+    const actorId = this.cls.get('userId')!;
+    const before = await this.mailSettings.view();
+    await this.mailSettings.save(input, actorId);
+    const changes: Record<string, { from: unknown; to: unknown }> = {};
+    const after = { host: input.host, port: input.port, secure: input.secure, from: input.from };
+    for (const [key, to] of Object.entries(after)) {
+      const from = before[key as keyof typeof after];
+      if (from !== to) changes[key] = { from, to };
+    }
+    if (input.password !== undefined)
+      changes.password = { from: null, to: input.password ? 'set' : 'cleared' };
+    await this.activity.record(this.tenant.db, {
+      workspaceId,
+      actorId,
+      entityType: 'workspace',
+      entityId: workspaceId,
+      action: 'workspace.mail_updated',
+      changes: changes as Record<string, { from: string; to: string }>,
+    });
+  }
+
+  /** Uygulamada kaydedilmiş SMTP ayarını siler; sunucu .env değerlerine dönülür. */
+  async resetMail(): Promise<void> {
+    const workspaceId = this.cls.get('workspaceId')!;
+    await this.mailSettings.reset();
+    await this.activity.record(this.tenant.db, {
+      workspaceId,
+      actorId: this.cls.get('userId')!,
+      entityType: 'workspace',
+      entityId: workspaceId,
+      action: 'workspace.mail_reset',
+    });
+  }
 
   /** Yöneticinin kendi adresine doğrudan test e-postası yollar; hata nedenini döner (ADR-119). */
   async sendTestMail(user: AuthUser): Promise<MailTestResult> {

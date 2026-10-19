@@ -1,8 +1,7 @@
 import { Injectable, Logger, type OnModuleInit } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { createTransport, type Transporter } from 'nodemailer';
-import type { Env } from '../config/env';
 import { QueueService } from '../queue/queue.service';
+import { MailSettingsService, type SmtpConfig } from './mail-settings.service';
 import type { MailMessage } from './templates';
 
 const MAIL_JOB = 'mail.send';
@@ -18,69 +17,14 @@ export interface MailTestOutcome {
 @Injectable()
 export class MailService implements OnModuleInit {
   private readonly logger = new Logger(MailService.name);
-  private readonly transporter?: Transporter;
-  private readonly from: string;
-  private readonly server: string | null = null;
-  /** SMTP_USER verilmiş ama SMTP_PASS boş: sunucuya gitmeden anlaşılır hata ver. */
-  private readonly passwordMissing: boolean = false;
+  private transporter?: { key: string; value: Transporter };
   /** MAIL_TRANSPORT=memory iken gönderilen e-postalar (yalnızca testler). */
   readonly outbox: MailMessage[] = [];
 
   constructor(
-    config: ConfigService<Env, true>,
+    private readonly settings: MailSettingsService,
     private readonly queue: QueueService,
-  ) {
-    this.from = config.get('MAIL_FROM', { infer: true });
-    if (config.get('MAIL_TRANSPORT', { infer: true }) === 'smtp') {
-      const host = config.get('SMTP_HOST', { infer: true });
-      const port = config.get('SMTP_PORT', { infer: true });
-      const user = config.get('SMTP_USER', { infer: true });
-      this.server = `${host}:${port}`;
-      this.passwordMissing = Boolean(user) && !config.get('SMTP_PASS', { infer: true });
-      this.transporter = createTransport({
-        host,
-        port,
-        secure: config.get('SMTP_SECURE', { infer: true }),
-        auth: user ? { user, pass: config.get('SMTP_PASS', { infer: true }) } : undefined,
-        // Test düğmesi dakikalarca asılı kalmasın (engelli port sessizce zaman aşımına uğrar).
-        connectionTimeout: 10_000,
-        greetingTimeout: 10_000,
-        socketTimeout: 15_000,
-      });
-    }
-  }
-
-  /**
-   * Yöneticinin "Test e-postası gönder" düğmesi: kuyruğu atlayıp doğrudan gönderir ve hatayı
-   * (EAUTH, ETIMEDOUT…) çağırana döndürür; kuyruktaki gönderimler hatayı yalnızca günlüğe yazar.
-   */
-  async sendTest(message: MailMessage): Promise<MailTestOutcome> {
-    if (!this.transporter) {
-      this.outbox.push(message);
-      return { ok: true, server: null, code: null, detail: null };
-    }
-    if (this.passwordMissing) {
-      return { ok: false, server: this.server, code: 'SMTP_PASS_EMPTY', detail: null };
-    }
-    try {
-      await this.transporter.sendMail({
-        from: this.from,
-        ...message,
-        headers: { 'Auto-Submitted': 'auto-generated', ...message.headers },
-      });
-      this.logger.log(`Test e-postası gönderildi: ${message.to}`);
-      return { ok: true, server: this.server, code: null, detail: null };
-    } catch (err) {
-      const e = err as { code?: string; response?: string; message?: string };
-      this.logger.warn(`Test e-postası gönderilemedi (${e.code ?? 'bilinmiyor'}): ${e.message}`);
-      return {
-        ok: false,
-        server: this.server,
-        code: e.code ?? 'UNKNOWN',
-        detail: (e.response ?? e.message ?? '').slice(0, 400) || null,
-      };
-    }
-  }
+  ) {}
 
   async onModuleInit(): Promise<void> {
     await this.queue.register<MailMessage>(MAIL_JOB, (message) => this.deliver(message));
@@ -91,17 +35,77 @@ export class MailService implements OnModuleInit {
     await this.queue.enqueue(MAIL_JOB, message);
   }
 
+  /**
+   * Yöneticinin "Test e-postası gönder" düğmesi: kuyruğu atlayıp doğrudan gönderir ve hatayı
+   * (EAUTH, ETIMEDOUT…) çağırana döndürür; kuyruktaki gönderimler hatayı yalnızca günlüğe yazar.
+   */
+  async sendTest(message: MailMessage): Promise<MailTestOutcome> {
+    const cfg = await this.settings.effective();
+    if (!cfg) {
+      this.outbox.push(message);
+      return { ok: true, server: null, code: null, detail: null };
+    }
+    const server = `${cfg.host}:${cfg.port}`;
+    if (cfg.passwordState === 'EMPTY') {
+      return { ok: false, server, code: 'SMTP_PASS_EMPTY', detail: null };
+    }
+    if (cfg.passwordState === 'UNREADABLE') {
+      return { ok: false, server, code: 'SMTP_PASS_UNREADABLE', detail: null };
+    }
+    try {
+      await this.transport(cfg).sendMail(this.envelope(cfg, message));
+      this.logger.log(`Test e-postası gönderildi: ${message.to}`);
+      return { ok: true, server, code: null, detail: null };
+    } catch (err) {
+      const e = err as { code?: string; response?: string; message?: string };
+      this.logger.warn(`Test e-postası gönderilemedi (${e.code ?? 'bilinmiyor'}): ${e.message}`);
+      return {
+        ok: false,
+        server,
+        code: e.code ?? 'UNKNOWN',
+        detail: (e.response ?? e.message ?? '').slice(0, 400) || null,
+      };
+    }
+  }
+
   private async deliver(message: MailMessage): Promise<void> {
-    if (!this.transporter) {
+    const cfg = await this.settings.effective();
+    if (!cfg) {
       this.outbox.push(message);
       return;
     }
-    // Otomatik, işlemsel e-posta: yanıt otomatiği ve spam filtreleri için işaretlenir.
-    await this.transporter.sendMail({
-      from: this.from,
+    await this.transport(cfg).sendMail(this.envelope(cfg, message));
+    this.logger.log(`E-posta gönderildi: ${message.subject}`);
+  }
+
+  /** Otomatik, işlemsel e-posta: yanıt otomatiği ve spam filtreleri için işaretlenir. */
+  private envelope(cfg: SmtpConfig, message: MailMessage) {
+    return {
+      from: cfg.from,
       ...message,
       headers: { 'Auto-Submitted': 'auto-generated', ...message.headers },
-    });
-    this.logger.log(`E-posta gönderildi: ${message.subject}`);
+    };
+  }
+
+  /** Ayar değişince (anahtar farklı) yeni taşıyıcı kurulur; aynıysa bağlantı yeniden kullanılır. */
+  private transport(cfg: SmtpConfig): Transporter {
+    const key = JSON.stringify([cfg.host, cfg.port, cfg.secure, cfg.user, cfg.pass]);
+    if (this.transporter?.key !== key) {
+      this.transporter?.value.close();
+      this.transporter = {
+        key,
+        value: createTransport({
+          host: cfg.host,
+          port: cfg.port,
+          secure: cfg.secure,
+          auth: cfg.user ? { user: cfg.user, pass: cfg.pass ?? undefined } : undefined,
+          // Test düğmesi dakikalarca asılı kalmasın (engelli port sessizce zaman aşımına uğrar).
+          connectionTimeout: 10_000,
+          greetingTimeout: 10_000,
+          socketTimeout: 15_000,
+        }),
+      };
+    }
+    return this.transporter.value;
   }
 }

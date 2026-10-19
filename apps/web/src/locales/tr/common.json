@@ -2242,7 +2242,7 @@
   },
   "mailTest": {
     "title": "E-posta gönderimi",
-    "help": "Davet, şifre sıfırlama ve bildirim e-postalarının çalışıp çalışmadığını dene. Test e-postası senin adresine gider; çalışmıyorsa nedeni burada görünür.",
+    "help": "Giden e-postanın (davet, şifre sıfırlama, bildirim) SMTP bilgilerini buradan gir; sunucuda dosya düzenlemen gerekmez. Şifre şifreli saklanır ve bir daha gösterilmez.",
     "send": "Test e-postası gönder",
     "sending": "Gönderiliyor…",
     "okTitle": "Test e-postası {{to}} adresine gönderildi.",
@@ -2252,12 +2252,29 @@
     "code": "Hata kodu",
     "detail": "Sunucunun cevabı",
     "hint": {
-      "passEmpty": "SMTP şifresi boş. Sunucudaki .env dosyasında SMTP_PASS değerini gir (Gmail için 16 harfli “Uygulama şifresi”), sonra API’yi yeniden başlat: docker compose up -d.",
-      "auth": "Kullanıcı adı ya da şifre reddedildi. Gmail’de normal şifre çalışmaz; 2 adımlı doğrulamayı açıp 16 harfli, boşluksuz bir “Uygulama şifresi” üret ve SMTP_PASS olarak gir.",
-      "network": "SMTP sunucusuna bağlanılamadı. Sunucunun dışarıya 587 (ya da 465) portunu açtığından ve SMTP_HOST/SMTP_PORT değerlerinin doğru olduğundan emin ol; bazı barındırıcılar bu portu kapatır.",
-      "host": "SMTP sunucu adı çözülemedi. SMTP_HOST yazımını ve sunucunun DNS erişimini kontrol et.",
-      "rejected": "Sunucu gönderen ya da alıcı adresini reddetti. MAIL_FROM, SMTP_USER ile aynı hesaba ait olmalı.",
-      "other": "Ayrıntı için aşağıdaki sunucu cevabına ve API günlüğüne bak: docker compose logs api."
-    }
+      "passEmpty": "SMTP şifresi boş. Yukarıdaki Şifre alanına gir (Gmail için 16 harfli “Uygulama şifresi”) ve kaydet.",
+      "auth": "Kullanıcı adı ya da şifre reddedildi. Gmail’de normal şifre çalışmaz; 2 adımlı doğrulamayı açıp 16 harfli bir “Uygulama şifresi” üret ve yukarıdaki Şifre alanına gir.",
+      "network": "SMTP sunucusuna bağlanılamadı. Sunucu adı ve portu kontrol et (Gmail: smtp.gmail.com, 587); bazı barındırıcılar dışarıya 587/465 portunu kapatır.",
+      "host": "SMTP sunucu adı çözülemedi. Yukarıdaki SMTP sunucusu yazımını ve sunucunun DNS erişimini kontrol et.",
+      "rejected": "Sunucu gönderen ya da alıcı adresini reddetti. Gönderen adresi, kullanıcı adıyla aynı hesaba ait olmalı.",
+      "other": "Ayrıntı için aşağıdaki sunucu cevabına ve API günlüğüne bak: docker compose logs api.",
+      "unreadable": "Kayıtlı şifre çözülemedi (sunucudaki şifreleme anahtarı değişmiş). Şifreyi yeniden girip kaydet."
+    },
+    "sourceEnv": "Şu an sunucudaki .env değerleri kullanılıyor. Burada kaydettiğin bilgiler onların yerine geçer.",
+    "host": "SMTP sunucusu",
+    "port": "Port",
+    "secure": "SSL/TLS ile bağlan",
+    "secureHelp": "Port 465 için aç; 587 için kapalı bırak (STARTTLS otomatik kullanılır).",
+    "username": "Kullanıcı adı",
+    "password": "Şifre",
+    "passwordKept": "Kayıtlı (değiştirmek için yaz)",
+    "passwordHelp": "Gmail için normal şifre değil, 16 harfli “Uygulama şifresi” gir (boşluklu yapıştırabilirsin).",
+    "from": "Gönderen",
+    "fromHelp": "Alıcıların göreceği ad ve adres. Gmail’de adres, kullanıcı adıyla aynı olmalı.",
+    "save": "Kaydet",
+    "saved": "E-posta ayarı kaydedildi.",
+    "saveAndTest": "Kaydet ve test et",
+    "reset": "Sunucu ayarına dön",
+    "resetDone": "Kayıtlı ayar silindi; sunucu .env değerleri kullanılacak."
   }
 }

@@ -2242,7 +2242,7 @@
   },
   "mailTest": {
     "title": "Email delivery",
-    "help": "Check that invitation, password reset and notification emails work. The test email goes to your own address; if it fails, the reason is shown here.",
+    "help": "Enter the SMTP details for outgoing email (invitations, password resets, notifications) here; no file editing on the server. The password is stored encrypted and never shown again.",
     "send": "Send test email",
     "sending": "Sending…",
     "okTitle": "Test email sent to {{to}}.",
@@ -2252,12 +2252,29 @@
     "code": "Error code",
     "detail": "Server response",
     "hint": {
-      "passEmpty": "The SMTP password is empty. Set SMTP_PASS in the server’s .env file (for Gmail, a 16-letter “App password”), then restart the API: docker compose up -d.",
-      "auth": "The username or password was rejected. Gmail does not accept your normal password; turn on 2-step verification, create a 16-letter App password without spaces and use it as SMTP_PASS.",
-      "network": "Could not reach the SMTP server. Make sure the server can send out on port 587 (or 465) and that SMTP_HOST/SMTP_PORT are correct; some hosts block this port.",
-      "host": "The SMTP host name could not be resolved. Check the SMTP_HOST spelling and the server’s DNS access.",
-      "rejected": "The server rejected the sender or recipient address. MAIL_FROM must belong to the same account as SMTP_USER.",
-      "other": "See the server response below and the API log for details: docker compose logs api."
-    }
+      "passEmpty": "The SMTP password is empty. Enter it in the Password field above (for Gmail, a 16-letter “App password”) and save.",
+      "auth": "The username or password was rejected. Gmail does not accept your normal password; turn on 2-step verification, create a 16-letter App password and enter it in the Password field above.",
+      "network": "Could not reach the SMTP server. Check the server name and port (Gmail: smtp.gmail.com, 587); some hosts block outgoing 587/465.",
+      "host": "The SMTP host name could not be resolved. Check the SMTP server spelling above and the server’s DNS access.",
+      "rejected": "The server rejected the sender or recipient address. The sender address must belong to the same account as the username.",
+      "other": "See the server response below and the API log for details: docker compose logs api.",
+      "unreadable": "The saved password could not be decrypted (the server’s encryption key changed). Enter the password again and save."
+    },
+    "sourceEnv": "The server’s .env values are in use right now. What you save here takes their place.",
+    "host": "SMTP server",
+    "port": "Port",
+    "secure": "Connect with SSL/TLS",
+    "secureHelp": "Turn on for port 465; leave off for 587 (STARTTLS is used automatically).",
+    "username": "Username",
+    "password": "Password",
+    "passwordKept": "Saved (type to change)",
+    "passwordHelp": "For Gmail use a 16-letter “App password”, not your normal password (you can paste it with spaces).",
+    "from": "Sender",
+    "fromHelp": "The name and address recipients see. With Gmail the address must match the username.",
+    "save": "Save",
+    "saved": "Email settings saved.",
+    "saveAndTest": "Save and test",
+    "reset": "Back to server settings",
+    "resetDone": "Saved settings removed; the server’s .env values will be used."
   }
 }

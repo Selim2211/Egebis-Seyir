@@ -120,3 +120,37 @@ export const MailTestResultSchema = z.object({
   detail: z.string().nullable(),
 });
 export type MailTestResult = z.infer<typeof MailTestResultSchema>;
+
+/** Hangi kaynaktan okunuyor: uygulamada kaydedilen (APP), sunucu .env değerleri (ENV) ya da test belleği. */
+export const MAIL_SETTINGS_SOURCES = ['APP', 'ENV', 'MEMORY'] as const;
+
+/** GET /api/workspaces/:workspaceId/settings/mail — şifre hiçbir zaman dönmez, yalnızca kayıtlı olup olmadığı. */
+export const MailSettingsSchema = z.object({
+  host: z.string(),
+  port: z.number().int(),
+  secure: z.boolean(),
+  username: z.string().nullable(),
+  passwordSet: z.boolean(),
+  from: z.string(),
+  source: z.enum(MAIL_SETTINGS_SOURCES),
+});
+export type MailSettings = z.infer<typeof MailSettingsSchema>;
+
+/**
+ * PUT /api/workspaces/:workspaceId/settings/mail. `password` verilmezse kayıtlı şifre korunur,
+ * boş metin ("") verilirse silinir.
+ */
+export const UpdateMailSettingsRequestSchema = z.object({
+  host: z
+    .string()
+    .trim()
+    .min(1)
+    .max(253)
+    .regex(/^[A-Za-z0-9._-]+$/, 'host'),
+  port: z.number().int().min(1).max(65535),
+  secure: z.boolean(),
+  username: z.string().trim().max(254).nullable(),
+  password: z.string().max(200).optional(),
+  from: z.string().trim().min(3).max(200),
+});
+export type UpdateMailSettingsRequest = z.infer<typeof UpdateMailSettingsRequestSchema>;
