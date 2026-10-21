@@ -77,7 +77,11 @@ export function ItemsView({
   const [collapsedGroups, setCollapsedGroups] = useState<ReadonlySet<string>>(new Set());
   const [pickedIds, setPicked] = useState<ReadonlySet<string>>(new Set());
   const [addingUnder, setAddingUnder] = useState<string | null>(null);
-  const [promoting, setPromoting] = useState<{ id: string; key: string } | null>(null);
+  const [promoting, setPromoting] = useState<{
+    id: string;
+    key: string;
+    title: string;
+  } | null>(null);
   const [moving, setMoving] = useState<
     | { kind: 'nest'; item: WorkItemSummary; target: WorkItemSummary }
     | { kind: 'unnest'; item: WorkItemSummary }
@@ -220,7 +224,7 @@ export function ItemsView({
         },
       ),
     canPromote: (item: WorkItemSummary) => canWrite && space.scrumEnabled && item.type === 'TASK',
-    onPromote: (item) => setPromoting({ id: item.id, key: item.key }),
+    onPromote: (item) => setPromoting({ id: item.id, key: item.key, title: item.title }),
     onArchive: (item) => run(item.id, 'archive', t('items.archived', { key: item.key })),
     onDelete: (item) => run(item.id, 'delete', t('items.trashed', { key: item.key })),
     addingUnder,

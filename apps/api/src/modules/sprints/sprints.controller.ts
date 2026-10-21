@@ -28,6 +28,8 @@ import {
   RetroTaskCreatedSchema,
   CreateSprintRequestSchema,
   MoveBacklogItemsRequestSchema,
+  ConvertToEpicRequestSchema,
+  GroupItemsRequestSchema,
   NestItemRequestSchema,
   SPACE_PERMISSIONS as S,
   SetReviewNotesRequestSchema,
@@ -79,6 +81,8 @@ class MoveBacklogDto extends createZodDto(MoveBacklogItemsRequestSchema) {}
 class SprintImportFieldsDto extends createZodDto(SprintImportFieldsSchema) {}
 class SprintImportResultDto extends createZodDto(SprintImportResultSchema) {}
 class NestItemDto extends createZodDto(NestItemRequestSchema) {}
+class GroupItemsDto extends createZodDto(GroupItemsRequestSchema) {}
+class ConvertToEpicDto extends createZodDto(ConvertToEpicRequestSchema) {}
 
 const Uuid = (name: string) => Param(name, ParseUUIDPipe);
 const NO_CONTENT = HttpStatus.NO_CONTENT;
@@ -190,8 +194,16 @@ export class SprintsController {
   @Post('items/:itemId/convert-to-epic')
   @RequireSpacePermission(S.WORK_ITEM_WRITE)
   @HttpCode(NO_CONTENT)
-  promoteToEpic(@Uuid('itemId') itemId: string): Promise<void> {
-    return this.backlog.promoteToEpic(itemId);
+  promoteToEpic(@Uuid('itemId') itemId: string, @Body() body: ConvertToEpicDto): Promise<void> {
+    return this.backlog.promoteToEpic(itemId, body);
+  }
+
+  /** Seçili Task/Bug'ları bir Epic altında topla (ADR-124). */
+  @Post('spaces/:spaceId/items/group')
+  @RequireSpacePermission(S.WORK_ITEM_WRITE)
+  @HttpCode(NO_CONTENT)
+  group(@Uuid('spaceId') spaceId: string, @Body() body: GroupItemsDto): Promise<void> {
+    return this.backlog.group(spaceId, body);
   }
 
   /** Öğeyi başka öğenin alt öğesi yap (sürükle-bırak, ADR-102). */

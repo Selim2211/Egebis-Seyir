@@ -153,8 +153,11 @@ export const useUnnestItem = () =>
 
 /** Task'ı Epic'e dönüştürür (isteğe bağlı, ADR-109). */
 export const usePromoteToEpic = () =>
-  useWorkspaceMutation((id, input: { itemId: string }) =>
-    apiRequest(`${ws(id)}/items/${input.itemId}/convert-to-epic`, NoContent, { method: 'POST' }),
+  useWorkspaceMutation((id, input: { itemId: string; title?: string }) =>
+    apiRequest(`${ws(id)}/items/${input.itemId}/convert-to-epic`, NoContent, {
+      method: 'POST',
+      body: input.title ? { title: input.title } : {},
+    }),
   );
 
 export const useMoveItem = () =>

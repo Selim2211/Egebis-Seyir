@@ -2058,9 +2058,10 @@
   "promoteEpic": {
     "menu": "Epic'e dönüştür",
     "title": "{{key}} Epic'e dönüştürülsün mü?",
-    "body": "Bu Task bir Epic olur. Epic; üst öğe, sprint, saat tahmini, tamamlanma yüzdesi ve tekrar taşımaz: bir Epic'in altındaysa oradan ayrılır, sprint'teyse sprint'ten çıkar, bu alanlar temizlenir. Sub-Task'ları Task'a dönüşür ve Epic'in altında kalır. Bu işlem geri alınamaz.",
+    "body": "Bu Task bir Epic olur. Epic; üst öğe, sprint, saat tahmini, tamamlanma yüzdesi ve tekrar taşımaz: bir Epic’in altındaysa oradan ayrılır, sprint’teyse sprint’ten çıkar, bu alanlar temizlenir. Sub-Task’ları Task’a dönüşür ve Epic’in altında kalır. İstersen Epic’in adını aşağıdan değiştirebilirsin. Bu işlem geri alınamaz.",
     "confirm": "Epic'e dönüştür",
-    "done": "{{key}} artık bir Epic."
+    "done": "{{key}} artık bir Epic.",
+    "name": "Epic’in adı"
   },
   "defaultNames": {
     "list": "Görevler",
@@ -2293,5 +2294,30 @@
     "mismatchTitle": "E-postalardaki bağlantılar yanlış adrese gidiyor olabilir.",
     "mismatch": "Şu an bağlantılar {{saved}} adresiyle kuruluyor, ama sen uygulamayı {{here}} adresinde kullanıyorsun. Adres farklıysa davet edilen kişi bağlantıya tıklayınca “siteye ulaşılamıyor” hatası alır.",
     "useThis": "{{here}} adresini kullan"
+  },
+  "moveItem": {
+    "button": "Taşı…",
+    "title": "{{key}} taşınsın",
+    "epicNote": "Epic taşınırken altındaki Task’lar ve Sub-Task’ları da birlikte gelir.",
+    "project": "Proje",
+    "sprint": "Sprint",
+    "sprintForTasks": "Epic’in Task’ları için sprint",
+    "keepSprint": "Sprint’i değiştirme",
+    "noSprintKept": "Sprint yok (Backlog)",
+    "backlog": "Backlog (sprint yok)",
+    "noPlanPermission": "Bu Proje’de sprint planlama yetkin yok; öğe Backlog’a taşınır.",
+    "noSprints": "Bu Proje sprint kullanmıyor (Kanban); öğe doğrudan taşınır.",
+    "confirm": "Taşı",
+    "done": "{{key}}, “{{space}}” projesine taşındı."
+  },
+  "groupEpic": {
+    "action": "Epic altında grupla",
+    "title": "{{count}} öğeyi Epic altında grupla",
+    "body": "Seçilen Task’lar seçtiğin Epic’in altına girer. Sub-Task’lı Task’lar Sub-Task’larıyla birlikte gelir; sprint’leri değişmez.",
+    "epic": "Epic",
+    "newEpic": "+ Yeni Epic oluştur…",
+    "newName": "Yeni Epic’in adı",
+    "confirm": "Grupla",
+    "done": "{{count}} öğe Epic altında toplandı."
   }
 }

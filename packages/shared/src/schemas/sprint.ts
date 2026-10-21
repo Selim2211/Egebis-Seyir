@@ -149,6 +149,24 @@ export type MoveBacklogItemsRequest = z.infer<typeof MoveBacklogItemsRequestSche
 export const NestItemRequestSchema = z.object({ parentId: z.uuid() });
 export type NestItemRequest = z.infer<typeof NestItemRequestSchema>;
 
+/**
+ * POST .../spaces/:spaceId/items/group — seçili Task/Bug'ları bir Epic altında toplar (ADR-124).
+ * Alt öğeleri olan Task'lar alt öğeleriyle birlikte gelir; sprint üyelikleri değişmez.
+ */
+export const GroupItemsRequestSchema = z.object({
+  itemIds: z.array(z.uuid()).min(1).max(200),
+  epicId: z.uuid(),
+});
+export type GroupItemsRequest = z.infer<typeof GroupItemsRequestSchema>;
+
+/** POST .../items/:itemId/convert-to-epic — Epic'e dönüşürken ad isteğe bağlı değiştirilebilir (ADR-124). */
+export const ConvertToEpicRequestSchema = z.preprocess(
+  // Gövdesiz istek (eski istemciler) boş nesne sayılır.
+  (value) => value ?? {},
+  z.object({ title: z.string().trim().min(1).max(500).optional() }),
+);
+export type ConvertToEpicRequest = z.infer<typeof ConvertToEpicRequestSchema>;
+
 // ---------- Sprint Review (Faz 2.4, ADR-065) ----------
 
 export const SprintScopeChangeSchema = z.object({

@@ -8,6 +8,7 @@ import {
   rankBetween,
   rankForPlacement,
   SPACE_PERMISSIONS as S,
+  sprintMoveReason,
   type BulkUpdateRequest,
   type CopyItemRequest,
   type CreatedItem,
@@ -112,10 +113,33 @@ export class ItemTreeService {
       const rank = rankForPlacement(siblings.sort(compareRank), itemId, input.afterId ?? null);
       if (!rank) throw notFound();
 
-      if (crossSpace) await this.remapAcrossSpaces(tx, ids, target.spaceId);
+      if (crossSpace) {
+        await this.remapAcrossSpaces(tx, ids, target.spaceId);
+        // Sprint'ler Space'e aittir: başka Space'e giden öğe sprint'inden çıkar (üyelik geçmişine yazılır).
+        const inSprints = await tx.workItem.findMany({
+          where: { id: { in: ids }, sprintId: { not: null } },
+          select: { id: true, points: true, sprintId: true, sprint: { select: { status: true } } },
+        });
+        for (const row of inSprints) {
+          await tx.sprintItemEvent.create({
+            data: {
+              workspaceId,
+              sprintId: row.sprintId!,
+              workItemId: row.id,
+              action: 'REMOVED',
+              reason: sprintMoveReason(row.sprint!.status),
+              points: row.points,
+              actorId,
+            },
+          });
+        }
+      }
       await tx.workItem.updateMany({
         where: { id: { in: ids } },
-        data: { listId: target.id, ...(crossSpace && { spaceId: target.spaceId }) },
+        data: {
+          listId: target.id,
+          ...(crossSpace && { spaceId: target.spaceId, sprintId: null, backlogRank: null }),
+        },
       });
       await tx.workItem.update({
         where: { id: itemId },

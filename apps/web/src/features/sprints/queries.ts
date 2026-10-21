@@ -102,6 +102,34 @@ export const useDeleteSprint = () =>
  * Backlog'a/sprint'e taşıma ve yeniden sıralama. Yalnızca Backlog içi sıralama anında
  * önbelleğe yansır (sürükleme sonrası sıçrama olmasın); hata olursa geri alınır.
  */
+/** Öğeleri herhangi bir Proje'nin sprint'ine / Backlog'una taşır (Space çağrıda verilir; iyimser güncelleme yok). */
+export function useMoveToSprint() {
+  const qc = useQueryClient();
+  const { id: workspaceId } = useCurrentWorkspace();
+  return useMutation({
+    mutationFn: ({ spaceId, body }: { spaceId: string; body: MoveBacklogItemsRequest }) =>
+      apiRequest(`${ws(workspaceId)}/spaces/${spaceId}/backlog/move`, NoContent, {
+        method: 'POST',
+        body,
+      }),
+    onSettled: () => qc.invalidateQueries({ queryKey: ['workspaces', workspaceId] }),
+  });
+}
+
+/** Seçili Task/Bug'ları bir Epic altında toplar (ADR-124). */
+export function useGroupItems(spaceId: string) {
+  const qc = useQueryClient();
+  const { id: workspaceId } = useCurrentWorkspace();
+  return useMutation({
+    mutationFn: (body: { itemIds: string[]; epicId: string }) =>
+      apiRequest(`${ws(workspaceId)}/spaces/${spaceId}/items/group`, NoContent, {
+        method: 'POST',
+        body,
+      }),
+    onSettled: () => qc.invalidateQueries({ queryKey: ['workspaces', workspaceId] }),
+  });
+}
+
 export function useMoveBacklogItems(spaceId: string) {
   const qc = useQueryClient();
   const { id: workspaceId } = useCurrentWorkspace();

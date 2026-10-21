@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Link, useNavigate } from '@tanstack/react-router';
 import {
   Archive,
+  ArrowRightLeft,
   ChevronRight,
   Copy,
   CopyPlus,
@@ -37,6 +38,7 @@ import { cn } from '@/lib/utils';
 import { itemByKeyQuery, useCopyItem, useItemLifecycle, useWatchItem } from '../queries';
 import { accessState, ShareDialog } from '../access/share-dialog';
 import { useItemAccess } from '../access/queries';
+import { MoveItemDialog } from '../move-item-dialog';
 import { PromoteEpicDialog } from '../promote-epic-dialog';
 import { Attachments } from './attachments';
 import { Checklists } from './checklists';
@@ -112,10 +114,13 @@ function Content({
   const wide = variant === 'page';
   const [promoting, setPromoting] = useState(false);
   const [sharing, setSharing] = useState(false);
+  const [moving, setMoving] = useState(false);
   const canShare = space.permissions.includes(S.WORK_ITEM_ACCESS) && !item.archived;
   const access = useItemAccess(item.id, true);
   const shareState = accessState(access.data);
   const canPromote = canWrite && space.scrumEnabled && item.type === 'TASK';
+  // Sub-Task üst öğesiyle birlikte taşınır; kendi başına taşınmaz.
+  const canMove = canWrite && item.type !== 'SUBTASK';
 
   const run = (action: 'archive' | 'unarchive' | 'delete' | 'restore', message?: string) =>
     lifecycle.mutate(
@@ -351,13 +356,41 @@ function Content({
           )}
         </aside>
       </div>
+      {canMove && (
+        <div className="border-t px-4 py-3 sm:px-6">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setMoving(true)}
+            data-testid="move-item"
+          >
+            <ArrowRightLeft aria-hidden />
+            {t('moveItem.button')}
+          </Button>
+        </div>
+      )}
       <p className="text-muted-foreground px-4 pb-4 text-xs sm:px-6">
         <Copy className="mr-1 inline size-3" aria-hidden />
         {t('detail.updated', { when: new Date(item.updatedAt).toLocaleString() })}
       </p>
       <ShareDialog itemId={item.id} itemKey={item.key} open={sharing} onOpenChange={setSharing} />
+      {canMove && (
+        <MoveItemDialog
+          item={{
+            id: item.id,
+            key: item.key,
+            type: item.type,
+            spaceId: item.spaceId,
+            childTaskIds: item.children
+              .filter((c) => c.type === 'TASK' || c.type === 'BUG')
+              .map((c) => c.id),
+          }}
+          open={moving}
+          onOpenChange={setMoving}
+        />
+      )}
       <PromoteEpicDialog
-        item={promoting ? { id: item.id, key: item.key } : null}
+        item={promoting ? { id: item.id, key: item.key, title: item.title } : null}
         onClose={() => setPromoting(false)}
       />
     </article>

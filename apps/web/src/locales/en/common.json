@@ -2058,9 +2058,10 @@
   "promoteEpic": {
     "menu": "Convert to Epic",
     "title": "Convert {{key}} to an Epic?",
-    "body": "This Task becomes an Epic. An Epic has no parent, sprint, hour estimate, completion percentage or recurrence: if it sits under an Epic it is detached, if it is in a sprint it leaves the sprint, and those fields are cleared. Its Sub-Tasks become Tasks and stay under the Epic. This cannot be undone.",
+    "body": "This Task becomes an Epic. An Epic has no parent, sprint, hour estimate, completion percentage or recurrence: if it sits under an Epic it is detached, if it is in a sprint it leaves the sprint, and those fields are cleared. Its Sub-Tasks become Tasks and stay under the Epic. You can rename the Epic below. This cannot be undone.",
     "confirm": "Convert to Epic",
-    "done": "{{key}} is now an Epic."
+    "done": "{{key}} is now an Epic.",
+    "name": "Name of the Epic"
   },
   "defaultNames": {
     "list": "Tasks",
@@ -2293,5 +2294,30 @@
     "mismatchTitle": "Links in emails may point to the wrong address.",
     "mismatch": "Links are currently built with {{saved}}, but you are using the app at {{here}}. If they differ, an invited person who clicks the link gets a “site can’t be reached” error.",
     "useThis": "Use {{here}}"
+  },
+  "moveItem": {
+    "button": "Move…",
+    "title": "Move {{key}}",
+    "epicNote": "When an Epic is moved, its Tasks and their Sub-Tasks come along.",
+    "project": "Project",
+    "sprint": "Sprint",
+    "sprintForTasks": "Sprint for the Epic’s Tasks",
+    "keepSprint": "Keep the sprint",
+    "noSprintKept": "No sprint (Backlog)",
+    "backlog": "Backlog (no sprint)",
+    "noPlanPermission": "You can’t plan sprints in this Project; the item goes to its Backlog.",
+    "noSprints": "This Project has no sprints (Kanban); the item is moved directly.",
+    "confirm": "Move",
+    "done": "{{key}} was moved to “{{space}}”."
+  },
+  "groupEpic": {
+    "action": "Group under an Epic",
+    "title": "Group {{count}} items under an Epic",
+    "body": "The selected Tasks go under the Epic you choose. Tasks with Sub-Tasks bring their Sub-Tasks; their sprints do not change.",
+    "epic": "Epic",
+    "newEpic": "+ Create a new Epic…",
+    "newName": "Name of the new Epic",
+    "confirm": "Group",
+    "done": "{{count}} items were grouped under the Epic."
   }
 }

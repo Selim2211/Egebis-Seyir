@@ -14,7 +14,17 @@ import {
 } from '@scrum/shared';
 import { useQueries, useQuery } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
-import { Archive, ChevronDown, Copy, FileSpreadsheet, Plus, Search, Upload, X } from 'lucide-react';
+import {
+  Archive,
+  ChevronDown,
+  Copy,
+  FileSpreadsheet,
+  Layers,
+  Plus,
+  Search,
+  Upload,
+  X,
+} from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -51,7 +61,11 @@ import { RestoreSprintDialog } from '@/features/backup/backup';
 import { PriorityColorToggle } from '@/features/work-items/priority-colors';
 import { SprintImportDialog } from './sprint-import-dialog';
 import { ScrumTabs } from './scrum-tabs';
+import { GroupEpicDialog } from './group-epic-dialog';
 import { SprintSection } from './sprint-section';
+
+/** Toplu taşıma seçiminde Backlog'a geri alma değeri. */
+const BACKLOG_OPTION = '__backlog';
 
 type DialogState = { kind: 'create' } | { kind: 'edit'; sprint: SprintSummary } | null;
 
@@ -83,6 +97,7 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
   const [dialog, setDialog] = useState<DialogState>(null);
   const [deleting, setDeleting] = useState<SprintSummary | null>(null);
   const [importing, setImporting] = useState(false);
+  const [grouping, setGrouping] = useState(false);
   const [restoring, setRestoring] = useState(false);
   // Aktif sprint'e ekleme/çıkarma kapsam değişikliğidir; onay istenir (brief §6.1.4).
   const [scopeChange, setScopeChange] = useState<{
@@ -99,7 +114,13 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
     [backlog.data],
   );
   // Seçim, listeden kaybolan öğeleri (taşındı/silindi) otomatik düşer.
-  const selected = useMemo(() => visible.filter((i) => picked.has(i.id)), [visible, picked]);
+  const selected = useMemo(
+    () =>
+      [...sprintDetails.flatMap((d) => d.data?.items ?? []), ...visible].filter((i) =>
+        picked.has(i.id),
+      ),
+    [sprintDetails, visible, picked],
+  );
   const totals = useMemo(
     () =>
       sprintTotals(
@@ -200,6 +221,7 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
 
   const perms = space.data.permissions;
   const canPlan = perms.includes(S.SPRINT_PLAN) && !space.data.archived;
+  const canWrite = perms.includes(S.WORK_ITEM_WRITE) && !space.data.archived;
   const canRank = perms.includes(S.BACKLOG_RANK) && !space.data.archived;
   const reorderable = canRank && !isFiltered(filter);
 
@@ -374,6 +396,8 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
                 targets={sprints}
                 canPlan={canPlan}
                 dnd={{ enabled: canRank }}
+                selected={picked}
+                onSelect={(itemId, on) => setPicked((p) => toggle(p, itemId, on))}
                 onCopy={() => copyList(detail?.data?.items ?? [])}
                 onMove={(itemId, target) => moveItems([itemId], target)}
                 onEdit={() => setDialog({ kind: 'edit', sprint })}
@@ -478,18 +502,30 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
                       if (e.target.value) {
                         moveItems(
                           selected.map((i) => i.id),
-                          e.target.value,
+                          e.target.value === BACKLOG_OPTION ? null : e.target.value,
                         );
                       }
                     }}
                   >
                     <option value="">{t('backlog.moveSelected')}</option>
+                    <option value={BACKLOG_OPTION}>{t('moveItem.backlog')}</option>
                     {sprints.map((s) => (
                       <option key={s.id} value={s.id}>
                         {s.name}
                       </option>
                     ))}
                   </NativeSelect>
+                )}
+                {canWrite && space.data.scrumEnabled && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    data-testid="group-selected"
+                    onClick={() => setGrouping(true)}
+                  >
+                    <Layers />
+                    {t('groupEpic.action')}
+                  </Button>
                 )}
                 <Button variant="ghost" size="sm" onClick={() => setPicked(new Set())}>
                   {t('backlog.clearSelection')}
@@ -543,6 +579,15 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
         </DragOverlay>
       </DndContext>
 
+      <GroupEpicDialog
+        spaceId={spaceId}
+        listId={selected[0]?.listId ?? ''}
+        itemIds={selected.map((i) => i.id)}
+        epics={backlog.data.epics}
+        open={grouping && selected.length > 0}
+        onOpenChange={setGrouping}
+        onDone={() => setPicked(new Set())}
+      />
       {restoring && <RestoreSprintDialog spaceId={spaceId} onClose={() => setRestoring(false)} />}
       {importing && (
         <SprintImportDialog open onOpenChange={setImporting} spaceId={spaceId} sprints={sprints} />

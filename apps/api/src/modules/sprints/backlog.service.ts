@@ -12,6 +12,8 @@ import {
   sprintEligibility,
   sprintMoveReason,
   type BacklogResponse,
+  type ConvertToEpicRequest,
+  type GroupItemsRequest,
   type MoveBacklogItemsRequest,
   type NestItemRequest,
 } from '@scrum/shared';
@@ -280,11 +282,61 @@ export class BacklogService {
   }
 
   /**
+   * Seçili Task/Bug'ları bir Epic altında toplar (ADR-124). Hepsi önce doğrulanır, sonra tek işlemde
+   * taşınır: biri uygun değilse hiçbiri değişmez. Alt öğeleri olan Task, alt öğeleriyle birlikte gelir
+   * (alt öğeler Task'a bağlı kalır). Epic de sprint'e girmez; Task'ların sprint üyeliği korunur.
+   */
+  async group(spaceId: string, input: GroupItemsRequest): Promise<void> {
+    const { workspaceId, actorId } = this.ctx;
+    const db = this.tenant.db;
+    const epic = await db.workItem.findFirst({
+      where: { id: input.epicId, spaceId, type: 'EPIC', ...countedItems },
+      select: { id: true, keyPrefix: true, number: true },
+    });
+    if (!epic) throw notFound();
+    const ids = [...new Set(input.itemIds)];
+    const items = await db.workItem.findMany({
+      where: { id: { in: ids }, spaceId, ...countedItems },
+      include: {
+        parent: { select: { keyPrefix: true, number: true } },
+        _count: { select: { children: { where: { deletedAt: null } } } },
+      },
+    });
+    if (items.length !== ids.length) throw notFound();
+    const plans = items.map((item) => ({
+      item,
+      plan: planNest({ type: item.type, hasChildren: item._count.children > 0 }, 'EPIC'),
+    }));
+    for (const { item, plan } of plans) {
+      if (!plan.ok) throw fail(plan.code, 422, { itemId: item.id });
+    }
+    const keyOf = (p: { keyPrefix: string; number: number } | null) =>
+      p ? formatItemKey(p.keyPrefix, p.number) : null;
+    await db.$transaction(async (tx) => {
+      for (const { item, plan } of plans) {
+        if (!plan.ok || (item.parentId === epic.id && plan.type === item.type)) continue;
+        await tx.workItem.update({
+          where: { id: item.id },
+          data: { parentId: epic.id, type: plan.type },
+        });
+        await this.activity.record(tx, {
+          workspaceId,
+          actorId,
+          entityType: 'item',
+          entityId: item.id,
+          action: 'item.updated',
+          changes: asJson({ parentId: { from: keyOf(item.parent), to: keyOf(epic) } }),
+        });
+      }
+    });
+  }
+
+  /**
    * Task'ı Epic'e dönüştürür (isteğe bağlı, ADR-109). Epic üst öğe, sprint, saat tahmini, yüzde ve tekrar
    * taşımaz; bu yüzden üst öğesinden ayrılır, sprint'ten çıkar (üyelik geçmişine yazılır) ve bu alanlar
    * temizlenir. Sub-Task'lar Epic'in altında geçerli olmadığından Task'a dönüşür.
    */
-  async promoteToEpic(itemId: string): Promise<void> {
+  async promoteToEpic(itemId: string, input: ConvertToEpicRequest = {}): Promise<void> {
     const { workspaceId, actorId } = this.ctx;
     const db = this.tenant.db;
     const item = await db.workItem.findFirst({
@@ -311,6 +363,7 @@ export class BacklogService {
         where: { id: item.id },
         data: {
           type: 'EPIC',
+          ...(input.title && input.title !== item.title ? { title: input.title } : {}),
           parentId: null,
           sprintId: null,
           backlogRank: null,
@@ -331,6 +384,9 @@ export class BacklogService {
         action: 'item.updated',
         changes: asJson({
           type: { from: 'TASK', to: 'EPIC' },
+          ...(input.title && input.title !== item.title
+            ? { title: { from: item.title, to: input.title } }
+            : {}),
           ...(item.parent
             ? {
                 parentId: {

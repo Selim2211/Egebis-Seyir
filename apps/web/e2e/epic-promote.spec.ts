@@ -51,7 +51,7 @@ test.describe.serial("Task'ı Epic'e dönüştürme", () => {
     // Vazgeçilirse hiçbir şey değişmez.
     await page.getByRole('button', { name: 'EPD-1 için işlemler' }).click();
     await page.getByRole('menuitem', { name: "Epic'e dönüştür" }).click();
-    const confirm = page.getByRole('alertdialog');
+    const confirm = page.getByRole('dialog', { name: /Epic'e dönüştürülsün mü/ });
     await expect(confirm).toContainText('geri alınamaz');
     await confirm.getByRole('button', { name: 'İptal' }).click();
     await expect(page.getByRole('img', { name: 'Epic' })).toHaveCount(0);
@@ -59,8 +59,12 @@ test.describe.serial("Task'ı Epic'e dönüştürme", () => {
     // Onaylanınca Epic olur; Sub-Task Task'a döner.
     await page.getByRole('button', { name: 'EPD-1 için işlemler' }).click();
     await page.getByRole('menuitem', { name: "Epic'e dönüştür" }).click();
-    await page.getByRole('alertdialog').getByRole('button', { name: "Epic'e dönüştür" }).click();
+    const dialog = page.getByRole('dialog', { name: /Epic'e dönüştürülsün mü/ });
+    // Dönüşürken Epic'in adı değiştirilebilir.
+    await dialog.getByLabel(/Epic.in adı/).fill('Yeniden adlandırılan Epic');
+    await dialog.getByRole('button', { name: "Epic'e dönüştür" }).click();
     await expect(page.getByText('EPD-1 artık bir Epic.')).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Yeniden adlandırılan Epic' })).toBeVisible();
     await expect(page.getByRole('img', { name: 'Epic' })).toHaveCount(1);
     await expect(page.getByRole('img', { name: 'Sub-task' })).toHaveCount(0);
 
