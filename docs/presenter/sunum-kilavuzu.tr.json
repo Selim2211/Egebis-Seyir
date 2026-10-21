@@ -1,0 +1,114 @@
+{
+  "title": "Egebis Seyir Sunum Kılavuzu",
+  "subtitle": "Seyir’i 5 dakikada anlatmak için: ne gösterilir, ne söylenir.",
+  "sections": [
+    {
+      "id": "hizli-tur",
+      "title": "Hızlı tur: Seyir’i 5 dakikada anlat (sunum için)",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Bu bölüm uygulamayı hızlıca öğrenmek ve başkasına göstermek için. Uzun anlatımlar sonraki bölümlerde; burada yalnızca **ne gösterip ne söyleyeceğin** var."
+        },
+        {
+          "type": "bullets",
+          "items": [
+            "**Seyir nedir?** Ekibin bütün işini tek yerde planladığı, sprintlerle ilerlettiği ve takip ettiği uygulama.",
+            "**Kimin için?** İş yazan, iş yapan ve ilerlemeyi izleyen herkes: yönetici, ürün sahibi, yazılımcı, paydaş.",
+            "**Fark ne?** Kendi sunucunuzda çalışır; veri kurumda kalır. Türkçe ve İngilizce."
+          ]
+        },
+        {
+          "type": "table",
+          "head": ["Sıra", "Ekranda göster", "Söyleyeceğin cümle"],
+          "rows": [
+            [
+              "1",
+              "Sol menüde **Proje oluştur** (mor düğme)",
+              "Her ürün ya da ekip için ayrı bir çalışma alanı açılır."
+            ],
+            [
+              "2",
+              "Üstteki mor **New** düğmesi",
+              "İş eklemenin tek kapısı: Sprint, Task, Epic, Bug buradan açılır."
+            ],
+            [
+              "3",
+              "Bir **Epic** ve altına **Task**’lar ekle",
+              "Büyük hedef Epic, yapılacak iş Task; küçük parçalar Sub-Task."
+            ],
+            [
+              "4",
+              "Bir Task’ı başka Task’ın üstüne **sürükle**",
+              "Sürüklemek yeterli: onay verince Sub-Task olur, “Ayır” alanına bırakınca tekrar Task."
+            ],
+            [
+              "5",
+              "New → **Sprint**",
+              "Sprint, ekibin 1–2 haftalık hedefidir; tarihleri ve hedefi burada yazılır."
+            ],
+            [
+              "6",
+              "Backlog’daki işleri **Sprint’e taşı**",
+              "Ekip bu dönem hangi işleri yapacağını seçer."
+            ],
+            [
+              "7",
+              "**Sprint panosu**: kartı sütundan sütuna sürükle",
+              "Herkes işin hangi aşamada olduğunu bir bakışta görür."
+            ],
+            [
+              "8",
+              "Kırmızı **Bugs** sekmesi (Raporlar’ın yanında) → Bug aç → ata → Çözüldü",
+              "Hatalar kaybolmaz: sahibi, atananı ve durumu olur; herkese e-posta gider."
+            ],
+            [
+              "9",
+              "**Raporlar**: Burndown ve Velocity",
+              "Sprint zamanında biter mi, ekip ne kadar iş çıkarıyor: grafikte görünür."
+            ],
+            [
+              "10",
+              "Bir Epic’te **Share**; Ayarlar → **Roles**",
+              "Kim neyi görür, neyi değiştirir: Proje’den tek bir işe kadar ayarlanır."
+            ]
+          ]
+        },
+        {
+          "type": "tip",
+          "text": "Sunumdan önce bir Proje, birkaç Task ve bir Sprint hazırla. Sıfırdan yazmak zaman alır; hazır veriyle 5 dakikada bitirirsin. Sürükleme ve Bugs adımları en çok ilgi çekenlerdir, onlara zaman ayır."
+        },
+        {
+          "type": "figure",
+          "image": "01-overview",
+          "alt": "Seyir ana ekranı ve işaretli bölümler",
+          "caption": "Ana ekran: soldaki menüden Projeye ve bölümlerine, üstteki çubuktan arama, yardım ve hesap menüsüne ulaşırsın.",
+          "legend": [
+            "**Proje**: Çalıştığın proje alanı. Tıklayınca altındaki bölümler açılır.",
+            "**Backlog ve sprint'ler**: Sprint oluşturma ve planlama burada yapılır.",
+            "**Sprint panosu**: Sprint'teki işleri durum sütunlarında (Kanban) gösterir.",
+            "**Görevler**: Projenin iş listesi; Epic, Task ve Sub-Task'lar burada eklenir.",
+            "**Arama**: Task, doküman veya kişi ara (kısayol: Ctrl + K).",
+            "**Yardım**: Bu kılavuzu her zaman buradan açabilirsin.",
+            "**Hesap menüsü**: Profil, dil (Türkçe/İngilizce), tema ve çıkış.",
+            "**Yeni iş ekleme satırı**: Başlığı yazıp Enter'a basarak yeni Task eklersin."
+          ]
+        },
+        {
+          "type": "p",
+          "text": "**Sık sorulacak sorular**"
+        },
+        {
+          "type": "bullets",
+          "items": [
+            "**Veriler nerede?** Kurumun kendi sunucusunda (PostgreSQL). Günlük otomatik yedek alınır; bir Proje ayrıca yedekten geri yüklenebilir.",
+            "**Kim neyi görür?** Roller ve yetkiler Ayarlar → Roles’ten düzenlenir; özel bir Epic ya da Task “Private” yapılıp yalnızca seçilenlere açılabilir.",
+            "**Dosya eklenir mi?** Evet, Task ve Epic’e her türden dosya, 100 MB’a kadar.",
+            "**Bildirim var mı?** Evet: uygulama içinde ve e-postayla (atama, yorum, durum, Bug). E-posta ayarı Ayarlar → Genel’den girilir.",
+            "**Başka araçla farkı?** Scrum (Sprint, Backlog, Burndown) ve Kanban bir arada; Türkçe; kendi sunucunda."
+          ]
+        }
+      ]
+    }
+  ]
+}

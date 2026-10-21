@@ -25,7 +25,6 @@ test.describe.serial('Yardım ve kullanıcı kılavuzu', () => {
     // Sprint, Task ve Sub-Task bölümleri içindekiler listesinde.
     const toc = page.getByRole('navigation', { name: 'İçindekiler' });
     for (const title of [
-      'Hızlı tur: Seyir’i 5 dakikada anlat (sunum için)',
       '3. Task oluşturma',
       '4. Task düzenleme',
       '5. Sub-Task oluşturma',

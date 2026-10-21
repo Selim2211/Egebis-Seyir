@@ -1,6 +1,7 @@
 /*
  * Görselli kullanıcı kılavuzu (Word). Uygulama içi Yardım sayfasıyla aynı içerik ve görselleri kullanır:
  *   apps/web/src/features/help/guide.<dil>.json  +  apps/web/public/help/<dil>/*.png
+ * Başka bir içerik için GUIDE_JSON=<dosya.json> verilebilir (ör. docs/presenter/sunum-kilavuzu.tr.json).
  * Kullanım: NODE_PATH=apps/web/node_modules node scripts/docs/make-guide-docx.cjs <tr|en> <çıktı.docx>
  */
 const fs = require('fs');
@@ -34,7 +35,10 @@ if (!['tr', 'en'].includes(lang) || !out) {
 
 const root = path.resolve(__dirname, '../../apps/web');
 const guide = JSON.parse(
-  fs.readFileSync(path.join(root, `src/features/help/guide.${lang}.json`), 'utf8'),
+  fs.readFileSync(
+    process.env.GUIDE_JSON ?? path.join(root, `src/features/help/guide.${lang}.json`),
+    'utf8',
+  ),
 );
 const imageDir = path.join(root, 'public/help', lang);
 
@@ -69,18 +73,16 @@ const MAX_IMAGE_HEIGHT_PX = 430;
 
 /** **kalın** işaretlerini koşullara böler. */
 function runs(text, base = {}) {
-  return text
-    .split('**')
-    .map(
-      (part, index) =>
-        new TextRun({
-          text: part,
-          font: FONT,
-          size: 22,
-          ...base,
-          bold: index % 2 === 1 || base.bold,
-        }),
-    );
+  return text.split('**').map(
+    (part, index) =>
+      new TextRun({
+        text: part,
+        font: FONT,
+        size: 22,
+        ...base,
+        bold: index % 2 === 1 || base.bold,
+      }),
+  );
 }
 const para = (text, opts = {}) =>
   new Paragraph({ spacing: { after: 140, line: 300 }, ...opts, children: runs(text, opts.run) });
