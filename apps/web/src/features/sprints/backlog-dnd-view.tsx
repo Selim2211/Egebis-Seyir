@@ -1,67 +1,75 @@
-import { useDroppable } from '@dnd-kit/core';
-import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import type { ReactNode } from 'react';
+import { useDraggable } from '@dnd-kit/core';
+import type { PointerEventHandler, ReactNode } from 'react';
 import type { DragHandleProps } from '@/features/spaces/sortable';
 import { cn } from '@/lib/utils';
 
 /**
- * Backlog sayfasının bırakma alanı (Backlog ya da bir sprint). Boşken de bırakılabilir;
- * üzerine gelinince vurgulanır.
+ * Backlog sayfasının bırakma alanı (Backlog ya da bir sprint). Hedef, imleç konumundan bulunur
+ * (`data-drop-container`); alanlar dnd-kit'e kaydedilmez. Sürükleme sırasında üzerine gelinince
+ * `data-drop-over` ile vurgulanır, en başa bırakılacaksa `data-drop-top` ile üst çizgi çıkar.
  */
 export function DropContainerView({
   id,
-  itemIds,
-  enabled,
   children,
 }: {
   id: string;
-  itemIds: string[];
-  enabled: boolean;
+  itemIds?: string[];
+  enabled?: boolean;
   children: ReactNode;
 }) {
-  const { setNodeRef, isOver } = useDroppable({ id, disabled: !enabled });
   return (
     <div
-      ref={setNodeRef}
       data-drop-container={id}
-      className={cn('min-h-10 transition-colors', isOver && 'bg-primary/[0.05]')}
+      className={cn(
+        'min-h-10 transition-colors',
+        'data-[drop-over]:bg-primary/[0.05]',
+        'data-[drop-top]:shadow-[inset_0_3px_0_0_var(--primary)]',
+      )}
     >
-      <SortableContext items={itemIds} strategy={verticalListSortingStrategy}>
-        {children}
-      </SortableContext>
+      {children}
     </div>
   );
 }
 
-/** Sürüklenebilir satır sarmalayıcısı; tutamak özelliklerini satıra verir. */
+/**
+ * Sürüklenebilir satır sarmalayıcısı. Satırın tamamı tutulup taşınır (fare ile); tutamak düğmesi
+ * klavye ve ekran okuyucu için kalır. Satırdaki bağlantı, düğme ve kutular 6 px'ten az harekette
+ * normal tıklanır.
+ *
+ * Performans: satırlar sıralama bağlamına (useSortable) bağlı değildir; imleç her satıra girdiğinde
+ * yüzlerce satır yeniden çizilmez. Hedef vurgusu (`data-drop-state`, `data-drop-after`) sayfadan
+ * doğrudan DOM özniteliğiyle verilir.
+ */
 export function SortableRow({
   id,
   enabled,
-  nestTarget,
   children,
 }: {
   id: string;
   enabled: boolean;
-  /** Sürüklenen öğe bu satırın alt öğesi olacaksa vurgulanır. */
-  nestTarget: boolean;
   children: (handle: DragHandleProps | null) => ReactNode;
 }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id,
     disabled: !enabled,
   });
+  const { onPointerDown, ...keyboard } = listeners ?? {};
   return (
     <div
       ref={setNodeRef}
-      style={{ transform: CSS.Translate.toString(transform), transition }}
+      data-row-id={id}
+      onPointerDown={enabled ? (onPointerDown as PointerEventHandler | undefined) : undefined}
       className={cn(
         'relative',
-        isDragging && 'opacity-40',
-        nestTarget && 'ring-primary bg-primary/[0.06] rounded-md ring-2 ring-inset',
+        enabled && 'cursor-grab',
+        'data-[drop-state=nest]:ring-primary data-[drop-state=nest]:bg-primary/[0.06] data-[drop-state=nest]:rounded-md data-[drop-state=nest]:ring-2 data-[drop-state=nest]:ring-inset',
+        'data-[drop-after]:shadow-[inset_0_-3px_0_0_var(--primary)]',
+        // Taşınan satırın yerinde boş, kesik çizgili bir yuva kalır.
+        isDragging &&
+          'border-primary/40 bg-primary/[0.04] rounded-lg border-2 border-dashed [&>*]:invisible',
       )}
     >
-      {children(enabled ? { ...attributes, ...listeners } : null)}
+      {children(enabled ? { ...attributes, ...keyboard } : null)}
     </div>
   );
 }

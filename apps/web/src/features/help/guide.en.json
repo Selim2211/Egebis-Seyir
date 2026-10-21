@@ -603,7 +603,7 @@
         {
           "type": "bullets",
           "items": [
-            "**By dragging:** grab the handle at the left of the row and drop it on a sprint section. Moving between sprints and from a sprint back to the Backlog works the same way.",
+            "**By dragging:** grab the Task row anywhere (an empty spot) and drop it on a sprint section. Moving between sprints and from a sprint back to the Backlog works the same way. A purple line shows where it will land; pull the row to the right and it becomes a Sub-Task of the Task you drop it on.",
             "**Bulk move:** tick the boxes at the left of the rows and choose **Move to sprint…** from the bar that appears.",
             "Tasks and Bugs can enter a sprint; Epics cannot. Sub-tasks come with their parent."
           ]

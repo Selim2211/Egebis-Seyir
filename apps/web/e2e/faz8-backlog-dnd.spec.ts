@@ -87,6 +87,35 @@ test.describe.serial('Backlog sürükle-bırak ve sprint ağacı', () => {
     await expect(backlog.getByRole('link', { name: 'Birinci iş' })).toBeVisible();
   });
 
+  test('satırın herhangi bir yerinden tutup başka sprint bölümüne sürüklenir (tutamaç gerekmez)', async ({
+    page,
+  }) => {
+    await openBacklog(page);
+    const backlog = page.getByRole('region', { name: 'Backlog', exact: true });
+    const one = page.getByRole('region', { name: 'Sprint 1' });
+
+    // Başlığın sağındaki boş yerden tut (tutamaca ya da bağlantıya basmadan).
+    const row = backlog.locator('[data-drop-container] > div', { hasText: 'Birinci iş' }).first();
+    const box = (await row.boundingBox())!;
+    const to = (await one.locator('[data-drop-container]').boundingBox())!;
+    await page.mouse.move(box.x + box.width * 0.62, box.y + box.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(to.x + 80, to.y + to.height / 2, { steps: 15 });
+    await page.mouse.up();
+    await expect(one.getByRole('link', { name: 'Birinci iş' })).toBeVisible();
+    await expect(backlog.getByRole('link', { name: 'Birinci iş' })).toHaveCount(0);
+
+    // Geri al: aynı şekilde Backlog'a sürükle.
+    const back = one.locator('[data-drop-container] > div', { hasText: 'Birinci iş' }).first();
+    const b = (await back.boundingBox())!;
+    const target = (await backlog.locator('[data-drop-container]').boundingBox())!;
+    await page.mouse.move(b.x + b.width * 0.62, b.y + b.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(target.x + 80, target.y + target.height / 2, { steps: 15 });
+    await page.mouse.up();
+    await expect(backlog.getByRole('link', { name: 'Birinci iş' })).toBeVisible();
+  });
+
   test('satırı başka satırın üzerine sağa bırakınca alt öğe (Sub-task) olur', async ({ page }) => {
     await openBacklog(page);
     const backlog = page.getByRole('region', { name: 'Backlog', exact: true });

@@ -1,17 +1,11 @@
 import {
-  closestCenter,
   DndContext,
-  type DragEndEvent,
-  type DragMoveEvent,
+  type DragStartEvent,
   DragOverlay,
-  type CollisionDetection,
-  KeyboardSensor,
   PointerSensor,
-  pointerWithin,
   useSensor,
   useSensors,
 } from '@dnd-kit/core';
-import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import {
   SPACE_PERMISSIONS as S,
   sprintTotals,
@@ -21,7 +15,7 @@ import {
 import { useQueries, useQuery } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
 import { Archive, ChevronDown, Copy, FileSpreadsheet, Plus, Search, Upload, X } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { NativeSelect } from '@/components/form';
@@ -41,7 +35,7 @@ import { useCurrentWorkspace } from '@/features/workspace/queries';
 import { useErrorMessage } from '@/lib/use-error-message';
 import { BacklogRow } from './backlog-row';
 import { filterBacklog, isFiltered, NO_FILTER, type BacklogFilter } from './backlog-filter';
-import { BACKLOG_CONTAINER, resolveBacklogDrop } from './backlog-dnd';
+import { BACKLOG_CONTAINER, containerId, resolveBacklogDrop } from './backlog-dnd';
 import { DropContainerView, SortableRow } from './backlog-dnd-view';
 import { itemsToTsv } from './copy-list';
 import {
@@ -59,14 +53,6 @@ import { SprintImportDialog } from './sprint-import-dialog';
 import { ScrumTabs } from './scrum-tabs';
 import { SprintSection } from './sprint-section';
 
-/** Satırlar önce, yoksa kapsayıcılar: boş alana da bırakılabilsin ama satır hedefi öncelikli olsun. */
-const collision: CollisionDetection = (args) => {
-  const hits = pointerWithin(args);
-  const rows = hits.filter((h) => !String(h.id).startsWith('container:'));
-  if (rows.length > 0) return rows;
-  return hits.length > 0 ? hits : closestCenter(args);
-};
-
 type DialogState = { kind: 'create' } | { kind: 'edit'; sprint: SprintSummary } | null;
 
 /** Product Backlog sayfası (brief §5.5, ADR-062): açık sprint'ler üstte, Backlog altta. */
@@ -80,12 +66,11 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
   const move = useMoveBacklogItems(spaceId);
   const remove = useDeleteSprint();
   const nestItem = useNestItem();
-  const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
-  );
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
   const [activeId, setActiveId] = useState<string | null>(null);
-  const [nestTarget, setNestTarget] = useState<string | null>(null);
+  // Sürükleme sırasındaki imleç konumu ve DOM'a işaretlenen hedef öğeler (yeniden çizim tetiklemez).
+  const pointer = useRef({ x: 0, y: 0, startX: 0 });
+  const marked = useRef<HTMLElement[]>([]);
 
   const sprints = useMemo(() => backlog.data?.sprints ?? [], [backlog.data]);
   const sprintDetails = useQueries({
@@ -123,6 +108,93 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
     [items],
   );
 
+  // Sürükle-bırak kapsayıcıları: her sprint ve Backlog (ADR-102).
+  const containers = [
+    ...sprints.map((sprint, index) => ({
+      sprintId: sprint.id,
+      itemIds: (sprintDetails[index]?.data?.items ?? []).map((i) => i.id),
+    })),
+    { sprintId: null, itemIds: visible.map((i) => i.id) },
+  ];
+  /**
+   * Bırakma hedefi: imlecin altındaki satır ya da kapsayıcı (elementsFromPoint). Satırlar dnd-kit'e
+   * bırakma alanı olarak kaydedilmez; böylece sürüklerken yüzlerce satır yeniden çizilmez.
+   */
+  const dropAtPointer = () => {
+    if (!activeId) return null;
+    let overId: string | null = null;
+    for (const el of document.elementsFromPoint(pointer.current.x, pointer.current.y)) {
+      const row = el.closest<HTMLElement>('[data-row-id]');
+      const box = el.closest<HTMLElement>('[data-drop-container]');
+      overId = row?.dataset.rowId ?? box?.dataset.dropContainer ?? null;
+      if (overId) break;
+    }
+    return resolveBacklogDrop({
+      activeId,
+      overId,
+      deltaX: pointer.current.x - pointer.current.startX,
+      containers,
+    });
+  };
+  const clearMarks = () => {
+    for (const el of marked.current) {
+      delete el.dataset.dropState;
+      delete el.dataset.dropAfter;
+      delete el.dataset.dropOver;
+      delete el.dataset.dropTop;
+    }
+    marked.current = [];
+  };
+  const showDrop = (drop: ReturnType<typeof dropAtPointer>) => {
+    clearMarks();
+    if (!drop) return;
+    const put = (
+      el: HTMLElement | null,
+      key: 'dropState' | 'dropAfter' | 'dropOver' | 'dropTop',
+      value = '',
+    ) => {
+      if (!el) return;
+      el.dataset[key] = value;
+      marked.current.push(el);
+    };
+    const row = (id: string) => document.querySelector<HTMLElement>(`[data-row-id="${id}"]`);
+    if (drop.kind === 'nest') {
+      put(row(drop.parentId), 'dropState', 'nest');
+      return;
+    }
+    const box = document.querySelector<HTMLElement>(
+      `[data-drop-container="${containerId(drop.sprintId)}"]`,
+    );
+    put(box, 'dropOver');
+    if (drop.afterId) put(row(drop.afterId), 'dropAfter');
+    else put(box, 'dropTop');
+  };
+  useEffect(() => {
+    if (!activeId) return;
+    let frame = 0;
+    const resolve = () => {
+      frame = 0;
+      showDrop(dropAtPointer());
+    };
+    const move = (e: PointerEvent) => {
+      pointer.current.x = e.clientX;
+      pointer.current.y = e.clientY;
+      if (!frame) frame = requestAnimationFrame(resolve);
+    };
+    document.addEventListener('pointermove', move, { passive: true });
+    return () => {
+      document.removeEventListener('pointermove', move);
+      if (frame) cancelAnimationFrame(frame);
+      clearMarks();
+    };
+    // Yalnızca sürükleme başlayıp bittiğinde kurulur/kaldırılır.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeId]);
+  const onDragStart = ({ active, activatorEvent }: DragStartEvent) => {
+    const e = activatorEvent as PointerEvent;
+    pointer.current = { x: e.clientX, y: e.clientY, startX: e.clientX };
+    setActiveId(String(active.id));
+  };
   if (space.isPending || backlog.isPending) return <LoadingState />;
   if (space.isError || backlog.isError) return <NotFoundState />;
 
@@ -178,34 +250,15 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
     return next;
   };
 
-  // Sürükle-bırak kapsayıcıları: her sprint ve Backlog (ADR-102).
-  const containers = [
-    ...sprints.map((sprint, index) => ({
-      sprintId: sprint.id,
-      itemIds: (sprintDetails[index]?.data?.items ?? []).map((i) => i.id),
-    })),
-    { sprintId: null, itemIds: visible.map((i) => i.id) },
-  ];
   const allItems: WorkItemRow[] = [
     ...sprintDetails.flatMap((d) => d.data?.items ?? []),
     ...visible,
   ];
   const dragging = allItems.find((i) => i.id === activeId);
-  const dropFor = ({ active, over, delta }: Pick<DragEndEvent, 'active' | 'over' | 'delta'>) =>
-    resolveBacklogDrop({
-      activeId: String(active.id),
-      overId: over ? String(over.id) : null,
-      deltaX: delta.x,
-      containers,
-    });
-  const onDragMove = (e: DragMoveEvent) => {
-    const drop = dropFor(e);
-    setNestTarget(drop?.kind === 'nest' ? drop.parentId : null);
-  };
-  const onDragEnd = (e: DragEndEvent) => {
+  const onDragEnd = () => {
+    // Bırakma anındaki gerçek imleç konumu (kare beklemeden).
+    const drop = dropAtPointer();
     setActiveId(null);
-    setNestTarget(null);
-    const drop = dropFor(e);
     if (!drop || !canRank) return;
     if (drop.kind === 'nest') {
       nestItem.mutate(
@@ -301,14 +354,10 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
 
       <DndContext
         sensors={sensors}
-        collisionDetection={collision}
-        onDragStart={({ active }) => setActiveId(String(active.id))}
-        onDragMove={onDragMove}
+        collisionDetection={() => []}
+        onDragStart={onDragStart}
         onDragEnd={onDragEnd}
-        onDragCancel={() => {
-          setActiveId(null);
-          setNestTarget(null);
-        }}
+        onDragCancel={() => setActiveId(null)}
       >
         <div className="mx-auto flex max-w-5xl flex-col gap-4 px-4 py-6 sm:px-6">
           {sprints.map((sprint, index) => {
@@ -324,7 +373,7 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
                 epicTitles={epicTitles}
                 targets={sprints}
                 canPlan={canPlan}
-                dnd={{ enabled: canRank, nestTarget }}
+                dnd={{ enabled: canRank }}
                 onCopy={() => copyList(detail?.data?.items ?? [])}
                 onMove={(itemId, target) => moveItems([itemId], target)}
                 onEdit={() => setDialog({ kind: 'edit', sprint })}
@@ -460,12 +509,7 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
                   </p>
                 ) : (
                   visible.map((item) => (
-                    <SortableRow
-                      key={item.id}
-                      id={item.id}
-                      enabled={canRank}
-                      nestTarget={nestTarget === item.id}
-                    >
+                    <SortableRow key={item.id} id={item.id} enabled={canRank}>
                       {(handle) => (
                         <BacklogRow
                           item={item}
@@ -490,9 +534,9 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
             )}
           </section>
         </div>
-        <DragOverlay>
+        <DragOverlay style={{ pointerEvents: 'none' }}>
           {dragging && (
-            <div className="bg-card ring-primary/30 rounded-md border shadow-lg ring-2">
+            <div className="dnd-lift bg-card ring-primary/30 overflow-hidden rounded-xl shadow-xl ring-1">
               <BacklogRow item={dragging} targets={[]} canPlan={false} onMove={() => undefined} />
             </div>
           )}

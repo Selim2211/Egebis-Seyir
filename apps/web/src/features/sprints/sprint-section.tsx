@@ -64,7 +64,7 @@ export function SprintSection({
   onDelete: () => void;
   onCopy: () => void;
   /** Sürükle-bırak: izin ve alt öğe olarak vurgulanacak satır (ADR-102). */
-  dnd: { enabled: boolean; nestTarget: string | null };
+  dnd: { enabled: boolean };
   /** Başlat / Tamamla / İptal düğmeleri (SprintActions). */
   actions?: ReactNode;
 }) {
@@ -221,12 +221,7 @@ export function SprintSection({
               </p>
             ) : (
               items.map((item) => (
-                <SortableRow
-                  key={item.id}
-                  id={item.id}
-                  enabled={dnd.enabled}
-                  nestTarget={dnd.nestTarget === item.id}
-                >
+                <SortableRow key={item.id} id={item.id} enabled={dnd.enabled}>
                   {(handle) => (
                     <BacklogRow
                       item={item}

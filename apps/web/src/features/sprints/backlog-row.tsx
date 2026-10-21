@@ -64,7 +64,7 @@ export function BacklogRow({
               type="button"
               {...handle}
               aria-label={t('backlog.dragHandle', { key: item.key })}
-              className="text-muted-foreground cursor-grab rounded focus-visible:opacity-100 md:opacity-0 md:group-hover/item:opacity-100"
+              className="text-muted-foreground cursor-grab rounded focus-visible:opacity-100 md:opacity-40 md:group-hover/item:opacity-100"
             >
               <GripVertical className="size-4" />
             </button>

@@ -607,7 +607,7 @@
         {
           "type": "bullets",
           "items": [
-            "**Sürükleyerek:** Satırın solundaki tutamağı tutup Sprint bölümüne bırak. Sprint'ten Sprint'e ve Sprint'ten Backlog'a da aynı şekilde taşınır.",
+            "**Sürükleyerek:** Task satırını herhangi bir yerinden (boş bir noktasından) tutup Sprint bölümüne bırak. Sprint'ten Sprint'e ve Sprint'ten Backlog'a da aynı şekilde taşınır. Bırakılacak yer mor bir çizgiyle gösterilir; satırı sağa doğru çekersen üstüne bıraktığın Task'ın Sub-Task'ı olur.",
             "**Toplu taşıma:** Satırların solundaki kutuları işaretle, çıkan çubuktan **Sprint'e taşı…** seç.",
             "Sprint'e Task ve Bug girer; Epic girmez. Sub-Task'lar üstleriyle birlikte gelir."
           ]
