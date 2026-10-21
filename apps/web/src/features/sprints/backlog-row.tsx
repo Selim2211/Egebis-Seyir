@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import type { SprintSummary, WorkItemRow } from '@scrum/shared';
 import { ArrowRight, GripVertical, MoreHorizontal, Undo2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -27,6 +28,7 @@ export function BacklogRow({
   selected,
   onSelect,
   handle,
+  expand,
   targets,
   canPlan,
   onMove,
@@ -37,6 +39,8 @@ export function BacklogRow({
   selected?: boolean;
   onSelect?: (selected: boolean) => void;
   handle?: DragHandleProps | null;
+  /** Alt öğeleri aç/kapat oku (alt öğesi olan Task'ta). */
+  expand?: ReactNode;
   /** Taşınabilecek açık sprint'ler (öğenin bulunduğu hariç). */
   targets: SprintSummary[];
   canPlan: boolean;
@@ -80,6 +84,7 @@ export function BacklogRow({
           className="size-4 shrink-0"
         />
       )}
+      {expand}
       <WorkItemTypeIcon type={item.type} />
       <button
         type="button"

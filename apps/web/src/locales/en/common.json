@@ -937,7 +937,10 @@
     "reorderHint": "Clear the filters to change the order.",
     "nested": "Made a sub-item",
     "nestHint": "Drop a row onto another row, dragging to the right, to make it a sub-item.",
-    "copyKeyLink": "Copy link to {{key}}"
+    "copyKeyLink": "Copy link to {{key}}",
+    "collapseSubtasks": "Hide sub-items",
+    "expandSubtasks": "Show sub-items",
+    "dragSubtask": "Drag {{key}} out of its parent"
   },
   "sprints": {
     "create": "Create sprint",

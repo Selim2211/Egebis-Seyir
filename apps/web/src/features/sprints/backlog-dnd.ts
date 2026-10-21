@@ -1,11 +1,40 @@
 /**
- * Backlog sayfası sürükle-bırak çözümleyicisi (Faz 8.2, ADR-102). Saf fonksiyon: dnd-kit olayından
- * hangi işlemin yapılacağını bulur. Kapsayıcılar Backlog ve açık sprint'lerdir; bir satır başka bir
- * satırın üzerine sağa doğru (girinti) bırakılırsa o satırın alt öğesi olur.
+ * Backlog sayfası sürükle-bırak çözümleyicisi (Faz 8.2, ADR-102; ADR-125). Saf fonksiyon: imlecin
+ * altındaki hedeften hangi işlemin yapılacağını bulur. Kapsayıcılar Backlog ve açık sprint'lerdir.
+ * Bir Task, başka bir Task satırının ortasına bırakılırsa (`nestOn`) onun Sub-Task'ı olur; satırın
+ * kenarına ya da boş alana bırakılırsa sprint/sıra değişir. Alt öğeler Ayır alanına bırakılınca ayrılır.
  */
 
-/** Sağa bu kadar piksel çekilen öğe "alt öğe yap" olarak yorumlanır (Jira/Linear girinti hissi). */
-export const NEST_OFFSET_PX = 48;
+/** Satırın üst ve alt kenarındaki bu oran "araya bırak"tır; ortası "alt öğe yap" (Görevler listesi gibi). */
+export const NEST_EDGE_RATIO = 0.25;
+
+/** Sürüklenen öğenin şu an neyin üstünde olduğu: kopyada gösterilir. */
+export type BacklogIntent =
+  { kind: 'nest'; targetKey: string } | { kind: 'detach' } | { kind: 'move'; label: string } | null;
+
+/**
+ * Niyet için küçük dış depo (Görevler listesindekiyle aynı yaklaşım, ADR-123): niyet her satır geçişinde
+ * değişir; React durumunda tutulsaydı sayfa ve tüm satırlar yeniden çizilirdi.
+ */
+export function createIntentStore() {
+  let value: BacklogIntent = null;
+  const listeners = new Set<() => void>();
+  return {
+    get: (): BacklogIntent => value,
+    set: (next: BacklogIntent): void => {
+      if (JSON.stringify(next) === JSON.stringify(value)) return;
+      value = next;
+      listeners.forEach((l) => l());
+    },
+    subscribe: (listener: () => void): (() => void) => {
+      listeners.add(listener);
+      return () => void listeners.delete(listener);
+    },
+  };
+}
+export type IntentStore = ReturnType<typeof createIntentStore>;
+
+export const DETACH_ATTR = 'data-detach-zone';
 
 export const BACKLOG_CONTAINER = 'container:backlog';
 export const containerId = (sprintId: string | null) =>
@@ -19,20 +48,49 @@ export interface DropContainer {
 
 export type BacklogDrop =
   | { kind: 'move'; itemId: string; sprintId: string | null; afterId: string | null }
-  | { kind: 'nest'; itemId: string; parentId: string };
+  | { kind: 'nest'; itemId: string; parentId: string }
+  /** Alt öğe Ayır alanına bırakıldı: bağımsız Task olur, yeri değişmez. */
+  | { kind: 'detach'; itemId: string }
+  /** Alt öğe üst öğesinden ayrılıp bir kapsayıcıya (sprint/Backlog) bırakıldı. */
+  | { kind: 'unnest'; itemId: string; sprintId: string | null; afterId: string | null };
 
 export function resolveBacklogDrop({
   activeId,
   overId,
-  deltaX,
+  nestOn = false,
   containers,
+  detach = false,
 }: {
   activeId: string;
   overId: string | null;
-  deltaX: number;
+  /** İmleç `overId` satırının ortasında ve o satır geçerli bir üst öğe (sayfa karar verir). */
+  nestOn?: boolean;
   containers: readonly DropContainer[];
+  /** Sürüklenen bir alt öğe (kapsayıcılarda satırı yok): bırakılınca üst öğesinden ayrılır. */
+  detach?: boolean;
 }): BacklogDrop | null {
   if (!overId) return null;
+  if (detach) {
+    const box = containers.find((c) => containerId(c.sprintId) === overId);
+    if (box) {
+      return {
+        kind: 'unnest',
+        itemId: activeId,
+        sprintId: box.sprintId,
+        afterId: box.itemIds.at(-1) ?? null,
+      };
+    }
+    const host = containers.find((c) => c.itemIds.includes(overId));
+    if (!host) return null;
+    if (nestOn) return { kind: 'nest', itemId: activeId, parentId: overId };
+    const index = host.itemIds.indexOf(overId);
+    return {
+      kind: 'unnest',
+      itemId: activeId,
+      sprintId: host.sprintId,
+      afterId: host.itemIds[index - 1] ?? null,
+    };
+  }
   const source = containers.find((c) => c.itemIds.includes(activeId));
   if (!source) return null;
 
@@ -51,7 +109,7 @@ export function resolveBacklogDrop({
 
   const target = containers.find((c) => c.itemIds.includes(overId));
   if (!target) return null;
-  if (overId !== activeId && deltaX >= NEST_OFFSET_PX) {
+  if (overId !== activeId && nestOn) {
     return { kind: 'nest', itemId: activeId, parentId: overId };
   }
   if (overId === activeId) return null;

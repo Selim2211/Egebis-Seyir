@@ -1,13 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { BACKLOG_CONTAINER, containerId, NEST_OFFSET_PX, resolveBacklogDrop } from './backlog-dnd';
+import { BACKLOG_CONTAINER, containerId, resolveBacklogDrop } from './backlog-dnd';
 
 const containers = [
   { sprintId: 's1', itemIds: ['a', 'b'] },
   { sprintId: 's2', itemIds: ['c'] },
   { sprintId: null, itemIds: ['d', 'e', 'f'] },
 ];
-const drop = (activeId: string, overId: string | null, deltaX = 0) =>
-  resolveBacklogDrop({ activeId, overId, deltaX, containers });
+const drop = (activeId: string, overId: string | null, nestOn = false) =>
+  resolveBacklogDrop({ activeId, overId, nestOn, containers });
 
 describe('resolveBacklogDrop', () => {
   it('reorders within the backlog', () => {
@@ -38,14 +38,23 @@ describe('resolveBacklogDrop', () => {
     expect(drop('a', containerId('s1'))).toBeNull();
   });
 
-  it('nests when dragged right over another row', () => {
-    expect(drop('d', 'e', NEST_OFFSET_PX)).toEqual({ kind: 'nest', itemId: 'd', parentId: 'e' });
-    expect(drop('d', 'a', NEST_OFFSET_PX + 10)).toEqual({
-      kind: 'nest',
-      itemId: 'd',
-      parentId: 'a',
+  it('nests when dropped onto the middle of a valid parent row', () => {
+    expect(drop('d', 'e', true)).toEqual({ kind: 'nest', itemId: 'd', parentId: 'e' });
+    expect(drop('d', 'a', true)).toEqual({ kind: 'nest', itemId: 'd', parentId: 'a' });
+    expect(drop('d', 'd', true)).toBeNull();
+  });
+
+  it('detaches a sub-item dropped into a sprint or the backlog', () => {
+    const sub = (overId: string, nestOn = false) =>
+      resolveBacklogDrop({ activeId: 'x', overId, nestOn, containers, detach: true });
+    expect(sub('b')).toEqual({ kind: 'unnest', itemId: 'x', sprintId: 's1', afterId: 'a' });
+    expect(sub(BACKLOG_CONTAINER)).toEqual({
+      kind: 'unnest',
+      itemId: 'x',
+      sprintId: null,
+      afterId: 'f',
     });
-    expect(drop('d', 'd', NEST_OFFSET_PX)).toBeNull();
+    expect(sub('c', true)).toEqual({ kind: 'nest', itemId: 'x', parentId: 'c' });
   });
 
   it('ignores unknown targets', () => {

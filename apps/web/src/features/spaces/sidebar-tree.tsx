@@ -348,15 +348,18 @@ function SpaceNode({
               />
             )}
           </SortableGroup>
-          <ListNodes
-            space={space}
-            folderId={null}
-            lists={space.lists}
-            depth={1}
-            favorites={favorites}
-            onReordered={(reordered) => updateSpace((s) => ({ ...s, lists: reordered }))}
-          />
-          {space.folders.length === 0 && space.lists.length === 0 && (
+          {/* Scrum Proje'sinde görevler Backlog'da yönetilir; kök List'ler (Görevler) listelenmez (ADR-125). */}
+          {!space.scrumEnabled && (
+            <ListNodes
+              space={space}
+              folderId={null}
+              lists={space.lists}
+              depth={1}
+              favorites={favorites}
+              onReordered={(reordered) => updateSpace((s) => ({ ...s, lists: reordered }))}
+            />
+          )}
+          {space.folders.length === 0 && (space.scrumEnabled || space.lists.length === 0) && (
             <p className="text-muted-foreground py-1 pl-9 text-xs">{t('structure.emptySpace')}</p>
           )}
         </div>

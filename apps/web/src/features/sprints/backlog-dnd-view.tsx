@@ -43,10 +43,13 @@ export function DropContainerView({
 export function SortableRow({
   id,
   enabled,
+  subtask,
   children,
 }: {
   id: string;
   enabled: boolean;
+  /** Alt öğe satırı: bırakılınca üst öğesinden ayrılır. */
+  subtask?: boolean;
   children: (handle: DragHandleProps | null) => ReactNode;
 }) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
@@ -58,6 +61,7 @@ export function SortableRow({
     <div
       ref={setNodeRef}
       data-row-id={id}
+      data-subtask={subtask ? '' : undefined}
       onPointerDown={enabled ? (onPointerDown as PointerEventHandler | undefined) : undefined}
       className={cn(
         'relative',

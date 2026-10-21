@@ -30,8 +30,8 @@ import { useCurrentWorkspace } from '@/features/workspace/queries';
 import { formatShortDate } from '@/lib/format';
 import { cn } from '@/lib/utils';
 import { containerId } from './backlog-dnd';
-import { DropContainerView, SortableRow } from './backlog-dnd-view';
-import { BacklogRow } from './backlog-row';
+import { DropContainerView } from './backlog-dnd-view';
+import { ItemWithSubtasks } from './backlog-subtasks';
 import { SprintStats } from './sprint-stats';
 
 /** Sprint bölümü: başlık (ad, tarih, hedef, toplamlar), menü ve öğe satırları (ADR-061). */
@@ -226,20 +226,17 @@ export function SprintSection({
               </p>
             ) : (
               items.map((item) => (
-                <SortableRow key={item.id} id={item.id} enabled={dnd.enabled}>
-                  {(handle) => (
-                    <BacklogRow
-                      item={item}
-                      epicTitle={item.parentId ? epicTitles.get(item.parentId) : undefined}
-                      selected={selected.has(item.id)}
-                      onSelect={(on) => onSelect(item.id, on)}
-                      handle={handle}
-                      targets={targets.filter((s) => s.id !== sprint.id)}
-                      canPlan={canPlan}
-                      onMove={(sprintId) => onMove(item.id, sprintId)}
-                    />
-                  )}
-                </SortableRow>
+                <ItemWithSubtasks
+                  key={item.id}
+                  enabled={dnd.enabled}
+                  item={item}
+                  epicTitle={item.parentId ? epicTitles.get(item.parentId) : undefined}
+                  selected={selected.has(item.id)}
+                  onSelect={(on) => onSelect(item.id, on)}
+                  targets={targets.filter((s) => s.id !== sprint.id)}
+                  canPlan={canPlan}
+                  onMove={(sprintId) => onMove(item.id, sprintId)}
+                />
               ))
             )}
           </DropContainerView>

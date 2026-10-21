@@ -1069,3 +1069,14 @@
   - **Epic'e dönüştürme (ADR-109):** pencere artık onay kutusu değil bir formdur; Epic'in **adı değiştirilebilir** (`POST items/:id/convert-to-epic { title? }`; gövdesiz istek eskisi gibi çalışır). Sub-Task'lar yine Task olur ve Epic'in altında kalır.
 - **Alternatifler:** Gruplamayı öğe öğe `nest` çağrılarıyla yapmak (kısmen uygulanmış bir grup bırakabilirdi); Epic taşırken çocuk Task'ları istemcide taşımak (kopuk durum riski); eski sprint bağını korumak (başka Proje'nin sprint'i, raporları bozar).
 - **Bilinen sınırlar:** Taşınan öğe eski anahtarını (ör. `BRN-1`) korur, hedef Proje'nin sayacına yeniden numaralanmaz (ADR-047); toplu **Proje** değiştirme yalnızca tek öğede (Taşı…) vardır; aktif sprint'e/sprint'ten taşıma kapsam değişikliği olarak kaydedilir.
+
+## ADR-125 — Scrum'da Görevler Backlog'a taşındı: sürükleyerek Sub-Task yapma/ayırma Backlog'da (Faz 13)
+
+- **Tarih:** 2026-10-21 · **Durum:** Kabul (kaynak: toplantı notları "Görevler kısmı kalkacak", kullanıcı isteği).
+- **Karar:**
+  - **Kenar çubuğu:** Scrum Proje'sinde kök List'ler (ör. "Görevler") sol menüde listelenmez; görevler "Backlog ve sprint'ler" sayfasından yönetilir. Klasörler ve Kanban Proje'leri değişmez; List sayfası (`/lists/:id`) adresle ve Proje sayfasından açılabilir.
+  - **Backlog'da Görevler listesindeki sürükleme (ADR-116/123) aynen:** satır tutulup başka bir **Task satırının ortasına** bırakılınca onay penceresinden sonra Sub-Task olur (eski "sağa 48 px çek" kuralı kalktı). Satırın üst/alt çeyreği ya da boş alan "araya bırak" demektir: sıra veya sprint değişir. Kopya (ghost) imlece yapışır ve altında niyeti yazar ("X altına taşı", "Sprint'e taşı", "Ayır"). Epic ve Bug alt öğe yapılmaz ve hedef olmaz; Bug sprint'ler arasında taşınabilir.
+  - **Alt öğeler Backlog'da:** alt öğesi olan Task'ın solunda aç/kapat oku; açılınca Sub-Task'lar girintili listelenir. Sub-Task sürüklenince ekranın altında **Ayır** alanı çıkar (bırakınca onayla bağımsız Task olur); bir sprint'e ya da Backlog'a bırakılırsa ayrılır ve oraya yerleşir; başka bir Task'ın ortasına bırakılırsa o Task'a geçer.
+  - Uygulama: `backlog-dnd.ts` (`resolveBacklogDrop` `nestOn`/`detach`, niyet deposu), `backlog-drag-parts.tsx` (kopya ve Ayır alanı), `backlog-subtasks.tsx`. API değişmedi (`items/:id/nest`, `items/:id/unnest`, `spaces/:id/backlog/move`).
+- **Alternatifler:** Görevler sayfasını Backlog'a gömmek (iki farklı sıralama modeli, karmaşık); sağa çekme kuralını korumak (kullanıcı Görevler listesindeki davranışı istedi).
+- **Bilinen sınırlar:** Satırın ortasına bırakmak sprint'e taşıma yerine alt öğe yapma anlamına gelir; boş alan, sprint başlığı ya da satır kenarı taşıma içindir (onay penceresi yanlış bırakmayı önler).

@@ -26,6 +26,7 @@ import {
   X,
 } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { NativeSelect } from '@/components/form';
@@ -43,10 +44,21 @@ import { spaceQuery } from '@/features/spaces/queries';
 import { ItemNavContext } from '@/features/work-items/detail/item-nav-context';
 import { useCurrentWorkspace } from '@/features/workspace/queries';
 import { useErrorMessage } from '@/lib/use-error-message';
-import { BacklogRow } from './backlog-row';
 import { filterBacklog, isFiltered, NO_FILTER, type BacklogFilter } from './backlog-filter';
-import { BACKLOG_CONTAINER, containerId, resolveBacklogDrop } from './backlog-dnd';
-import { DropContainerView, SortableRow } from './backlog-dnd-view';
+import {
+  BACKLOG_CONTAINER,
+  type BacklogDrop,
+  type BacklogIntent,
+  containerId,
+  createIntentStore,
+  DETACH_ATTR,
+  NEST_EDGE_RATIO,
+  resolveBacklogDrop,
+} from './backlog-dnd';
+import { BacklogGhost, DetachZone, type DraggedItem } from './backlog-drag-parts';
+import { DropContainerView } from './backlog-dnd-view';
+import { ItemWithSubtasks } from './backlog-subtasks';
+import { subtaskRegistry } from './subtask-registry';
 import { itemsToTsv } from './copy-list';
 import {
   backlogQuery,
@@ -58,6 +70,7 @@ import {
 import { SprintActions } from './sprint-actions';
 import { SprintDialog } from './sprint-dialog';
 import { RestoreSprintDialog } from '@/features/backup/backup';
+import { useUnnestItem } from '@/features/work-items/queries';
 import { PriorityColorToggle } from '@/features/work-items/priority-colors';
 import { SprintImportDialog } from './sprint-import-dialog';
 import { ScrumTabs } from './scrum-tabs';
@@ -66,6 +79,9 @@ import { SprintSection } from './sprint-section';
 
 /** Toplu taşıma seçiminde Backlog'a geri alma değeri. */
 const BACKLOG_OPTION = '__backlog';
+
+/** Bildirim baloncuklarının (sonner) da üstünde kalır. */
+const TOP_LAYER = 1000000001;
 
 type DialogState = { kind: 'create' } | { kind: 'edit'; sprint: SprintSummary } | null;
 
@@ -80,10 +96,22 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
   const move = useMoveBacklogItems(spaceId);
   const remove = useDeleteSprint();
   const nestItem = useNestItem();
+  const unnestItem = useUnnestItem();
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [ghostWidth, setGhostWidth] = useState(0);
+  const [intents] = useState(createIntentStore);
+  const [hierarchy, setHierarchy] = useState<
+    | { kind: 'nest'; item: DraggedItem; target: WorkItemRow }
+    | {
+        kind: 'unnest';
+        item: DraggedItem;
+        place: { sprintId: string | null; afterId: string | null } | null;
+      }
+    | null
+  >(null);
   // Sürükleme sırasındaki imleç konumu ve DOM'a işaretlenen hedef öğeler (yeniden çizim tetiklemez).
-  const pointer = useRef({ x: 0, y: 0, startX: 0 });
+  const pointer = useRef({ x: 0, y: 0 });
   const marked = useRef<HTMLElement[]>([]);
 
   const sprints = useMemo(() => backlog.data?.sprints ?? [], [backlog.data]);
@@ -137,25 +165,99 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
     })),
     { sprintId: null, itemIds: visible.map((i) => i.id) },
   ];
+  const allItems: WorkItemRow[] = [
+    ...sprintDetails.flatMap((d) => d.data?.items ?? []),
+    ...visible,
+  ];
+  /** Sürüklenen öğe: üst düzey satır ya da açılmış bir alt öğe. */
+  const draggedOf = (id: string | null): DraggedItem | null => {
+    if (!id) return null;
+    const row = allItems.find((i) => i.id === id) ?? subtaskRegistry.get(id);
+    return row
+      ? {
+          id: row.id,
+          key: row.key,
+          title: row.title,
+          type: row.type,
+          parentId: row.parentId,
+          childCount: row.childCount,
+        }
+      : null;
+  };
+  const dragged = draggedOf(activeId);
   /**
-   * Bırakma hedefi: imlecin altındaki satır ya da kapsayıcı (elementsFromPoint). Satırlar dnd-kit'e
-   * bırakma alanı olarak kaydedilmez; böylece sürüklerken yüzlerce satır yeniden çizilmez.
+   * Görevler listesindeki kural (ADR-116): alt öğesi olmayan Task ya da Sub-Task, başka bir Task'ın
+   * üstüne bırakılınca onun Sub-Task'ı olur. Epic ve Bug ne alt öğe yapılır ne de hedef olur.
    */
-  const dropAtPointer = () => {
-    if (!activeId) return null;
+  const canNestOn = (item: DraggedItem, targetId: string) => {
+    const target = allItems.find((i) => i.id === targetId);
+    return (
+      !!target &&
+      target.id !== item.id &&
+      target.type === 'TASK' &&
+      target.id !== item.parentId &&
+      (item.type === 'SUBTASK' || (item.type === 'TASK' && item.childCount === 0))
+    );
+  };
+  const sourceOf = (id: string) =>
+    items.some((i) => i.id === id)
+      ? null
+      : (sprintDetails.find((d) => d.data?.items.some((i) => i.id === id))?.data?.sprint.id ??
+        null);
+  /**
+   * Bırakma hedefi: imlecin altındaki Ayır alanı, satır ya da kapsayıcı (elementsFromPoint). Satırlar
+   * dnd-kit'e bırakma alanı olarak kaydedilmez; böylece sürüklerken yüzlerce satır yeniden çizilmez.
+   * Satırın ortası "alt öğe yap", üst/alt kenarı "araya bırak"tır.
+   */
+  const dropAtPointer = (): BacklogDrop | null => {
+    if (!dragged) return null;
     let overId: string | null = null;
+    let nestOn = false;
     for (const el of document.elementsFromPoint(pointer.current.x, pointer.current.y)) {
+      if (el.closest(`[${DETACH_ATTR}]`)) {
+        return dragged.parentId ? { kind: 'detach', itemId: dragged.id } : null;
+      }
       const row = el.closest<HTMLElement>('[data-row-id]');
+      if (row?.dataset.subtask !== undefined) {
+        // Alt öğe satırları hedef değildir (alt öğenin alt öğesi olmaz).
+        if (row.dataset.rowId === dragged.id) return null;
+        continue;
+      }
       const box = el.closest<HTMLElement>('[data-drop-container]');
       overId = row?.dataset.rowId ?? box?.dataset.dropContainer ?? null;
+      if (row && overId) {
+        const rect = row.getBoundingClientRect();
+        const ratio = (pointer.current.y - rect.top) / Math.max(rect.height, 1);
+        nestOn =
+          ratio > NEST_EDGE_RATIO && ratio < 1 - NEST_EDGE_RATIO && canNestOn(dragged, overId);
+      }
       if (overId) break;
     }
     return resolveBacklogDrop({
-      activeId,
+      activeId: dragged.id,
       overId,
-      deltaX: pointer.current.x - pointer.current.startX,
+      nestOn,
       containers,
+      detach: dragged.type === 'SUBTASK',
     });
+  };
+  const nameOf = (sprintId: string | null) =>
+    sprintId === null
+      ? t('backlog.moveToBacklog')
+      : t('backlog.moveToSprint', { name: sprints.find((s) => s.id === sprintId)?.name ?? '' });
+  /** Kopyanın altında yazan niyet. Aynı kapsayıcıda sıra değişiminde yazı çıkmaz. */
+  const intentOf = (drop: BacklogDrop | null): BacklogIntent => {
+    if (!drop) return null;
+    if (drop.kind === 'detach') return { kind: 'detach' };
+    if (drop.kind === 'nest') {
+      return { kind: 'nest', targetKey: allItems.find((i) => i.id === drop.parentId)?.key ?? '' };
+    }
+    if (drop.kind === 'unnest') {
+      return { kind: 'move', label: `${t('dnd.detachShort')} · ${nameOf(drop.sprintId)}` };
+    }
+    return sourceOf(drop.itemId) === drop.sprintId
+      ? null
+      : { kind: 'move', label: nameOf(drop.sprintId) };
   };
   const clearMarks = () => {
     for (const el of marked.current) {
@@ -166,9 +268,10 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
     }
     marked.current = [];
   };
-  const showDrop = (drop: ReturnType<typeof dropAtPointer>) => {
+  const showDrop = (drop: BacklogDrop | null) => {
     clearMarks();
-    if (!drop) return;
+    intents.set(intentOf(drop));
+    if (!drop || drop.kind === 'detach') return;
     const put = (
       el: HTMLElement | null,
       key: 'dropState' | 'dropAfter' | 'dropOver' | 'dropTop',
@@ -207,13 +310,15 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
       document.removeEventListener('pointermove', move);
       if (frame) cancelAnimationFrame(frame);
       clearMarks();
+      intents.set(null);
     };
     // Yalnızca sürükleme başlayıp bittiğinde kurulur/kaldırılır.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeId]);
   const onDragStart = ({ active, activatorEvent }: DragStartEvent) => {
     const e = activatorEvent as PointerEvent;
-    pointer.current = { x: e.clientX, y: e.clientY, startX: e.clientX };
+    pointer.current = { x: e.clientX, y: e.clientY };
+    setGhostWidth(active.rect.current.initial?.width ?? 0);
     setActiveId(String(active.id));
   };
   if (space.isPending || backlog.isPending) return <LoadingState />;
@@ -272,31 +377,30 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
     return next;
   };
 
-  const allItems: WorkItemRow[] = [
-    ...sprintDetails.flatMap((d) => d.data?.items ?? []),
-    ...visible,
-  ];
-  const dragging = allItems.find((i) => i.id === activeId);
   const onDragEnd = () => {
     // Bırakma anındaki gerçek imleç konumu (kare beklemeden).
     const drop = dropAtPointer();
+    const item = dragged;
     setActiveId(null);
-    if (!drop || !canRank) return;
+    if (!drop || !item) return;
+    // Hiyerarşi değişiklikleri (alt öğe yap / ayır) Görevler listesindeki gibi onayla yapılır.
     if (drop.kind === 'nest') {
-      nestItem.mutate(
-        { itemId: drop.itemId, parentId: drop.parentId },
-        {
-          onSuccess: () => toast.success(t('backlog.nested')),
-          onError: (error) => toast.error(errorMessage(error)),
-        },
-      );
+      const target = allItems.find((i) => i.id === drop.parentId);
+      if (canWrite && target) setHierarchy({ kind: 'nest', item, target });
       return;
     }
-    const from = items.find((i) => i.id === drop.itemId)
-      ? null
-      : (sprintDetails.find((d) => d.data?.items.some((i) => i.id === drop.itemId))?.data?.sprint
-          .id ?? null);
-    if (from === drop.sprintId) {
+    if (drop.kind === 'detach' || drop.kind === 'unnest') {
+      if (canWrite) {
+        setHierarchy({
+          kind: 'unnest',
+          item,
+          place: drop.kind === 'unnest' ? { sprintId: drop.sprintId, afterId: drop.afterId } : null,
+        });
+      }
+      return;
+    }
+    if (!canRank) return;
+    if (sourceOf(drop.itemId) === drop.sprintId) {
       // Aynı kapsayıcıda yeniden sıralama (filtre varken sıra belirsiz olduğundan yapılmaz).
       if (drop.sprintId === null && !reorderable) return;
       move.mutate(
@@ -311,6 +415,38 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
       drop.sprintId,
       drop.sprintId === null && isFiltered(filter) ? undefined : drop.afterId,
     );
+  };
+  /** Onaylanan hiyerarşi değişikliği: alt öğe yap ya da ayır (ayrılan öğe gerekirse sprint'e yerleşir). */
+  const applyHierarchy = () => {
+    if (!hierarchy) return;
+    const { item } = hierarchy;
+    const done = (message: string) => {
+      toast.success(message);
+      setHierarchy(null);
+    };
+    const failed = (error: unknown) => {
+      toast.error(errorMessage(error));
+      setHierarchy(null);
+    };
+    if (hierarchy.kind === 'nest') {
+      const { target } = hierarchy;
+      nestItem.mutate(
+        { itemId: item.id, parentId: target.id },
+        {
+          onSuccess: () => done(t('dnd.nested', { key: item.key, target: target.key })),
+          onError: failed,
+        },
+      );
+      return;
+    }
+    const { place } = hierarchy;
+    unnestItem.mutate(item.id, {
+      onSuccess: () => {
+        done(t('dnd.unnested', { key: item.key }));
+        if (place?.sprintId && canPlan) moveItems([item.id], place.sprintId, place.afterId);
+      },
+      onError: failed,
+    });
   };
   const copyList = (list: readonly WorkItemRow[]) => {
     navigator.clipboard.writeText(itemsToTsv(list, t)).then(
@@ -545,20 +681,17 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
                   </p>
                 ) : (
                   visible.map((item) => (
-                    <SortableRow key={item.id} id={item.id} enabled={canRank}>
-                      {(handle) => (
-                        <BacklogRow
-                          item={item}
-                          epicTitle={item.parentId ? epicTitles.get(item.parentId) : undefined}
-                          selected={picked.has(item.id)}
-                          onSelect={(on) => setPicked((p) => toggle(p, item.id, on))}
-                          handle={handle}
-                          targets={sprints}
-                          canPlan={canPlan}
-                          onMove={(target) => moveItems([item.id], target)}
-                        />
-                      )}
-                    </SortableRow>
+                    <ItemWithSubtasks
+                      key={item.id}
+                      enabled={canRank}
+                      item={item}
+                      epicTitle={item.parentId ? epicTitles.get(item.parentId) : undefined}
+                      selected={picked.has(item.id)}
+                      onSelect={(on) => setPicked((p) => toggle(p, item.id, on))}
+                      targets={sprints}
+                      canPlan={canPlan}
+                      onMove={(target) => moveItems([item.id], target)}
+                    />
                   ))
                 )}
               </DropContainerView>
@@ -570,13 +703,13 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
             )}
           </section>
         </div>
-        <DragOverlay style={{ pointerEvents: 'none' }}>
-          {dragging && (
-            <div className="dnd-lift bg-card ring-primary/30 overflow-hidden rounded-xl shadow-xl ring-1">
-              <BacklogRow item={dragging} targets={[]} canPlan={false} onMove={() => undefined} />
-            </div>
-          )}
-        </DragOverlay>
+        {dragged?.parentId && <DetachZone store={intents} />}
+        {createPortal(
+          <DragOverlay dropAnimation={null} zIndex={TOP_LAYER} style={{ pointerEvents: 'none' }}>
+            {dragged && <BacklogGhost item={dragged} width={ghostWidth} store={intents} />}
+          </DragOverlay>,
+          document.body,
+        )}
       </DndContext>
 
       <GroupEpicDialog
@@ -599,6 +732,23 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
         weeks={space.data.sprintLengthWeeks}
         existing={sprints}
         editing={dialog?.kind === 'edit' ? dialog.sprint : undefined}
+      />
+      <ConfirmDialog
+        open={hierarchy !== null}
+        onOpenChange={(open) => !open && setHierarchy(null)}
+        title={
+          hierarchy?.kind === 'nest'
+            ? t('dnd.nestTitle', { key: hierarchy.item.key, target: hierarchy.target.key })
+            : t('dnd.unnestTitle', { key: hierarchy?.item.key ?? '' })
+        }
+        description={
+          hierarchy?.kind === 'nest'
+            ? t('dnd.nestBody', { title: hierarchy.item.title, target: hierarchy.target.title })
+            : t('dnd.unnestBody', { title: hierarchy?.item.title ?? '' })
+        }
+        confirmLabel={t(hierarchy?.kind === 'nest' ? 'dnd.nestConfirm' : 'dnd.unnestConfirm')}
+        pending={nestItem.isPending || unnestItem.isPending}
+        onConfirm={applyHierarchy}
       />
       <ConfirmDialog
         open={scopeChange !== null}

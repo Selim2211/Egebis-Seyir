@@ -78,6 +78,7 @@ test.describe.serial('Backlog sürükle-bırak ve sprint ağacı', () => {
 
     await drag(page, 'DND-1', one.locator('[data-drop-container]'));
     await expect(one.getByRole('link', { name: 'Birinci iş' })).toBeVisible();
+    await expect(backlog.getByRole('link', { name: 'Birinci iş' })).toHaveCount(0);
 
     await drag(page, 'DND-1', two.locator('[data-drop-container]'));
     await expect(two.getByRole('link', { name: 'Birinci iş' })).toBeVisible();
@@ -116,17 +117,42 @@ test.describe.serial('Backlog sürükle-bırak ve sprint ağacı', () => {
     await expect(backlog.getByRole('link', { name: 'Birinci iş' })).toBeVisible();
   });
 
-  test('satırı başka satırın üzerine sağa bırakınca alt öğe (Sub-task) olur', async ({ page }) => {
+  test('Task başka Task satırının üstüne bırakılınca onayla Sub-Task olur (Görevler listesi gibi)', async ({
+    page,
+  }) => {
     await openBacklog(page);
     const backlog = page.getByRole('region', { name: 'Backlog', exact: true });
-    const target = backlog.getByRole('link', { name: 'İkinci iş' });
-    await drag(page, 'DND-3', target, 70);
-    await expect(page.getByText('Alt öğe yapıldı')).toBeVisible();
+    const target = backlog.locator('[data-row-id]', { hasText: 'İkinci iş' }).first();
+    const row = backlog.locator('[data-row-id]', { hasText: 'Üçüncü iş' }).first();
+    const from = (await row.boundingBox())!;
+    const to = (await target.boundingBox())!;
+    await page.mouse.move(from.x + from.width * 0.62, from.y + from.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(to.x + to.width * 0.5, to.y + to.height / 2, { steps: 15 });
+    await expect(page.locator('[data-dnd-overlay]')).toContainText('Üçüncü iş');
+    await expect(page.getByTestId('dnd-intent')).toHaveText(/DND-2 altına/);
+    await expect(target).toHaveAttribute('data-drop-state', 'nest');
+    await page.mouse.up();
+    await page.getByRole('alertdialog').getByRole('button', { name: 'Sub-Task yap' }).click();
+    await expect(page.getByText('DND-3 artık DND-2 öğesinin Sub-Task’ı.')).toBeVisible();
     await expect(backlog.getByRole('link', { name: 'Üçüncü iş' })).toHaveCount(0);
-    await page.goto('/items/DND-3');
-    await expect(page.getByRole('textbox', { name: 'Başlık' }).first()).toHaveValue('Üçüncü iş');
-    await expect(page.getByRole('img', { name: 'Sub-task' }).first()).toBeVisible();
-    await expect(page.getByRole('link', { name: 'DND-2' }).first()).toBeVisible();
+
+    // Alt öğe Task'ın altında açılır; sürüklenince altta Ayır alanı çıkar, bırakınca Task olur.
+    await backlog.getByRole('button', { name: 'Alt öğeleri göster' }).click();
+    const sub = backlog.locator('[data-subtask]', { hasText: 'Üçüncü iş' });
+    const s = (await sub.boundingBox())!;
+    await page.mouse.move(s.x + s.width * 0.62, s.y + s.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(s.x + s.width * 0.62, s.y + s.height / 2 + 30, { steps: 5 });
+    const zone = page.getByTestId('detach-zone');
+    await expect(zone).toBeVisible();
+    const z = (await zone.boundingBox())!;
+    await page.mouse.move(z.x + z.width / 2, z.y + z.height / 2, { steps: 15 });
+    await expect(page.getByTestId('dnd-intent')).toHaveText('Ayır — bağımsız Task olur');
+    await page.mouse.up();
+    await page.getByRole('alertdialog').getByRole('button', { name: 'Ayır' }).click();
+    await expect(page.getByText('DND-3 artık bağımsız bir Task.')).toBeVisible();
+    await expect(backlog.getByRole('link', { name: 'Üçüncü iş' })).toBeVisible();
   });
 
   test('sprint listesi panoya kopyalanır', async ({ page, context }) => {
