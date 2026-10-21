@@ -1573,3 +1573,12 @@ model MailSettings {
 
   @@map("mail_settings")
 }
+
+/// Sunucu başına tek satır (id = 1): uygulamadan girilen genel adres (ADR-122). Yoksa APP_URL (.env) kullanılır.
+model AppSettings {
+  id        Int      @id @default(1)
+  publicUrl String?
+  updatedAt DateTime @updatedAt @db.Timestamptz
+
+  @@map("app_settings")
+}

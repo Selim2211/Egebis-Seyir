@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { AppSettingsService } from '../../infra/settings/app-settings.service';
 import { formatItemKey } from '@scrum/shared';
-import type { Env } from '../../infra/config/env';
 import { TenantPrismaService } from '../../infra/prisma/tenant-prisma.service';
 import { dateOnly } from '../work-items/item-support';
 import { notFound } from '../spaces/space-errors';
@@ -16,14 +15,10 @@ export const SPRINT_JSON_VERSION = 1;
  */
 @Injectable()
 export class SprintJsonService {
-  private readonly appUrl: string;
-
   constructor(
     private readonly tenant: TenantPrismaService,
-    config: ConfigService<Env, true>,
-  ) {
-    this.appUrl = config.get('APP_URL', { infer: true });
-  }
+    private readonly appSettings: AppSettingsService,
+  ) {}
 
   async exportSprint(sprintId: string) {
     const db = this.tenant.db;
@@ -46,7 +41,8 @@ export class SprintJsonService {
       where: { fromId: { in: ids }, toId: { in: ids } },
       select: { fromId: true, toId: true, type: true },
     });
-    const url = (path: string) => `${this.appUrl}${path}`;
+    const base = await this.appSettings.publicUrl();
+    const url = (path: string) => `${base}${path}`;
     return {
       name: sprint.name,
       data: {

@@ -46,4 +46,28 @@ test.describe.serial('New menüsü', () => {
       .click();
     await expect(page.getByText('NMN-2 oluşturuldu.')).toBeVisible();
   });
+
+  test('New menüsünde Sprint en üsttedir ve Backlog sayfasındaki pencereyi açar', async ({
+    page,
+  }) => {
+    await page.goto('/');
+    await page.getByRole('link', { name: 'Yeni Menü' }).first().click();
+    await page.getByTestId('new-menu').click();
+
+    // İlk seçenek Sprint; ardından Task, Epic, Bug.
+    const items = page.getByRole('menuitem');
+    await expect(items.first()).toContainText('Sprint');
+    await expect(items.nth(1)).toContainText('Task');
+    await items.first().click();
+
+    const dialog = page.getByRole('dialog', { name: 'Yeni sprint' });
+    await expect(dialog.getByLabel('Ad')).toHaveValue('Sprint 1');
+    await dialog.getByLabel('Sprint hedefi').fill('Menüden açıldı');
+    await dialog.getByRole('button', { name: 'Sprint oluştur' }).click();
+
+    await expect(page).toHaveURL(/\/backlog/);
+    const sprint = page.getByRole('region', { name: 'Sprint 1' });
+    await expect(sprint).toBeVisible();
+    await expect(sprint.getByText('Menüden açıldı')).toBeVisible();
+  });
 });

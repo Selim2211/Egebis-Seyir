@@ -10,6 +10,7 @@ import { ZodSerializerInterceptor, ZodValidationPipe } from 'nestjs-zod';
 import { validateEnv, type Env } from './infra/config/env';
 import { ApiExceptionFilter } from './infra/http/api-exception.filter';
 import { MailModule } from './infra/mail/mail.module';
+import { SettingsModule } from './infra/settings/settings.module';
 import { PrismaModule } from './infra/prisma/prisma.module';
 import { QueueModule } from './infra/queue/queue.module';
 import { StorageModule } from './infra/storage/storage.module';
@@ -99,6 +100,7 @@ const isAuthRateLimited = (ctx: ExecutionContext): boolean =>
     QueueModule,
     StorageModule,
     MailModule,
+    SettingsModule,
     ActivityModule,
     AccessModule,
     AuthModule,

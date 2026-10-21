@@ -45,6 +45,10 @@
   },
   "newMenu": {
     "button": "New",
+    "SPRINT": "Sprint",
+    "SPRINTHint": "Bir Proje için yeni sprint planla",
+    "sprintPickTitle": "Hangi Proje için sprint?",
+    "sprintPickContinue": "Devam",
     "TASK": "Task",
     "TASKHint": "Sprint için bir iş parçası",
     "EPIC": "Epic",
@@ -2276,5 +2280,18 @@
     "saveAndTest": "Kaydet ve test et",
     "reset": "Sunucu ayarına dön",
     "resetDone": "Kayıtlı ayar silindi; sunucu .env değerleri kullanılacak."
+  },
+  "appUrl": {
+    "title": "Uygulama adresi",
+    "help": "E-postalardaki bağlantılar (davet, şifre sıfırlama, bildirim) bu adresle kurulur. Kullanıcıların tarayıcıda yazdığı adresi gir; yanlışsa bağlantılar açılmaz.",
+    "label": "Adres",
+    "hint": "Örnek: https://seyir.firma.com ya da http://192.168.1.20:8092 (sonda eğik çizgi gerekmez).",
+    "save": "Kaydet",
+    "saved": "Uygulama adresi kaydedildi.",
+    "reset": "Sunucu ayarına dön",
+    "resetDone": "Kayıtlı adres silindi; sunucudaki APP_URL kullanılacak.",
+    "mismatchTitle": "E-postalardaki bağlantılar yanlış adrese gidiyor olabilir.",
+    "mismatch": "Şu an bağlantılar {{saved}} adresiyle kuruluyor, ama sen uygulamayı {{here}} adresinde kullanıyorsun. Adres farklıysa davet edilen kişi bağlantıya tıklayınca “siteye ulaşılamıyor” hatası alır.",
+    "useThis": "{{here}} adresini kullan"
   }
 }

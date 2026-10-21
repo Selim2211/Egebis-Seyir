@@ -1,7 +1,6 @@
 import { HttpStatus, Injectable, UnauthorizedException, HttpException } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { AppSettingsService } from '../../infra/settings/app-settings.service';
 import { ERROR_CODES, type Locale } from '@scrum/shared';
-import type { Env } from '../../infra/config/env';
 import { passwordResetMail } from '../../infra/mail/templates';
 import { MailService } from '../../infra/mail/mail.service';
 import { PrismaService } from '../../infra/prisma/prisma.service';
@@ -12,16 +11,12 @@ import { SessionService } from './session.service';
 
 @Injectable()
 export class AuthService {
-  private readonly appUrl: string;
-
   constructor(
     private readonly prisma: PrismaService,
     private readonly sessions: SessionService,
     private readonly mail: MailService,
-    config: ConfigService<Env, true>,
-  ) {
-    this.appUrl = config.get('APP_URL', { infer: true });
-  }
+    private readonly appSettings: AppSettingsService,
+  ) {}
 
   /** E-posta/şifre doğrular. Kullanıcı yoksa da aynı sürede yanıt verir. */
   async verifyCredentials(email: string, password: string): Promise<string> {
@@ -52,7 +47,7 @@ export class AuthService {
         to: user.email,
         locale: user.locale as Locale,
         name: user.name,
-        url: `${this.appUrl}/reset-password?token=${encodeURIComponent(token)}`,
+        url: `${await this.appSettings.publicUrl()}/reset-password?token=${encodeURIComponent(token)}`,
         expiresInMinutes: PASSWORD_RESET_TTL_MINUTES,
       }),
     );

@@ -376,9 +376,51 @@
     transition-duration: var(--duration-fast);
     transition-timing-function: var(--ease-out);
   }
-  input[type='checkbox'],
   input[type='radio'] {
     accent-color: var(--primary);
+  }
+  /*
+   * Onay kutusu: tarayıcının kendi çizimi (koyu/dolu görünebiliyordu) yerine her ortamda aynı,
+   * açık renkli kutu; işaretlenince marka moru ve beyaz tik.
+   */
+  input[type='checkbox'] {
+    appearance: none;
+    -webkit-appearance: none;
+    flex-shrink: 0;
+    width: 1rem;
+    height: 1rem;
+    margin: 0;
+    vertical-align: middle;
+    cursor: pointer;
+    border: 1.5px solid color-mix(in oklab, var(--foreground) 32%, transparent);
+    border-radius: 0.3rem;
+    background-color: var(--card);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 100% 100%;
+    transition-property: background-color, border-color, box-shadow;
+    transition-duration: var(--duration-fast);
+  }
+  input[type='checkbox']:hover:not(:disabled) {
+    border-color: var(--primary);
+  }
+  input[type='checkbox']:checked {
+    background-color: var(--primary);
+    border-color: var(--primary);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='white' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3.5 8.5l3 3 6-7'/%3E%3C/svg%3E");
+  }
+  input[type='checkbox']:indeterminate {
+    background-color: var(--primary);
+    border-color: var(--primary);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='white' stroke-width='2.4' stroke-linecap='round'%3E%3Cpath d='M4 8h8'/%3E%3C/svg%3E");
+  }
+  input[type='checkbox']:focus-visible {
+    outline: 2px solid color-mix(in oklab, var(--primary) 55%, transparent);
+    outline-offset: 2px;
+  }
+  input[type='checkbox']:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
 }
 

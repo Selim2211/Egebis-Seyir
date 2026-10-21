@@ -154,3 +154,23 @@ export const UpdateMailSettingsRequestSchema = z.object({
   from: z.string().trim().min(3).max(200),
 });
 export type UpdateMailSettingsRequest = z.infer<typeof UpdateMailSettingsRequestSchema>;
+
+/** GET /api/workspaces/:workspaceId/settings/app-url — e-postalardaki bağlantıların kökü. */
+export const AppUrlSettingsSchema = z.object({
+  /** Şu an kullanılan adres (kaydedilmiş ya da sunucudaki `APP_URL`). */
+  url: z.string(),
+  /** true: uygulamadan girilmiş; false: sunucu .env değeri kullanılıyor. */
+  custom: z.boolean(),
+});
+export type AppUrlSettings = z.infer<typeof AppUrlSettingsSchema>;
+
+/** PUT /api/workspaces/:workspaceId/settings/app-url — `null` kaydı silip .env değerine döner. */
+export const UpdateAppUrlRequestSchema = z.object({
+  url: z
+    .string()
+    .trim()
+    .max(200)
+    .regex(/^https?:\/\/[A-Za-z0-9._-]+(:\d{1,5})?(\/[^\s?#]*)?$/, 'url')
+    .nullable(),
+});
+export type UpdateAppUrlRequest = z.infer<typeof UpdateAppUrlRequestSchema>;

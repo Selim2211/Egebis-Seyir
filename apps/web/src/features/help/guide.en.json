@@ -3,6 +3,114 @@
   "subtitle": "Creating and editing Epics, Tasks, Sub-Tasks and Sprints — step by step, with pictures.",
   "sections": [
     {
+      "id": "hizli-tur",
+      "title": "Quick tour: Seyir in 5 minutes (for presenting)",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "This section is for learning the app quickly and showing it to others. The long explanations are in the later sections; here you only get **what to show and what to say**."
+        },
+        {
+          "type": "bullets",
+          "items": [
+            "**What is Seyir?** An app where a team plans all its work in one place, moves it forward in sprints and tracks it.",
+            "**Who is it for?** Everyone who writes work, does work or follows progress: managers, product owners, developers, stakeholders.",
+            "**What is different?** It runs on your own server, so data stays in the company. Turkish and English."
+          ]
+        },
+        {
+          "type": "table",
+          "head": ["#", "Show on screen", "What to say"],
+          "rows": [
+            [
+              "1",
+              "**Create Project** in the left menu (purple button)",
+              "Every product or team gets its own workspace."
+            ],
+            [
+              "2",
+              "The purple **New** button at the top",
+              "One door for adding work: Sprint, Task, Epic and Bug all start here."
+            ],
+            [
+              "3",
+              "Add an **Epic** and some **Tasks** under it",
+              "A big goal is an Epic, a piece of work is a Task, small parts are Sub-Tasks."
+            ],
+            [
+              "4",
+              "**Drag** a Task onto another Task",
+              "Dragging is enough: confirm and it becomes a Sub-Task; drop it on “Detach” to make it a Task again."
+            ],
+            [
+              "5",
+              "New → **Sprint**",
+              "A sprint is the team’s 1–2 week goal; its dates and goal are written here."
+            ],
+            [
+              "6",
+              "**Move work** from the Backlog into the Sprint",
+              "The team chooses which work it will do this period."
+            ],
+            [
+              "7",
+              "**Sprint board**: drag a card between columns",
+              "Everyone sees at a glance which stage each piece of work is in."
+            ],
+            [
+              "8",
+              "Red **Bugs** tab (next to Reports) → report a Bug → assign → Resolved",
+              "Bugs do not get lost: each has an owner, an assignee and a status, and everyone is emailed."
+            ],
+            [
+              "9",
+              "**Reports**: Burndown and Velocity",
+              "Will the sprint finish on time, how much does the team deliver: it is in the chart."
+            ],
+            [
+              "10",
+              "**Share** on an Epic; Settings → **Roles**",
+              "Who sees and changes what can be set from the whole Project down to a single item."
+            ]
+          ]
+        },
+        {
+          "type": "tip",
+          "text": "Before the presentation, prepare a Project, a few Tasks and a Sprint. Typing from scratch takes time; with ready data you finish in 5 minutes. Dragging and Bugs are the crowd-pleasers, so give them time."
+        },
+        {
+          "type": "figure",
+          "image": "01-overview",
+          "alt": "Seyir home screen with marked areas",
+          "caption": "Main screen: use the left menu for the Project and its sections, and the top bar for search, help and your account.",
+          "legend": [
+            "**Project**: The project area you work in. Click to open the sections below it.",
+            "**Backlog and sprints**: Sprints are created and planned here.",
+            "**Sprint board**: Shows the sprint's work in status columns (Kanban).",
+            "**Tasks**: The Project's work list; Tasks and Sub-Tasks are added here.",
+            "**Search**: Find a task, document or person (shortcut: Ctrl + K).",
+            "**Help**: Open this guide at any time.",
+            "**Account menu**: Profile, language, theme and sign out.",
+            "**New item row**: Type a title and press Enter to add a task."
+          ]
+        },
+        {
+          "type": "p",
+          "text": "**Questions you will be asked**"
+        },
+        {
+          "type": "bullets",
+          "items": [
+            "**Where is the data?** On the company’s own server (PostgreSQL). A daily backup is taken automatically; a Project can also be restored from a backup.",
+            "**Who sees what?** Roles and permissions are edited in Settings → Roles; a single Epic or Task can be made “Private” and opened only to chosen people.",
+            "**Can files be attached?** Yes, any file type up to 100 MB on Tasks and Epics.",
+            "**Are there notifications?** Yes: in the app and by email (assignment, comment, status, Bug). The email setup is entered in Settings → General.",
+            "**How is it different from other tools?** Scrum (Sprints, Backlog, Burndown) and Kanban together; Turkish; on your own server."
+          ]
+        }
+      ]
+    },
+    {
       "id": "baslangic",
       "title": "Before you start: the basics",
       "blocks": [
@@ -721,12 +829,12 @@
       "blocks": [
         {
           "type": "p",
-          "text": "Bugs are not shown in the task list; they have their own screen. Open it with the red **Bugs** button at the top right of the sprint board (and the Kanban board). The number on the button is the count of open bugs."
+          "text": "Bugs are not shown in the task list; they have their own screen. Open it with the red **Bugs** tab next to **Reports** in the tabs at the top of the page (on the Kanban board it is the red **Bugs** button at the top right). The number on the tab is the count of open bugs."
         },
         {
           "type": "steps",
           "items": [
-            "Click the red **Bugs** button. (Or **New → Bug**.)",
+            "Click the red **Bugs** tab at the top. (Or **New → Bug**.)",
             "Click **Report a bug**. Fill in **What is wrong?**, **Severity**, **Priority**, **Steps to reproduce**, **Expected** and **Actual result**, **Environment**; add screenshots if you like.",
             "Click **Report bug**. You become the **bug owner**; the bug starts as **Unassigned** and the people who assign bugs (Product Owner, Scrum Master, Admin) get a notification and an e-mail.",
             "A Product Owner, Scrum Master or Admin assigns the bug in the **Assignee** box on its row. The status becomes **Assigned**; the assignee gets a notification and an e-mail.",
@@ -739,7 +847,7 @@
           "alt": "The Bugs screen",
           "caption": "The Bugs screen: status tabs, bug owner and assignee.",
           "legend": [
-            "**Bugs**: The screen opened by the red **Bugs** button on the sprint board.",
+            "**Bugs**: The screen opened by the red **Bugs** tab next to Reports.",
             "**Report a bug**: Opens the new bug form.",
             "**Status tabs**: Unassigned, Assigned, In progress, Resolved.",
             "**Assignee**: Assigns the bug to someone (only people allowed to)."
@@ -763,7 +871,7 @@
           "type": "steps",
           "items": [
             "Click **New** (or press **N** on the keyboard when you are not typing).",
-            "Pick what you want to create: **Task**, **Epic** or **Bug**. New Projects are created with the **Create project** button in the left menu.",
+            "Pick what you want to create: **Sprint**, **Task**, **Epic** or **Bug**. **Sprint** opens the same Create sprint window as the Backlog page. New Projects are created with the **Create project** button in the left menu.",
             "For Task and Epic a small window opens (Bug opens the bug report form). Type the **Title** and check the **Project** and **List** (the one you are looking at is preselected).",
             "Optionally click **Attach files** to add any files right away.",
             "Click **Create**. The new item opens so you can fill in the details."
@@ -776,6 +884,7 @@
           "caption": "The New menu opened from the top bar.",
           "legend": [
             "**New**: The big button in the top bar. Shortcut: N.",
+            "**Sprint**: Plan a new sprint for a Project (name, goal and dates).",
             "**Task**: A piece of work for the sprint.",
             "**Epic**: A big goal that groups many Tasks."
           ]

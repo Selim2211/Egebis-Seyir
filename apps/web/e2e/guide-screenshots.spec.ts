@@ -597,13 +597,18 @@ test.describe.serial('Kılavuz görselleri', () => {
     await shot(page, '22-new-menu', [
       { at: page.getByTestId('new-menu'), n: 1, badge: 'tr' },
       {
-        at: page.getByRole('menuitem', { name: new RegExp('^' + t('newMenu.TASK')) }),
+        at: page.getByRole('menuitem', { name: new RegExp('^' + t('newMenu.SPRINT')) }),
         n: 2,
         badge: 'r',
       },
       {
-        at: page.getByRole('menuitem', { name: new RegExp('^' + t('newMenu.EPIC')) }),
+        at: page.getByRole('menuitem', { name: new RegExp('^' + t('newMenu.TASK')) }),
         n: 3,
+        badge: 'r',
+      },
+      {
+        at: page.getByRole('menuitem', { name: new RegExp('^' + t('newMenu.EPIC')) }),
+        n: 4,
         badge: 'r',
       },
     ]);

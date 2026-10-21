@@ -15,6 +15,8 @@ import {
 } from '@nestjs/common';
 import {
   AcceptInvitationRequestSchema,
+  AppUrlSettingsSchema,
+  UpdateAppUrlRequestSchema,
   AcceptInvitationResponseSchema,
   CreateInvitationsRequestSchema,
   CreateMemberRequestSchema,
@@ -31,6 +33,7 @@ import {
   WorkspaceSettingsSchema,
   WORKSPACE_PERMISSIONS as W,
   type AcceptInvitationResponse,
+  type AppUrlSettings,
   type InvitationPreview,
   type InvitationsResponse,
   type MailSettings,
@@ -62,6 +65,8 @@ class AcceptInvitationDto extends createZodDto(AcceptInvitationRequestSchema) {}
 class AcceptInvitationResponseDto extends createZodDto(AcceptInvitationResponseSchema) {}
 class CreateMemberDto extends createZodDto(CreateMemberRequestSchema) {}
 class CreatedMemberDto extends createZodDto(CreatedMemberSchema) {}
+class AppUrlSettingsDto extends createZodDto(AppUrlSettingsSchema) {}
+class UpdateAppUrlDto extends createZodDto(UpdateAppUrlRequestSchema) {}
 class MailSettingsDto extends createZodDto(MailSettingsSchema) {}
 class UpdateMailSettingsDto extends createZodDto(UpdateMailSettingsRequestSchema) {}
 class MailTestResultDto extends createZodDto(MailTestResultSchema) {}
@@ -154,6 +159,21 @@ export class WorkspaceSettingsController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async update(@Body() body: UpdateWorkspaceSettingsDto): Promise<void> {
     await this.settings.update(body);
+  }
+
+  /** Uygulamanın genel adresi (ADR-122): e-postalardaki bağlantıların kökü. */
+  @Get('app-url')
+  @RequirePermission(W.WORKSPACE_SETTINGS)
+  @ZodResponse({ type: AppUrlSettingsDto })
+  getAppUrl(): Promise<AppUrlSettings> {
+    return this.settings.getAppUrl();
+  }
+
+  @Put('app-url')
+  @RequirePermission(W.WORKSPACE_SETTINGS)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async updateAppUrl(@Body() body: UpdateAppUrlDto): Promise<void> {
+    await this.settings.updateAppUrl(body);
   }
 
   /** SMTP ayarı (ADR-120): şifre dönmez, yalnızca kayıtlı olup olmadığı. */

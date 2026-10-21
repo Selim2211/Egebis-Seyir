@@ -1,18 +1,19 @@
 import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import {
   WORKSPACE_PERMISSIONS as W,
+  type AppUrlSettings,
   type Locale,
   type MailSettings,
   type MailTestResult,
+  type UpdateAppUrlRequest,
   type UpdateMailSettingsRequest,
   type UpdateWorkspaceSettingsRequest,
   type WorkspaceSettings,
 } from '@scrum/shared';
 import { ClsService } from 'nestjs-cls';
 import { RoleScope } from '../../generated/prisma/client';
-import type { Env } from '../../infra/config/env';
 import type { AppClsStore } from '../../infra/cls/request-context';
+import { AppSettingsService } from '../../infra/settings/app-settings.service';
 import { MailSettingsService } from '../../infra/mail/mail-settings.service';
 import { MailService } from '../../infra/mail/mail.service';
 import { testMail } from '../../infra/mail/templates';
@@ -29,8 +30,29 @@ export class WorkspaceSettingsService {
     private readonly activity: ActivityService,
     private readonly mail: MailService,
     private readonly mailSettings: MailSettingsService,
-    private readonly config: ConfigService<Env, true>,
+    private readonly appSettings: AppSettingsService,
   ) {}
+
+  getAppUrl(): Promise<AppUrlSettings> {
+    return this.appSettings.view();
+  }
+
+  /** Genel adres: e-postalardaki bağlantıların kökü. `null` kaydı siler, .env değerine dönülür (ADR-122). */
+  async updateAppUrl(input: UpdateAppUrlRequest): Promise<void> {
+    const workspaceId = this.cls.get('workspaceId')!;
+    const before = await this.appSettings.view();
+    await this.appSettings.save(input.url);
+    const after = await this.appSettings.view();
+    if (before.url === after.url) return;
+    await this.activity.record(this.tenant.db, {
+      workspaceId,
+      actorId: this.cls.get('userId')!,
+      entityType: 'workspace',
+      entityId: workspaceId,
+      action: 'workspace.app_url_updated',
+      changes: { url: { from: before.url, to: after.url } },
+    });
+  }
 
   getMail(): Promise<MailSettings> {
     return this.mailSettings.view();
@@ -79,7 +101,7 @@ export class WorkspaceSettingsService {
       testMail({
         to: user.email,
         locale: user.locale as Locale,
-        url: this.config.get('APP_URL', { infer: true }),
+        url: await this.appSettings.publicUrl(),
       }),
     );
     return { ...outcome, to: user.email };

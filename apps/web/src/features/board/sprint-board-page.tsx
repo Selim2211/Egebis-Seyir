@@ -11,7 +11,6 @@ import { ContainerHeader, LoadingState, NotFoundState } from '@/features/spaces/
 import { spaceQuery } from '@/features/spaces/queries';
 import { backlogQuery, sprintsQuery } from '@/features/sprints/queries';
 import { SprintActions } from '@/features/sprints/sprint-actions';
-import { BugsButton } from '@/features/bugs/bugs-page';
 import { ScrumTabs } from '@/features/sprints/scrum-tabs';
 import { SprintStats } from '@/features/sprints/sprint-stats';
 import { PriorityColorToggle } from '@/features/work-items/priority-colors';
@@ -106,7 +105,6 @@ export function SprintBoardPage({
         name={space.data.name}
         archived={space.data.archived}
         canUnarchive={space.data.permissions.includes(S.SPACE_SETTINGS)}
-        actions={<BugsButton spaceId={spaceId} />}
       >
         <ScrumTabs spaceId={spaceId} current="board" />
       </ContainerHeader>

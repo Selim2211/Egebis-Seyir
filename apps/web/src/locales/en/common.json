@@ -45,6 +45,10 @@
   },
   "newMenu": {
     "button": "New",
+    "SPRINT": "Sprint",
+    "SPRINTHint": "Plan a new sprint for a Project",
+    "sprintPickTitle": "Which Project is the sprint for?",
+    "sprintPickContinue": "Continue",
     "TASK": "Task",
     "TASKHint": "A piece of work for the sprint",
     "EPIC": "Epic",
@@ -2276,5 +2280,18 @@
     "saveAndTest": "Save and test",
     "reset": "Back to server settings",
     "resetDone": "Saved settings removed; the server’s .env values will be used."
+  },
+  "appUrl": {
+    "title": "Application address",
+    "help": "Links in emails (invitations, password resets, notifications) are built from this address. Enter the address people type in their browser; if it is wrong the links will not open.",
+    "label": "Address",
+    "hint": "Example: https://seyir.company.com or http://192.168.1.20:8092 (no trailing slash needed).",
+    "save": "Save",
+    "saved": "Application address saved.",
+    "reset": "Back to server settings",
+    "resetDone": "Saved address removed; the server’s APP_URL will be used.",
+    "mismatchTitle": "Links in emails may point to the wrong address.",
+    "mismatch": "Links are currently built with {{saved}}, but you are using the app at {{here}}. If they differ, an invited person who clicks the link gets a “site can’t be reached” error.",
+    "useThis": "Use {{here}}"
   }
 }

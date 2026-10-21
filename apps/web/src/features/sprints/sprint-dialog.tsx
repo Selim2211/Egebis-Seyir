@@ -35,6 +35,8 @@ interface Props {
   existing: ReadonlyArray<{ endDate: string }>;
   /** Verilirse düzenleme; yoksa yeni sprint. */
   editing?: SprintSummary;
+  /** Yeni sprint oluşturulunca (örneğin üst çubuktaki New menüsünden açıldığında sayfaya gitmek için). */
+  onCreated?: () => void;
 }
 
 /** Sprint oluşturma/düzenleme penceresi (brief §5.6). */
@@ -51,7 +53,14 @@ export function SprintDialog(props: Props) {
   );
 }
 
-function SprintForm({ spaceId, weeks, existing, editing, onDone }: Props & { onDone: () => void }) {
+function SprintForm({
+  spaceId,
+  weeks,
+  existing,
+  editing,
+  onCreated,
+  onDone,
+}: Props & { onDone: () => void }) {
   const { t } = useTranslation();
   const ids = useId();
   const create = useCreateSprint(spaceId);
@@ -82,6 +91,7 @@ function SprintForm({ spaceId, weeks, existing, editing, onDone }: Props & { onD
     const done = () => {
       toast.success(t(editing ? 'sprints.updated' : 'sprints.created', { name: body.name }));
       onDone();
+      if (!editing) onCreated?.();
     };
     if (editing) {
       update.mutate(

@@ -1,7 +1,18 @@
 import { listName } from '@/lib/default-names';
 import { SPACE_PERMISSIONS as S, type TreeSpace, type WorkItemType } from '@scrum/shared';
 import { useNavigate, useRouterState } from '@tanstack/react-router';
-import { Bug, CheckSquare, ChevronDown, FolderKanban, Paperclip, Plus, X, Zap } from 'lucide-react';
+import {
+  Bug,
+  CalendarRange,
+  CheckSquare,
+  ChevronDown,
+  FolderKanban,
+  Paperclip,
+  Plus,
+  X,
+  Zap,
+} from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import { type FormEvent, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -19,9 +30,13 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { useHierarchy } from '@/features/spaces/queries';
+import { SprintDialog } from '@/features/sprints/sprint-dialog';
+import { sprintsQuery } from '@/features/sprints/queries';
+import { spaceQuery, useHierarchy } from '@/features/spaces/queries';
+import { useCurrentWorkspace } from '@/features/workspace/queries';
 import { creatableTypes } from '@/features/work-items/item-tree';
 import { useCreateItem, useUploadAttachment } from '@/features/work-items/queries';
 import { useErrorMessage } from '@/lib/use-error-message';
@@ -50,11 +65,16 @@ export function NewMenu() {
   const targets = writableSpaces(data?.spaces);
   const [menuOpen, setMenuOpen] = useState(false);
   const [itemType, setItemType] = useState<WorkItemType | null>(null);
+  const [sprintOpen, setSprintOpen] = useState(false);
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const openSpace = /^\/spaces\/([0-9a-f-]{36})/.exec(pathname)?.[1];
   const currentSpaceId =
     targets.find((target) => target.space.id === openSpace)?.space.id ?? targets[0]?.space.id ?? '';
+  // Sprint yalnızca Scrum Proje'sinde ve sprint planlama yetkisiyle oluşturulur.
+  const sprintSpaces = (data?.spaces ?? []).filter(
+    (space) => space.scrumEnabled && space.permissions.includes(S.SPRINT_PLAN),
+  );
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -70,7 +90,7 @@ export function NewMenu() {
     return () => document.removeEventListener('keydown', onKey);
   }, []);
 
-  if (targets.length === 0) return null;
+  if (targets.length === 0 && sprintSpaces.length === 0) return null;
 
   return (
     <>
@@ -89,6 +109,22 @@ export function NewMenu() {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="w-72 p-2">
+          {sprintSpaces.length > 0 && (
+            <>
+              <DropdownMenuItem
+                className="gap-3 py-2.5 text-base"
+                data-testid="new-sprint"
+                onSelect={() => setSprintOpen(true)}
+              >
+                <CalendarRange className="text-primary size-5" aria-hidden />
+                <span className="flex flex-col">
+                  <span className="font-medium">{t('newMenu.SPRINT')}</span>
+                  <span className="text-muted-foreground text-xs">{t('newMenu.SPRINTHint')}</span>
+                </span>
+              </DropdownMenuItem>
+              {targets.length > 0 && <DropdownMenuSeparator />}
+            </>
+          )}
           {targets.length > 0 &&
             MENU_TYPES.map((type) => {
               const Icon = ITEM_ICONS[type];
@@ -119,12 +155,90 @@ export function NewMenu() {
         </DropdownMenuContent>
       </DropdownMenu>
 
+      {sprintOpen && (
+        <NewSprintFlow
+          spaces={sprintSpaces}
+          preferredId={openSpace}
+          onClose={() => setSprintOpen(false)}
+        />
+      )}
       <NewItemDialog
         type={itemType}
         onOpenChange={(open) => !open && setItemType(null)}
         targets={targets}
       />
     </>
+  );
+}
+
+/**
+ * Sprint oluşturma: Proje sayfasındaki ile aynı pencere. Açık sayfa uygun bir Scrum Proje'siyse onu,
+ * tek uygun Proje varsa onu kullanır; birden fazlaysa önce hangi Proje için olduğu sorulur.
+ */
+function NewSprintFlow({
+  spaces,
+  preferredId,
+  onClose,
+}: {
+  spaces: TreeSpace[];
+  preferredId: string | undefined;
+  onClose: () => void;
+}) {
+  const { t } = useTranslation();
+  const [picked, setPicked] = useState<string | null>(
+    spaces.find((space) => space.id === preferredId)?.id ??
+      (spaces.length === 1 ? spaces[0]!.id : null),
+  );
+  const [choice, setChoice] = useState(spaces[0]!.id);
+
+  if (picked) return <NewSprintDialog spaceId={picked} onClose={onClose} />;
+  return (
+    <Dialog open onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="max-w-md" closeLabel="×">
+        <DialogHeader>
+          <DialogTitle className="text-xl">{t('newMenu.sprintPickTitle')}</DialogTitle>
+        </DialogHeader>
+        <DialogBody>
+          <SelectField
+            label={t('newMenu.space')}
+            value={choice}
+            onChange={(e) => setChoice(e.target.value)}
+          >
+            {spaces.map((space) => (
+              <option key={space.id} value={space.id}>
+                {space.name}
+              </option>
+            ))}
+          </SelectField>
+        </DialogBody>
+        <DialogFooter>
+          <Button type="button" variant="ghost" onClick={onClose}>
+            {t('common.cancel')}
+          </Button>
+          <Button type="button" onClick={() => setPicked(choice)}>
+            {t('newMenu.sprintPickContinue')}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function NewSprintDialog({ spaceId, onClose }: { spaceId: string; onClose: () => void }) {
+  const { id: workspaceId } = useCurrentWorkspace();
+  const navigate = useNavigate();
+  const space = useQuery(spaceQuery(workspaceId, spaceId));
+  const sprints = useQuery(sprintsQuery(workspaceId, spaceId));
+  if (!space.data || !sprints.data) return null;
+  return (
+    <SprintDialog
+      open
+      onOpenChange={(open) => !open && onClose()}
+      spaceId={spaceId}
+      weeks={space.data.sprintLengthWeeks}
+      existing={sprints.data.sprints}
+      onCreated={() => void navigate({ to: '/spaces/$spaceId/backlog', params: { spaceId } })}
+    />
   );
 }
 

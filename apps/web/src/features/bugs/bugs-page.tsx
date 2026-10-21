@@ -116,7 +116,7 @@ export function BugsPage({
         archived={space.data.archived}
         canUnarchive={permissions.includes(S.SPACE_SETTINGS)}
       >
-        {space.data.scrumEnabled && <ScrumTabs spaceId={spaceId} current="board" />}
+        {space.data.scrumEnabled && <ScrumTabs spaceId={spaceId} current="bugs" />}
       </ContainerHeader>
 
       <div className="mx-auto max-w-6xl px-4 py-5 sm:px-6">

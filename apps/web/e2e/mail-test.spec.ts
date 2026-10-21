@@ -37,3 +37,37 @@ test('E-posta ayarı uygulamadan kaydedilir ve denenir', async ({ page, request 
   await section.getByRole('button', { name: 'Sunucu ayarına dön' }).click();
   await expect(page.getByText(/Kayıtlı ayar silindi/)).toBeVisible();
 });
+
+/** ADR-122: e-postalardaki bağlantı adresi uygulamadan girilir; yanlışsa uyarır ve tek tıkla düzeltir. */
+test('Uygulama adresi kaydedilir; tarayıcıdaki adresten farklıysa uyarır', async ({
+  page,
+  request,
+}) => {
+  await ensureOwner(request);
+  await page.goto('/login');
+  await login(page, OWNER.email, OWNER.password);
+  await expect(page.getByRole('heading', { name: /Hoş geldin/ })).toBeVisible();
+
+  await page.goto('/settings/general');
+  const section = page.getByRole('region', { name: 'Uygulama adresi' });
+  await expect(section).toBeVisible();
+
+  await section.getByLabel('Adres').fill('https://seyir.firma.com/');
+  await section.getByRole('button', { name: 'Kaydet' }).click();
+  await expect(page.getByText('Uygulama adresi kaydedildi.')).toBeVisible();
+
+  // Kaydedilen adres tarayıcıdakinden farklı: uyarı çıkar, düğme tarayıcıdaki adresi önerir.
+  await page.reload();
+  await expect(section.getByLabel('Adres')).toHaveValue('https://seyir.firma.com');
+  const warning = section.getByTestId('app-url-warning');
+  await expect(warning).toContainText('yanlış adrese');
+  await warning.getByRole('button', { name: /adresini kullan/ }).click();
+  await expect(section.getByLabel('Adres')).toHaveValue(new URL(page.url()).origin);
+  await section.getByRole('button', { name: 'Kaydet' }).click();
+  await expect(page.getByText('Uygulama adresi kaydedildi.')).toBeVisible();
+  await expect(warning).toHaveCount(0);
+
+  // Sunucu ayarına dön: kayıt silinir.
+  await section.getByRole('button', { name: 'Sunucu ayarına dön' }).click();
+  await expect(page.getByText(/Kayıtlı adres silindi/)).toBeVisible();
+});

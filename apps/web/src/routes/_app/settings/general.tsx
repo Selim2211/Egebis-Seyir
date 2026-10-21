@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { Field, FormError } from '@/components/form';
 import { RestoreSpaceSection } from '@/features/backup/backup';
+import { AppUrlSection } from '@/features/mail/app-url';
 import { MailTestSection } from '@/features/mail/mail-test';
 import { PageHeading } from '@/components/layout/page-heading';
 import { Button } from '@/components/ui/button';
@@ -28,6 +29,9 @@ function GeneralSettingsPage() {
     <>
       <PageHeading title={t('generalSettings.title')} subtitle={t('generalSettings.subtitle')} />
       {data ? <SettingsForm initial={data} /> : <LoadingState />}
+      <div className="mt-5">
+        <AppUrlSection />
+      </div>
       <div className="mt-5">
         <MailTestSection />
       </div>

@@ -1,4 +1,5 @@
 import { createHmac } from 'node:crypto';
+import { AppSettingsService } from '../../infra/settings/app-settings.service';
 import { lookup } from 'node:dns/promises';
 import { HttpException, HttpStatus, Injectable, Logger, type OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -65,16 +66,15 @@ const toWebhook = (row: {
 export class WebhooksService implements OnModuleInit {
   private readonly logger = new Logger(WebhooksService.name);
   private readonly allowPrivate: boolean;
-  private readonly appUrl: string;
 
   constructor(
     private readonly prisma: PrismaService,
     private readonly cls: ClsService<AppClsStore>,
     private readonly events: AutomationEvents,
     private readonly queue: QueueService,
+    private readonly appSettings: AppSettingsService,
     config: ConfigService<Env, true>,
   ) {
-    this.appUrl = config.get('APP_URL', { infer: true }).replace(/\/$/, '');
     this.allowPrivate =
       config.get('WEBHOOK_ALLOW_PRIVATE_HOSTS', { infer: true }) ??
       config.get('NODE_ENV', { infer: true }) !== 'production';
@@ -248,7 +248,7 @@ export class WebhooksService implements OnModuleInit {
         status: item.status.name,
         priority: item.priority,
       };
-      payload.url = `${this.appUrl}/items/${payload.item.key}`;
+      payload.url = `${await this.appSettings.publicUrl()}/items/${payload.item.key}`;
       if (event.type === 'COMMENT_CREATED') payload.commentId = event.commentId;
     } else {
       const sprint = await this.prisma.sprint.findFirst({
@@ -257,7 +257,7 @@ export class WebhooksService implements OnModuleInit {
       });
       if (!sprint) return;
       payload.sprint = sprint;
-      payload.url = `${this.appUrl}/spaces/${event.spaceId}/review/${sprint.id}`;
+      payload.url = `${await this.appSettings.publicUrl()}/spaces/${event.spaceId}/review/${sprint.id}`;
     }
 
     for (const hook of hooks) await this.enqueue(hook.id, name, payload);

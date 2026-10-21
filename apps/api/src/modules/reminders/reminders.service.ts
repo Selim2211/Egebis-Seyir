@@ -1,5 +1,5 @@
 import { Injectable, Logger, NotFoundException, type OnModuleInit } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { AppSettingsService } from '../../infra/settings/app-settings.service';
 import {
   channelEnabled,
   ERROR_CODES,
@@ -13,7 +13,6 @@ import {
 } from '@scrum/shared';
 import { ClsService } from 'nestjs-cls';
 import type { AppClsStore } from '../../infra/cls/request-context';
-import type { Env } from '../../infra/config/env';
 import { MailService } from '../../infra/mail/mail.service';
 import { notificationMail } from '../../infra/mail/notification-mail';
 import { PrismaService } from '../../infra/prisma/prisma.service';
@@ -32,7 +31,6 @@ const DAY_MS = 86_400_000;
 @Injectable()
 export class RemindersService implements OnModuleInit {
   private readonly logger = new Logger(RemindersService.name);
-  private readonly appUrl: string;
 
   constructor(
     private readonly prisma: PrismaService,
@@ -40,10 +38,8 @@ export class RemindersService implements OnModuleInit {
     private readonly cls: ClsService<AppClsStore>,
     private readonly queue: QueueService,
     private readonly mail: MailService,
-    config: ConfigService<Env, true>,
-  ) {
-    this.appUrl = config.get('APP_URL', { infer: true });
-  }
+    private readonly appSettings: AppSettingsService,
+  ) {}
 
   async onModuleInit(): Promise<void> {
     await this.queue.schedule(SEND_JOB, '* * * * *', () => this.sendDue().then(() => {}));
@@ -181,7 +177,7 @@ export class RemindersService implements OnModuleInit {
           actorName: '',
           item: { key, title: r.workItem.title },
           detail,
-          url: `${this.appUrl}/items/${encodeURIComponent(key)}`,
+          url: `${await this.appSettings.publicUrl()}/items/${encodeURIComponent(key)}`,
         }),
       );
     }

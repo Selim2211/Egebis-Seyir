@@ -7,7 +7,7 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { AppSettingsService } from '../../infra/settings/app-settings.service';
 import {
   ERROR_CODES,
   type AcceptInvitationRequest,
@@ -19,7 +19,6 @@ import {
 import { ClsService } from 'nestjs-cls';
 import { type Prisma, RoleScope } from '../../generated/prisma/client';
 import type { AppClsStore } from '../../infra/cls/request-context';
-import type { Env } from '../../infra/config/env';
 import { MailService } from '../../infra/mail/mail.service';
 import { invitationMail } from '../../infra/mail/templates';
 import { PrismaService } from '../../infra/prisma/prisma.service';
@@ -36,8 +35,6 @@ const pending = () => ({ acceptedAt: null, revokedAt: null, expiresAt: { gt: new
 /** Davetle kayıt (ADR-034). Davet = kayıt bağlantısı; token tek kullanımlık ve süreli. */
 @Injectable()
 export class InvitationsService {
-  private readonly appUrl: string;
-
   constructor(
     private readonly prisma: PrismaService,
     private readonly tenant: TenantPrismaService,
@@ -45,10 +42,8 @@ export class InvitationsService {
     private readonly access: AccessService,
     private readonly activity: ActivityService,
     private readonly mail: MailService,
-    config: ConfigService<Env, true>,
-  ) {
-    this.appUrl = config.get('APP_URL', { infer: true });
-  }
+    private readonly appSettings: AppSettingsService,
+  ) {}
 
   // ---------- Workspace yöneticisi tarafı (tenant kapsamlı) ----------
 
@@ -313,7 +308,7 @@ export class InvitationsService {
         workspaceName: workspace.name,
         inviterName: inviter.name,
         role,
-        url: `${this.appUrl}/invite/${encodeURIComponent(token)}`,
+        url: `${await this.appSettings.publicUrl()}/invite/${encodeURIComponent(token)}`,
         expiresInDays: INVITATION_TTL_DAYS,
       }),
     );
