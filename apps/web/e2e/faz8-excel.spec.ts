@@ -50,7 +50,10 @@ test.describe.serial('Sprint Excel dışa/içe aktarma', () => {
     const backlog = page.getByRole('region', { name: 'Backlog', exact: true });
     await backlog.getByLabel('XLS-1 öğesini seç').check();
     await backlog.getByLabel('XLS-2 öğesini seç').check();
-    await backlog.getByLabel("Sprint'e taşı…").selectOption({ label: 'Excel Sprint' });
+    await page
+      .getByRole('region', { name: 'Seçili öğeler' })
+      .getByLabel("Sprint'e taşı…")
+      .selectOption({ label: 'Excel Sprint' });
     await expect(sprint.getByText('2 öğe · 0 puan')).toBeVisible();
 
     await sprint.getByRole('button', { name: 'Excel Sprint için işlemler' }).click();

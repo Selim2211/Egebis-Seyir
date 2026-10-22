@@ -69,29 +69,38 @@ test.describe.serial('Proje / Folder / List', () => {
     page,
   }) => {
     const sidebar = page.getByRole('complementary');
-    await sidebar.getByRole('link', { name: 'Kurumsal Site' }).click();
+
+    // Scrum Proje'sinde kök "Görevler" listesi kenar çubuğunda yok (ADR-125); klasördeki liste kullanılır.
+    const openFolder = async () => {
+      await sidebar.getByRole('link', { name: 'Kurumsal Site' }).click();
+      await sidebar.getByRole('link', { name: 'Sürüm 2.0' }).click();
+    };
+    await openFolder();
+    const tree = sidebar.getByRole('group', { name: 'Sürüm 2.0' });
+    const list = tree.getByRole('link', { name: 'Hata Kayıtları' });
+    await expect(list).toBeVisible();
 
     // Arşivle → bildirimdeki "Geri al".
-    await sidebar.getByRole('button', { name: 'Görevler için işlemler' }).click();
+    await tree.getByRole('button', { name: 'Hata Kayıtları için işlemler' }).click();
     await page.getByRole('menuitem', { name: 'Arşivle' }).click();
-    await expect(page.getByText('Görevler arşivlendi.')).toBeVisible();
-    await expect(sidebar.getByRole('link', { name: 'Görevler' })).toHaveCount(0);
+    await expect(page.getByText('Hata Kayıtları arşivlendi.')).toBeVisible();
+    await expect(list).toHaveCount(0);
     await page.getByRole('button', { name: 'Geri al' }).click();
-    await expect(sidebar.getByRole('link', { name: 'Görevler' })).toBeVisible();
+    await expect(list).toBeVisible();
 
     // Sil → onay → Ayarlar › Arşiv ve çöp kutusu → Geri getir.
-    await sidebar.getByRole('button', { name: 'Görevler için işlemler' }).click();
+    await tree.getByRole('button', { name: 'Hata Kayıtları için işlemler' }).click();
     await page.getByRole('menuitem', { name: 'Sil' }).click();
     await page.getByRole('alertdialog').getByRole('button', { name: 'Sil' }).click();
-    await expect(sidebar.getByRole('link', { name: 'Görevler' })).toHaveCount(0);
+    await expect(list).toHaveCount(0);
 
     await page.goto('/settings/archive');
     await page.getByRole('tab', { name: /Çöp kutusu/ }).click();
     await expect(page.getByText('30 gün sonra kalıcı olarak silinir')).toBeVisible();
     await page.getByRole('button', { name: 'Geri getir' }).click();
     await expect(page.getByText('Geri getirildi.')).toBeVisible();
-    // Sayfa yenilenince Space kapalı gelir; açınca liste görünür.
-    await sidebar.getByRole('link', { name: 'Kurumsal Site' }).click();
-    await expect(sidebar.getByRole('link', { name: 'Görevler' })).toBeVisible();
+    // Sayfa yenilenince ağaç kapalı gelir; klasör açılınca liste görünür.
+    await openFolder();
+    await expect(list).toBeVisible();
   });
 });
