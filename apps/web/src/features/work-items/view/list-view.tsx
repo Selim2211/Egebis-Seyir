@@ -16,6 +16,7 @@ import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { StatusBadge, WorkItemTypeIcon } from '@/components/work-item/work-item-visuals';
 import { statusName } from '@/lib/default-names';
+import { dragFromRow } from '@/lib/drag-start';
 import { cn } from '@/lib/utils';
 import { ItemOpenLink } from '../detail/item-nav';
 import { AssigneeStack, DueCell, EstimateCell, PriorityCell, StatusCell } from './cells';
@@ -367,7 +368,9 @@ function ItemRow({
       ref={dragRef}
       // Satırın tamamı tutulup taşınır; klavye ile sürükleme yalnızca tutamaçtan.
       onPointerDown={
-        draggable ? (listeners?.onPointerDown as React.PointerEventHandler) : undefined
+        draggable
+          ? dragFromRow(listeners?.onPointerDown as React.PointerEventHandler | undefined)
+          : undefined
       }
       data-item-row={item.key}
       // Sürükleme sırasında hedef vurgusu ve soluklaşma doğrudan DOM özniteliğiyle verilir

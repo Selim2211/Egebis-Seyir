@@ -1166,3 +1166,14 @@
   - Proje seçilmezse kullanıcının raporlarını görebildiği **tüm Proje'ler** toplanır (gizli/izinsiz Proje'ler sayılmaz); sprint seçilmezse **Proje geneli**.
   - Sprint varsayılanı **en son sprint**: aktif varsa o, yoksa son tamamlanan, yoksa ilk planlanan. Sprint seçici aranabilir: açılınca **son 3 sprint**, yazınca tüm sprint'lerde ada göre arar; "Proje geneli" seçeneği hep vardır. Sprint seçimi Proje değişince varsayılana döner.
   - API: `GET workspaces/:wid/workload?spaceId=&sprintId=` (eski Proje ucu korunur; pano bileşeni kullanır).
+
+## ADR-133 — Backlog'da tıklama güvenilirliği ve hız (Faz 15, Görev 5)
+
+- **Tarih:** 2026-10-22 · **Durum:** Kabul (kullanıcı: "butona rahat tıklayalım, kasmasın").
+- **Ölçüm (90 Task'lı Backlog, geliştirme modu):** satır içi düğmeye basıp fare 8 px kayınca tıklama **kayboluyordu** (sürükleme başlıyordu); toplu taşımadan sonra 11 istek ve ~300 ms takılma; açılışta ~600 ms uzun görev.
+- **Karar:**
+  - **Tıklama:** satır sürüklemesi düğme, kutucuk, form alanı ve menü öğelerinin üstünden başlamaz (`lib/drag-start.ts`); sürükleme tutamacı (`data-drag-handle`), boş alan ve başlık bağlantısı sürüklenebilir kalır. Backlog ve Görevler listesinde geçerli; kalıcı e2e testi var.
+  - **Tazeleme:** Backlog işlemleri (taşı, grupla, alt görev yap/çıkar) sonrası workspace'teki tüm sorgular yeniden çekilmez; hepsi eskimiş işaretlenir, yalnızca ekrandaki Proje/List/sprint/öğe sorguları hemen çekilir (`refreshAfterBacklogChange`). İstek 11 → 7–9.
+  - **Biçimleyiciler:** `Intl.DateTimeFormat`/`RelativeTimeFormat` dil ve seçenek başına önbelleğe alınır (listede her tarih için yeniden oluşturuluyordu).
+  - **Satır menüsü** ilk tıklamada kurulur (yüzlerce satırda menü bileşeni baştan kurulmaz). Açılıştaki uzun görevler ~600 → ~490 ms (geliştirme modu; üretim derlemesi belirgin şekilde daha hızlıdır).
+- **Not:** Rota bazlı kod bölme ve dil dosyalarının tembel yüklenmesi zaten vardı; ana paket ~104 KB (33 KB gzip).

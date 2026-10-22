@@ -55,13 +55,13 @@ import {
   sprintQuery,
   useDeleteSprint,
   useMoveBacklogItems,
+  useBacklogUnnest,
   useNestItem,
 } from './queries';
 import { SprintActions } from './sprint-actions';
 import { SprintDialog } from './sprint-dialog';
 import { RestoreSprintDialog } from '@/features/backup/backup';
 import { PromoteEpicDialog } from '@/features/work-items/promote-epic-dialog';
-import { useUnnestItem } from '@/features/work-items/queries';
 import { PriorityColorToggle } from '@/features/work-items/priority-colors';
 import { SprintImportDialog } from './sprint-import-dialog';
 import { ScrumTabs } from './scrum-tabs';
@@ -90,7 +90,7 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
   const move = useMoveBacklogItems(spaceId);
   const remove = useDeleteSprint();
   const nestItem = useNestItem();
-  const unnestItem = useUnnestItem();
+  const unnestItem = useBacklogUnnest();
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
   const [activeId, setActiveId] = useState<string | null>(null);
   const [ghostWidth, setGhostWidth] = useState(0);

@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { type ReactNode, useState } from 'react';
 import type { SprintSummary, WorkItemRow } from '@scrum/shared';
 import { ArrowRight, GripVertical, MoreHorizontal, Undo2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -66,6 +66,7 @@ export function BacklogRow({
             <button
               type="button"
               {...handle}
+              data-drag-handle
               aria-label={t('backlog.dragHandle', { key: item.key })}
               className="text-muted-foreground cursor-grab rounded focus-visible:opacity-100 md:opacity-40 md:group-hover/item:opacity-100"
             >
@@ -134,33 +135,21 @@ export function BacklogRow({
         )}
       </span>
       {hasMenu ? (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-7 shrink-0 md:opacity-0 md:group-hover/item:opacity-100 md:focus-visible:opacity-100 md:data-[state=open]:opacity-100"
-              aria-label={t('items.actions', { key: item.key })}
-            >
-              <MoreHorizontal />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56">
-            {targets.map((sprint) => (
-              <DropdownMenuItem key={sprint.id} onSelect={() => onMove(sprint.id)}>
-                <ArrowRight />
-                {t('backlog.moveToSprint', { name: sprint.name })}
-              </DropdownMenuItem>
-            ))}
-            {inSprint && targets.length > 0 && <DropdownMenuSeparator />}
-            {inSprint && (
-              <DropdownMenuItem onSelect={() => onMove(null)}>
-                <Undo2 />
-                {t('backlog.moveToBacklog')}
-              </DropdownMenuItem>
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <RowMenu label={t('items.actions', { key: item.key })}>
+          {targets.map((sprint) => (
+            <DropdownMenuItem key={sprint.id} onSelect={() => onMove(sprint.id)}>
+              <ArrowRight />
+              {t('backlog.moveToSprint', { name: sprint.name })}
+            </DropdownMenuItem>
+          ))}
+          {inSprint && targets.length > 0 && <DropdownMenuSeparator />}
+          {inSprint && (
+            <DropdownMenuItem onSelect={() => onMove(null)}>
+              <Undo2 />
+              {t('backlog.moveToBacklog')}
+            </DropdownMenuItem>
+          )}
+        </RowMenu>
       ) : (
         <span className="size-7 shrink-0" aria-hidden />
       )}
@@ -200,4 +189,44 @@ function Estimate({ item, unestimated }: { item: WorkItemRow; unestimated: boole
     );
   }
   return null;
+}
+
+/**
+ * Satır menüsü yalnızca ilk tıklamada kurulur: yüzlerce satırda her birinin menü bileşenini baştan kurmak
+ * sayfa açılışını yavaşlatıyordu (ADR-133). Görünüm ve klavye davranışı aynıdır.
+ */
+function RowMenu({ label, children }: { label: string; children: ReactNode }) {
+  const [mounted, setMounted] = useState(false);
+  const [open, setOpen] = useState(false);
+  const className =
+    'size-7 shrink-0 md:opacity-0 md:group-hover/item:opacity-100 md:focus-visible:opacity-100 md:data-[state=open]:opacity-100';
+  if (!mounted) {
+    return (
+      <Button
+        variant="ghost"
+        size="icon"
+        className={className}
+        aria-label={label}
+        aria-haspopup="menu"
+        onClick={() => {
+          setMounted(true);
+          setOpen(true);
+        }}
+      >
+        <MoreHorizontal />
+      </Button>
+    );
+  }
+  return (
+    <DropdownMenu open={open} onOpenChange={setOpen}>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon" className={className} aria-label={label}>
+          <MoreHorizontal />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-56">
+        {children}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
 }

@@ -1,6 +1,7 @@
 import { useDraggable } from '@dnd-kit/core';
 import type { PointerEventHandler, ReactNode } from 'react';
 import type { DragHandleProps } from '@/features/spaces/sortable';
+import { dragFromRow } from '@/lib/drag-start';
 import { cn } from '@/lib/utils';
 
 /**
@@ -62,7 +63,9 @@ export function SortableRow({
       ref={setNodeRef}
       data-row-id={id}
       data-subtask={subtask ? '' : undefined}
-      onPointerDown={enabled ? (onPointerDown as PointerEventHandler | undefined) : undefined}
+      onPointerDown={
+        enabled ? dragFromRow(onPointerDown as PointerEventHandler | undefined) : undefined
+      }
       className={cn(
         'relative',
         enabled && 'cursor-grab',

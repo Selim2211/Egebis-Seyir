@@ -84,6 +84,7 @@ export function SubtaskRows({
                   <button
                     type="button"
                     {...handle}
+                    data-drag-handle
                     aria-label={t('backlog.dragSubtask', { key: child.key })}
                     className="text-muted-foreground cursor-grab rounded md:opacity-40 md:hover:opacity-100"
                   >

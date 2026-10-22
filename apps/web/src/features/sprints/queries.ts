@@ -18,7 +18,7 @@ import {
   type SprintImportResult,
   type UpdateSprintRequest,
 } from '@scrum/shared';
-import { queryOptions, useMutation, useQueryClient } from '@tanstack/react-query';
+import { type QueryClient, queryOptions, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useCurrentWorkspace } from '@/features/workspace/queries';
 import { apiRequest, NoContent } from '@/lib/api';
 
@@ -70,6 +70,28 @@ export const sprintReviewQuery = (workspaceId: string, sprintId: string) =>
     queryFn: () => apiRequest(`${ws(workspaceId)}/sprints/${sprintId}/review`, SprintReviewSchema),
   });
 
+/**
+ * Backlog değişikliği sonrası tazeleme (Faz 15, ADR-133): workspace'teki her şey eskimiş işaretlenir ama
+ * yalnızca ekranda görünen Proje, List, sprint ve öğe verisi hemen yeniden çekilir; diğerleri açıldığında tazelenir.
+ * Her taşımada tüm workspace sorgularının birden çekilmesi Backlog'da takılmaya yol açıyordu.
+ */
+export function refreshAfterBacklogChange(qc: QueryClient, workspaceId: string) {
+  void qc.invalidateQueries({ queryKey: ['workspaces', workspaceId], refetchType: 'none' });
+  for (const scope of ['spaces', 'lists', 'sprints', 'items'] as const) {
+    void qc.refetchQueries({ queryKey: ['workspaces', workspaceId, scope], type: 'active' });
+  }
+}
+
+/** Backlog işlemi: bitince yalnızca Backlog'u etkileyen sorgular tazelenir (`refreshAfterBacklogChange`). */
+function useBacklogMutation<T, R = unknown>(fn: (workspaceId: string, input: T) => Promise<R>) {
+  const qc = useQueryClient();
+  const { id } = useCurrentWorkspace();
+  return useMutation({
+    mutationFn: (input: T) => fn(id, input),
+    onSettled: () => refreshAfterBacklogChange(qc, id),
+  });
+}
+
 /** Workspace kapsamlı değişiklik; bitince workspace'e ait tüm sorgular tazelenir. */
 function useWorkspaceMutation<T, R = unknown>(fn: (workspaceId: string, input: T) => Promise<R>) {
   const qc = useQueryClient();
@@ -112,7 +134,7 @@ export function useMoveToSprint() {
         method: 'POST',
         body,
       }),
-    onSettled: () => qc.invalidateQueries({ queryKey: ['workspaces', workspaceId] }),
+    onSettled: () => refreshAfterBacklogChange(qc, workspaceId),
   });
 }
 
@@ -126,7 +148,7 @@ export function useGroupItems(spaceId: string) {
         method: 'POST',
         body,
       }),
-    onSettled: () => qc.invalidateQueries({ queryKey: ['workspaces', workspaceId] }),
+    onSettled: () => refreshAfterBacklogChange(qc, workspaceId),
   });
 }
 
@@ -158,7 +180,7 @@ export function useMoveBacklogItems(spaceId: string) {
     onError: (_error, _body, context) => {
       if (context?.previous) qc.setQueryData(key, context.previous);
     },
-    onSettled: () => qc.invalidateQueries({ queryKey: ['workspaces', workspaceId] }),
+    onSettled: () => refreshAfterBacklogChange(qc, workspaceId),
   });
 }
 
@@ -234,11 +256,17 @@ export function useRetro(sprintId: string) {
 
 /** Öğeyi başka öğenin alt öğesi yapar (sürükle-bırak ya da "Üst öğe seç", ADR-102). */
 export const useNestItem = () =>
-  useWorkspaceMutation((id, input: { itemId: string; parentId: string }) =>
+  useBacklogMutation((id, input: { itemId: string; parentId: string }) =>
     apiRequest(`${ws(id)}/items/${input.itemId}/nest`, NoContent, {
       method: 'POST',
       body: { parentId: input.parentId },
     }),
+  );
+
+/** Backlog'da üst öğeden ayırma (Sub-Task → Task); yalnızca Backlog verisi tazelenir. */
+export const useBacklogUnnest = () =>
+  useBacklogMutation((id, itemId: string) =>
+    apiRequest(`${ws(id)}/items/${itemId}/unnest`, NoContent, { method: 'POST' }),
   );
 
 /** Excel'den sprint içe aktarma (Faz 8.4): `dryRun` yalnızca doğrular. */

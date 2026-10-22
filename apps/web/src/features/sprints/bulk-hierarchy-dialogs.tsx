@@ -12,10 +12,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { useUnnestItem } from '@/features/work-items/queries';
 import { useErrorMessage } from '@/lib/use-error-message';
 import { canBecomeSubtask, type BulkItem } from './bulk-utils';
-import { useNestItem } from './queries';
+import { useBacklogUnnest, useNestItem } from './queries';
 
 /** Seçili öğeleri seçilen bir Task'ın Sub-Task'ı yapar. Uygun olmayanlar (Epic, Bug, alt görevli Task) atlanır. */
 export function BulkNestDialog({
@@ -148,7 +147,7 @@ export function BulkUnnestDialog({
 }) {
   const { t } = useTranslation();
   const errorMessage = useErrorMessage();
-  const unnest = useUnnestItem();
+  const unnest = useBacklogUnnest();
   const withParent = items.filter((i) => i.parentId);
 
   return (

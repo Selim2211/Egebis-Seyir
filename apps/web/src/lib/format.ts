@@ -2,13 +2,34 @@ import i18n from 'i18next';
 
 const locale = () => (i18n.language === 'en' ? 'en-US' : 'tr-TR');
 
+/**
+ * Intl biçimleyicileri pahalıdır (her oluşturma ~ms); listelerde yüzlerce kez çağrıldığından dil ve
+ * seçenek başına bir kez oluşturulup yeniden kullanılır.
+ */
+const dateFormats = new Map<string, Intl.DateTimeFormat>();
+function dateFormat(options: Intl.DateTimeFormatOptions): Intl.DateTimeFormat {
+  const key = `${locale()}|${JSON.stringify(options)}`;
+  let format = dateFormats.get(key);
+  if (!format) {
+    format = new Intl.DateTimeFormat(locale(), options);
+    dateFormats.set(key, format);
+  }
+  return format;
+}
+const relativeFormats = new Map<string, Intl.RelativeTimeFormat>();
+function relativeFormat(): Intl.RelativeTimeFormat {
+  const key = locale();
+  let format = relativeFormats.get(key);
+  if (!format) {
+    format = new Intl.RelativeTimeFormat(key, { numeric: 'auto' });
+    relativeFormats.set(key, format);
+  }
+  return format;
+}
+
 /** 14 Ekim 2026 */
 export function formatDate(iso: string): string {
-  return new Intl.DateTimeFormat(locale(), {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  }).format(new Date(iso));
+  return dateFormat({ day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(iso));
 }
 
 const UNITS: Array<[Intl.RelativeTimeFormatUnit, number]> = [
@@ -23,7 +44,7 @@ const UNITS: Array<[Intl.RelativeTimeFormatUnit, number]> = [
 /** "5 dakika önce", "dün" */
 export function relativeTime(iso: string, now: Date = new Date()): string {
   const seconds = (new Date(iso).getTime() - now.getTime()) / 1000;
-  const rtf = new Intl.RelativeTimeFormat(locale(), { numeric: 'auto' });
+  const rtf = relativeFormat();
   for (const [unit, size] of UNITS) {
     if (Math.abs(seconds) >= size) return rtf.format(Math.round(seconds / size), unit);
   }
@@ -34,7 +55,7 @@ export function relativeTime(iso: string, now: Date = new Date()): string {
 export function formatShortDate(day: string): string {
   const date = new Date(`${day}T12:00:00`);
   const sameYear = date.getFullYear() === new Date().getFullYear();
-  return new Intl.DateTimeFormat(locale(), {
+  return dateFormat({
     day: 'numeric',
     month: 'short',
     ...(sameYear ? {} : { year: 'numeric' }),
@@ -50,7 +71,5 @@ export function todayDay(): string {
 
 /** 14 Eki 2026 15:42 */
 export function formatDateTime(iso: string): string {
-  return new Intl.DateTimeFormat(locale(), { dateStyle: 'medium', timeStyle: 'short' }).format(
-    new Date(iso),
-  );
+  return dateFormat({ dateStyle: 'medium', timeStyle: 'short' }).format(new Date(iso));
 }

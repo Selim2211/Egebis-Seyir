@@ -65,7 +65,15 @@ test.describe.serial('Backlog alt öğeleri', () => {
     await expect(sidebar.getByRole('link', { name: 'Görevler' })).toHaveCount(0);
     await page.goto(`/spaces/${space.id}/backlog`);
 
-    await page.getByRole('button', { name: 'Alt öğeleri göster' }).click();
+    // Satır sürüklenebilir olsa da düğmeye basıp fare biraz kayarak bırakılınca tıklama kaybolmaz (ADR-133).
+    const toggle = page.getByRole('button', { name: 'Alt öğeleri göster' });
+    await toggle.scrollIntoViewIfNeeded();
+    const tb = (await toggle.boundingBox())!;
+    await page.mouse.move(tb.x + tb.width / 2, tb.y + tb.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(tb.x + tb.width / 2 + 8, tb.y + tb.height / 2 + 2, { steps: 3 });
+    await page.mouse.up();
+    await expect(page.getByRole('button', { name: 'Alt öğeleri gizle' })).toBeVisible();
     const sub = page.locator('[data-subtask]').first();
     await expect(sub).toContainText('Küçük adım');
 
