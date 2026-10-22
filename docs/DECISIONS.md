@@ -1151,3 +1151,8 @@
     - Önizleme kutusu seçime göre ne olacağını yazar. API: `items/group { withSubtasks }` (gövdede yoksa `true`, eski istemciler için).
   - **Dönüştür** ("Epic'e dönüştür"): ayrı işlemdir; tek Task seçilince çubukta düğme olarak (ve satır menüsü/detayda) çıkar. Ad varsayılan Task'ın adıdır, değiştirilebilir; önizleme "X Epic olacak, N alt görevi Task olup altında kalacak" der. Gruplama penceresindeki mod seçimi kaldırıldı.
 - **Neden:** Gruplama ve dönüştürme aynı pencerede seçilince kullanıcı iki işlemi karıştırıyordu; Sub-Task'ların ne olacağı açıkça seçilmeli.
+
+## ADR-131 — Backlog görünümü: renkli seçim çubuğu ve alt görev rozeti (Faz 15, Görev 4a)
+
+- **Tarih:** 2026-10-22 · **Durum:** Kabul (kullanıcı: "göz ayırt edebilsin, kullanıcı dostu olsun").
+- **Karar:** Kutucukla seçince çıkan çubuk marka renginde (mor degrade) yüzer; seçili sayısı beyaz rozetle, her işlem kendi renginde beyaz düğme: Sprint'e taşı (mor), Epic altında grupla (mor), Epic'e dönüştür (turuncu), Alt görev yap (mavi), Üst öğeden çıkar (kırmızı). Düğmelerin üzerine gelince ne yaptıkları yazar; **Esc** seçimi temizler (açık pencere yokken). Alt görev sayısı renkli hap rozettir (açıkken dolu renk). Kod: `selection-bar.tsx`.

@@ -31,7 +31,13 @@ export function ExpandToggle({
       onClick={onToggle}
       aria-expanded={open}
       aria-label={t(open ? 'backlog.collapseSubtasks' : 'backlog.expandSubtasks')}
-      className="text-muted-foreground hover:bg-accent flex shrink-0 items-center gap-0.5 rounded px-0.5 text-xs tabular-nums"
+      title={t(open ? 'backlog.collapseSubtasks' : 'backlog.expandSubtasks')}
+      className={cn(
+        'flex h-5 shrink-0 items-center gap-0.5 rounded-full pr-1.5 pl-0.5 text-[11px] font-semibold tabular-nums transition-colors',
+        open
+          ? 'bg-primary text-primary-foreground'
+          : 'bg-primary/10 text-primary hover:bg-primary/20',
+      )}
     >
       <ChevronRight className={cn('size-3.5 transition-transform', open && 'rotate-90')} />
       {count}

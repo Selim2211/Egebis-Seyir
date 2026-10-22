@@ -974,7 +974,8 @@
     "copyKeyLink": "{{key}} bağlantısını kopyala",
     "collapseSubtasks": "Alt öğeleri gizle",
     "expandSubtasks": "Alt öğeleri göster",
-    "dragSubtask": "{{key}} alt öğesini sürükleyip üst öğesinden ayır"
+    "dragSubtask": "{{key}} alt öğesini sürükleyip üst öğesinden ayır",
+    "selectedShort": "seçili"
   },
   "sprints": {
     "create": "Sprint oluştur",
@@ -2378,7 +2379,15 @@
     "unnestBody": "Sub-Task’lar bağımsız Task olur, Epic altındaki Task’lar Epic’ten ayrılır.",
     "unnestConfirm": "Çıkar",
     "unnested": "{{count}} öğe üst öğesinden çıkarıldı.",
-    "viaParent": "Sub-Task bağlı olduğu Task ile gider: {{list}}"
+    "viaParent": "Sub-Task bağlı olduğu Task ile gider: {{list}}",
+    "hint": {
+      "move": "Seçilenleri başka bir sprint'e ya da Backlog'a taşı",
+      "group": "Seçilen Task'ları bir Epic'in altında topla",
+      "convert": "Bu Task'ı Epic'e çevir; Sub-Task'ları Epic'in Task'ı olur",
+      "nest": "Seçilenleri bir Task'ın Sub-Task'ı yap",
+      "unnest": "Seçilenleri üst öğesinden ayır (bağımsız Task olur)",
+      "clear": "Seçimi temizle (Esc)"
+    }
   },
   "moveSelected": {
     "other": "Farklı sprint…",

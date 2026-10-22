@@ -14,20 +14,7 @@ import {
 } from '@scrum/shared';
 import { useQueries, useQuery } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
-import {
-  Archive,
-  ChevronDown,
-  Copy,
-  CornerDownRight,
-  FileSpreadsheet,
-  Layers,
-  Plus,
-  Search,
-  Unlink,
-  Zap,
-  Upload,
-  X,
-} from 'lucide-react';
+import { Archive, ChevronDown, Copy, FileSpreadsheet, Plus, Search, Upload, X } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
@@ -79,17 +66,13 @@ import { PriorityColorToggle } from '@/features/work-items/priority-colors';
 import { SprintImportDialog } from './sprint-import-dialog';
 import { ScrumTabs } from './scrum-tabs';
 import { BulkNestDialog, BulkUnnestDialog } from './bulk-hierarchy-dialogs';
-import { canBecomeSubtask, type BulkItem } from './bulk-utils';
+import { BACKLOG_OPTION, canBecomeSubtask, OTHER_OPTION, type BulkItem } from './bulk-utils';
+import { SelectionBar } from './selection-bar';
 import { MoveSelectedDialog } from './move-selected-dialog';
 import { quickSprintTargets } from './sprint-window';
 import { createSelectionStore, SelectionContext, useSelectionSet } from './selection';
 import { GroupEpicDialog } from './group-epic-dialog';
 import { SprintSection } from './sprint-section';
-
-/** Toplu taşıma seçiminde Backlog'a geri alma değeri. */
-const BACKLOG_OPTION = '__backlog';
-/** "Farklı sprint…": Proje ve sprint seçilen pencereyi açar. */
-const OTHER_OPTION = '__other';
 
 /** Bildirim baloncuklarının (sonner) da üstünde kalır. */
 const TOP_LAYER = 1000000001;
@@ -134,6 +117,17 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
   // Seçim dış depoda tutulur: kutucuk tıklanınca sayfa ve satırlar yeniden çizilmez (tıklama anında yanıt verir).
   const [selection] = useState(createSelectionStore);
   const picked = useSelectionSet(selection);
+  // Esc seçimi temizler (açık bir pencere yokken; pencereler Esc'i kendileri kapatır).
+  useEffect(() => {
+    if (picked.size === 0) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape' || document.querySelector('[role="dialog"],[role="alertdialog"]'))
+        return;
+      selection.clear();
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [picked.size, selection]);
   const [collapsed, setCollapsed] = useState<ReadonlySet<string>>(new Set());
   const [dialog, setDialog] = useState<DialogState>(null);
   const [deleting, setDeleting] = useState<SprintSummary | null>(null);
@@ -704,98 +698,49 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
               )}
             </section>
             {selected.length > 0 && (
-              <div
-                role="region"
-                aria-label={t('backlog.selection')}
-                className="bg-card ring-primary/20 sticky bottom-4 z-30 flex flex-wrap items-center gap-2 rounded-xl border px-4 py-2.5 text-sm shadow-xl ring-1"
-              >
-                <span className="font-medium">
-                  {t('backlog.selected', { count: selected.length })}
-                </span>
-                {canPlan && sprints.length > 0 && movable.length > 0 && (
-                  <NativeSelect
-                    value=""
-                    aria-label={t('backlog.moveSelected')}
-                    className="h-8"
-                    onChange={(e) => {
-                      if (e.target.value === OTHER_OPTION) {
-                        setMovingSelected(true);
-                      } else if (e.target.value) {
-                        moveItems(
-                          movable.map((i) => i.id),
-                          e.target.value === BACKLOG_OPTION ? null : e.target.value,
-                        );
-                      }
-                    }}
-                  >
-                    <option value="">{t('backlog.moveSelected')}</option>
-                    <option value={BACKLOG_OPTION}>{t('moveItem.backlog')}</option>
-                    {quickTargets.map((s) => (
-                      <option key={s.id} value={s.id}>
-                        {s.name}
-                      </option>
-                    ))}
-                    <option value={OTHER_OPTION}>{t('moveSelected.other')}</option>
-                  </NativeSelect>
-                )}
-                {canWrite && movable.length > 0 && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    data-testid="group-selected"
-                    onClick={() => setGrouping(true)}
-                  >
-                    <Layers />
-                    {t('groupEpic.action')}
-                  </Button>
-                )}
-                {canWrite &&
+              <SelectionBar
+                count={selected.length}
+                quickTargets={
+                  canPlan && sprints.length > 0 && movable.length > 0 ? quickTargets : null
+                }
+                onMove={(value) => {
+                  if (value === OTHER_OPTION) setMovingSelected(true);
+                  else
+                    moveItems(
+                      movable.map((i) => i.id),
+                      value === BACKLOG_OPTION ? null : value,
+                    );
+                }}
+                onGroup={canWrite && movable.length > 0 ? () => setGrouping(true) : undefined}
+                onConvert={
+                  canWrite &&
                   space.data.scrumEnabled &&
                   selected.length === 1 &&
-                  selected[0]!.type === 'TASK' && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      data-testid="convert-selected"
-                      onClick={() => setConverting(selected[0]!)}
-                    >
-                      <Zap />
-                      {t('promoteEpic.menu')}
-                    </Button>
-                  )}
-                {canWrite && selected.some(canBecomeSubtask) && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    data-testid="nest-selected"
-                    onClick={() => setNestingSelected(true)}
-                  >
-                    <CornerDownRight />
-                    {t('bulk.nestAction')}
-                  </Button>
-                )}
-                {canWrite && selected.some((i) => i.parentId !== null) && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    data-testid="unnest-selected"
-                    onClick={() => setUnnestingSelected(true)}
-                  >
-                    <Unlink />
-                    {t('bulk.unnestAction')}
-                  </Button>
-                )}
-                {viaParent.length > 0 && (
-                  <span className="text-muted-foreground text-xs" data-testid="via-parent">
-                    {t('bulk.viaParent', {
-                      list: viaParent.map((v) => `${v.sub} → ${v.parent}`).join(', '),
-                    })}
-                  </span>
-                )}
-                <Button variant="ghost" size="sm" onClick={() => selection.clear()}>
-                  {t('backlog.clearSelection')}
-                </Button>
-              </div>
+                  selected[0]!.type === 'TASK'
+                    ? () => setConverting(selected[0]!)
+                    : undefined
+                }
+                onNest={
+                  canWrite && selected.some(canBecomeSubtask)
+                    ? () => setNestingSelected(true)
+                    : undefined
+                }
+                onUnnest={
+                  canWrite && selected.some((i) => i.parentId !== null)
+                    ? () => setUnnestingSelected(true)
+                    : undefined
+                }
+                onClear={() => selection.clear()}
+                note={
+                  viaParent.length > 0 ? (
+                    <span data-testid="via-parent">
+                      {t('bulk.viaParent', {
+                        list: viaParent.map((v) => `${v.sub} → ${v.parent}`).join(', '),
+                      })}
+                    </span>
+                  ) : undefined
+                }
+              />
             )}
           </div>
           {dragged?.parentId && <DetachZone store={intents} />}

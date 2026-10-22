@@ -974,7 +974,8 @@
     "copyKeyLink": "Copy link to {{key}}",
     "collapseSubtasks": "Hide sub-items",
     "expandSubtasks": "Show sub-items",
-    "dragSubtask": "Drag {{key}} out of its parent"
+    "dragSubtask": "Drag {{key}} out of its parent",
+    "selectedShort": "selected"
   },
   "sprints": {
     "create": "Create sprint",
@@ -2378,7 +2379,15 @@
     "unnestBody": "Sub-Tasks become standalone Tasks; Tasks under an Epic leave the Epic.",
     "unnestConfirm": "Remove",
     "unnested": "{{count}} items removed from their parent.",
-    "viaParent": "A Sub-Task goes with its Task: {{list}}"
+    "viaParent": "A Sub-Task goes with its Task: {{list}}",
+    "hint": {
+      "move": "Move the selection to another sprint or the Backlog",
+      "group": "Gather the selected Tasks under an Epic",
+      "convert": "Turn this Task into an Epic; its Sub-Tasks become the Epic's Tasks",
+      "nest": "Make the selection Sub-Tasks of a Task",
+      "unnest": "Detach the selection from its parent (becomes standalone Tasks)",
+      "clear": "Clear selection (Esc)"
+    }
   },
   "moveSelected": {
     "other": "Another sprint…",
