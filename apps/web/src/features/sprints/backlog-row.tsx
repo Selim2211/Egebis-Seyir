@@ -18,6 +18,7 @@ import { ItemOpenLink } from '@/features/work-items/detail/item-nav';
 import { priorityTint, usePriorityColors } from '@/features/work-items/priority-colors';
 import { cn } from '@/lib/utils';
 import { isUnestimated } from './backlog-filter';
+import { RowCheckbox } from './row-checkbox';
 
 const MAX_AVATARS = 3;
 
@@ -25,8 +26,7 @@ const MAX_AVATARS = 3;
 export function BacklogRow({
   item,
   epicTitle,
-  selected,
-  onSelect,
+  selectable,
   handle,
   expand,
   targets,
@@ -35,9 +35,8 @@ export function BacklogRow({
 }: {
   item: WorkItemRow;
   epicTitle?: string;
-  /** Seçim kutusu yoksa (sprint bölümleri) undefined. */
-  selected?: boolean;
-  onSelect?: (selected: boolean) => void;
+  /** Seçim kutucuğu gösterilsin mi (seçim deposu sayfadan bağlam olarak gelir). */
+  selectable?: boolean;
   handle?: DragHandleProps | null;
   /** Alt öğeleri aç/kapat oku (alt öğesi olan Task'ta). */
   expand?: ReactNode;
@@ -58,7 +57,7 @@ export function BacklogRow({
       className={cn(
         'group/item hover:bg-accent/40 flex items-center gap-2 border-b px-3 py-1.5 text-sm',
         priorityTint(item.priority, colored),
-        selected && 'bg-accent/60',
+        'has-[input:checked]:bg-accent/60',
       )}
     >
       {handle !== undefined && (
@@ -75,15 +74,7 @@ export function BacklogRow({
           )}
         </span>
       )}
-      {onSelect && (
-        <input
-          type="checkbox"
-          checked={selected ?? false}
-          onChange={(e) => onSelect(e.target.checked)}
-          aria-label={t('backlog.select', { key: item.key })}
-          className="size-4 shrink-0"
-        />
-      )}
+      {selectable && <RowCheckbox id={item.id} itemKey={item.key} />}
       {expand}
       <WorkItemTypeIcon type={item.type} />
       <button

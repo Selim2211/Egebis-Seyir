@@ -49,8 +49,6 @@ export function SprintSection({
   onDelete,
   onCopy,
   dnd,
-  selected,
-  onSelect,
   actions,
 }: {
   sprint: SprintSummary;
@@ -67,9 +65,6 @@ export function SprintSection({
   onCopy: () => void;
   /** Sürükle-bırak: izin ve alt öğe olarak vurgulanacak satır (ADR-102). */
   dnd: { enabled: boolean };
-  /** Çoklu seçim (Backlog sayfasıyla ortak): farklı sprint'lerden seçilebilir. */
-  selected: ReadonlySet<string>;
-  onSelect: (itemId: string, on: boolean) => void;
   /** Başlat / Tamamla / İptal düğmeleri (SprintActions). */
   actions?: ReactNode;
 }) {
@@ -229,10 +224,9 @@ export function SprintSection({
                 <ItemWithSubtasks
                   key={item.id}
                   enabled={dnd.enabled}
+                  selectable
                   item={item}
                   epicTitle={item.parentId ? epicTitles.get(item.parentId) : undefined}
-                  selected={selected.has(item.id)}
-                  onSelect={(on) => onSelect(item.id, on)}
                   targets={targets.filter((s) => s.id !== sprint.id)}
                   canPlan={canPlan}
                   onMove={(sprintId) => onMove(item.id, sprintId)}

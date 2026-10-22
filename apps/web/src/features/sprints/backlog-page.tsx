@@ -18,10 +18,12 @@ import {
   Archive,
   ChevronDown,
   Copy,
+  CornerDownRight,
   FileSpreadsheet,
   Layers,
   Plus,
   Search,
+  Unlink,
   Upload,
   X,
 } from 'lucide-react';
@@ -74,6 +76,9 @@ import { useUnnestItem } from '@/features/work-items/queries';
 import { PriorityColorToggle } from '@/features/work-items/priority-colors';
 import { SprintImportDialog } from './sprint-import-dialog';
 import { ScrumTabs } from './scrum-tabs';
+import { BulkNestDialog, BulkUnnestDialog } from './bulk-hierarchy-dialogs';
+import { canBecomeSubtask, type BulkItem } from './bulk-utils';
+import { createSelectionStore, SelectionContext, useSelectionSet } from './selection';
 import { GroupEpicDialog } from './group-epic-dialog';
 import { SprintSection } from './sprint-section';
 
@@ -120,12 +125,16 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
   });
 
   const [filter, setFilter] = useState<BacklogFilter>(NO_FILTER);
-  const [picked, setPicked] = useState<ReadonlySet<string>>(new Set());
+  // Seçim dış depoda tutulur: kutucuk tıklanınca sayfa ve satırlar yeniden çizilmez (tıklama anında yanıt verir).
+  const [selection] = useState(createSelectionStore);
+  const picked = useSelectionSet(selection);
   const [collapsed, setCollapsed] = useState<ReadonlySet<string>>(new Set());
   const [dialog, setDialog] = useState<DialogState>(null);
   const [deleting, setDeleting] = useState<SprintSummary | null>(null);
   const [importing, setImporting] = useState(false);
   const [grouping, setGrouping] = useState(false);
+  const [nestingSelected, setNestingSelected] = useState(false);
+  const [unnestingSelected, setUnnestingSelected] = useState(false);
   const [restoring, setRestoring] = useState(false);
   // Aktif sprint'e ekleme/çıkarma kapsam değişikliğidir; onay istenir (brief §6.1.4).
   const [scopeChange, setScopeChange] = useState<{
@@ -141,14 +150,16 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
     () => new Map((backlog.data?.epics ?? []).map((e) => [e.id, e.title])),
     [backlog.data],
   );
-  // Seçim, listeden kaybolan öğeleri (taşındı/silindi) otomatik düşer.
-  const selected = useMemo(
-    () =>
-      [...sprintDetails.flatMap((d) => d.data?.items ?? []), ...visible].filter((i) =>
-        picked.has(i.id),
-      ),
-    [sprintDetails, visible, picked],
-  );
+  // Seçim, listeden kaybolan öğeleri (taşındı/silindi) otomatik düşer. Alt öğeler açıldıkları sürece bulunur.
+  const selected = useMemo<BulkItem[]>(() => {
+    const top = new Map(
+      [...sprintDetails.flatMap((d) => d.data?.items ?? []), ...visible].map((i) => [i.id, i]),
+    );
+    return [...picked].flatMap((id) => {
+      const row = top.get(id) ?? subtaskRegistry.get(id);
+      return row ? [row] : [];
+    });
+  }, [sprintDetails, visible, picked]);
   const totals = useMemo(
     () =>
       sprintTotals(
@@ -341,7 +352,7 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
               ? t('backlog.movedToSprint', { count: itemIds.length, name: target.name })
               : t('backlog.movedToBacklog', { count: itemIds.length }),
           );
-          setPicked(new Set());
+          selection.clear();
         },
         onError: (error) => toast.error(errorMessage(error)),
       },
@@ -456,344 +467,386 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
   };
 
   return (
-    <ItemNavContext.Provider value={(key) => void navigate({ to: '/items/$key', params: { key } })}>
-      <ContainerHeader
-        type="SPACE"
-        id={space.data.id}
-        name={space.data.name}
-        archived={space.data.archived}
-        canUnarchive={perms.includes(S.SPACE_SETTINGS)}
-        actions={
-          <>
-            <PriorityColorToggle />
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm">
-                  <FileSpreadsheet />
-                  {t('sprintImport.menu')}
-                  <ChevronDown />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem asChild>
-                  <a
-                    href={`/api/workspaces/${workspaceId}/spaces/${spaceId}/backlog/export.xlsx`}
-                    download
-                  >
+    <SelectionContext.Provider value={selection}>
+      <ItemNavContext.Provider
+        value={(key) => void navigate({ to: '/items/$key', params: { key } })}
+      >
+        <ContainerHeader
+          type="SPACE"
+          id={space.data.id}
+          name={space.data.name}
+          archived={space.data.archived}
+          canUnarchive={perms.includes(S.SPACE_SETTINGS)}
+          actions={
+            <>
+              <PriorityColorToggle />
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm">
                     <FileSpreadsheet />
-                    {t('sprintImport.exportBacklog')}
-                  </a>
-                </DropdownMenuItem>
-                {canPlan && (
-                  <DropdownMenuItem onSelect={() => setRestoring(true)}>
-                    <Archive />
-                    {t('backup.restoreSprint')}
+                    {t('sprintImport.menu')}
+                    <ChevronDown />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem asChild>
+                    <a
+                      href={`/api/workspaces/${workspaceId}/spaces/${spaceId}/backlog/export.xlsx`}
+                      download
+                    >
+                      <FileSpreadsheet />
+                      {t('sprintImport.exportBacklog')}
+                    </a>
                   </DropdownMenuItem>
-                )}
-                {canPlan && (
-                  <DropdownMenuItem onSelect={() => setImporting(true)}>
-                    <Upload />
-                    {t('sprintImport.import')}
-                  </DropdownMenuItem>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
-            {canPlan && (
-              <Button size="sm" onClick={() => setDialog({ kind: 'create' })}>
-                <Plus />
-                {t('sprints.create')}
-              </Button>
-            )}
-          </>
-        }
-      >
-        <ScrumTabs spaceId={spaceId} current="backlog" />
-      </ContainerHeader>
-
-      <DndContext
-        sensors={sensors}
-        collisionDetection={() => []}
-        onDragStart={onDragStart}
-        onDragEnd={onDragEnd}
-        onDragCancel={() => setActiveId(null)}
-      >
-        <div className="mx-auto flex max-w-5xl flex-col gap-4 px-4 py-6 sm:px-6">
-          {sprints.map((sprint, index) => {
-            const detail = sprintDetails[index];
-            return (
-              <SprintSection
-                key={sprint.id}
-                sprint={sprint}
-                items={detail?.data?.items ?? []}
-                loading={detail?.isPending ?? true}
-                collapsed={collapsed.has(sprint.id)}
-                onToggle={() => setCollapsed((c) => toggle(c, sprint.id, !c.has(sprint.id)))}
-                epicTitles={epicTitles}
-                targets={sprints}
-                canPlan={canPlan}
-                dnd={{ enabled: canRank }}
-                selected={picked}
-                onSelect={(itemId, on) => setPicked((p) => toggle(p, itemId, on))}
-                onCopy={() => copyList(detail?.data?.items ?? [])}
-                onMove={(itemId, target) => moveItems([itemId], target)}
-                onEdit={() => setDialog({ kind: 'edit', sprint })}
-                onDelete={() => setDeleting(sprint)}
-                actions={
-                  <SprintActions
-                    sprint={sprint}
-                    permissions={perms}
-                    goalRequired={space.data.sprintGoalRequired}
-                    plannedOthers={sprints.filter(
-                      (s) => s.status === 'PLANNED' && s.id !== sprint.id,
-                    )}
-                    archived={space.data.archived}
-                  />
-                }
-              />
-            );
-          })}
-
-          <section className="bg-card rounded-lg border" aria-label={t('backlog.title')}>
-            <header className="flex flex-wrap items-center gap-x-3 gap-y-2 px-3 py-2">
-              <h2 className="text-sm font-semibold">{t('backlog.title')}</h2>
-              <Button
-                variant="ghost"
-                size="xs"
-                className="text-muted-foreground"
-                onClick={() => copyList(visible)}
-              >
-                <Copy />
-                {t('copyList.action')}
-              </Button>
-              <span className="text-muted-foreground text-xs tabular-nums">
-                {t('sprints.totals', { count: totals.itemCount, points: totals.points })}
-                {totals.unestimatedCount > 0 && (
-                  <span className="ml-2 text-amber-700 dark:text-amber-400">
-                    {t('sprints.unestimated', { count: totals.unestimatedCount })}
-                  </span>
-                )}
-              </span>
-            </header>
-
-            <div className="flex flex-wrap items-center gap-2 border-t px-3 py-2">
-              <div className="relative min-w-40 flex-1 sm:max-w-64">
-                <Search
-                  className="text-muted-foreground pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2"
-                  aria-hidden
-                />
-                <Input
-                  value={filter.q}
-                  onChange={(e) => setFilter({ ...filter, q: e.target.value })}
-                  placeholder={t('backlog.search')}
-                  aria-label={t('backlog.search')}
-                  className="h-8 pl-8"
-                />
-              </div>
-              <NativeSelect
-                value={filter.epic}
-                onChange={(e) => setFilter({ ...filter, epic: e.target.value })}
-                aria-label={t('backlog.epicFilter')}
-                className="h-8 max-w-48"
-              >
-                <option value="">{t('backlog.allEpics')}</option>
-                <option value="none">{t('backlog.noEpic')}</option>
-                {backlog.data.epics.map((epic) => (
-                  <option key={epic.id} value={epic.id}>
-                    {epic.key} {epic.title}
-                  </option>
-                ))}
-              </NativeSelect>
-              <label className="flex items-center gap-1.5 text-sm">
-                <input
-                  type="checkbox"
-                  checked={filter.unestimated}
-                  onChange={(e) => setFilter({ ...filter, unestimated: e.target.checked })}
-                  className="size-4"
-                />
-                {t('backlog.onlyUnestimated')}
-              </label>
-              {isFiltered(filter) && (
-                <Button variant="ghost" size="sm" onClick={() => setFilter(NO_FILTER)}>
-                  <X />
-                  {t('view.clear')}
+                  {canPlan && (
+                    <DropdownMenuItem onSelect={() => setRestoring(true)}>
+                      <Archive />
+                      {t('backup.restoreSprint')}
+                    </DropdownMenuItem>
+                  )}
+                  {canPlan && (
+                    <DropdownMenuItem onSelect={() => setImporting(true)}>
+                      <Upload />
+                      {t('sprintImport.import')}
+                    </DropdownMenuItem>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+              {canPlan && (
+                <Button size="sm" onClick={() => setDialog({ kind: 'create' })}>
+                  <Plus />
+                  {t('sprints.create')}
                 </Button>
               )}
-            </div>
+            </>
+          }
+        >
+          <ScrumTabs spaceId={spaceId} current="backlog" />
+        </ContainerHeader>
 
-            {selected.length > 0 && (
-              <div
-                role="region"
-                aria-label={t('backlog.selection')}
-                className="bg-accent/50 flex flex-wrap items-center gap-2 border-t px-3 py-2 text-sm"
-              >
-                <span className="font-medium">
-                  {t('backlog.selected', { count: selected.length })}
+        <DndContext
+          sensors={sensors}
+          collisionDetection={() => []}
+          onDragStart={onDragStart}
+          onDragEnd={onDragEnd}
+          onDragCancel={() => setActiveId(null)}
+        >
+          <div className="mx-auto flex max-w-5xl flex-col gap-4 px-4 py-6 sm:px-6">
+            {sprints.map((sprint, index) => {
+              const detail = sprintDetails[index];
+              return (
+                <SprintSection
+                  key={sprint.id}
+                  sprint={sprint}
+                  items={detail?.data?.items ?? []}
+                  loading={detail?.isPending ?? true}
+                  collapsed={collapsed.has(sprint.id)}
+                  onToggle={() => setCollapsed((c) => toggle(c, sprint.id, !c.has(sprint.id)))}
+                  epicTitles={epicTitles}
+                  targets={sprints}
+                  canPlan={canPlan}
+                  dnd={{ enabled: canRank }}
+                  onCopy={() => copyList(detail?.data?.items ?? [])}
+                  onMove={(itemId, target) => moveItems([itemId], target)}
+                  onEdit={() => setDialog({ kind: 'edit', sprint })}
+                  onDelete={() => setDeleting(sprint)}
+                  actions={
+                    <SprintActions
+                      sprint={sprint}
+                      permissions={perms}
+                      goalRequired={space.data.sprintGoalRequired}
+                      plannedOthers={sprints.filter(
+                        (s) => s.status === 'PLANNED' && s.id !== sprint.id,
+                      )}
+                      archived={space.data.archived}
+                    />
+                  }
+                />
+              );
+            })}
+
+            <section className="bg-card rounded-lg border" aria-label={t('backlog.title')}>
+              <header className="flex flex-wrap items-center gap-x-3 gap-y-2 px-3 py-2">
+                <h2 className="text-sm font-semibold">{t('backlog.title')}</h2>
+                <Button
+                  variant="ghost"
+                  size="xs"
+                  className="text-muted-foreground"
+                  onClick={() => copyList(visible)}
+                >
+                  <Copy />
+                  {t('copyList.action')}
+                </Button>
+                <span className="text-muted-foreground text-xs tabular-nums">
+                  {t('sprints.totals', { count: totals.itemCount, points: totals.points })}
+                  {totals.unestimatedCount > 0 && (
+                    <span className="ml-2 text-amber-700 dark:text-amber-400">
+                      {t('sprints.unestimated', { count: totals.unestimatedCount })}
+                    </span>
+                  )}
                 </span>
-                {canPlan && sprints.length > 0 && (
-                  <NativeSelect
-                    value=""
-                    aria-label={t('backlog.moveSelected')}
-                    className="h-8"
-                    onChange={(e) => {
-                      if (e.target.value) {
-                        moveItems(
-                          selected.map((i) => i.id),
-                          e.target.value === BACKLOG_OPTION ? null : e.target.value,
-                        );
-                      }
-                    }}
-                  >
-                    <option value="">{t('backlog.moveSelected')}</option>
-                    <option value={BACKLOG_OPTION}>{t('moveItem.backlog')}</option>
-                    {sprints.map((s) => (
-                      <option key={s.id} value={s.id}>
-                        {s.name}
-                      </option>
-                    ))}
-                  </NativeSelect>
-                )}
-                {canWrite && space.data.scrumEnabled && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    data-testid="group-selected"
-                    onClick={() => setGrouping(true)}
-                  >
-                    <Layers />
-                    {t('groupEpic.action')}
+              </header>
+
+              <div className="flex flex-wrap items-center gap-2 border-t px-3 py-2">
+                <div className="relative min-w-40 flex-1 sm:max-w-64">
+                  <Search
+                    className="text-muted-foreground pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2"
+                    aria-hidden
+                  />
+                  <Input
+                    value={filter.q}
+                    onChange={(e) => setFilter({ ...filter, q: e.target.value })}
+                    placeholder={t('backlog.search')}
+                    aria-label={t('backlog.search')}
+                    className="h-8 pl-8"
+                  />
+                </div>
+                <NativeSelect
+                  value={filter.epic}
+                  onChange={(e) => setFilter({ ...filter, epic: e.target.value })}
+                  aria-label={t('backlog.epicFilter')}
+                  className="h-8 max-w-48"
+                >
+                  <option value="">{t('backlog.allEpics')}</option>
+                  <option value="none">{t('backlog.noEpic')}</option>
+                  {backlog.data.epics.map((epic) => (
+                    <option key={epic.id} value={epic.id}>
+                      {epic.key} {epic.title}
+                    </option>
+                  ))}
+                </NativeSelect>
+                <label className="flex items-center gap-1.5 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={filter.unestimated}
+                    onChange={(e) => setFilter({ ...filter, unestimated: e.target.checked })}
+                    className="size-4"
+                  />
+                  {t('backlog.onlyUnestimated')}
+                </label>
+                {isFiltered(filter) && (
+                  <Button variant="ghost" size="sm" onClick={() => setFilter(NO_FILTER)}>
+                    <X />
+                    {t('view.clear')}
                   </Button>
                 )}
-                <Button variant="ghost" size="sm" onClick={() => setPicked(new Set())}>
-                  {t('backlog.clearSelection')}
-                </Button>
               </div>
-            )}
 
-            <div className="border-t">
-              <DropContainerView
-                id={BACKLOG_CONTAINER}
-                itemIds={visible.map((i) => i.id)}
-                enabled={canRank}
-              >
-                {visible.length === 0 ? (
-                  <p className="text-muted-foreground px-4 py-10 text-center text-sm">
-                    {t(isFiltered(filter) ? 'backlog.noResults' : 'backlog.empty')}
-                  </p>
-                ) : (
-                  visible.map((item) => (
-                    <ItemWithSubtasks
-                      key={item.id}
-                      enabled={canRank}
-                      item={item}
-                      epicTitle={item.parentId ? epicTitles.get(item.parentId) : undefined}
-                      selected={picked.has(item.id)}
-                      onSelect={(on) => setPicked((p) => toggle(p, item.id, on))}
-                      targets={sprints}
-                      canPlan={canPlan}
-                      onMove={(target) => moveItems([item.id], target)}
-                    />
-                  ))
-                )}
-              </DropContainerView>
-            </div>
-            {canRank && isFiltered(filter) && visible.length > 0 && (
-              <p className="text-muted-foreground border-t px-4 py-2 text-xs">
-                {t('backlog.reorderHint')}
-              </p>
-            )}
-          </section>
-        </div>
-        {dragged?.parentId && <DetachZone store={intents} />}
-        {createPortal(
-          <DragOverlay dropAnimation={null} zIndex={TOP_LAYER} style={{ pointerEvents: 'none' }}>
-            {dragged && <BacklogGhost item={dragged} width={ghostWidth} store={intents} />}
-          </DragOverlay>,
-          document.body,
-        )}
-      </DndContext>
+              {selected.length > 0 && (
+                <div
+                  role="region"
+                  aria-label={t('backlog.selection')}
+                  className="bg-accent/50 flex flex-wrap items-center gap-2 border-t px-3 py-2 text-sm"
+                >
+                  <span className="font-medium">
+                    {t('backlog.selected', { count: selected.length })}
+                  </span>
+                  {canPlan && sprints.length > 0 && !selected.some((i) => i.type === 'SUBTASK') && (
+                    <NativeSelect
+                      value=""
+                      aria-label={t('backlog.moveSelected')}
+                      className="h-8"
+                      onChange={(e) => {
+                        if (e.target.value) {
+                          moveItems(
+                            selected.map((i) => i.id),
+                            e.target.value === BACKLOG_OPTION ? null : e.target.value,
+                          );
+                        }
+                      }}
+                    >
+                      <option value="">{t('backlog.moveSelected')}</option>
+                      <option value={BACKLOG_OPTION}>{t('moveItem.backlog')}</option>
+                      {sprints.map((s) => (
+                        <option key={s.id} value={s.id}>
+                          {s.name}
+                        </option>
+                      ))}
+                    </NativeSelect>
+                  )}
+                  {canWrite && !selected.some((i) => i.type === 'SUBTASK') && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      data-testid="group-selected"
+                      onClick={() => setGrouping(true)}
+                    >
+                      <Layers />
+                      {t('groupEpic.action')}
+                    </Button>
+                  )}
+                  {canWrite && selected.some(canBecomeSubtask) && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      data-testid="nest-selected"
+                      onClick={() => setNestingSelected(true)}
+                    >
+                      <CornerDownRight />
+                      {t('bulk.nestAction')}
+                    </Button>
+                  )}
+                  {canWrite && selected.some((i) => i.parentId !== null) && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      data-testid="unnest-selected"
+                      onClick={() => setUnnestingSelected(true)}
+                    >
+                      <Unlink />
+                      {t('bulk.unnestAction')}
+                    </Button>
+                  )}
+                  <Button variant="ghost" size="sm" onClick={() => selection.clear()}>
+                    {t('backlog.clearSelection')}
+                  </Button>
+                </div>
+              )}
 
-      <GroupEpicDialog
-        spaceId={spaceId}
-        listId={selected[0]?.listId ?? ''}
-        itemIds={selected.map((i) => i.id)}
-        epics={backlog.data.epics}
-        open={grouping && selected.length > 0}
-        onOpenChange={setGrouping}
-        onDone={() => setPicked(new Set())}
-      />
-      {restoring && <RestoreSprintDialog spaceId={spaceId} onClose={() => setRestoring(false)} />}
-      {importing && (
-        <SprintImportDialog open onOpenChange={setImporting} spaceId={spaceId} sprints={sprints} />
-      )}
-      <SprintDialog
-        open={dialog !== null}
-        onOpenChange={(open) => !open && setDialog(null)}
-        spaceId={spaceId}
-        weeks={space.data.sprintLengthWeeks}
-        existing={sprints}
-        editing={dialog?.kind === 'edit' ? dialog.sprint : undefined}
-      />
-      <ConfirmDialog
-        open={hierarchy !== null}
-        onOpenChange={(open) => !open && setHierarchy(null)}
-        title={
-          hierarchy?.kind === 'nest'
-            ? t('dnd.nestTitle', { key: hierarchy.item.key, target: hierarchy.target.key })
-            : t('dnd.unnestTitle', { key: hierarchy?.item.key ?? '' })
-        }
-        description={
-          hierarchy?.kind === 'nest'
-            ? t('dnd.nestBody', { title: hierarchy.item.title, target: hierarchy.target.title })
-            : t('dnd.unnestBody', { title: hierarchy?.item.title ?? '' })
-        }
-        confirmLabel={t(hierarchy?.kind === 'nest' ? 'dnd.nestConfirm' : 'dnd.unnestConfirm')}
-        pending={nestItem.isPending || unnestItem.isPending}
-        onConfirm={applyHierarchy}
-      />
-      <ConfirmDialog
-        open={scopeChange !== null}
-        onOpenChange={(open) => !open && setScopeChange(null)}
-        title={t('sprints.scopeChangeTitle')}
-        description={t(
-          scopeChange?.adding ? 'sprints.scopeChangeAdd' : 'sprints.scopeChangeRemove',
-          {
-            name: scopeChange?.sprint.name,
-            count: scopeChange?.itemIds.length,
-          },
+              <div className="border-t">
+                <DropContainerView
+                  id={BACKLOG_CONTAINER}
+                  itemIds={visible.map((i) => i.id)}
+                  enabled={canRank}
+                >
+                  {visible.length === 0 ? (
+                    <p className="text-muted-foreground px-4 py-10 text-center text-sm">
+                      {t(isFiltered(filter) ? 'backlog.noResults' : 'backlog.empty')}
+                    </p>
+                  ) : (
+                    visible.map((item) => (
+                      <ItemWithSubtasks
+                        key={item.id}
+                        enabled={canRank}
+                        item={item}
+                        epicTitle={item.parentId ? epicTitles.get(item.parentId) : undefined}
+                        selectable
+                        targets={sprints}
+                        canPlan={canPlan}
+                        onMove={(target) => moveItems([item.id], target)}
+                      />
+                    ))
+                  )}
+                </DropContainerView>
+              </div>
+              {canRank && isFiltered(filter) && visible.length > 0 && (
+                <p className="text-muted-foreground border-t px-4 py-2 text-xs">
+                  {t('backlog.reorderHint')}
+                </p>
+              )}
+            </section>
+          </div>
+          {dragged?.parentId && <DetachZone store={intents} />}
+          {createPortal(
+            <DragOverlay dropAnimation={null} zIndex={TOP_LAYER} style={{ pointerEvents: 'none' }}>
+              {dragged && <BacklogGhost item={dragged} width={ghostWidth} store={intents} />}
+            </DragOverlay>,
+            document.body,
+          )}
+        </DndContext>
+
+        <GroupEpicDialog
+          spaceId={spaceId}
+          listId={selected[0]?.listId ?? ''}
+          itemIds={selected.map((i) => i.id)}
+          epics={backlog.data.epics}
+          open={grouping && selected.length > 0}
+          onOpenChange={setGrouping}
+          defaultTitle={selected[0]?.title ?? ''}
+          onDone={() => selection.clear()}
+        />
+        <BulkNestDialog
+          items={selected}
+          parents={allItems.filter((i) => i.type === 'TASK')}
+          open={nestingSelected && selected.length > 0}
+          onOpenChange={setNestingSelected}
+          onDone={() => selection.clear()}
+        />
+        <BulkUnnestDialog
+          items={selected}
+          open={unnestingSelected && selected.some((i) => i.parentId !== null)}
+          onOpenChange={setUnnestingSelected}
+          onDone={() => selection.clear()}
+        />
+        {restoring && <RestoreSprintDialog spaceId={spaceId} onClose={() => setRestoring(false)} />}
+        {importing && (
+          <SprintImportDialog
+            open
+            onOpenChange={setImporting}
+            spaceId={spaceId}
+            sprints={sprints}
+          />
         )}
-        confirmLabel={t('sprints.scopeChangeConfirm')}
-        pending={move.isPending}
-        onConfirm={() => {
-          if (!scopeChange) return;
-          performMove(
-            scopeChange.itemIds,
-            scopeChange.adding ? scopeChange.sprint.id : null,
-            scopeChange.afterId,
-          );
-          setScopeChange(null);
-        }}
-      />
-      <ConfirmDialog
-        open={deleting !== null}
-        onOpenChange={(open) => !open && setDeleting(null)}
-        title={t('sprints.deleteTitle', { name: deleting?.name })}
-        description={t('sprints.deleteBody')}
-        confirmLabel={t('structure.delete')}
-        pending={remove.isPending}
-        onConfirm={() => {
-          if (!deleting) return;
-          remove.mutate(deleting.id, {
-            onSuccess: () => {
-              toast.success(t('sprints.deleted', { name: deleting.name }));
-              setDeleting(null);
+        <SprintDialog
+          open={dialog !== null}
+          onOpenChange={(open) => !open && setDialog(null)}
+          spaceId={spaceId}
+          weeks={space.data.sprintLengthWeeks}
+          existing={sprints}
+          editing={dialog?.kind === 'edit' ? dialog.sprint : undefined}
+        />
+        <ConfirmDialog
+          open={hierarchy !== null}
+          onOpenChange={(open) => !open && setHierarchy(null)}
+          title={
+            hierarchy?.kind === 'nest'
+              ? t('dnd.nestTitle', { key: hierarchy.item.key, target: hierarchy.target.key })
+              : t('dnd.unnestTitle', { key: hierarchy?.item.key ?? '' })
+          }
+          description={
+            hierarchy?.kind === 'nest'
+              ? t('dnd.nestBody', { title: hierarchy.item.title, target: hierarchy.target.title })
+              : t('dnd.unnestBody', { title: hierarchy?.item.title ?? '' })
+          }
+          confirmLabel={t(hierarchy?.kind === 'nest' ? 'dnd.nestConfirm' : 'dnd.unnestConfirm')}
+          pending={nestItem.isPending || unnestItem.isPending}
+          onConfirm={applyHierarchy}
+        />
+        <ConfirmDialog
+          open={scopeChange !== null}
+          onOpenChange={(open) => !open && setScopeChange(null)}
+          title={t('sprints.scopeChangeTitle')}
+          description={t(
+            scopeChange?.adding ? 'sprints.scopeChangeAdd' : 'sprints.scopeChangeRemove',
+            {
+              name: scopeChange?.sprint.name,
+              count: scopeChange?.itemIds.length,
             },
-            onError: (error) => {
-              toast.error(errorMessage(error));
-              setDeleting(null);
-            },
-          });
-        }}
-      />
-    </ItemNavContext.Provider>
+          )}
+          confirmLabel={t('sprints.scopeChangeConfirm')}
+          pending={move.isPending}
+          onConfirm={() => {
+            if (!scopeChange) return;
+            performMove(
+              scopeChange.itemIds,
+              scopeChange.adding ? scopeChange.sprint.id : null,
+              scopeChange.afterId,
+            );
+            setScopeChange(null);
+          }}
+        />
+        <ConfirmDialog
+          open={deleting !== null}
+          onOpenChange={(open) => !open && setDeleting(null)}
+          title={t('sprints.deleteTitle', { name: deleting?.name })}
+          description={t('sprints.deleteBody')}
+          confirmLabel={t('structure.delete')}
+          pending={remove.isPending}
+          onConfirm={() => {
+            if (!deleting) return;
+            remove.mutate(deleting.id, {
+              onSuccess: () => {
+                toast.success(t('sprints.deleted', { name: deleting.name }));
+                setDeleting(null);
+              },
+              onError: (error) => {
+                toast.error(errorMessage(error));
+                setDeleting(null);
+              },
+            });
+          }}
+        />
+      </ItemNavContext.Provider>
+    </SelectionContext.Provider>
   );
 }

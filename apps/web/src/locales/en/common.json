@@ -2322,5 +2322,19 @@
     "newName": "Name of the new Epic",
     "confirm": "Group",
     "done": "{{count}} items were grouped under the Epic."
+  },
+  "bulk": {
+    "nestAction": "Make Sub-Task",
+    "nestTitle": "Make {{count}} items Sub-Tasks",
+    "nestBody": "Selected items become Sub-Tasks of the Task you choose. Epics, Bugs and Tasks that have sub-items are skipped.",
+    "parent": "Parent Task",
+    "skipped": "{{count}} items are not eligible and will be skipped.",
+    "nestConfirm": "Make Sub-Tasks",
+    "nested": "{{count}} items moved under {{target}}.",
+    "unnestAction": "Remove from parent",
+    "unnestTitle": "Remove {{count}} items from their parent?",
+    "unnestBody": "Sub-Tasks become standalone Tasks; Tasks under an Epic leave the Epic.",
+    "unnestConfirm": "Remove",
+    "unnested": "{{count}} items removed from their parent."
   }
 }

@@ -27,6 +27,7 @@ export function GroupEpicDialog({
   listId,
   itemIds,
   epics,
+  defaultTitle = '',
   open,
   onOpenChange,
   onDone,
@@ -36,6 +37,8 @@ export function GroupEpicDialog({
   listId: string;
   itemIds: string[];
   epics: ReadonlyArray<{ id: string; key: string; title: string }>;
+  /** Yeni Epic adının varsayılanı: seçilen ilk Task'ın adı (değiştirilebilir). */
+  defaultTitle?: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onDone: () => void;
@@ -50,6 +53,7 @@ export function GroupEpicDialog({
             listId={listId}
             itemIds={itemIds}
             epics={epics}
+            defaultTitle={defaultTitle}
             onClose={() => onOpenChange(false)}
             onDone={onDone}
           />
@@ -64,6 +68,7 @@ function GroupForm({
   listId,
   itemIds,
   epics,
+  defaultTitle,
   onClose,
   onDone,
 }: {
@@ -71,6 +76,7 @@ function GroupForm({
   listId: string;
   itemIds: string[];
   epics: ReadonlyArray<{ id: string; key: string; title: string }>;
+  defaultTitle: string;
   onClose: () => void;
   onDone: () => void;
 }) {
@@ -79,7 +85,7 @@ function GroupForm({
   const create = useCreateItem();
   const group = useGroupItems(spaceId);
   const [choice, setChoice] = useState(epics[0]?.id ?? NEW_EPIC);
-  const [title, setTitle] = useState('');
+  const [title, setTitle] = useState(defaultTitle);
   const [error, setError] = useState<unknown>(null);
   const creating = choice === NEW_EPIC;
   const invalid = creating && !title.trim();

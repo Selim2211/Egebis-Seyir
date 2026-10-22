@@ -1080,3 +1080,15 @@
   - Uygulama: `backlog-dnd.ts` (`resolveBacklogDrop` `nestOn`/`detach`, niyet deposu), `backlog-drag-parts.tsx` (kopya ve Ayır alanı), `backlog-subtasks.tsx`. API değişmedi (`items/:id/nest`, `items/:id/unnest`, `spaces/:id/backlog/move`).
 - **Alternatifler:** Görevler sayfasını Backlog'a gömmek (iki farklı sıralama modeli, karmaşık); sağa çekme kuralını korumak (kullanıcı Görevler listesindeki davranışı istedi).
 - **Bilinen sınırlar:** Satırın ortasına bırakmak sprint'e taşıma yerine alt öğe yapma anlamına gelir; boş alan, sprint başlığı ya da satır kenarı taşıma içindir (onay penceresi yanlış bırakmayı önler).
+
+## ADR-126 — Toplu Sub-Task yapma/çıkarma ve anında yanıt veren seçim (Faz 14)
+
+- **Tarih:** 2026-10-22 · **Durum:** Kabul (kaynak: kullanıcı isteği; toplantı notlarındaki 3 durum ADR-124 ile zaten karşılandı).
+- **Karar:**
+  - **Toplu işlem çubuğu (Backlog):** seçilen öğelerle ayrıca **Alt görev yap** (seçilen bir Task'ın Sub-Task'ı; Epic, Bug ve alt görevli Task atlanır, pencerede sayısı yazar) ve **Üst öğeden çıkar** (Sub-Task bağımsız Task olur, Epic altındaki Task Epic'ten ayrılır) düğmeleri eklendi. Sprint'e taşıma ve Epic altında gruplama ADR-124'teki gibi; yalnızca Sub-Task seçiliyken bu ikisi gizlenir (Sub-Task sprint'e girmez). Alt öğelerin de kutucuğu vardır; seçim sprint'ler ve alt öğeler arasında birlikte yapılabilir.
+  - **Epic adı:** Epic'e dönüştürmede ad Task'ın adıyla gelir (ADR-124); gruplarken **yeni Epic adı** da seçilen ilk Task'ın adıyla dolu gelir, ikisi de değiştirilebilir.
+  - **Kutucuk gecikmesi (düzeltme):** seçim React durumunda tutulduğundan her tıklamada sayfa ve tüm satırlar yeniden çizilip tıklama geç tepki veriyordu. Seçim artık küçük bir dış depodur (`selection.ts`, `useSyncExternalStore`); her kutucuk yalnızca kendi değerine abone olur, satırlar `memo` ile korunur (işlev özellikleri en güncel çağrılır). 60+ satırlı listede tıklama→işaret gecikmesi testle ölçülür (< 250 ms).
+  - Alt öğe listesi, üst öğenin alt öğe sayısı değişince yeniden okunur (art arda yapılan toplu işlemde eski liste kalmasın).
+  - API değişmedi: toplu işlemler istemcide `items/:id/nest` ve `items/:id/unnest` çağrılarını sırayla yapar.
+- **Alternatifler:** Toplu işlemi tek bir API çağrısına almak (grup gibi atomik olurdu); şimdilik her öğe zaten kendi doğrulamasından geçtiği ve uygunsuzlar önceden atlandığı için ertelendi.
+- **Bilinen sınırlar:** Toplu Sub-Task yapma atomik değildir: ağ ya da yetki hatasında işlenenler kalır, kalanlar yapılmaz (hata bildirilir). Aktif sprint'teki bir öğe Sub-Task yapılırsa sprint'ten çıkar (ADR-102).

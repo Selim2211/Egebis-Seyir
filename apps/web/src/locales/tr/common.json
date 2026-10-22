@@ -2322,5 +2322,19 @@
     "newName": "Yeni Epic’in adı",
     "confirm": "Grupla",
     "done": "{{count}} öğe Epic altında toplandı."
+  },
+  "bulk": {
+    "nestAction": "Alt görev yap",
+    "nestTitle": "{{count}} öğe Sub-Task yapılsın",
+    "nestBody": "Seçili öğeler seçeceğin Task’ın Sub-Task’ı olur. Epic, Bug ve alt görevi olan Task’lar alt görev yapılamaz; atlanır.",
+    "parent": "Üst Task",
+    "skipped": "{{count}} öğe uygun değil, atlanacak.",
+    "nestConfirm": "Sub-Task yap",
+    "nested": "{{count}} öğe {{target}} altına alındı.",
+    "unnestAction": "Üst öğeden çıkar",
+    "unnestTitle": "{{count}} öğe üst öğesinden çıkarılsın mı?",
+    "unnestBody": "Sub-Task’lar bağımsız Task olur, Epic altındaki Task’lar Epic’ten ayrılır.",
+    "unnestConfirm": "Çıkar",
+    "unnested": "{{count}} öğe üst öğesinden çıkarıldı."
   }
 }
