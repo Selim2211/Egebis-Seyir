@@ -7,6 +7,7 @@ import {
   MessageSquare,
   Palette,
   Target,
+  Users,
   Settings2,
   UserPlus,
   X,
@@ -122,6 +123,7 @@ export function Sidebar() {
           <NavLink to="/" icon={House} label={t('nav.home')} />
           <NavLink to="/my-work" icon={ListTodo} label={t('nav.myWork')} />
           <NavLink to="/goals" icon={Target} label={t('nav.goals')} />
+          <NavLink to="/workload" icon={Users} label={t('nav.workload')} />
           {canMessage && (
             <NavLink
               to="/messages"

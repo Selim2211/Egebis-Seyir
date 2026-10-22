@@ -87,3 +87,20 @@ export const workloadQuery = (workspaceId: string, spaceId: string, sprintId: st
         WorkloadSchema,
       ),
   });
+
+/** Workspace iş yükü (ADR-132): Proje yoksa görülebilen tüm Proje'ler, sprint yoksa Proje geneli. */
+export const workspaceWorkloadQuery = (
+  workspaceId: string,
+  spaceId: string | null,
+  sprintId: string | null,
+) =>
+  queryOptions({
+    queryKey: ['workspaces', workspaceId, 'workload', spaceId ?? 'all', sprintId ?? 'all'],
+    queryFn: () => {
+      const params = new URLSearchParams();
+      if (spaceId) params.set('spaceId', spaceId);
+      if (sprintId) params.set('sprintId', sprintId);
+      const q = params.toString();
+      return apiRequest(`${ws(workspaceId)}/workload${q ? `?${q}` : ''}`, WorkloadSchema);
+    },
+  });

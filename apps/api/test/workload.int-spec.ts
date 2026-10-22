@@ -162,4 +162,30 @@ describe('Kişi bazlı iş yükü (gerçek veritabanı)', () => {
     const elif = await inviteAndAccept(ctx, owner, ws, ELIF);
     await elif.get(api(`/spaces/${hidden.id}/workload`)).expect(404);
   });
+
+  it('workspace geneli: Proje seçilmezse görülebilen tüm Proje’ler toplanır, gizli Proje sayılmaz (ADR-132)', async () => {
+    const a = await space();
+    const b = await space({ name: 'Web', key: 'WEB' });
+    const hidden = await space({ name: 'Gizli', key: 'GZL', isPrivate: true });
+    await item(a.listId, { type: 'TASK', title: 'A', points: 3, assigneeIds: [ownerId] });
+    await item(b.listId, { type: 'TASK', title: 'B', points: 5, assigneeIds: [ownerId] });
+    await item(hidden.listId, { type: 'TASK', title: 'Gizli', points: 8, assigneeIds: [ownerId] });
+
+    const all = (await owner.get(api('/workload')).expect(200)).body as Workload;
+    expect(all.rows.find((r) => r.user?.id === ownerId)).toMatchObject({
+      itemCount: 3,
+      points: 16,
+    });
+    const one = (await owner.get(api(`/workload?spaceId=${b.id}`)).expect(200)).body as Workload;
+    expect(one.rows.find((r) => r.user?.id === ownerId)).toMatchObject({ itemCount: 1, points: 5 });
+
+    // Elif gizli Proje'yi göremez: toplamda yok, doğrudan istenirse 404.
+    const elif = await inviteAndAccept(ctx, owner, ws, ELIF);
+    const seen = (await elif.get(api('/workload')).expect(200)).body as Workload;
+    expect(seen.rows.find((r) => r.user?.id === ownerId)).toMatchObject({
+      itemCount: 2,
+      points: 8,
+    });
+    await elif.get(api(`/workload?spaceId=${hidden.id}`)).expect(404);
+  });
 });

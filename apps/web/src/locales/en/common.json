@@ -35,7 +35,8 @@
     "comingSoon": "Coming in the next step",
     "workspace": "Workspace",
     "goals": "Goals",
-    "messages": "Messages"
+    "messages": "Messages",
+    "workload": "Workload"
   },
   "spaces": {
     "emptyTitle": "No projects yet",
@@ -1370,7 +1371,21 @@
     "remaining": "Remaining time",
     "overdue": "Overdue",
     "dueSoon": "Due in 7 days",
-    "loggedWeek": "Logged this week"
+    "loggedWeek": "Logged this week",
+    "space": "Space",
+    "project": "Project",
+    "allProjects": "All projects",
+    "sprint": "Sprint",
+    "wholeProject": "Whole project (no sprint)",
+    "searchSprint": "Search sprints…",
+    "recentSprints": "Recent sprints",
+    "noSprint": "No matching sprints.",
+    "sprintActive": "Active",
+    "sprintPlanned": "Planned",
+    "sprintDone": "Done",
+    "scopeAll": "All projects in the space",
+    "scopeProject": "Whole project",
+    "scopeSprint": "Sprint: {{name}}"
   },
   "gantt": {
     "link": "Gantt",

@@ -52,9 +52,16 @@ test.describe.serial('İş yükü', () => {
         WHERE "keyPrefix" = 'YUK' AND number = 1;
     `);
 
+    // Proje menüsündeki "İş yükü": o Proje seçilir ve genel İş yükü sayfası açılır (ADR-132).
     await sidebar.getByRole('link', { name: 'Yük Testi' }).click();
-    await sidebar.getByRole('link', { name: 'İş yükü' }).click();
+    await sidebar.getByRole('link', { name: 'İş yükü' }).last().click();
+    await expect(page).toHaveURL(/\/workload$/);
     await expect(page.getByRole('heading', { name: 'İş yükü' })).toBeVisible();
+    await expect(page.getByLabel('Proje', { exact: true }).locator('option:checked')).toHaveText(
+      'Yük Testi',
+    );
+    // Scrum Proje'si, sprint yok: Proje geneli.
+    await expect(page.getByTestId('sprint-picker')).toHaveText('Proje geneli (sprint yok)');
 
     const table = page.getByRole('table', { name: 'İş yükü' });
     const mine = table.getByRole('row', { name: /Zeynep/ });
@@ -62,5 +69,26 @@ test.describe.serial('İş yükü', () => {
     await expect(mine).toContainText('2s');
     await expect(mine.getByRole('cell').nth(3)).toHaveText('1');
     await expect(table.getByRole('row', { name: /Atanmamış/ })).toBeVisible();
+  });
+
+  test('Space ve Proje seçimi hatırlanır; Proje seçilmezse tüm projeler toplanır', async ({
+    page,
+  }) => {
+    await page.getByRole('complementary').getByRole('link', { name: 'İş yükü' }).first().click();
+    const project = page.getByLabel('Proje', { exact: true });
+    await project.selectOption({ label: 'Yük Testi' });
+    await page.reload();
+    // Seçim yenilemeden sonra da kalır (kullanıcı değiştirene kadar).
+    await expect(project.locator('option:checked')).toHaveText('Yük Testi');
+    await project.selectOption({ label: 'Tüm projeler' });
+    await expect(page.getByTestId('workload-scope')).toHaveText("Space'teki tüm projeler");
+    await expect(page.getByTestId('sprint-picker')).toHaveCount(0);
+    await page.reload();
+    await expect(page.getByLabel('Proje', { exact: true }).locator('option:checked')).toHaveText(
+      'Tüm projeler',
+    );
+    await expect(
+      page.getByRole('table', { name: 'İş yükü' }).getByRole('row', { name: /Zeynep/ }),
+    ).toBeVisible();
   });
 });

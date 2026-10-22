@@ -35,7 +35,8 @@
     "comingSoon": "Sonraki adımda gelecek",
     "workspace": "Workspace",
     "goals": "Hedefler",
-    "messages": "Mesajlar"
+    "messages": "Mesajlar",
+    "workload": "İş yükü"
   },
   "spaces": {
     "emptyTitle": "Henüz Proje yok",
@@ -1370,7 +1371,21 @@
     "remaining": "Kalan süre",
     "overdue": "Geciken",
     "dueSoon": "7 gün içinde",
-    "loggedWeek": "Bu hafta harcanan"
+    "loggedWeek": "Bu hafta harcanan",
+    "space": "Space",
+    "project": "Proje",
+    "allProjects": "Tüm projeler",
+    "sprint": "Sprint",
+    "wholeProject": "Proje geneli (sprint yok)",
+    "searchSprint": "Sprint ara…",
+    "recentSprints": "Son sprint'ler",
+    "noSprint": "Eşleşen sprint yok.",
+    "sprintActive": "Aktif",
+    "sprintPlanned": "Planlandı",
+    "sprintDone": "Bitti",
+    "scopeAll": "Space'teki tüm projeler",
+    "scopeProject": "Proje geneli",
+    "scopeSprint": "Sprint: {{name}}"
   },
   "gantt": {
     "link": "Gantt",

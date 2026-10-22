@@ -1156,3 +1156,13 @@
 
 - **Tarih:** 2026-10-22 · **Durum:** Kabul (kullanıcı: "göz ayırt edebilsin, kullanıcı dostu olsun").
 - **Karar:** Kutucukla seçince çıkan çubuk marka renginde (mor degrade) yüzer; seçili sayısı beyaz rozetle, her işlem kendi renginde beyaz düğme: Sprint'e taşı (mor), Epic altında grupla (mor), Epic'e dönüştür (turuncu), Alt görev yap (mavi), Üst öğeden çıkar (kırmızı). Düğmelerin üzerine gelince ne yaptıkları yazar; **Esc** seçimi temizler (açık pencere yokken). Alt görev sayısı renkli hap rozettir (açıkken dolu renk). Kod: `selection-bar.tsx`.
+
+## ADR-132 — İş yükü: Space → Proje → Sprint seçimi, hatırlanan seçim (Faz 15, Görev 4b)
+
+- **Tarih:** 2026-10-22 · **Durum:** Kabul (kullanıcı: Space = workspace).
+- **Karar:**
+  - İş yükü artık workspace düzeyinde bir sayfa (`/workload`, sol menüde "İş yükü"); Proje menüsündeki "İş yükü" o Proje'yi seçip bu sayfayı açar.
+  - Seçimler: **Space** (workspace; değiştirmek uygulamanın workspace'ini değiştirir) → **Proje** ("Tüm projeler" ya da bir Proje) → **Sprint** (yalnızca Scrum Proje'sinde). Space ve Proje seçimi **hatırlanır** (cihazda, workspace başına) ve kullanıcı değiştirene kadar kalır.
+  - Proje seçilmezse kullanıcının raporlarını görebildiği **tüm Proje'ler** toplanır (gizli/izinsiz Proje'ler sayılmaz); sprint seçilmezse **Proje geneli**.
+  - Sprint varsayılanı **en son sprint**: aktif varsa o, yoksa son tamamlanan, yoksa ilk planlanan. Sprint seçici aranabilir: açılınca **son 3 sprint**, yazınca tüm sprint'lerde ada göre arar; "Proje geneli" seçeneği hep vardır. Sprint seçimi Proje değişince varsayılana döner.
+  - API: `GET workspaces/:wid/workload?spaceId=&sprintId=` (eski Proje ucu korunur; pano bileşeni kullanır).

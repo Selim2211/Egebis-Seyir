@@ -48,6 +48,9 @@ class FlowDto extends createZodDto(FlowSchema) {}
 class FlowQueryDto extends createZodDto(z.object({ days: z.coerce.number().int().optional() })) {}
 class WorkloadDto extends createZodDto(WorkloadSchema) {}
 class WorkloadQueryDto extends createZodDto(z.object({ sprintId: z.uuid().optional() })) {}
+class WorkspaceWorkloadQueryDto extends createZodDto(
+  z.object({ spaceId: z.uuid().optional(), sprintId: z.uuid().optional() }),
+) {}
 class TimesheetDto extends createZodDto(TimesheetSchema) {}
 class StoppedDto extends createZodDto(z.object({ minutes: z.int() })) {}
 class TimesheetQueryDto extends createZodDto(
@@ -116,6 +119,16 @@ export class TimeController {
     @Query() query: TimesheetQueryDto,
   ): Promise<Timesheet> {
     return this.time.timesheet(spaceId, query.from, query.to);
+  }
+
+  /**
+   * Workspace iş yükü (ADR-132): Proje seçilmezse raporlarını görebildiğin tüm Proje'ler, seçilirse o Proje
+   * ve isteğe bağlı sprint'i. Proje izni serviste denetlenir.
+   */
+  @Get('workload')
+  @ZodResponse({ type: WorkloadDto })
+  workspaceWorkload(@Query() query: WorkspaceWorkloadQueryDto): Promise<Workload> {
+    return this.workload.forWorkspace(query.spaceId, query.sprintId);
   }
 
   /** Kişi bazlı iş yükü; sprintId verilirse yalnızca o sprint'in açık işleri (ADR-076). */

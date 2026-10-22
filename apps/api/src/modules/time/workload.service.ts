@@ -1,6 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import {
   addDays,
+  ERROR_CODES,
+  SPACE_PERMISSIONS as S,
   buildWorkload,
   localDate,
   REPORT_TIME_ZONE,
@@ -8,13 +10,17 @@ import {
   type Workload,
 } from '@scrum/shared';
 import { TenantPrismaService } from '../../infra/prisma/tenant-prisma.service';
+import { SpaceAccessService } from '../access/space-access.service';
 import { notFound } from '../spaces/space-errors';
 import { dateOnly, toDate } from '../work-items/item-support';
 
 /** Kişi bazlı iş yükü (Faz 4.4, ADR-076): açık işler, puan, kalan süre, geciken ve yaklaşan. */
 @Injectable()
 export class WorkloadService {
-  constructor(private readonly tenant: TenantPrismaService) {}
+  constructor(
+    private readonly tenant: TenantPrismaService,
+    private readonly access: SpaceAccessService,
+  ) {}
 
   async workload(spaceId: string, sprintId?: string): Promise<Workload> {
     const db = this.tenant.db;
@@ -31,10 +37,40 @@ export class WorkloadService {
         })
       : null;
     if (sprintId && !sprint) throw notFound();
+    return this.compute([spaceId], sprint);
+  }
+
+  /**
+   * Workspace genelinde iş yükü (Faz 15, ADR-132): Proje verilmezse kullanıcının raporlarını görebildiği
+   * tüm Proje'ler toplanır; Proje verilirse o Proje (ve isteğe bağlı sprint'i).
+   */
+  async forWorkspace(spaceId?: string, sprintId?: string): Promise<Workload> {
+    const permissions = await this.access.permissionMap({ deletedAt: null });
+    if (spaceId) {
+      const perms = permissions.get(spaceId);
+      if (!perms) throw notFound();
+      if (!perms.includes(S.REPORT_VIEW)) {
+        throw new ForbiddenException({ code: ERROR_CODES.FORBIDDEN });
+      }
+      return this.workload(spaceId, sprintId);
+    }
+    const spaceIds = [...permissions]
+      .filter(([, p]) => p.includes(S.REPORT_VIEW))
+      .map(([id]) => id);
+    return this.compute(spaceIds, null);
+  }
+
+  private async compute(
+    spaceIds: string[],
+    sprint: { id: string; name: string } | null,
+  ): Promise<Workload> {
+    const db = this.tenant.db;
+    const inSpaces = { in: spaceIds };
 
     const items = await db.workItem.findMany({
       where: {
-        spaceId,
+        spaceId: inSpaces,
+        space: { deletedAt: null },
         deletedAt: null,
         archivedAt: null,
         type: { not: 'EPIC' },
@@ -59,7 +95,7 @@ export class WorkloadService {
         select: { workItemId: true, minutes: true },
       }),
       db.user.findMany({
-        where: { assignedItems: { some: { workItem: { spaceId } } } },
+        where: { assignedItems: { some: { workItem: { spaceId: inSpaces } } } },
         select: { id: true, name: true },
       }),
     ]);
@@ -69,7 +105,7 @@ export class WorkloadService {
     const thisWeek = await db.timeEntry.groupBy({
       by: ['userId'],
       where: {
-        workItem: { spaceId },
+        workItem: { spaceId: inSpaces },
         userId: { not: null },
         day: { gte: toDate(weekFrom)!, lte: toDate(addDays(weekFrom, 6))! },
       },

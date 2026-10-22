@@ -15,6 +15,9 @@ interface UiState {
   expanded: Record<string, boolean>;
   /** Table görünümünde görünen sütunlar (cihaza özel). */
   tableColumns: string[] | null;
+  /** İş yükünde son seçilen Proje (workspace başına; null = tüm Proje'ler, ADR-132). */
+  workloadSpace: Record<string, string | null>;
+  setWorkloadSpace: (workspaceId: string, spaceId: string | null) => void;
   setTheme: (theme: Theme) => void;
   setLanguage: (language: Locale) => void;
   setWorkspaceId: (id: string | null) => void;
@@ -36,6 +39,9 @@ export const useUiStore = create<UiState>()(
       sidebarOpen: false,
       expanded: {},
       tableColumns: null,
+      workloadSpace: {},
+      setWorkloadSpace: (workspaceId, spaceId) =>
+        set((s) => ({ workloadSpace: { ...s.workloadSpace, [workspaceId]: spaceId } })),
       setTheme: (theme) => set({ theme }),
       setLanguage: (language) => set({ language }),
       setWorkspaceId: (workspaceId) => set({ workspaceId }),
@@ -45,12 +51,13 @@ export const useUiStore = create<UiState>()(
     }),
     {
       name: 'scrum-ui',
-      partialize: ({ theme, language, workspaceId, expanded, tableColumns }) => ({
+      partialize: ({ theme, language, workspaceId, expanded, tableColumns, workloadSpace }) => ({
         theme,
         language,
         workspaceId,
         expanded,
         tableColumns,
+        workloadSpace,
       }),
     },
   ),
