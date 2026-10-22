@@ -1,3 +1,4 @@
+import { DateField } from '@/components/date-field';
 import { statusName } from '@/lib/default-names';
 import {
   PERCENT_DONE,
@@ -498,13 +499,12 @@ function DateInput({
   onChange: (value: string | null) => void;
 }) {
   return (
-    <input
-      type="date"
-      value={value ?? ''}
+    <DateField
+      value={value}
       min={min}
       disabled={disabled}
       aria-label={label}
-      onChange={(e) => onChange(e.target.value || null)}
+      onCommit={onChange}
       className="border-input focus-visible:ring-ring/50 h-8 rounded-md border bg-transparent px-2 text-sm outline-none focus-visible:ring-[3px] disabled:opacity-60"
     />
   );

@@ -4,10 +4,10 @@ import { createFileRoute } from '@tanstack/react-router';
 import { Download, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { DateField } from '@/components/date-field';
 import { NativeSelect } from '@/components/form';
 import { PageHeading } from '@/components/layout/page-heading';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { UserAvatar } from '@/components/user-avatar';
 import { auditCsvRows, describeAudit } from '@/features/audit/audit-text';
 import { auditQuery, type AuditFilter } from '@/features/audit/queries';
@@ -93,20 +93,18 @@ function AuditPage() {
         </label>
         <label className="flex flex-col gap-1 text-xs font-medium">
           {t('audit.from')}
-          <Input
-            type="date"
-            value={filter.from ?? ''}
-            onChange={(e) => set({ from: e.target.value })}
-            className="h-8 w-40"
+          <DateField
+            value={filter.from ?? null}
+            onCommit={(from) => set({ from: from ?? '' })}
+            className="border-input bg-card h-8 w-40 rounded-md border px-2 text-sm"
           />
         </label>
         <label className="flex flex-col gap-1 text-xs font-medium">
           {t('audit.to')}
-          <Input
-            type="date"
-            value={filter.to ?? ''}
-            onChange={(e) => set({ to: e.target.value })}
-            className="h-8 w-40"
+          <DateField
+            value={filter.to ?? null}
+            onCommit={(to) => set({ to: to ?? '' })}
+            className="border-input bg-card h-8 w-40 rounded-md border px-2 text-sm"
           />
         </label>
         {Object.keys(filter).length > 0 && (

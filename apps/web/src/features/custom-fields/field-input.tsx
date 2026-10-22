@@ -1,6 +1,7 @@
 import type { CustomField, CustomFieldValue } from '@scrum/shared';
 import { type ReactNode, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { DateField } from '@/components/date-field';
 import { NativeSelect } from '@/components/form';
 import { Input } from '@/components/ui/input';
 import { useMembers } from '@/features/workspace/queries';
@@ -87,13 +88,12 @@ export function CustomFieldInput({
       );
     case 'DATE':
       return (
-        <Input
-          type="date"
-          className="h-8"
+        <DateField
+          className="border-input focus-visible:ring-ring/50 h-8 w-full rounded-md border bg-transparent px-2 text-sm outline-none focus-visible:ring-[3px] disabled:opacity-60"
           aria-label={label}
           disabled={disabled}
-          value={typeof value === 'string' ? value : ''}
-          onChange={(e) => onChange(e.target.value === '' ? null : e.target.value)}
+          value={typeof value === 'string' ? value : null}
+          onCommit={onChange}
         />
       );
     case 'CHECKBOX':

@@ -3,6 +3,9 @@ import { ensureOwner, login, OWNER } from './accounts';
 
 /** Faz 1.4 akışı: yan panel → açıklama → kabul kriteri → böl → bağlantı → engelleyen uyarısı → tam sayfa. */
 test.describe.serial('Görev detayı', () => {
+  // Tarih alanı gün.ay.yıl sırasıyla yazılır (Türkçe tarayıcı).
+  test.use({ locale: 'tr-TR' });
+
   test.beforeAll(async ({ request }) => {
     await ensureOwner(request);
   });
@@ -118,6 +121,22 @@ test.describe.serial('Görev detayı', () => {
     await page.goto('/items/DET-2');
     await page.getByLabel('Bitiş').fill('2026-12-31');
     await expect(page.getByLabel('Bitiş')).toHaveValue('2026-12-31');
+
+    // Klavyeyle tuş tuş yazılan tarih: yıl yazılırken ara değerler ("0002") kaydedilmez, gün/ay silinmez.
+    const patches: string[] = [];
+    page.on('request', (r) => {
+      if (r.method() === 'PATCH' && r.url().includes('/items/')) patches.push(r.postData() ?? '');
+    });
+    const start = page.getByLabel('Başlangıç');
+    await start.click({ position: { x: 12, y: 10 } });
+    await page.keyboard.type('30112026', { delay: 60 });
+    await expect(start).toHaveValue('2026-11-30');
+    await page.keyboard.press('Tab');
+    await page.reload();
+    await expect(page.getByLabel('Başlangıç')).toHaveValue('2026-11-30');
+    expect(patches.filter((b) => b.includes('startDate'))).toEqual([
+      JSON.stringify({ startDate: '2026-11-30' }),
+    ]);
     await page.getByLabel('Story Point').selectOption('5');
     await expect(page.getByLabel('Story Point')).toHaveValue('5');
 

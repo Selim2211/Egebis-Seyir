@@ -1177,3 +1177,8 @@
   - **Biçimleyiciler:** `Intl.DateTimeFormat`/`RelativeTimeFormat` dil ve seçenek başına önbelleğe alınır (listede her tarih için yeniden oluşturuluyordu).
   - **Satır menüsü** ilk tıklamada kurulur (yüzlerce satırda menü bileşeni baştan kurulmaz). Açılıştaki uzun görevler ~600 → ~490 ms (geliştirme modu; üretim derlemesi belirgin şekilde daha hızlıdır).
 - **Not:** Rota bazlı kod bölme ve dil dosyalarının tembel yüklenmesi zaten vardı; ana paket ~104 KB (33 KB gzip).
+
+## ADR-134 — Tarih alanları yazarken kaydetmez (hata düzeltmesi)
+
+- **Sorun:** Görev detayındaki Başlangıç/Bitiş, tablo tarih hücresi, özel tarih alanı ve denetim filtresi her tuşta kaydediyordu. Yıl yazılırken tarayıcı "0002", "0020" gibi ara değerler üretir; bunlar kaydedilip alana geri yazılınca gün/ay siliniyor, tarih tam yazılamıyordu.
+- **Karar:** Ortak `DateField` (`components/date-field.tsx`): değer yalnızca tarih tamamlanınca (yıl 1900–2999, 4 hane), takvimden seçilince, Enter'a basınca ya da alandan çıkınca bildirilir; yarım tarih kaydedilmez, boşaltılan alan "tarih yok" olur. Pencerelerdeki tarih alanları (sprint, form, hedef, şablon, süre, hatırlatıcı) yerel durum tuttuğundan etkilenmiyordu. E2E: tuş tuş yazılan tarihte tek kayıt isteği gider.

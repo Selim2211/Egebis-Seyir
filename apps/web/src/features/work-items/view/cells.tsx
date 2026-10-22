@@ -1,3 +1,4 @@
+import { DateField } from '@/components/date-field';
 import { statusName } from '@/lib/default-names';
 import {
   FIBONACCI_SCALE,
@@ -138,11 +139,10 @@ export function DueCell({
   const value = item[field];
   if (editable && onChange) {
     return (
-      <input
-        type="date"
-        value={value ?? ''}
+      <DateField
+        value={value}
         aria-label={t(field === 'dueDate' ? 'detail.dueDate' : 'detail.startDate')}
-        onChange={(e) => onChange(e.target.value || null)}
+        onCommit={onChange}
         className={cn(
           'hover:border-input focus-visible:ring-ring/50 h-7 w-full rounded border border-transparent bg-transparent px-1 text-xs outline-none focus-visible:ring-[3px]',
           overdue && 'text-destructive font-medium',
