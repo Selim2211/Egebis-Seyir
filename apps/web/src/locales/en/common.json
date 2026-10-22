@@ -2321,7 +2321,17 @@
     "newEpic": "+ Create a new Epic…",
     "newName": "Name of the new Epic",
     "confirm": "Group",
-    "done": "{{count}} items were grouped under the Epic."
+    "done": "{{count}} items were grouped under the Epic.",
+    "preview": "{{count}} items will move under the Epic.",
+    "previewSub": "Their Sub-Tasks come along ({{count}} sub-items in total).",
+    "modeLabel": "What do you want to do?",
+    "mode": {
+      "group": "Put under an Epic",
+      "groupHint": "The Task stays as it is and goes under an existing or new Epic. Its Sub-Tasks come with it.",
+      "convert": "Convert to Epic",
+      "convertHint": "The Task itself becomes an Epic. Its Sub-Tasks become Tasks under that Epic."
+    },
+    "convertPreview": "{{key}} will become an Epic. Its {{count}} sub-items become Tasks under the Epic."
   },
   "bulk": {
     "nestAction": "Make Sub-Task",

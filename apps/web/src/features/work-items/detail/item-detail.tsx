@@ -390,7 +390,11 @@ function Content({
         />
       )}
       <PromoteEpicDialog
-        item={promoting ? { id: item.id, key: item.key, title: item.title } : null}
+        item={
+          promoting
+            ? { id: item.id, key: item.key, title: item.title, childCount: item.children.length }
+            : null
+        }
         onClose={() => setPromoting(false)}
       />
     </article>

@@ -112,6 +112,39 @@ test.describe.serial('Backlog toplu hiyerarşi', () => {
     const group = page.getByRole('dialog', { name: /1 öğeyi Epic altında grupla/ });
     await group.getByLabel('Epic', { exact: true }).selectOption({ label: '+ Yeni Epic oluştur…' });
     await expect(group.getByLabel('Yeni Epic’in adı')).toHaveValue('Profil');
+    await group.getByRole('button', { name: 'İptal' }).click();
+    await key(3).uncheck();
+
+    // Tek Task ve alt görevi varsa iki yol sunulur: Epic altına al ya da Epic'e dönüştür.
+    const parent = await make('Büyük iş');
+    const sub = (title: string) =>
+      call<{ id: string }>(page, 'POST', `/workspaces/${ws}/lists/${space.lists[0]!.id}/items`, {
+        type: 'SUBTASK',
+        title,
+        parentId: parent.id,
+      });
+    await sub('Adım 1');
+    await sub('Adım 2');
+    const big = await call<{ key: string }>(page, 'GET', `/workspaces/${ws}/items/${parent.id}`);
+    await page.reload();
+    await page.getByLabel(`${big.key} öğesini seç`).check();
+    await bar.getByTestId('group-selected').click();
+    const modes = page.getByRole('dialog', { name: /1 öğeyi Epic altında grupla/ });
+    await expect(modes.getByRole('radiogroup')).toBeVisible();
+    await expect(modes.getByTestId('group-preview')).toContainText('2 alt görev');
+    await modes.getByRole('radio', { name: /Epic’e dönüştür/ }).check();
+    await expect(modes).toContainText(`${big.key} Epic olacak. 2 alt görevi Task`);
+    await expect(modes.getByLabel('Epic’in adı')).toHaveValue('Büyük iş');
+    await modes.getByLabel('Epic’in adı').fill('Büyük proje');
+    await modes.getByRole('button', { name: /Epic.e dönüştür/ }).click();
+    await expect(page.getByText(`${big.key} artık bir Epic.`)).toBeVisible();
+    const epic = await call<{ type: string; title: string }>(
+      page,
+      'GET',
+      `/workspaces/${ws}/items/${parent.id}`,
+    );
+    expect(epic.type).toBe('EPIC');
+    expect(epic.title).toBe('Büyük proje');
   });
 
   test('seçim çubuğu uzun listede de ekranda kalır; seçilenler toplu sprint’e taşınır', async ({

@@ -747,11 +747,10 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
         <GroupEpicDialog
           spaceId={spaceId}
           listId={selected[0]?.listId ?? ''}
-          itemIds={selected.map((i) => i.id)}
+          items={selected}
           epics={backlog.data.epics}
           open={grouping && selected.length > 0}
           onOpenChange={setGrouping}
-          defaultTitle={selected[0]?.title ?? ''}
           onDone={() => selection.clear()}
         />
         <BulkNestDialog

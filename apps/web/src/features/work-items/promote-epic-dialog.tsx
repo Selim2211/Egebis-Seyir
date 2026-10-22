@@ -19,7 +19,7 @@ export function PromoteEpicDialog({
   item,
   onClose,
 }: {
-  item: { id: string; key: string; title: string } | null;
+  item: { id: string; key: string; title: string; childCount?: number } | null;
   onClose: () => void;
 }) {
   const { t } = useTranslation();
@@ -36,7 +36,7 @@ function PromoteForm({
   item,
   onClose,
 }: {
-  item: { id: string; key: string; title: string };
+  item: { id: string; key: string; title: string; childCount?: number };
   onClose: () => void;
 }) {
   const { t } = useTranslation();
@@ -69,6 +69,9 @@ function PromoteForm({
         <DialogTitle>{t('promoteEpic.title', { key: item.key })}</DialogTitle>
       </DialogHeader>
       <DialogBody className="flex flex-col gap-4">
+        <p className="bg-muted rounded-md px-3 py-2 text-sm" data-testid="promote-preview">
+          {t('groupEpic.convertPreview', { key: item.key, count: item.childCount ?? 0 })}
+        </p>
         <p className="text-muted-foreground text-sm">{t('promoteEpic.body')}</p>
         <Field
           label={t('promoteEpic.name')}

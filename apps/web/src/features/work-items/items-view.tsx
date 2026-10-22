@@ -81,6 +81,7 @@ export function ItemsView({
     id: string;
     key: string;
     title: string;
+    childCount: number;
   } | null>(null);
   const [moving, setMoving] = useState<
     | { kind: 'nest'; item: WorkItemSummary; target: WorkItemSummary }
@@ -224,7 +225,8 @@ export function ItemsView({
         },
       ),
     canPromote: (item: WorkItemSummary) => canWrite && space.scrumEnabled && item.type === 'TASK',
-    onPromote: (item) => setPromoting({ id: item.id, key: item.key, title: item.title }),
+    onPromote: (item) =>
+      setPromoting({ id: item.id, key: item.key, title: item.title, childCount: item.childCount }),
     onArchive: (item) => run(item.id, 'archive', t('items.archived', { key: item.key })),
     onDelete: (item) => run(item.id, 'delete', t('items.trashed', { key: item.key })),
     addingUnder,

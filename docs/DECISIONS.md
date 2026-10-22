@@ -1092,3 +1092,9 @@
   - API değişmedi: toplu işlemler istemcide `items/:id/nest` ve `items/:id/unnest` çağrılarını sırayla yapar.
 - **Alternatifler:** Toplu işlemi tek bir API çağrısına almak (grup gibi atomik olurdu); şimdilik her öğe zaten kendi doğrulamasından geçtiği ve uygunsuzlar önceden atlandığı için ertelendi.
 - **Bilinen sınırlar:** Toplu Sub-Task yapma atomik değildir: ağ ya da yetki hatasında işlenenler kalır, kalanlar yapılmaz (hata bildirilir). Aktif sprint'teki bir öğe Sub-Task yapılırsa sprint'ten çıkar (ADR-102).
+
+### ADR-126 eki — Grupla ve Epic'e dönüştür ayrımı
+
+- **Grupla** ("Epic altında grupla", kutucukla seçince çıkan çubuk): Task'lar olduğu gibi bir Epic'in altına girer; pencerede önizleme yazar ("N öğe taşınacak; Sub-Task'ları onlarla gelir, toplam M alt görev"). Yeni Epic adı seçilen ilk Task'ın adıyla dolu gelir.
+- **Dönüştür** ("Epic'e dönüştür", tek Task'ın satır menüsü ve detay sayfası): Task'ın kendisi Epic olur; pencerede "X Epic olacak, N alt görevi Task olup altında kalacak" önizlemesi ve değiştirilebilir ad alanı (varsayılan Task adı) vardır.
+- **Tek Task seçili ve alt görevi varsa** çubuktaki "Epic altında grupla" penceresi iki seçenek sunar (Epic altına al / Epic'e dönüştür); seçime göre aynı pencerede ilgili form gösterilir. Çoklu seçimde bu soru çıkmaz.

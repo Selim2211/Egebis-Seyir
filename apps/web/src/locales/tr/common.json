@@ -2321,7 +2321,17 @@
     "newEpic": "+ Yeni Epic oluştur…",
     "newName": "Yeni Epic’in adı",
     "confirm": "Grupla",
-    "done": "{{count}} öğe Epic altında toplandı."
+    "done": "{{count}} öğe Epic altında toplandı.",
+    "preview": "{{count}} öğe Epic’in altına taşınacak.",
+    "previewSub": "Sub-Task’ları onlarla birlikte gelir (toplam {{count}} alt görev).",
+    "modeLabel": "Ne yapmak istiyorsun?",
+    "mode": {
+      "group": "Epic altına al",
+      "groupHint": "Bu Task olduğu gibi kalır; var olan ya da yeni bir Epic’in altına girer. Sub-Task’ları onunla gelir.",
+      "convert": "Epic’e dönüştür",
+      "convertHint": "Bu Task’ın kendisi Epic olur. Sub-Task’ları Task olup Epic’in altında kalır."
+    },
+    "convertPreview": "{{key}} Epic olacak. {{count}} alt görevi Task olup Epic’in altında kalacak."
   },
   "bulk": {
     "nestAction": "Alt görev yap",
