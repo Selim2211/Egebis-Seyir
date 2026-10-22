@@ -1114,3 +1114,7 @@
 
 - Gruplama penceresinde Epic seçimi arama kutulu bir listedir (anahtar ve başlıkta arar; "+ Yeni Epic oluştur…" hep listededir).
 - **Sub-Task'lar annesiyle birlikte gider** (veride `parentId` Task'ta kalır, ADR-124); ancak Epic'in "Alt öğeler" bölümü yalnızca doğrudan çocukları (Task'ları) gösterdiğinden Sub-Task'lar gitmemiş gibi görünüyordu. Epic sayfasında her Task'ın altında Sub-Task'ları girintili, açılıp kapanır (varsayılan açık) listelenir.
+
+### ADR-126 eki 3 — Seçilen Sub-Task annesiyle taşınır/gruplanır
+
+- Toplu taşıma ve Epic altında gruplamada seçilen bir **Sub-Task** atlanmaz: bağlı olduğu **Task** kullanılır (aynı Task'ın birden çok Sub-Task'ı seçilse de Task bir kez sayılır) ve Sub-Task onunla gider. Çubukta "Sub-Task bağlı olduğu Task ile gider: DMB-33 → DMB-15" yazar. Taşı/Grupla düğmeleri artık seçimde Sub-Task olsa da görünür; Alt görev yap / Üst öğeden çıkar seçilen öğelerin kendisiyle çalışır.

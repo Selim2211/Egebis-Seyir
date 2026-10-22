@@ -2347,7 +2347,8 @@
     "unnestTitle": "{{count}} öğe üst öğesinden çıkarılsın mı?",
     "unnestBody": "Sub-Task’lar bağımsız Task olur, Epic altındaki Task’lar Epic’ten ayrılır.",
     "unnestConfirm": "Çıkar",
-    "unnested": "{{count}} öğe üst öğesinden çıkarıldı."
+    "unnested": "{{count}} öğe üst öğesinden çıkarıldı.",
+    "viaParent": "Sub-Task bağlı olduğu Task ile gider: {{list}}"
   },
   "moveSelected": {
     "other": "Farklı sprint…",

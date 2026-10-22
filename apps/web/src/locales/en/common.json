@@ -2347,7 +2347,8 @@
     "unnestTitle": "Remove {{count}} items from their parent?",
     "unnestBody": "Sub-Tasks become standalone Tasks; Tasks under an Epic leave the Epic.",
     "unnestConfirm": "Remove",
-    "unnested": "{{count}} items removed from their parent."
+    "unnested": "{{count}} items removed from their parent.",
+    "viaParent": "A Sub-Task goes with its Task: {{list}}"
   },
   "moveSelected": {
     "other": "Another sprint…",

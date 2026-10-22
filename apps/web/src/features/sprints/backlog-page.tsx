@@ -165,6 +165,26 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
       return row ? [row] : [];
     });
   }, [sprintDetails, visible, picked]);
+  // Sub-Task sprint'e ya da Epic'e tek başına girmez: seçiliyse bağlı olduğu Task kullanılır, Sub-Task onunla gider.
+  const { movable, viaParent } = useMemo(() => {
+    const byId = new Map<string, BulkItem>(
+      [...sprintDetails.flatMap((d) => d.data?.items ?? []), ...visible].map((i) => [i.id, i]),
+    );
+    const out = new Map<string, BulkItem>();
+    const via: Array<{ sub: string; parent: string }> = [];
+    for (const item of selected) {
+      if (item.type !== 'SUBTASK') {
+        out.set(item.id, item);
+        continue;
+      }
+      const parent = item.parentId ? byId.get(item.parentId) : undefined;
+      if (parent) {
+        out.set(parent.id, parent);
+        via.push({ sub: item.key, parent: parent.key });
+      }
+    }
+    return { movable: [...out.values()], viaParent: via };
+  }, [selected, sprintDetails, visible]);
   const quickTargets = useMemo(() => {
     const sources = new Set(
       selected.map(
@@ -689,7 +709,7 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
                 <span className="font-medium">
                   {t('backlog.selected', { count: selected.length })}
                 </span>
-                {canPlan && sprints.length > 0 && !selected.some((i) => i.type === 'SUBTASK') && (
+                {canPlan && sprints.length > 0 && movable.length > 0 && (
                   <NativeSelect
                     value=""
                     aria-label={t('backlog.moveSelected')}
@@ -699,7 +719,7 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
                         setMovingSelected(true);
                       } else if (e.target.value) {
                         moveItems(
-                          selected.map((i) => i.id),
+                          movable.map((i) => i.id),
                           e.target.value === BACKLOG_OPTION ? null : e.target.value,
                         );
                       }
@@ -715,7 +735,7 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
                     <option value={OTHER_OPTION}>{t('moveSelected.other')}</option>
                   </NativeSelect>
                 )}
-                {canWrite && !selected.some((i) => i.type === 'SUBTASK') && (
+                {canWrite && movable.length > 0 && (
                   <Button
                     variant="outline"
                     size="sm"
@@ -748,6 +768,13 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
                     {t('bulk.unnestAction')}
                   </Button>
                 )}
+                {viaParent.length > 0 && (
+                  <span className="text-muted-foreground text-xs" data-testid="via-parent">
+                    {t('bulk.viaParent', {
+                      list: viaParent.map((v) => `${v.sub} → ${v.parent}`).join(', '),
+                    })}
+                  </span>
+                )}
                 <Button variant="ghost" size="sm" onClick={() => selection.clear()}>
                   {t('backlog.clearSelection')}
                 </Button>
@@ -765,21 +792,21 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
 
         <GroupEpicDialog
           spaceId={spaceId}
-          listId={selected[0]?.listId ?? ''}
-          items={selected}
+          listId={movable[0]?.listId ?? ''}
+          items={movable}
           epics={backlog.data.epics}
-          open={grouping && selected.length > 0}
+          open={grouping && movable.length > 0}
           onOpenChange={setGrouping}
           onDone={() => selection.clear()}
         />
         <MoveSelectedDialog
-          items={selected}
+          items={movable}
           currentSpaceId={spaceId}
-          open={movingSelected && selected.length > 0}
+          open={movingSelected && movable.length > 0}
           onOpenChange={setMovingSelected}
           onSameProject={(sprintId) =>
             moveItems(
-              selected.map((i) => i.id),
+              movable.map((i) => i.id),
               sprintId,
             )
           }
