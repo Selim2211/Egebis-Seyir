@@ -632,77 +632,6 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
                 )}
               </div>
 
-              {selected.length > 0 && (
-                <div
-                  role="region"
-                  aria-label={t('backlog.selection')}
-                  className="bg-accent/50 flex flex-wrap items-center gap-2 border-t px-3 py-2 text-sm"
-                >
-                  <span className="font-medium">
-                    {t('backlog.selected', { count: selected.length })}
-                  </span>
-                  {canPlan && sprints.length > 0 && !selected.some((i) => i.type === 'SUBTASK') && (
-                    <NativeSelect
-                      value=""
-                      aria-label={t('backlog.moveSelected')}
-                      className="h-8"
-                      onChange={(e) => {
-                        if (e.target.value) {
-                          moveItems(
-                            selected.map((i) => i.id),
-                            e.target.value === BACKLOG_OPTION ? null : e.target.value,
-                          );
-                        }
-                      }}
-                    >
-                      <option value="">{t('backlog.moveSelected')}</option>
-                      <option value={BACKLOG_OPTION}>{t('moveItem.backlog')}</option>
-                      {sprints.map((s) => (
-                        <option key={s.id} value={s.id}>
-                          {s.name}
-                        </option>
-                      ))}
-                    </NativeSelect>
-                  )}
-                  {canWrite && !selected.some((i) => i.type === 'SUBTASK') && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      data-testid="group-selected"
-                      onClick={() => setGrouping(true)}
-                    >
-                      <Layers />
-                      {t('groupEpic.action')}
-                    </Button>
-                  )}
-                  {canWrite && selected.some(canBecomeSubtask) && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      data-testid="nest-selected"
-                      onClick={() => setNestingSelected(true)}
-                    >
-                      <CornerDownRight />
-                      {t('bulk.nestAction')}
-                    </Button>
-                  )}
-                  {canWrite && selected.some((i) => i.parentId !== null) && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      data-testid="unnest-selected"
-                      onClick={() => setUnnestingSelected(true)}
-                    >
-                      <Unlink />
-                      {t('bulk.unnestAction')}
-                    </Button>
-                  )}
-                  <Button variant="ghost" size="sm" onClick={() => selection.clear()}>
-                    {t('backlog.clearSelection')}
-                  </Button>
-                </div>
-              )}
-
               <div className="border-t">
                 <DropContainerView
                   id={BACKLOG_CONTAINER}
@@ -735,6 +664,76 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
                 </p>
               )}
             </section>
+            {selected.length > 0 && (
+              <div
+                role="region"
+                aria-label={t('backlog.selection')}
+                className="bg-card ring-primary/20 sticky bottom-4 z-30 flex flex-wrap items-center gap-2 rounded-xl border px-4 py-2.5 text-sm shadow-xl ring-1"
+              >
+                <span className="font-medium">
+                  {t('backlog.selected', { count: selected.length })}
+                </span>
+                {canPlan && sprints.length > 0 && !selected.some((i) => i.type === 'SUBTASK') && (
+                  <NativeSelect
+                    value=""
+                    aria-label={t('backlog.moveSelected')}
+                    className="h-8"
+                    onChange={(e) => {
+                      if (e.target.value) {
+                        moveItems(
+                          selected.map((i) => i.id),
+                          e.target.value === BACKLOG_OPTION ? null : e.target.value,
+                        );
+                      }
+                    }}
+                  >
+                    <option value="">{t('backlog.moveSelected')}</option>
+                    <option value={BACKLOG_OPTION}>{t('moveItem.backlog')}</option>
+                    {sprints.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.name}
+                      </option>
+                    ))}
+                  </NativeSelect>
+                )}
+                {canWrite && !selected.some((i) => i.type === 'SUBTASK') && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    data-testid="group-selected"
+                    onClick={() => setGrouping(true)}
+                  >
+                    <Layers />
+                    {t('groupEpic.action')}
+                  </Button>
+                )}
+                {canWrite && selected.some(canBecomeSubtask) && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    data-testid="nest-selected"
+                    onClick={() => setNestingSelected(true)}
+                  >
+                    <CornerDownRight />
+                    {t('bulk.nestAction')}
+                  </Button>
+                )}
+                {canWrite && selected.some((i) => i.parentId !== null) && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    data-testid="unnest-selected"
+                    onClick={() => setUnnestingSelected(true)}
+                  >
+                    <Unlink />
+                    {t('bulk.unnestAction')}
+                  </Button>
+                )}
+                <Button variant="ghost" size="sm" onClick={() => selection.clear()}>
+                  {t('backlog.clearSelection')}
+                </Button>
+              </div>
+            )}
           </div>
           {dragged?.parentId && <DetachZone store={intents} />}
           {createPortal(

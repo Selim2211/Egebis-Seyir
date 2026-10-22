@@ -113,4 +113,60 @@ test.describe.serial('Backlog toplu hiyerarşi', () => {
     await group.getByLabel('Epic', { exact: true }).selectOption({ label: '+ Yeni Epic oluştur…' });
     await expect(group.getByLabel('Yeni Epic’in adı')).toHaveValue('Profil');
   });
+
+  test('seçim çubuğu uzun listede de ekranda kalır; seçilenler toplu sprint’e taşınır', async ({
+    page,
+  }) => {
+    await page.goto('/login');
+    await login(page, OWNER.email, OWNER.password);
+    await expect(page.getByRole('heading', { name: /Hoş geldin/ })).toBeVisible();
+    const sidebar = page.getByRole('complementary');
+    await sidebar.getByRole('button', { name: 'Proje oluştur' }).first().click();
+    const dialog = page.getByRole('dialog', { name: 'Yeni Proje oluştur' });
+    await dialog.getByLabel('Ad', { exact: true }).fill('Taşıma Proje');
+    await dialog.getByLabel('Anahtar').fill('TSM');
+    await dialog.getByRole('button', { name: 'Proje oluştur' }).click();
+    await expect(page.getByRole('heading', { name: 'Taşıma Proje' })).toBeVisible();
+
+    const me = await call<{ workspaces: Array<{ id: string }> }>(page, 'GET', '/auth/me');
+    const ws = me.workspaces[0]!.id;
+    const tree = await call<{
+      spaces: Array<{ key: string; id: string; lists: Array<{ id: string }> }>;
+    }>(page, 'GET', `/workspaces/${ws}/hierarchy`);
+    const space = tree.spaces.find((s) => s.key === 'TSM')!;
+    const day = (n: number) => new Date(Date.now() + n * 864e5).toISOString().slice(0, 10);
+    const sprint = (name: string, from: number) =>
+      call<{ id: string }>(page, 'POST', `/workspaces/${ws}/spaces/${space.id}/sprints`, {
+        name,
+        goal: 'Hedef',
+        startDate: day(from),
+        endDate: day(from + 10),
+      });
+    const one = await sprint('Birinci', 0);
+    await sprint('İkinci', 11);
+    const ids: string[] = [];
+    for (let i = 0; i < 40; i += 1) {
+      const it = await call<{ id: string }>(
+        page,
+        'POST',
+        `/workspaces/${ws}/lists/${space.lists[0]!.id}/items`,
+        { type: 'TASK', title: `Görev ${i}`, parentId: null },
+      );
+      ids.push(it.id);
+    }
+    await call(page, 'POST', `/workspaces/${ws}/spaces/${space.id}/backlog/move`, {
+      itemIds: ids.slice(0, 2),
+      sprintId: one.id,
+    });
+
+    await page.goto(`/spaces/${space.id}/backlog`);
+    await page.getByLabel('TSM-1 öğesini seç').check();
+    await page.getByLabel('TSM-2 öğesini seç').check();
+    const bar = page.getByRole('region', { name: 'Seçili öğeler' });
+    // Sayfa en alta kaydırılsa da çubuk görünür kalır.
+    await page.mouse.wheel(0, 5000);
+    await expect(bar).toBeInViewport();
+    await bar.getByLabel("Sprint'e taşı…").selectOption({ label: 'İkinci' });
+    await expect(page.getByText(/2 öğe İkinci sprint/)).toBeVisible();
+  });
 });
