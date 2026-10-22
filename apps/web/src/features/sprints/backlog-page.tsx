@@ -78,12 +78,16 @@ import { SprintImportDialog } from './sprint-import-dialog';
 import { ScrumTabs } from './scrum-tabs';
 import { BulkNestDialog, BulkUnnestDialog } from './bulk-hierarchy-dialogs';
 import { canBecomeSubtask, type BulkItem } from './bulk-utils';
+import { MoveSelectedDialog } from './move-selected-dialog';
+import { quickSprintTargets } from './sprint-window';
 import { createSelectionStore, SelectionContext, useSelectionSet } from './selection';
 import { GroupEpicDialog } from './group-epic-dialog';
 import { SprintSection } from './sprint-section';
 
 /** Toplu taşıma seçiminde Backlog'a geri alma değeri. */
 const BACKLOG_OPTION = '__backlog';
+/** "Farklı sprint…": Proje ve sprint seçilen pencereyi açar. */
+const OTHER_OPTION = '__other';
 
 /** Bildirim baloncuklarının (sonner) da üstünde kalır. */
 const TOP_LAYER = 1000000001;
@@ -134,6 +138,7 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
   const [importing, setImporting] = useState(false);
   const [grouping, setGrouping] = useState(false);
   const [nestingSelected, setNestingSelected] = useState(false);
+  const [movingSelected, setMovingSelected] = useState(false);
   const [unnestingSelected, setUnnestingSelected] = useState(false);
   const [restoring, setRestoring] = useState(false);
   // Aktif sprint'e ekleme/çıkarma kapsam değişikliğidir; onay istenir (brief §6.1.4).
@@ -160,6 +165,17 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
       return row ? [row] : [];
     });
   }, [sprintDetails, visible, picked]);
+  const quickTargets = useMemo(() => {
+    const sources = new Set(
+      selected.map(
+        (i) =>
+          sprintDetails.find((d) => d.data?.items.some((x) => x.id === i.id))?.data?.sprint.id ??
+          null,
+      ),
+    );
+    const only = sources.size === 1 ? [...sources][0]! : null;
+    return quickSprintTargets(sprints, only);
+  }, [selected, sprintDetails, sprints]);
   const totals = useMemo(
     () =>
       sprintTotals(
@@ -679,7 +695,9 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
                     aria-label={t('backlog.moveSelected')}
                     className="h-8"
                     onChange={(e) => {
-                      if (e.target.value) {
+                      if (e.target.value === OTHER_OPTION) {
+                        setMovingSelected(true);
+                      } else if (e.target.value) {
                         moveItems(
                           selected.map((i) => i.id),
                           e.target.value === BACKLOG_OPTION ? null : e.target.value,
@@ -689,11 +707,12 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
                   >
                     <option value="">{t('backlog.moveSelected')}</option>
                     <option value={BACKLOG_OPTION}>{t('moveItem.backlog')}</option>
-                    {sprints.map((s) => (
+                    {quickTargets.map((s) => (
                       <option key={s.id} value={s.id}>
                         {s.name}
                       </option>
                     ))}
+                    <option value={OTHER_OPTION}>{t('moveSelected.other')}</option>
                   </NativeSelect>
                 )}
                 {canWrite && !selected.some((i) => i.type === 'SUBTASK') && (
@@ -751,6 +770,19 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
           epics={backlog.data.epics}
           open={grouping && selected.length > 0}
           onOpenChange={setGrouping}
+          onDone={() => selection.clear()}
+        />
+        <MoveSelectedDialog
+          items={selected}
+          currentSpaceId={spaceId}
+          open={movingSelected && selected.length > 0}
+          onOpenChange={setMovingSelected}
+          onSameProject={(sprintId) =>
+            moveItems(
+              selected.map((i) => i.id),
+              sprintId,
+            )
+          }
           onDone={() => selection.clear()}
         />
         <BulkNestDialog

@@ -202,4 +202,91 @@ test.describe.serial('Backlog toplu hiyerarşi', () => {
     await bar.getByLabel("Sprint'e taşı…").selectOption({ label: 'İkinci' });
     await expect(page.getByText(/2 öğe İkinci sprint/)).toBeVisible();
   });
+
+  test('hızlı liste en çok 3 sprint gösterir; "Farklı sprint…" penceresi Proje seçer, arar ve kaydırdıkça devam eder', async ({
+    page,
+  }) => {
+    await page.goto('/login');
+    await login(page, OWNER.email, OWNER.password);
+    await expect(page.getByRole('heading', { name: /Hoş geldin/ })).toBeVisible();
+    const sidebar = page.getByRole('complementary');
+    const create = async (name: string, key: string) => {
+      await sidebar.getByRole('button', { name: 'Proje oluştur' }).first().click();
+      const d = page.getByRole('dialog', { name: 'Yeni Proje oluştur' });
+      await d.getByLabel('Ad', { exact: true }).fill(name);
+      await d.getByLabel('Anahtar').fill(key);
+      await d.getByRole('button', { name: 'Proje oluştur' }).click();
+      await expect(page.getByRole('heading', { name })).toBeVisible();
+    };
+    await create('Çok Sprint', 'CSP');
+    await create('Varış Proje', 'VRS');
+
+    const me = await call<{ workspaces: Array<{ id: string }> }>(page, 'GET', '/auth/me');
+    const ws = me.workspaces[0]!.id;
+    const tree = await call<{
+      spaces: Array<{ key: string; id: string; lists: Array<{ id: string }> }>;
+    }>(page, 'GET', `/workspaces/${ws}/hierarchy`);
+    const csp = tree.spaces.find((s) => s.key === 'CSP')!;
+    const hdf = tree.spaces.find((s) => s.key === 'VRS')!;
+    const day = (n: number) => new Date(Date.now() + n * 864e5).toISOString().slice(0, 10);
+    const sprint = (spaceId: string, name: string, from: number) =>
+      call<{ id: string }>(page, 'POST', `/workspaces/${ws}/spaces/${spaceId}/sprints`, {
+        name,
+        goal: 'Hedef',
+        startDate: day(from),
+        endDate: day(from + 10),
+      });
+    for (let n = 1; n <= 30; n += 1) await sprint(csp.id, `Koşu ${n}`, (n - 1) * 11);
+    await sprint(hdf.id, 'Hedef Koşusu', 0);
+    const item = (title: string) =>
+      call<{ id: string }>(page, 'POST', `/workspaces/${ws}/lists/${csp.lists[0]!.id}/items`, {
+        type: 'TASK',
+        title,
+        parentId: null,
+      });
+    await item('Bir');
+    const two = await item('İki');
+
+    await page.goto(`/spaces/${csp.id}/backlog`);
+    await page.getByLabel('CSP-1 öğesini seç').check();
+    const bar = page.getByRole('region', { name: 'Seçili öğeler' });
+    const quick = bar.getByLabel("Sprint'e taşı…");
+    // Placeholder + Backlog + en çok 3 sprint + "Farklı sprint…".
+    await expect(quick.locator('option')).toHaveCount(6);
+    await quick.selectOption({ label: 'Farklı sprint…' });
+
+    const dlg = page.getByRole('dialog', { name: /1 öğeyi taşı/ });
+    await expect(dlg.getByLabel('Proje')).toHaveValue(csp.id);
+    const list = dlg.getByTestId('sprint-list');
+    // İlk sayfa: Backlog + 12 sprint; aşağı kaydırdıkça devam eder.
+    await expect(list.getByRole('option')).toHaveCount(13);
+    await list.evaluate((el) => el.scrollTo(0, el.scrollHeight));
+    await expect(list.getByRole('option')).toHaveCount(25);
+    // Ada göre arama.
+    await dlg.getByLabel('Sprint ara…').fill('Koşu 27');
+    await expect(list.getByRole('option')).toHaveCount(1);
+    await list.getByRole('option', { name: /Koşu 27/ }).click();
+    await expect(dlg.getByTestId('move-summary')).toContainText('CSP-1');
+    await expect(dlg.getByTestId('move-summary')).toContainText('Koşu 27');
+    await dlg.getByRole('button', { name: 'Taşı', exact: true }).click();
+    await expect(page.getByText(/1 öğe .*Koşu 27/)).toBeVisible();
+
+    // Başka Proje: sprint listesi seçilen Proje'ninkidir.
+    await page.getByLabel('CSP-2 öğesini seç').check();
+    await quick.selectOption({ label: 'Farklı sprint…' });
+    const dlg2 = page.getByRole('dialog', { name: /1 öğeyi taşı/ });
+    await dlg2.getByLabel('Proje').selectOption({ label: 'Varış Proje' });
+    await expect(dlg2.getByTestId('sprint-list').getByRole('option')).toHaveCount(2);
+    await dlg2.getByRole('option', { name: /Hedef Koşusu/ }).click();
+    await expect(dlg2.getByTestId('move-summary')).toContainText('Varış Proje');
+    await dlg2.getByRole('button', { name: 'Taşı', exact: true }).click();
+    await expect(page.getByText(/1 öğe taşındı: Varış Proje/)).toBeVisible();
+    const moved = await call<{ spaceId: string; sprintId: string | null }>(
+      page,
+      'GET',
+      `/workspaces/${ws}/items/${two.id}`,
+    );
+    expect(moved.spaceId).toBe(hdf.id);
+    expect(moved.sprintId).not.toBeNull();
+  });
 });

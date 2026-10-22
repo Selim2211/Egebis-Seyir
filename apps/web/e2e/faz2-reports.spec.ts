@@ -79,7 +79,10 @@ test.describe.serial('Raporlar', () => {
     const backlog = page.getByRole('region', { name: 'Backlog', exact: true });
     await backlog.getByLabel('RPR-1 öğesini seç').check();
     await backlog.getByLabel('RPR-2 öğesini seç').check();
-    await backlog.getByLabel("Sprint'e taşı…").selectOption({ label: 'Sprint 1' });
+    await page
+      .getByRole('region', { name: 'Seçili öğeler' })
+      .getByLabel("Sprint'e taşı…")
+      .selectOption({ label: 'Sprint 1' });
     await expect(sprint.getByText('2 öğe')).toBeVisible();
     await sprint.getByRole('button', { name: 'Başlat' }).click();
     await page

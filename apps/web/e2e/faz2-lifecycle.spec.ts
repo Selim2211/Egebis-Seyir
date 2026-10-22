@@ -57,7 +57,10 @@ test.describe.serial('Sprint yaşam döngüsü', () => {
     const backlog = page.getByRole('region', { name: 'Backlog', exact: true });
     await backlog.getByLabel('DNG-1 öğesini seç').check();
     await backlog.getByLabel('DNG-2 öğesini seç').check();
-    await backlog.getByLabel("Sprint'e taşı…").selectOption({ label: 'Sprint 1' });
+    await page
+      .getByRole('region', { name: 'Seçili öğeler' })
+      .getByLabel("Sprint'e taşı…")
+      .selectOption({ label: 'Sprint 1' });
     const sprint1 = page.getByRole('region', { name: 'Sprint 1' });
     await expect(sprint1.getByText('2 öğe')).toBeVisible();
 

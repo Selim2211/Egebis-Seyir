@@ -74,7 +74,10 @@ test.describe.serial('Backlog ve sprint', () => {
 
     await backlog.getByLabel('BKL-2 öğesini seç').check();
     await backlog.getByLabel('BKL-3 öğesini seç').check();
-    await backlog.getByLabel("Sprint'e taşı…").selectOption({ label: 'Sprint 1' });
+    await page
+      .getByRole('region', { name: 'Seçili öğeler' })
+      .getByLabel("Sprint'e taşı…")
+      .selectOption({ label: 'Sprint 1' });
     await expect(sprint.getByText('3 öğe · 0 puan')).toBeVisible();
     await expect(backlog.getByText('Backlog boş.')).toBeVisible();
 

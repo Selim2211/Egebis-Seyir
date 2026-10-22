@@ -2346,5 +2346,19 @@
     "unnestBody": "Sub-Task’lar bağımsız Task olur, Epic altındaki Task’lar Epic’ten ayrılır.",
     "unnestConfirm": "Çıkar",
     "unnested": "{{count}} öğe üst öğesinden çıkarıldı."
+  },
+  "moveSelected": {
+    "other": "Farklı sprint…",
+    "title": "{{count}} öğeyi taşı",
+    "search": "Sprint ara…",
+    "sprints": "Sprint listesi",
+    "active": "Aktif",
+    "none": "Eşleşen sprint yok.",
+    "more": "{{shown}} / {{total}} sprint gösteriliyor; devamı için aşağı kaydır.",
+    "summary": "{{count}} öğe şuraya taşınacak: {{target}}",
+    "andMore": "…ve {{count}} öğe daha",
+    "crossNote": "Başka Proje'ye taşınan öğeler eski anahtarlarını korur.",
+    "confirm": "Taşı",
+    "done": "{{count}} öğe taşındı: {{target}}"
   }
 }

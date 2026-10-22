@@ -2346,5 +2346,19 @@
     "unnestBody": "Sub-Tasks become standalone Tasks; Tasks under an Epic leave the Epic.",
     "unnestConfirm": "Remove",
     "unnested": "{{count}} items removed from their parent."
+  },
+  "moveSelected": {
+    "other": "Another sprint…",
+    "title": "Move {{count}} items",
+    "search": "Search sprints…",
+    "sprints": "Sprint list",
+    "active": "Active",
+    "none": "No matching sprints.",
+    "more": "Showing {{shown}} of {{total}} sprints; scroll down for more.",
+    "summary": "{{count}} items will move to: {{target}}",
+    "andMore": "…and {{count}} more",
+    "crossNote": "Items moved to another project keep their old keys.",
+    "confirm": "Move",
+    "done": "{{count}} items moved: {{target}}"
   }
 }

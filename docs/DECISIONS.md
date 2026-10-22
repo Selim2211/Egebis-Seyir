@@ -1098,3 +1098,14 @@
 - **Grupla** ("Epic altında grupla", kutucukla seçince çıkan çubuk): Task'lar olduğu gibi bir Epic'in altına girer; pencerede önizleme yazar ("N öğe taşınacak; Sub-Task'ları onlarla gelir, toplam M alt görev"). Yeni Epic adı seçilen ilk Task'ın adıyla dolu gelir.
 - **Dönüştür** ("Epic'e dönüştür", tek Task'ın satır menüsü ve detay sayfası): Task'ın kendisi Epic olur; pencerede "X Epic olacak, N alt görevi Task olup altında kalacak" önizlemesi ve değiştirilebilir ad alanı (varsayılan Task adı) vardır.
 - **Tek Task seçili ve alt görevi varsa** çubuktaki "Epic altında grupla" penceresi iki seçenek sunar (Epic altına al / Epic'e dönüştür); seçime göre aynı pencerede ilgili form gösterilir. Çoklu seçimde bu soru çıkmaz.
+
+## ADR-127 — Toplu taşımada hızlı liste ve "Farklı sprint…" penceresi (Faz 14.1)
+
+- **Tarih:** 2026-10-22 · **Durum:** Kabul (kullanıcı isteği).
+- **Karar:**
+  - Backlog'daki seçim çubuğunun "Sprint'e taşı…" listesi artık **en çok 3 sprint** gösterir: seçilenler tek bir sprint'teyse oradan bakınca 1 önceki + 2 sonraki (kaynak sprint listede yok); Backlog'taysa aktif sprint ve ondan sonraki ikisi. Her durumda "Backlog (sprint yok)" ve en altta **Farklı sprint…** vardır (`sprint-window.ts`, birim testli).
+  - **Farklı sprint…** penceresi: önce **Proje** (varsayılan bu Proje; sprint planlayabildiğin Scrum Proje'leri seçilebilir), altında seçilen Proje'nin açık sprint'leri; ada göre arama ve **kaydırdıkça devam eden** liste (12'şer; yüzlerce sprint olsa da liste sınırlı yükseklikte kalır). Seçim yapılınca özet kutusu **hangi öğelerin hangi sprint'e (ve Proje'ye) taşınacağını** yazar; **Taşı** ile onaylanır, sonuç bildiriminde de aynı hedef görünür.
+  - Aynı Proje'de taşıma mevcut yolu kullanır (aktif sprint için kapsam değişikliği onayı korunur); başka Proje'ye önce öğeler taşınır (`items/:id/move`), sonra sprint atanır (öğeler eski anahtarını korur, ADR-047).
+  - Seçim çubuğu Backlog bölümünden çıkarıldı ve ekranın altında yüzer (ADR-126 sonrası): üstteki sprint'ten seçince de görünür.
+- **Alternatifler:** Tüm sprint'leri listelemek (yüzlerce satırlık açılır liste kullanılamaz olur); sprint listesini sunucudan sayfalamak (şimdilik tüm sprint'ler zaten tek istekle geliyor, istemcide pencerelemek yeterli).
+- **Bilinen sınırlar:** Tamamlanmış/iptal sprint'ler hedef olarak listelenmez (salt-okunur). Başka Proje'ye toplu taşıma öğe öğe yapılır, atomik değildir.
