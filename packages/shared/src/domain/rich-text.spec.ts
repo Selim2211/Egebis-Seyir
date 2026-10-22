@@ -187,3 +187,39 @@ describe('image node (Faz 8.6)', () => {
     expect(richTextToPlain(docWith({ src, alt: 'Mimari şema' }))).toBe('Mimari şema');
   });
 });
+
+describe('tablo hücresi öznitelikleri', () => {
+  const table = (attrs: Record<string, unknown>) => ({
+    type: 'doc',
+    content: [
+      {
+        type: 'table',
+        content: [
+          {
+            type: 'tableRow',
+            content: [{ type: 'tableCell', attrs, content: [{ type: 'paragraph' }] }],
+          },
+        ],
+      },
+    ],
+  });
+
+  it('birleştirme, genişlik ve renk kabul edilir', () => {
+    expect(
+      isValidRichText(
+        table({ colspan: 2, rowspan: 1, colwidth: [120, 80], backgroundColor: '#FDE68A' }),
+      ),
+    ).toBe(true);
+    expect(
+      isValidRichText(table({ colspan: 1, rowspan: 1, colwidth: null, backgroundColor: null })),
+    ).toBe(true);
+  });
+
+  it('stil enjeksiyonu ve geçersiz sayılar reddedilir', () => {
+    expect(isValidRichText(table({ backgroundColor: 'red; background: url(x)' }))).toBe(false);
+    expect(isValidRichText(table({ backgroundColor: 'red' }))).toBe(false);
+    expect(isValidRichText(table({ colspan: 0 }))).toBe(false);
+    expect(isValidRichText(table({ rowspan: 999 }))).toBe(false);
+    expect(isValidRichText(table({ colwidth: ['10px'] }))).toBe(false);
+  });
+});

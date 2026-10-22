@@ -1118,3 +1118,13 @@
 ### ADR-126 eki 3 — Seçilen Sub-Task annesiyle taşınır/gruplanır
 
 - Toplu taşıma ve Epic altında gruplamada seçilen bir **Sub-Task** atlanmaz: bağlı olduğu **Task** kullanılır (aynı Task'ın birden çok Sub-Task'ı seçilse de Task bir kez sayılır) ve Sub-Task onunla gider. Çubukta "Sub-Task bağlı olduğu Task ile gider: DMB-33 → DMB-15" yazar. Taşı/Grupla düğmeleri artık seçimde Sub-Task olsa da görünür; Alt görev yap / Üst öğeden çıkar seçilen öğelerin kendisiyle çalışır.
+
+## ADR-128 — Dokümanlarda Word benzeri tablo araçları (Faz 15, Görev 1)
+
+- **Tarih:** 2026-10-22 · **Durum:** Kabul (kullanıcı isteği; toplantı notu "Word gibi tablo ekleme").
+- **Karar:** Doküman editöründe tek bir **Tablo** düğmesi; tıklayınca açılan panelde:
+  - Tablo dışındayken: **ızgaradan boyut seçme** (8×10, fareyle "3 satır × 4 sütun" önizlemesi) ya da **sayı girerek** (en çok 50×50) ekleme; başlık satırıyla eklenir.
+  - Tablo içindeyken: üste/alta **satır ekle**, sola/sağa **sütun ekle**, satır/sütun **sil**, **hücreleri birleştir** (Shift+tık ya da sürükleyerek seçilen hücreler), **hücreyi böl**, **başlık satırı/sütunu** aç/kapat, **hücre rengi** (açık tonlu palet + renksiz) ve **tabloyu sil**. Sütun kenarından sürükleyerek **genişlik** ayarlanır; seçili hücreler vurgulanır.
+  - Panel düğmeleri editörden odak almaz; imleç tablodaki yerinde kalır. Durum (`useEditorState`) her işlemde güncellenir.
+- **Güvenlik:** Hücre öznitelikleri sunucuda doğrulanır (`rich-text.ts`): `colspan/rowspan` 1–50, `colwidth` tam sayı dizisi, `backgroundColor` yalnızca `#rrggbb` (stil enjeksiyonu yok). Salt-okunur görünüm ve **Word'e aktarma** birleşik hücreleri (`gridSpan`/`rowSpan`) ve hücre rengini korur. Renkli hücrede metin her temada koyu yazılır.
+- **Kapsam:** Görev açıklamaları (kompakt editör) tablosuz kalır; tablo yalnızca doküman sayfalarındadır (ADR-069).

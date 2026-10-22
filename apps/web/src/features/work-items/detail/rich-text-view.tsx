@@ -1,4 +1,9 @@
-import { IMAGE_SRC_PATTERN, type RichTextMark, type RichTextNode } from '@scrum/shared';
+import {
+  CELL_COLOR_PATTERN,
+  IMAGE_SRC_PATTERN,
+  type RichTextMark,
+  type RichTextNode,
+} from '@scrum/shared';
 import type { ReactNode } from 'react';
 
 const SAFE_LINK = /^(https?:\/\/|mailto:)/i;
@@ -32,6 +37,19 @@ function applyMarks(text: ReactNode, marks: RichTextMark[] | undefined): ReactNo
         return child;
     }
   }, text);
+}
+
+/** Birleşik hücre ve hücre rengi; renk yalnızca `#rrggbb` ise uygulanır (sunucu da doğrular). */
+function cellProps(node: RichTextNode) {
+  const span = (v: unknown) =>
+    Number.isInteger(v) && (v as number) > 1 ? (v as number) : undefined;
+  const bg = str(node.attrs?.backgroundColor);
+  return {
+    colSpan: span(node.attrs?.colspan),
+    rowSpan: span(node.attrs?.rowspan),
+    'data-bg': CELL_COLOR_PATTERN.test(bg) ? bg : undefined,
+    style: CELL_COLOR_PATTERN.test(bg) ? { backgroundColor: bg } : undefined,
+  };
 }
 
 function renderNode(node: RichTextNode, key: number): ReactNode {
@@ -91,9 +109,17 @@ function renderNode(node: RichTextNode, key: number): ReactNode {
     case 'tableRow':
       return <tr key={key}>{children}</tr>;
     case 'tableHeader':
-      return <th key={key}>{children}</th>;
+      return (
+        <th key={key} {...cellProps(node)}>
+          {children}
+        </th>
+      );
     case 'tableCell':
-      return <td key={key}>{children}</td>;
+      return (
+        <td key={key} {...cellProps(node)}>
+          {children}
+        </td>
+      );
     case 'horizontalRule':
       return <hr key={key} />;
     case 'image': {

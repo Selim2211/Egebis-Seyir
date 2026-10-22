@@ -1,4 +1,4 @@
-import type { RichTextMark, RichTextNode } from '@scrum/shared';
+import { CELL_COLOR_PATTERN, type RichTextMark, type RichTextNode } from '@scrum/shared';
 import {
   AlignmentType,
   BorderStyle,
@@ -209,13 +209,22 @@ async function blocksOf(
           const cells: TableCell[] = [];
           for (const cell of row.content ?? []) {
             const children = await blocksOf(cell.content ?? [], ctx, 0);
+            // Hücre rengi (yalnızca #rrggbb) ve birleşik hücreler Word'e aynen taşınır.
+            const bg =
+              typeof cell.attrs?.backgroundColor === 'string' ? cell.attrs.backgroundColor : '';
+            const fill = CELL_COLOR_PATTERN.test(bg)
+              ? bg.slice(1).toUpperCase()
+              : cell.type === 'tableHeader'
+                ? 'EEEEF3'
+                : null;
+            const span = (v: unknown) =>
+              Number.isInteger(v) && (v as number) > 1 ? (v as number) : undefined;
             cells.push(
               new TableCell({
                 children: children.length ? children : [new Paragraph({})],
-                shading:
-                  cell.type === 'tableHeader'
-                    ? { type: ShadingType.CLEAR, color: 'auto', fill: 'EEEEF3' }
-                    : undefined,
+                shading: fill ? { type: ShadingType.CLEAR, color: 'auto', fill } : undefined,
+                columnSpan: span(cell.attrs?.colspan),
+                rowSpan: span(cell.attrs?.rowspan),
                 margins: { top: 60, bottom: 60, left: 100, right: 100 },
               }),
             );

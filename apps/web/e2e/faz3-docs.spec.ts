@@ -68,10 +68,43 @@ test.describe.serial('Dokümanlar', () => {
     const tree = page.getByRole('list', { name: 'Sayfa ağacı' });
     await tree.getByRole('button', { name: 'Ürün gereksinimleri', exact: true }).click();
     await body(page).click();
-    await page.getByRole('button', { name: 'Tablo ekle / sil' }).click();
+    // Word'deki gibi: Tablo düğmesi → ızgaradan 3×3 seç.
+    await page.getByTestId('table-menu').click();
+    await page.locator('[data-cell="3x3"]').hover();
+    await expect(page.getByText('3 satır × 3 sütun')).toBeVisible();
+    await page.locator('[data-cell="3x3"]').click();
     await expect(body(page).locator('table')).toBeVisible();
     await expect(body(page).locator('th')).toHaveCount(3);
+    await expect(body(page).locator('tr')).toHaveCount(3);
+
+    // Tablo içindeyken aynı düğme tablo araçlarını açar.
+    await body(page).locator('td').first().click();
+    const tools = async (name: string) => {
+      await page.getByTestId('table-menu').click();
+      await page.getByRole('button', { name }).click();
+      await page.keyboard.press('Escape');
+    };
+    await tools('Alta satır ekle');
+    await expect(body(page).locator('tr')).toHaveCount(4);
+    await tools('Sağa sütun ekle');
+    await expect(body(page).locator('th')).toHaveCount(4);
+    await page.getByTestId('table-menu').click();
+    await page.getByRole('radio', { name: '#fef9c3' }).click();
+    await page.keyboard.press('Escape');
+    await expect(body(page).locator('td[data-bg="#fef9c3"]')).toHaveCount(1);
+
+    // İki hücre seçilip birleştirilir.
+    const cells = body(page).locator('tr').nth(1).locator('td');
+    await cells.nth(0).click();
+    await cells.nth(1).click({ modifiers: ['Shift'] });
+    await tools('Hücreleri birleştir');
+    await expect(body(page).locator('td[colspan="2"]')).toHaveCount(1);
     await expect(page.getByText('Kaydedildi')).toBeVisible();
+
+    // Kaydedilen tablo (birleşik hücre, renk) sunucu doğrulamasından geçer ve geri yüklenir.
+    await page.reload();
+    await expect(body(page).locator('td[colspan="2"]')).toHaveCount(1);
+    await expect(body(page).locator('th')).toHaveCount(4);
 
     await page.getByRole('button', { name: 'Ürün gereksinimleri altına sayfa ekle' }).click();
     await expect(page.getByRole('textbox', { name: 'Sayfa başlığı' })).toHaveValue(

@@ -98,4 +98,36 @@ describe('docToDocx', () => {
     const { xml } = await build({ type: 'doc', content: [] });
     expect(xml).toContain('Mimari');
   });
+
+  it('keeps merged cells and cell colours from the table tools', async () => {
+    const { xml } = await build({
+      type: 'doc',
+      content: [
+        {
+          type: 'table',
+          content: [
+            {
+              type: 'tableRow',
+              content: [
+                {
+                  type: 'tableCell',
+                  attrs: { colspan: 2, rowspan: 1, backgroundColor: '#fde68a' },
+                  content: [p(text('Birleşik'))],
+                },
+              ],
+            },
+            {
+              type: 'tableRow',
+              content: [
+                { type: 'tableCell', content: [p(text('A'))] },
+                { type: 'tableCell', content: [p(text('B'))] },
+              ],
+            },
+          ],
+        },
+      ],
+    });
+    expect(xml).toContain('w:gridSpan w:val="2"');
+    expect(xml).toContain('FDE68A');
+  });
 });

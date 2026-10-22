@@ -264,6 +264,40 @@
   font-weight: 600;
   text-align: left;
 }
+/* Tablo araçları (Word benzeri): renkli hücrede metin her temada okunur, seçili hücreler vurgulanır,
+   sütun kenarından sürükleyerek genişlik ayarlanır. */
+.rich-text th,
+.rich-text td {
+  position: relative;
+}
+.rich-text td[data-bg],
+.rich-text th[data-bg] {
+  color: #1f2937;
+}
+.rich-text .tableWrapper {
+  overflow-x: auto;
+  margin: 0.5rem 0;
+}
+.rich-text .selectedCell::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: color-mix(in oklab, var(--primary) 18%, transparent);
+  pointer-events: none;
+}
+.rich-text .column-resize-handle {
+  position: absolute;
+  top: 0;
+  right: -2px;
+  bottom: -2px;
+  width: 4px;
+  background: var(--primary);
+  pointer-events: none;
+}
+.rich-text.resize-cursor,
+.ProseMirror.resize-cursor {
+  cursor: col-resize;
+}
 .rich-text hr {
   border-color: var(--border);
 }

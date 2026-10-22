@@ -19,7 +19,6 @@ import {
   Minus,
   Redo2,
   Strikethrough,
-  Table as TableIcon,
   Undo2,
 } from 'lucide-react';
 import { type FormEvent, type ReactNode, useEffect, useRef, useState } from 'react';
@@ -36,6 +35,8 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
+import { ColoredTableCell, ColoredTableHeader } from './table-extensions';
+import { TableMenu } from './table-menu';
 
 const SAVE_DELAY_MS = 1500;
 
@@ -119,7 +120,14 @@ export function RichTextEditor({
       Placeholder.configure({ placeholder }),
       ...(variant === 'page'
         ? [
-            TableKit.configure({ table: { resizable: false } }),
+            // Sütun genişliği sürüklenerek ayarlanır; hücreler renklendirilebilir (Word'deki gibi).
+            TableKit.configure({
+              table: { resizable: true, lastColumnResizable: false },
+              tableCell: false,
+              tableHeader: false,
+            }),
+            ColoredTableCell,
+            ColoredTableHeader,
             TaskList,
             TaskItem.configure({ nested: true }),
             Image.configure({ inline: false, allowBase64: false }),
@@ -357,15 +365,7 @@ export function RichTextEditor({
           )}
           {variant === 'page' && (
             <>
-              {tool(
-                'table',
-                <TableIcon className="size-4" />,
-                () => {
-                  if (editor.isActive('table')) chain().deleteTable().run();
-                  else chain().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
-                },
-                editor.isActive('table'),
-              )}
+              <TableMenu editor={editor} />
               {tool('rule', <Minus className="size-4" />, () => chain().setHorizontalRule().run())}
               {onUploadImage &&
                 tool('image', <ImagePlus className="size-4" />, () => fileInput?.click())}

@@ -71,6 +71,29 @@ const BLOCK_NODES = new Set([
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
+/** Tablo hücresi rengi: yalnızca `#rrggbb` (stil olarak yazılır; serbest metin kabul edilmez). */
+export const CELL_COLOR_PATTERN = /^#[0-9a-f]{6}$/i;
+const MAX_SPAN = 50;
+const isSpan = (v: unknown) =>
+  Number.isInteger(v) && (v as number) >= 1 && (v as number) <= MAX_SPAN;
+
+/** Hücre öznitelikleri (birleştirme, sütun genişliği, arka plan rengi; Faz 15 tablo araçları). */
+function validCellAttrs(attrs: Record<string, unknown> | undefined): boolean {
+  if (!attrs) return true;
+  const { colspan, rowspan, colwidth, backgroundColor } = attrs;
+  if (colspan !== undefined && !isSpan(colspan)) return false;
+  if (rowspan !== undefined && !isSpan(rowspan)) return false;
+  if (colwidth !== undefined && colwidth !== null) {
+    if (!Array.isArray(colwidth) || colwidth.length > MAX_SPAN) return false;
+    if (!colwidth.every((w) => Number.isInteger(w) && w >= 0 && w <= 4000)) return false;
+  }
+  if (backgroundColor !== undefined && backgroundColor !== null) {
+    if (typeof backgroundColor !== 'string' || !CELL_COLOR_PATTERN.test(backgroundColor))
+      return false;
+  }
+  return true;
+}
+
 function validNode(node: unknown, depth: number): node is RichTextNode {
   if (!isRecord(node) || depth > MAX_DEPTH) return false;
   const { type, content, marks, text, attrs } = node;
@@ -97,6 +120,7 @@ function validNode(node: unknown, depth: number): node is RichTextNode {
   if (type === 'taskItem' && attrs?.checked !== undefined && typeof attrs.checked !== 'boolean') {
     return false;
   }
+  if ((type === 'tableCell' || type === 'tableHeader') && !validCellAttrs(attrs)) return false;
   if (type === 'heading') {
     const level = attrs?.level;
     if (typeof level !== 'number' || ![1, 2, 3].includes(level)) return false;
