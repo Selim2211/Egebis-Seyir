@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { ChevronRight, GripVertical } from 'lucide-react';
-import { type ComponentProps, useState } from 'react';
+import { type ComponentProps, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { UserAvatar } from '@/components/user-avatar';
 import { WorkItemTypeIcon } from '@/components/work-item/work-item-visuals';
@@ -105,6 +105,12 @@ export function ItemWithSubtasks({
 }: ComponentProps<typeof BacklogRow> & { enabled: boolean }) {
   const [open, setOpen] = useState(false);
   const count = row.item.type === 'EPIC' ? 0 : row.item.childCount;
+  // Alt öğe eklenince (sürükleyip bırakınca) liste açılır; öğe kaybolmuş gibi görünmesin.
+  const previous = useRef(count);
+  useEffect(() => {
+    if (count > previous.current) setOpen(true);
+    previous.current = count;
+  }, [count]);
   return (
     <>
       <SortableRow id={row.item.id} enabled={enabled}>

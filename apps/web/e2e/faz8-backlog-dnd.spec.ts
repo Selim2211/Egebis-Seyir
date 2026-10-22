@@ -138,7 +138,8 @@ test.describe.serial('Backlog sürükle-bırak ve sprint ağacı', () => {
     await expect(backlog.getByRole('link', { name: 'Üçüncü iş' })).toHaveCount(0);
 
     // Alt öğe Task'ın altında açılır; sürüklenince altta Ayır alanı çıkar, bırakınca Task olur.
-    await backlog.getByRole('button', { name: 'Alt öğeleri göster' }).click();
+    // Alt öğe eklenince Task'ın altı kendiliğinden açılır; öğe kaybolmuş gibi durmaz.
+    await expect(backlog.locator('[data-subtask]', { hasText: 'Üçüncü iş' })).toBeVisible();
     const sub = backlog.locator('[data-subtask]', { hasText: 'Üçüncü iş' });
     const s = (await sub.boundingBox())!;
     await page.mouse.move(s.x + s.width * 0.62, s.y + s.height / 2);
