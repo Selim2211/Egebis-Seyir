@@ -24,6 +24,7 @@ import {
   Plus,
   Search,
   Unlink,
+  Zap,
   Upload,
   X,
 } from 'lucide-react';
@@ -72,6 +73,7 @@ import {
 import { SprintActions } from './sprint-actions';
 import { SprintDialog } from './sprint-dialog';
 import { RestoreSprintDialog } from '@/features/backup/backup';
+import { PromoteEpicDialog } from '@/features/work-items/promote-epic-dialog';
 import { useUnnestItem } from '@/features/work-items/queries';
 import { PriorityColorToggle } from '@/features/work-items/priority-colors';
 import { SprintImportDialog } from './sprint-import-dialog';
@@ -139,6 +141,7 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
   const [grouping, setGrouping] = useState(false);
   const [nestingSelected, setNestingSelected] = useState(false);
   const [movingSelected, setMovingSelected] = useState(false);
+  const [converting, setConverting] = useState<BulkItem | null>(null);
   const [unnestingSelected, setUnnestingSelected] = useState(false);
   const [restoring, setRestoring] = useState(false);
   // Aktif sprint'e ekleme/çıkarma kapsam değişikliğidir; onay istenir (brief §6.1.4).
@@ -746,6 +749,20 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
                     {t('groupEpic.action')}
                   </Button>
                 )}
+                {canWrite &&
+                  space.data.scrumEnabled &&
+                  selected.length === 1 &&
+                  selected[0]!.type === 'TASK' && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      data-testid="convert-selected"
+                      onClick={() => setConverting(selected[0]!)}
+                    >
+                      <Zap />
+                      {t('promoteEpic.menu')}
+                    </Button>
+                  )}
                 {canWrite && selected.some(canBecomeSubtask) && (
                   <Button
                     variant="outline"
@@ -799,6 +816,7 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
           onOpenChange={setGrouping}
           onDone={() => selection.clear()}
         />
+        <PromoteEpicDialog item={converting} onClose={() => setConverting(null)} />
         <MoveSelectedDialog
           items={movable}
           currentSpaceId={spaceId}

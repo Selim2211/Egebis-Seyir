@@ -1140,3 +1140,14 @@
   - Yetki: görme `doc.view`, yükleme/düzenleme/silme `doc.write`. Klasör silinince alt klasörler silinir, videolar silinmez, Klasörsüz'e düşer.
 - **Alternatifler:** Mevcut ek altyapısı (tek istekte, bellekte, 100 MB) — büyük videoda bellek ve vekil sınırı sorunu; harici video servisi — şirket içi kurulumda dış bağımlılık istenmedi.
 - **Bilinen sınırlar:** Videolar Proje yedeğine (`backup.zip`) eklenmez (boyut); disk yedeği `UPLOAD_DIR` ile alınır. Yarım kalan yüklemeler otomatik temizlenmez (kayıt silinince dosya da silinir). Küçük resim sunucuda üretilmez (tarayıcı ilk kareyi gösterir).
+
+## ADR-130 — Epic işlemlerinin ayrımı: Grupla (Sub-Task'ları götür seçeneği) ve Dönüştür (Faz 15, Görev 3)
+
+- **Tarih:** 2026-10-22 · **Durum:** Kabul (kullanıcının 3 durumu; ADR-124 ve ADR-126 eklerini değiştirir).
+- **Karar:**
+  - **Grupla** ("Epic altında grupla", çubuk): seçilen Task'lar var olan ya da yeni Epic'in (adı ilk Task'ın adıyla dolu) altına girer. Seçilenlerde Sub-Task'lı Task varsa pencerede **"Sub-Task'ları da birlikte götür"** anahtarı çıkar:
+    - **Açık:** hiyerarşi korunur (Epic → Task → Sub-Task).
+    - **Kapalı (varsayılan):** Sub-Task'lar ayrılır, **bağımsız Task** olur, Epic dışında kalır; eski Task'ın açık sprint'indeyse o sprint'te durur (sprint üyelik geçmişine yazılır).
+    - Önizleme kutusu seçime göre ne olacağını yazar. API: `items/group { withSubtasks }` (gövdede yoksa `true`, eski istemciler için).
+  - **Dönüştür** ("Epic'e dönüştür"): ayrı işlemdir; tek Task seçilince çubukta düğme olarak (ve satır menüsü/detayda) çıkar. Ad varsayılan Task'ın adıdır, değiştirilebilir; önizleme "X Epic olacak, N alt görevi Task olup altında kalacak" der. Gruplama penceresindeki mod seçimi kaldırıldı.
+- **Neden:** Gruplama ve dönüştürme aynı pencerede seçilince kullanıcı iki işlemi karıştırıyordu; Sub-Task'ların ne olacağı açıkça seçilmeli.

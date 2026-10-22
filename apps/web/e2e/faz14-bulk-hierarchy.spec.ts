@@ -116,7 +116,7 @@ test.describe.serial('Backlog toplu hiyerarşi', () => {
     await group.getByRole('button', { name: 'İptal' }).click();
     await key(3).uncheck();
 
-    // Tek Task ve alt görevi varsa iki yol sunulur: Epic altına al ya da Epic'e dönüştür.
+    // Dönüştür ayrı bir işlemdir: tek Task seçilince çubukta "Epic'e dönüştür" çıkar.
     const parent = await make('Büyük iş');
     const sub = (title: string) =>
       call<{ id: string }>(page, 'POST', `/workspaces/${ws}/lists/${space.lists[0]!.id}/items`, {
@@ -129,15 +129,14 @@ test.describe.serial('Backlog toplu hiyerarşi', () => {
     const big = await call<{ key: string }>(page, 'GET', `/workspaces/${ws}/items/${parent.id}`);
     await page.reload();
     await page.getByLabel(`${big.key} öğesini seç`).check();
-    await bar.getByTestId('group-selected').click();
-    const modes = page.getByRole('dialog', { name: /1 öğeyi Epic altında grupla/ });
-    await expect(modes.getByRole('radiogroup')).toBeVisible();
-    await expect(modes.getByTestId('group-preview')).toContainText('2 alt görev');
-    await modes.getByRole('radio', { name: /Epic’e dönüştür/ }).check();
-    await expect(modes).toContainText(`${big.key} Epic olacak. 2 alt görevi Task`);
-    await expect(modes.getByLabel('Epic’in adı')).toHaveValue('Büyük iş');
-    await modes.getByLabel('Epic’in adı').fill('Büyük proje');
-    await modes.getByRole('button', { name: /Epic.e dönüştür/ }).click();
+    await bar.getByTestId('convert-selected').click();
+    const convert = page.getByRole('dialog', { name: new RegExp(`${big.key} Epic`) });
+    await expect(convert.getByTestId('promote-preview')).toContainText(
+      `${big.key} Epic olacak. 2 alt görevi Task`,
+    );
+    await expect(convert.getByLabel('Epic’in adı')).toHaveValue('Büyük iş');
+    await convert.getByLabel('Epic’in adı').fill('Büyük proje');
+    await convert.getByRole('button', { name: /Epic.e dönüştür/ }).click();
     await expect(page.getByText(`${big.key} artık bir Epic.`)).toBeVisible();
     const epic = await call<{ type: string; title: string }>(
       page,
@@ -332,7 +331,14 @@ test.describe.serial('Backlog toplu hiyerarşi', () => {
     const bar = page.getByRole('region', { name: 'Seçili öğeler' });
     await bar.getByTestId('group-selected').click();
     const group = page.getByRole('dialog', { name: /2 öğeyi Epic altında grupla/ });
-    await expect(group.getByTestId('group-preview')).toContainText('4 alt görev');
+    // Varsayılan: Sub-Task'lar götürülmez; anahtar açılınca Task'larıyla birlikte gider.
+    await expect(group.getByTestId('group-preview')).toContainText(
+      '4 Sub-Task ayrılıp bağımsız Task olacak',
+    );
+    await group.getByTestId('with-subtasks').click();
+    await expect(group.getByTestId('group-preview')).toContainText(
+      "4 Sub-Task Task'larıyla birlikte gidecek.",
+    );
     await group.getByLabel('Epic ara…').fill('hedef');
     await expect(group.getByTestId('epic-list').getByRole('option')).toHaveCount(2); // Hedef Epic + yeni
     await group.getByRole('option', { name: /Hedef Epic/ }).click();

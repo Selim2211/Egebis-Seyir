@@ -2350,24 +2350,20 @@
   "groupEpic": {
     "action": "Group under an Epic",
     "title": "Group {{count}} items under an Epic",
-    "body": "The selected Tasks go under the Epic you choose. Tasks with Sub-Tasks bring their Sub-Tasks; their sprints do not change.",
+    "body": "Selected Tasks go under the Epic you choose; their sprints don't change.",
     "epic": "Epic",
     "newEpic": "+ Create a new Epic…",
     "newName": "Name of the new Epic",
     "confirm": "Group",
     "done": "{{count}} items were grouped under the Epic.",
-    "preview": "{{count}} items will move under the Epic.",
-    "previewSub": "Their Sub-Tasks come along ({{count}} sub-items in total).",
-    "modeLabel": "What do you want to do?",
-    "mode": {
-      "group": "Put under an Epic",
-      "groupHint": "The Task stays as it is and goes under an existing or new Epic. Its Sub-Tasks come with it.",
-      "convert": "Convert to Epic",
-      "convertHint": "The Task itself becomes an Epic. Its Sub-Tasks become Tasks under that Epic."
-    },
+    "preview": "{{count}} Tasks will move under the Epic.",
     "convertPreview": "{{key}} will become an Epic. Its {{count}} sub-items become Tasks under the Epic.",
     "search": "Search Epics…",
-    "noEpic": "No matching Epics."
+    "noEpic": "No matching Epics.",
+    "withSubtasks": "Bring Sub-Tasks along",
+    "withSubtasksHint": "On: Sub-Tasks move under the Epic with their Task (Epic → Task → Sub-Task). Off: Sub-Tasks are detached, become standalone Tasks and stay outside the Epic.",
+    "previewWith": "{{count}} Sub-Tasks come along with their Tasks.",
+    "previewWithout": "{{count}} Sub-Tasks will be detached as standalone Tasks, outside the Epic (sprints unchanged)."
   },
   "bulk": {
     "nestAction": "Make Sub-Task",

@@ -2350,24 +2350,20 @@
   "groupEpic": {
     "action": "Epic altında grupla",
     "title": "{{count}} öğeyi Epic altında grupla",
-    "body": "Seçilen Task’lar seçtiğin Epic’in altına girer. Sub-Task’lı Task’lar Sub-Task’larıyla birlikte gelir; sprint’leri değişmez.",
+    "body": "Seçilen Task’lar seçtiğin Epic’in altına girer; sprint’leri değişmez.",
     "epic": "Epic",
     "newEpic": "+ Yeni Epic oluştur…",
     "newName": "Yeni Epic’in adı",
     "confirm": "Grupla",
     "done": "{{count}} öğe Epic altında toplandı.",
-    "preview": "{{count}} öğe Epic’in altına taşınacak.",
-    "previewSub": "Sub-Task’ları onlarla birlikte gelir (toplam {{count}} alt görev).",
-    "modeLabel": "Ne yapmak istiyorsun?",
-    "mode": {
-      "group": "Epic altına al",
-      "groupHint": "Bu Task olduğu gibi kalır; var olan ya da yeni bir Epic’in altına girer. Sub-Task’ları onunla gelir.",
-      "convert": "Epic’e dönüştür",
-      "convertHint": "Bu Task’ın kendisi Epic olur. Sub-Task’ları Task olup Epic’in altında kalır."
-    },
+    "preview": "{{count}} Task Epic'in altına taşınacak.",
     "convertPreview": "{{key}} Epic olacak. {{count}} alt görevi Task olup Epic’in altında kalacak.",
     "search": "Epic ara…",
-    "noEpic": "Eşleşen Epic yok."
+    "noEpic": "Eşleşen Epic yok.",
+    "withSubtasks": "Sub-Task'ları da birlikte götür",
+    "withSubtasksHint": "Açıksa Sub-Task'lar Task'larıyla birlikte Epic'in altına gider (Epic → Task → Sub-Task). Kapalıysa Sub-Task'lar ayrılır, bağımsız Task olur ve Epic dışında kalır.",
+    "previewWith": "{{count}} Sub-Task Task'larıyla birlikte gidecek.",
+    "previewWithout": "{{count}} Sub-Task ayrılıp bağımsız Task olacak, Epic dışında kalacak (sprint'leri değişmez)."
   },
   "bulk": {
     "nestAction": "Alt görev yap",

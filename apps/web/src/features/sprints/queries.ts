@@ -121,7 +121,7 @@ export function useGroupItems(spaceId: string) {
   const qc = useQueryClient();
   const { id: workspaceId } = useCurrentWorkspace();
   return useMutation({
-    mutationFn: (body: { itemIds: string[]; epicId: string }) =>
+    mutationFn: (body: { itemIds: string[]; epicId: string; withSubtasks: boolean }) =>
       apiRequest(`${ws(workspaceId)}/spaces/${spaceId}/items/group`, NoContent, {
         method: 'POST',
         body,

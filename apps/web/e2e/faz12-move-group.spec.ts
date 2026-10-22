@@ -107,6 +107,8 @@ test.describe.serial('Taşı ve grupla', () => {
     const dialog = page.getByRole('dialog', { name: /3 öğeyi Epic altında grupla/ });
     await dialog.getByRole('option', { name: '+ Yeni Epic oluştur…' }).click();
     await dialog.getByLabel('Yeni Epic’in adı').fill('Hesap yönetimi');
+    // Sub-Task'lı Task (BRN-3) alt öğesiyle birlikte gitsin.
+    await dialog.getByTestId('with-subtasks').click();
     await dialog.getByRole('button', { name: 'Grupla' }).click();
     await expect(page.getByText('3 öğe Epic altında toplandı.')).toBeVisible();
     await expect(bar).toHaveCount(0);

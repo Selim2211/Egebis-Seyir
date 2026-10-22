@@ -102,6 +102,32 @@ describe("Gruplama, Epic'e dönüştürme ve Space'ler arası taşıma", () => {
     expect(child.type).toBe('SUBTASK');
   });
 
+  it("'Sub-Task'ları götür' kapalıysa Sub-Task'lar bağımsız Task olur, Epic dışında kalır ve sprint'te durur", async () => {
+    const s = await space('MOB');
+    const epic = await item(s.listId, { type: 'EPIC', title: 'Hesap' });
+    const parent = await item(s.listId, { type: 'TASK', title: 'Profil' });
+    const sub1 = await item(s.listId, { type: 'SUBTASK', title: 'Fotoğraf', parentId: parent.id });
+    const sub2 = await item(s.listId, { type: 'SUBTASK', title: 'Ad', parentId: parent.id });
+    const one = await sprint(s.id, 'Sprint 1');
+    await toSprint(s.id, [parent.id], one.id);
+
+    await owner
+      .post(api(`/spaces/${s.id}/items/group`), {
+        itemIds: [parent.id],
+        epicId: epic.id,
+        withSubtasks: false,
+      })
+      .expect(204);
+
+    expect((await detail(parent.id)).parentId).toBe(epic.id);
+    expect((await detail(parent.id)).children).toEqual([]);
+    for (const sub of [sub1, sub2]) {
+      const d = await detail(sub.id);
+      expect(d).toMatchObject({ type: 'TASK', parentId: null, sprintId: one.id });
+    }
+    expect((await sprintKeys(one.id)).sort()).toEqual([parent.key, sub1.key, sub2.key].sort());
+  });
+
   it('uygun olmayan öğe varsa hiçbiri taşınmaz; Epic olmayan hedef ve başka Space reddedilir', async () => {
     const s = await space('MOB');
     const other = await space('OTH');

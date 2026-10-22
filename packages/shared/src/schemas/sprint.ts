@@ -156,6 +156,11 @@ export type NestItemRequest = z.infer<typeof NestItemRequestSchema>;
 export const GroupItemsRequestSchema = z.object({
   itemIds: z.array(z.uuid()).min(1).max(200),
   epicId: z.uuid(),
+  /**
+   * true: Sub-Task'lar Task'ıyla birlikte gider (Epic → Task → Sub-Task korunur). false: Sub-Task'lar
+   * ayrılır, bağımsız Task olur, Epic dışında kalır ve eski Task'ın sprint'inde durur (ADR-130).
+   */
+  withSubtasks: z.boolean().default(true),
 });
 export type GroupItemsRequest = z.infer<typeof GroupItemsRequestSchema>;
 

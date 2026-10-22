@@ -299,6 +299,7 @@ export class BacklogService {
       where: { id: { in: ids }, spaceId, ...countedItems },
       include: {
         parent: { select: { keyPrefix: true, number: true } },
+        sprint: { select: { id: true, name: true, status: true } },
         _count: { select: { children: { where: { deletedAt: null } } } },
       },
     });
@@ -327,6 +328,43 @@ export class BacklogService {
           action: 'item.updated',
           changes: asJson({ parentId: { from: keyOf(item.parent), to: keyOf(epic) } }),
         });
+      }
+      if (input.withSubtasks) return;
+      // Sub-Task'lar götürülmezse: ayrılıp bağımsız Task olur, Epic dışında kalır ve eski Task'ın
+      // (açık) sprint'inde durur; sprint'e girişleri üyelik geçmişine yazılır (ADR-130).
+      for (const { item } of plans) {
+        if (item._count.children === 0) continue;
+        const sprint = item.sprint && isSprintOpen(item.sprint.status) ? item.sprint : null;
+        const children = await tx.workItem.findMany({
+          where: { parentId: item.id, type: 'SUBTASK', ...countedItems },
+          select: { id: true, points: true },
+        });
+        for (const child of children) {
+          await tx.workItem.update({
+            where: { id: child.id },
+            data: { parentId: null, type: 'TASK', sprintId: sprint?.id ?? null },
+          });
+          if (sprint) {
+            await this.recordMembership(
+              tx,
+              { id: child.id, points: child.points, sprintId: null, sprint: null },
+              sprint,
+              workspaceId,
+              actorId,
+            );
+          }
+          await this.activity.record(tx, {
+            workspaceId,
+            actorId,
+            entityType: 'item',
+            entityId: child.id,
+            action: 'item.updated',
+            changes: asJson({
+              parentId: { from: formatItemKey(item.keyPrefix, item.number), to: null },
+              type: { from: 'SUBTASK', to: 'TASK' },
+            }),
+          });
+        }
       }
     });
   }

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { Field, FormError } from '@/components/form';
 import { Input } from '@/components/ui/input';
+import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -12,7 +13,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { useCreateItem, usePromoteToEpic } from '@/features/work-items/queries';
+import { useCreateItem } from '@/features/work-items/queries';
 import { useErrorMessage } from '@/lib/use-error-message';
 import { cn } from '@/lib/utils';
 import type { BulkItem } from './bulk-utils';
@@ -82,15 +83,11 @@ function GroupForm({
   const errorMessage = useErrorMessage();
   const create = useCreateItem();
   const group = useGroupItems(spaceId);
-  const promote = usePromoteToEpic();
   const itemIds = items.map((i) => i.id);
   const defaultTitle = items[0]?.title ?? '';
-  // Tek Task ve alt görevi varsa iki yol sunulur: Epic altına al ya da Task'ı Epic'e dönüştür.
-  const single = items.length === 1 && items[0]!.type === 'TASK' ? items[0]! : null;
-  const canConvert = single !== null && single.childCount > 0;
-  const [mode, setMode] = useState<'group' | 'convert'>('group');
-  const converting = canConvert && mode === 'convert';
   const subtaskCount = items.reduce((n, i) => n + (i.type === 'TASK' ? i.childCount : 0), 0);
+  // Varsayılan: Sub-Task'lar götürülmez (ayrılıp bağımsız Task olur); anahtar açılırsa Task'la gider.
+  const [withSubtasks, setWithSubtasks] = useState(false);
   const [epicQuery, setEpicQuery] = useState('');
   const [choice, setChoice] = useState(epics[0]?.id ?? NEW_EPIC);
   const [title, setTitle] = useState(defaultTitle);
@@ -100,28 +97,12 @@ function GroupForm({
     ? epics.filter((e) => `${e.key} ${e.title}`.toLocaleLowerCase().includes(q))
     : epics;
   const creating = choice === NEW_EPIC;
-  const invalid = (creating || converting) && !title.trim();
+  const invalid = creating && !title.trim();
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
     if (invalid) return;
     setError(null);
-    if (converting && single) {
-      try {
-        const name = title.trim();
-        await promote.mutateAsync({
-          itemId: single.id,
-          title: name !== single.title ? name : undefined,
-        });
-        toast.success(t('promoteEpic.done', { key: single.key }));
-        onDone();
-        onClose();
-      } catch (err) {
-        setError(err);
-        toast.error(errorMessage(err));
-      }
-      return;
-    }
     try {
       const epicId = creating
         ? (
@@ -131,7 +112,7 @@ function GroupForm({
             })
           ).id
         : choice;
-      await group.mutateAsync({ itemIds, epicId });
+      await group.mutateAsync({ itemIds, epicId, withSubtasks });
       toast.success(t('groupEpic.done', { count: itemIds.length }));
       onDone();
       onClose();
@@ -147,109 +128,85 @@ function GroupForm({
         <DialogTitle>{t('groupEpic.title', { count: itemIds.length })}</DialogTitle>
       </DialogHeader>
       <DialogBody className="flex flex-col gap-4">
-        {canConvert && (
-          <div role="radiogroup" aria-label={t('groupEpic.modeLabel')} className="grid gap-2">
-            {(['group', 'convert'] as const).map((m) => (
-              <label
-                key={m}
-                className={cn(
-                  'flex cursor-pointer items-start gap-2.5 rounded-lg border p-3 text-sm',
-                  mode === m
-                    ? 'border-primary bg-primary/5 ring-primary/30 ring-1'
-                    : 'hover:bg-accent/40',
-                )}
-              >
-                <input
-                  type="radio"
-                  name="group-mode"
-                  checked={mode === m}
-                  onChange={() => setMode(m)}
-                  className="mt-0.5"
-                />
-                <span>
-                  <span className="block font-medium">{t(`groupEpic.mode.${m}`)}</span>
-                  <span className="text-muted-foreground block text-xs">
-                    {t(`groupEpic.mode.${m}Hint`)}
-                  </span>
+        <>
+          <p className="text-muted-foreground text-sm">{t('groupEpic.body')}</p>
+          {subtaskCount > 0 && (
+            <label className="hover:bg-accent/40 flex cursor-pointer items-start gap-3 rounded-lg border p-3 text-sm">
+              <Switch
+                checked={withSubtasks}
+                onCheckedChange={setWithSubtasks}
+                aria-label={t('groupEpic.withSubtasks')}
+                data-testid="with-subtasks"
+                className="mt-0.5"
+              />
+              <span>
+                <span className="block font-medium">{t('groupEpic.withSubtasks')}</span>
+                <span className="text-muted-foreground block text-xs">
+                  {t('groupEpic.withSubtasksHint')}
                 </span>
-              </label>
-            ))}
+              </span>
+            </label>
+          )}
+          <div className="bg-muted rounded-md px-3 py-2 text-sm" data-testid="group-preview">
+            <p>{t('groupEpic.preview', { count: items.length })}</p>
+            {subtaskCount > 0 && (
+              <p className="text-muted-foreground mt-0.5 text-xs">
+                {withSubtasks
+                  ? t('groupEpic.previewWith', { count: subtaskCount })
+                  : t('groupEpic.previewWithout', { count: subtaskCount })}
+              </p>
+            )}
           </div>
-        )}
-        {converting && single ? (
-          <>
-            <p className="bg-muted rounded-md px-3 py-2 text-sm">
-              {t('groupEpic.convertPreview', { key: single.key, count: single.childCount })}
-            </p>
+          <div className="flex flex-col gap-1.5">
+            <span className="text-sm font-medium">{t('groupEpic.epic')}</span>
+            <Input
+              value={epicQuery}
+              onChange={(e) => setEpicQuery(e.target.value)}
+              placeholder={t('groupEpic.search')}
+              aria-label={t('groupEpic.search')}
+            />
+            <div
+              role="listbox"
+              aria-label={t('groupEpic.epic')}
+              data-testid="epic-list"
+              className="max-h-44 overflow-y-auto rounded-lg border p-1"
+            >
+              {visibleEpics.map((epic) => (
+                <EpicOption
+                  key={epic.id}
+                  selected={choice === epic.id}
+                  onSelect={() => setChoice(epic.id)}
+                >
+                  <span className="text-muted-foreground font-mono text-xs">{epic.key}</span>{' '}
+                  {epic.title}
+                </EpicOption>
+              ))}
+              {visibleEpics.length === 0 && epicQuery.trim() && (
+                <p className="text-muted-foreground px-3 py-2 text-sm">{t('groupEpic.noEpic')}</p>
+              )}
+              <EpicOption selected={choice === NEW_EPIC} onSelect={() => setChoice(NEW_EPIC)}>
+                {t('groupEpic.newEpic')}
+              </EpicOption>
+            </div>
+          </div>
+          {creating && (
             <Field
-              label={t('promoteEpic.name')}
+              label={t('groupEpic.newName')}
               value={title}
               maxLength={500}
               autoFocus
               onChange={(e) => setTitle(e.target.value)}
             />
-          </>
-        ) : (
-          <>
-            <p className="text-muted-foreground text-sm">{t('groupEpic.body')}</p>
-            <p className="bg-muted rounded-md px-3 py-2 text-sm" data-testid="group-preview">
-              {t('groupEpic.preview', { count: items.length })}
-              {subtaskCount > 0 && ` ${t('groupEpic.previewSub', { count: subtaskCount })}`}
-            </p>
-            <div className="flex flex-col gap-1.5">
-              <span className="text-sm font-medium">{t('groupEpic.epic')}</span>
-              <Input
-                value={epicQuery}
-                onChange={(e) => setEpicQuery(e.target.value)}
-                placeholder={t('groupEpic.search')}
-                aria-label={t('groupEpic.search')}
-              />
-              <div
-                role="listbox"
-                aria-label={t('groupEpic.epic')}
-                data-testid="epic-list"
-                className="max-h-44 overflow-y-auto rounded-lg border p-1"
-              >
-                {visibleEpics.map((epic) => (
-                  <EpicOption
-                    key={epic.id}
-                    selected={choice === epic.id}
-                    onSelect={() => setChoice(epic.id)}
-                  >
-                    <span className="text-muted-foreground font-mono text-xs">{epic.key}</span>{' '}
-                    {epic.title}
-                  </EpicOption>
-                ))}
-                {visibleEpics.length === 0 && epicQuery.trim() && (
-                  <p className="text-muted-foreground px-3 py-2 text-sm">{t('groupEpic.noEpic')}</p>
-                )}
-                <EpicOption selected={choice === NEW_EPIC} onSelect={() => setChoice(NEW_EPIC)}>
-                  {t('groupEpic.newEpic')}
-                </EpicOption>
-              </div>
-            </div>
-            {creating && (
-              <Field
-                label={t('groupEpic.newName')}
-                value={title}
-                maxLength={500}
-                autoFocus
-                onChange={(e) => setTitle(e.target.value)}
-              />
-            )}
-          </>
-        )}
+          )}
+        </>
         <FormError error={error} />
       </DialogBody>
       <DialogFooter>
         <Button type="button" variant="ghost" onClick={onClose}>
           {t('common.cancel')}
         </Button>
-        <Button
-          type="submit"
-          disabled={invalid || create.isPending || group.isPending || promote.isPending}
-        >
-          {converting ? t('promoteEpic.confirm') : t('groupEpic.confirm')}
+        <Button type="submit" disabled={invalid || create.isPending || group.isPending}>
+          {t('groupEpic.confirm')}
         </Button>
       </DialogFooter>
     </form>
