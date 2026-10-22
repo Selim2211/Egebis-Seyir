@@ -177,6 +177,7 @@ model User {
   docVersions             DocVersion[]             @relation("DocVersionAuthor")
   templates               Template[]
   apiTokens               ApiToken[]
+  videosUploaded          Video[]                  @relation("VideoUploader")
 
   @@map("users")
 }
@@ -269,6 +270,8 @@ model Workspace {
   teams                   Team[]
   conversations           Conversation[]
   messages                Message[]
+  videoFolders            VideoFolder[]
+  videos                  Video[]
 
   @@map("workspaces")
 }
@@ -405,6 +408,8 @@ model Space {
   sprints          Sprint[]
   docs             Doc[]
   dashboardLayouts DashboardLayout[]
+  videoFolders     VideoFolder[]
+  videos           Video[]
 
   notifications Notification[]
 
@@ -1560,16 +1565,16 @@ model WorkItemAccessEntry {
 /// Uygulama içinden girilen SMTP ayarı (ADR-120). Sunucu başına tek satır (id = 1); yoksa .env değerleri kullanılır.
 /// Şifre AES-256-GCM ile şifreli saklanır; anahtar veritabanında değil sunucu diskinde tutulur.
 model MailSettings {
-  id            Int      @id @default(1)
-  host          String
-  port          Int
-  secure        Boolean  @default(false)
-  username      String?
-  passwordEnc   String?
+  id          Int      @id @default(1)
+  host        String
+  port        Int
+  secure      Boolean  @default(false)
+  username    String?
+  passwordEnc String?
   /// Gönderen: `Ad <adres@ornek.com>` ya da yalnızca adres.
-  fromAddress   String
-  updatedById   String?  @db.Uuid
-  updatedAt     DateTime @updatedAt @db.Timestamptz
+  fromAddress String
+  updatedById String?  @db.Uuid
+  updatedAt   DateTime @updatedAt @db.Timestamptz
 
   @@map("mail_settings")
 }
@@ -1581,4 +1586,57 @@ model AppSettings {
   updatedAt DateTime @updatedAt @db.Timestamptz
 
   @@map("app_settings")
+}
+
+/// Video arşivi klasörü (Faz 15, ADR-129): Proje başına iç içe klasörler.
+model VideoFolder {
+  id          String        @id @default(uuid(7)) @db.Uuid
+  workspaceId String        @db.Uuid
+  workspace   Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  spaceId     String        @db.Uuid
+  space       Space         @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  parentId    String?       @db.Uuid
+  parent      VideoFolder?  @relation("VideoFolderTree", fields: [parentId], references: [id], onDelete: Cascade)
+  children    VideoFolder[] @relation("VideoFolderTree")
+  name        String
+  createdAt   DateTime      @default(now()) @db.Timestamptz
+  videos      Video[]
+
+  @@index([spaceId, parentId])
+  @@map("video_folders")
+}
+
+enum VideoStatus {
+  /// Parçalar yükleniyor; listede "yükleniyor" görünür, oynatılamaz.
+  UPLOADING
+  READY
+}
+
+/// Video arşivi kaydı: dosya depolamada, parça parça yüklenir ve Range ile oynatılır (ADR-129).
+model Video {
+  id           String       @id @default(uuid(7)) @db.Uuid
+  workspaceId  String       @db.Uuid
+  workspace    Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  spaceId      String       @db.Uuid
+  space        Space        @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  /// Klasör silinince video kök klasöre düşer.
+  folderId     String?      @db.Uuid
+  folder       VideoFolder? @relation(fields: [folderId], references: [id], onDelete: SetNull)
+  title        String
+  description  String       @default("")
+  fileName     String
+  mime         String
+  /// Bildirilen toplam boyut (bayt); tamamlanınca yazılan boyutla eşleşmelidir.
+  size         BigInt
+  /// Şu ana kadar yazılan bayt (devam ettirilebilir yükleme).
+  received     BigInt       @default(0)
+  storageKey   String
+  status       VideoStatus  @default(UPLOADING)
+  uploadedById String?      @db.Uuid
+  uploadedBy   User?        @relation("VideoUploader", fields: [uploadedById], references: [id], onDelete: SetNull)
+  createdAt    DateTime     @default(now()) @db.Timestamptz
+  updatedAt    DateTime     @updatedAt @db.Timestamptz
+
+  @@index([spaceId, folderId])
+  @@map("videos")
 }

@@ -1,7 +1,9 @@
 import { randomUUID } from 'node:crypto';
-import { createReadStream, type ReadStream } from 'node:fs';
+import { createReadStream, createWriteStream, type ReadStream } from 'node:fs';
 import { mkdir, open, rm, stat, writeFile } from 'node:fs/promises';
 import { dirname, resolve, sep } from 'node:path';
+import { Transform, type Readable } from 'node:stream';
+import { pipeline } from 'node:stream/promises';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import type { Env } from '../config/env';
@@ -36,6 +38,50 @@ export class StorageService {
     return createReadStream(this.pathOf(key));
   }
 
+  /** Dosyanın `start`–`end` (dahil) bayt aralığı: video oynatıcının ileri sarması için (HTTP Range). */
+  openRange(key: string, start: number, end: number): ReadStream {
+    return createReadStream(this.pathOf(key), { start, end });
+  }
+
+  /** Dosya boyutu (bayt); dosya yoksa 0. */
+  async size(key: string): Promise<number> {
+    try {
+      return (await stat(this.pathOf(key))).size;
+    } catch {
+      return 0;
+    }
+  }
+
+  /**
+   * Akışı dosyanın sonuna ekler (parça parça büyük dosya yükleme). Bellekte tutulmaz; `maxBytes` aşılırsa
+   * akış kesilir ve `StorageLimitError` fırlar (o ana kadar yazılanlar çağıran tarafından geri alınır).
+   * Dönen değer bu çağrıda yazılan bayt sayısıdır.
+   */
+  async append(key: string, source: Readable, maxBytes: number): Promise<number> {
+    const path = this.pathOf(key);
+    await mkdir(dirname(path), { recursive: true });
+    let written = 0;
+    const limit = new Transform({
+      transform(chunk: Buffer, _enc, done) {
+        written += chunk.length;
+        if (written > maxBytes) done(new StorageLimitError());
+        else done(null, chunk);
+      },
+    });
+    await pipeline(source, limit, createWriteStream(path, { flags: 'a' }));
+    return written;
+  }
+
+  /** Dosyayı verilen boyuta keser (yarım kalan parçayı geri almak için). */
+  async truncate(key: string, size: number): Promise<void> {
+    const handle = await open(this.pathOf(key), 'r+');
+    try {
+      await handle.truncate(size);
+    } finally {
+      await handle.close();
+    }
+  }
+
   async exists(key: string): Promise<boolean> {
     try {
       return (await stat(this.pathOf(key))).isFile();
@@ -66,5 +112,12 @@ export class StorageService {
     const path = resolve(this.root, key);
     if (!path.startsWith(this.root + sep)) throw new Error('Geçersiz depolama anahtarı');
     return path;
+  }
+}
+
+/** `append` sınırı aşıldı. */
+export class StorageLimitError extends Error {
+  constructor() {
+    super('Depolama sınırı aşıldı');
   }
 }

@@ -49,17 +49,18 @@ Diğer kullanıcılar Ayarlar → Üyeler'den e-posta ile davet edilir.
 
 ## 3. Ayarlar (.env)
 
-| Değişken                          | Açıklama                                                                                  |
-| --------------------------------- | ----------------------------------------------------------------------------------------- |
-| `APP_URL`                         | Tarayıcıdaki tam adres, ör. `https://scrum.sirket.com`                                    |
-| `SITE_ADDRESS`                    | Alan adı → otomatik HTTPS; `:80` → yalnız HTTP (önünde başka HTTPS vekili varsa)          |
-| `COOKIE_SECURE`                   | HTTPS varsa `true`. **Yalnızca HTTP ile** kullanılıyorsa `false` (yoksa giriş yapılamaz)  |
-| `POSTGRES_PASSWORD`               | Güçlü, rastgele şifre (`openssl rand -base64 24`)                                         |
-| `SMTP_HOST/PORT/SECURE/USER/PASS` | Şirket e-posta sunucusu                                                                   |
-| `MAIL_FROM`                       | Gönderen adı ve adresi                                                                    |
-| `BACKUP_HOUR`, `BACKUP_KEEP_DAYS` | Günlük yedek saati ve saklama süresi                                                      |
-| `WEBHOOK_ALLOW_PRIVATE_HOSTS`     | Webhook'lar iç ağ adreslerine gidebilsin mi (varsayılan hayır)                            |
-| `ANTHROPIC_API_KEY`               | Doldurulursa yapay zekâ önerileri açılır; iş metinleri Anthropic API'sine gider (ADR-090) |
+| Değişken                          | Açıklama                                                                                                           |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `APP_URL`                         | Tarayıcıdaki tam adres, ör. `https://scrum.sirket.com`                                                             |
+| `SITE_ADDRESS`                    | Alan adı → otomatik HTTPS; `:80` → yalnız HTTP (önünde başka HTTPS vekili varsa)                                   |
+| `COOKIE_SECURE`                   | HTTPS varsa `true`. **Yalnızca HTTP ile** kullanılıyorsa `false` (yoksa giriş yapılamaz)                           |
+| `POSTGRES_PASSWORD`               | Güçlü, rastgele şifre (`openssl rand -base64 24`)                                                                  |
+| `SMTP_HOST/PORT/SECURE/USER/PASS` | Şirket e-posta sunucusu                                                                                            |
+| `MAIL_FROM`                       | Gönderen adı ve adresi                                                                                             |
+| `BACKUP_HOUR`, `BACKUP_KEEP_DAYS` | Günlük yedek saati ve saklama süresi                                                                               |
+| `WEBHOOK_ALLOW_PRIVATE_HOSTS`     | Webhook'lar iç ağ adreslerine gidebilsin mi (varsayılan hayır)                                                     |
+| `ANTHROPIC_API_KEY`               | Doldurulursa yapay zekâ önerileri açılır; iş metinleri Anthropic API'sine gider (ADR-090)                          |
+| `MAX_VIDEO_MB`                    | Video arşivinde video başına en çok MB (varsayılan 2048). Videolar `UPLOAD_DIR` diskinde durur; yeterli yer ayırın |
 
 `.env` değiştirildikten sonra: `docker compose up -d` (yeniden derleme gerekmez).
 

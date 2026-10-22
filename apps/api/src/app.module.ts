@@ -36,6 +36,7 @@ import { BackupModule } from './modules/backup/backup.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { RemindersModule } from './modules/reminders/reminders.module';
 import { DocsModule } from './modules/docs/docs.module';
+import { VideosModule } from './modules/videos/videos.module';
 import { TimeModule } from './modules/time/time.module';
 import { AiModule } from './modules/ai/ai.module';
 import { GitModule } from './modules/git/git.module';
@@ -111,6 +112,7 @@ const isAuthRateLimited = (ctx: ExecutionContext): boolean =>
     WorkItemsModule,
     SprintsModule,
     DocsModule,
+    VideosModule,
     TimeModule,
     ViewsModule,
     AutomationEventsModule,

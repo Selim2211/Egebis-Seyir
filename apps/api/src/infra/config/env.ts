@@ -46,6 +46,8 @@ export const EnvSchema = z.object({
   UPLOAD_DIR: z.string().default('./data/uploads'),
   /** Dosya başına en çok MB (ADR-056). */
   MAX_UPLOAD_MB: z.coerce.number().positive().default(100),
+  /** Video arşivinde video başına en çok MB (ADR-129); parça parça yüklenir. */
+  MAX_VIDEO_MB: z.coerce.number().positive().default(2048),
 });
 export type Env = z.infer<typeof EnvSchema>;
 

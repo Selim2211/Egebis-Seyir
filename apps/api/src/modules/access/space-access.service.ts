@@ -15,6 +15,8 @@ export interface SpaceRouteParams {
   labelId?: string;
   sprintId?: string;
   docId?: string;
+  videoId?: string;
+  videoFolderId?: string;
 }
 
 const UUID = /^[0-9a-f-]{36}$/i;
@@ -68,6 +70,20 @@ export class SpaceAccessService {
         select: { spaceId: true },
       });
       return sprint?.spaceId ?? null;
+    }
+    if (params.videoId && UUID.test(params.videoId)) {
+      const video = await db.video.findFirst({
+        where: { id: params.videoId },
+        select: { spaceId: true },
+      });
+      return video?.spaceId ?? null;
+    }
+    if (params.videoFolderId && UUID.test(params.videoFolderId)) {
+      const folder = await db.videoFolder.findFirst({
+        where: { id: params.videoFolderId },
+        select: { spaceId: true },
+      });
+      return folder?.spaceId ?? null;
     }
     if (params.docId && UUID.test(params.docId)) {
       const doc = await db.doc.findFirst({

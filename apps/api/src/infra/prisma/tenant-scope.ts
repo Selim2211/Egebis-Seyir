@@ -13,6 +13,8 @@ export const TENANT_MODELS: ReadonlySet<string> = new Set([
   'SpaceMember',
   'Status',
   'Folder',
+  'VideoFolder',
+  'Video',
   'List',
   'Favorite',
   'WorkItem',

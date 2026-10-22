@@ -63,6 +63,14 @@ export class Client {
   put(path: string, body?: object) {
     return this.agent.put(path).set('x-csrf-token', this.csrf).send(body);
   }
+  /** Ham ikili gövde (application/octet-stream), ör. video parçası. */
+  putRaw(path: string, data: Buffer) {
+    return this.agent
+      .put(path)
+      .set('x-csrf-token', this.csrf)
+      .set('content-type', 'application/octet-stream')
+      .send(data);
+  }
   /** Çok parçalı dosya yükleme (alan adı `file`). */
   upload(path: string, buffer: Buffer, fileName: string, fields: Record<string, string> = {}) {
     const req = this.agent.post(path).set('x-csrf-token', this.csrf);

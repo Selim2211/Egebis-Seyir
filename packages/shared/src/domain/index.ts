@@ -36,3 +36,4 @@ export * from './doc-export';
 export * from './gantt-cascade';
 export * from './roles';
 export * from './item-access';
+export * from './videos';

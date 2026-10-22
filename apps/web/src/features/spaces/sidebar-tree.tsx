@@ -35,6 +35,7 @@ import {
   StarOff,
   Trash2,
   Users,
+  Clapperboard,
   ClipboardList,
 } from 'lucide-react';
 import type { ReactNode } from 'react';
@@ -322,6 +323,7 @@ function SpaceNode({
           {space.scrumEnabled && <ScrumLinks spaceId={space.id} />}
           <KanbanLink spaceId={space.id} />
           <DocsLink spaceId={space.id} />
+          <VideosLink spaceId={space.id} />
           <FormsLink spaceId={space.id} />
           <TimesheetLink spaceId={space.id} />
           <DashboardLink spaceId={space.id} />
@@ -549,6 +551,22 @@ function DocsLink({ spaceId }: { spaceId: string }) {
   );
 }
 
+/** Proje'nin video arşivi (Faz 15, ADR-129). */
+function VideosLink({ spaceId }: { spaceId: string }) {
+  const { t } = useTranslation();
+  const closeSidebar = useUiStore((s) => s.setSidebarOpen);
+  return (
+    <ScrumLink
+      to="/spaces/$spaceId/videos"
+      spaceId={spaceId}
+      onNavigate={() => closeSidebar(false)}
+    >
+      <Clapperboard className="text-muted-foreground size-4 shrink-0" aria-hidden />
+      <span className="truncate">{t('videos.link')}</span>
+    </ScrumLink>
+  );
+}
+
 /** Space'in formları (Faz 7.4). */
 function FormsLink({ spaceId }: { spaceId: string }) {
   const { t } = useTranslation();
@@ -572,6 +590,7 @@ function ScrumLink({
     | '/spaces/$spaceId/board'
     | '/spaces/$spaceId/kanban'
     | '/spaces/$spaceId/docs'
+    | '/spaces/$spaceId/videos'
     | '/spaces/$spaceId/forms'
     | '/spaces/$spaceId/timesheet'
     | '/spaces/$spaceId/workload'

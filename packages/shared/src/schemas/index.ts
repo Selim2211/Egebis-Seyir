@@ -35,3 +35,4 @@ export * from './team';
 export * from './role';
 export * from './item-access';
 export * from './bug';
+export * from './video';

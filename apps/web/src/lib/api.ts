@@ -33,7 +33,7 @@ function readCookie(name: string): string | undefined {
 }
 
 /** Durum değiştiren isteklerde CSRF başlığı gerekir (ADR-038); cookie yoksa önce alınır. */
-async function csrfToken(): Promise<string> {
+export async function csrfToken(): Promise<string> {
   const existing = readCookie(CSRF_COOKIE);
   if (existing) return existing;
   await fetch('/api/setup/status', { credentials: 'same-origin' });

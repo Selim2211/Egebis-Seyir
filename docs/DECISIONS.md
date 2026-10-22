@@ -1128,3 +1128,15 @@
   - Panel düğmeleri editörden odak almaz; imleç tablodaki yerinde kalır. Durum (`useEditorState`) her işlemde güncellenir.
 - **Güvenlik:** Hücre öznitelikleri sunucuda doğrulanır (`rich-text.ts`): `colspan/rowspan` 1–50, `colwidth` tam sayı dizisi, `backgroundColor` yalnızca `#rrggbb` (stil enjeksiyonu yok). Salt-okunur görünüm ve **Word'e aktarma** birleşik hücreleri (`gridSpan`/`rowSpan`) ve hücre rengini korur. Renkli hücrede metin her temada koyu yazılır.
 - **Kapsam:** Görev açıklamaları (kompakt editör) tablosuz kalır; tablo yalnızca doküman sayfalarındadır (ADR-069).
+
+## ADR-129 — Proje başına video arşivi (Faz 15, Görev 2)
+
+- **Tarih:** 2026-10-22 · **Durum:** Kabul (kaynak: toplantı notu "Video arşivi"; kullanıcı: her projede ayrı, klasör + başlık).
+- **Karar:**
+  - Sol menüde Dokümanlar'ın altında **Video arşivi**. Solda klasör ağacı (Tüm videolar, Klasörsüz, iç içe klasörler; yeni/alt klasör, yeniden adlandır, sil), sağda arama ve video kartları (ilk kare küçük resim, süre, boyut, klasör, tarih, yükleyen). Kart tıklanınca oynatıcı penceresi: video, **başlık**, açıklama, klasör, indir, sil.
+  - **Yükleme:** "Video yükle" ya da sayfaya sürükleyip bırakma; birden çok dosya. Başlık dosya adından gelir, değiştirilebilir. Dosya **8 MB'lık parçalarla** gönderilir (ters vekil gövde sınırına takılmaz), sunucuda bellekte tutulmadan diske eklenir; her parça sunucunun aldığı bayttan gönderilir, ağ hatasında yeniden denenir ve 409 ile bildirilen ofsetten **devam eder**. İlerleme bayt düzeyinde görünür, iptal edilebilir; yükleme sürerken sayfadan çıkmaya uyarı verilir.
+  - **Doğrulama:** yalnızca tarayıcıda oynatılabilen biçimler (MP4/M4V, MOV, WebM); en çok `MAX_VIDEO_MB` (varsayılan 2048). Tamamlanınca boyut ve **içerik imzası** (`ftyp` / EBML) denetlenir; uymayan dosya silinir. Tamamlanmamış video listede "yükleme tamamlanmadı" görünür, oynatılamaz.
+  - **Oynatma:** `GET videos/:id/stream` **HTTP Range** (206) destekler: ileri/geri sarma ve küçük resim için yalnızca gereken bayt okunur; içerik türü sabit, `nosniff`. Kart küçük resmi yalnızca ekranda görünür olunca yüklenir.
+  - Yetki: görme `doc.view`, yükleme/düzenleme/silme `doc.write`. Klasör silinince alt klasörler silinir, videolar silinmez, Klasörsüz'e düşer.
+- **Alternatifler:** Mevcut ek altyapısı (tek istekte, bellekte, 100 MB) — büyük videoda bellek ve vekil sınırı sorunu; harici video servisi — şirket içi kurulumda dış bağımlılık istenmedi.
+- **Bilinen sınırlar:** Videolar Proje yedeğine (`backup.zip`) eklenmez (boyut); disk yedeği `UPLOAD_DIR` ile alınır. Yarım kalan yüklemeler otomatik temizlenmez (kayıt silinince dosya da silinir). Küçük resim sunucuda üretilmez (tarayıcı ilk kareyi gösterir).
