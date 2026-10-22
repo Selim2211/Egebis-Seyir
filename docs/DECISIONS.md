@@ -1109,3 +1109,8 @@
   - Seçim çubuğu Backlog bölümünden çıkarıldı ve ekranın altında yüzer (ADR-126 sonrası): üstteki sprint'ten seçince de görünür.
 - **Alternatifler:** Tüm sprint'leri listelemek (yüzlerce satırlık açılır liste kullanılamaz olur); sprint listesini sunucudan sayfalamak (şimdilik tüm sprint'ler zaten tek istekle geliyor, istemcide pencerelemek yeterli).
 - **Bilinen sınırlar:** Tamamlanmış/iptal sprint'ler hedef olarak listelenmez (salt-okunur). Başka Proje'ye toplu taşıma öğe öğe yapılır, atomik değildir.
+
+### ADR-126 eki 2 — Epic seçimi aranabilir; Epic sayfasında Task'ın Sub-Task'ları görünür
+
+- Gruplama penceresinde Epic seçimi arama kutulu bir listedir (anahtar ve başlıkta arar; "+ Yeni Epic oluştur…" hep listededir).
+- **Sub-Task'lar annesiyle birlikte gider** (veride `parentId` Task'ta kalır, ADR-124); ancak Epic'in "Alt öğeler" bölümü yalnızca doğrudan çocukları (Task'ları) gösterdiğinden Sub-Task'lar gitmemiş gibi görünüyordu. Epic sayfasında her Task'ın altında Sub-Task'ları girintili, açılıp kapanır (varsayılan açık) listelenir.

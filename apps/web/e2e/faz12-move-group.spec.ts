@@ -105,9 +105,7 @@ test.describe.serial('Taşı ve grupla', () => {
 
     await bar.getByTestId('group-selected').click();
     const dialog = page.getByRole('dialog', { name: /3 öğeyi Epic altında grupla/ });
-    await dialog
-      .getByLabel('Epic', { exact: true })
-      .selectOption({ label: '+ Yeni Epic oluştur…' });
+    await dialog.getByRole('option', { name: '+ Yeni Epic oluştur…' }).click();
     await dialog.getByLabel('Yeni Epic’in adı').fill('Hesap yönetimi');
     await dialog.getByRole('button', { name: 'Grupla' }).click();
     await expect(page.getByText('3 öğe Epic altında toplandı.')).toBeVisible();

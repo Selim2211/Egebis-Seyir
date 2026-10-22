@@ -2331,7 +2331,9 @@
       "convert": "Convert to Epic",
       "convertHint": "The Task itself becomes an Epic. Its Sub-Tasks become Tasks under that Epic."
     },
-    "convertPreview": "{{key}} will become an Epic. Its {{count}} sub-items become Tasks under the Epic."
+    "convertPreview": "{{key}} will become an Epic. Its {{count}} sub-items become Tasks under the Epic.",
+    "search": "Search Epics…",
+    "noEpic": "No matching Epics."
   },
   "bulk": {
     "nestAction": "Make Sub-Task",

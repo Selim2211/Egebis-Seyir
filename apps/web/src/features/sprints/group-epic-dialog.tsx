@@ -1,7 +1,8 @@
-import { type FormEvent, useState } from 'react';
+import { type FormEvent, type ReactNode, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { Field, FormError, SelectField } from '@/components/form';
+import { Field, FormError } from '@/components/form';
+import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -90,9 +91,14 @@ function GroupForm({
   const [mode, setMode] = useState<'group' | 'convert'>('group');
   const converting = canConvert && mode === 'convert';
   const subtaskCount = items.reduce((n, i) => n + (i.type === 'TASK' ? i.childCount : 0), 0);
+  const [epicQuery, setEpicQuery] = useState('');
   const [choice, setChoice] = useState(epics[0]?.id ?? NEW_EPIC);
   const [title, setTitle] = useState(defaultTitle);
   const [error, setError] = useState<unknown>(null);
+  const q = epicQuery.trim().toLocaleLowerCase();
+  const visibleEpics = q
+    ? epics.filter((e) => `${e.key} ${e.title}`.toLocaleLowerCase().includes(q))
+    : epics;
   const creating = choice === NEW_EPIC;
   const invalid = (creating || converting) && !title.trim();
 
@@ -190,18 +196,38 @@ function GroupForm({
               {t('groupEpic.preview', { count: items.length })}
               {subtaskCount > 0 && ` ${t('groupEpic.previewSub', { count: subtaskCount })}`}
             </p>
-            <SelectField
-              label={t('groupEpic.epic')}
-              value={choice}
-              onChange={(e) => setChoice(e.target.value)}
-            >
-              {epics.map((epic) => (
-                <option key={epic.id} value={epic.id}>
-                  {epic.key} {epic.title}
-                </option>
-              ))}
-              <option value={NEW_EPIC}>{t('groupEpic.newEpic')}</option>
-            </SelectField>
+            <div className="flex flex-col gap-1.5">
+              <span className="text-sm font-medium">{t('groupEpic.epic')}</span>
+              <Input
+                value={epicQuery}
+                onChange={(e) => setEpicQuery(e.target.value)}
+                placeholder={t('groupEpic.search')}
+                aria-label={t('groupEpic.search')}
+              />
+              <div
+                role="listbox"
+                aria-label={t('groupEpic.epic')}
+                data-testid="epic-list"
+                className="max-h-44 overflow-y-auto rounded-lg border p-1"
+              >
+                {visibleEpics.map((epic) => (
+                  <EpicOption
+                    key={epic.id}
+                    selected={choice === epic.id}
+                    onSelect={() => setChoice(epic.id)}
+                  >
+                    <span className="text-muted-foreground font-mono text-xs">{epic.key}</span>{' '}
+                    {epic.title}
+                  </EpicOption>
+                ))}
+                {visibleEpics.length === 0 && epicQuery.trim() && (
+                  <p className="text-muted-foreground px-3 py-2 text-sm">{t('groupEpic.noEpic')}</p>
+                )}
+                <EpicOption selected={choice === NEW_EPIC} onSelect={() => setChoice(NEW_EPIC)}>
+                  {t('groupEpic.newEpic')}
+                </EpicOption>
+              </div>
+            </div>
             {creating && (
               <Field
                 label={t('groupEpic.newName')}
@@ -227,5 +253,31 @@ function GroupForm({
         </Button>
       </DialogFooter>
     </form>
+  );
+}
+
+/** Epic seçim listesindeki satır. */
+function EpicOption({
+  selected,
+  onSelect,
+  children,
+}: {
+  selected: boolean;
+  onSelect: () => void;
+  children: ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      role="option"
+      aria-selected={selected}
+      onClick={onSelect}
+      className={cn(
+        'flex w-full items-center rounded-md px-3 py-2 text-left text-sm',
+        selected ? 'bg-primary/10 ring-primary/40 ring-1' : 'hover:bg-accent',
+      )}
+    >
+      <span className="truncate">{children}</span>
+    </button>
   );
 }

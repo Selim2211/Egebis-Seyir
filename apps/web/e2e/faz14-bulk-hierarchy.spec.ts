@@ -110,7 +110,7 @@ test.describe.serial('Backlog toplu hiyerarşi', () => {
     await key(3).check();
     await bar.getByTestId('group-selected').click();
     const group = page.getByRole('dialog', { name: /1 öğeyi Epic altında grupla/ });
-    await group.getByLabel('Epic', { exact: true }).selectOption({ label: '+ Yeni Epic oluştur…' });
+    await group.getByRole('option', { name: '+ Yeni Epic oluştur…' }).click();
     await expect(group.getByLabel('Yeni Epic’in adı')).toHaveValue('Profil');
     await group.getByRole('button', { name: 'İptal' }).click();
     await key(3).uncheck();
@@ -288,5 +288,58 @@ test.describe.serial('Backlog toplu hiyerarşi', () => {
     );
     expect(moved.spaceId).toBe(hdf.id);
     expect(moved.sprintId).not.toBeNull();
+  });
+
+  test('Epic seçimi aranabilir; Task Epic altına girince Sub-Task’ları da Epic sayfasında altında görünür', async ({
+    page,
+  }) => {
+    await page.goto('/login');
+    await login(page, OWNER.email, OWNER.password);
+    await expect(page.getByRole('heading', { name: /Hoş geldin/ })).toBeVisible();
+    const sidebar = page.getByRole('complementary');
+    await sidebar.getByRole('button', { name: 'Proje oluştur' }).first().click();
+    const d = page.getByRole('dialog', { name: 'Yeni Proje oluştur' });
+    await d.getByLabel('Ad', { exact: true }).fill('Epic Arama');
+    await d.getByLabel('Anahtar').fill('EPA');
+    await d.getByRole('button', { name: 'Proje oluştur' }).click();
+    await expect(page.getByRole('heading', { name: 'Epic Arama' })).toBeVisible();
+
+    const me = await call<{ workspaces: Array<{ id: string }> }>(page, 'GET', '/auth/me');
+    const ws = me.workspaces[0]!.id;
+    const tree = await call<{
+      spaces: Array<{ key: string; id: string; lists: Array<{ id: string }> }>;
+    }>(page, 'GET', `/workspaces/${ws}/hierarchy`);
+    const space = tree.spaces.find((s) => s.key === 'EPA')!;
+    const make = (type: string, title: string, parentId: string | null = null) =>
+      call<{ id: string }>(page, 'POST', `/workspaces/${ws}/lists/${space.lists[0]!.id}/items`, {
+        type,
+        title,
+        parentId,
+      });
+    const hedef = await make('EPIC', 'Hedef Epic');
+    await make('EPIC', 'Başka Epic');
+    const anne = await make('TASK', 'Anne iş');
+    for (const n of [1, 2, 3, 4]) await make('SUBTASK', `Çocuk ${n}`, anne.id);
+    await make('TASK', 'Tek iş');
+
+    await page.goto(`/spaces/${space.id}/backlog`);
+    await page.getByLabel('EPA-3 öğesini seç').check();
+    await page.getByLabel('EPA-8 öğesini seç').check();
+    const bar = page.getByRole('region', { name: 'Seçili öğeler' });
+    await bar.getByTestId('group-selected').click();
+    const group = page.getByRole('dialog', { name: /2 öğeyi Epic altında grupla/ });
+    await expect(group.getByTestId('group-preview')).toContainText('4 alt görev');
+    await group.getByLabel('Epic ara…').fill('hedef');
+    await expect(group.getByTestId('epic-list').getByRole('option')).toHaveCount(2); // Hedef Epic + yeni
+    await group.getByRole('option', { name: /Hedef Epic/ }).click();
+    await group.getByRole('button', { name: 'Grupla' }).click();
+    await expect(page.getByText('2 öğe Epic altında toplandı.')).toBeVisible();
+
+    const epic = await call<{ key: string }>(page, 'GET', `/workspaces/${ws}/items/${hedef.id}`);
+    await page.goto(`/items/${epic.key}`);
+    await expect(page.getByRole('link', { name: /Anne iş/ })).toBeVisible();
+    for (const n of [1, 2, 3, 4]) {
+      await expect(page.getByRole('link', { name: new RegExp(`Çocuk ${n}`) })).toBeVisible();
+    }
   });
 });

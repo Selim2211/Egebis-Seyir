@@ -2331,7 +2331,9 @@
       "convert": "Epic’e dönüştür",
       "convertHint": "Bu Task’ın kendisi Epic olur. Sub-Task’ları Task olup Epic’in altında kalır."
     },
-    "convertPreview": "{{key}} Epic olacak. {{count}} alt görevi Task olup Epic’in altında kalacak."
+    "convertPreview": "{{key}} Epic olacak. {{count}} alt görevi Task olup Epic’in altında kalacak.",
+    "search": "Epic ara…",
+    "noEpic": "Eşleşen Epic yok."
   },
   "bulk": {
     "nestAction": "Alt görev yap",

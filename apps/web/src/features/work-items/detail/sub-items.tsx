@@ -1,6 +1,7 @@
 import { statusName } from '@/lib/default-names';
 import { SPLIT_MAX_TASKS, type SpaceDetail, type WorkItemDetail } from '@scrum/shared';
-import { Scissors } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { ChevronRight, Scissors } from 'lucide-react';
 import { type FormEvent, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -21,7 +22,8 @@ import { cn } from '@/lib/utils';
 import { ItemOpenLink } from './item-nav';
 import { creatableTypes } from '../item-tree';
 import { QuickCreate } from '../quick-create';
-import { useSplitItem } from '../queries';
+import { itemQuery, useSplitItem } from '../queries';
+import { useCurrentWorkspace } from '@/features/workspace/queries';
 
 /** Alt öğeler: liste, hızlı ekleme ve Story için "Task'lara böl" (ADR-051). */
 export function SubItems({
@@ -61,35 +63,15 @@ export function SubItems({
       </div>
       {item.children.length > 0 && (
         <ul className="divide-y rounded-md border">
-          {item.children.map((child) => {
-            const status = statuses.get(child.statusId);
-            return (
-              <li key={child.id}>
-                <ItemOpenLink
-                  itemKey={child.key}
-                  className="hover:bg-accent/50 flex items-center gap-2 px-3 py-1.5 text-sm"
-                >
-                  <WorkItemTypeIcon type={child.type} />
-                  <span className="text-muted-foreground font-mono text-xs">{child.key}</span>
-                  <span
-                    className={cn(
-                      'min-w-0 flex-1 truncate',
-                      status?.category === 'DONE' && 'text-muted-foreground line-through',
-                    )}
-                  >
-                    {child.title}
-                  </span>
-                  {status && (
-                    <StatusBadge
-                      category={status.category}
-                      label={statusName(status.name)}
-                      color={status.color}
-                    />
-                  )}
-                </ItemOpenLink>
-              </li>
-            );
-          })}
+          {item.children.map((child) => (
+            <ChildRow
+              key={child.id}
+              child={child}
+              statuses={statuses}
+              // Epic'in altındaki Task'ların Sub-Task'ları da (anneleriyle birlikte) görünür.
+              expandable={item.type === 'EPIC' && child.childCount > 0}
+            />
+          ))}
         </ul>
       )}
       {canAdd && (
@@ -103,6 +85,76 @@ export function SubItems({
       )}
       {splitting && <SplitDialog itemId={item.id} onClose={() => setSplitting(false)} />}
     </section>
+  );
+}
+
+type Statuses = Map<string, SpaceDetail['statuses'][number]>;
+
+/** Alt öğe satırı; Epic altındaki Task'ın Sub-Task'ları girintili olarak açılıp kapanır (varsayılan açık). */
+function ChildRow({
+  child,
+  statuses,
+  expandable,
+  depth = 0,
+}: {
+  child: WorkItemDetail['children'][number];
+  statuses: Statuses;
+  expandable: boolean;
+  depth?: number;
+}) {
+  const { t } = useTranslation();
+  const { id: workspaceId } = useCurrentWorkspace();
+  const [open, setOpen] = useState(true);
+  const nested = useQuery({ ...itemQuery(workspaceId, child.id), enabled: expandable && open });
+  const status = statuses.get(child.statusId);
+  return (
+    <li>
+      <div className="hover:bg-accent/50 flex items-center" style={{ paddingLeft: depth * 20 }}>
+        {expandable ? (
+          <button
+            type="button"
+            onClick={() => setOpen((o) => !o)}
+            aria-expanded={open}
+            aria-label={t(open ? 'backlog.collapseSubtasks' : 'backlog.expandSubtasks')}
+            className="text-muted-foreground hover:bg-accent ml-1 flex shrink-0 items-center gap-0.5 rounded px-0.5 text-xs tabular-nums"
+          >
+            <ChevronRight className={cn('size-3.5 transition-transform', open && 'rotate-90')} />
+            {child.childCount}
+          </button>
+        ) : (
+          depth === 0 && <span className="w-1.5" />
+        )}
+        <ItemOpenLink
+          itemKey={child.key}
+          className="flex min-w-0 flex-1 items-center gap-2 px-3 py-1.5 text-sm"
+        >
+          <WorkItemTypeIcon type={child.type} />
+          <span className="text-muted-foreground font-mono text-xs">{child.key}</span>
+          <span
+            className={cn(
+              'min-w-0 flex-1 truncate',
+              status?.category === 'DONE' && 'text-muted-foreground line-through',
+            )}
+          >
+            {child.title}
+          </span>
+          {status && (
+            <StatusBadge
+              category={status.category}
+              label={statusName(status.name)}
+              color={status.color}
+            />
+          )}
+        </ItemOpenLink>
+      </div>
+      {expandable && open && (
+        <ul className="bg-muted/30 divide-y border-t">
+          {(nested.data?.children ?? []).map((sub) => (
+            <ChildRow key={sub.id} child={sub} statuses={statuses} expandable={false} depth={2} />
+          ))}
+        </ul>
+      )}
+    </li>
   );
 }
 
