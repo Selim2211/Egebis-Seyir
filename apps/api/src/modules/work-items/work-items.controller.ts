@@ -250,6 +250,14 @@ export class WorkItemsController {
     return this.bugService.create(spaceId, body);
   }
 
+  /** Bug'ı Task'a çevirir; Bug kaybolmaz, ibare taşır (ADR-138). */
+  @Post('items/:itemId/convert-bug-to-task')
+  @RequireSpacePermission(S.WORK_ITEM_WRITE)
+  @ZodResponse({ type: CreatedItemDto, status: HttpStatus.CREATED })
+  convertBugToTask(@Uuid('itemId') itemId: string): Promise<CreatedItem> {
+    return this.bugService.convertToTask(itemId);
+  }
+
   @Put('items/:itemId/bug-assignee')
   @RequireSpacePermission(S.BUG_ASSIGN)
   @HttpCode(NO_CONTENT)

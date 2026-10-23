@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Link, useNavigate } from '@tanstack/react-router';
 import {
   Archive,
+  ClipboardCheck,
   ArrowRightLeft,
   ChevronRight,
   Copy,
@@ -35,10 +36,18 @@ import { spaceQuery } from '@/features/spaces/queries';
 import { useCurrentWorkspace } from '@/features/workspace/queries';
 import { useErrorMessage } from '@/lib/use-error-message';
 import { cn } from '@/lib/utils';
-import { itemByKeyQuery, useCopyItem, useItemLifecycle, useWatchItem } from '../queries';
+import {
+  itemByKeyQuery,
+  useConvertBugToTask,
+  useCopyItem,
+  useItemLifecycle,
+  useWatchItem,
+} from '../queries';
 import { accessState, ShareDialog } from '../access/share-dialog';
 import { useItemAccess } from '../access/queries';
 import { MoveItemDialog } from '../move-item-dialog';
+import { TicketCards } from './ticket-cards';
+import { ConfirmDialog } from '@/components/confirm-dialog';
 import { PromoteEpicDialog } from '../promote-epic-dialog';
 import { Attachments } from './attachments';
 import { Checklists } from './checklists';
@@ -109,6 +118,8 @@ function Content({
   const { save } = useSaveItem(item.id);
   const lifecycle = useItemLifecycle();
   const copy = useCopyItem();
+  const convertBug = useConvertBugToTask();
+  const [convertingBug, setConvertingBug] = useState(false);
   const watch = useWatchItem();
   const canWrite = space.permissions.includes(S.WORK_ITEM_WRITE) && !item.archived;
   const wide = variant === 'page';
@@ -119,6 +130,7 @@ function Content({
   const access = useItemAccess(item.id, true);
   const shareState = accessState(access.data);
   const canPromote = canWrite && space.scrumEnabled && item.type === 'TASK';
+  const canConvertBug = canWrite && item.type === 'BUG';
   // Sub-Task üst öğesiyle birlikte taşınır; kendi başına taşınmaz.
   const canMove = canWrite && item.type !== 'SUBTASK';
 
@@ -244,6 +256,15 @@ function Content({
                     <CopyPlus />
                     {t('items.copy')}
                   </DropdownMenuItem>
+                  {canConvertBug && (
+                    <DropdownMenuItem
+                      data-testid="convert-bug"
+                      onSelect={() => setConvertingBug(true)}
+                    >
+                      <ClipboardCheck />
+                      {t('tickets.convertMenu')}
+                    </DropdownMenuItem>
+                  )}
                   {canPromote && (
                     <DropdownMenuItem onSelect={() => setPromoting(true)}>
                       <Zap />
@@ -315,6 +336,7 @@ function Content({
         className={cn('grid gap-6 px-4 py-4 sm:px-6', wide && 'lg:grid-cols-[minmax(0,1fr)_20rem]')}
       >
         <div className={cn('flex min-w-0 flex-col gap-6', wide ? 'lg:order-1' : 'order-2')}>
+          <TicketCards item={item} />
           <section aria-labelledby="description-title">
             <h3 id="description-title" className="mb-1 text-sm font-semibold">
               {t('detail.description')}
@@ -373,6 +395,27 @@ function Content({
         <Copy className="mr-1 inline size-3" aria-hidden />
         {t('detail.updated', { when: new Date(item.updatedAt).toLocaleString() })}
       </p>
+      <ConfirmDialog
+        open={convertingBug}
+        onOpenChange={setConvertingBug}
+        title={t('tickets.convertTitle', { key: item.key })}
+        description={t('tickets.convertBody')}
+        confirmLabel={t('tickets.convertConfirm')}
+        pending={convertBug.isPending}
+        onConfirm={() =>
+          convertBug.mutate(item.id, {
+            onSuccess: (task) => {
+              setConvertingBug(false);
+              toast.success(t('tickets.converted', { bug: item.key, task: task.key }));
+              void navigate({ to: '/items/$key', params: { key: task.key } });
+            },
+            onError: (error) => {
+              setConvertingBug(false);
+              toast.error(errorMessage(error));
+            },
+          })
+        }
+      />
       <ShareDialog itemId={item.id} itemKey={item.key} open={sharing} onOpenChange={setSharing} />
       {canMove && (
         <MoveItemDialog

@@ -36,7 +36,8 @@ export class AppSettingsService {
   /** `null`: kaydı siler, `.env` değerine dönülür. Adres `http(s)://` ile başlamalı (şema doğrular). */
   async save(url: string | null): Promise<void> {
     if (url === null) {
-      await this.prisma.appSettings.deleteMany({ where: { id: 1 } });
+      // Satır silinmez: aynı satırda başka ayarlar (çağrı gelen kutusu başlangıcı) da durur.
+      await this.prisma.appSettings.updateMany({ where: { id: 1 }, data: { publicUrl: null } });
       return;
     }
     const publicUrl = clean(url);

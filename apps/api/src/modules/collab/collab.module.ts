@@ -22,5 +22,6 @@ import { CommentsService } from './comments.service';
   ],
   controllers: [CollabController],
   providers: [CommentsService, AttachmentsService, ActivityFeedService],
+  exports: [AttachmentsService],
 })
 export class CollabModule {}

@@ -60,7 +60,20 @@ export class BugsService {
         archivedAt: null,
         list: { deletedAt: null },
       },
-      include: { reporter: person, assignees: { select: { user: person }, take: 1 } },
+      include: {
+        reporter: person,
+        assignees: { select: { user: person }, take: 1 },
+        inboundEmails: {
+          where: { kind: 'NEW' },
+          take: 1,
+          select: { fromName: true, fromEmail: true },
+        },
+        convertedTasks: {
+          where: { deletedAt: null },
+          select: { keyPrefix: true, number: true },
+          orderBy: { createdAt: 'asc' },
+        },
+      },
       orderBy: [{ createdAt: 'desc' }],
       take: 1000,
     });
@@ -76,6 +89,10 @@ export class BugsService {
         reporter: r.reporter,
         assignee: r.assignees[0]?.user ?? null,
         environment: r.environment,
+        fromEmail: r.inboundEmails[0]
+          ? { name: r.inboundEmails[0].fromName, email: r.inboundEmails[0].fromEmail }
+          : null,
+        convertedTo: r.convertedTasks.map((t) => formatItemKey(t.keyPrefix, t.number)),
         createdAt: r.createdAt.toISOString(),
         updatedAt: r.updatedAt.toISOString(),
       })),
@@ -114,6 +131,55 @@ export class BugsService {
       recipientIds: await this.triagers(spaceId),
       spaceId,
       item: { id: created.id, key: created.key, title: input.title },
+    });
+    return created;
+  }
+
+  /**
+   * Bug'ı Task'a çevirir (ADR-138): büyük bir sorun daha derin ele alınacaksa. Bug silinmez; üzerinde "Task'a
+   * çevrildi" ibaresi kalır. Yeni Task başlığı, açıklamayı ve atananı taşır; kaynak Bug'a bağlıdır
+   * (`sourceBugId`), geçmişinde "Bug'dan oluşturuldu" yazar.
+   */
+  async convertToTask(itemId: string): Promise<CreatedItem> {
+    const { workspaceId, actorId } = this.ctx;
+    const db = this.tenant.db;
+    const bug = await this.bug(itemId);
+    const created = await this.items.create(
+      bug.listId,
+      CreateWorkItemRequestSchema.parse({
+        type: 'TASK',
+        title: bug.title,
+        priority: bug.priority,
+        assigneeIds: bug.assignees.map((a) => a.userId),
+      }),
+    );
+    const bugKey = formatItemKey(bug.keyPrefix, bug.number);
+    await db.$transaction(async (tx) => {
+      await tx.workItem.update({
+        where: { id: created.id },
+        data: {
+          sourceBugId: bug.id,
+          description: bug.description ?? undefined,
+          descriptionText: bug.descriptionText,
+          reporterId: bug.reporterId,
+        },
+      });
+      await this.activity.record(tx, {
+        workspaceId,
+        actorId,
+        entityType: 'item',
+        entityId: created.id,
+        action: 'item.created_from_bug',
+        changes: { key: bugKey },
+      });
+      await this.activity.record(tx, {
+        workspaceId,
+        actorId,
+        entityType: 'item',
+        entityId: bug.id,
+        action: 'item.converted_to_task',
+        changes: { key: created.key },
+      });
     });
     return created;
   }

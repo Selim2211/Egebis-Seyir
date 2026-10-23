@@ -949,7 +949,9 @@
     "gitLinked": "Git link added: {{detail}}",
     "gitUpdated": "Git link updated: {{detail}}",
     "recurred": "Created because recurring task {{key}} was completed.",
-    "formSubmitted": "Created through the “{{name}}” form."
+    "formSubmitted": "Created through the “{{name}}” form.",
+    "createdFromBug": "created this Task from Bug {{key}}.",
+    "convertedToTask": "converted this Bug to Task {{key}}."
   },
   "backlog": {
     "title": "Backlog",
@@ -2294,7 +2296,8 @@
       "status": "Status",
       "owner": "Bug owner",
       "assignee": "Assignee",
-      "created": "Reported"
+      "created": "Reported",
+      "actions": "Actions"
     },
     "form": {
       "title": "What is wrong?",
@@ -2306,7 +2309,11 @@
       "environment": "Environment",
       "environmentHint": "e.g. Chrome 140, Windows 11, version 2.3",
       "attach": "Attach screenshots or files"
-    }
+    },
+    "fromEmail": "Came by email: {{name}} <{{email}}>",
+    "fromEmailShort": "By email",
+    "convertedTo": "Converted to Task: {{keys}}",
+    "move": "Move {{key}} to another Project"
   },
   "bugStatus": {
     "UNASSIGNED": "Unassigned",
@@ -2499,5 +2506,23 @@
     "direction": "Layout direction",
     "horizontal": "Horizontal",
     "vertical": "Vertical"
+  },
+  "tickets": {
+    "title": "Ticket details",
+    "inboundMail": "Inbound email",
+    "sourceMail": "Source email",
+    "from": "From",
+    "subject": "Subject",
+    "received": "Received",
+    "replies": "Replies",
+    "replyCount": "{{count}} replies (see comments)",
+    "convertedTo": "This Bug was converted to a Task:",
+    "fromBug": "This Task was converted from Bug:",
+    "seeBugHistory": "Its history and attachments are there.",
+    "convertMenu": "Convert to Task",
+    "convertTitle": "Convert {{key}} to a Task?",
+    "convertBody": "A new Task is created with the same title, description and assignee. The Bug is kept with a “converted to Task” marker, and the Task links back to it.",
+    "convertConfirm": "Convert to Task",
+    "converted": "{{bug}} converted to Task {{task}}"
   }
 }

@@ -949,7 +949,9 @@
     "gitLinked": "Git bağlantısı eklendi: {{detail}}",
     "gitUpdated": "Git bağlantısı güncellendi: {{detail}}",
     "recurred": "Tekrarlayan görev {{key}} tamamlandığı için oluşturuldu.",
-    "formSubmitted": "“{{name}}” formuyla oluşturuldu."
+    "formSubmitted": "“{{name}}” formuyla oluşturuldu.",
+    "createdFromBug": "{{key}} numaralı Bug’dan Task oluşturdu.",
+    "convertedToTask": "Bug’ı Task’a çevirdi: {{key}}"
   },
   "backlog": {
     "title": "Backlog",
@@ -2293,7 +2295,8 @@
       "status": "Durum",
       "owner": "Bug sahibi",
       "assignee": "Atanan",
-      "created": "Açıldı"
+      "created": "Açıldı",
+      "actions": "İşlemler"
     },
     "form": {
       "title": "Sorun ne?",
@@ -2305,7 +2308,11 @@
       "environment": "Ortam",
       "environmentHint": "ör. Chrome 140, Windows 11, sürüm 2.3",
       "attach": "Ekran görüntüsü veya dosya ekle"
-    }
+    },
+    "fromEmail": "E-postadan geldi: {{name}} <{{email}}>",
+    "fromEmailShort": "E-postadan",
+    "convertedTo": "Task’a çevrildi: {{keys}}",
+    "move": "{{key}} başka Projeye taşı"
   },
   "bugStatus": {
     "UNASSIGNED": "Atanmadı",
@@ -2498,5 +2505,23 @@
     "direction": "Düzen yönü",
     "horizontal": "Yatay",
     "vertical": "Dikey"
+  },
+  "tickets": {
+    "title": "Çağrı bilgileri",
+    "inboundMail": "Gelen e-posta",
+    "sourceMail": "Kaynak e-posta",
+    "from": "Gönderen",
+    "subject": "Konu",
+    "received": "Geldiği zaman",
+    "replies": "Yanıtlar",
+    "replyCount": "{{count}} yanıt geldi (yorumlarda)",
+    "convertedTo": "Bu Bug Task’a çevrildi:",
+    "fromBug": "Bu Task şu Bug’dan çevrildi:",
+    "seeBugHistory": "Bug’ın geçmişi ve ekleri orada.",
+    "convertMenu": "Task’a çevir",
+    "convertTitle": "{{key}} Task’a çevrilsin mi?",
+    "convertBody": "Aynı başlık, açıklama ve atananla yeni bir Task açılır. Bug silinmez; üzerinde “Task’a çevrildi” ibaresi kalır ve Task’tan Bug’a ulaşabilirsin.",
+    "convertConfirm": "Task’a çevir",
+    "converted": "{{bug}} Task’a çevrildi: {{task}}"
   }
 }

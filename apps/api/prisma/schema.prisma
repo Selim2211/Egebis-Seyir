@@ -171,7 +171,8 @@ model User {
   timeEntries             TimeEntry[]
   activeTimer             ActiveTimer?
   dashboardLayouts        DashboardLayout[]
-  mapLayouts MapLayout[]
+  mapLayouts              MapLayout[]
+  inboundEmails           InboundEmail[]
   savedViews              SavedView[]
   docsCreated             Doc[]                    @relation("DocCreator")
   docsUpdated             Doc[]                    @relation("DocUpdater")
@@ -252,7 +253,8 @@ model Workspace {
   timeEntries       TimeEntry[]
   activeTimers      ActiveTimer[]
   dashboardLayouts  DashboardLayout[]
-  mapLayouts MapLayout[]
+  mapLayouts        MapLayout[]
+  inboundEmails     InboundEmail[]
   savedViews        SavedView[]
   customFields      CustomField[]
   templates         Template[]
@@ -366,6 +368,8 @@ model ActivityEvent {
 
 model Space {
   id                 String          @id @default(uuid(7)) @db.Uuid
+  /// Çağrı sistemi: e-postadan gelen Bug'ların düştüğü sistem Projesi (ADR-138).
+  ticketInbox        Boolean         @default(false)
   workspaceId        String          @db.Uuid
   workspace          Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   name               String
@@ -410,7 +414,7 @@ model Space {
   sprints          Sprint[]
   docs             Doc[]
   dashboardLayouts DashboardLayout[]
-  mapLayouts MapLayout[]
+  mapLayouts       MapLayout[]
   videoFolders     VideoFolder[]
   videos           Video[]
 
@@ -551,6 +555,11 @@ model WorkItem {
   parentId         String?         @db.Uuid
   parent           WorkItem?       @relation("Tree", fields: [parentId], references: [id], onDelete: Cascade)
   children         WorkItem[]      @relation("Tree")
+  /// Bug'dan çevrilen Task'ta kaynak Bug (Bug silinmez; ADR-138). Bug tarafında convertedTasks.
+  sourceBugId      String?         @db.Uuid
+  sourceBug        WorkItem?       @relation("BugToTask", fields: [sourceBugId], references: [id], onDelete: SetNull)
+  convertedTasks   WorkItem[]      @relation("BugToTask")
+  inboundEmails    InboundEmail[]
   /// Öğeye özel erişim kaydı (ADR-113); yoksa Space erişimi geçerlidir.
   access           WorkItemAccess?
   /// En yakın "özel erişimli" üst öğe (kendisi dahil); DB tetikleyicileri tutar (ADR-113).
@@ -636,6 +645,7 @@ model WorkItem {
   @@index([listId, rank])
   @@index([spaceId, backlogRank])
   @@index([sprintId])
+  @@index([sourceBugId])
   @@index([spaceId])
   @@index([parentId])
   @@index([workspaceId, accessRootId])
@@ -1584,9 +1594,11 @@ model MailSettings {
 
 /// Sunucu başına tek satır (id = 1): uygulamadan girilen genel adres (ADR-122). Yoksa APP_URL (.env) kullanılır.
 model AppSettings {
-  id        Int      @id @default(1)
-  publicUrl String?
-  updatedAt DateTime @updatedAt @db.Timestamptz
+  id           Int       @id @default(1)
+  publicUrl    String?
+  /// Çağrı gelen kutusu: bu andan önce gelen e-postalar içe alınmaz (ilk açılışta şimdiye ayarlanır).
+  ticketsSince DateTime? @db.Timestamptz
+  updatedAt    DateTime  @updatedAt @db.Timestamptz
 
   @@map("app_settings")
 }
@@ -1659,4 +1671,38 @@ model MapLayout {
 
   @@id([userId, spaceId])
   @@map("map_layouts")
+}
+
+// ---------- Çağrı sistemi (ADR-138) ----------
+
+enum InboundEmailKind {
+  NEW
+  REPLY
+}
+
+/// Gelen kutusundan içe alınan e-posta: Bug'ın kaynağı (kimden/ne zaman) ve yanıt zinciri.
+model InboundEmail {
+  id           String           @id @default(uuid(7)) @db.Uuid
+  workspaceId  String           @db.Uuid
+  workspace    Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  workItemId   String           @db.Uuid
+  workItem     WorkItem         @relation(fields: [workItemId], references: [id], onDelete: Cascade)
+  kind         InboundEmailKind
+  /// Orijinal Message-ID (yinelenen içe almayı ve yanıt eşlemesini sağlar).
+  messageId    String
+  /// Müşteriye gönderdiğimiz otomatik yanıtın Message-ID'si (müşterinin yanıtını Bug'a bağlamak için).
+  ackMessageId String?
+  fromName     String
+  fromEmail    String
+  subject      String
+  receivedAt   DateTime         @db.Timestamptz
+  /// E-postadaki gönderen Seyir kullanıcısıysa kimliği.
+  userId       String?          @db.Uuid
+  user         User?            @relation(fields: [userId], references: [id], onDelete: SetNull)
+  createdAt    DateTime         @default(now()) @db.Timestamptz
+
+  @@unique([workspaceId, messageId])
+  @@index([workItemId])
+  @@index([fromEmail, createdAt])
+  @@map("inbound_emails")
 }

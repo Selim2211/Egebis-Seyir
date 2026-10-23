@@ -28,6 +28,6 @@ import { WorkItemsService } from './work-items.service';
     LabelsService,
     RecurrenceService,
   ],
-  exports: [WorkItemsService, ItemDetailsService],
+  exports: [WorkItemsService, ItemDetailsService, BugsService],
 })
 export class WorkItemsModule {}

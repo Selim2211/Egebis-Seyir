@@ -230,8 +230,45 @@ export class WorkItemsService {
       take: 50,
     });
 
+    const [sourceBug, convertedTasks, inboundRows] = await Promise.all([
+      row.sourceBugId
+        ? db.workItem.findFirst({
+            where: { id: row.sourceBugId, deletedAt: null },
+            select: { id: true, keyPrefix: true, number: true, title: true },
+          })
+        : null,
+      row.type === 'BUG'
+        ? db.workItem.findMany({
+            where: { sourceBugId: row.id, deletedAt: null },
+            select: { id: true, keyPrefix: true, number: true, title: true },
+            orderBy: { createdAt: 'asc' },
+          })
+        : [],
+      db.inboundEmail.findMany({
+        where: { workItemId: row.sourceBugId ?? row.id },
+        orderBy: { receivedAt: 'asc' },
+      }),
+    ]);
+    const ref = (r: { id: string; keyPrefix: string; number: number; title: string }) => ({
+      id: r.id,
+      key: formatItemKey(r.keyPrefix, r.number),
+      title: r.title,
+    });
+    const firstMail = inboundRows.find((m) => m.kind === 'NEW');
+
     return {
       ...toSummary(row),
+      sourceBug: sourceBug ? ref(sourceBug) : null,
+      convertedTasks: convertedTasks.map(ref),
+      inbound: firstMail
+        ? {
+            fromName: firstMail.fromName,
+            fromEmail: firstMail.fromEmail,
+            subject: firstMail.subject,
+            receivedAt: firstMail.receivedAt.toISOString(),
+            replyCount: inboundRows.filter((m) => m.kind === 'REPLY').length,
+          }
+        : null,
       recurrence: (row.recurrence as RecurrenceRule | null) ?? null,
       readiness,
       spaceId: row.spaceId,

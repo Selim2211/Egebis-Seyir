@@ -15,6 +15,10 @@ export const BugSchema = z.object({
   reporter: Person.nullable(),
   assignee: Person.nullable(),
   environment: z.string().nullable(),
+  /** E-postadan açıldıysa gönderen (ADR-138). */
+  fromEmail: z.object({ name: z.string(), email: z.string() }).nullable(),
+  /** Task'a çevrildiyse çevrilen Task anahtarları. */
+  convertedTo: z.array(z.string()),
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime(),
 });

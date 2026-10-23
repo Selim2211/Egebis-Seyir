@@ -26,6 +26,23 @@ export const EnvSchema = z.object({
   SMTP_PASS: z.string().optional(),
   MAIL_FROM: z.string().default('Egebis Seyir <no-reply@localhost>'),
 
+  /** Çağrı sistemi (ADR-138): bu kutuya gelen e-postalar Bug olur. IMAP_HOST, USER ve PASS doluysa açılır. */
+  TICKET_IMAP_HOST: z.string().optional(),
+  TICKET_IMAP_PORT: z.coerce.number().int().positive().default(993),
+  TICKET_IMAP_SECURE: z.stringbool().default(true),
+  TICKET_USER: z.string().optional(),
+  TICKET_PASS: z.string().optional(),
+  /** Kutunun e-posta adresi (kullanıcı adı adres değilse). Müşteriye otomatik yanıt bu adresten gider. */
+  TICKET_ADDRESS: z.string().optional(),
+  TICKET_SMTP_HOST: z.string().optional(),
+  TICKET_SMTP_PORT: z.coerce.number().int().positive().default(465),
+  TICKET_SMTP_SECURE: z.stringbool().default(true),
+  TICKET_FROM_NAME: z.string().default('Egebis Destek'),
+  TICKET_POLL_SECONDS: z.coerce.number().int().min(15).default(60),
+  TICKET_AUTO_REPLY: z.stringbool().default(true),
+  /** Birden fazla workspace varsa gelen kutusunun bağlı olduğu workspace; boşsa en eskisi. */
+  TICKET_WORKSPACE_ID: z.string().optional(),
+
   /** Arka plan kuyruğu (pg-boss). Kapalıysa işler istek içinde çalışır (testler). */
   QUEUE_ENABLED: z.stringbool().default(true),
 

@@ -10,7 +10,7 @@ import {
 } from '@scrum/shared';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
-import { Bug as BugIcon, Paperclip, Plus, X } from 'lucide-react';
+import { Bug as BugIcon, FolderInput, Mail, Paperclip, Plus, X } from 'lucide-react';
 import { type FormEvent, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -34,6 +34,7 @@ import { ScrumTabs } from '@/features/sprints/scrum-tabs';
 import { ItemOpenLink } from '@/features/work-items/detail/item-nav';
 import { ItemNavContext } from '@/features/work-items/detail/item-nav-context';
 import { ItemPanel } from '@/features/work-items/detail/item-panel';
+import { MoveItemDialog } from '@/features/work-items/move-item-dialog';
 import { useUploadAttachment } from '@/features/work-items/queries';
 import { useCurrentWorkspace } from '@/features/workspace/queries';
 import { formatDate } from '@/lib/format';
@@ -177,6 +178,9 @@ export function BugsPage({
                   <th className="px-3 py-2">{t('bugs.col.owner')}</th>
                   <th className="px-3 py-2">{t('bugs.col.assignee')}</th>
                   <th className="px-3 py-2">{t('bugs.col.created')}</th>
+                  <th className="px-3 py-2">
+                    <span className="sr-only">{t('bugs.col.actions')}</span>
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -218,6 +222,8 @@ function BugRow({
   const canStatus =
     canAssign || permissions.includes(S.WORK_ITEM_WRITE) || bug.assignee?.id === user.id;
   const onError = (error: unknown) => toast.error(errorMessage(error));
+  const canMove = permissions.includes(S.WORK_ITEM_WRITE);
+  const [moving, setMoving] = useState(false);
 
   return (
     <tr className="hover:bg-accent/40 border-b last:border-0">
@@ -228,6 +234,23 @@ function BugRow({
           <ItemOpenLink itemKey={bug.key} className="min-w-0 truncate font-medium hover:underline">
             {bug.title}
           </ItemOpenLink>
+          {bug.fromEmail && (
+            <span
+              data-testid="bug-from-email"
+              title={t('bugs.fromEmail', { name: bug.fromEmail.name, email: bug.fromEmail.email })}
+              className="text-muted-foreground shrink-0"
+            >
+              <Mail className="size-3.5" aria-label={t('bugs.fromEmailShort')} />
+            </span>
+          )}
+          {bug.convertedTo.length > 0 && (
+            <span
+              data-testid="bug-converted"
+              className="shrink-0 rounded-full bg-violet-100 px-1.5 py-0.5 text-[11px] font-medium text-violet-800 dark:bg-violet-500/20 dark:text-violet-300"
+            >
+              {t('bugs.convertedTo', { keys: bug.convertedTo.join(', ') })}
+            </span>
+          )}
         </span>
       </td>
       <td
@@ -279,6 +302,11 @@ function BugRow({
             />
             {bug.reporter.name}
           </span>
+        ) : bug.fromEmail ? (
+          <span className="text-muted-foreground flex items-center gap-1.5 whitespace-nowrap">
+            <Mail className="size-3.5" aria-hidden />
+            {bug.fromEmail.name}
+          </span>
         ) : (
           '—'
         )}
@@ -322,6 +350,28 @@ function BugRow({
       </td>
       <td className="text-muted-foreground px-3 py-2 whitespace-nowrap">
         {formatDate(bug.createdAt)}
+      </td>
+      <td className="px-3 py-2 text-right">
+        {canMove && (
+          <>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-8"
+              data-testid="bug-move"
+              aria-label={t('bugs.move', { key: bug.key })}
+              title={t('bugs.move', { key: bug.key })}
+              onClick={() => setMoving(true)}
+            >
+              <FolderInput />
+            </Button>
+            <MoveItemDialog
+              item={{ id: bug.id, key: bug.key, type: 'BUG', spaceId, childTaskIds: [] }}
+              open={moving}
+              onOpenChange={setMoving}
+            />
+          </>
+        )}
       </td>
     </tr>
   );

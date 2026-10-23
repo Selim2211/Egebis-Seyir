@@ -145,6 +145,14 @@ export const useCopyItem = () =>
     }),
   );
 
+/** Bug'ı Task'a çevirir; Bug kalır, ibare taşır (ADR-138). */
+export const useConvertBugToTask = () =>
+  useWorkspaceMutation((id, itemId: string) =>
+    apiRequest(`${ws(id)}/items/${itemId}/convert-bug-to-task`, CreatedItemSchema, {
+      method: 'POST',
+    }),
+  );
+
 /** Öğeyi üst öğesinden ayırır; Sub-Task bağımsız Task olur (ADR-116). */
 export const useUnnestItem = () =>
   useWorkspaceMutation((id, itemId: string) =>

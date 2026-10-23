@@ -144,6 +144,10 @@ export function describeEvent(event: ActivityEvent, t: TFunction): string[] {
       return [t('activity.checklistAdded', { name: detail })];
     case 'item.checklist_removed':
       return [t('activity.checklistRemoved', { name: detail })];
+    case 'item.created_from_bug':
+      return [t('activity.createdFromBug', { key: detail })];
+    case 'item.converted_to_task':
+      return [t('activity.convertedToTask', { key: detail })];
     case 'item.split':
       return [t('activity.split')];
     case 'item.attachment_added':

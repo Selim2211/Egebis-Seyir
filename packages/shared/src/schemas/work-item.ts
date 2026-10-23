@@ -293,6 +293,20 @@ export const WorkItemDetailSchema = WorkItemSummarySchema.extend({
   /** Alt öğelerin saat toplamı (rollup); alt öğede saat yoksa null. */
   rolledUpHours: z.number().nullable(),
   archived: z.boolean(),
+  /** Bug'dan çevrilen Task'ta kaynak Bug (ADR-138). */
+  sourceBug: z.object({ id: z.uuid(), key: z.string(), title: z.string() }).nullable(),
+  /** Bug ise: bu Bug'dan çevrilen Task'lar. Bug silinmez, yalnızca "Task'a çevrildi" ibaresi taşır. */
+  convertedTasks: z.array(z.object({ id: z.uuid(), key: z.string(), title: z.string() })),
+  /** E-postadan açılan Bug'ın (ya da kaynak Bug'ı e-postadan gelen Task'ın) gönderen bilgisi. */
+  inbound: z
+    .object({
+      fromName: z.string(),
+      fromEmail: z.string(),
+      subject: z.string(),
+      receivedAt: z.iso.datetime(),
+      replyCount: z.int(),
+    })
+    .nullable(),
   severity: z.enum(BUG_SEVERITIES).nullable(),
   stepsToReproduce: z.string().nullable(),
   expectedResult: z.string().nullable(),

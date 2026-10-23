@@ -51,6 +51,7 @@ import { SprintsModule } from './modules/sprints/sprints.module';
 import { SpacesModule } from './modules/spaces/spaces.module';
 import { UsersModule } from './modules/users/users.module';
 import { WorkItemsModule } from './modules/work-items/work-items.module';
+import { TicketsModule } from './modules/tickets/tickets.module';
 import { WorkspacesModule } from './modules/workspaces/workspaces.module';
 
 const requestId = (req: Request): string => {
@@ -110,6 +111,7 @@ const isAuthRateLimited = (ctx: ExecutionContext): boolean =>
     WorkspacesModule,
     SpacesModule,
     WorkItemsModule,
+    TicketsModule,
     SprintsModule,
     DocsModule,
     VideosModule,
