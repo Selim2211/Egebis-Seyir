@@ -1,6 +1,7 @@
 import { WORKSPACE_PERMISSIONS } from '@scrum/shared';
 import { Link, type LinkProps } from '@tanstack/react-router';
 import {
+  Gauge,
   House,
   Inbox,
   ListTodo,
@@ -75,6 +76,7 @@ export function Sidebar() {
   const { sidebarOpen, setSidebarOpen } = useUiStore();
   const workspace = useCurrentWorkspace();
   const canManageMembers = useCan(WORKSPACE_PERMISSIONS.MEMBERS_MANAGE);
+  const isAdmin = useCan(WORKSPACE_PERMISSIONS.WORKSPACE_SETTINGS);
   // Misafirler mesajlaşamaz (ADR-098); onlar için yoklama da yapılmaz.
   const canMessage = workspace.role !== 'GUEST';
   const unreadMessages = useConversations(canMessage).data?.unreadCount ?? 0;
@@ -124,6 +126,7 @@ export function Sidebar() {
           <NavLink to="/my-work" icon={ListTodo} label={t('nav.myWork')} />
           <NavLink to="/goals" icon={Target} label={t('nav.goals')} />
           <NavLink to="/workload" icon={Users} label={t('nav.workload')} />
+          {isAdmin && <NavLink to="/admin" icon={Gauge} label={t('nav.admin')} />}
           {canMessage && (
             <NavLink
               to="/messages"

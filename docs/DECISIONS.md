@@ -1209,3 +1209,9 @@
 - **Bug → Task:** `POST items/:id/convert-bug-to-task` aynı listede yeni Task açar (başlık, açıklama, atanan, öncelik taşınır), `sourceBugId` ile Bug'a bağlar. Bug silinmez, "Task'a çevrildi → KEY" ibaresi taşır (Bug sayfası ve Bugs listesi); Task sayfasında "Kaynak Bug" kartı ve gönderen bilgisi görünür; her iki tarafın geçmişine kayıt düşer.
 - **Güvenlik/işletme:** Kutu şifresi yalnızca ortam değişkenlerinde (`.env`, git'e girmez). Kullanıcı bilgisi olmayan arka plan işi, workspace sahibi adına çalışır (aktivitede sahip görünür).
 - **Henüz yapılmadı:** gelen kutusu ayarlarını arayüzden yönetme, e-posta içeriğinden Proje bulma, Bug çözülünce müşteriye bildirim (ayrı iş).
+
+## ADR-139 — Yönetici paneli
+
+- **Bağlam:** Yönetici, tüm projelerin durumunu karmaşık olmadan tek ekranda görmek istedi: Bug akışı (bugün/bu hafta gelen, çözülen, toplam), projelerin sprint ilerlemesi, geciken işler, ekip yükü.
+- **Karar:** Kenar çubuğuna "Yönetici paneli" (`/admin`) eklendi; yalnızca `workspace.settings` iznine sahip Owner/Admin görür, API de aynı izinle korunur (`GET workspaces/:id/admin/overview`, Member 403). Tek istekte hesaplanır, dakikada bir yenilenir. İçerik: Bug KPI'ları (bugün/hafta gelen, açık, atanmamış, çözülme oranı, ort. çözüm süresi, gelen kutusunda bekleyen), 14 günlük Bug akışı grafiği, açık Bug'ların önem dağılımı, Bug kaynağı (e-posta/elle), genel KPI'lar (açık/geciken/hafta tamamlanan, proje/üye, gelen e-posta), her proje için aktif sprint kartı (ilerleme çubuğu + geçen süre işareti, "Yolunda/Geride", geciken ve açık Bug rozetleri; geride kalanlar üstte), 14 günlük tamamlanan iş grafiği, ekip yükü (zamanında/geciken yığılmış çubuk). "Çözülmüş" = durum kategorisi Tamamlandı. Günler Europe/Istanbul takvimine göre sayılır. Sprint "Geride" = tamamlanma % + 15 < geçen süre %.
+- **Sınır:** Okunan satır sayısı 50 bin ile sınırlı (çok büyük çalışma alanları için ileride SQL toplamaya geçilir).
