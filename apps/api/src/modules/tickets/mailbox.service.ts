@@ -1,27 +1,30 @@
 import { Injectable, Logger, type OnModuleDestroy, type OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ImapFlow } from 'imapflow';
-import { simpleParser } from 'mailparser';
+import { simpleParser, type ParsedMail } from 'mailparser';
 import type { Env } from '../../infra/config/env';
-import { TicketsService } from './tickets.service';
+import { type IngestResult, TicketsService } from './tickets.service';
 
 /** Bu boyuttan büyük e-postalar (ek dahil) okunmaz; bellek ve süre sınırı. */
 const MAX_MAIL_BYTES = 40 * 1024 * 1024;
 /** Aynı e-posta bu kadar kez hata verirse atlanır (sonsuz yeniden deneme olmasın). */
 const MAX_FAILURES = 3;
 
+type Box = 'inbox' | 'sent';
+
 /**
- * Gelen kutusu yoklayıcısı (ADR-138): her turda IMAP'ten imleçten (UID) sonra gelen e-postaları alır ve
- * `TicketsService`'e verir. Okundu bayrağına dokunmaz: kendi gönderdiğiniz ya da webmail'de açılmış e-posta da
- * işlenir, kutunun durumu bozulmaz. İlk açılışta imleç kutudaki son UID'ye konur (eski e-postalar içe alınmaz).
- * TICKET_IMAP_HOST/USER/PASS boşsa hiç çalışmaz.
+ * Gelen kutusu yoklayıcısı (ADR-138): her turda iki klasörü UID imleciyle izler.
+ * - INBOX: müşteri e-postaları (yeni çağrı ya da yanıt).
+ * - Gönderilmiş Öğeler: bizim bir çağrıya verdiğimiz yanıtlar (Outlook/webmail'den); yazışmaya "Destek yanıtı" düşer.
+ * Okundu bayrağına dokunmaz: kendi gönderdiğiniz ya da webmail'de açılmış e-posta da işlenir. İlk açılışta imleç klasördeki
+ * son UID'ye konur (eski e-postalar içe alınmaz). TICKET_IMAP_HOST/USER/PASS boşsa hiç çalışmaz.
  */
 @Injectable()
 export class MailboxService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(MailboxService.name);
   private timer?: ReturnType<typeof setInterval>;
   private running = false;
-  private readonly failures = new Map<number, number>();
+  private readonly failures = new Map<string, number>();
 
   constructor(
     private readonly config: ConfigService<Env, true>,
@@ -62,7 +65,7 @@ export class MailboxService implements OnModuleInit, OnModuleDestroy {
     }
   }
 
-  /** Bir tur: imleçten sonraki e-postaları işler. Bug olan ya da yanıt olarak eklenen sayıyı döner. */
+  /** Bir tur: gelen ve gönderilmiş klasörlerde imleçten sonraki e-postaları işler. Yazışmaya eklenen sayıyı döner. */
   async pollOnce(): Promise<number> {
     const client = new ImapFlow({
       host: this.config.get('TICKET_IMAP_HOST', { infer: true })!,
@@ -80,30 +83,16 @@ export class MailboxService implements OnModuleInit, OnModuleDestroy {
     let handled = 0;
     await client.connect();
     try {
-      const lock = await client.getMailboxLock('INBOX');
-      try {
-        const box = client.mailbox;
-        if (!box) return 0;
-        const validity = box.uidValidity;
-        const last = box.uidNext - 1;
-        const cursor = await this.tickets.cursor();
-        if (cursor.uid === null || cursor.validity !== validity) {
-          // İlk açılış (ya da kutu yeniden kuruldu): şimdiye kadarki e-postalar içe alınmaz.
-          await this.tickets.saveCursor(last, validity);
-          this.logger.log(`Çağrı gelen kutusu imleci UID ${last}'e konuldu (öncesi içe alınmaz)`);
-          return 0;
-        }
-        if (last <= cursor.uid) return 0;
-        const found = (await client.search({ uid: `${cursor.uid + 1}:*` }, { uid: true })) || [];
-        const uids = found.filter((uid) => uid > cursor.uid!).sort((a, b) => a - b);
-        for (const uid of uids) {
-          const ok = await this.handle(client, uid);
-          if (ok === 'retry') break; // sıra korunur; sonraki turda aynı e-posta yeniden denenir
-          await this.tickets.saveCursor(uid, validity);
-          if (ok === 'done') handled += 1;
-        }
-      } finally {
-        lock.release();
+      handled += await this.pollFolder(client, 'INBOX', 'inbox', (m, raw, at) =>
+        this.tickets.ingest(m, raw, at),
+      );
+      const sent = (await client.list()).find(
+        (b) => b.specialUse === '\\Sent' || /^(sent|gönderilmiş)/i.test(b.name),
+      );
+      if (sent) {
+        handled += await this.pollFolder(client, sent.path, 'sent', (m, raw, at) =>
+          this.tickets.ingestSent(m, raw, at),
+        );
       }
     } finally {
       await client.logout().catch(() => undefined);
@@ -111,8 +100,49 @@ export class MailboxService implements OnModuleInit, OnModuleDestroy {
     return handled;
   }
 
+  private async pollFolder(
+    client: ImapFlow,
+    path: string,
+    box: Box,
+    ingest: (mail: ParsedMail, raw: Buffer, at: Date) => Promise<IngestResult>,
+  ): Promise<number> {
+    let handled = 0;
+    const lock = await client.getMailboxLock(path);
+    try {
+      const mailbox = client.mailbox;
+      if (!mailbox) return 0;
+      const validity = mailbox.uidValidity;
+      const last = mailbox.uidNext - 1;
+      const cursor = await this.tickets.cursor(box);
+      if (cursor.uid === null || cursor.validity !== validity) {
+        // İlk açılış (ya da klasör yeniden kuruldu): şimdiye kadarki e-postalar içe alınmaz.
+        await this.tickets.saveCursor(box, last, validity);
+        this.logger.log(`${path} imleci UID ${last}'e konuldu (öncesi içe alınmaz)`);
+        return 0;
+      }
+      if (last <= cursor.uid) return 0;
+      const found = (await client.search({ uid: `${cursor.uid + 1}:*` }, { uid: true })) || [];
+      const uids = found.filter((uid) => uid > cursor.uid!).sort((a, b) => a - b);
+      for (const uid of uids) {
+        const outcome = await this.handle(client, box, uid, ingest);
+        if (outcome === 'retry') break; // sıra korunur; sonraki turda aynı e-posta yeniden denenir
+        await this.tickets.saveCursor(box, uid, validity);
+        if (outcome === 'done') handled += 1;
+      }
+    } finally {
+      lock.release();
+    }
+    return handled;
+  }
+
   /** done: Bug/yorum oldu · skip: atlandı (imleç ilerler) · retry: hata, tekrar denenecek. */
-  private async handle(client: ImapFlow, uid: number): Promise<'done' | 'skip' | 'retry'> {
+  private async handle(
+    client: ImapFlow,
+    box: Box,
+    uid: number,
+    ingest: (mail: ParsedMail, raw: Buffer, at: Date) => Promise<IngestResult>,
+  ): Promise<'done' | 'skip' | 'retry'> {
+    const key = `${box}:${uid}`;
     try {
       const meta = await client.fetchOne(
         String(uid),
@@ -121,21 +151,21 @@ export class MailboxService implements OnModuleInit, OnModuleDestroy {
       );
       if (!meta) return 'skip';
       if ((meta.size ?? 0) > MAX_MAIL_BYTES) {
-        this.logger.warn(`E-posta çok büyük, atlandı (uid ${uid}, ${meta.size} bayt)`);
+        this.logger.warn(`E-posta çok büyük, atlandı (${key}, ${meta.size} bayt)`);
         return 'skip';
       }
       const receivedAt = meta.internalDate instanceof Date ? meta.internalDate : new Date();
       const full = await client.fetchOne(String(uid), { source: true }, { uid: true });
       if (!full || !full.source) return 'skip';
       const parsed = await simpleParser(full.source);
-      const result = await this.tickets.ingest(parsed, full.source, receivedAt);
-      this.failures.delete(uid);
+      const result = await ingest(parsed, full.source, receivedAt);
+      this.failures.delete(key);
       return result === 'created' || result === 'reply' ? 'done' : 'skip';
     } catch (error) {
-      const count = (this.failures.get(uid) ?? 0) + 1;
-      this.failures.set(uid, count);
+      const count = (this.failures.get(key) ?? 0) + 1;
+      this.failures.set(key, count);
       this.logger.error(
-        `E-posta işlenemedi (uid ${uid}, deneme ${count}): ${(error as Error).message}`,
+        `E-posta işlenemedi (${key}, deneme ${count}): ${(error as Error).message}`,
       );
       return count >= MAX_FAILURES ? 'skip' : 'retry';
     }

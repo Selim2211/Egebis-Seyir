@@ -18,6 +18,8 @@ import { SpacesService } from '../spaces/spaces.service';
 import { BugsService } from '../work-items/bugs.service';
 import { asJson } from '../work-items/item-support';
 import {
+  MAIL_CUSTOMER_PREFIX,
+  MAIL_SUPPORT_PREFIX,
   htmlToText,
   isAutomatedMail,
   plainOf,
@@ -63,17 +65,23 @@ export class TicketsService {
     ).toLowerCase();
   }
 
-  /** Gelen kutusu imleci: en son işlenen UID ve kutunun UIDVALIDITY değeri (yoksa null). */
-  async cursor(): Promise<{ uid: number | null; validity: bigint | null }> {
+  /** Klasör imleci: en son işlenen UID ve klasörün UIDVALIDITY değeri (yoksa null). */
+  async cursor(box: 'inbox' | 'sent'): Promise<{ uid: number | null; validity: bigint | null }> {
     const row = await this.prisma.appSettings.findUnique({ where: { id: 1 } });
-    return { uid: row?.ticketsLastUid ?? null, validity: row?.ticketsUidValidity ?? null };
+    return box === 'inbox'
+      ? { uid: row?.ticketsLastUid ?? null, validity: row?.ticketsUidValidity ?? null }
+      : { uid: row?.ticketsSentUid ?? null, validity: row?.ticketsSentValidity ?? null };
   }
 
-  async saveCursor(uid: number, validity: bigint): Promise<void> {
+  async saveCursor(box: 'inbox' | 'sent', uid: number, validity: bigint): Promise<void> {
+    const data =
+      box === 'inbox'
+        ? { ticketsLastUid: uid, ticketsUidValidity: validity }
+        : { ticketsSentUid: uid, ticketsSentValidity: validity };
     await this.prisma.appSettings.upsert({
       where: { id: 1 },
-      create: { id: 1, ticketsLastUid: uid, ticketsUidValidity: validity },
-      update: { ticketsLastUid: uid, ticketsUidValidity: validity },
+      create: { id: 1, ...data },
+      update: data,
     });
   }
 
@@ -214,16 +222,8 @@ export class TicketsService {
       const itemId = parent.workItemId;
       const body = stripQuotedReply(rawText);
       const failed = await this.attach(workspaceId, actorId, itemId, files);
-      const doc = this.replyDoc(fromName, fromEmail, body, failed);
-      await this.prisma.comment.create({
-        data: {
-          workspaceId,
-          workItemId: itemId,
-          authorId: reporter?.id ?? null,
-          body: asJson(doc),
-          bodyText: plainOf(doc),
-        },
-      });
+      const doc = this.mailDoc(`${MAIL_CUSTOMER_PREFIX} ${fromName} <${fromEmail}>`, body, failed);
+      await this.commentOnThread(workspaceId, itemId, reporter?.id ?? null, doc);
       await this.prisma.inboundEmail.create({
         data: {
           workspaceId,
@@ -304,6 +304,115 @@ export class TicketsService {
     return 'created';
   }
 
+  /**
+   * Gönderilmiş Öğeler klasöründeki e-posta: bizim bir çağrıya verdiğimiz yanıt (Outlook/webmail'den). Yazışmanın
+   * (In-Reply-To/References) bilinen bir çağrıya bağlıysa "Destek yanıtı" olarak Bug'ın ve ondan çevrilen
+   * Task'ların yorumlarına eklenir; bağlı değilse yok sayılır (çağrıyla ilgisiz giden e-postalar).
+   */
+  async ingestSent(mail: ParsedMail, rawSource: Buffer, serverDate: Date): Promise<IngestResult> {
+    const target = await this.target();
+    if (!target) return 'ignored';
+    const { workspaceId, actorId } = target;
+    const messageId =
+      mail.messageId ?? `<${createHash('sha256').update(rawSource).digest('hex')}@ticket.local>`;
+    if (
+      await this.prisma.inboundEmail.findUnique({
+        where: { workspaceId_messageId: { workspaceId, messageId } },
+        select: { id: true },
+      })
+    ) {
+      return 'duplicate';
+    }
+    // Otomatik yanıtlarımız (talebiniz alındı) ve sistem e-postaları yazışmaya yorum olarak eklenmez.
+    const autoSubmitted = mail.headers.get('auto-submitted');
+    if (typeof autoSubmitted === 'string' && autoSubmitted.toLowerCase() !== 'no') return 'ignored';
+
+    const refs = [
+      mail.inReplyTo,
+      ...(Array.isArray(mail.references) ? mail.references : []),
+    ].filter((r): r is string => typeof r === 'string' && r !== '');
+    if (refs.length === 0) return 'ignored';
+    const parent = await this.prisma.inboundEmail.findFirst({
+      where: {
+        workspaceId,
+        OR: [{ messageId: { in: refs } }, { ackMessageId: { in: refs } }],
+        workItem: { deletedAt: null },
+      },
+      select: { workItemId: true },
+    });
+    if (!parent) return 'ignored';
+
+    const sender = mail.from?.value[0];
+    const fromEmail = sender?.address?.toLowerCase() ?? this.ownAddress;
+    const fromName = sender?.name?.trim() || fromEmail.split('@')[0]!;
+    const recipients = (Array.isArray(mail.to) ? mail.to : mail.to ? [mail.to] : [])
+      .flatMap((group) => group.value.map((v) => v.address))
+      .filter((a): a is string => !!a);
+    const sent = mail.date && !Number.isNaN(mail.date.getTime()) ? mail.date : null;
+    const receivedAt = sent && sent.getTime() <= Date.now() + 300_000 ? sent : serverDate;
+    const rawText = (mail.text ?? '').trim() || (mail.html ? htmlToText(mail.html) : '');
+    const files = mail.attachments.filter(
+      (a) => !(a.related && a.size < 30_000) && a.content.length > 0,
+    );
+    const staff = await this.prisma.user.findFirst({
+      where: { email: fromEmail, memberships: { some: { workspaceId } } },
+      select: { id: true },
+    });
+
+    const failed = await this.attach(workspaceId, actorId, parent.workItemId, files);
+    const header = `${MAIL_SUPPORT_PREFIX} ${fromName}${recipients.length > 0 ? ` → ${recipients.join(', ')}` : ''}`;
+    const doc = this.mailDoc(header, stripQuotedReply(rawText), failed);
+    await this.commentOnThread(workspaceId, parent.workItemId, staff?.id ?? null, doc);
+    await this.prisma.inboundEmail.create({
+      data: {
+        workspaceId,
+        workItemId: parent.workItemId,
+        kind: 'OUTBOUND',
+        messageId,
+        fromName,
+        fromEmail,
+        subject: (mail.subject ?? '').slice(0, 500),
+        receivedAt,
+        userId: staff?.id ?? null,
+      },
+    });
+    this.logger.log(`Destek yanıtı yazışmaya eklendi (${recipients.join(', ') || 'alıcı yok'})`);
+    return 'reply';
+  }
+
+  /** Yazışma yorumu: çağrının Bug'ına ve ondan çevrilen (silinmemiş) tüm Task'lara aynen yazılır. */
+  private async commentOnThread(
+    workspaceId: string,
+    bugId: string,
+    authorId: string | null,
+    doc: RichTextNode,
+  ): Promise<void> {
+    const tasks = await this.prisma.workItem.findMany({
+      where: { sourceBugId: bugId, deletedAt: null },
+      select: { id: true },
+    });
+    await this.prisma.comment.createMany({
+      data: [bugId, ...tasks.map((t) => t.id)].map((workItemId) => ({
+        workspaceId,
+        workItemId,
+        authorId,
+        body: asJson(doc),
+        bodyText: plainOf(doc),
+      })),
+    });
+  }
+
+  private mailDoc(header: string, body: string, failed: string[]): RichTextNode {
+    const content: RichTextNode[] = [
+      { type: 'paragraph', content: [{ type: 'text', text: header, marks: [{ type: 'bold' }] }] },
+      ...(textToRichText(body).content ?? []),
+    ];
+    if (failed.length > 0) {
+      content.push(...(textToRichText(`Eklenemeyen dosyalar: ${failed.join(', ')}`).content ?? []));
+    }
+    return { type: 'doc', content };
+  }
+
   /** Dosyaları Bug'a ekler; eklenemeyenlerin adlarını döner. */
   private async attach(
     workspaceId: string,
@@ -335,22 +444,6 @@ export class TicketsService {
       }
     }
     return failed;
-  }
-
-  private replyDoc(name: string, email: string, body: string, failed: string[]): RichTextNode {
-    const content: RichTextNode[] = [
-      {
-        type: 'paragraph',
-        content: [
-          { type: 'text', text: `Müşteri yanıtı — ${name} <${email}>`, marks: [{ type: 'bold' }] },
-        ],
-      },
-      ...(textToRichText(body).content ?? []),
-    ];
-    if (failed.length > 0) {
-      content.push(...(textToRichText(`Eklenemeyen dosyalar: ${failed.join(', ')}`).content ?? []));
-    }
-    return { type: 'doc', content };
   }
 
   private mailer(): Transporter | null {

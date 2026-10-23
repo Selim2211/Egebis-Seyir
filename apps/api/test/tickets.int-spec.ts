@@ -29,11 +29,12 @@ describe('Çağrı sistemi (gerçek veritabanı)', { timeout: 30_000 }, () => {
     headers?: string[];
     inReplyTo?: string;
     attach?: boolean;
+    to?: string;
   }) =>
     Buffer.from(
       [
         `From: ${o.from}`,
-        'To: destek@egebis.com.tr',
+        `To: ${o.to ?? 'destek@egebis.com.tr'}`,
         `Subject: ${o.subject}`,
         `Message-ID: <${o.id}>`,
         ...(o.inReplyTo ? [`In-Reply-To: ${o.inReplyTo}`, `References: ${o.inReplyTo}`] : []),
@@ -265,5 +266,108 @@ describe('Çağrı sistemi (gerçek veritabanı)', { timeout: 30_000 }, () => {
     await owner.post(api(`/items/${bug.id}/move`), { listId }).expect(204);
     expect((await bugs(target.id)).map((b) => b.id)).toEqual([bug.id]);
     expect(await bugs((await inboxSpace()).id)).toHaveLength(0);
+  });
+
+  it('destek yanıtı (gönderilmiş öğeler) ve müşteri yanıtı Bug’ın ve çevrilen Task’ın yorumlarına düşer', async () => {
+    await ingest(
+      mime({
+        from: 'ayse@firma.com',
+        subject: 'Hata var',
+        id: 't1@firma.com',
+        text: 'ilk mesaj',
+        attach: false,
+      }),
+    );
+    const inbox = await inboxSpace();
+    const bug = (await bugs(inbox.id))[0]!;
+    const tickets = ctx.app.get(TicketsService);
+    const sent = async (raw: Buffer) =>
+      tickets.ingestSent(await simpleParser(raw), raw, new Date('2026-10-23T08:00:00Z'));
+    const comments = async (id: string) =>
+      (
+        (await owner.get(api(`/items/${id}/comments`)).expect(200)).body as {
+          comments: Array<Record<string, unknown>>;
+        }
+      ).comments.map((c) => JSON.stringify(c));
+
+    // Konuşma Task'a çevrilmeden önce: destek yanıtı Bug'a yorum olur.
+    const supportReply = (id: string, text: string) =>
+      mime({
+        from: 'Destek Ekibi <destek@egebis.com.tr>',
+        to: 'ayse@firma.com',
+        subject: 'Re: Hata var',
+        id,
+        inReplyTo: '<t1@firma.com>',
+        text,
+        attach: false,
+      });
+    expect(await sent(supportReply('s1@egebis.com.tr', 'Kontrol ediyoruz.\n\n> alıntı'))).toBe(
+      'reply',
+    );
+    expect(await sent(supportReply('s1@egebis.com.tr', 'Kontrol ediyoruz.'))).toBe('duplicate');
+    let bugComments = await comments(bug.id);
+    expect(bugComments).toHaveLength(1);
+    expect(bugComments[0]).toContain('Destek yanıtı — Destek Ekibi → ayse@firma.com');
+    expect(bugComments[0]).toContain('Kontrol ediyoruz.');
+    expect(bugComments[0]).not.toContain('alıntı');
+
+    // İlgisiz giden e-posta ve otomatik yanıtlar yazışmaya girmez.
+    expect(
+      await sent(
+        mime({
+          from: 'destek@egebis.com.tr',
+          to: 'x@y.com',
+          subject: 'Başka konu',
+          id: 'x1@e.com',
+          text: 'x',
+          attach: false,
+        }),
+      ),
+    ).toBe('ignored');
+    expect(
+      await sent(
+        mime({
+          from: 'destek@egebis.com.tr',
+          to: 'ayse@firma.com',
+          subject: 'Re: Hata var',
+          id: 'ack@e.com',
+          inReplyTo: '<t1@firma.com>',
+          text: 'Talebiniz alındı',
+          headers: ['Auto-Submitted: auto-replied'],
+          attach: false,
+        }),
+      ),
+    ).toBe('ignored');
+
+    // Task'a çevrilince o ana kadarki yazışma Task'a kopyalanır.
+    const task = (await owner.post(api(`/items/${bug.id}/convert-bug-to-task`)).expect(201))
+      .body as CreatedItem;
+    let taskComments = await comments(task.id);
+    expect(taskComments).toHaveLength(1);
+    expect(taskComments[0]).toContain('Destek yanıtı');
+
+    // Çevirmeden sonraki müşteri ve destek yanıtları hem Bug'a hem Task'a yazılır.
+    expect(
+      await ingest(
+        mime({
+          from: 'ayse@firma.com',
+          subject: 'Re: Hata var',
+          id: 'c2@firma.com',
+          inReplyTo: '<s1@egebis.com.tr>',
+          text: 'Safari 17 de',
+          attach: false,
+        }),
+      ),
+    ).toBe('reply');
+    expect(await sent(supportReply('s2@egebis.com.tr', 'Düzeltme yolda.'))).toBe('reply');
+    bugComments = await comments(bug.id);
+    taskComments = await comments(task.id);
+    for (const list of [bugComments, taskComments]) {
+      expect(list).toHaveLength(3);
+      expect(list.join('')).toContain('Müşteri yanıtı — ayse <ayse@firma.com>');
+      expect(list.join('')).toContain('Safari 17 de');
+      expect(list.join('')).toContain('Düzeltme yolda.');
+    }
+    expect((await detail(bug.id)).inbound!.replyCount).toBe(3);
   });
 });

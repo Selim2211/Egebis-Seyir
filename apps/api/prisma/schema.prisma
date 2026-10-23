@@ -1600,6 +1600,9 @@ model AppSettings {
   /// yani eski e-postalar içe alınmaz). UIDVALIDITY değişirse imleç sıfırlanır.
   ticketsLastUid Int?
   ticketsUidValidity BigInt?
+  /// Gönderilmiş Öğeler klasörü için aynı imleç.
+  ticketsSentUid Int?
+  ticketsSentValidity BigInt?
   updatedAt    DateTime  @updatedAt @db.Timestamptz
 
   @@map("app_settings")
@@ -1680,6 +1683,8 @@ model MapLayout {
 enum InboundEmailKind {
   NEW
   REPLY
+  /// Gönderilmiş Öğeler klasöründeki destek yanıtı (yazışmanın bizim tarafı).
+  OUTBOUND
 }
 
 /// Gelen kutusundan içe alınan e-posta: Bug'ın kaynağı (kimden/ne zaman) ve yanıt zinciri.

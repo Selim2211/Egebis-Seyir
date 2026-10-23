@@ -17,6 +17,7 @@ import { TenantPrismaService } from '../../infra/prisma/tenant-prisma.service';
 import { ActivityService } from '../activity/activity.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { notFound } from '../spaces/space-errors';
+import { MAIL_CUSTOMER_PREFIX, MAIL_SUPPORT_PREFIX } from '../tickets/ticket-mail';
 import { WorkItemsService } from './work-items.service';
 
 /** Bug durumunun panodaki durum kategorisi karşılığı (ADR-117). */
@@ -164,6 +165,31 @@ export class BugsService {
           reporterId: bug.reporterId,
         },
       });
+      // E-posta yazışması (müşteri/destek yanıtları) Task'a da kopyalanır; Task'ın yorumlarında da görünür.
+      const thread = await tx.comment.findMany({
+        where: {
+          workItemId: bug.id,
+          deletedAt: null,
+          OR: [
+            { bodyText: { startsWith: MAIL_CUSTOMER_PREFIX } },
+            { bodyText: { startsWith: MAIL_SUPPORT_PREFIX } },
+          ],
+        },
+        orderBy: { createdAt: 'asc' },
+        select: { authorId: true, body: true, bodyText: true, createdAt: true },
+      });
+      if (thread.length > 0) {
+        await tx.comment.createMany({
+          data: thread.map((c) => ({
+            workspaceId,
+            workItemId: created.id,
+            authorId: c.authorId,
+            body: c.body ?? {},
+            bodyText: c.bodyText,
+            createdAt: c.createdAt,
+          })),
+        });
+      }
       await this.activity.record(tx, {
         workspaceId,
         actorId,

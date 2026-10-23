@@ -266,7 +266,7 @@ export class WorkItemsService {
             fromEmail: firstMail.fromEmail,
             subject: firstMail.subject,
             receivedAt: firstMail.receivedAt.toISOString(),
-            replyCount: inboundRows.filter((m) => m.kind === 'REPLY').length,
+            replyCount: inboundRows.filter((m) => m.kind !== 'NEW').length,
           }
         : null,
       recurrence: (row.recurrence as RecurrenceRule | null) ?? null,

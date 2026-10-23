@@ -67,5 +67,21 @@ describe('htmlToText / stripQuotedReply', () => {
       'Sorun çözüldü, sağ olun.\n\n23.10.2026 tarihinde Egebis yazdı:\n> Talebiniz alındı';
     expect(stripQuotedReply(reply)).toBe('Sorun çözüldü, sağ olun.');
     expect(stripQuotedReply('> sadece alıntı')).toBe('> sadece alıntı');
+    const nl = String.fromCharCode(10);
+    const outlook = [
+      'Hemen dönüş yapıcaz.',
+      '',
+      '________________________________',
+      'From: Müşteri <m@x.com>',
+      'Sent: Friday, October 23, 2026 3:34 PM',
+      'To: Destek',
+      'Subject: Sorun',
+    ].join(nl);
+    expect(stripQuotedReply(outlook)).toBe('Hemen dönüş yapıcaz.');
+    const noSeparator = ['Tamam.', 'From: Ali <a@x.com>', 'Sent: dün', 'Subject: x'].join(nl);
+    expect(stripQuotedReply(noSeparator)).toBe('Tamam.');
+    expect(stripQuotedReply('Gönderen bilgisi: From: bir şey')).toBe(
+      'Gönderen bilgisi: From: bir şey',
+    );
   });
 });

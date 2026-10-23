@@ -1,5 +1,9 @@
 import { richTextToPlain, type RichTextNode } from '@scrum/shared';
 
+/** Yazışma yorumlarının ilk satırı: Bug'dan Task'a çevrilirken bu yorumlar Task'a da kopyalanır. */
+export const MAIL_CUSTOMER_PREFIX = 'Müşteri yanıtı —';
+export const MAIL_SUPPORT_PREFIX = 'Destek yanıtı —';
+
 /** Başlık üst sınırı (Bug başlığı en çok 500 karakter). */
 const TITLE_MAX = 200;
 /** Açıklamaya alınacak en çok karakter; fazlası "(devamı kırpıldı)" ile kesilir. */
@@ -91,8 +95,18 @@ export function htmlToText(html: string): string {
 export function stripQuotedReply(text: string): string {
   const lines = text.replace(/\r\n?/g, '\n').split('\n');
   const out: string[] = [];
-  for (const line of lines) {
+  for (const [index, line] of lines.entries()) {
     if (/^\s*>/.test(line)) break;
+    // Outlook: "________" ayracı ya da "From:/Kimden:" ardından "Sent:/Gönderilen:" başlık bloğu alıntının başıdır.
+    if (/^\s*_{10,}\s*$/.test(line)) break;
+    if (
+      /^\s*(from|kimden)\s*:/i.test(line) &&
+      lines
+        .slice(index + 1, index + 4)
+        .some((next) => /^\s*(sent|gönderilen|date|tarih)\s*:/i.test(next))
+    ) {
+      break;
+    }
     if (/^\s*-{2,}\s*(original message|orijinal ileti|forwarded message)/i.test(line)) break;
     if (
       /^\s*(on .{5,80} wrote:|.{5,80} tarihinde .{3,80} şunu yazdı:|.{5,80} yazdı:)\s*$/i.test(line)
