@@ -116,7 +116,7 @@ describe('Çağrı sistemi (gerçek veritabanı)', { timeout: 30_000 }, () => {
     const outbox = ctx.app.get(TicketsService).outbox;
     expect(outbox.at(-1)).toMatchObject({
       to: 'ayse@firma.com',
-      subject: 'Re: Fwd: Re: Sepet açılmıyor',
+      subject: 'Re: Sepet açılmıyor',
       inReplyTo: '<m1@firma.com>',
     });
     expect(outbox.at(-1)!.text).toContain(bug.key);

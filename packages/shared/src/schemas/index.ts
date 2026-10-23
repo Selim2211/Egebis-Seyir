@@ -18,6 +18,7 @@ export * from './gantt';
 export * from './flow';
 export * from './admin';
 export * from './dashboard';
+export * from './ticket';
 export * from './project-map';
 export * from './saved-view';
 export * from './status';

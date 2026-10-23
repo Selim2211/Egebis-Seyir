@@ -442,7 +442,11 @@
     "VIDEO_NOT_READY": "Video henüz yükleniyor.",
     "VIDEO_FOLDER_INVALID": "Klasör bulunamadı.",
     "BUG_NOT_IN_BACKLOG": "Bug'lar Backlog'a alınmaz; sprint'te kalır ya da başka bir sprint'e taşınır.",
-    "EPIC_SPRINTS_DIFFER": "Bu Epic taşınamaz: altındaki Task’lar farklı sprint’lerde (ya da bir kısmı Backlog’da). Önce Task’ları aynı sprint’e al."
+    "EPIC_SPRINTS_DIFFER": "Bu Epic taşınamaz: altındaki Task’lar farklı sprint’lerde (ya da bir kısmı Backlog’da). Önce Task’ları aynı sprint’e al.",
+    "TICKET_DOMAIN_TAKEN": "Bu alan adı başka bir firmada tanımlı.",
+    "TICKET_COMPANY_EXISTS": "Bu adla bir firma zaten var.",
+    "TICKET_COMPANY_CYCLE": "Üst firma seçimi döngü oluşturuyor.",
+    "TICKET_SPACE_INVALID": "Seçilen proje geçerli değil (silinmiş, arşivde ya da gelen kutusu)."
   },
   "spaceRoles": {
     "PRODUCT_OWNER": "Product Owner",

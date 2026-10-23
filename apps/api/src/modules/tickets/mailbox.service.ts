@@ -3,49 +3,46 @@ import { ConfigService } from '@nestjs/config';
 import { ImapFlow } from 'imapflow';
 import { simpleParser, type ParsedMail } from 'mailparser';
 import type { Env } from '../../infra/config/env';
+import { TicketConfigService, type TicketRuntime } from './ticket-config.service';
+import { TicketRepliesService } from './ticket-replies.service';
 import { type IngestResult, TicketsService } from './tickets.service';
 
 /** Bu boyuttan büyük e-postalar (ek dahil) okunmaz; bellek ve süre sınırı. */
 const MAX_MAIL_BYTES = 40 * 1024 * 1024;
 /** Aynı e-posta bu kadar kez hata verirse atlanır (sonsuz yeniden deneme olmasın). */
 const MAX_FAILURES = 3;
+/** Zamanlayıcı bu aralıkla uyanır; asıl yoklama sıklığı ayardaki `pollSeconds`'tır. */
+const TICK_MS = 10_000;
 
 type Box = 'inbox' | 'sent';
 
 /**
- * Gelen kutusu yoklayıcısı (ADR-138): her turda iki klasörü UID imleciyle izler.
+ * Gelen kutusu yoklayıcısı (ADR-138, ADR-140): ayarlar ekranındaki (yoksa .env) posta kutusunu izler. Her turda iki
+ * klasörü UID imleciyle okur ve ardından süreç yanıtlarını (işleme alındı, çözüldü) gönderir.
  * - INBOX: müşteri e-postaları (yeni çağrı ya da yanıt).
  * - Gönderilmiş Öğeler: bizim bir çağrıya verdiğimiz yanıtlar (Outlook/webmail'den); yazışmaya "Destek yanıtı" düşer.
- * Okundu bayrağına dokunmaz: kendi gönderdiğiniz ya da webmail'de açılmış e-posta da işlenir. İlk açılışta imleç klasördeki
- * son UID'ye konur (eski e-postalar içe alınmaz). TICKET_IMAP_HOST/USER/PASS boşsa hiç çalışmaz.
+ * Okundu bayrağına dokunmaz. İlk açılışta imleç klasördeki son UID'ye konur (eski e-postalar içe alınmaz).
+ * Ayarlar değişince yeniden başlatma gerekmez.
  */
 @Injectable()
 export class MailboxService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(MailboxService.name);
   private timer?: ReturnType<typeof setInterval>;
   private running = false;
+  private lastPoll = 0;
   private readonly failures = new Map<string, number>();
 
   constructor(
     private readonly config: ConfigService<Env, true>,
     private readonly tickets: TicketsService,
+    private readonly cfg: TicketConfigService,
+    private readonly replies: TicketRepliesService,
   ) {}
 
-  get enabled(): boolean {
-    return Boolean(
-      this.config.get('TICKET_IMAP_HOST', { infer: true }) &&
-      this.config.get('TICKET_USER', { infer: true }) &&
-      this.config.get('TICKET_PASS', { infer: true }) &&
-      this.config.get('NODE_ENV', { infer: true }) !== 'test',
-    );
-  }
-
   onModuleInit(): void {
-    if (!this.enabled) return;
-    const every = this.config.get('TICKET_POLL_SECONDS', { infer: true }) * 1000;
-    this.logger.log(`Çağrı gelen kutusu açık (${every / 1000} sn'de bir yoklanır)`);
+    if (this.config.get('NODE_ENV', { infer: true }) === 'test') return;
     setTimeout(() => void this.tick(), 5_000).unref();
-    this.timer = setInterval(() => void this.tick(), every);
+    this.timer = setInterval(() => void this.tick(), TICK_MS);
     this.timer.unref();
   }
 
@@ -53,11 +50,22 @@ export class MailboxService implements OnModuleInit, OnModuleDestroy {
     if (this.timer) clearInterval(this.timer);
   }
 
+  /** Kutu bilgisi (sunucu, kullanıcı, şifre) tam mı? */
+  static configured(rt: TicketRuntime): boolean {
+    return Boolean(rt.imap && rt.user && rt.pass);
+  }
+
   private async tick(): Promise<void> {
     if (this.running) return;
     this.running = true;
     try {
-      await this.pollOnce();
+      const target = await this.tickets.target();
+      if (!target) return;
+      const rt = await this.cfg.effective(target.workspaceId);
+      if (Date.now() - this.lastPoll < rt.pollSeconds * 1000) return;
+      this.lastPoll = Date.now();
+      if (MailboxService.configured(rt)) await this.pollOnce(rt);
+      await this.replies.sweep(target.workspaceId);
     } catch (error) {
       this.logger.warn(`Gelen kutusu yoklanamadı: ${(error as Error).message}`);
     } finally {
@@ -66,15 +74,13 @@ export class MailboxService implements OnModuleInit, OnModuleDestroy {
   }
 
   /** Bir tur: gelen ve gönderilmiş klasörlerde imleçten sonraki e-postaları işler. Yazışmaya eklenen sayıyı döner. */
-  async pollOnce(): Promise<number> {
+  async pollOnce(rt: TicketRuntime): Promise<number> {
+    if (!rt.imap || !rt.user || !rt.pass) return 0;
     const client = new ImapFlow({
-      host: this.config.get('TICKET_IMAP_HOST', { infer: true })!,
-      port: this.config.get('TICKET_IMAP_PORT', { infer: true }),
-      secure: this.config.get('TICKET_IMAP_SECURE', { infer: true }),
-      auth: {
-        user: this.config.get('TICKET_USER', { infer: true }),
-        pass: this.config.get('TICKET_PASS', { infer: true })!,
-      },
+      host: rt.imap.host,
+      port: rt.imap.port,
+      secure: rt.imap.secure,
+      auth: { user: rt.user, pass: rt.pass },
       logger: false,
       socketTimeout: 60_000,
     });

@@ -9,7 +9,6 @@ import {
 } from '@scrum/shared';
 import type { ParsedMail } from 'mailparser';
 import { ClsService } from 'nestjs-cls';
-import { createTransport, type Transporter } from 'nodemailer';
 import type { AppClsStore } from '../../infra/cls/request-context';
 import type { Env } from '../../infra/config/env';
 import { PrismaService } from '../../infra/prisma/prisma.service';
@@ -17,6 +16,9 @@ import { AttachmentsService } from '../collab/attachments.service';
 import { SpacesService } from '../spaces/spaces.service';
 import { BugsService } from '../work-items/bugs.service';
 import { asJson } from '../work-items/item-support';
+import { TicketCompaniesService } from './ticket-companies.service';
+import { TicketConfigService } from './ticket-config.service';
+import { TicketRepliesService } from './ticket-replies.service';
 import {
   MAIL_CUSTOMER_PREFIX,
   MAIL_SUPPORT_PREFIX,
@@ -30,10 +32,6 @@ import {
 
 export type IngestResult = 'created' | 'reply' | 'duplicate' | 'ignored';
 
-/** Aynı göndericiye saatte en çok bu kadar otomatik yanıt gider (bir döngü ya da saldırı gelen kutusunu boğmasın). */
-const ACK_PER_SENDER_PER_HOUR = 3;
-/** Saatte en çok bu kadar otomatik yanıt (tüm göndericiler toplamı). */
-const ACK_PER_HOUR = 12;
 const INBOX_KEYS = ['CGR', 'CAGRI', 'INBOX'];
 
 /**
@@ -44,9 +42,6 @@ const INBOX_KEYS = ['CGR', 'CAGRI', 'INBOX'];
 @Injectable()
 export class TicketsService {
   private readonly logger = new Logger(TicketsService.name);
-  private transporter?: Transporter;
-  /** NODE_ENV=test iken gönderilecek otomatik yanıtlar gerçekten gönderilmez, burada birikir (yalnızca testler). */
-  readonly outbox: Array<{ to: string; subject: string; text: string; inReplyTo: string }> = [];
 
   constructor(
     private readonly prisma: PrismaService,
@@ -55,14 +50,14 @@ export class TicketsService {
     private readonly spaces: SpacesService,
     private readonly bugs: BugsService,
     private readonly attachments: AttachmentsService,
+    private readonly cfg: TicketConfigService,
+    private readonly companies: TicketCompaniesService,
+    private readonly replies: TicketRepliesService,
   ) {}
 
-  get ownAddress(): string {
-    return (
-      this.config.get('TICKET_ADDRESS', { infer: true }) ??
-      this.config.get('TICKET_USER', { infer: true }) ??
-      ''
-    ).toLowerCase();
+  /** NODE_ENV=test iken otomatik yanıtlar gerçekten gönderilmez, burada birikir (yalnızca testler). */
+  get outbox() {
+    return this.replies.outbox;
   }
 
   /** Klasör imleci: en son işlenen UID ve klasörün UIDVALIDITY değeri (yoksa null). */
@@ -86,7 +81,7 @@ export class TicketsService {
   }
 
   /** Gelen kutusunun bağlı olduğu workspace ve onun adına işlem yapacak sahip kullanıcı. */
-  private async target(): Promise<{ workspaceId: string; actorId: string } | null> {
+  async target(): Promise<{ workspaceId: string; actorId: string } | null> {
     const wanted = this.config.get('TICKET_WORKSPACE_ID', { infer: true });
     const workspace = wanted
       ? await this.prisma.workspace.findUnique({ where: { id: wanted }, select: { id: true } })
@@ -163,6 +158,7 @@ export class TicketsService {
     const target = await this.target();
     if (!target) return 'ignored';
     const { workspaceId, actorId } = target;
+    const rt = await this.cfg.effective(workspaceId);
 
     const sender = mail.from?.value[0];
     const fromEmail = sender?.address?.toLowerCase();
@@ -184,7 +180,7 @@ export class TicketsService {
     for (const [name, value] of mail.headers) {
       headers.set(name.toLowerCase(), typeof value === 'string' ? value : JSON.stringify(value));
     }
-    const automated = isAutomatedMail({ fromEmail, headers, ownAddress: this.ownAddress });
+    const automated = isAutomatedMail({ fromEmail, headers, ownAddress: rt.address });
     if (automated) {
       this.logger.log(`Otomatik e-posta atlandı: ${fromEmail}`);
       return 'ignored';
@@ -241,12 +237,15 @@ export class TicketsService {
       return 'reply';
     }
 
-    const box = await this.inbox(workspaceId, actorId);
+    // Firma (domain'den) ve atama (kural → firma varsayılanı → gelen kutusu); gerekçe günlüğe yazılır.
+    const company = await this.companies.resolve(workspaceId, fromEmail);
+    const routing = await this.companies.route(workspaceId, company, mail.subject ?? '', rawText);
+    const box = routing.spaceId ? null : await this.inbox(workspaceId, actorId);
     const description = textToRichText(rawText);
     const bug = await this.runAs(workspaceId, actorId, () =>
-      this.bugs.create(box.spaceId, {
+      this.bugs.create((routing.spaceId ?? box?.spaceId)!, {
         title: ticketTitle(mail.subject),
-        listId: box.listId,
+        ...(box ? { listId: box.listId } : {}),
         severity: 'MAJOR',
         priority: 'NORMAL',
       }),
@@ -276,7 +275,7 @@ export class TicketsService {
       });
     }
 
-    const ackMessageId = `<ack-${randomUUID()}@${this.ownAddress.split('@')[1] ?? 'ticket.local'}>`;
+    const ackMessageId = `<ack-${randomUUID()}@${rt.address.split('@')[1] ?? 'ticket.local'}>`;
     await this.prisma.inboundEmail.create({
       data: {
         workspaceId,
@@ -289,18 +288,31 @@ export class TicketsService {
         subject: (mail.subject ?? '').slice(0, 500),
         receivedAt,
         userId: reporter?.id ?? null,
+        companyId: company?.company.id ?? null,
+        rootCompanyId: company?.root.id ?? null,
+        routedSpaceId: routing.spaceId,
+        routedSpaceName: routing.spaceName ?? (box ? 'Gelen Çağrılar (Belirsiz)' : null),
+        routeReason: routing.reason,
       },
     });
     this.logger.log(`E-posta Bug oldu: ${bug.key} ← ${fromEmail}`);
 
-    await this.acknowledge({
-      to: fromEmail,
-      name: fromName,
-      key: bug.key,
-      subject: mail.subject,
-      messageId,
-      ackMessageId,
-    });
+    try {
+      await this.replies.send('ack', {
+        workspaceId,
+        to: fromEmail,
+        name: fromName,
+        key: bug.key,
+        subject: mail.subject,
+        messageId,
+        replyMessageId: ackMessageId,
+        company: company?.root.name,
+        project: routing.spaceName ?? undefined,
+      });
+    } catch (error) {
+      // Yanıt gönderilemese de Bug oluştu; hata yalnızca günlüğe yazılır.
+      this.logger.warn(`Otomatik yanıt gönderilemedi (${fromEmail}): ${(error as Error).message}`);
+    }
     return 'created';
   }
 
@@ -313,6 +325,7 @@ export class TicketsService {
     const target = await this.target();
     if (!target) return 'ignored';
     const { workspaceId, actorId } = target;
+    const rt = await this.cfg.effective(workspaceId);
     const messageId =
       mail.messageId ?? `<${createHash('sha256').update(rawSource).digest('hex')}@ticket.local>`;
     if (
@@ -343,7 +356,7 @@ export class TicketsService {
     if (!parent) return 'ignored';
 
     const sender = mail.from?.value[0];
-    const fromEmail = sender?.address?.toLowerCase() ?? this.ownAddress;
+    const fromEmail = sender?.address?.toLowerCase() ?? rt.address;
     const fromName = sender?.name?.trim() || fromEmail.split('@')[0]!;
     const recipients = (Array.isArray(mail.to) ? mail.to : mail.to ? [mail.to] : [])
       .flatMap((group) => group.value.map((v) => v.address))
@@ -444,82 +457,6 @@ export class TicketsService {
       }
     }
     return failed;
-  }
-
-  private mailer(): Transporter | null {
-    if (this.transporter) return this.transporter;
-    const user = this.config.get('TICKET_USER', { infer: true });
-    const pass = this.config.get('TICKET_PASS', { infer: true });
-    const host =
-      this.config.get('TICKET_SMTP_HOST', { infer: true }) ??
-      this.config.get('TICKET_IMAP_HOST', { infer: true });
-    if (!user || !pass || !host) return null;
-    this.transporter = createTransport({
-      host,
-      port: this.config.get('TICKET_SMTP_PORT', { infer: true }),
-      secure: this.config.get('TICKET_SMTP_SECURE', { infer: true }),
-      auth: { user, pass },
-      connectionTimeout: 10_000,
-      greetingTimeout: 10_000,
-      socketTimeout: 20_000,
-    });
-    return this.transporter;
-  }
-
-  /** Müşteriye "talebiniz alındı" yanıtı. Hata Bug'ın oluşmasını engellemez. */
-  private async acknowledge(input: {
-    to: string;
-    name: string;
-    key: string;
-    subject: string | undefined;
-    messageId: string;
-    ackMessageId: string;
-  }): Promise<void> {
-    if (!this.config.get('TICKET_AUTO_REPLY', { infer: true })) return;
-    if (input.to === this.ownAddress) return;
-    const recent = await this.prisma.inboundEmail.count({
-      where: {
-        fromEmail: input.to,
-        kind: 'NEW',
-        createdAt: { gte: new Date(Date.now() - 3_600_000) },
-      },
-    });
-    if (recent > ACK_PER_SENDER_PER_HOUR) return;
-    // Toplam sınır: sahte göndericili toplu e-posta gelirse, var olmayan adreslere onlarca yanıt gidip posta sağlayıcısının
-    // "saatte 30 başarısız teslimat" kuralıyla kutunun gönderimini kilitlemesin.
-    const lastHour = await this.prisma.inboundEmail.count({
-      where: { kind: 'NEW', createdAt: { gte: new Date(Date.now() - 3_600_000) } },
-    });
-    if (lastHour > ACK_PER_HOUR) return;
-    const from = this.config.get('TICKET_FROM_NAME', { infer: true });
-    const subject = `Re: ${input.subject?.trim() || 'Talebiniz'}`;
-    const text =
-      `Merhaba ${input.name},\n\n` +
-      `E-postanız alındı ve ${input.key} numarasıyla kaydedildi. Ekibimiz en kısa sürede inceleyecek.\n` +
-      `Eklemek istedikleriniz olursa bu e-postayı yanıtlamanız yeterli; yanıtınız aynı kayda eklenir.\n\n` +
-      `${from}`;
-    // Testler (.env'deki gerçek posta ayarlarını da yükler) asla gerçek e-posta göndermez.
-    if (this.config.get('NODE_ENV', { infer: true }) === 'test') {
-      this.outbox.push({ to: input.to, subject, text, inReplyTo: input.messageId });
-      return;
-    }
-    const mailer = this.mailer();
-    if (!mailer) return;
-    try {
-      await mailer.sendMail({
-        from: { name: from, address: this.ownAddress },
-        to: input.to,
-        subject,
-        text,
-        messageId: input.ackMessageId,
-        inReplyTo: input.messageId,
-        references: input.messageId,
-        headers: { 'Auto-Submitted': 'auto-replied', Precedence: 'bulk' },
-      });
-      this.logger.log(`Otomatik yanıt gönderildi: ${input.to} (${input.key})`);
-    } catch (error) {
-      this.logger.warn(`Otomatik yanıt gönderilemedi (${input.to}): ${(error as Error).message}`);
-    }
   }
 }
 

@@ -442,7 +442,11 @@
     "VIDEO_NOT_READY": "The video is still uploading.",
     "VIDEO_FOLDER_INVALID": "Folder not found.",
     "BUG_NOT_IN_BACKLOG": "Bugs are not kept in the Backlog; keep them in a sprint or move them to another sprint.",
-    "EPIC_SPRINTS_DIFFER": "This Epic can’t be moved: its Tasks are in different sprints (or some are in the Backlog). Put them in the same sprint first."
+    "EPIC_SPRINTS_DIFFER": "This Epic can’t be moved: its Tasks are in different sprints (or some are in the Backlog). Put them in the same sprint first.",
+    "TICKET_DOMAIN_TAKEN": "This domain is already assigned to another company.",
+    "TICKET_COMPANY_EXISTS": "A company with this name already exists.",
+    "TICKET_COMPANY_CYCLE": "That parent company would create a cycle.",
+    "TICKET_SPACE_INVALID": "The selected project is not valid (deleted, archived or the inbox)."
   },
   "spaceRoles": {
     "PRODUCT_OWNER": "Product Owner",

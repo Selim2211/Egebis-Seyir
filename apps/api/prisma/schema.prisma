@@ -276,6 +276,10 @@ model Workspace {
   messages                Message[]
   videoFolders            VideoFolder[]
   videos                  Video[]
+  ticketSettings          TicketSettings?
+  ticketCompanies         TicketCompany[]
+  ticketCompanyDomains    TicketCompanyDomain[]
+  ticketRules             TicketRule[]
 
   @@map("workspaces")
 }
@@ -418,7 +422,9 @@ model Space {
   videoFolders     VideoFolder[]
   videos           Video[]
 
-  notifications Notification[]
+  notifications   Notification[]
+  ticketCompanies TicketCompany[]
+  ticketRules     TicketRule[]
 
   @@index([workspaceId])
   @@map("spaces")
@@ -1594,16 +1600,16 @@ model MailSettings {
 
 /// Sunucu başına tek satır (id = 1): uygulamadan girilen genel adres (ADR-122). Yoksa APP_URL (.env) kullanılır.
 model AppSettings {
-  id           Int       @id @default(1)
-  publicUrl    String?
+  id                  Int      @id @default(1)
+  publicUrl           String?
   /// Çağrı gelen kutusu imleci: bu UID'den sonra gelen e-postalar işlenir (ilk açılışta kutudaki son UID'dir,
   /// yani eski e-postalar içe alınmaz). UIDVALIDITY değişirse imleç sıfırlanır.
-  ticketsLastUid Int?
-  ticketsUidValidity BigInt?
+  ticketsLastUid      Int?
+  ticketsUidValidity  BigInt?
   /// Gönderilmiş Öğeler klasörü için aynı imleç.
-  ticketsSentUid Int?
+  ticketsSentUid      Int?
   ticketsSentValidity BigInt?
-  updatedAt    DateTime  @updatedAt @db.Timestamptz
+  updatedAt           DateTime @updatedAt @db.Timestamptz
 
   @@map("app_settings")
 }
@@ -1689,27 +1695,123 @@ enum InboundEmailKind {
 
 /// Gelen kutusundan içe alınan e-posta: Bug'ın kaynağı (kimden/ne zaman) ve yanıt zinciri.
 model InboundEmail {
-  id           String           @id @default(uuid(7)) @db.Uuid
-  workspaceId  String           @db.Uuid
-  workspace    Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  workItemId   String           @db.Uuid
-  workItem     WorkItem         @relation(fields: [workItemId], references: [id], onDelete: Cascade)
-  kind         InboundEmailKind
+  id               String           @id @default(uuid(7)) @db.Uuid
+  workspaceId      String           @db.Uuid
+  workspace        Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  workItemId       String           @db.Uuid
+  workItem         WorkItem         @relation(fields: [workItemId], references: [id], onDelete: Cascade)
+  kind             InboundEmailKind
   /// Orijinal Message-ID (yinelenen içe almayı ve yanıt eşlemesini sağlar).
-  messageId    String
+  messageId        String
   /// Müşteriye gönderdiğimiz otomatik yanıtın Message-ID'si (müşterinin yanıtını Bug'a bağlamak için).
-  ackMessageId String?
-  fromName     String
-  fromEmail    String
-  subject      String
-  receivedAt   DateTime         @db.Timestamptz
+  ackMessageId     String?
+  fromName         String
+  fromEmail        String
+  subject          String
+  receivedAt       DateTime         @db.Timestamptz
   /// E-postadaki gönderen Seyir kullanıcısıysa kimliği.
-  userId       String?          @db.Uuid
-  user         User?            @relation(fields: [userId], references: [id], onDelete: SetNull)
-  createdAt    DateTime         @default(now()) @db.Timestamptz
+  userId           String?          @db.Uuid
+  user             User?            @relation(fields: [userId], references: [id], onDelete: SetNull)
+  createdAt        DateTime         @default(now()) @db.Timestamptz
+  /// Gönderenin domain'inden bulunan firma (alt firma olabilir) ve en üst firma; bulunamazsa null.
+  companyId        String?          @db.Uuid
+  company          TicketCompany?   @relation("EmailCompany", fields: [companyId], references: [id], onDelete: SetNull)
+  rootCompanyId    String?          @db.Uuid
+  rootCompany      TicketCompany?   @relation("EmailRootCompany", fields: [rootCompanyId], references: [id], onDelete: SetNull)
+  /// Otomatik atama günlüğü: Bug'ın gönderildiği Proje ve nedeni (anlık görüntü; Proje silinse de kalır).
+  routedSpaceId    String?          @db.Uuid
+  routedSpaceName  String?
+  routeReason      String?
+  /// Müşteriye "işleme alındı" / "çözüldü" yanıtı gönderildiği an (her biri bir kez).
+  processingMailAt DateTime?        @db.Timestamptz
+  resolvedMailAt   DateTime?        @db.Timestamptz
 
   @@unique([workspaceId, messageId])
   @@index([workItemId])
   @@index([fromEmail, createdAt])
   @@map("inbound_emails")
+}
+
+/// Çağrı sistemi ayarları (ADR-140): posta kutusu, şirket bilgisi ve yanıt şablonları. Workspace başına tek satır;
+/// satır yoksa .env değerleri kullanılır. Şifre SecretBox ile şifreli saklanır.
+model TicketSettings {
+  workspaceId  String    @id @db.Uuid
+  workspace    Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  imapHost     String?
+  imapPort     Int       @default(993)
+  imapSecure   Boolean   @default(true)
+  smtpHost     String?
+  smtpPort     Int       @default(465)
+  smtpSecure   Boolean   @default(true)
+  username     String?
+  passwordEnc  String?
+  address      String?
+  fromName     String    @default("Egebis Destek")
+  pollSeconds  Int       @default(60)
+  autoReply    Boolean   @default(true)
+  orgName      String?
+  orgPhone     String?
+  orgWebsite   String?
+  orgSignature String?
+  /// { ack | processing | resolved: { enabled, subject, body } }; eksik anahtar varsayılanı kullanır.
+  templates    Json      @default("{}")
+  updatedAt    DateTime  @updatedAt @db.Timestamptz
+
+  @@map("ticket_settings")
+}
+
+/// Müşteri firması. Alt firma, domain'iyle gelen e-postayı üst firmaya bağlar (parentId).
+model TicketCompany {
+  id             String                @id @default(uuid(7)) @db.Uuid
+  workspaceId    String                @db.Uuid
+  workspace      Workspace             @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  name           String
+  parentId       String?               @db.Uuid
+  parent         TicketCompany?        @relation("CompanyTree", fields: [parentId], references: [id], onDelete: SetNull)
+  children       TicketCompany[]       @relation("CompanyTree")
+  /// Bu firmanın e-postaları varsayılan olarak bu Projeye gider (yoksa üst firmanınki, o da yoksa Belirsiz).
+  defaultSpaceId String?               @db.Uuid
+  defaultSpace   Space?                @relation(fields: [defaultSpaceId], references: [id], onDelete: SetNull)
+  notes          String?
+  createdAt      DateTime              @default(now()) @db.Timestamptz
+  domains        TicketCompanyDomain[]
+  rules          TicketRule[]
+  emails         InboundEmail[]        @relation("EmailCompany")
+  rootEmails     InboundEmail[]        @relation("EmailRootCompany")
+
+  @@unique([workspaceId, name])
+  @@map("ticket_companies")
+}
+
+model TicketCompanyDomain {
+  id          String        @id @default(uuid(7)) @db.Uuid
+  workspaceId String        @db.Uuid
+  workspace   Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  companyId   String        @db.Uuid
+  company     TicketCompany @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  /// Küçük harf; alt alan adları (mail.firma.com) kayıtlı en uzun eşleşmeyle bulunur.
+  domain      String
+
+  @@unique([workspaceId, domain])
+  @@index([companyId])
+  @@map("ticket_company_domains")
+}
+
+/// Yönlendirme kuralı: konu ya da metinde anahtar kelime geçerse Bug belirtilen Projeye gider.
+/// Kurallar position sırasıyla denenir; ilk eşleşen kazanır. companyId boşsa her firma için geçerlidir.
+model TicketRule {
+  id          String         @id @default(uuid(7)) @db.Uuid
+  workspaceId String         @db.Uuid
+  workspace   Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  companyId   String?        @db.Uuid
+  company     TicketCompany? @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  keyword     String
+  spaceId     String         @db.Uuid
+  space       Space          @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  position    Int            @default(0)
+  enabled     Boolean        @default(true)
+  createdAt   DateTime       @default(now()) @db.Timestamptz
+
+  @@index([workspaceId, position])
+  @@map("ticket_rules")
 }
