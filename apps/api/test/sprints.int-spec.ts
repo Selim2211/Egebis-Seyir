@@ -175,7 +175,13 @@ describe('Sprint ve Product Backlog (gerçek veritabanı)', () => {
       const a = await item(s.listId, { type: 'TASK', title: 'A', points: 5 });
       const b = await item(s.listId, { type: 'BUG', title: 'B' });
       expect(keys(await backlog(s.id))).toEqual([a.key]);
-      expect(b.key).toBeTruthy();
+      // Bug Backlog'da görünmez; sprint'e alınabilir, orada görünür, Backlog'a geri bırakılamaz.
+      const sp = await sprint(s.id);
+      await move(s.id, { itemIds: [b.id], sprintId: sp.id, afterId: null }).expect(204);
+      expect((await detail(sp.id)).items.map((i) => i.key)).toEqual([b.key]);
+      const back = await move(s.id, { itemIds: [b.id], sprintId: null, afterId: null }).expect(422);
+      expect((back.body as { code: string }).code).toBe('BUG_NOT_IN_BACKLOG');
+      expect((await detail(sp.id)).items.map((i) => i.key)).toEqual([b.key]);
       const c = await item(s.listId, { type: 'TASK', title: 'C' });
       expect(keys(await backlog(s.id))).toEqual([a.key, c.key]);
     });
@@ -192,9 +198,7 @@ describe('Sprint ve Product Backlog (gerçek veritabanı)', () => {
       const res = await backlog(s.id);
       expect(keys(res)).toEqual([story.key]);
       expect(res.items[0]!.parentId).toBe(epic.id);
-      expect(res.epics).toEqual([
-        { id: epic.id, key: epic.key, title: 'Ödeme', color: '#7C3AED', childCount: 1 },
-      ]);
+      expect(res.epics).toEqual([{ id: epic.id, key: epic.key, title: 'Ödeme', color: '#7C3AED' }]);
     });
 
     it('sıra mevcut öğelerin arasına sürüklenerek değişir', async () => {

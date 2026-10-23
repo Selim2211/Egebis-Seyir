@@ -205,13 +205,29 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
     [items],
   );
 
+  // Backlog ekrandaki sırayla kurulur: Epic grupları üstte, sonra serbest Task'lar. Sıra değişimi (afterId)
+  // görünen komşuya göre hesaplanır; aksi halde satır beklenen yere gelmez.
+  const epicList = backlog.data?.epics;
+  const grouped = !isFiltered(filter) && !!epicList;
+  const byEpic = new Map<string, WorkItemRow[]>();
+  const loose: WorkItemRow[] = [];
+  for (const item of visible) {
+    if (grouped && item.parentId && epicList.some((e) => e.id === item.parentId)) {
+      const list = byEpic.get(item.parentId) ?? [];
+      list.push(item);
+      byEpic.set(item.parentId, list);
+    } else loose.push(item);
+  }
+  const displayed = grouped
+    ? [...(epicList ?? []).flatMap((e) => byEpic.get(e.id) ?? []), ...loose]
+    : visible;
   // Sürükle-bırak kapsayıcıları: her sprint ve Backlog (ADR-102).
   const containers = [
     ...sprints.map((sprint, index) => ({
       sprintId: sprint.id,
       itemIds: (sprintDetails[index]?.data?.items ?? []).map((i) => i.id),
     })),
-    { sprintId: null, itemIds: visible.map((i) => i.id) },
+    { sprintId: null, itemIds: displayed.map((i) => i.id) },
   ];
   const allItems: WorkItemRow[] = [
     ...sprintDetails.flatMap((d) => d.data?.items ?? []),
@@ -288,13 +304,15 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
       }
       if (overId) break;
     }
-    return resolveBacklogDrop({
+    const drop = resolveBacklogDrop({
       activeId: dragged.id,
       overId,
       nestOn,
       containers,
       detach: dragged.type === 'SUBTASK',
     });
+    // Bug'lar Backlog'a bırakılamaz (sprint'te kalır).
+    return dragged.type === 'BUG' && drop?.kind === 'move' && drop.sprintId === null ? null : drop;
   };
   const nameOf = (sprintId: string | null) =>
     sprintId === null
@@ -400,17 +418,14 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
   const reorderable = canRank && !isFiltered(filter);
 
   /** Süzgeç yokken Epic'ler grup olarak üstte durur, Task'ları altlarında görünür (ADR-135). */
-  const groupedByEpic = !isFiltered(filter);
-  const epicIds = new Set(backlog.data.epics.map((e) => e.id));
-  const flat = groupedByEpic
-    ? visible.filter((i) => !i.parentId || !epicIds.has(i.parentId))
-    : visible;
-  const renderItem = (item: WorkItemRow) => (
+  const groupedByEpic = grouped;
+  const flat = loose;
+  const renderItem = (item: WorkItemRow, inGroup = false) => (
     <ItemWithSubtasks
       key={item.id}
       enabled={canRank}
       item={item}
-      epicTitle={item.parentId ? epicTitles.get(item.parentId) : undefined}
+      epicTitle={!inGroup && item.parentId ? epicTitles.get(item.parentId) : undefined}
       selectable
       targets={sprints}
       canPlan={canPlan}
@@ -445,6 +460,13 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
 
   /** Aktif sprint söz konusuysa önce onay alır (brief §6.1.4). */
   const moveItems = (itemIds: string[], sprintId: string | null, afterId?: string | null) => {
+    if (
+      sprintId === null &&
+      itemIds.some((id) => allItems.find((i) => i.id === id)?.type === 'BUG')
+    ) {
+      toast.error(t('backlog.bugNotInBacklog'));
+      return;
+    }
     const target = sprints.find((s) => s.id === sprintId);
     if (target?.status === 'ACTIVE') {
       setScopeChange({ itemIds, sprint: target, adding: true, afterId });
@@ -736,6 +758,7 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
                       <EpicGroup
                         key={epic.id}
                         epic={epic}
+                        childIds={(byEpic.get(epic.id) ?? []).map((i) => i.id)}
                         inSprint={sprintDetails.flatMap((d) =>
                           (d.data?.items ?? [])
                             .filter((i) => i.parentId === epic.id)
@@ -747,7 +770,7 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
                             })),
                         )}
                       >
-                        {visible.filter((i) => i.parentId === epic.id).map(renderItem)}
+                        {(byEpic.get(epic.id) ?? []).map((i) => renderItem(i, true))}
                       </EpicGroup>
                     ))}
                   {flat.length === 0 && !(groupedByEpic && backlog.data.epics.length > 0) ? (
@@ -755,7 +778,7 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
                       {t(isFiltered(filter) ? 'backlog.noResults' : 'backlog.empty')}
                     </p>
                   ) : (
-                    flat.map(renderItem)
+                    flat.map((i) => renderItem(i))
                   )}
                 </DropContainerView>
               </div>

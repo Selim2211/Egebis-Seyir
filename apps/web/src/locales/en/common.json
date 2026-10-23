@@ -439,7 +439,8 @@
     "VIDEO_UPLOAD_INCOMPLETE": "The video upload isn't complete.",
     "VIDEO_INVALID": "The file isn't a valid video.",
     "VIDEO_NOT_READY": "The video is still uploading.",
-    "VIDEO_FOLDER_INVALID": "Folder not found."
+    "VIDEO_FOLDER_INVALID": "Folder not found.",
+    "BUG_NOT_IN_BACKLOG": "Bugs are not kept in the Backlog; keep them in a sprint or move them to another sprint."
   },
   "spaceRoles": {
     "PRODUCT_OWNER": "Product Owner",
@@ -977,10 +978,12 @@
     "expandSubtasks": "Show sub-items",
     "dragSubtask": "Drag {{key}} out of its parent",
     "selectedShort": "selected",
-    "epicTasks": "{{count}} Tasks",
     "collapseEpic": "Collapse Epic {{key}}",
     "expandEpic": "Expand Epic {{key}}",
-    "epicEmpty": "No Tasks under this Epic yet. Drag a Task here."
+    "epicEmpty": "No Tasks under this Epic yet. Drag a Task here.",
+    "epicTasks_one": "{{count}} Task",
+    "epicTasks_other": "{{count}} Tasks",
+    "bugNotInBacklog": "Bugs are not kept in the Backlog; keep them in a sprint or move them to another sprint."
   },
   "sprints": {
     "create": "Create sprint",

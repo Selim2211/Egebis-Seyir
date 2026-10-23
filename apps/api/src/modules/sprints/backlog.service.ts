@@ -84,7 +84,6 @@ export class BacklogService {
           number: true,
           title: true,
           color: true,
-          _count: { select: { children: { where: { type: 'TASK', ...countedItems } } } },
         },
         orderBy: { rank: 'asc' },
       }),
@@ -101,7 +100,6 @@ export class BacklogService {
         key: formatItemKey(e.keyPrefix, e.number),
         title: e.title,
         color: e.color,
-        childCount: e._count.children,
       })),
       labels: labels.map(({ id, name, color }) => ({ id, name, color })),
       sprints: await summarize(db, sprints),
@@ -135,6 +133,10 @@ export class BacklogService {
         parentType: item.parent?.type ?? null,
         category: item.status.category,
       });
+      // Bug'lar Backlog'da listelenmez; sprint'ten çıkarılırsa hiçbir Scrum listesinde görünmez olurdu.
+      if (input.sprintId === null && item.type === 'BUG') {
+        throw fail(ERROR_CODES.BUG_NOT_IN_BACKLOG, 422, { itemId: item.id });
+      }
       // Tamamlanmış öğe zaten sprint'teyse ve olduğu yerde sıralanıyorsa sorun yok.
       if (reason && !(reason === 'DONE' && item.sprintId === input.sprintId)) {
         throw fail(ERROR_CODES.SPRINT_ITEM_NOT_ELIGIBLE, 422, { itemId: item.id, reason });

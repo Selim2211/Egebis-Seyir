@@ -23,3 +23,7 @@ dev-server.log
 
 # graphify
 graphify-out/
+
+# ruflo (araç çalışma durumu)
+.claude-flow/
+.swarm/

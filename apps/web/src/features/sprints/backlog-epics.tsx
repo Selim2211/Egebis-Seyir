@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { WorkItemTypeIcon } from '@/components/work-item/work-item-visuals';
 import { ItemOpenLink } from '@/features/work-items/detail/item-nav';
 import { cn } from '@/lib/utils';
+import { useSelectionStore } from './selection';
 
 export const EPIC_ATTR = 'data-epic-id';
 
@@ -12,7 +13,6 @@ export interface EpicRowData {
   key: string;
   title: string;
   color: string | null;
-  childCount: number;
 }
 
 /**
@@ -22,17 +22,21 @@ export interface EpicRowData {
  */
 export function EpicGroup({
   epic,
+  childIds,
   children,
   inSprint,
 }: {
   epic: EpicRowData;
+  /** Backlog'daki Task'ların kimlikleri: Epic daraltılınca seçimden düşer. */
+  childIds: readonly string[];
   /** Backlog'daki Task satırları. */
   children: ReactNode;
   inSprint: Array<{ id: string; key: string; title: string; sprintName: string }>;
 }) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(true);
-  const count = epic.childCount;
+  const selection = useSelectionStore();
+  const count = childIds.length + inSprint.length;
   return (
     <div className="border-b last:border-b-0" data-testid="epic-group">
       <div
@@ -45,7 +49,11 @@ export function EpicGroup({
       >
         <button
           type="button"
-          onClick={() => setOpen((o) => !o)}
+          onClick={() => {
+            // Gizlenen satırlar seçili kalıp toplu işlemlere görünmeden katılmasın.
+            if (open) for (const id of childIds) selection?.toggle(id, false);
+            setOpen((o) => !o);
+          }}
           aria-expanded={open}
           aria-label={t(open ? 'backlog.collapseEpic' : 'backlog.expandEpic', { key: epic.key })}
           className="hover:bg-muted flex size-5 shrink-0 items-center justify-center rounded"
@@ -82,7 +90,7 @@ export function EpicGroup({
               </span>
             </div>
           ))}
-          {count === 0 && inSprint.length === 0 && (
+          {count === 0 && (
             <p className="text-muted-foreground px-3 py-2 pl-9 text-xs">{t('backlog.epicEmpty')}</p>
           )}
         </div>

@@ -439,7 +439,8 @@
     "VIDEO_UPLOAD_INCOMPLETE": "Video yüklemesi tamamlanmadı.",
     "VIDEO_INVALID": "Dosya geçerli bir video değil.",
     "VIDEO_NOT_READY": "Video henüz yükleniyor.",
-    "VIDEO_FOLDER_INVALID": "Klasör bulunamadı."
+    "VIDEO_FOLDER_INVALID": "Klasör bulunamadı.",
+    "BUG_NOT_IN_BACKLOG": "Bug'lar Backlog'a alınmaz; sprint'te kalır ya da başka bir sprint'e taşınır."
   },
   "spaceRoles": {
     "PRODUCT_OWNER": "Product Owner",
@@ -977,10 +978,11 @@
     "expandSubtasks": "Alt öğeleri göster",
     "dragSubtask": "{{key}} alt öğesini sürükleyip üst öğesinden ayır",
     "selectedShort": "seçili",
-    "epicTasks": "{{count}} Task",
     "collapseEpic": "{{key}} Epic’ini daralt",
     "expandEpic": "{{key}} Epic’ini aç",
-    "epicEmpty": "Bu Epic’in altında Task yok. Bir Task’ı buraya sürükleyip bırak."
+    "epicEmpty": "Bu Epic’in altında Task yok. Bir Task’ı buraya sürükleyip bırak.",
+    "epicTasks_other": "{{count}} Task",
+    "bugNotInBacklog": "Bug'lar Backlog'a alınmaz; sprint'te kalır ya da başka bir sprint'e taşınır."
   },
   "sprints": {
     "create": "Sprint oluştur",
