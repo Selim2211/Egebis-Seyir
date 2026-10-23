@@ -247,6 +247,7 @@ export class WorkItemsService {
       db.inboundEmail.findMany({
         where: { workItemId: row.sourceBugId ?? row.id },
         orderBy: { receivedAt: 'asc' },
+        include: { company: { select: { name: true } }, rootCompany: { select: { name: true } } },
       }),
     ]);
     const ref = (r: { id: string; keyPrefix: string; number: number; title: string }) => ({
@@ -267,6 +268,15 @@ export class WorkItemsService {
             subject: firstMail.subject,
             receivedAt: firstMail.receivedAt.toISOString(),
             replyCount: inboundRows.filter((m) => m.kind !== 'NEW').length,
+            company: firstMail.rootCompany?.name ?? firstMail.company?.name ?? null,
+            subCompany:
+              firstMail.rootCompany &&
+              firstMail.company &&
+              firstMail.company.name !== firstMail.rootCompany.name
+                ? firstMail.company.name
+                : null,
+            routedTo: firstMail.routedSpaceName,
+            routeReason: firstMail.routeReason,
           }
         : null,
       recurrence: (row.recurrence as RecurrenceRule | null) ?? null,

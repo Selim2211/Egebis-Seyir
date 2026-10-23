@@ -1,6 +1,7 @@
 import { WORKSPACE_PERMISSIONS } from '@scrum/shared';
 import { Link, type LinkProps } from '@tanstack/react-router';
 import {
+  Bug,
   Gauge,
   House,
   Inbox,
@@ -124,6 +125,7 @@ export function Sidebar() {
         <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto p-2">
           <NavLink to="/" icon={House} label={t('nav.home')} />
           <NavLink to="/my-work" icon={ListTodo} label={t('nav.myWork')} />
+          <NavLink to="/bug-box" icon={Bug} label={t('nav.bugBox')} />
           <NavLink to="/goals" icon={Target} label={t('nav.goals')} />
           <NavLink to="/workload" icon={Users} label={t('nav.workload')} />
           {isAdmin && <NavLink to="/admin" icon={Gauge} label={t('nav.admin')} />}

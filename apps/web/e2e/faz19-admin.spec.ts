@@ -95,10 +95,19 @@ test.describe.serial('Yönetici paneli', () => {
     await expect(page.getByTestId('admin-page')).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Yönetici paneli' })).toBeVisible();
 
-    await expect(page.getByTestId('kpi-new-today')).toContainText('2');
-    await expect(page.getByTestId('kpi-open')).toContainText('1');
-    await expect(page.getByTestId('kpi-rate')).toContainText('%50');
-    await expect(page.getByTestId('kpi-overdue')).toContainText('1');
+    // Diğer testlerin bıraktığı veri sayıları değiştirebilir: ekrandaki değerler API ile aynı olmalı.
+    const overview = await call<{
+      bugs: { newToday: number; open: number; resolutionRate: number };
+      totals: { overdueItems: number };
+    }>(page, 'GET', `/workspaces/${ws}/admin/overview`);
+    expect(overview.bugs.newToday).toBeGreaterThanOrEqual(2);
+    expect(overview.totals.overdueItems).toBeGreaterThanOrEqual(1);
+    await expect(page.getByTestId('kpi-new-today')).toContainText(String(overview.bugs.newToday));
+    await expect(page.getByTestId('kpi-open')).toContainText(String(overview.bugs.open));
+    await expect(page.getByTestId('kpi-rate')).toContainText(`%${overview.bugs.resolutionRate}`);
+    await expect(page.getByTestId('kpi-overdue')).toContainText(
+      String(overview.totals.overdueItems),
+    );
     await expect(page.getByTestId('chart-bug-flow')).toBeVisible();
 
     const card = page.getByTestId('admin-project').filter({ hasText: 'Panel Proje' });

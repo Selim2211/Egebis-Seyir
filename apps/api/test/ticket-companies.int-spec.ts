@@ -130,6 +130,9 @@ describe(
       await ingest(mime({ from: 'x@bilinmeyen.org', subject: 'Başka', id: 'a2@x.com', text: 'x' }));
       const unknown = (await box()).items.find((i) => i.title === 'Başka')!;
       expect(unknown.space.inbox).toBe(true);
+      // Gelen kutusu Projesi sol menüde (hiyerarşide) görünmez.
+      const tree = (await owner.get(api('/hierarchy')).expect(200)).body as HierarchyResponse;
+      expect(tree.spaces.map((x) => x.name)).toEqual(['Mobil']);
       expect(unknown.email).toMatchObject({
         company: null,
         routeReason: 'Firma bulunamadı (domain tanımlı değil)',

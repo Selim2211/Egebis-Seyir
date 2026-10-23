@@ -73,6 +73,28 @@ export function TicketCards({ item }: { item: WorkItemDetail }) {
                 &lt;{inbound.fromEmail}&gt;
               </a>
             </dd>
+            <dt className="text-muted-foreground">{t('tickets.company')}</dt>
+            <dd data-testid="inbound-company">
+              {inbound.company ? (
+                <>
+                  <span className="font-medium">{inbound.company}</span>
+                  {inbound.subCompany && (
+                    <span className="text-muted-foreground"> · {inbound.subCompany}</span>
+                  )}
+                </>
+              ) : (
+                <span className="text-muted-foreground">{t('tickets.noCompany')}</span>
+              )}
+            </dd>
+            {inbound.routeReason && (
+              <>
+                <dt className="text-muted-foreground">{t('tickets.routing')}</dt>
+                <dd data-testid="inbound-routing">
+                  {inbound.routedTo && <span className="font-medium">{inbound.routedTo} · </span>}
+                  <span className="text-muted-foreground">{inbound.routeReason}</span>
+                </dd>
+              </>
+            )}
             <dt className="text-muted-foreground">{t('tickets.subject')}</dt>
             <dd className="min-w-0 truncate">{inbound.subject}</dd>
             <dt className="text-muted-foreground">{t('tickets.received')}</dt>

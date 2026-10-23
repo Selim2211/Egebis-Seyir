@@ -305,6 +305,12 @@ export const WorkItemDetailSchema = WorkItemSummarySchema.extend({
       subject: z.string(),
       receivedAt: z.iso.datetime(),
       replyCount: z.int(),
+      /** Gönderenin firması (üst firma) ve alt firması; domain tanımlı değilse null (ADR-140). */
+      company: z.string().nullable(),
+      subCompany: z.string().nullable(),
+      /** Otomatik atama günlüğü: Bug'ın gönderildiği Proje ve gerekçe. */
+      routedTo: z.string().nullable(),
+      routeReason: z.string().nullable(),
     })
     .nullable(),
   severity: z.enum(BUG_SEVERITIES).nullable(),

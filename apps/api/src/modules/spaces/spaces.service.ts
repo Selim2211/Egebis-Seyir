@@ -52,7 +52,11 @@ export class SpacesService {
     const active = { deletedAt: null, archivedAt: null };
 
     const [spaces, folders, lists, favorites] = await Promise.all([
-      db.space.findMany({ where: { id: { in: ids }, ...active }, orderBy: { rank: 'asc' } }),
+      // Çağrı gelen kutusu Projesi (ADR-140) sol menüde ve seçicilerde görünmez; Bug'ları Bug Kutusu'ndadır.
+      db.space.findMany({
+        where: { id: { in: ids }, ...active, ticketInbox: false },
+        orderBy: { rank: 'asc' },
+      }),
       db.folder.findMany({ where: { spaceId: { in: ids }, ...active }, orderBy: { rank: 'asc' } }),
       db.list.findMany({
         where: {

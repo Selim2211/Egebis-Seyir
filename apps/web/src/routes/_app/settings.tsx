@@ -2,6 +2,7 @@ import { WORKSPACE_PERMISSIONS } from '@scrum/shared';
 import { createFileRoute, Link, type LinkProps, Outlet } from '@tanstack/react-router';
 import {
   KeyRound,
+  Mail,
   Plug,
   Archive,
   Building2,
@@ -69,6 +70,9 @@ function SettingsLayout() {
         )}
         {canEditWorkspace && (
           <SubLink to="/settings/integrations" icon={Plug} label={t('settings.integrations')} />
+        )}
+        {canEditWorkspace && (
+          <SubLink to="/settings/email" icon={Mail} label={t('settings.email')} />
         )}
         {canViewMembers && (
           <SubLink to="/settings/members" icon={Users} label={t('settings.members')} />

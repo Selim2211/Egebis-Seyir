@@ -67,8 +67,11 @@ describe('Çağrı sistemi (gerçek veritabanı)', { timeout: 30_000 }, () => {
     return tickets.ingest(await simpleParser(raw), raw, new Date('2026-10-23T07:00:00Z'));
   };
   const inboxSpace = async () => {
-    const tree = (await owner.get(api('/hierarchy')).expect(200)).body as HierarchyResponse;
-    return tree.spaces.find((s) => s.name === 'Gelen Çağrılar')!;
+    const space = await ctx.prisma.space.findFirstOrThrow({
+      where: { ticketInbox: true },
+      include: { lists: { select: { name: true } } },
+    });
+    return { id: space.id, name: space.name, lists: space.lists };
   };
   const bugs = async (spaceId: string) =>
     ((await owner.get(api(`/spaces/${spaceId}/bugs`)).expect(200)).body as BugsResponse).bugs;
