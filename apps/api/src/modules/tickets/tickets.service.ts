@@ -30,6 +30,8 @@ export type IngestResult = 'created' | 'reply' | 'duplicate' | 'ignored';
 
 /** Aynı göndericiye saatte en çok bu kadar otomatik yanıt gider (bir döngü ya da saldırı gelen kutusunu boğmasın). */
 const ACK_PER_SENDER_PER_HOUR = 3;
+/** Saatte en çok bu kadar otomatik yanıt (tüm göndericiler toplamı). */
+const ACK_PER_HOUR = 12;
 const INBOX_KEYS = ['CGR', 'CAGRI', 'INBOX'];
 
 /**
@@ -41,6 +43,8 @@ const INBOX_KEYS = ['CGR', 'CAGRI', 'INBOX'];
 export class TicketsService {
   private readonly logger = new Logger(TicketsService.name);
   private transporter?: Transporter;
+  /** NODE_ENV=test iken gönderilecek otomatik yanıtlar gerçekten gönderilmez, burada birikir (yalnızca testler). */
+  readonly outbox: Array<{ to: string; subject: string; text: string; inReplyTo: string }> = [];
 
   constructor(
     private readonly prisma: PrismaService,
@@ -388,19 +392,32 @@ export class TicketsService {
       },
     });
     if (recent > ACK_PER_SENDER_PER_HOUR) return;
+    // Toplam sınır: sahte göndericili toplu e-posta gelirse, var olmayan adreslere onlarca yanıt gidip posta sağlayıcısının
+    // "saatte 30 başarısız teslimat" kuralıyla kutunun gönderimini kilitlemesin.
+    const lastHour = await this.prisma.inboundEmail.count({
+      where: { kind: 'NEW', createdAt: { gte: new Date(Date.now() - 3_600_000) } },
+    });
+    if (lastHour > ACK_PER_HOUR) return;
+    const from = this.config.get('TICKET_FROM_NAME', { infer: true });
+    const subject = `Re: ${input.subject?.trim() || 'Talebiniz'}`;
+    const text =
+      `Merhaba ${input.name},\n\n` +
+      `E-postanız alındı ve ${input.key} numarasıyla kaydedildi. Ekibimiz en kısa sürede inceleyecek.\n` +
+      `Eklemek istedikleriniz olursa bu e-postayı yanıtlamanız yeterli; yanıtınız aynı kayda eklenir.\n\n` +
+      `${from}`;
+    // Testler (.env'deki gerçek posta ayarlarını da yükler) asla gerçek e-posta göndermez.
+    if (this.config.get('NODE_ENV', { infer: true }) === 'test') {
+      this.outbox.push({ to: input.to, subject, text, inReplyTo: input.messageId });
+      return;
+    }
     const mailer = this.mailer();
     if (!mailer) return;
-    const from = this.config.get('TICKET_FROM_NAME', { infer: true });
     try {
       await mailer.sendMail({
         from: { name: from, address: this.ownAddress },
         to: input.to,
-        subject: `Re: ${input.subject?.trim() || 'Talebiniz'}`,
-        text:
-          `Merhaba ${input.name},\n\n` +
-          `E-postanız alındı ve ${input.key} numarasıyla kaydedildi. Ekibimiz en kısa sürede inceleyecek.\n` +
-          `Eklemek istedikleriniz olursa bu e-postayı yanıtlamanız yeterli; yanıtınız aynı kayda eklenir.\n\n` +
-          `${from}`,
+        subject,
+        text,
         messageId: input.ackMessageId,
         inReplyTo: input.messageId,
         references: input.messageId,

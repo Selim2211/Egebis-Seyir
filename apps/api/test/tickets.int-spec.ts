@@ -111,6 +111,14 @@ describe('Çağrı sistemi (gerçek veritabanı)', { timeout: 30_000 }, () => {
     expect(bug.type).toBe('BUG');
     expect(bug.attachments.map((a) => a.fileName)).toEqual(['hata.png']);
     expect(JSON.stringify(bug.description)).toContain('sepet sayfası beyaz geliyor');
+    // Müşteriye otomatik yanıt hazırlanır (testte gerçekten gönderilmez).
+    const outbox = ctx.app.get(TicketsService).outbox;
+    expect(outbox.at(-1)).toMatchObject({
+      to: 'ayse@firma.com',
+      subject: 'Re: Fwd: Re: Sepet açılmıyor',
+      inReplyTo: '<m1@firma.com>',
+    });
+    expect(outbox.at(-1)!.text).toContain(bug.key);
     expect(bug.inbound).toMatchObject({
       fromName: 'Ayşe Müşteri',
       fromEmail: 'ayse@firma.com',
