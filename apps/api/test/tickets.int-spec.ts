@@ -11,7 +11,7 @@ import { TicketsService } from '../src/modules/tickets/tickets.service';
 import { Client, createTestApp, resetState, setupOwner, type TestContext } from './helpers';
 
 /** ADR-138: e-postadan otomatik Bug (çağrı sistemi), yanıtlar, Bug → Task çevirme. */
-describe('Çağrı sistemi (gerçek veritabanı)', () => {
+describe('Çağrı sistemi (gerçek veritabanı)', { timeout: 30_000 }, () => {
   let ctx: TestContext;
   let owner: Client;
   let ws: string;

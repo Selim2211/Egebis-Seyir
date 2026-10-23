@@ -18,7 +18,7 @@ import {
 const ELIF = { email: 'elif@example.com', name: 'Elif Demir', password: 'elif-pass' };
 
 /** ADR-139: yönetici paneli verisi. */
-describe('Yönetici paneli (gerçek veritabanı)', () => {
+describe('Yönetici paneli (gerçek veritabanı)', { timeout: 30_000 }, () => {
   let ctx: TestContext;
   let owner: Client;
   let ws: string;
