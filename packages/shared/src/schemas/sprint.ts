@@ -113,6 +113,8 @@ export const BacklogEpicSchema = z.object({
   key: z.string(),
   title: z.string(),
   color: z.string().nullable(),
+  /** Epic'in altındaki Task sayısı (Backlog'da Epic satırının rozeti). */
+  childCount: z.int(),
 });
 export type BacklogEpic = z.infer<typeof BacklogEpicSchema>;
 

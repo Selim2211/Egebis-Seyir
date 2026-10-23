@@ -976,7 +976,11 @@
     "collapseSubtasks": "Hide sub-items",
     "expandSubtasks": "Show sub-items",
     "dragSubtask": "Drag {{key}} out of its parent",
-    "selectedShort": "selected"
+    "selectedShort": "selected",
+    "epicTasks": "{{count}} Tasks",
+    "collapseEpic": "Collapse Epic {{key}}",
+    "expandEpic": "Expand Epic {{key}}",
+    "epicEmpty": "No Tasks under this Epic yet. Drag a Task here."
   },
   "sprints": {
     "create": "Create sprint",
@@ -2254,7 +2258,12 @@
     "detachShort": "Detach — becomes a standalone Task",
     "moveUnder": "Move under {{key}} as Sub-Task",
     "cannotDrop": "Can't drop here",
-    "dropHint": "Drop as Sub-Task"
+    "dropHint": "Drop as Sub-Task",
+    "moveUnderEpic": "Move under Epic {{key}}",
+    "epicTitle": "Move {{key}} under Epic {{epic}}?",
+    "epicBody": "“{{title}}” will move under Epic “{{epic}}” together with its Sub-Tasks.",
+    "epicConfirm": "Move under Epic",
+    "groupedUnderEpic": "{{key}} is now under Epic {{epic}}."
   },
   "bugs": {
     "button": "Bugs",

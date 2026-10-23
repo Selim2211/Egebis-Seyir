@@ -40,6 +40,8 @@ const eligibleShape = (spaceId: string): Prisma.WorkItemWhereInput => ({
 /** Backlog: sprint'e atanmamış, tamamlanmamış uygun öğeler (ADR-062). */
 const backlogWhere = (spaceId: string): Prisma.WorkItemWhereInput => ({
   ...eligibleShape(spaceId),
+  // Bug'lar Backlog'da listelenmez (Bugs ekranından yönetilir, ADR-135).
+  type: 'TASK',
   sprintId: null,
   status: { category: { not: 'DONE' } },
 });
@@ -76,7 +78,14 @@ export class BacklogService {
       }),
       db.workItem.findMany({
         where: { spaceId, type: 'EPIC', ...countedItems },
-        select: { id: true, keyPrefix: true, number: true, title: true, color: true },
+        select: {
+          id: true,
+          keyPrefix: true,
+          number: true,
+          title: true,
+          color: true,
+          _count: { select: { children: { where: { type: 'TASK', ...countedItems } } } },
+        },
         orderBy: { rank: 'asc' },
       }),
       db.label.findMany({ where: { spaceId }, orderBy: { name: 'asc' } }),
@@ -92,6 +101,7 @@ export class BacklogService {
         key: formatItemKey(e.keyPrefix, e.number),
         title: e.title,
         color: e.color,
+        childCount: e._count.children,
       })),
       labels: labels.map(({ id, name, color }) => ({ id, name, color })),
       sprints: await summarize(db, sprints),

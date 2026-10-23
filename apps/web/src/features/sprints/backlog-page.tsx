@@ -56,6 +56,7 @@ import {
   useDeleteSprint,
   useMoveBacklogItems,
   useBacklogUnnest,
+  useGroupItems,
   useNestItem,
 } from './queries';
 import { SprintActions } from './sprint-actions';
@@ -65,6 +66,7 @@ import { PromoteEpicDialog } from '@/features/work-items/promote-epic-dialog';
 import { PriorityColorToggle } from '@/features/work-items/priority-colors';
 import { SprintImportDialog } from './sprint-import-dialog';
 import { ScrumTabs } from './scrum-tabs';
+import { EPIC_ATTR, EpicGroup } from './backlog-epics';
 import { BulkNestDialog, BulkUnnestDialog } from './bulk-hierarchy-dialogs';
 import { BACKLOG_OPTION, canBecomeSubtask, OTHER_OPTION, type BulkItem } from './bulk-utils';
 import { SelectionBar } from './selection-bar';
@@ -91,12 +93,14 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
   const remove = useDeleteSprint();
   const nestItem = useNestItem();
   const unnestItem = useBacklogUnnest();
+  const groupItems = useGroupItems(spaceId);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
   const [activeId, setActiveId] = useState<string | null>(null);
   const [ghostWidth, setGhostWidth] = useState(0);
   const [intents] = useState(createIntentStore);
   const [hierarchy, setHierarchy] = useState<
     | { kind: 'nest'; item: DraggedItem; target: WorkItemRow }
+    | { kind: 'epic'; item: DraggedItem; epic: { id: string; key: string; title: string } }
     | {
         kind: 'unnest';
         item: DraggedItem;
@@ -261,6 +265,13 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
       if (el.closest(`[${DETACH_ATTR}]`)) {
         return dragged.parentId ? { kind: 'detach', itemId: dragged.id } : null;
       }
+      const epicId = el.closest<HTMLElement>(`[${EPIC_ATTR}]`)?.dataset.epicId;
+      if (epicId) {
+        // Epic satırına yalnızca Task bırakılır (alt öğeleriyle birlikte girer).
+        return dragged.type === 'TASK' && dragged.parentId !== epicId
+          ? { kind: 'epic', itemId: dragged.id, epicId }
+          : null;
+      }
       const row = el.closest<HTMLElement>('[data-row-id]');
       if (row?.dataset.subtask !== undefined) {
         // Alt öğe satırları hedef değildir (alt öğenin alt öğesi olmaz).
@@ -293,6 +304,12 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
   const intentOf = (drop: BacklogDrop | null): BacklogIntent => {
     if (!drop) return null;
     if (drop.kind === 'detach') return { kind: 'detach' };
+    if (drop.kind === 'epic') {
+      return {
+        kind: 'epic',
+        targetKey: backlog.data?.epics.find((e) => e.id === drop.epicId)?.key ?? '',
+      };
+    }
     if (drop.kind === 'nest') {
       return { kind: 'nest', targetKey: allItems.find((i) => i.id === drop.parentId)?.key ?? '' };
     }
@@ -326,6 +343,14 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
       marked.current.push(el);
     };
     const row = (id: string) => document.querySelector<HTMLElement>(`[data-row-id="${id}"]`);
+    if (drop.kind === 'epic') {
+      put(
+        document.querySelector<HTMLElement>(`[${EPIC_ATTR}="${drop.epicId}"]`),
+        'dropState',
+        'nest',
+      );
+      return;
+    }
     if (drop.kind === 'nest') {
       put(row(drop.parentId), 'dropState', 'nest');
       return;
@@ -373,6 +398,25 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
   const canWrite = perms.includes(S.WORK_ITEM_WRITE) && !space.data.archived;
   const canRank = perms.includes(S.BACKLOG_RANK) && !space.data.archived;
   const reorderable = canRank && !isFiltered(filter);
+
+  /** Süzgeç yokken Epic'ler grup olarak üstte durur, Task'ları altlarında görünür (ADR-135). */
+  const groupedByEpic = !isFiltered(filter);
+  const epicIds = new Set(backlog.data.epics.map((e) => e.id));
+  const flat = groupedByEpic
+    ? visible.filter((i) => !i.parentId || !epicIds.has(i.parentId))
+    : visible;
+  const renderItem = (item: WorkItemRow) => (
+    <ItemWithSubtasks
+      key={item.id}
+      enabled={canRank}
+      item={item}
+      epicTitle={item.parentId ? epicTitles.get(item.parentId) : undefined}
+      selectable
+      targets={sprints}
+      canPlan={canPlan}
+      onMove={(target) => moveItems([item.id], target)}
+    />
+  );
 
   const performMove = (itemIds: string[], sprintId: string | null, afterId?: string | null) =>
     move.mutate(
@@ -433,6 +477,11 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
       if (canWrite && target) setHierarchy({ kind: 'nest', item, target });
       return;
     }
+    if (drop.kind === 'epic') {
+      const epic = backlog.data?.epics.find((e) => e.id === drop.epicId);
+      if (canWrite && epic) setHierarchy({ kind: 'epic', item, epic });
+      return;
+    }
     if (drop.kind === 'detach' || drop.kind === 'unnest') {
       if (canWrite) {
         setHierarchy({
@@ -478,6 +527,17 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
         { itemId: item.id, parentId: target.id },
         {
           onSuccess: () => done(t('dnd.nested', { key: item.key, target: target.key })),
+          onError: failed,
+        },
+      );
+      return;
+    }
+    if (hierarchy.kind === 'epic') {
+      const { epic } = hierarchy;
+      groupItems.mutate(
+        { itemIds: [item.id], epicId: epic.id, withSubtasks: true },
+        {
+          onSuccess: () => done(t('dnd.groupedUnderEpic', { key: item.key, epic: epic.key })),
           onError: failed,
         },
       );
@@ -671,23 +731,31 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
                   itemIds={visible.map((i) => i.id)}
                   enabled={canRank}
                 >
-                  {visible.length === 0 ? (
+                  {groupedByEpic &&
+                    backlog.data.epics.map((epic) => (
+                      <EpicGroup
+                        key={epic.id}
+                        epic={epic}
+                        inSprint={sprintDetails.flatMap((d) =>
+                          (d.data?.items ?? [])
+                            .filter((i) => i.parentId === epic.id)
+                            .map((i) => ({
+                              id: i.id,
+                              key: i.key,
+                              title: i.title,
+                              sprintName: d.data?.sprint.name ?? '',
+                            })),
+                        )}
+                      >
+                        {visible.filter((i) => i.parentId === epic.id).map(renderItem)}
+                      </EpicGroup>
+                    ))}
+                  {flat.length === 0 && !(groupedByEpic && backlog.data.epics.length > 0) ? (
                     <p className="text-muted-foreground px-4 py-10 text-center text-sm">
                       {t(isFiltered(filter) ? 'backlog.noResults' : 'backlog.empty')}
                     </p>
                   ) : (
-                    visible.map((item) => (
-                      <ItemWithSubtasks
-                        key={item.id}
-                        enabled={canRank}
-                        item={item}
-                        epicTitle={item.parentId ? epicTitles.get(item.parentId) : undefined}
-                        selectable
-                        targets={sprints}
-                        canPlan={canPlan}
-                        onMove={(target) => moveItems([item.id], target)}
-                      />
-                    ))
+                    flat.map(renderItem)
                   )}
                 </DropContainerView>
               </div>
@@ -811,15 +879,25 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
           title={
             hierarchy?.kind === 'nest'
               ? t('dnd.nestTitle', { key: hierarchy.item.key, target: hierarchy.target.key })
-              : t('dnd.unnestTitle', { key: hierarchy?.item.key ?? '' })
+              : hierarchy?.kind === 'epic'
+                ? t('dnd.epicTitle', { key: hierarchy.item.key, epic: hierarchy.epic.key })
+                : t('dnd.unnestTitle', { key: hierarchy?.item.key ?? '' })
           }
           description={
             hierarchy?.kind === 'nest'
               ? t('dnd.nestBody', { title: hierarchy.item.title, target: hierarchy.target.title })
-              : t('dnd.unnestBody', { title: hierarchy?.item.title ?? '' })
+              : hierarchy?.kind === 'epic'
+                ? t('dnd.epicBody', { title: hierarchy.item.title, epic: hierarchy.epic.title })
+                : t('dnd.unnestBody', { title: hierarchy?.item.title ?? '' })
           }
-          confirmLabel={t(hierarchy?.kind === 'nest' ? 'dnd.nestConfirm' : 'dnd.unnestConfirm')}
-          pending={nestItem.isPending || unnestItem.isPending}
+          confirmLabel={t(
+            hierarchy?.kind === 'nest'
+              ? 'dnd.nestConfirm'
+              : hierarchy?.kind === 'epic'
+                ? 'dnd.epicConfirm'
+                : 'dnd.unnestConfirm',
+          )}
+          pending={nestItem.isPending || unnestItem.isPending || groupItems.isPending}
           onConfirm={applyHierarchy}
         />
         <ConfirmDialog

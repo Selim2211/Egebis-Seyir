@@ -10,7 +10,11 @@ export const NEST_EDGE_RATIO = 0.25;
 
 /** Sürüklenen öğenin şu an neyin üstünde olduğu: kopyada gösterilir. */
 export type BacklogIntent =
-  { kind: 'nest'; targetKey: string } | { kind: 'detach' } | { kind: 'move'; label: string } | null;
+  | { kind: 'nest'; targetKey: string }
+  | { kind: 'epic'; targetKey: string }
+  | { kind: 'detach' }
+  | { kind: 'move'; label: string }
+  | null;
 
 /**
  * Niyet için küçük dış depo (Görevler listesindekiyle aynı yaklaşım, ADR-123): niyet her satır geçişinde
@@ -49,6 +53,8 @@ export interface DropContainer {
 export type BacklogDrop =
   | { kind: 'move'; itemId: string; sprintId: string | null; afterId: string | null }
   | { kind: 'nest'; itemId: string; parentId: string }
+  /** Task bir Epic satırına bırakıldı: Epic'in altına girer (alt öğeleriyle birlikte). */
+  | { kind: 'epic'; itemId: string; epicId: string }
   /** Alt öğe Ayır alanına bırakıldı: bağımsız Task olur, yeri değişmez. */
   | { kind: 'detach'; itemId: string }
   /** Alt öğe üst öğesinden ayrılıp bir kapsayıcıya (sprint/Backlog) bırakıldı. */

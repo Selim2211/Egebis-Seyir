@@ -65,6 +65,12 @@ export function BacklogGhost({
               {t('dnd.moveUnder', { key: intent.targetKey })}
             </>
           )}
+          {intent.kind === 'epic' && (
+            <>
+              <CornerDownRight className="size-3.5" aria-hidden />
+              {t('dnd.moveUnderEpic', { key: intent.targetKey })}
+            </>
+          )}
           {intent.kind === 'detach' && (
             <>
               <Unlink className="size-3.5" aria-hidden />

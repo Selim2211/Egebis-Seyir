@@ -170,13 +170,14 @@ describe('Sprint ve Product Backlog (gerçek veritabanı)', () => {
   });
 
   describe('Product Backlog (ADR-062)', () => {
-    it('Task/Bug öncelik sırasıyla listelenir; yeni öğe en alta gelir', async () => {
+    it('Task öncelik sırasıyla listelenir, Bug listelenmez (ADR-135); yeni öğe en alta gelir', async () => {
       const s = await space();
       const a = await item(s.listId, { type: 'TASK', title: 'A', points: 5 });
       const b = await item(s.listId, { type: 'BUG', title: 'B' });
-      expect(keys(await backlog(s.id))).toEqual([a.key, b.key]);
+      expect(keys(await backlog(s.id))).toEqual([a.key]);
+      expect(b.key).toBeTruthy();
       const c = await item(s.listId, { type: 'TASK', title: 'C' });
-      expect(keys(await backlog(s.id))).toEqual([a.key, b.key, c.key]);
+      expect(keys(await backlog(s.id))).toEqual([a.key, c.key]);
     });
 
     it('Epic, alt öğeler ve tamamlananlar görünmez; Epic filtre için ayrıca döner', async () => {
@@ -191,7 +192,9 @@ describe('Sprint ve Product Backlog (gerçek veritabanı)', () => {
       const res = await backlog(s.id);
       expect(keys(res)).toEqual([story.key]);
       expect(res.items[0]!.parentId).toBe(epic.id);
-      expect(res.epics).toEqual([{ id: epic.id, key: epic.key, title: 'Ödeme', color: '#7C3AED' }]);
+      expect(res.epics).toEqual([
+        { id: epic.id, key: epic.key, title: 'Ödeme', color: '#7C3AED', childCount: 1 },
+      ]);
     });
 
     it('sıra mevcut öğelerin arasına sürüklenerek değişir', async () => {

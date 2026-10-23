@@ -976,7 +976,11 @@
     "collapseSubtasks": "Alt öğeleri gizle",
     "expandSubtasks": "Alt öğeleri göster",
     "dragSubtask": "{{key}} alt öğesini sürükleyip üst öğesinden ayır",
-    "selectedShort": "seçili"
+    "selectedShort": "seçili",
+    "epicTasks": "{{count}} Task",
+    "collapseEpic": "{{key}} Epic’ini daralt",
+    "expandEpic": "{{key}} Epic’ini aç",
+    "epicEmpty": "Bu Epic’in altında Task yok. Bir Task’ı buraya sürükleyip bırak."
   },
   "sprints": {
     "create": "Sprint oluştur",
@@ -2254,7 +2258,12 @@
     "detachShort": "Ayır — bağımsız Task olur",
     "moveUnder": "{{key}} altına Sub-Task olarak taşı",
     "cannotDrop": "Buraya bırakılamaz",
-    "dropHint": "Sub-Task olarak bırak"
+    "dropHint": "Sub-Task olarak bırak",
+    "moveUnderEpic": "{{key}} Epic’inin altına taşı",
+    "epicTitle": "{{key}}, {{epic}} Epic’inin altına girsin mi?",
+    "epicBody": "“{{title}}”, alt öğeleriyle birlikte “{{epic}}” Epic’inin altına taşınacak.",
+    "epicConfirm": "Epic altına al",
+    "groupedUnderEpic": "{{key}} artık {{epic}} Epic’inin altında."
   },
   "bugs": {
     "button": "Bugs",

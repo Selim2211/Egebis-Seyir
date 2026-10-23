@@ -1182,3 +1182,9 @@
 
 - **Sorun:** Görev detayındaki Başlangıç/Bitiş, tablo tarih hücresi, özel tarih alanı ve denetim filtresi her tuşta kaydediyordu. Yıl yazılırken tarayıcı "0002", "0020" gibi ara değerler üretir; bunlar kaydedilip alana geri yazılınca gün/ay siliniyor, tarih tam yazılamıyordu.
 - **Karar:** Ortak `DateField` (`components/date-field.tsx`): değer yalnızca tarih tamamlanınca (yıl 1900–2999, 4 hane), takvimden seçilince, Enter'a basınca ya da alandan çıkınca bildirilir; yarım tarih kaydedilmez, boşaltılan alan "tarih yok" olur. Pencerelerdeki tarih alanları (sprint, form, hedef, şablon, süre, hatırlatıcı) yerel durum tuttuğundan etkilenmiyordu. E2E: tuş tuş yazılan tarihte tek kayıt isteği gider.
+
+## ADR-135 — Backlog: Bug gizli, Epic hiyerarşisi ve Epic’e sürükleme
+
+- **Bağlam:** Backlog’da Bug’lar Task’larla karışıyor, Epic’ler yalnızca süzgeç seçeneği olarak görünüyordu; Epic → Task → Sub-Task hiyerarşisi Backlog’da belli değildi.
+- **Karar:** Backlog listesi yalnızca Task döner (Bug’lar Bugs ekranında). Süzgeç yokken Epic’ler Backlog’un üstünde grup olur: Epic satırı (sürüklenmez, bırakma hedefi) ve altında girintili Task’ları; Task’ların Sub-Task’ları kendi satırında açılır. Sprint’te olan Epic çocukları bilgi satırı olarak sprint adıyla görünür. Task, Epic satırına bırakılınca onayla Epic’in altına girer (alt öğeleriyle birlikte, `items/group`); Epic altındaki Task Ayır alanına bırakılınca Epic’ten çıkar (`unnest`). Arama/süzgeç açıkken gruplama kapanır, eşleşenler düz listede Epic rozetiyle görünür. Sprint bölümlerindeki Bug’lar değişmedi (sprint kapsamı ve puanı bozulmasın). Epic ekranı aynen kalır.
+- **API:** `BacklogEpic.childCount` (Epic altındaki Task sayısı).
