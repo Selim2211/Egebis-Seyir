@@ -171,6 +171,7 @@ model User {
   timeEntries             TimeEntry[]
   activeTimer             ActiveTimer?
   dashboardLayouts        DashboardLayout[]
+  mapLayouts MapLayout[]
   savedViews              SavedView[]
   docsCreated             Doc[]                    @relation("DocCreator")
   docsUpdated             Doc[]                    @relation("DocUpdater")
@@ -251,6 +252,7 @@ model Workspace {
   timeEntries       TimeEntry[]
   activeTimers      ActiveTimer[]
   dashboardLayouts  DashboardLayout[]
+  mapLayouts MapLayout[]
   savedViews        SavedView[]
   customFields      CustomField[]
   templates         Template[]
@@ -408,6 +410,7 @@ model Space {
   sprints          Sprint[]
   docs             Doc[]
   dashboardLayouts DashboardLayout[]
+  mapLayouts MapLayout[]
   videoFolders     VideoFolder[]
   videos           Video[]
 
@@ -1639,4 +1642,21 @@ model Video {
 
   @@index([spaceId, folderId])
   @@map("videos")
+}
+
+// ---------- Proje Kuş Bakışı (ADR-136) ----------
+
+/// Kullanıcının bir Space için Kuş Bakışı kutu konumları ({ [işId]: { x, y } }). Yalnızca görünümdür.
+model MapLayout {
+  userId      String    @db.Uuid
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  spaceId     String    @db.Uuid
+  space       Space     @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  workspaceId String    @db.Uuid
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  positions   Json
+  updatedAt   DateTime  @updatedAt @db.Timestamptz
+
+  @@id([userId, spaceId])
+  @@map("map_layouts")
 }

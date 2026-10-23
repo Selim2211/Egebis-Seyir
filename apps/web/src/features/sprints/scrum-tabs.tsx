@@ -11,6 +11,7 @@ const TABS = [
   { key: 'history', to: '/spaces/$spaceId/sprints', label: 'history.title' },
   { key: 'epics', to: '/spaces/$spaceId/epics', label: 'epics.title' },
   { key: 'roadmap', to: '/spaces/$spaceId/roadmap', label: 'roadmap.title' },
+  { key: 'map', to: '/spaces/$spaceId/map', label: 'projectMap.title' },
   { key: 'reports', to: '/spaces/$spaceId/reports', label: 'reports.title' },
   { key: 'bugs', to: '/spaces/$spaceId/bugs', label: 'bugs.title' },
 ] as const;

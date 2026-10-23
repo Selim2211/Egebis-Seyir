@@ -1188,3 +1188,9 @@
 - **Bağlam:** Backlog’da Bug’lar Task’larla karışıyor, Epic’ler yalnızca süzgeç seçeneği olarak görünüyordu; Epic → Task → Sub-Task hiyerarşisi Backlog’da belli değildi.
 - **Karar:** Backlog listesi yalnızca Task döner (Bug’lar Bugs ekranında). Süzgeç yokken Epic’ler Backlog’un üstünde grup olur: Epic satırı (sürüklenmez, bırakma hedefi) ve altında girintili Task’ları; Task’ların Sub-Task’ları kendi satırında açılır. Sprint’te olan Epic çocukları bilgi satırı olarak sprint adıyla görünür. Task, Epic satırına bırakılınca onayla Epic’in altına girer (alt öğeleriyle birlikte, `items/group`); Epic altındaki Task Ayır alanına bırakılınca Epic’ten çıkar (`unnest`). Arama/süzgeç açıkken gruplama kapanır, eşleşenler düz listede Epic rozetiyle görünür. Sprint bölümlerindeki Bug’lar değişmedi (sprint kapsamı ve puanı bozulmasın). Epic ekranı aynen kalır.
 - **API:** `BacklogEpic.childCount` (Epic altındaki Task sayısı).
+
+## ADR-136 — Proje Kuş Bakışı
+
+- **Bağlam:** Projenin tamamını (Epic, Task, Sub-Task, Bug) tek bakışta, ilişkileriyle anlamak için görsel bir harita istendi.
+- **Karar:** Scrum sekmelerine "Proje Kuş Bakışı" eklendi (`/spaces/:id/map`). React Flow (`@xyflow/react`) ile soldan sağa ağaç: Epic → Task → Sub-Task okla bağlı, Bug ayrı kök. Kutu çerçevesi durumu (Başlanmadı/Devam/Tamamlandı), rozet durum adını, avatar ve sprint adı atananı gösterir; Epic kutusu kendi rengini taşır. Yakınlaştır/kaydır, mini harita, "Sığdır" ve "Otomatik düzen". Arama, sprint, kişi ve durum süzgeçleri eşleşmeyenleri soluklaştırır; Sub-Task ve Bug göster/gizle. Kutuyu sürüklemek yalnızca görünümü değiştirir (iş verisine dokunmaz); yerleşim kullanıcıya özel `map_layouts` tablosunda saklanır (silinen işlerin konumu düşer, "Otomatik düzen" kaydı siler). Kutuya tıklayınca iş açılır. İlk sürümde oklar yalnızca hiyerarşidir (bağımlılık okları yok); sürükleyerek hiyerarşi değiştirme yok.
+- **API:** `GET spaces/:id/map` (SPACE_VIEW), `PUT spaces/:id/map/layout`.

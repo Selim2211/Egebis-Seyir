@@ -2472,5 +2472,25 @@
     "deleteTitle": "Delete “{{title}}”?",
     "deleteBody": "The video and its file are permanently deleted.",
     "deleted": "Video deleted."
+  },
+  "projectMap": {
+    "title": "Project Overview",
+    "search": "Search (title or key)",
+    "sprint": "Filter by sprint",
+    "allSprints": "All sprints",
+    "person": "Filter by person",
+    "allPeople": "Everyone",
+    "status": "Filter by status",
+    "allStatuses": "All statuses",
+    "notStarted": "Not started",
+    "inProgress": "In progress",
+    "done": "Done",
+    "showSubtasks": "Sub-Tasks",
+    "showBugs": "Bugs",
+    "fit": "Fit view",
+    "autoLayout": "Auto layout",
+    "legend": "Box border:",
+    "hint": "Scroll to zoom, drag the background to pan, drag a box to move it (your layout is saved), click a box to open the item.",
+    "empty": "This Project has no items yet."
   }
 }

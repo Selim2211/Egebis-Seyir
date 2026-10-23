@@ -36,6 +36,9 @@ import {
   CreatedSchema,
   EpicsResponseSchema,
   GanttSchema,
+  MapLayoutRequestSchema,
+  ProjectMapSchema,
+  type ProjectMap,
   CreateLabelRequestSchema,
   CreateWorkItemRequestSchema,
   LabelsResponseSchema,
@@ -72,9 +75,12 @@ import { ItemDetailsService } from './item-details.service';
 import { ItemQueriesService } from './item-queries.service';
 import { ItemTreeService } from './item-tree.service';
 import { LabelsService } from './labels.service';
+import { ProjectMapService } from './project-map.service';
 import { WorkItemsService } from './work-items.service';
 
 class GanttDto extends createZodDto(GanttSchema) {}
+class ProjectMapDto extends createZodDto(ProjectMapSchema) {}
+class MapLayoutDto extends createZodDto(MapLayoutRequestSchema) {}
 class EpicsDto extends createZodDto(EpicsResponseSchema) {}
 class WorkItemsDto extends createZodDto(WorkItemsResponseSchema) {}
 class WorkItemDetailDto extends createZodDto(WorkItemDetailSchema) {}
@@ -122,6 +128,7 @@ export class WorkItemsController {
     private readonly queries: ItemQueriesService,
     private readonly epics: EpicsService,
     private readonly gantt: GanttService,
+    private readonly projectMap: ProjectMapService,
 
     private readonly itemAccess: ItemAccessService,
     private readonly bugService: BugsService,
@@ -158,6 +165,21 @@ export class WorkItemsController {
   @ZodResponse({ type: GanttDto })
   ganttOf(@Uuid('spaceId') spaceId: string): Promise<Gantt> {
     return this.gantt.gantt(spaceId);
+  }
+
+  /** Proje Kuş Bakışı: tüm işler ve kullanıcının kutu konumları (ADR-136). */
+  @Get('spaces/:spaceId/map')
+  @RequireSpacePermission(S.SPACE_VIEW)
+  @ZodResponse({ type: ProjectMapDto })
+  mapOf(@Uuid('spaceId') spaceId: string): Promise<ProjectMap> {
+    return this.projectMap.get(spaceId);
+  }
+
+  @Put('spaces/:spaceId/map/layout')
+  @RequireSpacePermission(S.SPACE_VIEW)
+  @HttpCode(NO_CONTENT)
+  saveMapLayout(@Uuid('spaceId') spaceId: string, @Body() body: MapLayoutDto): Promise<void> {
+    return this.projectMap.saveLayout(spaceId, body);
   }
 
   @Get('lists/:listId/items')

@@ -2471,5 +2471,25 @@
     "deleteTitle": "“{{title}}” silinsin mi?",
     "deleteBody": "Video dosyasıyla birlikte kalıcı olarak silinir.",
     "deleted": "Video silindi."
+  },
+  "projectMap": {
+    "title": "Proje Kuş Bakışı",
+    "search": "Ara (başlık ya da anahtar)",
+    "sprint": "Sprint süz",
+    "allSprints": "Tüm sprint’ler",
+    "person": "Kişi süz",
+    "allPeople": "Tüm kişiler",
+    "status": "Durum süz",
+    "allStatuses": "Tüm durumlar",
+    "notStarted": "Başlanmadı",
+    "inProgress": "Devam ediyor",
+    "done": "Tamamlandı",
+    "showSubtasks": "Sub-Task’lar",
+    "showBugs": "Bug’lar",
+    "fit": "Sığdır",
+    "autoLayout": "Otomatik düzen",
+    "legend": "Kutu çerçevesi:",
+    "hint": "Tekerlekle yakınlaştır, boşluğu tutup kaydır, kutuyu sürükleyip taşı (yerleşimin kaydedilir), kutuya tıklayınca iş açılır.",
+    "empty": "Bu Projede henüz iş yok."
   }
 }
