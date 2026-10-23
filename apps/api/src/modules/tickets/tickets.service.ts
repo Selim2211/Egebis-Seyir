@@ -59,18 +59,18 @@ export class TicketsService {
     ).toLowerCase();
   }
 
-  /** Bu andan önce gelen e-postalar içe alınmaz; ilk çalışmada şimdiye ayarlanır (eski kutu Bug'a boğulmasın). */
-  async baseline(): Promise<Date> {
+  /** Gelen kutusu imleci: en son işlenen UID ve kutunun UIDVALIDITY değeri (yoksa null). */
+  async cursor(): Promise<{ uid: number | null; validity: bigint | null }> {
     const row = await this.prisma.appSettings.findUnique({ where: { id: 1 } });
-    if (row?.ticketsSince) return row.ticketsSince;
-    const now = new Date();
+    return { uid: row?.ticketsLastUid ?? null, validity: row?.ticketsUidValidity ?? null };
+  }
+
+  async saveCursor(uid: number, validity: bigint): Promise<void> {
     await this.prisma.appSettings.upsert({
       where: { id: 1 },
-      create: { id: 1, ticketsSince: now },
-      update: { ticketsSince: now },
+      create: { id: 1, ticketsLastUid: uid, ticketsUidValidity: validity },
+      update: { ticketsLastUid: uid, ticketsUidValidity: validity },
     });
-    this.logger.log(`Çağrı gelen kutusu başlangıcı: ${now.toISOString()} (öncesi içe alınmaz)`);
-    return now;
   }
 
   /** Gelen kutusunun bağlı olduğu workspace ve onun adına işlem yapacak sahip kullanıcı. */
@@ -143,7 +143,11 @@ export class TicketsService {
   }
 
   /** E-postayı işler. Hata fırlatırsa çağıran e-postayı okunmamış bırakır (yeniden denenir). */
-  async ingest(mail: ParsedMail, rawSource: Buffer, receivedAt: Date): Promise<IngestResult> {
+  async ingest(mail: ParsedMail, rawSource: Buffer, serverDate: Date): Promise<IngestResult> {
+    // Gönderim zamanı için e-postanın kendi Date başlığı (saat dilimiyle) önceliklidir; bazı posta sunucularının iç tarihi
+    // saat dilimini yanlış işaretler. Başlık yoksa ya da gelecekteyse sunucu tarihi kullanılır.
+    const sent = mail.date && !Number.isNaN(mail.date.getTime()) ? mail.date : null;
+    const receivedAt = sent && sent.getTime() <= Date.now() + 300_000 ? sent : serverDate;
     const target = await this.target();
     if (!target) return 'ignored';
     const { workspaceId, actorId } = target;

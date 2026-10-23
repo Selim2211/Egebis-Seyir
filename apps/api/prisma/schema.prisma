@@ -1596,8 +1596,10 @@ model MailSettings {
 model AppSettings {
   id           Int       @id @default(1)
   publicUrl    String?
-  /// Çağrı gelen kutusu: bu andan önce gelen e-postalar içe alınmaz (ilk açılışta şimdiye ayarlanır).
-  ticketsSince DateTime? @db.Timestamptz
+  /// Çağrı gelen kutusu imleci: bu UID'den sonra gelen e-postalar işlenir (ilk açılışta kutudaki son UID'dir,
+  /// yani eski e-postalar içe alınmaz). UIDVALIDITY değişirse imleç sıfırlanır.
+  ticketsLastUid Int?
+  ticketsUidValidity BigInt?
   updatedAt    DateTime  @updatedAt @db.Timestamptz
 
   @@map("app_settings")
