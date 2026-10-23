@@ -2,6 +2,12 @@ import type { MapNode } from '@scrum/shared';
 
 export const COLUMN_WIDTH = 340;
 export const ROW_HEIGHT = 96;
+/** Dikey düzende: yan yana kutular arası ve seviyeler arası uzaklık. */
+export const TB_COLUMN_WIDTH = 300;
+export const TB_ROW_HEIGHT = 170;
+
+/** LR: soldan sağa (yatay), TB: yukarıdan aşağıya (dikey). */
+export type MapDirection = 'LR' | 'TB';
 const ROOT_GAP = 0.6;
 
 export type MapPos = { x: number; y: number };
@@ -11,12 +17,14 @@ const TYPE_ORDER: Record<string, number> = { EPIC: 0, TASK: 1, BUG: 2, SUBTASK: 
 const keyNumber = (key: string) => Number(key.slice(key.lastIndexOf('-') + 1)) || 0;
 
 /**
- * Otomatik düzen (soldan sağa ağaç): Epic'ler solda, Task'lar ortada, Sub-Task'lar sağda. Her ebeveyn,
+ * Otomatik düzen. Yatay (LR): Epic'ler solda, Task'lar ortada, Sub-Task'lar sağda. Dikey (TB): Epic'ler üstte,
+ * Task'lar ortada, Sub-Task'lar altta. Her ebeveyn,
  * çocuklarının dikey ortasında durur; kökler arasında küçük bir boşluk kalır. Ebeveyni görünmeyen
  * (süzgeçle gizlenmiş ya da yok) iş kök sayılır.
  */
 export function autoLayout(
   nodes: ReadonlyArray<Pick<MapNode, 'id' | 'key' | 'type' | 'parentId'>>,
+  direction: MapDirection = 'LR',
 ): Record<string, MapPos> {
   const ids = new Set(nodes.map((n) => n.id));
   const children = new Map<string, (typeof nodes)[number][]>();
@@ -43,7 +51,10 @@ export function autoLayout(
       const ys = kids.map((k) => place(k, depth + 1));
       y = (ys[0]! + ys[ys.length - 1]!) / 2;
     }
-    out[node.id] = { x: depth * COLUMN_WIDTH, y };
+    out[node.id] =
+      direction === 'LR'
+        ? { x: depth * COLUMN_WIDTH, y }
+        : { x: (y / ROW_HEIGHT) * TB_COLUMN_WIDTH, y: depth * TB_ROW_HEIGHT };
     return y;
   };
   for (const root of roots.sort(order)) {

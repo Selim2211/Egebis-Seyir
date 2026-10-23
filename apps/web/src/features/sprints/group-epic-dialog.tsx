@@ -87,7 +87,7 @@ function GroupForm({
   const defaultTitle = items[0]?.title ?? '';
   const subtaskCount = items.reduce((n, i) => n + (i.type === 'TASK' ? i.childCount : 0), 0);
   // Varsayılan: Sub-Task'lar götürülmez (ayrılıp bağımsız Task olur); anahtar açılırsa Task'la gider.
-  const [withSubtasks, setWithSubtasks] = useState(false);
+  const [withSubtasks, setWithSubtasks] = useState(true);
   const [epicQuery, setEpicQuery] = useState('');
   const [choice, setChoice] = useState(epics[0]?.id ?? NEW_EPIC);
   const [title, setTitle] = useState(defaultTitle);

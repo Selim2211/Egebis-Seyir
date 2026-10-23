@@ -15,6 +15,17 @@ const p = (text: string, marks?: RichTextNode['marks']): RichTextNode => ({
 });
 const doc = (...content: RichTextNode[]) => ({ type: 'doc', content });
 
+describe('metin hizalama', () => {
+  it('yalnızca left/center/right kabul edilir', () => {
+    const aligned = (textAlign: unknown) => ({ ...p('x'), attrs: { textAlign } });
+    expect(isValidRichText(doc(aligned('center')))).toBe(true);
+    expect(isValidRichText(doc(aligned('right')))).toBe(true);
+    expect(isValidRichText(doc(aligned(null)))).toBe(true);
+    expect(isValidRichText(doc(aligned('justify')))).toBe(false);
+    expect(isValidRichText(doc(aligned('expression(alert(1))')))).toBe(false);
+  });
+});
+
 describe('zengin metin doğrulaması (ADR-048)', () => {
   it('izinli yapıyı kabul eder', () => {
     expect(

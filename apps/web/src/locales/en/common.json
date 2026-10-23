@@ -440,7 +440,8 @@
     "VIDEO_INVALID": "The file isn't a valid video.",
     "VIDEO_NOT_READY": "The video is still uploading.",
     "VIDEO_FOLDER_INVALID": "Folder not found.",
-    "BUG_NOT_IN_BACKLOG": "Bugs are not kept in the Backlog; keep them in a sprint or move them to another sprint."
+    "BUG_NOT_IN_BACKLOG": "Bugs are not kept in the Backlog; keep them in a sprint or move them to another sprint.",
+    "EPIC_SPRINTS_DIFFER": "This Epic can’t be moved: its Tasks are in different sprints (or some are in the Backlog). Put them in the same sprint first."
   },
   "spaceRoles": {
     "PRODUCT_OWNER": "Product Owner",
@@ -753,7 +754,10 @@
       "color": "Cell color",
       "noColor": "No color",
       "deleteTable": "Delete table"
-    }
+    },
+    "align-left": "Align left",
+    "align-center": "Center",
+    "align-right": "Align right"
   },
   "severity": {
     "CRITICAL": "Critical",
@@ -2491,6 +2495,9 @@
     "autoLayout": "Auto layout",
     "legend": "Box border:",
     "hint": "Scroll to zoom, drag the background to pan, drag a box to move it (your layout is saved), click a box to open the item.",
-    "empty": "This Project has no items yet."
+    "empty": "This Project has no items yet.",
+    "direction": "Layout direction",
+    "horizontal": "Horizontal",
+    "vertical": "Vertical"
   }
 }

@@ -139,5 +139,25 @@ test.describe.serial('Proje Kuş Bakışı', () => {
           ).length,
       )
       .toBe(0);
+
+    // Dikey düzen: Epic üstte, Task altında (yatayda Epic solda).
+    await page.getByRole('button', { name: 'Dikey' }).click();
+    await expect(page.getByRole('button', { name: 'Dikey' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+    await expect
+      .poll(async () => {
+        const epicBox = await nodes.filter({ hasText: 'Ödeme altyapısı' }).boundingBox();
+        const taskBox = await nodes.filter({ hasText: 'Kart ekleme' }).boundingBox();
+        return (
+          !!epicBox &&
+          !!taskBox &&
+          epicBox.y < taskBox.y - 40 &&
+          Math.abs(epicBox.x - taskBox.x) < 300
+        );
+      })
+      .toBe(true);
+    await page.getByRole('button', { name: 'Yatay' }).click();
   });
 });

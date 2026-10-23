@@ -73,6 +73,10 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
 
 /** Tablo hücresi rengi: yalnızca `#rrggbb` (stil olarak yazılır; serbest metin kabul edilmez). */
 export const CELL_COLOR_PATTERN = /^#[0-9a-f]{6}$/i;
+
+/** Paragraf ve başlık hizalaması (Word'deki Sola / Ortala / Sağa). Sol varsayılandır, yazılmaz. */
+export const TEXT_ALIGNS = ['left', 'center', 'right'] as const;
+export type TextAlign = (typeof TEXT_ALIGNS)[number];
 const MAX_SPAN = 50;
 const isSpan = (v: unknown) =>
   Number.isInteger(v) && (v as number) >= 1 && (v as number) <= MAX_SPAN;
@@ -121,6 +125,14 @@ function validNode(node: unknown, depth: number): node is RichTextNode {
     return false;
   }
   if ((type === 'tableCell' || type === 'tableHeader') && !validCellAttrs(attrs)) return false;
+  const align = attrs?.textAlign;
+  if (
+    align !== undefined &&
+    align !== null &&
+    !(TEXT_ALIGNS as readonly unknown[]).includes(align)
+  ) {
+    return false;
+  }
   if (type === 'heading') {
     const level = attrs?.level;
     if (typeof level !== 'number' || ![1, 2, 3].includes(level)) return false;

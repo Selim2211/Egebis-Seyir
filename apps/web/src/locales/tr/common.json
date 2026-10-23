@@ -440,7 +440,8 @@
     "VIDEO_INVALID": "Dosya geçerli bir video değil.",
     "VIDEO_NOT_READY": "Video henüz yükleniyor.",
     "VIDEO_FOLDER_INVALID": "Klasör bulunamadı.",
-    "BUG_NOT_IN_BACKLOG": "Bug'lar Backlog'a alınmaz; sprint'te kalır ya da başka bir sprint'e taşınır."
+    "BUG_NOT_IN_BACKLOG": "Bug'lar Backlog'a alınmaz; sprint'te kalır ya da başka bir sprint'e taşınır.",
+    "EPIC_SPRINTS_DIFFER": "Bu Epic taşınamaz: altındaki Task’lar farklı sprint’lerde (ya da bir kısmı Backlog’da). Önce Task’ları aynı sprint’e al."
   },
   "spaceRoles": {
     "PRODUCT_OWNER": "Product Owner",
@@ -753,7 +754,10 @@
       "color": "Hücre rengi",
       "noColor": "Renksiz",
       "deleteTable": "Tabloyu sil"
-    }
+    },
+    "align-left": "Sola hizala",
+    "align-center": "Ortala",
+    "align-right": "Sağa hizala"
   },
   "severity": {
     "CRITICAL": "Kritik",
@@ -2490,6 +2494,9 @@
     "autoLayout": "Otomatik düzen",
     "legend": "Kutu çerçevesi:",
     "hint": "Tekerlekle yakınlaştır, boşluğu tutup kaydır, kutuyu sürükleyip taşı (yerleşimin kaydedilir), kutuya tıklayınca iş açılır.",
-    "empty": "Bu Projede henüz iş yok."
+    "empty": "Bu Projede henüz iş yok.",
+    "direction": "Düzen yönü",
+    "horizontal": "Yatay",
+    "vertical": "Dikey"
   }
 }

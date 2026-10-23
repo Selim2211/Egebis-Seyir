@@ -99,12 +99,27 @@ test.describe.serial('Dokümanlar', () => {
     await cells.nth(1).click({ modifiers: ['Shift'] });
     await tools('Hücreleri birleştir');
     await expect(body(page).locator('td[colspan="2"]')).toHaveCount(1);
-    await expect(page.getByText('Kaydedildi')).toBeVisible();
+
+    // Hücredeki metin ortalanır ya da sağa hizalanır (Word'deki gibi).
+    const last = body(page).locator('tr').nth(2).locator('td').first();
+    await last.click();
+    await last.pressSequentially('Ortalı');
+    await page.getByRole('button', { name: 'Sağa hizala' }).click();
+    await expect(last.locator('p')).toHaveCSS('text-align', 'right');
+    await page.getByRole('button', { name: 'Ortala' }).click();
+    await expect(last.locator('p')).toHaveCSS('text-align', 'center');
+    // Alandan çıkınca bekleyen kayıt hemen gider; sunucu yanıtı gelmeden yeniden yükleme yapılmaz.
+    const flushed = page.waitForResponse(
+      (r) => r.url().includes('/docs/') && r.request().method() !== 'GET',
+    );
+    await page.getByRole('textbox', { name: 'Sayfa başlığı' }).click();
+    await flushed;
 
     // Kaydedilen tablo (birleşik hücre, renk) sunucu doğrulamasından geçer ve geri yüklenir.
     await page.reload();
     await expect(body(page).locator('td[colspan="2"]')).toHaveCount(1);
     await expect(body(page).locator('th')).toHaveCount(4);
+    await expect(body(page).locator('td p[style*="text-align: center"]')).toHaveCount(1);
 
     await page.getByRole('button', { name: 'Ürün gereksinimleri altına sayfa ekle' }).click();
     await expect(page.getByRole('textbox', { name: 'Sayfa başlığı' })).toHaveValue(

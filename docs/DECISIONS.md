@@ -1194,3 +1194,10 @@
 - **Bağlam:** Projenin tamamını (Epic, Task, Sub-Task, Bug) tek bakışta, ilişkileriyle anlamak için görsel bir harita istendi.
 - **Karar:** Scrum sekmelerine "Proje Kuş Bakışı" eklendi (`/spaces/:id/map`). React Flow (`@xyflow/react`) ile soldan sağa ağaç: Epic → Task → Sub-Task okla bağlı, Bug ayrı kök. Kutu çerçevesi durumu (Başlanmadı/Devam/Tamamlandı), rozet durum adını, avatar ve sprint adı atananı gösterir; Epic kutusu kendi rengini taşır. Yakınlaştır/kaydır, mini harita, "Sığdır" ve "Otomatik düzen". Arama, sprint, kişi ve durum süzgeçleri eşleşmeyenleri soluklaştırır; Sub-Task ve Bug göster/gizle. Kutuyu sürüklemek yalnızca görünümü değiştirir (iş verisine dokunmaz); yerleşim kullanıcıya özel `map_layouts` tablosunda saklanır (silinen işlerin konumu düşer, "Otomatik düzen" kaydı siler). Kutuya tıklayınca iş açılır. İlk sürümde oklar yalnızca hiyerarşidir (bağımlılık okları yok); sürükleyerek hiyerarşi değiştirme yok.
 - **API:** `GET spaces/:id/map` (SPACE_VIEW), `PUT spaces/:id/map/layout`.
+
+## ADR-137 — Küçük işler: Epic taşıma kuralı, grupla varsayılanı, doküman hizalama, Kuş Bakışı yönü
+
+- **Epic başka Projeye taşınırken:** altındaki Task/Bug'lar farklı sprint'lerdeyse (ya da bir kısmı sprint'te, bir kısmı Backlog'da) taşıma `409 EPIC_SPRINTS_DIFFER` ile reddedilir. Hepsi aynı sprint'teyse hedef Projenin en son başlayan aktif sprint'ine geçer (üyelik geçmişine yazılır); hedefte aktif sprint yoksa ya da hepsi Backlog'daysa hedefin Backlog'una gider.
+- **Grupla penceresi:** "Sub-Task'ları da götür" artık varsayılan olarak açık (Sub-Task'lar Task'larıyla birlikte gider).
+- **Doküman hizalama:** paragraf ve başlıklara `textAlign` (left/center/right) özniteliği; araç çubuğunda Sola/Ortala/Sağa düğmeleri, tablo hücrelerindeki metin de paragraf olduğundan çalışır. Sunucu yalnızca bu üç değeri kabul eder; görüntüleme ve Word dışa aktarma hizayı korur. Yeni bağımlılık: `@tiptap/core` (zaten dolaylı olarak vardı).
+- **Kuş Bakışı yönü:** Yatay (soldan sağa) / Dikey (yukarıdan aşağıya) düğmesi; seçim tarayıcıda hatırlanır. Konumlar yöne özel olduğundan yön değişince otomatik düzene dönülür ve kayıtlı yerleşim silinir.

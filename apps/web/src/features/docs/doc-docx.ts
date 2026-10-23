@@ -77,6 +77,14 @@ function runsOf(node: RichTextNode): ParagraphChild[] {
   return [run];
 }
 
+/** Paragraf/başlık hizalaması (Sola varsayılandır). */
+function alignmentOf(node: RichTextNode) {
+  const align = node.attrs?.textAlign;
+  if (align === 'center') return AlignmentType.CENTER;
+  if (align === 'right') return AlignmentType.RIGHT;
+  return undefined;
+}
+
 async function blocksOf(
   nodes: readonly RichTextNode[],
   ctx: Context,
@@ -89,6 +97,7 @@ async function blocksOf(
         out.push(
           new Paragraph({
             children: runsOf(node),
+            alignment: alignmentOf(node),
             indent: level > 0 ? { left: level * INDENT } : undefined,
             spacing: { after: 120 },
           }),
@@ -96,7 +105,13 @@ async function blocksOf(
         break;
       case 'heading': {
         const index = Math.min(Math.max(Number(node.attrs?.level) || 1, 1), 3) - 1;
-        out.push(new Paragraph({ heading: HEADINGS[index], children: runsOf(node) }));
+        out.push(
+          new Paragraph({
+            heading: HEADINGS[index],
+            alignment: alignmentOf(node),
+            children: runsOf(node),
+          }),
+        );
         break;
       }
       case 'bulletList':

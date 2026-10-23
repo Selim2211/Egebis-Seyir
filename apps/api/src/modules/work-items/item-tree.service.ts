@@ -104,6 +104,32 @@ export class ItemTreeService {
       throw fail(ERROR_CODES.WORK_ITEM_PARENT_REQUIRED);
     }
 
+    // Epic başka Projeye giderken Task'ları sprint'leriyle birlikte düşünülür: hepsi aynı sprint'teyse hedef
+    // Projenin son aktif sprint'ine geçer; farklı yerlerdeyse (farklı sprint'ler ya da sprint + Backlog) taşınamaz.
+    // Hepsi Backlog'daysa ya da hedefte aktif sprint yoksa hedefin Backlog'una gider.
+    let epicSprint: {
+      id: string;
+      status: 'PLANNED' | 'ACTIVE' | 'COMPLETED' | 'CANCELLED';
+    } | null = null;
+    let epicTasks: Array<{ id: string; points: number | null }> = [];
+    if (crossSpace && item.type === 'EPIC') {
+      const children = await db.workItem.findMany({
+        where: { parentId: item.id, deletedAt: null, type: { in: ['TASK', 'BUG'] } },
+        select: { id: true, points: true, sprintId: true },
+      });
+      if (new Set(children.map((c) => c.sprintId)).size > 1) {
+        throw fail(ERROR_CODES.EPIC_SPRINTS_DIFFER, HttpStatus.CONFLICT);
+      }
+      if (children[0]?.sprintId) {
+        epicSprint = await db.sprint.findFirst({
+          where: { spaceId: target.spaceId, status: 'ACTIVE' },
+          orderBy: { startDate: 'desc' },
+          select: { id: true, status: true },
+        });
+        epicTasks = children;
+      }
+    }
+
     await db.$transaction(async (tx) => {
       const ids = await this.subtree(tx, itemId, { deletedAt: null });
       const siblings = await tx.workItem.findMany({
@@ -145,6 +171,25 @@ export class ItemTreeService {
         where: { id: itemId },
         data: { rank, ...(crossSpace && { parentId: null }) },
       });
+      if (epicSprint && epicTasks.length > 0) {
+        await tx.workItem.updateMany({
+          where: { id: { in: epicTasks.map((t) => t.id) } },
+          data: { sprintId: epicSprint.id },
+        });
+        for (const task of epicTasks) {
+          await tx.sprintItemEvent.create({
+            data: {
+              workspaceId,
+              sprintId: epicSprint.id,
+              workItemId: task.id,
+              action: 'ADDED',
+              reason: sprintMoveReason(epicSprint.status),
+              points: task.points,
+              actorId,
+            },
+          });
+        }
+      }
       await this.activity.record(tx, {
         workspaceId,
         actorId,

@@ -206,4 +206,47 @@ describe("Gruplama, Epic'e dönüştürme ve Space'ler arası taşıma", () => {
       .body as BacklogResponse;
     expect(backlog.items.map((i) => i.id)).toContain(child.id);
   });
+
+  it("Epic başka Proje'ye giderken: altındaki Task'lar farklı sprint'teyse taşınamaz", async () => {
+    const a = await space('MOB');
+    const b = await space('WEB');
+    const s1 = await sprint(a.id, 'Sprint 1');
+    const s2 = await sprint(a.id, 'Sprint 2');
+    const epic = await item(a.listId, { type: 'EPIC', title: 'Hedef' });
+    const t1 = await item(a.listId, { type: 'TASK', title: 'T1', parentId: epic.id });
+    const t2 = await item(a.listId, { type: 'TASK', title: 'T2', parentId: epic.id });
+    await toSprint(a.id, [t1.id], s1.id);
+    await toSprint(a.id, [t2.id], s2.id);
+
+    const res = await owner.post(api(`/items/${epic.id}/move`), { listId: b.listId }).expect(409);
+    expect((res.body as { code: string }).code).toBe('EPIC_SPRINTS_DIFFER');
+    expect((await detail(epic.id)).spaceId).toBe(a.id);
+    expect((await detail(t1.id)).sprintId).toBe(s1.id);
+  });
+
+  it("Epic başka Proje'ye giderken: Task'lar aynı sprint'teyse hedefin aktif sprint'ine geçer", async () => {
+    const a = await space('MOB');
+    const b = await space('WEB');
+    const s1 = await sprint(a.id, 'Sprint 1');
+    const active = (
+      await owner
+        .post(api(`/spaces/${b.id}/sprints`), {
+          name: 'Hedef Aktif',
+          goal: 'Hedef',
+          startDate: '2026-10-05',
+          endDate: '2026-10-16',
+        })
+        .expect(201)
+    ).body as Created;
+    await owner.post(api(`/sprints/${active.id}/start`), {}).expect(204);
+    const epic = await item(a.listId, { type: 'EPIC', title: 'Hedef' });
+    const t1 = await item(a.listId, { type: 'TASK', title: 'T1', parentId: epic.id });
+    const t2 = await item(a.listId, { type: 'TASK', title: 'T2', parentId: epic.id });
+    await toSprint(a.id, [t1.id, t2.id], s1.id);
+
+    await owner.post(api(`/items/${epic.id}/move`), { listId: b.listId }).expect(204);
+    expect(await sprintKeys(active.id)).toEqual([t1.key, t2.key]);
+    expect((await detail(t1.id)).parentId).toBe(epic.id);
+    expect(await sprintKeys(s1.id)).toEqual([]);
+  });
 });

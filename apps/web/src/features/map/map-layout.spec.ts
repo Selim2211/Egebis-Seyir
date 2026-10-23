@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { autoLayout, COLUMN_WIDTH, ROW_HEIGHT } from './map-layout';
+import { autoLayout, COLUMN_WIDTH, ROW_HEIGHT, TB_COLUMN_WIDTH, TB_ROW_HEIGHT } from './map-layout';
 
 const n = (id: string, type: string, parentId: string | null, key = `P-${id}`) =>
   ({ id, key, type, parentId }) as Parameters<typeof autoLayout>[0][number];
@@ -19,6 +19,24 @@ describe('autoLayout', () => {
     expect(pos.t1!.y).toBe(0);
     expect(pos.t2!.y).toBe(ROW_HEIGHT);
     expect(pos.e!.y).toBe((pos.t1!.y + pos.t2!.y) / 2);
+  });
+
+  it('dikey düzende seviyeler yukarıdan aşağıya, kardeşler yan yana dizilir', () => {
+    const pos = autoLayout(
+      [
+        n('e', 'EPIC', null, 'P-1'),
+        n('t1', 'TASK', 'e', 'P-2'),
+        n('t2', 'TASK', 'e', 'P-3'),
+        n('s', 'SUBTASK', 't1', 'P-4'),
+      ],
+      'TB',
+    );
+    expect(pos.e!.y).toBe(0);
+    expect(pos.t1!.y).toBe(TB_ROW_HEIGHT);
+    expect(pos.s!.y).toBe(TB_ROW_HEIGHT * 2);
+    expect(pos.t1!.x).toBe(0);
+    expect(pos.t2!.x).toBe(TB_COLUMN_WIDTH);
+    expect(pos.e!.x).toBe(TB_COLUMN_WIDTH / 2);
   });
 
   it('ebeveyni listede olmayan iş kök olur; kutular üst üste binmez', () => {

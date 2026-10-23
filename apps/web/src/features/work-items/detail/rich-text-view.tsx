@@ -52,18 +52,32 @@ function cellProps(node: RichTextNode) {
   };
 }
 
+/** Paragraf/başlık hizalaması; yalnızca bilinen değerler kullanılır. */
+function alignStyle(node: RichTextNode): { textAlign: 'center' | 'right' } | undefined {
+  const align = node.attrs?.textAlign;
+  return align === 'center' || align === 'right' ? { textAlign: align } : undefined;
+}
+
 function renderNode(node: RichTextNode, key: number): ReactNode {
   const children = (node.content ?? []).map((child, i) => renderNode(child, i));
   switch (node.type) {
     case 'text':
       return <span key={key}>{applyMarks(node.text, node.marks)}</span>;
     case 'paragraph':
-      return <p key={key}>{children}</p>;
+      return (
+        <p key={key} style={alignStyle(node)}>
+          {children}
+        </p>
+      );
     case 'heading': {
       const Tag = (['h1', 'h2', 'h3'] as const)[
         Math.min(Math.max(Number(node.attrs?.level) || 1, 1), 3) - 1
       ]!;
-      return <Tag key={key}>{children}</Tag>;
+      return (
+        <Tag key={key} style={alignStyle(node)}>
+          {children}
+        </Tag>
+      );
     }
     case 'bulletList':
       return <ul key={key}>{children}</ul>;

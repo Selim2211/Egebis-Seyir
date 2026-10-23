@@ -331,14 +331,15 @@ test.describe.serial('Backlog toplu hiyerarşi', () => {
     const bar = page.getByRole('region', { name: 'Seçili öğeler' });
     await bar.getByTestId('group-selected').click();
     const group = page.getByRole('dialog', { name: /2 öğeyi Epic altında grupla/ });
-    // Varsayılan: Sub-Task'lar götürülmez; anahtar açılınca Task'larıyla birlikte gider.
+    // Varsayılan: Sub-Task'lar Task'larıyla birlikte gider; anahtar kapatılınca ayrılıp bağımsız Task olur.
+    await expect(group.getByTestId('group-preview')).toContainText(
+      "4 Sub-Task Task'larıyla birlikte gidecek.",
+    );
+    await group.getByTestId('with-subtasks').click();
     await expect(group.getByTestId('group-preview')).toContainText(
       '4 Sub-Task ayrılıp bağımsız Task olacak',
     );
     await group.getByTestId('with-subtasks').click();
-    await expect(group.getByTestId('group-preview')).toContainText(
-      "4 Sub-Task Task'larıyla birlikte gidecek.",
-    );
     await group.getByLabel('Epic ara…').fill('hedef');
     await expect(group.getByTestId('epic-list').getByRole('option')).toHaveCount(2); // Hedef Epic + yeni
     await group.getByRole('option', { name: /Hedef Epic/ }).click();

@@ -23,7 +23,7 @@ import {
 } from '@xyflow/react';
 import { queryOptions, useMutation, useQuery } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
-import { LayoutDashboard, Maximize2, Search, X } from 'lucide-react';
+import { ArrowDown, ArrowRight, LayoutDashboard, Maximize2, Search, X } from 'lucide-react';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NativeSelect } from '@/components/form';
@@ -37,7 +37,7 @@ import { ScrumTabs } from '@/features/sprints/scrum-tabs';
 import { useCurrentWorkspace } from '@/features/workspace/queries';
 import { apiRequest, NoContent } from '@/lib/api';
 import { cn } from '@/lib/utils';
-import { autoLayout, type MapPos } from './map-layout';
+import { autoLayout, type MapDirection, type MapPos } from './map-layout';
 
 const mapQuery = (workspaceId: string, spaceId: string) =>
   queryOptions({
@@ -52,6 +52,7 @@ const NODE_WIDTH = { EPIC: 280, TASK: 240, SUBTASK: 210, BUG: 240 } as const;
 interface ItemData extends Record<string, unknown> {
   item: MapNode;
   dim: boolean;
+  direction: MapDirection;
 }
 
 const CATEGORY_RING: Record<string, string> = {
@@ -62,7 +63,7 @@ const CATEGORY_RING: Record<string, string> = {
 
 /** Haritadaki bir iş kutusu. */
 const MapItemNode = memo(function MapItemNode({ data }: NodeProps<Node<ItemData>>) {
-  const { item, dim } = data;
+  const { item, dim, direction } = data;
   const epic = item.type === 'EPIC';
   const bug = item.type === 'BUG';
   return (
@@ -84,7 +85,7 @@ const MapItemNode = memo(function MapItemNode({ data }: NodeProps<Node<ItemData>
     >
       <Handle
         type="target"
-        position={Position.Left}
+        position={direction === 'LR' ? Position.Left : Position.Top}
         isConnectable={false}
         onClick={(e) => e.stopPropagation()}
         className="!bg-muted-foreground !size-1.5"
@@ -130,7 +131,7 @@ const MapItemNode = memo(function MapItemNode({ data }: NodeProps<Node<ItemData>
       )}
       <Handle
         type="source"
-        position={Position.Right}
+        position={direction === 'LR' ? Position.Right : Position.Bottom}
         isConnectable={false}
         onClick={(e) => e.stopPropagation()}
         className="!bg-muted-foreground !size-1.5"
@@ -141,6 +142,15 @@ const MapItemNode = memo(function MapItemNode({ data }: NodeProps<Node<ItemData>
 const nodeTypes = { item: MapItemNode };
 
 const SAVE_DELAY_MS = 600;
+
+const DIRECTION_KEY = 'map.direction';
+function readDirection(): MapDirection {
+  try {
+    return localStorage.getItem(DIRECTION_KEY) === 'TB' ? 'TB' : 'LR';
+  } catch {
+    return 'LR';
+  }
+}
 
 /** Tıklama, kutunun kenarındaki bağlantı noktalarından birinin üstünde mi? (Noktalar pointer olayı almaz, o yüzden konumla bakılır.) */
 function onHandle(event: React.MouseEvent): boolean {
@@ -195,6 +205,7 @@ function MapCanvas({ spaceId, data }: { spaceId: string; data: ProjectMap }) {
   const [filters, setFilters] = useState<Filters>(NO_FILTERS);
   // Kullanıcının taşıdığı kutular; kaydedilmişse sunucudan gelir, yoksa otomatik düzen kullanılır.
   const [moved, setMoved] = useState<Record<string, MapPos>>(data.positions);
+  const [direction, setDirection] = useState<MapDirection>(readDirection);
   // React Flow ölçtüğü kutu boyutlarını burada geri ister; verilmezse her karede kutular ölçülmemiş sayılır ve sürüklerken kaybolur.
   const [sizes, setSizes] = useState<Record<string, { width: number; height: number }>>({});
 
@@ -227,7 +238,7 @@ function MapCanvas({ spaceId, data }: { spaceId: string; data: ProjectMap }) {
       ),
     [data.nodes, filters.subtasks, filters.bugs],
   );
-  const auto = useMemo(() => autoLayout(shown), [shown]);
+  const auto = useMemo(() => autoLayout(shown, direction), [shown, direction]);
 
   const sprints = useMemo(() => {
     const map = new Map<string, string>();
@@ -265,9 +276,9 @@ function MapCanvas({ spaceId, data }: { spaceId: string; data: ProjectMap }) {
         type: 'item',
         position: moved[item.id] ?? auto[item.id] ?? { x: 0, y: 0 },
         measured: sizes[item.id],
-        data: { item, dim: dimmed.has(item.id) },
+        data: { item, dim: dimmed.has(item.id), direction },
       })),
-    [shown, moved, auto, dimmed, sizes],
+    [shown, moved, auto, dimmed, sizes, direction],
   );
   const edges = useMemo<Edge[]>(() => {
     const byId = new Map(shown.map((n) => [n.id, n]));
@@ -303,6 +314,17 @@ function MapCanvas({ spaceId, data }: { spaceId: string; data: ProjectMap }) {
     if (Object.keys(dims).length > 0) setSizes((m) => ({ ...m, ...dims }));
   }, []);
 
+  /** Yatay/dikey seçimi: konumlar yöne özeldir; bu yüzden otomatik düzene dönülür ve kayıtlı yerleşim silinir. */
+  const changeDirection = (next: MapDirection) => {
+    if (next === direction) return;
+    setDirection(next);
+    try {
+      localStorage.setItem(DIRECTION_KEY, next);
+    } catch {
+      // Tarayıcı depolaması kapalıysa seçim yalnızca bu oturumda geçerli olur.
+    }
+    resetLayout();
+  };
   const resetLayout = () => {
     setMoved({});
     if (saveTimer.current) clearTimeout(saveTimer.current);
@@ -389,6 +411,33 @@ function MapCanvas({ spaceId, data }: { spaceId: string; data: ProjectMap }) {
           </Button>
         )}
         <div className="ml-auto flex gap-2">
+          <div
+            role="group"
+            aria-label={t('projectMap.direction')}
+            className="flex overflow-hidden rounded-md border"
+          >
+            {(['LR', 'TB'] as const).map((dir) => (
+              <button
+                key={dir}
+                type="button"
+                aria-pressed={direction === dir}
+                onClick={() => changeDirection(dir)}
+                className={cn(
+                  'flex h-8 items-center gap-1.5 px-2.5 text-sm',
+                  direction === dir
+                    ? 'bg-primary text-primary-foreground'
+                    : 'hover:bg-muted text-muted-foreground',
+                )}
+              >
+                {dir === 'LR' ? (
+                  <ArrowRight className="size-4" />
+                ) : (
+                  <ArrowDown className="size-4" />
+                )}
+                {t(dir === 'LR' ? 'projectMap.horizontal' : 'projectMap.vertical')}
+              </button>
+            ))}
+          </div>
           <Button
             variant="outline"
             size="sm"

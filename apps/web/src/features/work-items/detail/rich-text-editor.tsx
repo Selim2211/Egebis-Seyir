@@ -6,6 +6,9 @@ import { TableKit } from '@tiptap/extension-table';
 import { EditorContent, useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import {
+  AlignCenter,
+  AlignLeft,
+  AlignRight,
   Bold,
   Code,
   ImagePlus,
@@ -36,6 +39,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { ColoredTableCell, ColoredTableHeader } from './table-extensions';
+import { TextAlignment } from './text-align';
 import { TableMenu } from './table-menu';
 
 const SAVE_DELAY_MS = 1500;
@@ -46,6 +50,9 @@ const imageFiles = (list: FileList | null | undefined): File[] =>
   Array.from(list ?? []).filter((f) => IMAGE_TYPES.has(f.type));
 
 type ToolName =
+  | 'align-left'
+  | 'align-center'
+  | 'align-right'
   | 'bold'
   | 'italic'
   | 'strike'
@@ -128,6 +135,7 @@ export function RichTextEditor({
             }),
             ColoredTableCell,
             ColoredTableHeader,
+            TextAlignment,
             TaskList,
             TaskItem.configure({ nested: true }),
             Image.configure({ inline: false, allowBase64: false }),
@@ -365,6 +373,23 @@ export function RichTextEditor({
           )}
           {variant === 'page' && (
             <>
+              {(['left', 'center', 'right'] as const).map((align) =>
+                tool(
+                  `align-${align}`,
+                  align === 'left' ? (
+                    <AlignLeft className="size-4" />
+                  ) : align === 'center' ? (
+                    <AlignCenter className="size-4" />
+                  ) : (
+                    <AlignRight className="size-4" />
+                  ),
+                  () => chain().setTextAlign(align).run(),
+                  align === 'left'
+                    ? !editor.isActive({ textAlign: 'center' }) &&
+                        !editor.isActive({ textAlign: 'right' })
+                    : editor.isActive({ textAlign: align }),
+                ),
+              )}
               <TableMenu editor={editor} />
               {tool('rule', <Minus className="size-4" />, () => chain().setHorizontalRule().run())}
               {onUploadImage &&
