@@ -82,7 +82,13 @@ const MapItemNode = memo(function MapItemNode({ data }: NodeProps<Node<ItemData>
         dim && 'opacity-20',
       )}
     >
-      <Handle type="target" position={Position.Left} className="!bg-muted-foreground !size-1.5" />
+      <Handle
+        type="target"
+        position={Position.Left}
+        isConnectable={false}
+        onClick={(e) => e.stopPropagation()}
+        className="!bg-muted-foreground !size-1.5"
+      />
       <div className="flex items-center gap-1.5">
         <WorkItemTypeIcon type={item.type} />
         <span className="text-muted-foreground font-mono text-[11px]">{item.key}</span>
@@ -122,13 +128,34 @@ const MapItemNode = memo(function MapItemNode({ data }: NodeProps<Node<ItemData>
           )}
         </div>
       )}
-      <Handle type="source" position={Position.Right} className="!bg-muted-foreground !size-1.5" />
+      <Handle
+        type="source"
+        position={Position.Right}
+        isConnectable={false}
+        onClick={(e) => e.stopPropagation()}
+        className="!bg-muted-foreground !size-1.5"
+      />
     </div>
   );
 });
 const nodeTypes = { item: MapItemNode };
 
 const SAVE_DELAY_MS = 600;
+
+/** Tıklama, kutunun kenarındaki bağlantı noktalarından birinin üstünde mi? (Noktalar pointer olayı almaz, o yüzden konumla bakılır.) */
+function onHandle(event: React.MouseEvent): boolean {
+  const node = (event.target as HTMLElement).closest('.react-flow__node');
+  const pad = 8;
+  return [...(node?.querySelectorAll('.react-flow__handle') ?? [])].some((h) => {
+    const r = h.getBoundingClientRect();
+    return (
+      event.clientX >= r.left - pad &&
+      event.clientX <= r.right + pad &&
+      event.clientY >= r.top - pad &&
+      event.clientY <= r.bottom + pad
+    );
+  });
+}
 
 interface Filters {
   q: string;
@@ -168,6 +195,8 @@ function MapCanvas({ spaceId, data }: { spaceId: string; data: ProjectMap }) {
   const [filters, setFilters] = useState<Filters>(NO_FILTERS);
   // Kullanıcının taşıdığı kutular; kaydedilmişse sunucudan gelir, yoksa otomatik düzen kullanılır.
   const [moved, setMoved] = useState<Record<string, MapPos>>(data.positions);
+  // React Flow ölçtüğü kutu boyutlarını burada geri ister; verilmezse her karede kutular ölçülmemiş sayılır ve sürüklerken kaybolur.
+  const [sizes, setSizes] = useState<Record<string, { width: number; height: number }>>({});
 
   const save = useMutation({
     mutationFn: (positions: Record<string, MapPos>) =>
@@ -235,9 +264,10 @@ function MapCanvas({ spaceId, data }: { spaceId: string; data: ProjectMap }) {
         id: item.id,
         type: 'item',
         position: moved[item.id] ?? auto[item.id] ?? { x: 0, y: 0 },
+        measured: sizes[item.id],
         data: { item, dim: dimmed.has(item.id) },
       })),
-    [shown, moved, auto, dimmed],
+    [shown, moved, auto, dimmed, sizes],
   );
   const edges = useMemo<Edge[]>(() => {
     const byId = new Map(shown.map((n) => [n.id, n]));
@@ -264,8 +294,13 @@ function MapCanvas({ spaceId, data }: { spaceId: string; data: ProjectMap }) {
 
   const onNodesChange = useCallback((changes: NodeChange<Node<ItemData>>[]) => {
     const next: Record<string, MapPos> = {};
-    for (const c of changes) if (c.type === 'position' && c.position) next[c.id] = c.position;
+    const dims: Record<string, { width: number; height: number }> = {};
+    for (const c of changes) {
+      if (c.type === 'position' && c.position) next[c.id] = c.position;
+      if (c.type === 'dimensions' && c.dimensions) dims[c.id] = c.dimensions;
+    }
     if (Object.keys(next).length > 0) setMoved((m) => ({ ...m, ...next }));
+    if (Object.keys(dims).length > 0) setSizes((m) => ({ ...m, ...dims }));
   }, []);
 
   const resetLayout = () => {
@@ -383,9 +418,11 @@ function MapCanvas({ spaceId, data }: { spaceId: string; data: ProjectMap }) {
             for (const n of all) positions[n.id] = n.position;
             saveSoon(positions);
           }}
-          onNodeClick={(_, node) =>
-            void navigate({ to: '/items/$key', params: { key: node.data.item.key } })
-          }
+          onNodeClick={(event, node) => {
+            // Kutunun kenarındaki bağlantı noktası süs; tıklamak iş sayfasını açmaz.
+            if (onHandle(event)) return;
+            void navigate({ to: '/items/$key', params: { key: node.data.item.key } });
+          }}
           colorMode={dark ? 'dark' : 'light'}
           fitView
           fitViewOptions={{ padding: 0.15 }}

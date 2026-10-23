@@ -65,6 +65,13 @@ test.describe.serial('Proje Kuş Bakışı', () => {
     await page.waitForTimeout(800);
     await page.screenshot({ path: 'test-results/project-map.png' });
 
+    // Bağlantı noktasına tıklamak haritada bırakır (iş sayfasına atmaz, çökmez).
+    const url = page.url();
+    await page.locator('.react-flow__handle.source').first().click({ force: true });
+    await page.waitForTimeout(300);
+    expect(page.url()).toBe(url);
+    await expect(nodes).toHaveCount(4);
+
     // Arama: eşleşmeyen kutular soluklaşır.
     await page.getByLabel('Ara (başlık ya da anahtar)').fill('Ödeme düşüyor');
     await expect(nodes.filter({ hasText: 'Ödeme düşüyor' })).not.toHaveClass(/opacity-20/);
@@ -76,7 +83,15 @@ test.describe.serial('Proje Kuş Bakışı', () => {
     const before = (await target.boundingBox())!;
     await page.mouse.move(before.x + before.width / 2, before.y + before.height / 2);
     await page.mouse.down();
-    await page.mouse.move(before.x + 200, before.y + 160, { steps: 12 });
+    await page.mouse.move(before.x + 100, before.y + 80, { steps: 6 });
+    // Sürüklerken hiçbir kutu kaybolmaz (ölçüm kaybı kutuları gizliyordu).
+    for (const node of await nodes.all()) {
+      await expect(node).toBeVisible();
+      expect(
+        await node.evaluate((el) => getComputedStyle(el.closest('.react-flow__node')!).visibility),
+      ).toBe('visible');
+    }
+    await page.mouse.move(before.x + 200, before.y + 160, { steps: 6 });
     await page.mouse.up();
     const moved = (await target.boundingBox())!;
     expect(Math.abs(moved.x - before.x)).toBeGreaterThan(40);
