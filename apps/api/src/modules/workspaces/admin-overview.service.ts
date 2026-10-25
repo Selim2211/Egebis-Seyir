@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import {
+  ADMIN_AGE_BUCKETS,
   BUG_SEVERITIES,
+  formatItemKey,
   type AdminOverview,
   type AdminProject,
   type BugSeverity,
@@ -55,6 +57,9 @@ export class AdminOverviewService {
       select: {
         id: true,
         type: true,
+        title: true,
+        keyPrefix: true,
+        number: true,
         spaceId: true,
         dueDate: true,
         createdAt: true,
@@ -104,6 +109,71 @@ export class AdminOverviewService {
       if (b.severity) bySeverity.set(b.severity, (bySeverity.get(b.severity) ?? 0) + 1);
     }
     const emailBugs = bugs.filter((b) => b.inboundEmails.length > 0).length;
+
+    // Destek süreleri: ilk insan yanıtı (giden kutusu), yanıt bekleyenler, atanma yöntemi, firma kırılımı.
+    const bugMails = await db.inboundEmail.findMany({
+      where: {
+        kind: { in: ['NEW', 'OUTBOUND'] },
+        workItem: { type: 'BUG', deletedAt: null, archivedAt: null },
+      },
+      select: {
+        workItemId: true,
+        kind: true,
+        receivedAt: true,
+        routeReason: true,
+        rootCompany: { select: { id: true, name: true } },
+      },
+      take: SCAN_LIMIT,
+    });
+    const bugById = new Map(bugs.map((b) => [b.id, b]));
+    const firstMail = new Map<string, (typeof bugMails)[number]>();
+    const outgoing = new Map<string, Date[]>();
+    for (const m of bugMails) {
+      if (m.kind === 'NEW') firstMail.set(m.workItemId, m);
+      else outgoing.set(m.workItemId, [...(outgoing.get(m.workItemId) ?? []), m.receivedAt]);
+    }
+    const responseHours: number[] = [];
+    let awaitingReply = 0;
+    const routing = { rule: 0, company: 0, ai: 0, unrouted: 0 };
+    const byCompany = new Map<
+      string,
+      { name: string; total: number; open: number; resolved: number }
+    >();
+    let noCompany = 0;
+    for (const [bugId, mail] of firstMail) {
+      const bug = bugById.get(bugId);
+      if (!bug) continue;
+      const reason = mail.routeReason ?? '';
+      if (reason.startsWith('Kural:')) routing.rule += 1;
+      else if (reason.startsWith('Firma varsayılanı')) routing.company += 1;
+      else if (reason.startsWith('YZ:')) routing.ai += 1;
+      else routing.unrouted += 1;
+      if (mail.rootCompany) {
+        const c = byCompany.get(mail.rootCompany.id) ?? {
+          name: mail.rootCompany.name,
+          total: 0,
+          open: 0,
+          resolved: 0,
+        };
+        c.total += 1;
+        if (isDone(bug)) c.resolved += 1;
+        else c.open += 1;
+        byCompany.set(mail.rootCompany.id, c);
+      } else noCompany += 1;
+      const replies = (outgoing.get(bugId) ?? []).filter((d) => d >= mail.receivedAt);
+      if (replies.length > 0) {
+        if (mail.receivedAt.getTime() >= now.getTime() - 30 * DAY_MS) {
+          const first = Math.min(...replies.map((d) => d.getTime()));
+          responseHours.push((first - mail.receivedAt.getTime()) / 3_600_000);
+        }
+      } else if (!isDone(bug)) awaitingReply += 1;
+    }
+    const aging = ADMIN_AGE_BUCKETS.map((bucket) => ({ bucket, count: 0 }));
+    for (const b of openBugs) {
+      const age = (now.getTime() - b.createdAt.getTime()) / DAY_MS;
+      aging[age <= 1 ? 0 : age <= 3 ? 1 : age <= 7 ? 2 : 3]!.count += 1;
+    }
+    const oldest = [...openBugs].sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())[0];
 
     // ---- E-posta çağrıları
     const mails = await db.inboundEmail.findMany({
@@ -188,22 +258,45 @@ export class AdminOverviewService {
     }
 
     // ---- Ekip yükü: açık işleri en çok olan kişiler
-    const load = new Map<string, { open: number; overdue: number }>();
+    const load = new Map<string, { open: number; overdue: number; completed30: number }>();
+    const since30 = now.getTime() - 30 * DAY_MS;
     for (const i of items) {
-      if (isDone(i)) continue;
       for (const a of i.assignees) {
-        const l = load.get(a.userId) ?? { open: 0, overdue: 0 };
-        l.open += 1;
-        if (overdue(i)) l.overdue += 1;
+        const l = load.get(a.userId) ?? { open: 0, overdue: 0, completed30: 0 };
+        if (isDone(i)) {
+          if (i.completedAt && i.completedAt.getTime() >= since30) l.completed30 += 1;
+        } else {
+          l.open += 1;
+          if (overdue(i)) l.overdue += 1;
+        }
         load.set(a.userId, l);
       }
     }
-    const topIds = [...load.entries()].sort((a, b) => b[1].open - a[1].open).slice(0, 8);
+    const topIds = [...load.entries()]
+      .filter(([, l]) => l.open > 0 || l.completed30 > 0)
+      .sort((a, b) => b[1].open - a[1].open || b[1].completed30 - a[1].completed30)
+      .slice(0, 8);
     const people = await db.user.findMany({
       where: { id: { in: topIds.map(([id]) => id) } },
       select: { id: true, name: true, avatarVersion: true },
     });
-    const members = await db.membership.count();
+    const memberRows = await db.membership.findMany({ select: { userId: true } });
+    const members = memberRows.length;
+    const busy = new Set([...load.entries()].filter(([, l]) => l.open > 0).map(([id]) => id));
+    const idleMembers = memberRows.filter((m) => !busy.has(m.userId)).length;
+    const completedSprints = await db.sprint.findMany({
+      where: { status: 'COMPLETED', spaceId: { in: spaces.map((s) => s.id) } },
+      select: {
+        id: true,
+        name: true,
+        completedAt: true,
+        completedPoints: true,
+        committedPoints: true,
+        space: { select: { name: true } },
+      },
+      orderBy: { completedAt: 'desc' },
+      take: 6,
+    });
 
     const openItems = items.filter((i) => !isDone(i)).length;
     return {
@@ -216,6 +309,8 @@ export class AdminOverviewService {
         completedThisWeek: days
           .filter((d) => d >= weekStart)
           .reduce((n, d) => n + (doneOn.get(d) ?? 0), 0),
+        unassignedOpen: items.filter((i) => !isDone(i) && i.assignees.length === 0).length,
+        idleMembers,
       },
       bugs: {
         total: bugs.length,
@@ -239,6 +334,27 @@ export class AdminOverviewService {
           opened: openedOn.get(date) ?? 0,
           resolved: resolvedOn.get(date) ?? 0,
         })),
+        avgFirstResponseHours:
+          responseHours.length === 0
+            ? null
+            : Math.round((responseHours.reduce((a, b) => a + b, 0) / responseHours.length) * 10) /
+              10,
+        awaitingReply,
+        oldestOpen: oldest
+          ? {
+              id: oldest.id,
+              key: formatItemKey(oldest.keyPrefix, oldest.number),
+              title: oldest.title,
+              ageDays: Math.floor((now.getTime() - oldest.createdAt.getTime()) / DAY_MS),
+            }
+          : null,
+        aging,
+        routing,
+        byCompany: [...byCompany.entries()]
+          .map(([id, c]) => ({ id, ...c }))
+          .sort((a, b) => b.total - a.total || a.name.localeCompare(b.name, 'tr'))
+          .slice(0, 8),
+        noCompany,
       },
       tickets: {
         emailsToday: mailsOn('NEW', today),
@@ -253,6 +369,16 @@ export class AdminOverviewService {
           ? [{ userId, name: person.name, avatarVersion: person.avatarVersion, ...l }]
           : [];
       }),
+      velocity: completedSprints
+        .map((s) => ({
+          id: s.id,
+          name: s.name,
+          project: s.space.name,
+          committed: s.committedPoints ?? 0,
+          completed: s.completedPoints ?? 0,
+          completedAt: dayKey(s.completedAt ?? now),
+        }))
+        .reverse(),
     };
   }
 }

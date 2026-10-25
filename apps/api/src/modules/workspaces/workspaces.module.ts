@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AdminController } from './admin.controller';
+import { AdminListService } from './admin-list.service';
 import { AdminOverviewService } from './admin-overview.service';
 import { InvitationsService } from './invitations.service';
 import { MembersService } from './members.service';
@@ -28,6 +29,7 @@ import {
     WorkspaceSettingsService,
     RolesService,
     AdminOverviewService,
+    AdminListService,
   ],
 })
 export class WorkspacesModule {}

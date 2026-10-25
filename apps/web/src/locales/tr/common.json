@@ -2600,7 +2600,34 @@
     "teamLoadHint": "Açık işi en çok olan kişiler",
     "noLoad": "Atanmış açık iş yok.",
     "onTime": "Zamanında",
-    "overdue": "Geciken"
+    "overdue": "Geciken",
+    "supportSection": "Destek ve müşteri e-postaları",
+    "firstResponse": "İlk yanıt süresi",
+    "firstResponseSub": "Son 30 gün, e-postadan gelen Bug’lara insan yanıtı",
+    "awaitingReply": "Yanıt bekleyen",
+    "awaitingSub": "E-postadan gelip henüz yanıtlanmamış açık Bug",
+    "oldestOpen": "En eski açık Bug",
+    "unassignedBugs": "Atanmamış açık Bug",
+    "unassignedBugsSub": "Sahibi olmayan Bug’lar",
+    "agingTitle": "Açık Bug’ların yaşı",
+    "agingHint": "Çubuğa tıkla: o yaştaki Bug’lar",
+    "routingTitle": "Proje atama yöntemi",
+    "routingHint": "E-postadan gelen Bug’lar nasıl atandı? Dilime tıkla",
+    "companiesTitle": "Firmalara göre Bug",
+    "companiesHint": "En çok Bug gönderen firmalar. Çubuğa tıkla",
+    "noEmailBugs": "Henüz e-postadan gelen Bug yok.",
+    "openLabel": "Açık",
+    "noCompany": "Firması bilinmeyen: {{count}} Bug",
+    "unassignedWork": "Atanmamış iş",
+    "unassignedWorkSub": "Açık, kimseye verilmemiş",
+    "idleSub": "{{count}} üyenin açık işi yok",
+    "completed30": "Son 30 günde {{count}} iş bitirdi",
+    "completed30Short": "{{count}} bitti",
+    "velocityTitle": "Sprint hızı",
+    "velocityHint": "Son tamamlanan sprintlerde taahhüt edilen ve biten puan",
+    "committed": "Taahhüt",
+    "completedPoints": "Biten",
+    "minutes": "{{value}} dk"
   },
   "bugBox": {
     "title": "Bug Kutusu",
@@ -2733,5 +2760,57 @@
     "aiPrivacy": "Gizlilik: yalnızca konu ve metnin ilk kısmı gönderilir; e-posta adresi, telefon ve bağlantılar silinir, ekler gönderilmez. Yapay zeka emin olamazsa ya da hata verirse Bug \"Belirsiz\"de kalır.",
     "aiTest": "Kaydet ve yapay zekayı dene",
     "aiOk": "Çalışıyor ({{ms}} ms)"
+  },
+  "adminList": {
+    "back": "Yönetici paneli",
+    "total": "{{count}} kayıt",
+    "empty": "Bu süzgece uyan kayıt yok.",
+    "unassigned": "Atanmadı",
+    "due": "Termin",
+    "noCompany": "Firması bilinmeyen",
+    "col": {
+      "item": "İş",
+      "project": "Proje",
+      "status": "Durum",
+      "severity": "Önem",
+      "assignee": "Atanan",
+      "company": "Firma",
+      "date": "Termin / açılış"
+    },
+    "kinds": {
+      "open-work": "Açık işler",
+      "overdue": "Geciken işler",
+      "completed-week": "Bu hafta tamamlananlar",
+      "unassigned-work": "Atanmamış işler",
+      "bugs-all": "Tüm Bug’lar",
+      "bugs-open": "Açık Bug’lar",
+      "bugs-new-today": "Bugün gelen Bug’lar",
+      "bugs-new-week": "Bu hafta gelen Bug’lar",
+      "bugs-resolved-today": "Bugün çözülen Bug’lar",
+      "bugs-resolved-week": "Bu hafta çözülen Bug’lar",
+      "bugs-unassigned": "Atanmamış açık Bug’lar",
+      "bugs-inbox": "Belirsiz’de bekleyen Bug’lar",
+      "bugs-awaiting": "Yanıt bekleyen Bug’lar",
+      "bugs-email": "E-postadan gelen Bug’lar",
+      "bugs-manual": "Elle açılan Bug’lar",
+      "bugs-severity": "Önem derecesine göre açık Bug’lar",
+      "bugs-company": "Firmaya göre Bug’lar",
+      "bugs-age": "Yaşa göre açık Bug’lar",
+      "bugs-route": "Atama yöntemine göre Bug’lar",
+      "person": "Kişinin açık işleri",
+      "project": "Projenin açık işleri"
+    },
+    "age": {
+      "D1": "1 güne kadar",
+      "D3": "1–3 gün",
+      "D7": "3–7 gün",
+      "D7P": "7 günden eski"
+    },
+    "route": {
+      "rule": "Kural",
+      "company": "Firma varsayılanı",
+      "ai": "Yapay zeka",
+      "none": "Belirsiz"
+    }
   }
 }

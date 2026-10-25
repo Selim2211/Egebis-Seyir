@@ -1236,3 +1236,14 @@ Kural ve firma varsayılanı projeyi belirleyemeyen e-postalar "Belirsiz"de kal�
 - **Güvenlik:** model yalnızca çalışma alanındaki gerçek Projeler (anahtar listesi) arasından seçebilir; uydurma ya da null ise Bug Belirsiz kalır. E-posta içeriği güvenilmez veri olarak işaretlenir. Giden metinden e-posta adresi, telefon, bağlantı ve uzun sayılar silinir; ekler gönderilmez.
 - **Hata toleransı:** zaman aşımı (25 sn), HTTP hatası ya da bozuk cevapta Bug yine açılır, akış eskisi gibidir (önem MAJOR).
 - **Ayarlar:** Ayarlar → E-posta ayarları → Yapay zeka (aç/kapa, model, anahtar şifreli `ticket_settings.aiKeyEnc`, "Kaydet ve yapay zekayı dene"). Kayıtlı anahtar yoksa `TICKET_AI_KEY` (.env) kullanılır. Testte ağa çıkılmaz (`useFetcher` ile sahte cevap).
+
+## ADR-142 — Yönetici paneli: yeni veriler ve tıklanabilir listeler
+
+**Durum:** Kabul · **Tarih:** 2026-10-25
+
+Panel (ADR-139) genişletildi ve her kutucuk/grafik, saydığı kayıtların listesine bağlandı.
+
+- **Yeni veriler** (`GET admin/overview`): destek süreleri (e-postadan gelen Bug'larda ilk insan yanıtı süresi — giden kutusundaki yanıt, son 30 gün; yanıt bekleyen açık Bug; en eski açık Bug; açık Bug yaşı kovaları ≤1/1–3/3–7/7+ gün), atama yöntemi (kural / firma varsayılanı / yapay zeka / belirsiz; `routeReason` önekinden), firma bazlı Bug (en çok Bug gönderen 8 firma, açık/çözülen, firması bilinmeyen sayısı), ekip (atanmamış açık iş, açık işi olmayan üye, kişi başı son 30 gün tamamlanan) ve sprint hızı (son 6 tamamlanan sprintin taahhüt/biten puanı).
+- **Tıklanabilir:** kutucuklar, önem/kaynak/yaş/atama yöntemi/firma grafikleri ve kişi etiketleri `/admin-list?kind=&value=` sayfasına gider. `GET admin/list` (yalnızca Owner/Admin, sayfa başına 25) her `kind` için panelle **aynı süzgeci** uygular; bu yüzden kutucuktaki sayı ile listedeki kayıt sayısı tutar (API testi her çifti karşılaştırır). Geçersiz `value` boş liste verir, bilinmeyen `kind` 400 döner.
+- **Gün sınırı:** "bugün/bu hafta" Europe/Istanbul takvim gününe göre; liste süzgeçleri gün başlangıcını `+03:00` ile kurar (Türkiye'de yaz saati yok).
+- **Sınır:** özet hâlâ tek istekte, bellekte hesaplanır (okuma sınırı `SCAN_LIMIT`); çok büyük çalışma alanları için ileride SQL toplamaya taşınır.

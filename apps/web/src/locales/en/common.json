@@ -2601,7 +2601,34 @@
     "teamLoadHint": "People with the most open items",
     "noLoad": "No assigned open items.",
     "onTime": "On time",
-    "overdue": "Overdue"
+    "overdue": "Overdue",
+    "supportSection": "Support and customer emails",
+    "firstResponse": "First response time",
+    "firstResponseSub": "Last 30 days, human reply to emailed Bugs",
+    "awaitingReply": "Awaiting reply",
+    "awaitingSub": "Open emailed Bugs with no reply yet",
+    "oldestOpen": "Oldest open Bug",
+    "unassignedBugs": "Unassigned open Bugs",
+    "unassignedBugsSub": "Bugs nobody owns",
+    "agingTitle": "Age of open Bugs",
+    "agingHint": "Click a bar for the Bugs of that age",
+    "routingTitle": "Project assignment method",
+    "routingHint": "How were emailed Bugs assigned? Click a slice",
+    "companiesTitle": "Bugs by company",
+    "companiesHint": "Companies sending the most Bugs. Click a bar",
+    "noEmailBugs": "No emailed Bugs yet.",
+    "openLabel": "Open",
+    "noCompany": "Unknown company: {{count}} Bugs",
+    "unassignedWork": "Unassigned work",
+    "unassignedWorkSub": "Open, given to nobody",
+    "idleSub": "{{count}} members have no open work",
+    "completed30": "Finished {{count}} items in the last 30 days",
+    "completed30Short": "{{count}} done",
+    "velocityTitle": "Sprint velocity",
+    "velocityHint": "Committed and completed points of the latest completed sprints",
+    "committed": "Committed",
+    "completedPoints": "Completed",
+    "minutes": "{{value}} min"
   },
   "bugBox": {
     "title": "Bug Box",
@@ -2734,5 +2761,57 @@
     "aiPrivacy": "Privacy: only the subject and the first part of the text are sent; email addresses, phone numbers and links are removed, attachments are not sent. If the AI is unsure or fails, the Bug stays in \"Unsorted\".",
     "aiTest": "Save and test AI",
     "aiOk": "Working ({{ms}} ms)"
+  },
+  "adminList": {
+    "back": "Admin dashboard",
+    "total": "{{count}} items",
+    "empty": "Nothing matches this filter.",
+    "unassigned": "Unassigned",
+    "due": "Due date",
+    "noCompany": "Unknown company",
+    "col": {
+      "item": "Item",
+      "project": "Project",
+      "status": "Status",
+      "severity": "Severity",
+      "assignee": "Assignee",
+      "company": "Company",
+      "date": "Due / opened"
+    },
+    "kinds": {
+      "open-work": "Open work",
+      "overdue": "Overdue work",
+      "completed-week": "Completed this week",
+      "unassigned-work": "Unassigned work",
+      "bugs-all": "All Bugs",
+      "bugs-open": "Open Bugs",
+      "bugs-new-today": "Bugs received today",
+      "bugs-new-week": "Bugs received this week",
+      "bugs-resolved-today": "Bugs resolved today",
+      "bugs-resolved-week": "Bugs resolved this week",
+      "bugs-unassigned": "Unassigned open Bugs",
+      "bugs-inbox": "Bugs waiting in Unsorted",
+      "bugs-awaiting": "Bugs awaiting a reply",
+      "bugs-email": "Emailed Bugs",
+      "bugs-manual": "Manually created Bugs",
+      "bugs-severity": "Open Bugs by severity",
+      "bugs-company": "Bugs by company",
+      "bugs-age": "Open Bugs by age",
+      "bugs-route": "Bugs by assignment method",
+      "person": "Open work of a person",
+      "project": "Open work of a project"
+    },
+    "age": {
+      "D1": "Up to 1 day",
+      "D3": "1–3 days",
+      "D7": "3–7 days",
+      "D7P": "Older than 7 days"
+    },
+    "route": {
+      "rule": "Rule",
+      "company": "Company default",
+      "ai": "AI",
+      "none": "Unsorted"
+    }
   }
 }
