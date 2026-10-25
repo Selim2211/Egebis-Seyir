@@ -62,7 +62,21 @@ const toRequest = (s: TicketSettings): UpdateTicketSettingsRequest => ({
   templates: s.templates,
   aiEnabled: s.aiEnabled,
   aiModel: s.aiModel,
+  aiUrl: s.aiUrl,
 });
+
+/** Hazır sağlayıcılar: seçilince adres ve önerilen model dolar. */
+const AI_PROVIDERS = {
+  nvidia: {
+    url: 'https://integrate.api.nvidia.com/v1',
+    model: 'nvidia/nemotron-3-ultra-550b-a55b',
+  },
+  groq: { url: 'https://api.groq.com/openai/v1', model: 'qwen/qwen3.8-27b' },
+} as const;
+const providerOf = (url: string | undefined) =>
+  (Object.keys(AI_PROVIDERS) as Array<keyof typeof AI_PROVIDERS>).find(
+    (k) => AI_PROVIDERS[k].url === url,
+  ) ?? 'custom';
 
 /**
  * Posta kutusu, şirket bilgisi ve yanıt şablonları (ADR-140). Üç kart tek formdur: "Kaydet" hepsini kaydeder.
@@ -290,6 +304,28 @@ export function SettingsForm({ settings }: { settings: TicketSettings }) {
           <Label htmlFor="aiEnabled">{t('emailSettings.aiEnabled')}</Label>
         </div>
         <div className="grid gap-3 sm:grid-cols-2">
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="aiProvider">{t('emailSettings.aiProvider')}</Label>
+            <NativeSelect
+              id="aiProvider"
+              value={providerOf(form.aiUrl)}
+              onChange={(e) => {
+                const p = e.target.value as keyof typeof AI_PROVIDERS | 'custom';
+                if (p !== 'custom')
+                  set({ aiUrl: AI_PROVIDERS[p].url, aiModel: AI_PROVIDERS[p].model });
+              }}
+            >
+              <option value="nvidia">NVIDIA</option>
+              <option value="groq">Groq</option>
+              <option value="custom">{t('emailSettings.aiCustom')}</option>
+            </NativeSelect>
+          </div>
+          <Field
+            label={t('emailSettings.aiUrl')}
+            value={form.aiUrl ?? ''}
+            onChange={(e) => set({ aiUrl: e.target.value })}
+            placeholder="https://api.example.com/v1"
+          />
           <Field
             label={t('emailSettings.aiModel')}
             hint={t('emailSettings.aiModelHint')}

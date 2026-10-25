@@ -2761,7 +2761,10 @@
     "aiKeyHint": "Leave empty to keep the saved key. Stored encrypted, never shown.",
     "aiPrivacy": "Privacy: only the subject and the first part of the text are sent; email addresses, phone numbers and links are removed, attachments are not sent. If the AI is unsure or fails, the Bug stays in \"Unsorted\".",
     "aiTest": "Save and test AI",
-    "aiOk": "Working ({{ms}} ms)"
+    "aiOk": "Working ({{ms}} ms)",
+    "aiProvider": "Provider",
+    "aiCustom": "Custom (OpenAI-compatible)",
+    "aiUrl": "API URL"
   },
   "adminList": {
     "back": "Admin dashboard",

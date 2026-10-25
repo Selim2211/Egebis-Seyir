@@ -246,7 +246,6 @@ export class TicketsService {
     const verdict = await this.ai.classify(workspaceId, {
       subject: mail.subject ?? '',
       text: rawText,
-      company: company?.root.name ?? null,
     });
     if (!routing.spaceId && verdict?.spaceId) {
       routing = {

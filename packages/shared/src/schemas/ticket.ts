@@ -49,6 +49,8 @@ export const TicketSettingsSchema = z.object({
   /** Yapay zeka (ADR-141): açık mı, hangi model, anahtar kayıtlı mı (anahtar dışarı verilmez). */
   aiEnabled: z.boolean(),
   aiModel: z.string(),
+  /** OpenAI uyumlu API adresi (NVIDIA, Groq, ...). */
+  aiUrl: z.string(),
   aiKeyState: z.enum(['SET', 'EMPTY']),
   /** Kayıt yoksa .env değerleri kullanılır. */
   source: z.enum(['APP', 'ENV']),
@@ -77,6 +79,7 @@ export const UpdateTicketSettingsRequestSchema = z.object({
   /** undefined = değiştirme. */
   aiEnabled: z.boolean().optional(),
   aiModel: z.string().trim().min(1).max(200).optional(),
+  aiUrl: z.string().trim().url().max(300).optional(),
   /** undefined = değiştirme · boş metin = sil. */
   aiKey: z.string().max(500).optional(),
 });

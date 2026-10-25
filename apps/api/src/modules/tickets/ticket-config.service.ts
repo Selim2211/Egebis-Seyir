@@ -89,7 +89,7 @@ export class TicketConfigService {
           enabled: row.aiEnabled,
           model: row.aiModel,
           key: row.aiKeyEnc ? await this.box.open(row.aiKeyEnc) : this.envAiKey(),
-          url: this.config.get('TICKET_AI_URL', { infer: true }),
+          url: row.aiUrl ?? this.config.get('TICKET_AI_URL', { infer: true }),
         },
         source: 'APP',
       };
@@ -177,6 +177,7 @@ export class TicketConfigService {
         templates: mergeTemplates(row.templates),
         aiEnabled: row.aiEnabled,
         aiModel: row.aiModel,
+        aiUrl: row.aiUrl ?? this.config.get('TICKET_AI_URL', { infer: true }),
         aiKeyState: row.aiKeyEnc || this.envAiKey() ? 'SET' : 'EMPTY',
         source: 'APP',
       };
@@ -202,6 +203,7 @@ export class TicketConfigService {
       templates: rt.templates,
       aiEnabled: rt.ai.enabled,
       aiModel: rt.ai.model,
+      aiUrl: rt.ai.url,
       aiKeyState: rt.ai.key ? 'SET' : 'EMPTY',
       source: 'ENV',
     };
@@ -220,7 +222,15 @@ export class TicketConfigService {
     let aiKeyEnc = existing?.aiKeyEnc ?? null;
     if (input.aiKey === '') aiKeyEnc = null;
     else if (input.aiKey !== undefined) aiKeyEnc = await this.box.seal(input.aiKey);
-    const { password: _password, aiKey: _aiKey, templates, aiEnabled, aiModel, ...rest } = input;
+    const {
+      password: _password,
+      aiKey: _aiKey,
+      templates,
+      aiEnabled,
+      aiModel,
+      aiUrl,
+      ...rest
+    } = input;
     void _password;
     void _aiKey;
     const data = {
@@ -229,6 +239,7 @@ export class TicketConfigService {
       aiKeyEnc,
       ...(aiEnabled === undefined ? {} : { aiEnabled }),
       ...(aiModel === undefined ? {} : { aiModel }),
+      ...(aiUrl === undefined ? {} : { aiUrl }),
       templates: asJson(templates),
     };
     await this.prisma.ticketSettings.upsert({

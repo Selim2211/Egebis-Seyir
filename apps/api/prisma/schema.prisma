@@ -1754,6 +1754,8 @@ model TicketSettings {
   /// Yapay zeka (ADR-141): kural/firma projeyi belirleyemezse proje, önem ve özet önerir.
   aiEnabled    Boolean   @default(false)
   aiModel      String    @default("nvidia/nemotron-3-ultra-550b-a55b")
+  /// OpenAI uyumlu API adresi; null ise .env (TICKET_AI_URL).
+  aiUrl        String?
   aiKeyEnc     String?
   orgName      String?
   orgPhone     String?

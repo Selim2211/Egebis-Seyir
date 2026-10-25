@@ -2760,7 +2760,10 @@
     "aiKeyHint": "Boş bırakırsan kayıtlı anahtar korunur. Şifreli saklanır, ekranda gösterilmez.",
     "aiPrivacy": "Gizlilik: yalnızca konu ve metnin ilk kısmı gönderilir; e-posta adresi, telefon ve bağlantılar silinir, ekler gönderilmez. Yapay zeka emin olamazsa ya da hata verirse Bug \"Belirsiz\"de kalır.",
     "aiTest": "Kaydet ve yapay zekayı dene",
-    "aiOk": "Çalışıyor ({{ms}} ms)"
+    "aiOk": "Çalışıyor ({{ms}} ms)",
+    "aiProvider": "Sağlayıcı",
+    "aiCustom": "Özel (OpenAI uyumlu)",
+    "aiUrl": "API adresi"
   },
   "adminList": {
     "back": "Yönetici paneli",
