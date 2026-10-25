@@ -46,6 +46,10 @@ export const TicketSettingsSchema = z.object({
   orgWebsite: z.string().nullable(),
   orgSignature: z.string().nullable(),
   templates: Templates,
+  /** Yapay zeka (ADR-141): açık mı, hangi model, anahtar kayıtlı mı (anahtar dışarı verilmez). */
+  aiEnabled: z.boolean(),
+  aiModel: z.string(),
+  aiKeyState: z.enum(['SET', 'EMPTY']),
   /** Kayıt yoksa .env değerleri kullanılır. */
   source: z.enum(['APP', 'ENV']),
 });
@@ -70,6 +74,11 @@ export const UpdateTicketSettingsRequestSchema = z.object({
   orgWebsite: z.string().trim().max(300).nullable(),
   orgSignature: z.string().trim().max(1000).nullable(),
   templates: Templates,
+  /** undefined = değiştirme. */
+  aiEnabled: z.boolean().optional(),
+  aiModel: z.string().trim().min(1).max(200).optional(),
+  /** undefined = değiştirme · boş metin = sil. */
+  aiKey: z.string().max(500).optional(),
 });
 export type UpdateTicketSettingsRequest = z.infer<typeof UpdateTicketSettingsRequestSchema>;
 
@@ -79,6 +88,16 @@ export const TicketConnectionTestSchema = z.object({
   smtp: z.object({ ok: z.boolean(), detail: z.string().nullable() }),
 });
 export type TicketConnectionTest = z.infer<typeof TicketConnectionTestSchema>;
+
+/** POST .../tickets/settings/ai-test — kayıtlı anahtar ve modelle küçük bir istek dener. */
+export const TicketAiTestSchema = z.object({
+  ok: z.boolean(),
+  detail: z.string().nullable(),
+  /** Başarılıysa modelin örnek cevabı. */
+  sample: z.string().nullable(),
+  ms: z.int().nullable(),
+});
+export type TicketAiTest = z.infer<typeof TicketAiTestSchema>;
 
 // ---------- Firmalar ----------
 

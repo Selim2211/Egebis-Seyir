@@ -1225,3 +1225,14 @@
 - **Proje atama:** önce `ticket_rules` (konu/metinde anahtar kelime, firmaya özel ya da tüm firmalar; sıra ile, ilk eşleşen) → sonra firmanın ya da üst firmalarının varsayılan projesi → yoksa Gelen Çağrılar (Belirsiz). Atama sonucu ve gerekçesi `inbound_emails` satırına yazılır (atama günlüğü; Bug Kutusu ve Bug detayında görünür).
 - **Bug Kutusu** (`/bug-box`, sol menü): tüm projelerdeki Bug'lar; kullanıcı yalnızca görebildiği projelerinkini görür (Owner/Admin hepsini). Sayfa başına 20, tarihe göre (yeni/eski) sıralı; başlık/anahtar, firma (alt/üst), gönderen adı/adresi, sahip, atanan ve proje adına göre aranır. Satırdan projeye taşınabilir. Gelen Çağrılar projesi artık hiyerarşide (sol menü, seçiciler) görünmez; teknik yer tutucudur.
 - **Süreç yanıtları:** "talebiniz alındı" (Bug olunca), "işleme alındı" (Bug Task'a çevrilip sprint'e girince ve kişiye atanınca), "çözüldü" (Bug ya da çevrilen Task'ların hepsi tamamlanınca). Yoklayıcı her turda son 60 günün e-posta Bug'larını tarar; her aşama bir kez gider (`processingMailAt`, `resolvedMailAt`), çözülmeden önce "işleme alındı" atlanmışsa gönderilmez. Sınırlar: alındı için gönderen başına 3/saat ve toplam 12/saat, süreç yanıtları toplam 30/saat. Testte hiçbir şey gönderilmez.
+
+## ADR-141 — Yapay zeka ile çağrı yönlendirme
+
+**Durum:** Kabul · **Tarih:** 2026-10-25
+
+Kural ve firma varsayılanı projeyi belirleyemeyen e-postalar "Belirsiz"de kalıyordu. İsteğe bağlı bir yapay zeka adımı eklendi (`TicketAiService`): OpenAI uyumlu bir sohbet API'sine (varsayılan NVIDIA, `nvidia/nemotron-3-ultra-550b-a55b`, muhakeme kapalı ≈1,5 sn) konu ve metnin ilk 1500 karakteri gönderilir; model Proje anahtarı, önem (CRITICAL/MAJOR/MINOR/TRIVIAL), 2 cümlelik özet ve kısa gerekçe döner.
+
+- **Sıra:** önce kurallar ve firma varsayılanı (tahmin edilebilir); Projeyi yalnızca bunlar belirleyemezse yapay zeka seçer ve gerekçe `YZ: ...` olarak atama günlüğüne yazılır. Önem ve özet, yapay zeka açıksa her yeni Bug için uygulanır (`inbound_emails.aiSummary`, Bug detayında "YZ özeti").
+- **Güvenlik:** model yalnızca çalışma alanındaki gerçek Projeler (anahtar listesi) arasından seçebilir; uydurma ya da null ise Bug Belirsiz kalır. E-posta içeriği güvenilmez veri olarak işaretlenir. Giden metinden e-posta adresi, telefon, bağlantı ve uzun sayılar silinir; ekler gönderilmez.
+- **Hata toleransı:** zaman aşımı (25 sn), HTTP hatası ya da bozuk cevapta Bug yine açılır, akış eskisi gibidir (önem MAJOR).
+- **Ayarlar:** Ayarlar → E-posta ayarları → Yapay zeka (aç/kapa, model, anahtar şifreli `ticket_settings.aiKeyEnc`, "Kaydet ve yapay zekayı dene"). Kayıtlı anahtar yoksa `TICKET_AI_KEY` (.env) kullanılır. Testte ağa çıkılmaz (`useFetcher` ile sahte cevap).

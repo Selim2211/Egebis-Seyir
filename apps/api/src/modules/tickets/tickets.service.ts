@@ -16,6 +16,7 @@ import { AttachmentsService } from '../collab/attachments.service';
 import { SpacesService } from '../spaces/spaces.service';
 import { BugsService } from '../work-items/bugs.service';
 import { asJson } from '../work-items/item-support';
+import { TicketAiService } from './ticket-ai.service';
 import { TicketCompaniesService } from './ticket-companies.service';
 import { TicketConfigService } from './ticket-config.service';
 import { TicketRepliesService } from './ticket-replies.service';
@@ -53,6 +54,7 @@ export class TicketsService {
     private readonly cfg: TicketConfigService,
     private readonly companies: TicketCompaniesService,
     private readonly replies: TicketRepliesService,
+    private readonly ai: TicketAiService,
   ) {}
 
   /** NODE_ENV=test iken otomatik yanıtlar gerçekten gönderilmez, burada birikir (yalnızca testler). */
@@ -239,14 +241,29 @@ export class TicketsService {
 
     // Firma (domain'den) ve atama (kural → firma varsayılanı → gelen kutusu); gerekçe günlüğe yazılır.
     const company = await this.companies.resolve(workspaceId, fromEmail);
-    const routing = await this.companies.route(workspaceId, company, mail.subject ?? '', rawText);
+    let routing = await this.companies.route(workspaceId, company, mail.subject ?? '', rawText);
+    // Yapay zeka (ADR-141): önem ve özeti her zaman, Projeyi yalnızca kural/firma belirleyemediyse önerir.
+    const verdict = await this.ai.classify(workspaceId, {
+      subject: mail.subject ?? '',
+      text: rawText,
+      company: company?.root.name ?? null,
+    });
+    if (!routing.spaceId && verdict?.spaceId) {
+      routing = {
+        spaceId: verdict.spaceId,
+        spaceName: verdict.spaceName,
+        reason: `YZ: ${verdict.reason || 'içerikten seçildi'}`,
+      };
+    } else if (!routing.spaceId && verdict) {
+      routing = { ...routing, reason: `${routing.reason} · YZ de emin olamadı` };
+    }
     const box = routing.spaceId ? null : await this.inbox(workspaceId, actorId);
     const description = textToRichText(rawText);
     const bug = await this.runAs(workspaceId, actorId, () =>
       this.bugs.create((routing.spaceId ?? box?.spaceId)!, {
         title: ticketTitle(mail.subject),
         ...(box ? { listId: box.listId } : {}),
-        severity: 'MAJOR',
+        severity: verdict?.severity ?? 'MAJOR',
         priority: 'NORMAL',
       }),
     );
@@ -293,6 +310,7 @@ export class TicketsService {
         routedSpaceId: routing.spaceId,
         routedSpaceName: routing.spaceName ?? (box ? 'Gelen Çağrılar (Belirsiz)' : null),
         routeReason: routing.reason,
+        aiSummary: verdict?.summary || null,
       },
     });
     this.logger.log(`E-posta Bug oldu: ${bug.key} ← ${fromEmail}`);

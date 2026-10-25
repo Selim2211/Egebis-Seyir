@@ -17,6 +17,7 @@ import {
   CreatedSchema,
   SaveTicketCompanyRequestSchema,
   SaveTicketRuleRequestSchema,
+  TicketAiTestSchema,
   TicketCompaniesResponseSchema,
   TicketConnectionTestSchema,
   TicketRulesResponseSchema,
@@ -25,6 +26,7 @@ import {
   WORKSPACE_PERMISSIONS as W,
   type BugBoxResponse,
   type Created,
+  type TicketAiTest,
   type TicketCompaniesResponse,
   type TicketConnectionTest,
   type TicketRulesResponse,
@@ -33,12 +35,14 @@ import {
 import { createZodDto, ZodResponse } from 'nestjs-zod';
 import { RequirePermission } from '../auth/decorators';
 import { BugBoxService } from './bug-box.service';
+import { TicketAiService } from './ticket-ai.service';
 import { TicketCompaniesService } from './ticket-companies.service';
 import { TicketConfigService } from './ticket-config.service';
 
 class SettingsDto extends createZodDto(TicketSettingsSchema) {}
 class UpdateSettingsDto extends createZodDto(UpdateTicketSettingsRequestSchema) {}
 class TestDto extends createZodDto(TicketConnectionTestSchema) {}
+class AiTestDto extends createZodDto(TicketAiTestSchema) {}
 class CompaniesDto extends createZodDto(TicketCompaniesResponseSchema) {}
 class SaveCompanyDto extends createZodDto(SaveTicketCompanyRequestSchema) {}
 class RulesDto extends createZodDto(TicketRulesResponseSchema) {}
@@ -55,6 +59,7 @@ export class TicketsController {
   constructor(
     private readonly config: TicketConfigService,
     private readonly companies: TicketCompaniesService,
+    private readonly ai: TicketAiService,
   ) {}
 
   @Get('settings')
@@ -80,6 +85,14 @@ export class TicketsController {
   @ZodResponse({ type: TestDto })
   test(@Id('workspaceId') workspaceId: string): Promise<TicketConnectionTest> {
     return this.config.test(workspaceId);
+  }
+
+  @Post('settings/ai-test')
+  @RequirePermission(W.WORKSPACE_SETTINGS)
+  @HttpCode(HttpStatus.OK)
+  @ZodResponse({ type: AiTestDto })
+  aiTest(@Id('workspaceId') workspaceId: string): Promise<TicketAiTest> {
+    return this.ai.test(workspaceId);
   }
 
   @Get('companies')

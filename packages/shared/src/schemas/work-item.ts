@@ -311,6 +311,8 @@ export const WorkItemDetailSchema = WorkItemSummarySchema.extend({
       /** Otomatik atama günlüğü: Bug'ın gönderildiği Proje ve gerekçe. */
       routedTo: z.string().nullable(),
       routeReason: z.string().nullable(),
+      /** Yapay zekanın kısa özeti (ADR-141); kapalıysa null. */
+      aiSummary: z.string().nullable(),
     })
     .nullable(),
   severity: z.enum(BUG_SEVERITIES).nullable(),

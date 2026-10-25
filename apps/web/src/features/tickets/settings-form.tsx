@@ -3,6 +3,7 @@ import {
   TICKET_PLACEHOLDERS,
   TICKET_TEMPLATE_KEYS,
   renderTicketTemplate,
+  type TicketAiTest,
   type TicketConnectionTest,
   type TicketSettings,
   type TicketTemplateKey,
@@ -19,7 +20,7 @@ import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { useErrorMessage } from '@/lib/use-error-message';
 import { cn } from '@/lib/utils';
-import { useSaveTicketSettings, useTestTicketConnection } from './queries';
+import { useSaveTicketSettings, useTestTicketAi, useTestTicketConnection } from './queries';
 
 function Card({ title, hint, children }: { title: string; hint?: string; children: ReactNode }) {
   return (
@@ -59,6 +60,8 @@ const toRequest = (s: TicketSettings): UpdateTicketSettingsRequest => ({
   orgWebsite: s.orgWebsite,
   orgSignature: s.orgSignature,
   templates: s.templates,
+  aiEnabled: s.aiEnabled,
+  aiModel: s.aiModel,
 });
 
 /**
@@ -71,7 +74,10 @@ export function SettingsForm({ settings }: { settings: TicketSettings }) {
   const save = useSaveTicketSettings();
   const test = useTestTicketConnection();
   const [form, setForm] = useState(() => toRequest(settings));
+  const testAi = useTestTicketAi();
   const [password, setPassword] = useState('');
+  const [aiKey, setAiKey] = useState('');
+  const [aiResult, setAiResult] = useState<TicketAiTest | null>(null);
   const [result, setResult] = useState<TicketConnectionTest | null>(null);
   const set = (patch: Partial<UpdateTicketSettingsRequest>) => setForm((f) => ({ ...f, ...patch }));
   const text = (v: string | null) => v ?? '';
@@ -79,10 +85,11 @@ export function SettingsForm({ settings }: { settings: TicketSettings }) {
 
   const submit = (then?: () => void) =>
     save.mutate(
-      { ...form, ...(password ? { password } : {}) },
+      { ...form, ...(password ? { password } : {}), ...(aiKey ? { aiKey } : {}) },
       {
         onSuccess: () => {
           setPassword('');
+          setAiKey('');
           toast.success(t('emailSettings.saved'));
           then?.();
         },
@@ -269,6 +276,78 @@ export function SettingsForm({ settings }: { settings: TicketSettings }) {
           <Button type="submit" disabled={save.isPending}>
             {t('common.save')}
           </Button>
+        </div>
+      </Card>
+
+      <Card title={t('emailSettings.ai')} hint={t('emailSettings.aiHint')}>
+        <div className="flex items-center gap-3">
+          <Switch
+            id="aiEnabled"
+            checked={form.aiEnabled ?? false}
+            onCheckedChange={(aiEnabled) => set({ aiEnabled })}
+            aria-label={t('emailSettings.aiEnabled')}
+          />
+          <Label htmlFor="aiEnabled">{t('emailSettings.aiEnabled')}</Label>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <Field
+            label={t('emailSettings.aiModel')}
+            hint={t('emailSettings.aiModelHint')}
+            value={form.aiModel ?? ''}
+            onChange={(e) => set({ aiModel: e.target.value })}
+          />
+          <Field
+            label={t('emailSettings.aiKey')}
+            type="password"
+            autoComplete="new-password"
+            value={aiKey}
+            onChange={(e) => setAiKey(e.target.value)}
+            placeholder={
+              settings.aiKeyState === 'SET'
+                ? t('emailSettings.passwordSet')
+                : t('emailSettings.passwordEmpty')
+            }
+            hint={t('emailSettings.aiKeyHint')}
+          />
+        </div>
+        <p className="text-muted-foreground text-xs">{t('emailSettings.aiPrivacy')}</p>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button type="submit" disabled={save.isPending}>
+            {t('common.save')}
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            disabled={testAi.isPending || save.isPending}
+            data-testid="test-ai"
+            onClick={() => {
+              setAiResult(null);
+              submit(() =>
+                testAi.mutate(undefined, {
+                  onSuccess: setAiResult,
+                  onError: (error) => toast.error(errorMessage(error)),
+                }),
+              );
+            }}
+          >
+            {testAi.isPending ? t('emailSettings.testing') : t('emailSettings.aiTest')}
+          </Button>
+          {aiResult && (
+            <span
+              data-testid="ai-test-result"
+              className={cn(
+                'flex items-center gap-1 text-sm',
+                aiResult.ok
+                  ? 'text-emerald-700 dark:text-emerald-300'
+                  : 'text-red-700 dark:text-red-300',
+              )}
+            >
+              {aiResult.ok ? <CheckCircle2 className="size-4" /> : <XCircle className="size-4" />}
+              {aiResult.ok
+                ? t('emailSettings.aiOk', { ms: aiResult.ms ?? 0 })
+                : (aiResult.detail ?? t('emailSettings.failed'))}
+            </span>
+          )}
         </div>
       </Card>
 

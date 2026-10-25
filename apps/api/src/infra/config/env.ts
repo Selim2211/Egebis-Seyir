@@ -40,6 +40,11 @@ export const EnvSchema = z.object({
   TICKET_FROM_NAME: z.string().default('Egebis Destek'),
   TICKET_POLL_SECONDS: z.coerce.number().int().min(15).default(60),
   TICKET_AUTO_REPLY: z.stringbool().default(true),
+  /** Yapay zeka (ADR-141): OpenAI uyumlu sohbet API'si. Ayarlar ekranındaki değer önceliklidir. */
+  TICKET_AI_KEY: z.string().optional(),
+  TICKET_AI_ENABLED: z.stringbool().default(false),
+  TICKET_AI_MODEL: z.string().default('nvidia/nemotron-3-ultra-550b-a55b'),
+  TICKET_AI_URL: z.string().default('https://integrate.api.nvidia.com/v1'),
   /** Birden fazla workspace varsa gelen kutusunun bağlı olduğu workspace; boşsa en eskisi. */
   TICKET_WORKSPACE_ID: z.string().optional(),
 

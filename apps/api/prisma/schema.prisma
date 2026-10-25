@@ -1722,6 +1722,8 @@ model InboundEmail {
   routedSpaceId    String?          @db.Uuid
   routedSpaceName  String?
   routeReason      String?
+  /// Yapay zekanın çıkardığı kısa özet (ADR-141); kapalıysa ya da hata olduysa null.
+  aiSummary        String?
   /// Müşteriye "işleme alındı" / "çözüldü" yanıtı gönderildiği an (her biri bir kez).
   processingMailAt DateTime?        @db.Timestamptz
   resolvedMailAt   DateTime?        @db.Timestamptz
@@ -1749,6 +1751,10 @@ model TicketSettings {
   fromName     String    @default("Egebis Destek")
   pollSeconds  Int       @default(60)
   autoReply    Boolean   @default(true)
+  /// Yapay zeka (ADR-141): kural/firma projeyi belirleyemezse proje, önem ve özet önerir.
+  aiEnabled    Boolean   @default(false)
+  aiModel      String    @default("nvidia/nemotron-3-ultra-550b-a55b")
+  aiKeyEnc     String?
   orgName      String?
   orgPhone     String?
   orgWebsite   String?

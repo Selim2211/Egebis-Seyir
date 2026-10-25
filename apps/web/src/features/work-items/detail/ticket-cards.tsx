@@ -95,6 +95,12 @@ export function TicketCards({ item }: { item: WorkItemDetail }) {
                 </dd>
               </>
             )}
+            {inbound.aiSummary && (
+              <>
+                <dt className="text-muted-foreground">{t('tickets.aiSummary')}</dt>
+                <dd data-testid="inbound-ai-summary">{inbound.aiSummary}</dd>
+              </>
+            )}
             <dt className="text-muted-foreground">{t('tickets.subject')}</dt>
             <dd className="min-w-0 truncate">{inbound.subject}</dd>
             <dt className="text-muted-foreground">{t('tickets.received')}</dt>

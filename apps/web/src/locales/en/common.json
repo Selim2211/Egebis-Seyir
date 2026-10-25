@@ -2533,7 +2533,8 @@
     "converted": "{{bug}} converted to Task {{task}}",
     "company": "Company",
     "noCompany": "No matching company",
-    "routing": "Routing"
+    "routing": "Routing",
+    "aiSummary": "AI summary"
   },
   "admin": {
     "title": "Admin dashboard",
@@ -2722,6 +2723,16 @@
       "up": "Move rule “{{keyword}}” up",
       "down": "Move rule “{{keyword}}” down",
       "remove": "Delete rule “{{keyword}}”"
-    }
+    },
+    "ai": "AI",
+    "aiHint": "When rules and the company default cannot decide the Project, AI picks it from the email content and also suggests the Bug severity and a short summary.",
+    "aiEnabled": "Evaluate emails with AI",
+    "aiModel": "Model",
+    "aiModelHint": "OpenAI-compatible chat model, e.g. nvidia/nemotron-3-ultra-550b-a55b",
+    "aiKey": "API key",
+    "aiKeyHint": "Leave empty to keep the saved key. Stored encrypted, never shown.",
+    "aiPrivacy": "Privacy: only the subject and the first part of the text are sent; email addresses, phone numbers and links are removed, attachments are not sent. If the AI is unsure or fails, the Bug stays in \"Unsorted\".",
+    "aiTest": "Save and test AI",
+    "aiOk": "Working ({{ms}} ms)"
   }
 }

@@ -2,6 +2,7 @@ import {
   CreatedSchema,
   type SaveTicketCompanyRequest,
   type SaveTicketRuleRequest,
+  TicketAiTestSchema,
   TicketCompaniesResponseSchema,
   TicketConnectionTestSchema,
   TicketRulesResponseSchema,
@@ -65,6 +66,11 @@ export const useSaveTicketSettings = () =>
 export const useTestTicketConnection = () =>
   useTicketMutation((id, _: void) =>
     apiRequest(`${base(id)}/settings/test`, TicketConnectionTestSchema, { method: 'POST' }),
+  );
+
+export const useTestTicketAi = () =>
+  useTicketMutation((id, _: void) =>
+    apiRequest(`${base(id)}/settings/ai-test`, TicketAiTestSchema, { method: 'POST' }),
   );
 
 export const useSaveCompany = () =>

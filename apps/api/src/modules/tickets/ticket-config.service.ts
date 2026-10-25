@@ -28,6 +28,8 @@ export interface TicketRuntime {
   autoReply: boolean;
   org: { name: string; phone: string; website: string; signature: string };
   templates: Record<TicketTemplateKey, TicketTemplate>;
+  /** Yapay zeka (ADR-141). Anahtar kayıtlı değilse `.env` anahtarı kullanılır. */
+  ai: { enabled: boolean; model: string; key: string | null; url: string };
   source: 'APP' | 'ENV';
 }
 
@@ -83,6 +85,12 @@ export class TicketConfigService {
         autoReply: row.autoReply,
         org: this.org(row.orgName, row.orgPhone, row.orgWebsite, row.orgSignature, row.fromName),
         templates: mergeTemplates(row.templates),
+        ai: {
+          enabled: row.aiEnabled,
+          model: row.aiModel,
+          key: row.aiKeyEnc ? await this.box.open(row.aiKeyEnc) : this.envAiKey(),
+          url: this.config.get('TICKET_AI_URL', { infer: true }),
+        },
         source: 'APP',
       };
     }
@@ -113,8 +121,18 @@ export class TicketConfigService {
       autoReply: this.config.get('TICKET_AUTO_REPLY', { infer: true }),
       org: this.org(null, null, null, null, fromName),
       templates: mergeTemplates({}),
+      ai: {
+        enabled: this.config.get('TICKET_AI_ENABLED', { infer: true }),
+        model: this.config.get('TICKET_AI_MODEL', { infer: true }),
+        key: this.envAiKey(),
+        url: this.config.get('TICKET_AI_URL', { infer: true }),
+      },
       source: 'ENV',
     };
+  }
+
+  private envAiKey(): string | null {
+    return this.config.get('TICKET_AI_KEY', { infer: true }) ?? null;
   }
 
   private org(
@@ -157,6 +175,9 @@ export class TicketConfigService {
         orgWebsite: row.orgWebsite,
         orgSignature: row.orgSignature,
         templates: mergeTemplates(row.templates),
+        aiEnabled: row.aiEnabled,
+        aiModel: row.aiModel,
+        aiKeyState: row.aiKeyEnc || this.envAiKey() ? 'SET' : 'EMPTY',
         source: 'APP',
       };
     }
@@ -179,6 +200,9 @@ export class TicketConfigService {
       orgWebsite: null,
       orgSignature: null,
       templates: rt.templates,
+      aiEnabled: rt.ai.enabled,
+      aiModel: rt.ai.model,
+      aiKeyState: rt.ai.key ? 'SET' : 'EMPTY',
       source: 'ENV',
     };
   }
@@ -192,9 +216,21 @@ export class TicketConfigService {
       passwordEnc = envPass ? await this.box.seal(envPass) : null;
     } else if (input.password === '') passwordEnc = null;
     else if (input.password !== undefined) passwordEnc = await this.box.seal(input.password);
-    const { password: _password, templates, ...rest } = input;
+    // Yapay zeka anahtarı da aynı kural: undefined = değiştirme, boş = sil, değer = şifrele.
+    let aiKeyEnc = existing?.aiKeyEnc ?? null;
+    if (input.aiKey === '') aiKeyEnc = null;
+    else if (input.aiKey !== undefined) aiKeyEnc = await this.box.seal(input.aiKey);
+    const { password: _password, aiKey: _aiKey, templates, aiEnabled, aiModel, ...rest } = input;
     void _password;
-    const data = { ...rest, passwordEnc, templates: asJson(templates) };
+    void _aiKey;
+    const data = {
+      ...rest,
+      passwordEnc,
+      aiKeyEnc,
+      ...(aiEnabled === undefined ? {} : { aiEnabled }),
+      ...(aiModel === undefined ? {} : { aiModel }),
+      templates: asJson(templates),
+    };
     await this.prisma.ticketSettings.upsert({
       where: { workspaceId },
       create: { workspaceId, ...data },

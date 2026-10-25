@@ -5,6 +5,7 @@ import { SpacesModule } from '../spaces/spaces.module';
 import { WorkItemsModule } from '../work-items/work-items.module';
 import { BugBoxService } from './bug-box.service';
 import { MailboxService } from './mailbox.service';
+import { TicketAiService } from './ticket-ai.service';
 import { TicketCompaniesService } from './ticket-companies.service';
 import { TicketConfigService } from './ticket-config.service';
 import { TicketRepliesService } from './ticket-replies.service';
@@ -21,9 +22,10 @@ import { TicketsService } from './tickets.service';
     TicketConfigService,
     TicketCompaniesService,
     TicketRepliesService,
+    TicketAiService,
     BugBoxService,
     SecretBoxService,
   ],
-  exports: [TicketsService, MailboxService, TicketRepliesService],
+  exports: [TicketsService, MailboxService, TicketRepliesService, TicketAiService],
 })
 export class TicketsModule {}

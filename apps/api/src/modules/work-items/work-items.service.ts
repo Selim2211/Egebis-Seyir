@@ -277,6 +277,7 @@ export class WorkItemsService {
                 : null,
             routedTo: firstMail.routedSpaceName,
             routeReason: firstMail.routeReason,
+            aiSummary: firstMail.aiSummary,
           }
         : null,
       recurrence: (row.recurrence as RecurrenceRule | null) ?? null,
