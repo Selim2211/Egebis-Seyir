@@ -2628,7 +2628,8 @@
     "velocityHint": "Committed and completed points of the latest completed sprints",
     "committed": "Committed",
     "completedPoints": "Completed",
-    "minutes": "{{value}} min"
+    "minutes": "{{value}} min",
+    "refreshFailed": "Refresh failed, showing the last data. It retries every minute."
   },
   "bugBox": {
     "title": "Bug Box",

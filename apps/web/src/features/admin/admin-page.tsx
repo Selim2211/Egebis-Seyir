@@ -48,6 +48,7 @@ const adminQuery = (workspaceId: string) =>
     queryKey: ['workspaces', workspaceId, 'admin', 'overview'],
     queryFn: () => apiRequest(`/workspaces/${workspaceId}/admin/overview`, AdminOverviewSchema),
     refetchInterval: 60_000,
+    retry: 2,
   });
 
 const AXIS = 'var(--muted-foreground)';
@@ -949,10 +950,22 @@ export function AdminPage() {
       </div>
       {query.isPending ? (
         <p className="text-muted-foreground py-10 text-sm">{t('common.loading')}</p>
-      ) : query.isError ? (
-        <NotFoundState />
+      ) : query.data ? (
+        <>
+          {/* Arka plandaki yenileme düşerse (ağ/sunucu yeniden başlıyor) eldeki veri silinmez. */}
+          {query.isError && (
+            <p
+              role="status"
+              className="mb-4 rounded-md border border-amber-300/60 bg-amber-50 px-3 py-2 text-xs text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200"
+              data-testid="admin-refresh-failed"
+            >
+              {t('admin.refreshFailed')}
+            </p>
+          )}
+          <Dashboard data={query.data} />
+        </>
       ) : (
-        <Dashboard data={query.data} />
+        <NotFoundState />
       )}
     </div>
   );

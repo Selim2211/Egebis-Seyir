@@ -2627,7 +2627,8 @@
     "velocityHint": "Son tamamlanan sprintlerde taahhüt edilen ve biten puan",
     "committed": "Taahhüt",
     "completedPoints": "Biten",
-    "minutes": "{{value}} dk"
+    "minutes": "{{value}} dk",
+    "refreshFailed": "Veri yenilenemedi, eldeki son veri gösteriliyor. Dakikada bir tekrar denenir."
   },
   "bugBox": {
     "title": "Bug Kutusu",

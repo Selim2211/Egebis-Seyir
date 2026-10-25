@@ -117,4 +117,51 @@ test.describe.serial('Yönetici paneli: tıklanabilir kutucuklar', () => {
       page.getByTestId('admin-list-row').filter({ hasText: 'Liste geciken iş' }),
     ).toBeVisible();
   });
+
+  test('paneldeki bütün bağlantılar ve grafikler hata vermeden açılır; yenileme düşse ekran silinmez', async ({
+    page,
+  }) => {
+    await page.goto('/login');
+    await login(page, OWNER.email, OWNER.password);
+    await expect(page.getByRole('heading', { name: /Hoş geldin/ })).toBeVisible();
+    await page.goto('/admin');
+    const admin = page.getByTestId('admin-page');
+    await expect(admin).toBeVisible();
+    await expect(page.getByTestId('kpi-open')).toBeVisible();
+
+    const failed = () => page.getByText(/Beklenmeyen bir hata|Bulunamadı/);
+    const hrefs = await admin
+      .locator('a[href]')
+      .evaluateAll((els) => [...new Set(els.map((e) => e.getAttribute('href') ?? ''))]);
+    expect(hrefs.length).toBeGreaterThan(10);
+    for (const href of hrefs) {
+      await page.goto(href);
+      if (href.startsWith('/admin-list')) {
+        await expect(page.getByTestId('admin-list-title'), href).toBeVisible();
+        await expect(page.getByTestId('admin-list-total'), href).toBeVisible();
+      } else {
+        // Sayfanın oturması için kısa bekleme; sonra hata ekranı olmamalı.
+        await expect(page.getByRole('complementary')).toBeVisible();
+        await page.waitForTimeout(1500);
+      }
+      await expect(failed(), href).toHaveCount(0);
+    }
+
+    // Grafikten tıklama: açık Bug yaşı çubuğu listeyi açar.
+    await page.goto('/admin');
+    await expect(page.getByTestId('chart-aging')).toBeVisible();
+    await page.locator('[data-testid="chart-aging"] .recharts-bar-rectangle').first().click();
+    await expect(page).toHaveURL(/kind=bugs-age/);
+    await expect(failed()).toHaveCount(0);
+    await expect(page.getByTestId('admin-list-total')).toBeVisible();
+
+    // Arka plandaki yenileme düşerse son veri ekranda kalır, uyarı çıkar.
+    await page.goto('/admin');
+    await expect(page.getByTestId('kpi-open')).toBeVisible();
+    await page.route('**/admin/overview', (route) => route.abort());
+    await page.getByRole('button', { name: 'Yenile' }).click();
+    await expect(page.getByTestId('admin-refresh-failed')).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByTestId('kpi-open')).toBeVisible();
+    await expect(failed()).toHaveCount(0);
+  });
 });
