@@ -14,6 +14,7 @@ import {
   UserPlus,
   X,
   type LucideIcon,
+  ChartColumn,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { BrandMark } from '@/components/logo';
@@ -129,6 +130,7 @@ export function Sidebar() {
           <NavLink to="/goals" icon={Target} label={t('nav.goals')} />
           <NavLink to="/workload" icon={Users} label={t('nav.workload')} />
           {isAdmin && <NavLink to="/admin" icon={Gauge} label={t('nav.admin')} />}
+          <NavLink to="/analytics" icon={ChartColumn} label={t('nav.analytics')} />
           {canMessage && (
             <NavLink
               to="/messages"

@@ -1,0 +1,174 @@
+import {
+  ANALYTICS_COMPARE_MAX,
+  WORKSPACE_PERMISSIONS,
+  type AnalyticsGrain,
+  type AnalyticsMetric,
+} from '@scrum/shared';
+import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
+import { useMe } from '@/features/auth/queries';
+import { useHierarchy } from '@/features/spaces/queries';
+import { useCan, useCurrentWorkspace } from '@/features/workspace/queries';
+import { todayDay } from '@/lib/format';
+import { cn } from '@/lib/utils';
+import { CompareView } from './compare-view';
+import { addDays, Empty, FilterBar } from './parts';
+import { PersonView } from './person-view';
+import { ProjectView } from './project-view';
+import {
+  compareQuery,
+  peopleQuery,
+  personQuery,
+  projectQuery,
+  type AnalyticsFilters,
+} from './queries';
+
+export type AnalyticsTab = 'person' | 'project' | 'compare';
+
+/** Adres çubuğundaki durum (hepsi isteğe bağlı; eksikler varsayılanla tamamlanır). */
+export interface AnalyticsSearch {
+  av?: AnalyticsTab | undefined;
+  ap?: string | undefined;
+  aj?: string | undefined;
+  af?: string | undefined;
+  at?: string | undefined;
+  ag?: AnalyticsGrain | undefined;
+  am?: AnalyticsMetric | undefined;
+  ac?: string | undefined;
+  asp?: string | undefined;
+}
+
+/** Kişi ve Proje analizi (ADR-143): kişi, Proje ve karşılaştırma sekmeleri. */
+export function AnalyticsPage({
+  search,
+  onSearch,
+}: {
+  search: AnalyticsSearch;
+  onSearch: (patch: AnalyticsSearch) => void;
+}) {
+  const { t } = useTranslation();
+  const { id: ws } = useCurrentWorkspace();
+  const me = useMe();
+  const admin = useCan(WORKSPACE_PERMISSIONS.WORKSPACE_SETTINGS);
+  const hierarchy = useHierarchy();
+
+  const today = todayDay();
+  const filters: AnalyticsFilters = {
+    from: search.af ?? addDays(today, -89),
+    to: search.at ?? today,
+    grain: search.ag ?? 'week',
+    spaceId: search.asp,
+  };
+  const metric: AnalyticsMetric = search.am ?? 'points';
+  // Üye yalnızca kendi kişi analizini görür.
+  const tab: AnalyticsTab = admin ? (search.av ?? 'person') : 'person';
+
+  const people = useQuery({ ...peopleQuery(ws, filters), enabled: admin });
+  const userId = admin ? (search.ap ?? me.user.id) : me.user.id;
+  const spaceId = search.aj ?? hierarchy.data?.spaces[0]?.id;
+  const selected = (search.ac ?? '').split(',').filter(Boolean).slice(0, ANALYTICS_COMPARE_MAX);
+
+  const person = useQuery({ ...personQuery(ws, userId, filters), enabled: tab === 'person' });
+  const project = useQuery({
+    ...projectQuery(ws, spaceId ?? '', filters),
+    enabled: admin && tab === 'project' && !!spaceId,
+  });
+  const compare = useQuery({
+    ...compareQuery(ws, selected, filters),
+    enabled: admin && tab === 'compare' && selected.length >= 2,
+  });
+
+  const setFilters = (patch: Partial<AnalyticsFilters>) =>
+    onSearch({
+      ...('from' in patch ? { af: patch.from } : {}),
+      ...('to' in patch ? { at: patch.to } : {}),
+      ...('grain' in patch ? { ag: patch.grain } : {}),
+      ...('spaceId' in patch ? { asp: patch.spaceId } : {}),
+    });
+
+  const tabs: AnalyticsTab[] = admin ? ['person', 'project', 'compare'] : ['person'];
+  const peopleList = people.data?.people ?? [];
+
+  return (
+    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6" data-testid="analytics-page">
+      <div className="mb-4">
+        <h1 className="text-[22px] font-semibold tracking-tight">{t('analytics.title')}</h1>
+        <p className="text-muted-foreground text-sm">
+          {admin ? t('analytics.subtitle') : t('analytics.subtitleSelf')}
+        </p>
+      </div>
+
+      {admin && (
+        <div className="mb-4 flex gap-1 border-b" role="tablist" aria-label={t('analytics.tabs')}>
+          {tabs.map((x) => (
+            <button
+              key={x}
+              type="button"
+              role="tab"
+              aria-selected={tab === x}
+              data-testid={`tab-${x}`}
+              onClick={() => onSearch({ av: x })}
+              className={cn(
+                '-mb-px border-b-2 px-4 py-2 text-sm font-medium transition-colors',
+                tab === x
+                  ? 'border-primary text-foreground'
+                  : 'text-muted-foreground hover:text-foreground border-transparent',
+              )}
+            >
+              {t(`analytics.tab.${x}`)}
+            </button>
+          ))}
+        </div>
+      )}
+
+      <div className="mb-5">
+        <FilterBar filters={filters} onChange={setFilters} showProject={tab !== 'project'} />
+      </div>
+
+      {tab === 'person' &&
+        (person.data ? (
+          <PersonView
+            data={person.data}
+            people={admin ? peopleList : null}
+            onUser={(id) => onSearch({ ap: id })}
+            metric={metric}
+            onMetric={(m) => onSearch({ am: m })}
+          />
+        ) : (
+          <Empty text={person.isError ? t('analytics.loadFailed') : t('common.loading')} />
+        ))}
+
+      {tab === 'project' &&
+        (project.data ? (
+          <ProjectView
+            data={project.data}
+            onSpace={(id) => onSearch({ aj: id })}
+            onPerson={(id) => onSearch({ av: 'person', ap: id })}
+            metric={metric}
+            onMetric={(m) => onSearch({ am: m })}
+          />
+        ) : (
+          <Empty
+            text={
+              project.isError
+                ? t('analytics.loadFailed')
+                : spaceId
+                  ? t('common.loading')
+                  : t('analytics.noProjects')
+            }
+          />
+        ))}
+
+      {tab === 'compare' && (
+        <CompareView
+          data={compare.data}
+          people={peopleList}
+          selected={selected}
+          onSelected={(ids) => onSearch({ ac: ids.join(',') || undefined })}
+          metric={metric}
+          onMetric={(m) => onSearch({ am: m })}
+        />
+      )}
+    </div>
+  );
+}

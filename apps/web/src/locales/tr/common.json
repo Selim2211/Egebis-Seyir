@@ -38,7 +38,8 @@
     "messages": "Mesajlar",
     "workload": "İş yükü",
     "admin": "Yönetici paneli",
-    "bugBox": "Bug Kutusu"
+    "bugBox": "Bug Kutusu",
+    "analytics": "Analiz"
   },
   "spaces": {
     "emptyTitle": "Henüz Proje yok",
@@ -2815,6 +2816,105 @@
       "company": "Firma varsayılanı",
       "ai": "Yapay zeka",
       "none": "Belirsiz"
+    }
+  },
+  "analytics": {
+    "title": "Analiz",
+    "subtitle": "Kişileri ve projeleri ayrıntılı çözümle, dönemleri ve kişileri kıyasla.",
+    "subtitleSelf": "Kendi çalışmanın özeti: biten iş, puan, saat ve zaman içindeki gidişat.",
+    "tabs": "Analiz sekmeleri",
+    "tab": {
+      "person": "Kişi",
+      "project": "Proje",
+      "compare": "Karşılaştırma"
+    },
+    "range": "Tarih aralığı",
+    "from": "Başlangıç",
+    "to": "Bitiş",
+    "lastDays": "Son {{count}} gün",
+    "grain": "Zaman dilimi",
+    "grains": {
+      "sprint": "Sprint",
+      "week": "Hafta",
+      "month": "Ay"
+    },
+    "project": "Proje",
+    "allProjects": "Tüm projeler",
+    "person": "Kişi",
+    "metric": {
+      "done": "Biten iş",
+      "points": "Puan",
+      "hours": "Harcanan saat",
+      "avgDays": "Ort. bitirme süresi",
+      "onTimePct": "Termine uyum",
+      "bugsFixed": "Çözülen Bug",
+      "reopened": "Yeniden açılan"
+    },
+    "unit": {
+      "hours": "{{value}} sa",
+      "days": "{{value}} gün"
+    },
+    "vsPrevious": "önceki döneme göre",
+    "noPrevious": "Önceki dönemle kıyas yok",
+    "newPeriod": "Önceki dönemde veri yok",
+    "trend": "Gidişat",
+    "trendOf": "{{metric}} — zaman içinde",
+    "trendHint": "Kutucuğa tıklayarak ölçütü değiştir. Çizgideki artış ve azalış seçili zaman dilimine göredir.",
+    "noWork": "Bu aralıkta tamamlanan iş ya da zaman kaydı yok.",
+    "byProject": "Projelere dağılım",
+    "byProjectHint": "Seçili aralıkta hangi projede ne kadar iş bitirdi",
+    "estimateVsActual": "Tahmin ve gerçekleşen",
+    "estimateHint": "Biten işlerin tahmini saati ile harcanan saat",
+    "noHours": "Tahmin ya da zaman kaydı yok.",
+    "estimate": "Tahmin",
+    "actual": "Harcanan",
+    "hoursShort": "Saat",
+    "estimateRatio": "Harcanan, tahminin %{{percent}}’i.",
+    "bySprint": "Sprint sprint ne yaptı",
+    "bySprintHint": "Satıra tıklayınca o sprintte bitirdiği işler açılır",
+    "noSprint": "Sprint dışı",
+    "col": {
+      "sprint": "Sprint",
+      "project": "Proje",
+      "metric": "Ölçüt"
+    },
+    "type": {
+      "TASK": "Task",
+      "SUBTASK": "Sub-Task",
+      "BUG": "Bug"
+    },
+    "bugFlow": "Bug akışı",
+    "bugFlowHint": "Açılan ve çözülen Bug",
+    "bugsOpened": "Açılan Bug",
+    "byPerson": "Kişilere katkı",
+    "byPersonHint": "Projede kim ne kadar iş bitirdi. Çubuğa tıklayınca kişinin analizi açılır",
+    "velocity": "Sprint hızı",
+    "velocityHint": "Son tamamlanan sprintler",
+    "noVelocity": "Tamamlanmış sprint yok.",
+    "committed": "Taahhüt",
+    "completedPoints": "Biten",
+    "byType": "İş türü dağılımı",
+    "noProjects": "Henüz proje yok.",
+    "loadFailed": "Analiz yüklenemedi.",
+    "pickPeople": "Karşılaştırılacak kişiler",
+    "pickPeopleHint": "2 ile {{max}} kişi seç",
+    "addPerson": "Kişi ekle…",
+    "remove": "{{name}} kişisini çıkar",
+    "pickAtLeastTwo": "Karşılaştırmak için en az iki kişi seç.",
+    "compare": "Karşılaştırma",
+    "compareTrendHint": "Her kişi ayrı renkte, aynı zaman ekseninde",
+    "metricPick": "Ölçüt",
+    "table": "Ölçüt tablosu",
+    "tableHint": "Yeşil: o ölçütte en iyi değer",
+    "radarTitle": "Genel görünüm",
+    "radarHint": "Her eksen seçilenler içindeki en yüksek değere göre ölçeklenir",
+    "radar": {
+      "done": "Hacim",
+      "points": "Puan",
+      "hours": "Saat",
+      "onTimePct": "Termin",
+      "bugsFixed": "Bug",
+      "speed": "Hız"
     }
   }
 }

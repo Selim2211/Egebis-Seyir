@@ -38,7 +38,8 @@
     "messages": "Messages",
     "workload": "Workload",
     "admin": "Admin dashboard",
-    "bugBox": "Bug Box"
+    "bugBox": "Bug Box",
+    "analytics": "Analytics"
   },
   "spaces": {
     "emptyTitle": "No projects yet",
@@ -2816,6 +2817,105 @@
       "company": "Company default",
       "ai": "AI",
       "none": "Unsorted"
+    }
+  },
+  "analytics": {
+    "title": "Analytics",
+    "subtitle": "Analyse people and projects in depth, and compare periods and people.",
+    "subtitleSelf": "A summary of your own work: finished items, points, hours and the trend over time.",
+    "tabs": "Analytics tabs",
+    "tab": {
+      "person": "Person",
+      "project": "Project",
+      "compare": "Compare"
+    },
+    "range": "Date range",
+    "from": "From",
+    "to": "To",
+    "lastDays": "Last {{count}} days",
+    "grain": "Time grain",
+    "grains": {
+      "sprint": "Sprint",
+      "week": "Week",
+      "month": "Month"
+    },
+    "project": "Project",
+    "allProjects": "All projects",
+    "person": "Person",
+    "metric": {
+      "done": "Items done",
+      "points": "Points",
+      "hours": "Hours logged",
+      "avgDays": "Avg. time to finish",
+      "onTimePct": "On-time rate",
+      "bugsFixed": "Bugs fixed",
+      "reopened": "Reopened"
+    },
+    "unit": {
+      "hours": "{{value}} h",
+      "days": "{{value}} d"
+    },
+    "vsPrevious": "vs previous period",
+    "noPrevious": "No previous period to compare",
+    "newPeriod": "No data in the previous period",
+    "trend": "Trend",
+    "trendOf": "{{metric}} over time",
+    "trendHint": "Click a card to change the metric. Rises and falls follow the selected time grain.",
+    "noWork": "No finished work or time entries in this range.",
+    "byProject": "By project",
+    "byProjectHint": "How much was finished in each project in the range",
+    "estimateVsActual": "Estimate vs actual",
+    "estimateHint": "Estimated hours of finished items vs hours logged",
+    "noHours": "No estimates or time entries.",
+    "estimate": "Estimate",
+    "actual": "Logged",
+    "hoursShort": "Hours",
+    "estimateRatio": "Logged time is {{percent}}% of the estimate.",
+    "bySprint": "What they did, sprint by sprint",
+    "bySprintHint": "Click a row to see the items finished in that sprint",
+    "noSprint": "Outside sprints",
+    "col": {
+      "sprint": "Sprint",
+      "project": "Project",
+      "metric": "Metric"
+    },
+    "type": {
+      "TASK": "Task",
+      "SUBTASK": "Sub-Task",
+      "BUG": "Bug"
+    },
+    "bugFlow": "Bug flow",
+    "bugFlowHint": "Bugs opened and fixed",
+    "bugsOpened": "Bugs opened",
+    "byPerson": "Contribution by person",
+    "byPersonHint": "Who finished how much in this project. Click a bar to open the person",
+    "velocity": "Sprint velocity",
+    "velocityHint": "Latest completed sprints",
+    "noVelocity": "No completed sprints.",
+    "committed": "Committed",
+    "completedPoints": "Completed",
+    "byType": "Item types",
+    "noProjects": "No projects yet.",
+    "loadFailed": "Could not load the analysis.",
+    "pickPeople": "People to compare",
+    "pickPeopleHint": "Pick 2 to {{max}} people",
+    "addPerson": "Add a person…",
+    "remove": "Remove {{name}}",
+    "pickAtLeastTwo": "Pick at least two people to compare.",
+    "compare": "Comparison",
+    "compareTrendHint": "One colour per person on a shared time axis",
+    "metricPick": "Metric",
+    "table": "Metrics table",
+    "tableHint": "Green: best value for that metric",
+    "radarTitle": "Overview",
+    "radarHint": "Each axis is scaled to the highest value among those selected",
+    "radar": {
+      "done": "Volume",
+      "points": "Points",
+      "hours": "Hours",
+      "onTimePct": "Deadline",
+      "bugsFixed": "Bugs",
+      "speed": "Speed"
     }
   }
 }
