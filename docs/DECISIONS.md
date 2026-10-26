@@ -1249,3 +1249,17 @@ Panel (ADR-139) genişletildi ve her kutucuk/grafik, saydığı kayıtların lis
 - **Sınır:** özet hâlâ tek istekte, bellekte hesaplanır (okuma sınırı `SCAN_LIMIT`); çok büyük çalışma alanları için ileride SQL toplamaya taşınır.
 
 - **Sağlayıcı seçimi (2026-10-25):** Ayarlar ekranından API adresi ve model seçilir (NVIDIA, Groq ya da özel OpenAI uyumlu). Groq için `qwen/qwen3.8-27b` önerilir (~0,3–0,4 sn). \`chat_template_kwargs\` yalnızca NVIDIA adresinde gönderilir. İstem, proje açıklamasını yalnızca ipucu sayar ve firma adını modele göndermez; model proje anahtarı ya da adı yazabilir. **Proje açıklamaları yönlendirme kalitesini doğrudan etkiler** (ör. "raporları denemek için" gibi bir açıklama rapor geçen her maili çeker).
+
+## ADR-143 — Kişi ve Proje analizi modülü
+
+**Durum:** Kabul · **Tarih:** 2026-10-26
+
+Scrum yöneticisinin kişileri ve Projeleri ayrıntılı çözümleyebilmesi, kişileri birbiriyle kıyaslayabilmesi için `analytics` modülü (API: `GET workspaces/:wid/analytics/{people,person/:userId,project/:spaceId,compare}`).
+
+- **Erişim:** Owner/Admin herkesi görür; üye yalnızca kendi kişi analizini görür (`person` ucu servis içinde denetler, başkasının kimliği 403). Kişi listesi, Proje analizi ve karşılaştırma yalnızca Owner/Admin.
+- **Ölçütler:** biten iş (Task/Sub-Task/Bug, `completedAt` aralıkta), story point, harcanan saat (zaman kayıtları), ortalama bitirme süresi (açılış→tamamlanma), termine uyum %, çözülen Bug, yeniden açılan iş, tahmini saat. Her ölçüt seçili aralık ve hemen öncesindeki eşit uzunlukta dönem için hesaplanır (artış/azalış).
+- **Çoklu atama:** kişi analizinde iş her atanan kişiye 1 iş sayılır, puan ve tahmin kişiler arasında bölünür (toplam şişmesin). Proje toplamında iş bir kez sayılır; yeniden açma olayı bir kez sayılır.
+- **Zaman dilimi:** hafta (Pzt), ay ya da sprint; aralığın boş noktaları sıfırla doldurulur. Sprint diliminde nokta = işin bağlı olduğu sprint, sprintsizler `none`. Tarih aralığı en çok 731 gün; gün sınırları Europe/Istanbul (+03:00).
+- **Yeniden açma:** `activity_events` içinde `item.updated` olaylarında `completedAt` dolu → boş değişimi (ham SQL, `workspaceId` ile).
+- **Sınırlar:** sistem atama geçmişi tutmaz, el değiştiren işin payı son atanan kişiye yazılır; bitirme süresi işin oluşturulmasından başlar ("çalışmaya başladı" anı ayrı tutulmuyor). Toplama bellekte yapılır, okunan iş/kayıt sayısı aralık ve `SCAN_LIMIT` (50 bin) ile sınırlı; çok büyük çalışma alanları için ileride SQL `date_trunc` toplamasına taşınır.
+- **Karşılaştırma:** 1–5 kişi; tüm kişiler ortak zaman eksenini paylaşır (olmayan nokta sıfır).

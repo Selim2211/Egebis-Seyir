@@ -51,6 +51,7 @@ import { SprintsModule } from './modules/sprints/sprints.module';
 import { SpacesModule } from './modules/spaces/spaces.module';
 import { UsersModule } from './modules/users/users.module';
 import { WorkItemsModule } from './modules/work-items/work-items.module';
+import { AnalyticsModule } from './modules/analytics/analytics.module';
 import { TicketsModule } from './modules/tickets/tickets.module';
 import { WorkspacesModule } from './modules/workspaces/workspaces.module';
 
@@ -112,6 +113,7 @@ const isAuthRateLimited = (ctx: ExecutionContext): boolean =>
     SpacesModule,
     WorkItemsModule,
     TicketsModule,
+    AnalyticsModule,
     SprintsModule,
     DocsModule,
     VideosModule,
