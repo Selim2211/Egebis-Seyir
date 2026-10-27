@@ -11,6 +11,7 @@ import { useHierarchy } from '@/features/spaces/queries';
 import { useCan, useCurrentWorkspace } from '@/features/workspace/queries';
 import { todayDay } from '@/lib/format';
 import { cn } from '@/lib/utils';
+import { CapacityView } from './capacity-view';
 import { CompareView } from './compare-view';
 import { FlowView } from './flow-view';
 import { addDays, Empty, FilterBar } from './parts';
@@ -18,6 +19,7 @@ import { PersonView } from './person-view';
 import { ProjectView } from './project-view';
 import { SprintView } from './sprint-view';
 import {
+  capacityQuery,
   compareQuery,
   flowQuery,
   sprintBurndownQuery,
@@ -28,7 +30,7 @@ import {
   type AnalyticsFilters,
 } from './queries';
 
-export type AnalyticsTab = 'person' | 'project' | 'flow' | 'sprint' | 'compare';
+export type AnalyticsTab = 'person' | 'project' | 'flow' | 'sprint' | 'capacity' | 'compare';
 
 /** Adres çubuğundaki durum (hepsi isteğe bağlı; eksikler varsayılanla tamamlanır). */
 export interface AnalyticsSearch {
@@ -43,6 +45,9 @@ export interface AnalyticsSearch {
   asp?: string | undefined;
   /** Sprint sekmesinde seçili sprint. */
   asr?: string | undefined;
+  /** Kapasite sekmesi: haftalık çalışma saati ve ısı haritası için seçili kişi. */
+  awh?: number | undefined;
+  acf?: string | undefined;
 }
 
 /** Kişi ve Proje analizi (ADR-143): kişi, Proje ve karşılaştırma sekmeleri. */
@@ -83,10 +88,18 @@ export function AnalyticsPage({
   const flow = useQuery({ ...flowQuery(ws, filters), enabled: admin && tab === 'flow' });
   const sprints = useQuery({ ...sprintsQuery(ws, filters), enabled: admin && tab === 'sprint' });
   const sprintList = sprints.data?.sprints ?? [];
-  const selectedSprint = search.asr ?? sprintList[sprintList.length - 1]?.id ?? '';
+  // Varsayılan: taahhüdü olan en yeni sprint (yoksa en yenisi).
+  const latestWithData = [...sprintList].reverse().find((s) => s.committed > 0);
+  const selectedSprint =
+    search.asr ?? latestWithData?.id ?? sprintList[sprintList.length - 1]?.id ?? '';
   const burndown = useQuery({
     ...sprintBurndownQuery(ws, selectedSprint),
     enabled: admin && tab === 'sprint' && selectedSprint !== '',
+  });
+  const weeklyHours = search.awh ?? 40;
+  const capacity = useQuery({
+    ...capacityQuery(ws, filters, weeklyHours),
+    enabled: admin && tab === 'capacity',
   });
   const compare = useQuery({
     ...compareQuery(ws, selected, filters),
@@ -102,7 +115,7 @@ export function AnalyticsPage({
     });
 
   const tabs: AnalyticsTab[] = admin
-    ? ['person', 'project', 'flow', 'sprint', 'compare']
+    ? ['person', 'project', 'flow', 'sprint', 'capacity', 'compare']
     : ['person'];
   const peopleList = people.data?.people ?? [];
 
@@ -193,6 +206,19 @@ export function AnalyticsPage({
           />
         ) : (
           <Empty text={sprints.isError ? t('analytics.loadFailed') : t('common.loading')} />
+        ))}
+
+      {tab === 'capacity' &&
+        (capacity.data ? (
+          <CapacityView
+            data={capacity.data}
+            weeklyHours={weeklyHours}
+            onWeeklyHours={(h) => onSearch({ awh: h })}
+            focus={search.acf}
+            onFocus={(id) => onSearch({ acf: id })}
+          />
+        ) : (
+          <Empty text={capacity.isError ? t('analytics.loadFailed') : t('common.loading')} />
         ))}
 
       {tab === 'compare' && (

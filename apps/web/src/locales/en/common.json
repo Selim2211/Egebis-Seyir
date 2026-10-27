@@ -2829,7 +2829,8 @@
       "project": "Project",
       "compare": "Compare",
       "flow": "Flow",
-      "sprint": "Sprint"
+      "sprint": "Sprint",
+      "capacity": "Capacity"
     },
     "range": "Date range",
     "from": "From",
@@ -2992,6 +2993,53 @@
       "remaining": "Remaining",
       "scopeChange": "Scope change",
       "total": "Total scope"
+    },
+    "capacity": {
+      "weekly": "Weekly working hours",
+      "hoursWeek": "{{count}} hours / week",
+      "note": "Capacity is not stored separately: the weekly hours you pick are split across weekdays (Mon–Fri). Time entries have no time of day, so the heatmap shows daily totals.",
+      "util": "Team utilisation",
+      "utilSub": "{{logged}} h logged / {{capacity}} h capacity",
+      "logging": "Time logging rate",
+      "loggingSub": "On how many weekdays time was logged (average)",
+      "remaining": "Remaining estimate",
+      "remainingSub": "Estimated hours of {{count}} open items",
+      "over": "Overloaded",
+      "overSub": "Remaining estimate exceeds 2 weeks of capacity",
+      "idle": "Idle",
+      "idleSub": "People with no open work",
+      "table": "Load per person",
+      "tableHint": "Click a row to open that person’s heatmap below",
+      "status": "Status",
+      "statuses": {
+        "over": "Overloaded",
+        "ok": "Normal",
+        "idle": "Idle"
+      },
+      "openItems": "Open items",
+      "overdue": "Overdue",
+      "remainingEst": "Remaining estimate",
+      "unestimated": "{{count}} open items have no estimate and are not in the remaining hours",
+      "loggedHours": "Logged hours",
+      "utilShort": "Utilisation",
+      "loggingShort": "Logging days",
+      "weeklyChart": "Weekly team hours and capacity",
+      "weeklyChartHint": "Bars: hours logged. Dashed line: the team’s weekly capacity",
+      "capacityLine": "Capacity",
+      "weekdayChart": "Logging by weekday",
+      "weekdayChartHint": "Which weekdays the team logs the most hours (total)",
+      "heatmapTitle": "Work heatmap — {{name}}",
+      "heatmapHint": "Each square is a day; darker = more hours logged. Last 26 weeks",
+      "noEntries": "This person has no time entries in the range.",
+      "weekday": {
+        "0": "Mon",
+        "1": "Tue",
+        "2": "Wed",
+        "3": "Thu",
+        "4": "Fri",
+        "5": "Sat",
+        "6": "Sun"
+      }
     }
   }
 }

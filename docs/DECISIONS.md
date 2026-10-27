@@ -1287,3 +1287,16 @@ Analiz modülüne "Sprint" sekmesi eklendi (`GET analytics/sprints`, yalnızca O
 - **Özet:** ortalamalar yalnızca tamamlanan sprintlerden hesaplanır; hiç yoksa boş gösterilir.
 - **Kapsam:** seçili tarih aralığıyla kesişen aktif ve tamamlanmış sprintler (en çok 30); planlı sprintler listelenmez. Proje süzgeci desteklenir.
 - **Sınır:** "taahhüt edilen iş sayısı" tutulmadığından yalnızca puan üzerinden ölçülür; puansız işler taahhüde sayılmaz.
+
+## ADR-146 — Analiz: iş yükü ve kapasite (aşama C)
+
+**Durum:** Kabul · **Tarih:** 2026-10-27
+
+Analiz modülüne "Kapasite" sekmesi eklendi (`GET analytics/capacity?weeklyHours=`, yalnızca Owner/Admin). Kişisel çalışma verisi hassas olduğundan üyelere kapalıdır.
+
+- **Kapasite varsayımı:** kişi başı kapasite kayıtlı değildir; haftalık çalışma saati (varsayılan 40, ekrandan 20–45 seçilir, API 1–80) hafta içi günlere (Pzt–Cum) bölünür ve aralıktaki hafta içi gün sayısıyla çarpılır. İzin/tatil dikkate alınmaz.
+- **Kişi başı yük:** açık iş ve puan, geciken iş, kalan tahmin saati (çoklu atamada pay bölünür), tahmini olmayan açık iş sayısı (kalan saate dahil değil, tabloda "+N?" ile gösterilir).
+- **Durum:** `over` = kalan tahmin 2 haftalık kapasiteyi aşıyor; `idle` = açık işi yok; `ok` = diğerleri. Not: gerçek veride açık işlerin çoğunda tahmin olmadığından "aşırı yüklü" nadiren tetiklenir; bunu ekranda "+N?" ve ADR ile açık tuttuk, tahmin girilmesi sinyali güçlendirir.
+- **Doluluk ve kayıt günü:** doluluk = kaydedilen saat ÷ kapasite; kayıt günü = hafta içi kaç günde zaman kaydı girildi ÷ hafta içi gün sayısı. Ekip için ortalama.
+- **Isı haritası:** zaman kayıtlarında yalnızca gün vardır (saat bilgisi yok), bu yüzden harita takvim günü (son 26 hafta, en çok 183 gün) ve haftanın günü bazlıdır; "hangi saatlerde çalışıyor" ölçülmez. Seçili kişi tablodan değiştirilir.
+- **Haftalık ekip serisi:** hafta başına kaydedilen saat ve kapasite (üye sayısı × haftanın hafta içi günleri × günlük saat).

@@ -2828,7 +2828,8 @@
       "project": "Proje",
       "compare": "Karşılaştırma",
       "flow": "Akış",
-      "sprint": "Sprint"
+      "sprint": "Sprint",
+      "capacity": "Kapasite"
     },
     "range": "Tarih aralığı",
     "from": "Başlangıç",
@@ -2991,6 +2992,53 @@
       "remaining": "Kalan",
       "scopeChange": "Kapsam değişimi",
       "total": "Toplam kapsam"
+    },
+    "capacity": {
+      "weekly": "Haftalık çalışma saati",
+      "hoursWeek": "{{count}} saat / hafta",
+      "note": "Kapasite ayrıca kayıtlı değil: seçtiğin haftalık saat hafta içi günlere (Pzt–Cum) bölünür. Zaman kayıtlarında saat bilgisi olmadığı için ısı haritası günlük toplamlardır.",
+      "util": "Ekip doluluğu",
+      "utilSub": "{{logged}} sa kayıt / {{capacity}} sa kapasite",
+      "logging": "Zaman kaydı oranı",
+      "loggingSub": "Hafta içi günlerin kaçında kayıt girildi (ortalama)",
+      "remaining": "Kalan tahmin",
+      "remainingSub": "{{count}} açık işin tahmini saati",
+      "over": "Aşırı yüklü",
+      "overSub": "Kalan tahmin 2 haftalık kapasiteyi aşıyor",
+      "idle": "Boşta",
+      "idleSub": "Açık işi olmayan kişi",
+      "table": "Kişi başı yük",
+      "tableHint": "Satıra tıklayınca aşağıda o kişinin ısı haritası açılır",
+      "status": "Durum",
+      "statuses": {
+        "over": "Aşırı yüklü",
+        "ok": "Normal",
+        "idle": "Boşta"
+      },
+      "openItems": "Açık iş",
+      "overdue": "Geciken",
+      "remainingEst": "Kalan tahmin",
+      "unestimated": "{{count}} açık işin tahmini yok, kalan saate dahil değil",
+      "loggedHours": "Kayıtlı saat",
+      "utilShort": "Doluluk",
+      "loggingShort": "Kayıt günü",
+      "weeklyChart": "Haftalık ekip saati ve kapasite",
+      "weeklyChartHint": "Çubuk: kaydedilen saat. Kesikli çizgi: ekibin haftalık kapasitesi",
+      "capacityLine": "Kapasite",
+      "weekdayChart": "Haftanın günlerine göre kayıt",
+      "weekdayChartHint": "Ekibin hangi günler daha çok saat girdiği (toplam)",
+      "heatmapTitle": "Çalışma ısı haritası — {{name}}",
+      "heatmapHint": "Her kare bir gün; koyu = o gün çok saat kaydedildi. Son 26 hafta",
+      "noEntries": "Bu kişinin aralıkta zaman kaydı yok.",
+      "weekday": {
+        "0": "Pzt",
+        "1": "Sal",
+        "2": "Çar",
+        "3": "Per",
+        "4": "Cum",
+        "5": "Cmt",
+        "6": "Paz"
+      }
     }
   }
 }

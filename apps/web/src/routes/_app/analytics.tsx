@@ -4,7 +4,10 @@ import { z } from 'zod';
 import { AnalyticsPage, type AnalyticsSearch } from '@/features/analytics/analytics-page';
 
 const SearchSchema = z.object({
-  av: z.enum(['person', 'project', 'flow', 'sprint', 'compare']).optional().catch(undefined),
+  av: z
+    .enum(['person', 'project', 'flow', 'sprint', 'capacity', 'compare'])
+    .optional()
+    .catch(undefined),
   ap: z.string().optional(),
   aj: z.string().optional(),
   af: z.string().optional(),
@@ -14,6 +17,8 @@ const SearchSchema = z.object({
   ac: z.string().optional(),
   asp: z.string().optional(),
   asr: z.string().optional(),
+  awh: z.number().int().min(1).max(80).optional().catch(undefined),
+  acf: z.string().optional(),
 });
 
 /** Kişi ve Proje analizi (ADR-143). Filtreler adres çubuğunda durur, sayfa yenilense de korunur. */

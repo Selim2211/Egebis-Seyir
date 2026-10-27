@@ -122,6 +122,17 @@ test.describe.serial('Analiz modülü', () => {
     await expect(page.getByTestId('sprint-kpis')).toBeVisible();
     await expect(page.getByText(/Beklenmeyen bir hata|Bulunamadı/)).toHaveCount(0);
 
+    // Kapasite sekmesi: kişi tablosu, kutucuklar, grafikler; haftalık saat seçimi adres çubuğuna yazılır.
+    await page.getByTestId('tab-capacity').click();
+    await expect(page.getByTestId('capacity-view')).toBeVisible();
+    await expect(page.getByTestId('capacity-kpis')).toBeVisible();
+    await expect(page.getByTestId('capacity-row').first()).toBeVisible();
+    await expect(page.getByTestId('chart-weekly-capacity')).toBeVisible();
+    await page.getByLabel('Haftalık çalışma saati').selectOption('36');
+    await expect(page).toHaveURL(/awh=36/);
+    await expect(page.getByTestId('capacity-view')).toBeVisible();
+    await expect(page.getByText(/Beklenmeyen bir hata|Bulunamadı/)).toHaveCount(0);
+
     // Karşılaştırma sekmesi: önce boş durum, kişi eklenince sayı güncellenir.
     await page.getByTestId('tab-compare').click();
     await expect(page.getByTestId('compare-view')).toBeVisible();

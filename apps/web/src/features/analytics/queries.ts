@@ -1,4 +1,5 @@
 import {
+  AnalyticsCapacitySchema,
   AnalyticsCompareSchema,
   AnalyticsFlowSchema,
   AnalyticsPeopleSchema,
@@ -90,4 +91,15 @@ export const sprintBurndownQuery = (ws: string, sprintId: string) =>
     queryFn: () =>
       apiRequest(`/workspaces/${ws}/sprints/${sprintId}/burndown`, SprintBurndownSchema),
     enabled: sprintId !== '',
+  });
+
+export const capacityQuery = (ws: string, f: AnalyticsFilters, weeklyHours: number) =>
+  queryOptions({
+    queryKey: key(ws, 'capacity', f, weeklyHours),
+    queryFn: () =>
+      apiRequest(
+        `/workspaces/${ws}/analytics/capacity?${params(f, { weeklyHours: String(weeklyHours) })}`,
+        AnalyticsCapacitySchema,
+      ),
+    placeholderData: keepPreviousData,
   });

@@ -70,7 +70,7 @@ export function SprintView({
   const { t } = useTranslation();
   const { summary, sprints } = data;
   const chart = sprints.map((s) => ({
-    name: s.name,
+    name: `${s.name} · ${s.project.name.slice(0, 10)}`,
     committed: s.committed,
     completed: s.completed,
     scopeAdded: s.scopeAdded,

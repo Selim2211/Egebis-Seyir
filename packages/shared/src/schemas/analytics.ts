@@ -285,3 +285,65 @@ export const AnalyticsSprintsSchema = z.object({
   sprints: z.array(AnalyticsSprintSummarySchema),
 });
 export type AnalyticsSprints = z.infer<typeof AnalyticsSprintsSchema>;
+
+// ---------- İş yükü ve kapasite (ADR-146) ----------
+
+export const ANALYTICS_DEFAULT_WEEKLY_HOURS = 40;
+export const ANALYTICS_CAPACITY_STATUSES = ['over', 'ok', 'idle'] as const;
+export type AnalyticsCapacityStatus = (typeof ANALYTICS_CAPACITY_STATUSES)[number];
+
+/** Kapasite sorgusu: ortak süzgeçlere ek olarak haftalık çalışma saati (varsayılan 40). */
+export const AnalyticsCapacityQuerySchema = AnalyticsQuerySchema.extend({
+  weeklyHours: z.coerce.number().int().min(1).max(80).default(ANALYTICS_DEFAULT_WEEKLY_HOURS),
+});
+export type AnalyticsCapacityQuery = z.infer<typeof AnalyticsCapacityQuerySchema>;
+
+/** GET analytics/capacity (Owner/Admin) */
+export const AnalyticsCapacitySchema = z.object({
+  range: RangeSchema,
+  weeklyHours: z.int(),
+  /** Aralıktaki hafta içi gün sayısı (Pzt–Cum). */
+  workdays: z.int(),
+  team: z.object({
+    capacityHours: z.number(),
+    loggedHours: z.number(),
+    utilizationPct: z.int().nullable(),
+    openItems: z.int(),
+    remainingHours: z.number(),
+    overloaded: z.int(),
+    idle: z.int(),
+    /** Ortalama zaman kaydı girilen gün oranı (%). */
+    avgLoggingPct: z.int().nullable(),
+  }),
+  people: z.array(
+    z.object({
+      user: UserRef,
+      /** over: kalan tahmin > 2 haftalık kapasite · idle: açık işi yok · ok: diğerleri. */
+      status: z.enum(ANALYTICS_CAPACITY_STATUSES),
+      open: z.object({
+        items: z.int(),
+        points: z.number(),
+        overdue: z.int(),
+        /** Açık işlerin tahmini saati (çoklu atamada pay bölünür). */
+        remainingHours: z.number(),
+        /** Tahmini olmayan açık iş sayısı (kalan saate dahil değil). */
+        unestimated: z.int(),
+      }),
+      logged: z.object({
+        hours: z.number(),
+        utilizationPct: z.int().nullable(),
+        /** Hafta içi zaman kaydı girilen gün sayısı ve oranı (%). */
+        loggingDays: z.int(),
+        loggingPct: z.int().nullable(),
+        avgPerLoggedDay: z.number().nullable(),
+      }),
+      /** Haftanın günlerine göre toplam saat; 0 = Pazartesi … 6 = Pazar. */
+      byWeekday: z.array(z.number()).length(7),
+      /** Saat girilen günler (ısı haritası); aralık 183 günden uzunsa son 183 gün. */
+      days: z.array(z.object({ day: DateKey, hours: z.number() })),
+    }),
+  ),
+  /** Ekip toplamı: hafta başına kaydedilen saat ve kapasite. */
+  weekly: z.array(z.object({ weekStart: DateKey, hours: z.number(), capacityHours: z.number() })),
+});
+export type AnalyticsCapacity = z.infer<typeof AnalyticsCapacitySchema>;
