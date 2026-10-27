@@ -6,16 +6,19 @@ import {
   AnalyticsPersonSchema,
   AnalyticsProjectSchema,
   AnalyticsQuerySchema,
+  AnalyticsSprintsSchema,
   WORKSPACE_PERMISSIONS as W,
   type AnalyticsCompare,
   type AnalyticsFlow,
   type AnalyticsPeople,
   type AnalyticsPerson,
   type AnalyticsProject,
+  type AnalyticsSprints,
 } from '@scrum/shared';
 import { createZodDto, ZodResponse } from 'nestjs-zod';
 import { RequirePermission } from '../auth/decorators';
 import { AnalyticsFlowService } from './analytics-flow.service';
+import { AnalyticsSprintService } from './analytics-sprint.service';
 import { AnalyticsService } from './analytics.service';
 
 class QueryDto extends createZodDto(AnalyticsQuerySchema) {}
@@ -24,6 +27,7 @@ class PersonDto extends createZodDto(AnalyticsPersonSchema) {}
 class ProjectDto extends createZodDto(AnalyticsProjectSchema) {}
 class CompareDto extends createZodDto(AnalyticsCompareSchema) {}
 class FlowDto extends createZodDto(AnalyticsFlowSchema) {}
+class SprintsDto extends createZodDto(AnalyticsSprintsSchema) {}
 
 /**
  * Kişi ve Proje analizi (ADR-143). Kişi, Proje ve karşılaştırma ekranları yalnızca Owner/Admin'e açıktır;
@@ -34,6 +38,7 @@ export class AnalyticsController {
   constructor(
     private readonly analytics: AnalyticsService,
     private readonly flow: AnalyticsFlowService,
+    private readonly sprintStats: AnalyticsSprintService,
   ) {}
 
   @Get('people')
@@ -74,5 +79,13 @@ export class AnalyticsController {
   @ZodResponse({ type: FlowDto })
   flowOf(@Query() query: QueryDto): Promise<AnalyticsFlow> {
     return this.flow.flow(query);
+  }
+
+  /** Sprint derinliği: taahhüt, biten, kapsam değişimi ve devir (ADR-145). */
+  @Get('sprints')
+  @RequirePermission(W.WORKSPACE_SETTINGS)
+  @ZodResponse({ type: SprintsDto })
+  sprints(@Query() query: QueryDto): Promise<AnalyticsSprints> {
+    return this.sprintStats.sprints(query);
   }
 }

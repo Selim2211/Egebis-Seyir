@@ -234,3 +234,54 @@ export const AnalyticsFlowSchema = z.object({
   }),
 });
 export type AnalyticsFlow = z.infer<typeof AnalyticsFlowSchema>;
+
+// ---------- Sprint derinliği (ADR-145) ----------
+
+const SprintStatus = z.enum(['ACTIVE', 'COMPLETED']);
+
+/** Bir sprintin taahhüt, biten, kapsam değişimi ve devir ölçütleri. */
+export const AnalyticsSprintSummarySchema = z.object({
+  id: z.uuid(),
+  name: z.string(),
+  project: SpaceRef.pick({ id: true, name: true, color: true }),
+  status: SprintStatus,
+  startDate: DateKey,
+  endDate: DateKey,
+  /** Başlatılırken taahhüt edilen puan. */
+  committed: z.number(),
+  /** Tamamlanan sprintte donmuş değer; aktifte şu ana kadar biten puan. */
+  completed: z.number(),
+  doneItems: z.int(),
+  /** Başlangıçtan sonra eklenen / çıkarılan puan (kapsam değişimi). */
+  scopeAdded: z.number(),
+  scopeRemoved: z.number(),
+  /** Sprint kapanırken bitmediği için çıkan iş (sonraki sprinte ya da Backlog'a devredilen). */
+  carryOverItems: z.int(),
+  carryOverPoints: z.number(),
+  /** Önceki sprintten devralınan iş. */
+  carriedInItems: z.int(),
+  carriedInPoints: z.number(),
+  /** Biten / taahhüt (%); taahhüt yoksa null. */
+  commitmentPct: z.int().nullable(),
+  /** (eklenen + çıkarılan) / taahhüt (%). */
+  scopeChangePct: z.int().nullable(),
+  /** Devir / (biten + devir) puan (%). */
+  carryOverPct: z.int().nullable(),
+});
+export type AnalyticsSprintSummary = z.infer<typeof AnalyticsSprintSummarySchema>;
+
+/** GET analytics/sprints (Owner/Admin): aralıkla kesişen aktif ve tamamlanmış sprintler. */
+export const AnalyticsSprintsSchema = z.object({
+  range: RangeSchema,
+  /** Tamamlanan sprintlerin ortalamaları; hiç yoksa null. */
+  summary: z.object({
+    completedCount: z.int(),
+    avgVelocity: z.number().nullable(),
+    avgCommitmentPct: z.int().nullable(),
+    avgScopeChangePct: z.int().nullable(),
+    avgCarryOverPct: z.int().nullable(),
+  }),
+  /** Eskiden yeniye. */
+  sprints: z.array(AnalyticsSprintSummarySchema),
+});
+export type AnalyticsSprints = z.infer<typeof AnalyticsSprintsSchema>;

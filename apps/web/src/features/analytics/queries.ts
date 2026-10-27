@@ -4,6 +4,8 @@ import {
   AnalyticsPeopleSchema,
   AnalyticsPersonSchema,
   AnalyticsProjectSchema,
+  AnalyticsSprintsSchema,
+  SprintBurndownSchema,
   type AnalyticsGrain,
 } from '@scrum/shared';
 import { keepPreviousData, queryOptions } from '@tanstack/react-query';
@@ -71,4 +73,21 @@ export const flowQuery = (ws: string, f: AnalyticsFilters) =>
     queryKey: key(ws, 'flow', f),
     queryFn: () => apiRequest(`/workspaces/${ws}/analytics/flow?${params(f)}`, AnalyticsFlowSchema),
     placeholderData: keepPreviousData,
+  });
+
+export const sprintsQuery = (ws: string, f: AnalyticsFilters) =>
+  queryOptions({
+    queryKey: key(ws, 'sprints', f),
+    queryFn: () =>
+      apiRequest(`/workspaces/${ws}/analytics/sprints?${params(f)}`, AnalyticsSprintsSchema),
+    placeholderData: keepPreviousData,
+  });
+
+/** Mevcut sprint raporu: günlük kalan puan, ideal çizgi, burn-up ve kapsam değişimi. */
+export const sprintBurndownQuery = (ws: string, sprintId: string) =>
+  queryOptions({
+    queryKey: key(ws, 'burndown', sprintId),
+    queryFn: () =>
+      apiRequest(`/workspaces/${ws}/sprints/${sprintId}/burndown`, SprintBurndownSchema),
+    enabled: sprintId !== '',
   });

@@ -1276,3 +1276,14 @@ Analiz modülüne "Akış" sekmesi eklendi (`GET analytics/flow`, yalnızca Owne
 - **Yaşlanma:** "Yapılıyor"daki açık işlerin son durum değişikliğinden beri günü (≤7/8–14/15–30/30+) ve en eski 10 iş. Backlog'daki işler doğal olarak eski olduğundan dahil edilmez.
 - **Veri sınırı:** geçiş kaydı olmayan işlerde (eski/aktarılmış veri) başlangıç durumu bilinmez; bunlar bitirme süresine girmez, yalnızca toplam süreye katılır ve ekranda "X işten hesaplandı" uyarısı çıkar. Gerçek veride 31 biten işin 3'ünde geçmiş vardı; kapsam yeni işlerle artar.
 - **Teknik:** geçişler tek ham SQL ile (`workspaceId` ve iş kimlikleriyle) okunur; açık işlerin son aralığı sonsuza uzatılarak günün sonundaki WIP doğru sayılır. Ortak tarih yardımcıları `analytics-util.ts`ye taşındı.
+
+## ADR-145 — Analiz: sprint derinliği (aşama B)
+
+**Durum:** Kabul · **Tarih:** 2026-10-27
+
+Analiz modülüne "Sprint" sekmesi eklendi (`GET analytics/sprints`, yalnızca Owner/Admin). Yeni veri toplanmadı; mevcut kayıtlar kullanıldı: `sprints` (başlatılırken donan `committedPoints`, tamamlanırken donan `completedPoints`) ve `sprint_item_events` (ADDED/REMOVED + neden: SCOPE_CHANGE, UNFINISHED, CARRIED_OVER). Günlük burndown/burn-up için mevcut `GET sprints/:id/burndown` yeniden kullanıldı (ideal çizgi, kalan puan, toplam kapsam, biten puan, kapsam değişimi).
+
+- **Ölçütler (sprint başına):** taahhüt, biten (tamamlanmışta donmuş değer; aktifte şu ana kadar biten), taahhüt tutturma % = biten ÷ taahhüt, kapsam değişimi % = (başladıktan sonra eklenen + çıkarılan) ÷ taahhüt, devir (bitmeyip sprintten çıkan iş ve puan) ve devir % = devir ÷ (biten + devir), devralınan (önceki sprintten gelen).
+- **Özet:** ortalamalar yalnızca tamamlanan sprintlerden hesaplanır; hiç yoksa boş gösterilir.
+- **Kapsam:** seçili tarih aralığıyla kesişen aktif ve tamamlanmış sprintler (en çok 30); planlı sprintler listelenmez. Proje süzgeci desteklenir.
+- **Sınır:** "taahhüt edilen iş sayısı" tutulmadığından yalnızca puan üzerinden ölçülür; puansız işler taahhüde sayılmaz.

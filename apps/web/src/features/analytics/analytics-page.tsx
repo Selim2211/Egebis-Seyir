@@ -16,16 +16,19 @@ import { FlowView } from './flow-view';
 import { addDays, Empty, FilterBar } from './parts';
 import { PersonView } from './person-view';
 import { ProjectView } from './project-view';
+import { SprintView } from './sprint-view';
 import {
   compareQuery,
   flowQuery,
+  sprintBurndownQuery,
+  sprintsQuery,
   peopleQuery,
   personQuery,
   projectQuery,
   type AnalyticsFilters,
 } from './queries';
 
-export type AnalyticsTab = 'person' | 'project' | 'flow' | 'compare';
+export type AnalyticsTab = 'person' | 'project' | 'flow' | 'sprint' | 'compare';
 
 /** Adres çubuğundaki durum (hepsi isteğe bağlı; eksikler varsayılanla tamamlanır). */
 export interface AnalyticsSearch {
@@ -38,6 +41,8 @@ export interface AnalyticsSearch {
   am?: AnalyticsMetric | undefined;
   ac?: string | undefined;
   asp?: string | undefined;
+  /** Sprint sekmesinde seçili sprint. */
+  asr?: string | undefined;
 }
 
 /** Kişi ve Proje analizi (ADR-143): kişi, Proje ve karşılaştırma sekmeleri. */
@@ -76,6 +81,13 @@ export function AnalyticsPage({
     enabled: admin && tab === 'project' && !!spaceId,
   });
   const flow = useQuery({ ...flowQuery(ws, filters), enabled: admin && tab === 'flow' });
+  const sprints = useQuery({ ...sprintsQuery(ws, filters), enabled: admin && tab === 'sprint' });
+  const sprintList = sprints.data?.sprints ?? [];
+  const selectedSprint = search.asr ?? sprintList[sprintList.length - 1]?.id ?? '';
+  const burndown = useQuery({
+    ...sprintBurndownQuery(ws, selectedSprint),
+    enabled: admin && tab === 'sprint' && selectedSprint !== '',
+  });
   const compare = useQuery({
     ...compareQuery(ws, selected, filters),
     enabled: admin && tab === 'compare' && selected.length >= 2,
@@ -89,7 +101,9 @@ export function AnalyticsPage({
       ...('spaceId' in patch ? { asp: patch.spaceId } : {}),
     });
 
-  const tabs: AnalyticsTab[] = admin ? ['person', 'project', 'flow', 'compare'] : ['person'];
+  const tabs: AnalyticsTab[] = admin
+    ? ['person', 'project', 'flow', 'sprint', 'compare']
+    : ['person'];
   const peopleList = people.data?.people ?? [];
 
   return (
@@ -167,6 +181,18 @@ export function AnalyticsPage({
           <FlowView data={flow.data} />
         ) : (
           <Empty text={flow.isError ? t('analytics.loadFailed') : t('common.loading')} />
+        ))}
+
+      {tab === 'sprint' &&
+        (sprints.data ? (
+          <SprintView
+            data={sprints.data}
+            selected={selectedSprint}
+            onSelect={(id) => onSearch({ asr: id })}
+            burndown={burndown.data}
+          />
+        ) : (
+          <Empty text={sprints.isError ? t('analytics.loadFailed') : t('common.loading')} />
         ))}
 
       {tab === 'compare' && (

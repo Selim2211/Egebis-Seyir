@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { AnalyticsPage, type AnalyticsSearch } from '@/features/analytics/analytics-page';
 
 const SearchSchema = z.object({
-  av: z.enum(['person', 'project', 'flow', 'compare']).optional().catch(undefined),
+  av: z.enum(['person', 'project', 'flow', 'sprint', 'compare']).optional().catch(undefined),
   ap: z.string().optional(),
   aj: z.string().optional(),
   af: z.string().optional(),
@@ -13,6 +13,7 @@ const SearchSchema = z.object({
   am: z.enum(ANALYTICS_METRICS).optional().catch(undefined),
   ac: z.string().optional(),
   asp: z.string().optional(),
+  asr: z.string().optional(),
 });
 
 /** Kişi ve Proje analizi (ADR-143). Filtreler adres çubuğunda durur, sayfa yenilense de korunur. */

@@ -2828,7 +2828,8 @@
       "person": "Person",
       "project": "Project",
       "compare": "Compare",
-      "flow": "Flow"
+      "flow": "Flow",
+      "sprint": "Sprint"
     },
     "range": "Date range",
     "from": "From",
@@ -2957,6 +2958,40 @@
         "assignee": "Assignee",
         "days": "Days"
       }
+    },
+    "sprint": {
+      "title": "Sprint depth",
+      "velocity": "Average velocity",
+      "velocitySub": "{{count}} completed sprints, points",
+      "commitment": "Commitment met",
+      "commitmentSub": "Completed ÷ committed points",
+      "scope": "Scope change",
+      "scopeSub": "Points added/removed after the sprint started",
+      "carry": "Carry-over rate",
+      "carrySub": "Points not finished and moved to the next sprint/Backlog",
+      "count": "Sprints",
+      "countSub": "Overlapping the selected range",
+      "none": "No active or completed sprint in this range.",
+      "commitChart": "Committed vs completed",
+      "commitChartHint": "Points planned and finished in each sprint",
+      "scopeChart": "Scope change and carry-over",
+      "scopeChartHint": "Points added (orange), removed (blue) mid-sprint and carried over (red)",
+      "added": "Added",
+      "removed": "Removed",
+      "carryPoints": "Carry-over (points)",
+      "carriedIn": "Carried in",
+      "tableTitle": "Sprint comparison",
+      "tableHint": "Click a row to open that sprint’s burndown and burn-up below",
+      "active": "active",
+      "burndown": "Burndown — {{name}}",
+      "burndownHint": "Remaining points, ideal line and mid-sprint scope change",
+      "burnup": "Burn-up — {{name}}",
+      "burnupHint": "Total scope and completed points; the gap is the remaining work",
+      "noBurn": "No daily data for this sprint (it may not have started).",
+      "ideal": "Ideal",
+      "remaining": "Remaining",
+      "scopeChange": "Scope change",
+      "total": "Total scope"
     }
   }
 }

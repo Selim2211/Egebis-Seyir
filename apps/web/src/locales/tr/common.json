@@ -2827,7 +2827,8 @@
       "person": "Kişi",
       "project": "Proje",
       "compare": "Karşılaştırma",
-      "flow": "Akış"
+      "flow": "Akış",
+      "sprint": "Sprint"
     },
     "range": "Tarih aralığı",
     "from": "Başlangıç",
@@ -2956,6 +2957,40 @@
         "assignee": "Atanan",
         "days": "Gün"
       }
+    },
+    "sprint": {
+      "title": "Sprint derinliği",
+      "velocity": "Ortalama hız",
+      "velocitySub": "Tamamlanan {{count}} sprint, puan",
+      "commitment": "Taahhüt tutturma",
+      "commitmentSub": "Biten ÷ taahhüt edilen puan",
+      "scope": "Kapsam değişimi",
+      "scopeSub": "Sprint başladıktan sonra eklenen/çıkarılan puan",
+      "carry": "Devir oranı",
+      "carrySub": "Bitmeyip sonraki sprinte/Backlog’a giden puan",
+      "count": "Sprint",
+      "countSub": "Seçili aralıkla kesişen",
+      "none": "Bu aralıkta aktif ya da tamamlanmış sprint yok.",
+      "commitChart": "Taahhüt ve biten",
+      "commitChartHint": "Her sprintte planlanan ve bitirilen puan",
+      "scopeChart": "Kapsam değişimi ve devir",
+      "scopeChartHint": "Sprint ortasında eklenen (turuncu), çıkarılan (mavi) ve devredilen (kırmızı) puan",
+      "added": "Eklenen",
+      "removed": "Çıkarılan",
+      "carryPoints": "Devir (puan)",
+      "carriedIn": "Devralınan",
+      "tableTitle": "Sprint karşılaştırması",
+      "tableHint": "Satıra tıklayınca aşağıda o sprintin burndown ve burn-up grafiği açılır",
+      "active": "aktif",
+      "burndown": "Burndown — {{name}}",
+      "burndownHint": "Kalan puan, ideal çizgi ve sprint ortasındaki kapsam değişimi",
+      "burnup": "Burn-up — {{name}}",
+      "burnupHint": "Toplam kapsam ve biten puan; aradaki fark kalan iştir",
+      "noBurn": "Bu sprint için günlük veri yok (henüz başlamamış olabilir).",
+      "ideal": "İdeal",
+      "remaining": "Kalan",
+      "scopeChange": "Kapsam değişimi",
+      "total": "Toplam kapsam"
     }
   }
 }
