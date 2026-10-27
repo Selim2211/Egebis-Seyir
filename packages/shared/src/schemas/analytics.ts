@@ -164,3 +164,73 @@ export const AnalyticsCompareSchema = z.object({
   buckets: z.array(z.object({ key: z.string(), label: z.string() })),
 });
 export type AnalyticsCompare = z.infer<typeof AnalyticsCompareSchema>;
+
+// ---------- Akış ve darboğaz (ADR-144) ----------
+
+/** Açık işin son hareketten beri yaşı: ≤7, 8–14, 15–30, 30 günden eski. */
+export const ANALYTICS_FLOW_AGES = ['D7', 'D14', 'D30', 'D30P'] as const;
+export type AnalyticsFlowAge = (typeof ANALYTICS_FLOW_AGES)[number];
+
+const DurationStats = z.object({
+  avg: z.number(),
+  median: z.number(),
+  p85: z.number(),
+});
+const FlowSummary = z.object({
+  /** Tamamlanan iş sayısı. */
+  done: z.int(),
+  /** Bunların kaçının gerçek durum geçişi kaydı var (bitirme süresi yalnızca bunlardan). */
+  withHistory: z.int(),
+  /** "Üzerinde çalışılmaya başlandı"dan bitişe gün; geçmişi olan iş yoksa null. */
+  cycleDays: DurationStats.nullable(),
+  /** Açılıştan bitişe gün (tüm tamamlanan işler). */
+  leadDays: DurationStats.nullable(),
+});
+
+/** GET analytics/flow (Owner/Admin) */
+export const AnalyticsFlowSchema = z.object({
+  range: RangeSchema,
+  totals: FlowSummary,
+  previous: FlowSummary,
+  /** Tamamlanma zamanına göre noktalar. */
+  series: z.array(
+    z.object({
+      key: z.string(),
+      label: z.string(),
+      from: DateKey.nullable(),
+      done: z.int(),
+      cycleDays: z.number().nullable(),
+      leadDays: z.number().nullable(),
+    }),
+  ),
+  /** Durumlarda ortalama bekleme (gün), en uzundan kısaya; geçmişi kayıtlı tamamlanan işlerden. */
+  dwell: z.array(
+    z.object({ status: z.string(), category: z.string(), avgDays: z.number(), items: z.int() }),
+  ),
+  wip: z.object({
+    /** Şu an "Yapılıyor" kategorisindeki açık iş (kesin). */
+    current: z.int(),
+    /** Seçili aralıkta günlük ortalama (yalnızca durum geçişi kayıtlı işlerden). */
+    average: z.number().nullable(),
+    series: z.array(z.object({ day: DateKey, count: z.int() })),
+    /** Geçmiş serisi kaç işe dayanıyor / toplam açık+tamamlanan iş. */
+    trackedItems: z.int(),
+    totalItems: z.int(),
+  }),
+  aging: z.object({
+    buckets: z.array(z.object({ bucket: z.enum(ANALYTICS_FLOW_AGES), count: z.int() })),
+    /** Son hareketi en eski, "Yapılıyor"daki açık işler (en çok 10). */
+    stale: z.array(
+      z.object({
+        id: z.uuid(),
+        key: z.string(),
+        title: z.string(),
+        space: SpaceRef,
+        status: z.string(),
+        days: z.int(),
+        assignee: z.string().nullable(),
+      }),
+    ),
+  }),
+});
+export type AnalyticsFlow = z.infer<typeof AnalyticsFlowSchema>;

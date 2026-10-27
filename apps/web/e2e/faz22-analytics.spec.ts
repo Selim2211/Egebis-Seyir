@@ -107,6 +107,15 @@ test.describe.serial('Analiz modülü', () => {
     await expect(page.getByTestId('kpi-done')).toHaveText(String(api.totals.done));
     await expect(page.getByTestId('chart-bugflow')).toBeVisible();
 
+    // Akış sekmesi: kutucuklar ve grafikler açılır; geçmişi olmayan işlerde uyarı çıkar.
+    await page.getByTestId('tab-flow').click();
+    await expect(page.getByTestId('flow-view')).toBeVisible();
+    await expect(page.getByTestId('flow-kpis')).toBeVisible();
+    await expect(page.getByTestId('kpi-lead')).not.toHaveText('—');
+    await expect(page.getByTestId('chart-flow-trend')).toBeVisible();
+    await expect(page.getByTestId('chart-aging-flow')).toBeVisible();
+    await expect(page.getByText(/Beklenmeyen bir hata|Bulunamadı/)).toHaveCount(0);
+
     // Karşılaştırma sekmesi: önce boş durum, kişi eklenince sayı güncellenir.
     await page.getByTestId('tab-compare').click();
     await expect(page.getByTestId('compare-view')).toBeVisible();

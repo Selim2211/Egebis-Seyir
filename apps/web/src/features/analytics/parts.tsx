@@ -81,14 +81,17 @@ export const metricValue = (m: AnalyticsMetrics, metric: AnalyticsMetric): numbe
   m[metric];
 export const pointValue = (p: AnalyticsPoint, metric: AnalyticsMetric): number | null => p[metric];
 
-function Delta({
-  metric,
+/** Önceki döneme göre yüzde değişim; `better` artışın iyi mi kötü mü olduğunu belirler. */
+export function DeltaPct({
   value,
   previous,
+  better,
+  testId,
 }: {
-  metric: AnalyticsMetric;
   value: number | null;
   previous: number | null;
+  better: 'up' | 'down' | 'neutral';
+  testId?: string;
 }) {
   const { t } = useTranslation();
   if (value === null || previous === null || (value === 0 && previous === 0)) {
@@ -99,7 +102,6 @@ function Delta({
   }
   const pct = Math.round(((value - previous) / Math.abs(previous)) * 100);
   const dir = pct === 0 ? 'flat' : pct > 0 ? 'up' : 'down';
-  const { better } = METRIC_META[metric];
   const good = better === 'neutral' || dir === 'flat' ? null : better === dir;
   const Icon = dir === 'flat' ? ArrowRight : dir === 'up' ? ArrowUp : ArrowDown;
   return (
@@ -110,11 +112,30 @@ function Delta({
         good === true && 'text-emerald-700 dark:text-emerald-300',
         good === false && 'text-red-700 dark:text-red-300',
       )}
-      data-testid={`delta-${metric}`}
+      data-testid={testId}
     >
       <Icon className="size-3" aria-hidden />%{Math.abs(pct)}
       <span className="text-muted-foreground font-normal">{t('analytics.vsPrevious')}</span>
     </span>
+  );
+}
+
+function Delta({
+  metric,
+  value,
+  previous,
+}: {
+  metric: AnalyticsMetric;
+  value: number | null;
+  previous: number | null;
+}) {
+  return (
+    <DeltaPct
+      value={value}
+      previous={previous}
+      better={METRIC_META[metric].better}
+      testId={`delta-${metric}`}
+    />
   );
 }
 

@@ -1263,3 +1263,16 @@ Scrum yöneticisinin kişileri ve Projeleri ayrıntılı çözümleyebilmesi, ki
 - **Yeniden açma:** `activity_events` içinde `item.updated` olaylarında `completedAt` dolu → boş değişimi (ham SQL, `workspaceId` ile).
 - **Sınırlar:** sistem atama geçmişi tutmaz, el değiştiren işin payı son atanan kişiye yazılır; bitirme süresi işin oluşturulmasından başlar ("çalışmaya başladı" anı ayrı tutulmuyor). Toplama bellekte yapılır, okunan iş/kayıt sayısı aralık ve `SCAN_LIMIT` (50 bin) ile sınırlı; çok büyük çalışma alanları için ileride SQL `date_trunc` toplamasına taşınır.
 - **Karşılaştırma:** 1–5 kişi; tüm kişiler ortak zaman eksenini paylaşır (olmayan nokta sıfır).
+
+## ADR-144 — Analiz: akış ve darboğaz (aşama A)
+
+**Durum:** Kabul · **Tarih:** 2026-10-27
+
+Analiz modülüne "Akış" sekmesi eklendi (`GET analytics/flow`, yalnızca Owner/Admin). Önceki ölçümün sınırı ("çalışmaya başladı anı kaydedilmiyor") durum geçişleri `activity_events` içindeki `statusId` değişimlerinden okunarak aşıldı; yeni tablo gerekmedi.
+
+- **Bitirme süresi (cycle):** işin ilk "Yapılıyor" (ACTIVE kategorisi) durumuna girişinden tamamlanmaya; **toplam süre (lead):** açılıştan tamamlanmaya. Ortalama, medyan ve %85'lik değer; önceki dönemle kıyas (düşüş iyi).
+- **Durumlarda bekleme:** geçmişi kayıtlı, aralıkta biten işlerde her durumda geçen süre; aynı adlı durumlar (Space'ler arası) birleşir, en uzun bekleyen darboğaz olarak kırmızı vurgulanır.
+- **WIP:** şu an "Yapılıyor"daki açık iş kesin; geçmiş WIP serisi yalnızca durum geçişi kayıtlı işlerden çizilir ve kaç işe dayandığı ekranda yazar. Aralık 92 günden uzunsa haftalık örnekleme yapılır.
+- **Yaşlanma:** "Yapılıyor"daki açık işlerin son durum değişikliğinden beri günü (≤7/8–14/15–30/30+) ve en eski 10 iş. Backlog'daki işler doğal olarak eski olduğundan dahil edilmez.
+- **Veri sınırı:** geçiş kaydı olmayan işlerde (eski/aktarılmış veri) başlangıç durumu bilinmez; bunlar bitirme süresine girmez, yalnızca toplam süreye katılır ve ekranda "X işten hesaplandı" uyarısı çıkar. Gerçek veride 31 biten işin 3'ünde geçmiş vardı; kapsam yeni işlerle artar.
+- **Teknik:** geçişler tek ham SQL ile (`workspaceId` ve iş kimlikleriyle) okunur; açık işlerin son aralığı sonsuza uzatılarak günün sonundaki WIP doğru sayılır. Ortak tarih yardımcıları `analytics-util.ts`ye taşındı.

@@ -2827,7 +2827,8 @@
     "tab": {
       "person": "Person",
       "project": "Project",
-      "compare": "Compare"
+      "compare": "Compare",
+      "flow": "Flow"
     },
     "range": "Date range",
     "from": "From",
@@ -2916,6 +2917,46 @@
       "onTimePct": "Deadline",
       "bugsFixed": "Bugs",
       "speed": "Speed"
+    },
+    "flow": {
+      "noHistory": "None of the {{done}} items finished in this range has status-change history (old or imported data). Real cycle time could not be computed; only time from creation to done is shown.",
+      "partialHistory": "Cycle time is computed only from the {{with}} items with status-change history (of {{done}} finished). Items without history count only in total time.",
+      "cycle": "Cycle time",
+      "cycleSub": "Median {{median}} · 85% within {{p85}} days",
+      "cycleNone": "From entering “In progress” to done",
+      "lead": "Total time",
+      "wip": "Work in progress (WIP)",
+      "wipAvg": "Daily average in range {{value}}",
+      "wipNoAvg": "No history for an average",
+      "stale": "Stuck items",
+      "staleSub": "In “In progress” with no movement for over 14 days",
+      "trendTitle": "Time curve",
+      "trendHint": "Cycle time (in progress → done) and total time (created → done), in days",
+      "dwellTitle": "Time in each status (bottleneck)",
+      "dwellHint": "Average days finished items stayed in each status. Red: the longest wait",
+      "noDwell": "No finished items with status-change history.",
+      "avgWait": "Avg. wait (days)",
+      "wipTitle": "Work in progress over time",
+      "wipHint": "Only from items with status-change history ({{tracked}} / {{total}} items)",
+      "noWipHistory": "No items with status-change history, so past WIP cannot be drawn.",
+      "agingTitle": "Age of items in progress",
+      "agingHint": "Time since the last status change",
+      "age": {
+        "D7": "Up to 7 days",
+        "D14": "8–14 days",
+        "D30": "15–30 days",
+        "D30P": "30+ days"
+      },
+      "items": "Items",
+      "staleTitle": "Items idle the longest",
+      "staleHint": "The 10 items in progress whose last status change is the oldest",
+      "noStale": "No idle items in progress.",
+      "col": {
+        "item": "Item",
+        "status": "Status",
+        "assignee": "Assignee",
+        "days": "Days"
+      }
     }
   }
 }

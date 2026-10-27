@@ -1,18 +1,21 @@
 import { Controller, Get, Param, ParseUUIDPipe, Query } from '@nestjs/common';
 import {
   AnalyticsCompareSchema,
+  AnalyticsFlowSchema,
   AnalyticsPeopleSchema,
   AnalyticsPersonSchema,
   AnalyticsProjectSchema,
   AnalyticsQuerySchema,
   WORKSPACE_PERMISSIONS as W,
   type AnalyticsCompare,
+  type AnalyticsFlow,
   type AnalyticsPeople,
   type AnalyticsPerson,
   type AnalyticsProject,
 } from '@scrum/shared';
 import { createZodDto, ZodResponse } from 'nestjs-zod';
 import { RequirePermission } from '../auth/decorators';
+import { AnalyticsFlowService } from './analytics-flow.service';
 import { AnalyticsService } from './analytics.service';
 
 class QueryDto extends createZodDto(AnalyticsQuerySchema) {}
@@ -20,6 +23,7 @@ class PeopleDto extends createZodDto(AnalyticsPeopleSchema) {}
 class PersonDto extends createZodDto(AnalyticsPersonSchema) {}
 class ProjectDto extends createZodDto(AnalyticsProjectSchema) {}
 class CompareDto extends createZodDto(AnalyticsCompareSchema) {}
+class FlowDto extends createZodDto(AnalyticsFlowSchema) {}
 
 /**
  * Kişi ve Proje analizi (ADR-143). Kişi, Proje ve karşılaştırma ekranları yalnızca Owner/Admin'e açıktır;
@@ -27,7 +31,10 @@ class CompareDto extends createZodDto(AnalyticsCompareSchema) {}
  */
 @Controller('workspaces/:workspaceId/analytics')
 export class AnalyticsController {
-  constructor(private readonly analytics: AnalyticsService) {}
+  constructor(
+    private readonly analytics: AnalyticsService,
+    private readonly flow: AnalyticsFlowService,
+  ) {}
 
   @Get('people')
   @RequirePermission(W.WORKSPACE_SETTINGS)
@@ -60,5 +67,12 @@ export class AnalyticsController {
   @ZodResponse({ type: CompareDto })
   compare(@Query() query: QueryDto): Promise<AnalyticsCompare> {
     return this.analytics.compare(query);
+  }
+  /** Akış ve darboğaz: bitirme süresi, durumlarda bekleme, WIP, yaşlanan işler (ADR-144). */
+  @Get('flow')
+  @RequirePermission(W.WORKSPACE_SETTINGS)
+  @ZodResponse({ type: FlowDto })
+  flowOf(@Query() query: QueryDto): Promise<AnalyticsFlow> {
+    return this.flow.flow(query);
   }
 }

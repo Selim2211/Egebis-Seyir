@@ -17,31 +17,18 @@ import type { AppClsStore } from '../../infra/cls/request-context';
 import { PrismaService } from '../../infra/prisma/prisma.service';
 import { TenantPrismaService } from '../../infra/prisma/tenant-prisma.service';
 import { fail } from '../work-items/item-support';
-
-const DAY_MS = 86_400_000;
-const TZ = 'Europe/Istanbul';
-/** Aralık başına okunacak en çok iş/kayıt sayısı (bellek sınırı). */
-const SCAN_LIMIT = 50_000;
-/** En çok kaç gün seçilebilir. */
-const MAX_DAYS = 731;
-
-const dayKey = (d: Date) => d.toLocaleDateString('sv-SE', { timeZone: TZ });
-/** Türkiye'de yaz/kış saati yok: gün başı her zaman +03:00. */
-const dayStart = (key: string) => new Date(`${key}T00:00:00+03:00`);
-const addDays = (key: string, n: number) =>
-  new Date(new Date(`${key}T12:00:00Z`).getTime() + n * DAY_MS).toISOString().slice(0, 10);
-const diffDays = (a: string, b: string) =>
-  Math.round(
-    (new Date(`${b}T12:00:00Z`).getTime() - new Date(`${a}T12:00:00Z`).getTime()) / DAY_MS,
-  );
-const round1 = (n: number) => Math.round(n * 10) / 10;
-
-/** Haftanın Pazartesi'si (YYYY-MM-DD). */
-function weekStart(key: string): string {
-  const dow = new Date(`${key}T12:00:00Z`).getUTCDay(); // 0 = Pazar
-  return addDays(key, -((dow + 6) % 7));
-}
-const monthStart = (key: string) => `${key.slice(0, 7)}-01`;
+import {
+  addDays,
+  DAY_MS,
+  dayKey,
+  dayStart,
+  monthStart,
+  round1,
+  SCAN_LIMIT,
+  spanOf,
+  type Span,
+  weekStart,
+} from './analytics-util';
 
 type ItemType = 'TASK' | 'SUBTASK' | 'BUG';
 
@@ -78,14 +65,6 @@ interface ReopenFact {
   day: string;
 }
 
-interface Span {
-  from: string;
-  to: string;
-  prevFrom: string;
-  prevTo: string;
-  grain: AnalyticsGrain;
-}
-
 const EMPTY: AnalyticsMetrics = {
   done: 0,
   points: 0,
@@ -113,12 +92,7 @@ export class AnalyticsService {
   // ---------- Aralık ----------
 
   private window(q: AnalyticsQuery, now = new Date()): Span {
-    const to = q.to ?? dayKey(now);
-    const from = q.from ?? addDays(to, -89);
-    const days = diffDays(from, to) + 1;
-    if (days < 1 || days > MAX_DAYS) throw new BadRequestException('Geçersiz tarih aralığı');
-    const prevTo = addDays(from, -1);
-    return { from, to, prevFrom: addDays(prevTo, -(days - 1)), prevTo, grain: q.grain };
+    return spanOf(q, now);
   }
 
   private isAdmin(): boolean {

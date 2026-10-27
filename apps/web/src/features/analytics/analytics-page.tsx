@@ -12,18 +12,20 @@ import { useCan, useCurrentWorkspace } from '@/features/workspace/queries';
 import { todayDay } from '@/lib/format';
 import { cn } from '@/lib/utils';
 import { CompareView } from './compare-view';
+import { FlowView } from './flow-view';
 import { addDays, Empty, FilterBar } from './parts';
 import { PersonView } from './person-view';
 import { ProjectView } from './project-view';
 import {
   compareQuery,
+  flowQuery,
   peopleQuery,
   personQuery,
   projectQuery,
   type AnalyticsFilters,
 } from './queries';
 
-export type AnalyticsTab = 'person' | 'project' | 'compare';
+export type AnalyticsTab = 'person' | 'project' | 'flow' | 'compare';
 
 /** Adres çubuğundaki durum (hepsi isteğe bağlı; eksikler varsayılanla tamamlanır). */
 export interface AnalyticsSearch {
@@ -73,6 +75,7 @@ export function AnalyticsPage({
     ...projectQuery(ws, spaceId ?? '', filters),
     enabled: admin && tab === 'project' && !!spaceId,
   });
+  const flow = useQuery({ ...flowQuery(ws, filters), enabled: admin && tab === 'flow' });
   const compare = useQuery({
     ...compareQuery(ws, selected, filters),
     enabled: admin && tab === 'compare' && selected.length >= 2,
@@ -86,7 +89,7 @@ export function AnalyticsPage({
       ...('spaceId' in patch ? { asp: patch.spaceId } : {}),
     });
 
-  const tabs: AnalyticsTab[] = admin ? ['person', 'project', 'compare'] : ['person'];
+  const tabs: AnalyticsTab[] = admin ? ['person', 'project', 'flow', 'compare'] : ['person'];
   const peopleList = people.data?.people ?? [];
 
   return (
@@ -157,6 +160,13 @@ export function AnalyticsPage({
                   : t('analytics.noProjects')
             }
           />
+        ))}
+
+      {tab === 'flow' &&
+        (flow.data ? (
+          <FlowView data={flow.data} />
+        ) : (
+          <Empty text={flow.isError ? t('analytics.loadFailed') : t('common.loading')} />
         ))}
 
       {tab === 'compare' && (

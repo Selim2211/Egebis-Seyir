@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { AnalyticsPage, type AnalyticsSearch } from '@/features/analytics/analytics-page';
 
 const SearchSchema = z.object({
-  av: z.enum(['person', 'project', 'compare']).optional().catch(undefined),
+  av: z.enum(['person', 'project', 'flow', 'compare']).optional().catch(undefined),
   ap: z.string().optional(),
   aj: z.string().optional(),
   af: z.string().optional(),

@@ -1,5 +1,6 @@
 import {
   AnalyticsCompareSchema,
+  AnalyticsFlowSchema,
   AnalyticsPeopleSchema,
   AnalyticsPersonSchema,
   AnalyticsProjectSchema,
@@ -62,5 +63,12 @@ export const compareQuery = (ws: string, userIds: string[], f: AnalyticsFilters)
         AnalyticsCompareSchema,
       ),
     enabled: userIds.length > 0,
+    placeholderData: keepPreviousData,
+  });
+
+export const flowQuery = (ws: string, f: AnalyticsFilters) =>
+  queryOptions({
+    queryKey: key(ws, 'flow', f),
+    queryFn: () => apiRequest(`/workspaces/${ws}/analytics/flow?${params(f)}`, AnalyticsFlowSchema),
     placeholderData: keepPreviousData,
   });

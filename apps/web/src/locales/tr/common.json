@@ -2826,7 +2826,8 @@
     "tab": {
       "person": "Kişi",
       "project": "Proje",
-      "compare": "Karşılaştırma"
+      "compare": "Karşılaştırma",
+      "flow": "Akış"
     },
     "range": "Tarih aralığı",
     "from": "Başlangıç",
@@ -2915,6 +2916,46 @@
       "onTimePct": "Termin",
       "bugsFixed": "Bug",
       "speed": "Hız"
+    },
+    "flow": {
+      "noHistory": "Bu aralıkta biten {{done}} işin hiçbirinde durum geçişi kaydı yok (eski ya da aktarılmış veri). Gerçek bitirme süresi hesaplanamadı; yalnızca açılıştan bitişe süre gösteriliyor.",
+      "partialHistory": "Bitirme süresi yalnızca durum geçişi kayıtlı {{with}} işten hesaplandı (toplam {{done}} biten iş). Geçiş kaydı olmayan işler yalnızca toplam süreye katılır.",
+      "cycle": "Bitirme süresi",
+      "cycleSub": "Medyan {{median}} · %85’i {{p85}} günde",
+      "cycleNone": "“Yapılıyor”a girişten bitişe",
+      "lead": "Toplam süre",
+      "wip": "Şu an yapılan iş (WIP)",
+      "wipAvg": "Aralıkta günlük ortalama {{value}}",
+      "wipNoAvg": "Geçmiş ortalaması için kayıt yok",
+      "stale": "Takılı iş",
+      "staleSub": "“Yapılıyor”da 14 günden uzun süredir hareketsiz",
+      "trendTitle": "Süre eğrisi",
+      "trendHint": "Bitirme süresi (Yapılıyor’dan bitişe) ve toplam süre (açılıştan bitişe); gün olarak",
+      "dwellTitle": "Durumlarda bekleme (darboğaz)",
+      "dwellHint": "Biten işlerin her durumda ortalama kaç gün kaldığı. Kırmızı: en uzun bekleyen durum",
+      "noDwell": "Durum geçişi kayıtlı biten iş yok.",
+      "avgWait": "Ort. bekleme (gün)",
+      "wipTitle": "Zaman içinde yapılan iş (WIP)",
+      "wipHint": "Yalnızca durum geçişi kayıtlı işlerden ({{tracked}} / {{total}} iş)",
+      "noWipHistory": "Durum geçişi kayıtlı iş yok, geçmiş WIP çizilemedi.",
+      "agingTitle": "Yapılıyor’daki işlerin yaşı",
+      "agingHint": "Son durum değişikliğinden beri geçen süre",
+      "age": {
+        "D7": "7 güne kadar",
+        "D14": "8–14 gün",
+        "D30": "15–30 gün",
+        "D30P": "30+ gün"
+      },
+      "items": "İş",
+      "staleTitle": "En uzun süredir hareketsiz işler",
+      "staleHint": "Yapılıyor’da olup son durum değişikliği en eski 10 iş",
+      "noStale": "Yapılıyor’da hareketsiz iş yok.",
+      "col": {
+        "item": "İş",
+        "status": "Durum",
+        "assignee": "Atanan",
+        "days": "Gün"
+      }
     }
   }
 }
