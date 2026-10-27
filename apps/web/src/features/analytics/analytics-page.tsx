@@ -14,6 +14,7 @@ import { cn } from '@/lib/utils';
 import { CapacityView } from './capacity-view';
 import { CompareView } from './compare-view';
 import { FlowView } from './flow-view';
+import { ForecastView } from './forecast-view';
 import { addDays, Empty, FilterBar } from './parts';
 import { PersonView } from './person-view';
 import { ProjectView } from './project-view';
@@ -23,6 +24,7 @@ import {
   capacityQuery,
   compareQuery,
   flowQuery,
+  forecastQuery,
   sprintBurndownQuery,
   sprintsQuery,
   peopleQuery,
@@ -33,7 +35,7 @@ import {
 } from './queries';
 
 export type AnalyticsTab =
-  'person' | 'project' | 'flow' | 'sprint' | 'capacity' | 'quality' | 'compare';
+  'person' | 'project' | 'flow' | 'sprint' | 'capacity' | 'quality' | 'forecast' | 'compare';
 
 /** Adres çubuğundaki durum (hepsi isteğe bağlı; eksikler varsayılanla tamamlanır). */
 export interface AnalyticsSearch {
@@ -105,6 +107,7 @@ export function AnalyticsPage({
     enabled: admin && tab === 'capacity',
   });
   const quality = useQuery({ ...qualityQuery(ws, filters), enabled: admin && tab === 'quality' });
+  const forecast = useQuery({ ...forecastQuery(ws), enabled: admin && tab === 'forecast' });
   const compare = useQuery({
     ...compareQuery(ws, selected, filters),
     enabled: admin && tab === 'compare' && selected.length >= 2,
@@ -119,7 +122,7 @@ export function AnalyticsPage({
     });
 
   const tabs: AnalyticsTab[] = admin
-    ? ['person', 'project', 'flow', 'sprint', 'capacity', 'quality', 'compare']
+    ? ['person', 'project', 'flow', 'sprint', 'capacity', 'quality', 'forecast', 'compare']
     : ['person'];
   const peopleList = people.data?.people ?? [];
 
@@ -230,6 +233,13 @@ export function AnalyticsPage({
           <QualityView data={quality.data} />
         ) : (
           <Empty text={quality.isError ? t('analytics.loadFailed') : t('common.loading')} />
+        ))}
+
+      {tab === 'forecast' &&
+        (forecast.data ? (
+          <ForecastView data={forecast.data} />
+        ) : (
+          <Empty text={forecast.isError ? t('analytics.loadFailed') : t('common.loading')} />
         ))}
 
       {tab === 'compare' && (

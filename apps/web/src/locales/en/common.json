@@ -2831,7 +2831,8 @@
       "flow": "Flow",
       "sprint": "Sprint",
       "capacity": "Capacity",
-      "quality": "Quality"
+      "quality": "Quality",
+      "forecast": "Forecast"
     },
     "range": "Date range",
     "from": "From",
@@ -3079,6 +3080,52 @@
       "criticalTitle": "Waiting Critical and Major Bugs",
       "criticalHint": "The 10 open Bugs that have waited the longest",
       "noCritical": "No open Critical or Major Bugs."
+    },
+    "forecast": {
+      "stripTitle": "Needs attention",
+      "count": "{{count}} alerts",
+      "all": "All alerts and forecasts",
+      "note": "Forecasts are simple linear estimates from the current pace, not promises: if the pace changes, so does the estimate. Alerts do not judge people; they only show the change versus the previous period.",
+      "risksTitle": "Risk alerts",
+      "risksHint": "Most important first; click a row to open the related page",
+      "noRisks": "No alerts right now.",
+      "level": {
+        "high": "High",
+        "medium": "Medium",
+        "low": "Low"
+      },
+      "risk": {
+        "sprint_behind": "{{subject}} is behind plan: at this pace about {{value}}% of the sprint will be finished.",
+        "critical_waiting": "“{{subject}}” has been open for {{value}} days (Critical/Major Bug).",
+        "person_slowing": "{{subject}}: {{value}} items finished in the last 14 days ({{previous}} in the 14 days before).",
+        "project_slowing": "{{subject}}: {{value}} items finished in the last 14 days ({{previous}} in the 14 days before).",
+        "stuck_items": "{{value}} items have been idle in “In progress” for over 14 days.",
+        "unassigned_bugs": "{{value}} Bugs have been unassigned for over 3 days."
+      },
+      "sprintsTitle": "Active sprints",
+      "sprintsHint": "Light shade: the level expected by the end date at this pace",
+      "noSprints": "No active sprint.",
+      "state": {
+        "ahead": "Ahead",
+        "on_track": "On track",
+        "at_risk": "At risk",
+        "behind": "Behind"
+      },
+      "projected": "Projected level",
+      "donePoints": "{{done}} / {{total}} points done",
+      "daysLeft": "{{count}} days left",
+      "rate": "Daily pace {{value}} points",
+      "noEstimate": "No pointed work in the sprint, so no estimate.",
+      "projection": "At this pace {{pct}}% of the total will be finished by sprint end. Remaining work done by: {{finish}}.",
+      "epicsTitle": "Open Epics",
+      "epicsHint": "Remaining points ÷ the project’s pace over the last 4 weeks",
+      "noEpics": "No Epics with open work.",
+      "col": {
+        "remaining": "Remaining / total points",
+        "rate": "Project pace (points/week)",
+        "weeks": "Est. weeks",
+        "finish": "Est. finish"
+      }
     }
   }
 }

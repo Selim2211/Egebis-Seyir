@@ -2830,7 +2830,8 @@
       "flow": "Akış",
       "sprint": "Sprint",
       "capacity": "Kapasite",
-      "quality": "Kalite"
+      "quality": "Kalite",
+      "forecast": "Öngörü"
     },
     "range": "Tarih aralığı",
     "from": "Başlangıç",
@@ -3078,6 +3079,52 @@
       "criticalTitle": "Bekleyen Kritik ve Önemli Bug’lar",
       "criticalHint": "Açık olan, en uzun süredir bekleyen 10 Bug",
       "noCritical": "Açık Kritik ya da Önemli Bug yok."
+    },
+    "forecast": {
+      "stripTitle": "Dikkat edilmesi gerekenler",
+      "count": "{{count}} uyarı",
+      "all": "Tüm uyarılar ve öngörüler",
+      "note": "Öngörüler mevcut hızdan basit doğrusal tahmindir, söz değildir: hız değişirse tahmin de değişir. Uyarılar kişileri değerlendirmez, yalnızca önceki döneme göre değişimi gösterir.",
+      "risksTitle": "Risk uyarıları",
+      "risksHint": "En önemliden başlayarak; satıra tıklayınca ilgili sayfa açılır",
+      "noRisks": "Şu an uyarı yok.",
+      "level": {
+        "high": "Yüksek",
+        "medium": "Orta",
+        "low": "Düşük"
+      },
+      "risk": {
+        "sprint_behind": "{{subject}} planın gerisinde: bu hızla sprintin yaklaşık %{{value}}’i bitecek.",
+        "critical_waiting": "“{{subject}}” {{value}} gündür açık (Kritik/Önemli Bug).",
+        "person_slowing": "{{subject}}: son 14 günde {{value}} iş bitti (önceki 14 günde {{previous}}).",
+        "project_slowing": "{{subject}} projesinde son 14 günde {{value}} iş bitti (önceki 14 günde {{previous}}).",
+        "stuck_items": "{{value}} iş “Yapılıyor”da 14 günden uzun süredir hareketsiz.",
+        "unassigned_bugs": "{{value}} Bug 3 günden uzun süredir kimseye atanmamış."
+      },
+      "sprintsTitle": "Aktif sprintler",
+      "sprintsHint": "Açık renk: bu hızla bitiş gününde ulaşılacak tahmini düzey",
+      "noSprints": "Aktif sprint yok.",
+      "state": {
+        "ahead": "Önde",
+        "on_track": "Yolunda",
+        "at_risk": "Risk altında",
+        "behind": "Geride"
+      },
+      "projected": "Tahmini bitiş düzeyi",
+      "donePoints": "{{done}} / {{total}} puan bitti",
+      "daysLeft": "Bitişe {{count}} gün",
+      "rate": "Günlük hız {{value}} puan",
+      "noEstimate": "Sprintte puanlı iş yok, tahmin yapılamıyor.",
+      "projection": "Bu hızla sprint sonunda toplamın %{{pct}}’i biter. Kalan işin bitişi: {{finish}}.",
+      "epicsTitle": "Açık Epic’ler",
+      "epicsHint": "Kalan puan ÷ projenin son 4 haftalık hızı",
+      "noEpics": "Açık işi olan Epic yok.",
+      "col": {
+        "remaining": "Kalan / toplam puan",
+        "rate": "Proje hızı (puan/hafta)",
+        "weeks": "Tahmini hafta",
+        "finish": "Tahmini bitiş"
+      }
     }
   }
 }

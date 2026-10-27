@@ -1312,3 +1312,15 @@ Analiz modülüne "Kalite" sekmesi eklendi (`GET analytics/quality`, yalnızca O
 - **Proje ve firma kırılımı:** projede Bug sayısı ve payı; e-postadan gelen Bug'larda firma bazında Bug, çözülen, açık, çözüm süresi ve ilk yanıt süresi (en çok Bug gönderen 8 firma).
 - **Atama doğruluğu:** e-posta Bug'ları atama yöntemine göre (kural, firma varsayılanı, yapay zeka, belirsiz) ayrılır; açıldıktan sonra **başka projeye taşınan** Bug oranı hesaplanır. Kural/firma/yapay zekada yüksek oran yanlış atama sinyalidir (UI'da %30 ve üstü kırmızı); "Belirsiz"de taşıma beklenen elle atama adımıdır. Aynı proje içindeki liste taşımaları sayılmaz.
 - **Sınır:** Bug "önem"i boş olabilir (önem seçilmemiş Bug'lar önem tablosuna girmez); e-posta olmayan Bug'larda firma ve ilk yanıt yoktur.
+
+## ADR-148 — Analiz: öngörü ve risk uyarıları (aşama E)
+
+**Durum:** Kabul · **Tarih:** 2026-10-27
+
+Analiz modülüne "Öngörü" sekmesi (`GET analytics/forecast`, yalnızca Owner/Admin) ve Yönetici panelinin üstüne en önemli 4 uyarıyı gösteren şerit eklendi. Tahminler **mevcut hızdan basit doğrusal** hesaptır, söz değildir; ekranda bu açıkça yazar.
+
+- **Sprint:** aktif sprintin toplam/biten/kalan puanı, günlük hız (biten ÷ geçen gün), bitiş gününde tahmini düzey ve kalan işin tahmini bitiş günü. Durum: geçen sürenin payına göre biten pay oranı ≥1,1 önde · ≥0,9 yolunda · ≥0,7 risk altında · altı geride; sprintin ilk %15'inde gürültüyü önlemek için hep "yolunda".
+- **Epic:** açık Epic'lerin çocuk Task/Bug puanlarından kalan puan; projenin son 28 günlük haftalık hızına bölünerek tahmini hafta ve bitiş günü (hız yoksa boş). Puansız çocuklar toplama girmez.
+- **Uyarılar (eşikli, hesaplanabilir):** sprint geride/risk altında; Kritik Bug 7 günden, Önemli Bug 14 günden uzun açık (en eski 5); 3 günden uzun atanmamış Bug (≥5 yüksek); "Yapılıyor"da 14 günden uzun `updatedAt` değişmemiş 3+ iş (≥8 yüksek); kişi ya da projede son 14 günde biten iş önceki 14 güne göre %40+ azalmış (önceki dönemde kişide ≥3, projede ≥5 iş; %70+ düşüş yüksek).
+- **Dil ve etik:** uyarı metinleri kişiyi "kötü" diye etiketlemez; yalnızca "son 14 günde X, öncesinde Y" der. Eşikler servis içinde sabittir (ADR'de belgeli), ayarlanabilir değildir.
+- **Sınırlar:** `updatedAt` iş satırı her değiştiğinde güncellenir (yorum dahil değil), bu yüzden "hareketsiz" bir yaklaşıktır; kesin durum geçişi için Akış sekmesine bakılır. Yavaşlama uyarısı tatil/izin dönemlerini ayırt etmez.

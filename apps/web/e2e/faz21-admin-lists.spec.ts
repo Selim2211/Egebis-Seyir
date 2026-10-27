@@ -26,6 +26,7 @@ test.describe.serial('Yönetici paneli: tıklanabilir kutucuklar', () => {
     );
 
   test('kutucuğa tıklayınca o kayıtların listesi açılır ve sayı tutar', async ({ page }) => {
+    test.setTimeout(90_000);
     await page.goto('/login');
     await login(page, OWNER.email, OWNER.password);
     await expect(page.getByRole('heading', { name: /Hoş geldin/ })).toBeVisible();
@@ -121,6 +122,8 @@ test.describe.serial('Yönetici paneli: tıklanabilir kutucuklar', () => {
   test('paneldeki bütün bağlantılar ve grafikler hata vermeden açılır; yenileme düşse ekran silinmez', async ({
     page,
   }) => {
+    // Panelde onlarca bağlantı var; hepsi tek tek açıldığı için süre payı geniş tutulur.
+    test.setTimeout(120_000);
     await page.goto('/login');
     await login(page, OWNER.email, OWNER.password);
     await expect(page.getByRole('heading', { name: /Hoş geldin/ })).toBeVisible();

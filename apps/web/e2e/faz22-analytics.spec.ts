@@ -139,6 +139,11 @@ test.describe.serial('Analiz modülü', () => {
     await expect(page.getByTestId('quality-kpis')).toBeVisible();
     await expect(page.getByText(/Beklenmeyen bir hata|Bulunamadı/)).toHaveCount(0);
 
+    // Öngörü sekmesi: not ve paneller gelir; uyarı yoksa boş durum yazılır.
+    await page.getByTestId('tab-forecast').click();
+    await expect(page.getByTestId('forecast-view')).toBeVisible();
+    await expect(page.getByText(/Beklenmeyen bir hata|Bulunamadı/)).toHaveCount(0);
+
     // Karşılaştırma sekmesi: önce boş durum, kişi eklenince sayı güncellenir.
     await page.getByTestId('tab-compare').click();
     await expect(page.getByTestId('compare-view')).toBeVisible();

@@ -37,6 +37,7 @@ import {
 } from 'recharts';
 import { Button } from '@/components/ui/button';
 import { UserAvatar } from '@/components/user-avatar';
+import { RiskStrip } from '@/features/analytics/risk-strip';
 import { NotFoundState } from '@/features/spaces/container-header';
 import { useCan, useCurrentWorkspace } from '@/features/workspace/queries';
 import { apiRequest } from '@/lib/api';
@@ -346,6 +347,7 @@ function Dashboard({ data }: { data: AdminOverview }) {
 
   return (
     <div className="flex flex-col gap-6">
+      <RiskStrip />
       <div>
         <h2 className="mb-2 text-xs font-semibold tracking-wide text-red-700 uppercase dark:text-red-300">
           {t('admin.bugSection')}

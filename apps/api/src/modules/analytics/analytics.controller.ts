@@ -4,6 +4,7 @@ import {
   AnalyticsCapacitySchema,
   AnalyticsCompareSchema,
   AnalyticsFlowSchema,
+  AnalyticsForecastSchema,
   AnalyticsPeopleSchema,
   AnalyticsPersonSchema,
   AnalyticsProjectSchema,
@@ -14,6 +15,7 @@ import {
   type AnalyticsCapacity,
   type AnalyticsCompare,
   type AnalyticsFlow,
+  type AnalyticsForecast,
   type AnalyticsPeople,
   type AnalyticsPerson,
   type AnalyticsProject,
@@ -24,6 +26,7 @@ import { createZodDto, ZodResponse } from 'nestjs-zod';
 import { RequirePermission } from '../auth/decorators';
 import { AnalyticsCapacityService } from './analytics-capacity.service';
 import { AnalyticsFlowService } from './analytics-flow.service';
+import { AnalyticsForecastService } from './analytics-forecast.service';
 import { AnalyticsQualityService } from './analytics-quality.service';
 import { AnalyticsSprintService } from './analytics-sprint.service';
 import { AnalyticsService } from './analytics.service';
@@ -38,6 +41,7 @@ class SprintsDto extends createZodDto(AnalyticsSprintsSchema) {}
 class CapacityQueryDto extends createZodDto(AnalyticsCapacityQuerySchema) {}
 class CapacityDto extends createZodDto(AnalyticsCapacitySchema) {}
 class QualityDto extends createZodDto(AnalyticsQualitySchema) {}
+class ForecastDto extends createZodDto(AnalyticsForecastSchema) {}
 
 /**
  * Kişi ve Proje analizi (ADR-143). Kişi, Proje ve karşılaştırma ekranları yalnızca Owner/Admin'e açıktır;
@@ -51,6 +55,7 @@ export class AnalyticsController {
     private readonly sprintStats: AnalyticsSprintService,
     private readonly capacityStats: AnalyticsCapacityService,
     private readonly qualityStats: AnalyticsQualityService,
+    private readonly forecastStats: AnalyticsForecastService,
   ) {}
 
   @Get('people')
@@ -115,5 +120,13 @@ export class AnalyticsController {
   @ZodResponse({ type: QualityDto })
   quality(@Query() query: QueryDto): Promise<AnalyticsQuality> {
     return this.qualityStats.quality(query);
+  }
+
+  /** Öngörü ve risk uyarıları: sprint/Epic tahmini bitiş, yavaşlama, bekleyen kritik Bug (ADR-148). */
+  @Get('forecast')
+  @RequirePermission(W.WORKSPACE_SETTINGS)
+  @ZodResponse({ type: ForecastDto })
+  forecast(): Promise<AnalyticsForecast> {
+    return this.forecastStats.forecast();
   }
 }

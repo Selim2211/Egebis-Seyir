@@ -442,3 +442,86 @@ export const AnalyticsQualitySchema = z.object({
   ),
 });
 export type AnalyticsQuality = z.infer<typeof AnalyticsQualitySchema>;
+
+// ---------- Öngörü ve risk (ADR-148) ----------
+
+export const ANALYTICS_RISK_KINDS = [
+  'sprint_behind',
+  'critical_waiting',
+  'person_slowing',
+  'project_slowing',
+  'stuck_items',
+  'unassigned_bugs',
+] as const;
+export type AnalyticsRiskKind = (typeof ANALYTICS_RISK_KINDS)[number];
+export const ANALYTICS_RISK_LEVELS = ['high', 'medium', 'low'] as const;
+export type AnalyticsRiskLevel = (typeof ANALYTICS_RISK_LEVELS)[number];
+export const ANALYTICS_SPRINT_STATES = ['ahead', 'on_track', 'at_risk', 'behind'] as const;
+export type AnalyticsSprintState = (typeof ANALYTICS_SPRINT_STATES)[number];
+
+/** Bir uyarı: metni arayüz kendi dilinde `kind` + sayılardan kurar. Kişileri etiketlemez, değişimi söyler. */
+export const AnalyticsRiskSchema = z.object({
+  id: z.string(),
+  kind: z.enum(ANALYTICS_RISK_KINDS),
+  level: z.enum(ANALYTICS_RISK_LEVELS),
+  /** Kişi, Proje, sprint ya da iş adı. */
+  subject: z.string(),
+  /** Anlamı türe göre: gün, adet ya da bu/önceki dönem değeri. */
+  value: z.number(),
+  previous: z.number().nullable(),
+  link: z
+    .object({
+      kind: z.enum(['item', 'person', 'project', 'sprint']),
+      /** `item` için iş anahtarı (MOB-12), diğerleri için kimlik. */
+      id: z.string(),
+    })
+    .nullable(),
+});
+export type AnalyticsRisk = z.infer<typeof AnalyticsRiskSchema>;
+
+/** GET analytics/forecast (Owner/Admin) */
+export const AnalyticsForecastSchema = z.object({
+  generatedAt: z.iso.datetime(),
+  /** Aktif sprintlerin mevcut hızla tahmini. */
+  sprints: z.array(
+    z.object({
+      id: z.uuid(),
+      name: z.string(),
+      project: SpaceRef.pick({ id: true, name: true, color: true }),
+      startDate: DateKey,
+      endDate: DateKey,
+      daysLeft: z.int(),
+      /** Sprintteki toplam, biten ve kalan puan (şu an). */
+      totalPoints: z.number(),
+      donePoints: z.number(),
+      remainingPoints: z.number(),
+      /** Başlangıçtan beri günlük biten puan. */
+      ratePerDay: z.number(),
+      /** Bu hızla bitiş gününde biten puan ve toplama oranı (%). */
+      projectedDone: z.number(),
+      projectedPct: z.int().nullable(),
+      /** Kalan işin bu hızla biteceği gün; hız sıfırsa ya da kalan yoksa null. */
+      projectedFinish: DateKey.nullable(),
+      state: z.enum(ANALYTICS_SPRINT_STATES),
+    }),
+  ),
+  /** Açık Epic'lerin kalan puanı ve Projenin son 4 haftalık hızıyla tahmini bitiş. */
+  epics: z.array(
+    z.object({
+      id: z.uuid(),
+      key: z.string(),
+      title: z.string(),
+      project: SpaceRef.pick({ id: true, name: true, color: true }),
+      totalPoints: z.number(),
+      donePoints: z.number(),
+      remainingPoints: z.number(),
+      openItems: z.int(),
+      /** Projenin son 28 günde haftalık ortalama biten puanı. */
+      ratePerWeek: z.number(),
+      weeksLeft: z.number().nullable(),
+      projectedFinish: DateKey.nullable(),
+    }),
+  ),
+  risks: z.array(AnalyticsRiskSchema),
+});
+export type AnalyticsForecast = z.infer<typeof AnalyticsForecastSchema>;

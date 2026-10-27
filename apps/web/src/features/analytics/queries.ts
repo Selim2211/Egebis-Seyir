@@ -2,6 +2,7 @@ import {
   AnalyticsCapacitySchema,
   AnalyticsCompareSchema,
   AnalyticsFlowSchema,
+  AnalyticsForecastSchema,
   AnalyticsPeopleSchema,
   AnalyticsPersonSchema,
   AnalyticsProjectSchema,
@@ -110,5 +111,12 @@ export const qualityQuery = (ws: string, f: AnalyticsFilters) =>
     queryKey: key(ws, 'quality', f),
     queryFn: () =>
       apiRequest(`/workspaces/${ws}/analytics/quality?${params(f)}`, AnalyticsQualitySchema),
+    placeholderData: keepPreviousData,
+  });
+
+export const forecastQuery = (ws: string) =>
+  queryOptions({
+    queryKey: key(ws, 'forecast'),
+    queryFn: () => apiRequest(`/workspaces/${ws}/analytics/forecast`, AnalyticsForecastSchema),
     placeholderData: keepPreviousData,
   });
