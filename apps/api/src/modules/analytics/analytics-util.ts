@@ -55,3 +55,23 @@ export function spanOf(
   const prevTo = addDays(from, -1);
   return { from, to, prevFrom: addDays(prevTo, -(days - 1)), prevTo, grain: q.grain };
 }
+
+/** Hafta/ay zaman noktaları (aralığın tamamı); sprint zaman diliminde haftaya düşer. */
+export function calendarBuckets(
+  w: Span,
+): Array<{ key: string; label: string; from: string; keyOf: (day: string) => string }> {
+  const monthly = w.grain === 'month';
+  const keyOf = (day: string) => (monthly ? monthStart(day) : weekStart(day));
+  const out: Array<{ key: string; label: string; from: string; keyOf: (day: string) => string }> =
+    [];
+  let cursor = keyOf(w.from);
+  while (cursor <= w.to && out.length < 400) {
+    out.push({ key: cursor, label: cursor, from: cursor, keyOf });
+    if (monthly) {
+      const d = new Date(`${cursor}T12:00:00Z`);
+      d.setUTCMonth(d.getUTCMonth() + 1);
+      cursor = `${d.toISOString().slice(0, 7)}-01`;
+    } else cursor = addDays(cursor, 7);
+  }
+  return out;
+}

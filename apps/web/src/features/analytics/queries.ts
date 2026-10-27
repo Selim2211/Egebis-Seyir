@@ -5,6 +5,7 @@ import {
   AnalyticsPeopleSchema,
   AnalyticsPersonSchema,
   AnalyticsProjectSchema,
+  AnalyticsQualitySchema,
   AnalyticsSprintsSchema,
   SprintBurndownSchema,
   type AnalyticsGrain,
@@ -101,5 +102,13 @@ export const capacityQuery = (ws: string, f: AnalyticsFilters, weeklyHours: numb
         `/workspaces/${ws}/analytics/capacity?${params(f, { weeklyHours: String(weeklyHours) })}`,
         AnalyticsCapacitySchema,
       ),
+    placeholderData: keepPreviousData,
+  });
+
+export const qualityQuery = (ws: string, f: AnalyticsFilters) =>
+  queryOptions({
+    queryKey: key(ws, 'quality', f),
+    queryFn: () =>
+      apiRequest(`/workspaces/${ws}/analytics/quality?${params(f)}`, AnalyticsQualitySchema),
     placeholderData: keepPreviousData,
   });

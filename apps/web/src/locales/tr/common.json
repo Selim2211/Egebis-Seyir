@@ -2829,7 +2829,8 @@
       "compare": "Karşılaştırma",
       "flow": "Akış",
       "sprint": "Sprint",
-      "capacity": "Kapasite"
+      "capacity": "Kapasite",
+      "quality": "Kalite"
     },
     "range": "Tarih aralığı",
     "from": "Başlangıç",
@@ -3039,6 +3040,44 @@
         "5": "Cmt",
         "6": "Paz"
       }
+    },
+    "quality": {
+      "title": "Kalite ve destek",
+      "opened": "Açılan Bug",
+      "resolved": "Çözülen Bug",
+      "resolveTime": "Çözüm süresi",
+      "median": "Medyan {{value}} gün",
+      "openNow": "Şu an açık",
+      "openNowSub": "Kapanmamış tüm Bug’lar",
+      "share": "Bug payı",
+      "shareSub": "Açılan işlerin yüzde kaçı Bug",
+      "none": "Bu aralıkta Bug yok.",
+      "flowTitle": "Bug akışı ve çözüm süresi",
+      "flowHint": "Çubuklar: açılan ve çözülen. Turuncu çizgi: ortalama çözüm süresi (gün, sağ eksen)",
+      "severityTitle": "Önem derecesine göre",
+      "severityHint": "Çözüm süresi ve açık Bug’ların en eskisi. Kritik/Önemli’de 7 günü aşan kırmızı",
+      "col": {
+        "severity": "Önem",
+        "avg": "Ort. çözüm",
+        "oldest": "En eski açık",
+        "method": "Atama yöntemi",
+        "bugs": "Bug",
+        "moved": "Taşınan",
+        "movedPct": "Taşınma %",
+        "company": "Firma",
+        "firstReply": "İlk yanıt"
+      },
+      "projectTitle": "Projelere göre Bug",
+      "projectHint": "Açılan ve şu an açık Bug sayısı",
+      "routingTitle": "Atama doğruluğu",
+      "routingHint": "E-postadan gelen Bug’lardan kaçı sonradan başka projeye taşındı",
+      "routingNote": "Kural, firma ve yapay zeka atamasında yüksek taşınma oranı yanlış atama işaretidir (kırmızı: %30 ve üstü). “Belirsiz”de taşınma beklenen elle atama adımıdır.",
+      "companyTitle": "Firmalara göre destek",
+      "companyHint": "En çok Bug gönderen firmalar; firmaya tıklayınca Bug’ları listelenir",
+      "noCompany": "Firması tanınan e-posta Bug’ı yok.",
+      "criticalTitle": "Bekleyen Kritik ve Önemli Bug’lar",
+      "criticalHint": "Açık olan, en uzun süredir bekleyen 10 Bug",
+      "noCritical": "Açık Kritik ya da Önemli Bug yok."
     }
   }
 }

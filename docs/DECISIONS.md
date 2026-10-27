@@ -1300,3 +1300,15 @@ Analiz modülüne "Kapasite" sekmesi eklendi (`GET analytics/capacity?weeklyHour
 - **Doluluk ve kayıt günü:** doluluk = kaydedilen saat ÷ kapasite; kayıt günü = hafta içi kaç günde zaman kaydı girildi ÷ hafta içi gün sayısı. Ekip için ortalama.
 - **Isı haritası:** zaman kayıtlarında yalnızca gün vardır (saat bilgisi yok), bu yüzden harita takvim günü (son 26 hafta, en çok 183 gün) ve haftanın günü bazlıdır; "hangi saatlerde çalışıyor" ölçülmez. Seçili kişi tablodan değiştirilir.
 - **Haftalık ekip serisi:** hafta başına kaydedilen saat ve kapasite (üye sayısı × haftanın hafta içi günleri × günlük saat).
+
+## ADR-147 — Analiz: kalite ve destek (aşama D)
+
+**Durum:** Kabul · **Tarih:** 2026-10-27
+
+Analiz modülüne "Kalite" sekmesi eklendi (`GET analytics/quality`, yalnızca Owner/Admin). Mevcut kayıtlar kullanıldı: `work_items` (Bug, önem, açılış/tamamlanma), `inbound_emails` (NEW: atama gerekçesi, firma; OUTBOUND: ilk insan yanıtı) ve `activity_events` (`item.moved` + `spaceId` değişimi).
+
+- **Ölçütler:** aralıkta açılan/çözülen Bug, ortalama ve medyan çözüm süresi (açılış→tamamlanma), şu an açık Bug, Bug payı (açılan işler içinde), önceki dönemle kıyas; açılan/çözülen/çözüm süresi zaman serisi (sprint dilimi haftaya düşer).
+- **Önem derecesine göre:** açılan, çözülen, ortalama çözüm, açık sayısı ve en eski açık Bug yaşı. Açık Kritik/Önemli Bug'lardan en eski 10'u listelenir.
+- **Proje ve firma kırılımı:** projede Bug sayısı ve payı; e-postadan gelen Bug'larda firma bazında Bug, çözülen, açık, çözüm süresi ve ilk yanıt süresi (en çok Bug gönderen 8 firma).
+- **Atama doğruluğu:** e-posta Bug'ları atama yöntemine göre (kural, firma varsayılanı, yapay zeka, belirsiz) ayrılır; açıldıktan sonra **başka projeye taşınan** Bug oranı hesaplanır. Kural/firma/yapay zekada yüksek oran yanlış atama sinyalidir (UI'da %30 ve üstü kırmızı); "Belirsiz"de taşıma beklenen elle atama adımıdır. Aynı proje içindeki liste taşımaları sayılmaz.
+- **Sınır:** Bug "önem"i boş olabilir (önem seçilmemiş Bug'lar önem tablosuna girmez); e-posta olmayan Bug'larda firma ve ilk yanıt yoktur.

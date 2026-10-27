@@ -5,7 +5,7 @@ import { AnalyticsPage, type AnalyticsSearch } from '@/features/analytics/analyt
 
 const SearchSchema = z.object({
   av: z
-    .enum(['person', 'project', 'flow', 'sprint', 'capacity', 'compare'])
+    .enum(['person', 'project', 'flow', 'sprint', 'capacity', 'quality', 'compare'])
     .optional()
     .catch(undefined),
   ap: z.string().optional(),

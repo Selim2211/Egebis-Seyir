@@ -17,6 +17,7 @@ import { FlowView } from './flow-view';
 import { addDays, Empty, FilterBar } from './parts';
 import { PersonView } from './person-view';
 import { ProjectView } from './project-view';
+import { QualityView } from './quality-view';
 import { SprintView } from './sprint-view';
 import {
   capacityQuery,
@@ -27,10 +28,12 @@ import {
   peopleQuery,
   personQuery,
   projectQuery,
+  qualityQuery,
   type AnalyticsFilters,
 } from './queries';
 
-export type AnalyticsTab = 'person' | 'project' | 'flow' | 'sprint' | 'capacity' | 'compare';
+export type AnalyticsTab =
+  'person' | 'project' | 'flow' | 'sprint' | 'capacity' | 'quality' | 'compare';
 
 /** Adres çubuğundaki durum (hepsi isteğe bağlı; eksikler varsayılanla tamamlanır). */
 export interface AnalyticsSearch {
@@ -101,6 +104,7 @@ export function AnalyticsPage({
     ...capacityQuery(ws, filters, weeklyHours),
     enabled: admin && tab === 'capacity',
   });
+  const quality = useQuery({ ...qualityQuery(ws, filters), enabled: admin && tab === 'quality' });
   const compare = useQuery({
     ...compareQuery(ws, selected, filters),
     enabled: admin && tab === 'compare' && selected.length >= 2,
@@ -115,7 +119,7 @@ export function AnalyticsPage({
     });
 
   const tabs: AnalyticsTab[] = admin
-    ? ['person', 'project', 'flow', 'sprint', 'capacity', 'compare']
+    ? ['person', 'project', 'flow', 'sprint', 'capacity', 'quality', 'compare']
     : ['person'];
   const peopleList = people.data?.people ?? [];
 
@@ -219,6 +223,13 @@ export function AnalyticsPage({
           />
         ) : (
           <Empty text={capacity.isError ? t('analytics.loadFailed') : t('common.loading')} />
+        ))}
+
+      {tab === 'quality' &&
+        (quality.data ? (
+          <QualityView data={quality.data} />
+        ) : (
+          <Empty text={quality.isError ? t('analytics.loadFailed') : t('common.loading')} />
         ))}
 
       {tab === 'compare' && (

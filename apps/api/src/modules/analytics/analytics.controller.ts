@@ -7,6 +7,7 @@ import {
   AnalyticsPeopleSchema,
   AnalyticsPersonSchema,
   AnalyticsProjectSchema,
+  AnalyticsQualitySchema,
   AnalyticsQuerySchema,
   AnalyticsSprintsSchema,
   WORKSPACE_PERMISSIONS as W,
@@ -16,12 +17,14 @@ import {
   type AnalyticsPeople,
   type AnalyticsPerson,
   type AnalyticsProject,
+  type AnalyticsQuality,
   type AnalyticsSprints,
 } from '@scrum/shared';
 import { createZodDto, ZodResponse } from 'nestjs-zod';
 import { RequirePermission } from '../auth/decorators';
 import { AnalyticsCapacityService } from './analytics-capacity.service';
 import { AnalyticsFlowService } from './analytics-flow.service';
+import { AnalyticsQualityService } from './analytics-quality.service';
 import { AnalyticsSprintService } from './analytics-sprint.service';
 import { AnalyticsService } from './analytics.service';
 
@@ -34,6 +37,7 @@ class FlowDto extends createZodDto(AnalyticsFlowSchema) {}
 class SprintsDto extends createZodDto(AnalyticsSprintsSchema) {}
 class CapacityQueryDto extends createZodDto(AnalyticsCapacityQuerySchema) {}
 class CapacityDto extends createZodDto(AnalyticsCapacitySchema) {}
+class QualityDto extends createZodDto(AnalyticsQualitySchema) {}
 
 /**
  * Kişi ve Proje analizi (ADR-143). Kişi, Proje ve karşılaştırma ekranları yalnızca Owner/Admin'e açıktır;
@@ -46,6 +50,7 @@ export class AnalyticsController {
     private readonly flow: AnalyticsFlowService,
     private readonly sprintStats: AnalyticsSprintService,
     private readonly capacityStats: AnalyticsCapacityService,
+    private readonly qualityStats: AnalyticsQualityService,
   ) {}
 
   @Get('people')
@@ -102,5 +107,13 @@ export class AnalyticsController {
   @ZodResponse({ type: CapacityDto })
   capacity(@Query() query: CapacityQueryDto): Promise<AnalyticsCapacity> {
     return this.capacityStats.capacity(query);
+  }
+
+  /** Kalite ve destek: Bug eğrisi, çözüm süresi, firma ve atama doğruluğu (ADR-147). */
+  @Get('quality')
+  @RequirePermission(W.WORKSPACE_SETTINGS)
+  @ZodResponse({ type: QualityDto })
+  quality(@Query() query: QueryDto): Promise<AnalyticsQuality> {
+    return this.qualityStats.quality(query);
   }
 }

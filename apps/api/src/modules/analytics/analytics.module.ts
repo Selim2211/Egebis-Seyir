@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { AnalyticsController } from './analytics.controller';
 import { AnalyticsCapacityService } from './analytics-capacity.service';
 import { AnalyticsFlowService } from './analytics-flow.service';
+import { AnalyticsQualityService } from './analytics-quality.service';
 import { AnalyticsSprintService } from './analytics-sprint.service';
 import { AnalyticsService } from './analytics.service';
 
@@ -13,6 +14,7 @@ import { AnalyticsService } from './analytics.service';
     AnalyticsFlowService,
     AnalyticsSprintService,
     AnalyticsCapacityService,
+    AnalyticsQualityService,
   ],
 })
 export class AnalyticsModule {}

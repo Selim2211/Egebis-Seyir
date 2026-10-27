@@ -2830,7 +2830,8 @@
       "compare": "Compare",
       "flow": "Flow",
       "sprint": "Sprint",
-      "capacity": "Capacity"
+      "capacity": "Capacity",
+      "quality": "Quality"
     },
     "range": "Date range",
     "from": "From",
@@ -3040,6 +3041,44 @@
         "5": "Sat",
         "6": "Sun"
       }
+    },
+    "quality": {
+      "title": "Quality and support",
+      "opened": "Bugs opened",
+      "resolved": "Bugs resolved",
+      "resolveTime": "Resolution time",
+      "median": "Median {{value}} days",
+      "openNow": "Open now",
+      "openNowSub": "All unresolved Bugs",
+      "share": "Bug share",
+      "shareSub": "Share of opened items that are Bugs",
+      "none": "No Bugs in this range.",
+      "flowTitle": "Bug flow and resolution time",
+      "flowHint": "Bars: opened and resolved. Orange line: average resolution time (days, right axis)",
+      "severityTitle": "By severity",
+      "severityHint": "Resolution time and the oldest open Bug. Over 7 days is red for Critical/Major",
+      "col": {
+        "severity": "Severity",
+        "avg": "Avg. resolution",
+        "oldest": "Oldest open",
+        "method": "Routing method",
+        "bugs": "Bugs",
+        "moved": "Moved",
+        "movedPct": "Moved %",
+        "company": "Company",
+        "firstReply": "First reply"
+      },
+      "projectTitle": "Bugs by project",
+      "projectHint": "Bugs opened and currently open",
+      "routingTitle": "Routing accuracy",
+      "routingHint": "How many emailed Bugs were later moved to another project",
+      "routingNote": "For rule, company and AI routing a high moved rate signals wrong assignment (red: 30% and up). In “Unsorted” moving is the expected manual step.",
+      "companyTitle": "Support by company",
+      "companyHint": "Companies sending the most Bugs; click a company to list its Bugs",
+      "noCompany": "No emailed Bugs from a known company.",
+      "criticalTitle": "Waiting Critical and Major Bugs",
+      "criticalHint": "The 10 open Bugs that have waited the longest",
+      "noCritical": "No open Critical or Major Bugs."
     }
   }
 }

@@ -347,3 +347,98 @@ export const AnalyticsCapacitySchema = z.object({
   weekly: z.array(z.object({ weekStart: DateKey, hours: z.number(), capacityHours: z.number() })),
 });
 export type AnalyticsCapacity = z.infer<typeof AnalyticsCapacitySchema>;
+
+// ---------- Kalite ve destek (ADR-147) ----------
+
+export const ANALYTICS_ROUTE_METHODS = ['rule', 'company', 'ai', 'unrouted'] as const;
+export type AnalyticsRouteMethod = (typeof ANALYTICS_ROUTE_METHODS)[number];
+
+const BugSeverityEnum = z.enum(['CRITICAL', 'MAJOR', 'MINOR', 'TRIVIAL']);
+const QualitySummary = z.object({
+  /** Aralıkta açılan, çözülen Bug. */
+  opened: z.int(),
+  resolved: z.int(),
+  /** Çözülenlerde açılıştan çözüme gün; yoksa null. */
+  avgResolveDays: z.number().nullable(),
+});
+
+/** GET analytics/quality (Owner/Admin) */
+export const AnalyticsQualitySchema = z.object({
+  range: RangeSchema,
+  totals: QualitySummary.extend({
+    /** Şu an açık Bug. */
+    openNow: z.int(),
+    medianResolveDays: z.number().nullable(),
+    /** Aralıkta açılan Bug'ların, açılan tüm işler (Task/Sub-Task/Bug) içindeki payı (%). */
+    bugSharePct: z.int().nullable(),
+  }),
+  previous: QualitySummary,
+  series: z.array(
+    z.object({
+      key: z.string(),
+      label: z.string(),
+      from: DateKey.nullable(),
+      opened: z.int(),
+      resolved: z.int(),
+      avgResolveDays: z.number().nullable(),
+    }),
+  ),
+  bySeverity: z.array(
+    z.object({
+      severity: BugSeverityEnum,
+      opened: z.int(),
+      resolved: z.int(),
+      avgResolveDays: z.number().nullable(),
+      openNow: z.int(),
+      /** Açık Bug'lar içinde en eskisinin yaşı (gün); yoksa null. */
+      oldestOpenDays: z.int().nullable(),
+    }),
+  ),
+  byProject: z.array(
+    z.object({
+      space: SpaceRef,
+      opened: z.int(),
+      resolved: z.int(),
+      openNow: z.int(),
+      avgResolveDays: z.number().nullable(),
+      /** Projede açılan işlerin yüzde kaçı Bug. */
+      bugSharePct: z.int().nullable(),
+    }),
+  ),
+  /** E-postadan gelen Bug'ların firma kırılımı (en çok Bug gönderen 8 firma). */
+  byCompany: z.array(
+    z.object({
+      id: z.uuid(),
+      name: z.string(),
+      bugs: z.int(),
+      resolved: z.int(),
+      openNow: z.int(),
+      avgResolveDays: z.number().nullable(),
+      /** E-postaya ilk insan yanıtına saat; yanıt yoksa null. */
+      avgFirstResponseHours: z.number().nullable(),
+    }),
+  ),
+  /** Atama yöntemine göre: kaç Bug sonradan başka projeye taşındı. */
+  routing: z.array(
+    z.object({
+      method: z.enum(ANALYTICS_ROUTE_METHODS),
+      bugs: z.int(),
+      moved: z.int(),
+      /** unrouted için taşınma beklenen adımdır (elle atama); diğerlerinde yanlış atama sinyalidir. */
+      movedPct: z.int().nullable(),
+    }),
+  ),
+  /** Açık Kritik/Önemli Bug'lardan en eski 10. */
+  critical: z.array(
+    z.object({
+      id: z.uuid(),
+      key: z.string(),
+      title: z.string(),
+      severity: BugSeverityEnum,
+      space: SpaceRef,
+      days: z.int(),
+      assignee: z.string().nullable(),
+    }),
+  ),
+});
+export type AnalyticsQuality = z.infer<typeof AnalyticsQualitySchema>;
