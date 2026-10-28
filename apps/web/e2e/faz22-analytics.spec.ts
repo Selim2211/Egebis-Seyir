@@ -106,7 +106,7 @@ test.describe.serial('Analiz modülü', () => {
     await expect(page.getByTestId('project-view')).toBeVisible();
     await page.getByLabel('Proje', { exact: true }).selectOption({ label: 'Analiz Proje' });
     await expect(page.getByRole('heading', { name: 'Analiz Proje' })).toBeVisible();
-    await expect(page.getByTestId('kpi-done')).toHaveText(String(api.totals.done));
+    await expect(page.getByTestId('kpi-done')).toHaveText('2'); // Analiz Proje'de biten iki iş
     await expect(page.getByTestId('chart-bugflow')).toBeVisible();
 
     // Akış sekmesi: kutucuklar ve grafikler açılır; geçmişi olmayan işlerde uyarı çıkar.

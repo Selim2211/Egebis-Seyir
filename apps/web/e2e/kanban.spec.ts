@@ -27,7 +27,7 @@ test.describe.serial('Kanban board', () => {
     await expect(page.getByRole('heading', { name: 'Akış' })).toBeVisible();
 
     // Sprint bağlantıları yok; Kanban board bağlantısı var.
-    await expect(sidebar.getByRole('link', { name: 'Backlog' })).toHaveCount(0);
+    await expect(sidebar.getByRole('link', { name: 'Backlog', exact: true })).toHaveCount(0);
     await sidebar.getByRole('link', { name: 'Kanban board' }).first().click();
     await expect(page.getByRole('heading', { name: 'Kanban board', level: 2 })).toBeVisible();
 

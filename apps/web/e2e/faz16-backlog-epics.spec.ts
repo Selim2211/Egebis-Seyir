@@ -87,8 +87,15 @@ test.describe.serial('Backlog Epic hiyerarşisi', () => {
       .toBe(epic.id);
 
     // Epic altındaki Task, Ayır alanına bırakılınca Epic'ten çıkar.
-    await expect(group).toContainText('Serbest iş');
-    const inside = page.locator('[data-row-id]', { hasText: 'Serbest iş' }).first();
+    // Liste yenilenene kadar bekle: satır yalnızca Epic grubunda, tek kopya olmalı.
+    const inside = group.locator('[data-row-id]', { hasText: 'Serbest iş' });
+    await expect(inside).toHaveCount(1);
+    await expect(page.locator('[data-row-id]', { hasText: 'Serbest iş' })).toHaveCount(1);
+    // Onay penceresi tamamen kapanmadan body pointer-events:none kalır; sürükleme başlamaz.
+    await expect(page.getByRole('alertdialog')).toHaveCount(0);
+    await expect
+      .poll(() => page.evaluate(() => getComputedStyle(document.body).pointerEvents))
+      .not.toBe('none');
     const box = (await inside.boundingBox())!;
     await page.mouse.move(box.x + box.width * 0.6, box.y + box.height / 2);
     await page.mouse.down();

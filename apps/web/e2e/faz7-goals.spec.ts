@@ -37,14 +37,15 @@ test.describe.serial('Hedefler', () => {
     await sidebar.getByRole('button', { name: 'Proje oluştur' }).first().click();
     const space = page.getByRole('dialog', { name: 'Yeni Proje oluştur' });
     await space.getByLabel('Ad', { exact: true }).fill('Hedef Testi');
-    await space.getByLabel('Anahtar').fill('HDF');
+    // HDF, faz12-move-group'taki "Hedef Proje"de kullanılıyor; tüm koşuda çakışmasın.
+    await space.getByLabel('Anahtar').fill('HDT');
     await space.getByRole('button', { name: 'Proje oluştur' }).click();
     await expect(page.getByRole('heading', { name: 'Hedef Testi' })).toBeVisible();
     await page.getByRole('link', { name: 'Görevler' }).first().click();
     const quick = page.getByRole('textbox', { name: 'Başlık' });
     await quick.fill('Lansman duyurusu');
     await quick.press('Enter');
-    await expect(page.getByText('HDF-1 oluşturuldu.')).toBeVisible();
+    await expect(page.getByText('HDT-1 oluşturuldu.')).toBeVisible();
 
     await sidebar.getByRole('link', { name: 'Hedefler' }).click();
     await page.getByRole('button', { name: 'Hedef ekle' }).click();
@@ -55,7 +56,7 @@ test.describe.serial('Hedefler', () => {
 
     await page.getByRole('button', { name: 'Lansman', exact: true }).click();
     await page.getByLabel('Lansman hedefine görev ekle').fill('Lansman duyurusu');
-    await page.getByRole('button', { name: /HDF-1/ }).click();
+    await page.getByRole('button', { name: /HDT-1/ }).click();
     await expect(page.getByRole('link', { name: /Lansman duyurusu/ })).toBeVisible();
     await expect(page.getByRole('progressbar', { name: 'Lansman' })).toHaveAttribute(
       'aria-valuenow',

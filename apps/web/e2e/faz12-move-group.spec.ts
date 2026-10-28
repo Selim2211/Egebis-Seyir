@@ -107,8 +107,8 @@ test.describe.serial('Taşı ve grupla', () => {
     const dialog = page.getByRole('dialog', { name: /3 öğeyi Epic altında grupla/ });
     await dialog.getByRole('option', { name: '+ Yeni Epic oluştur…' }).click();
     await dialog.getByLabel('Yeni Epic’in adı').fill('Hesap yönetimi');
-    // Sub-Task'lı Task (BRN-3) alt öğesiyle birlikte gitsin.
-    await dialog.getByTestId('with-subtasks').click();
+    // Sub-Task'lı Task (BRN-3) alt öğesiyle birlikte gider: varsayılan açık (ADR-137).
+    await expect(dialog.getByTestId('with-subtasks')).toBeChecked();
     await dialog.getByRole('button', { name: 'Grupla' }).click();
     await expect(page.getByText('3 öğe Epic altında toplandı.')).toBeVisible();
     await expect(bar).toHaveCount(0);
@@ -167,11 +167,17 @@ test.describe.serial('Taşı ve grupla', () => {
   }) => {
     const me = await call<{ workspaces: Array<{ id: string }> }>(page, 'GET', '/auth/me');
     const ws = me.workspaces[0]!.id;
-    const epicKey = await call<{ parentId: string }>(
+    const epicKey = await call<{ parentId: string; sprintId: string; spaceId: string }>(
       page,
       'GET',
       `/workspaces/${ws}/items/key/BRN-2`,
     );
+    // Epic yalnızca Task'ları aynı sprint'teyse taşınır: Backlog'taki BRN-3 de BRN-2'nin sprint'ine alınır.
+    const three = await call<{ id: string }>(page, 'GET', `/workspaces/${ws}/items/key/BRN-3`);
+    await call(page, 'POST', `/workspaces/${ws}/spaces/${epicKey.spaceId}/backlog/move`, {
+      itemIds: [three.id],
+      sprintId: epicKey.sprintId,
+    });
     const epic = await call<{ key: string }>(
       page,
       'GET',
