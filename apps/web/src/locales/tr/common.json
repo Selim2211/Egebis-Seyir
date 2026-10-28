@@ -3125,6 +3125,18 @@
         "weeks": "Tahmini hafta",
         "finish": "Tahmini bitiş"
       }
+    },
+    "export": {
+      "excel": "Excel indir",
+      "pdf": "PDF",
+      "digest": "Haftalık özet",
+      "on": "açık",
+      "digestEnable": "Haftalık e-posta özeti",
+      "digestHint": "Her Pazartesi 09:00’da geçen haftanın özeti {{count}} yöneticiye (Owner/Admin) e-postayla gider. Kişi sıralaması içermez.",
+      "next": "Sıradaki gönderim: {{when}}",
+      "last": "Son gönderim: {{when}}",
+      "testSend": "Kendime test gönder",
+      "testSent": "Özet {{to}} adresine gönderildi."
     }
   }
 }

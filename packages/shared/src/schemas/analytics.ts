@@ -525,3 +525,45 @@ export const AnalyticsForecastSchema = z.object({
   risks: z.array(AnalyticsRiskSchema),
 });
 export type AnalyticsForecast = z.infer<typeof AnalyticsForecastSchema>;
+
+// ---------- Dışa aktarma ve haftalık özet (ADR-149) ----------
+
+export const ANALYTICS_EXPORT_VIEWS = [
+  'person',
+  'project',
+  'flow',
+  'sprint',
+  'capacity',
+  'quality',
+  'forecast',
+  'compare',
+] as const;
+export type AnalyticsExportView = (typeof ANALYTICS_EXPORT_VIEWS)[number];
+
+/** GET analytics/export (Excel): ekrandaki sekmenin verisini indirir. */
+export const AnalyticsExportQuerySchema = AnalyticsCapacityQuerySchema.extend({
+  view: z.enum(ANALYTICS_EXPORT_VIEWS),
+  /** `person` için kişi; boşsa isteği yapan. */
+  userId: z.uuid().optional(),
+  /** `project` için Proje. */
+  projectId: z.uuid().optional(),
+});
+export type AnalyticsExportQuery = z.infer<typeof AnalyticsExportQuerySchema>;
+
+/** Haftalık özet e-postası ayarı (Owner/Admin). */
+export const AnalyticsDigestSchema = z.object({
+  enabled: z.boolean(),
+  lastSentAt: z.iso.datetime().nullable(),
+  /** Bir sonraki gönderim: Pazartesi 09:00 (Europe/Istanbul); kapalıysa null. */
+  nextSendAt: z.iso.datetime().nullable(),
+  /** Özetin gideceği kişi sayısı (Owner/Admin). */
+  recipients: z.int(),
+});
+export type AnalyticsDigest = z.infer<typeof AnalyticsDigestSchema>;
+
+export const UpdateAnalyticsDigestRequestSchema = z.object({ enabled: z.boolean() });
+export type UpdateAnalyticsDigestRequest = z.infer<typeof UpdateAnalyticsDigestRequestSchema>;
+
+/** POST analytics/digest/test: özet yalnızca isteği yapana gönderilir. */
+export const AnalyticsDigestTestSchema = z.object({ to: z.string() });
+export type AnalyticsDigestTest = z.infer<typeof AnalyticsDigestTestSchema>;

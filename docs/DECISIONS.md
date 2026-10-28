@@ -1324,3 +1324,14 @@ Analiz modülüne "Öngörü" sekmesi (`GET analytics/forecast`, yalnızca Owner
 - **Uyarılar (eşikli, hesaplanabilir):** sprint geride/risk altında; Kritik Bug 7 günden, Önemli Bug 14 günden uzun açık (en eski 5); 3 günden uzun atanmamış Bug (≥5 yüksek); "Yapılıyor"da 14 günden uzun `updatedAt` değişmemiş 3+ iş (≥8 yüksek); kişi ya da projede son 14 günde biten iş önceki 14 güne göre %40+ azalmış (önceki dönemde kişide ≥3, projede ≥5 iş; %70+ düşüş yüksek).
 - **Dil ve etik:** uyarı metinleri kişiyi "kötü" diye etiketlemez; yalnızca "son 14 günde X, öncesinde Y" der. Eşikler servis içinde sabittir (ADR'de belgeli), ayarlanabilir değildir.
 - **Sınırlar:** `updatedAt` iş satırı her değiştiğinde güncellenir (yorum dahil değil), bu yüzden "hareketsiz" bir yaklaşıktır; kesin durum geçişi için Akış sekmesine bakılır. Yavaşlama uyarısı tatil/izin dönemlerini ayırt etmez.
+
+## ADR-149 — Analiz: dışa aktarma ve haftalık e-posta özeti (aşama F)
+
+**Durum:** Kabul · **Tarih:** 2026-10-27
+
+- **Excel (`GET analytics/export?view=`):** her sekme kendi sayfalarıyla indirilir (kişi: Özet, Zaman serisi, Projeler, Sprintler, İşler; Proje, Akış, Sprint, Kapasite, Kalite, Öngörü ve Karşılaştırma kendi tablolarıyla). Değerler ekrandakiyle aynı servislerden gelir; ayrı bir hesap yoktur. Kişi dışındaki sekmeler yalnızca Owner/Admin'e açıktır (üye yalnızca kendi kişi dosyasını indirir). `exceljs` ile üretilir.
+- **PDF:** ayrı bir PDF üreticisi yok; mevcut yazdırma yolu (`.doc-print`, ADR-105) kullanılır: "PDF" düğmesi tarayıcının yazdır penceresini açar, kenar çubuğu/filtreler/sekmeler basılmaz, tarih aralığı başlığa eklenir. Böylece grafikler ekrandaki haliyle çıkar.
+- **Haftalık özet e-postası (`analytics_settings`):** ayar kapalı başlar, Analiz → "Haftalık özet"ten Owner/Admin açar. 15 dakikada bir çalışan iş, Pazartesi 09:00'dan sonra (Europe/Istanbul) ayarı açık her çalışma alanında geçen haftanın (Pzt–Paz) özetini Owner/Admin yetkili üyelere (`workspace.settings` izni olan roller) gönderir; `digestLastWeek` ile aynı hafta için bir kez. Sunucu o saatte kapalıysa Pazartesi içinde ilk açılışta gider.
+- **İçerik:** biten iş (önceki hafta ile), açılan/çözülen Bug ve çözüm süresi, ekip doluluğu ve zaman kaydı oranı, en önemli 5 uyarı, aktif sprintlerin durumu ve uygulamaya bağlantı. **Kişi sıralaması ya da kişi bazlı performans içermez.**
+- **Test e-postası:** "Kendime test gönder" özeti yalnızca düğmeye basana yollar ve gönderim hatasını (SMTP) olduğu gibi gösterir. Testlerde `MailService` belleğe yazar; gerçek e-posta gitmez.
+- **Sınır:** özet metni sabit Türkçe'dir; alıcı başına dil ya da saat seçimi yoktur. Zamanlayıcı pg-boss kuyruğunun açık olduğu ortamda çalışır.

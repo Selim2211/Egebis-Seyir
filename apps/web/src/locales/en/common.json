@@ -3126,6 +3126,18 @@
         "weeks": "Est. weeks",
         "finish": "Est. finish"
       }
+    },
+    "export": {
+      "excel": "Download Excel",
+      "pdf": "PDF",
+      "digest": "Weekly digest",
+      "on": "on",
+      "digestEnable": "Weekly email digest",
+      "digestHint": "Every Monday at 09:00 last week’s summary is emailed to {{count}} admins (Owner/Admin). It contains no ranking of people.",
+      "next": "Next send: {{when}}",
+      "last": "Last sent: {{when}}",
+      "testSend": "Send a test to me",
+      "testSent": "The digest was sent to {{to}}."
     }
   }
 }

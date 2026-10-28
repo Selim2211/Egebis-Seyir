@@ -1,8 +1,25 @@
-import { Controller, Get, Param, ParseUUIDPipe, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Header,
+  HttpCode,
+  HttpStatus,
+  Param,
+  ParseUUIDPipe,
+  Post,
+  Put,
+  Query,
+  Res,
+  StreamableFile,
+} from '@nestjs/common';
 import {
   AnalyticsCapacityQuerySchema,
   AnalyticsCapacitySchema,
   AnalyticsCompareSchema,
+  AnalyticsDigestSchema,
+  AnalyticsDigestTestSchema,
+  AnalyticsExportQuerySchema,
   AnalyticsFlowSchema,
   AnalyticsForecastSchema,
   AnalyticsPeopleSchema,
@@ -11,9 +28,12 @@ import {
   AnalyticsQualitySchema,
   AnalyticsQuerySchema,
   AnalyticsSprintsSchema,
+  UpdateAnalyticsDigestRequestSchema,
   WORKSPACE_PERMISSIONS as W,
   type AnalyticsCapacity,
   type AnalyticsCompare,
+  type AnalyticsDigest,
+  type AnalyticsDigestTest,
   type AnalyticsFlow,
   type AnalyticsForecast,
   type AnalyticsPeople,
@@ -23,8 +43,12 @@ import {
   type AnalyticsSprints,
 } from '@scrum/shared';
 import { createZodDto, ZodResponse } from 'nestjs-zod';
-import { RequirePermission } from '../auth/decorators';
+import type { Response } from 'express';
+import { CurrentUser, RequirePermission } from '../auth/decorators';
+import type { AuthUser } from '../auth/auth.constants';
 import { AnalyticsCapacityService } from './analytics-capacity.service';
+import { AnalyticsDigestService } from './analytics-digest.service';
+import { AnalyticsExportService } from './analytics-export.service';
 import { AnalyticsFlowService } from './analytics-flow.service';
 import { AnalyticsForecastService } from './analytics-forecast.service';
 import { AnalyticsQualityService } from './analytics-quality.service';
@@ -42,6 +66,10 @@ class CapacityQueryDto extends createZodDto(AnalyticsCapacityQuerySchema) {}
 class CapacityDto extends createZodDto(AnalyticsCapacitySchema) {}
 class QualityDto extends createZodDto(AnalyticsQualitySchema) {}
 class ForecastDto extends createZodDto(AnalyticsForecastSchema) {}
+class DigestDto extends createZodDto(AnalyticsDigestSchema) {}
+class ExportQueryDto extends createZodDto(AnalyticsExportQuerySchema) {}
+class UpdateDigestDto extends createZodDto(UpdateAnalyticsDigestRequestSchema) {}
+class DigestTestDto extends createZodDto(AnalyticsDigestTestSchema) {}
 
 /**
  * Kişi ve Proje analizi (ADR-143). Kişi, Proje ve karşılaştırma ekranları yalnızca Owner/Admin'e açıktır;
@@ -56,6 +84,8 @@ export class AnalyticsController {
     private readonly capacityStats: AnalyticsCapacityService,
     private readonly qualityStats: AnalyticsQualityService,
     private readonly forecastStats: AnalyticsForecastService,
+    private readonly digest: AnalyticsDigestService,
+    private readonly exporter: AnalyticsExportService,
   ) {}
 
   @Get('people')
@@ -128,5 +158,53 @@ export class AnalyticsController {
   @ZodResponse({ type: ForecastDto })
   forecast(): Promise<AnalyticsForecast> {
     return this.forecastStats.forecast();
+  }
+
+  /** Haftalık özet e-postası ayarı (ADR-149). */
+  @Get('digest')
+  @RequirePermission(W.WORKSPACE_SETTINGS)
+  @ZodResponse({ type: DigestDto })
+  digestSettings(
+    @Param('workspaceId', ParseUUIDPipe) workspaceId: string,
+  ): Promise<AnalyticsDigest> {
+    return this.digest.get(workspaceId);
+  }
+
+  @Put('digest')
+  @RequirePermission(W.WORKSPACE_SETTINGS)
+  @ZodResponse({ type: DigestDto })
+  setDigest(
+    @Param('workspaceId', ParseUUIDPipe) workspaceId: string,
+    @Body() body: UpdateDigestDto,
+  ): Promise<AnalyticsDigest> {
+    return this.digest.set(workspaceId, body.enabled);
+  }
+
+  /** Özet yalnızca isteği yapana gönderilir. */
+  @Post('digest/test')
+  @RequirePermission(W.WORKSPACE_SETTINGS)
+  @HttpCode(HttpStatus.OK)
+  @ZodResponse({ type: DigestTestDto })
+  digestTest(
+    @Param('workspaceId', ParseUUIDPipe) workspaceId: string,
+    @CurrentUser() user: AuthUser,
+  ): Promise<AnalyticsDigestTest> {
+    return this.digest.sendTest(workspaceId, user.id);
+  }
+
+  /** Ekrandaki sekmenin verisini Excel olarak indirir (ADR-149). Kişi dışındaki sekmeler yalnızca Owner/Admin. */
+  @Get('export')
+  @Header('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+  @Header('Cache-Control', 'private, no-store')
+  async export(
+    @Query() query: ExportQueryDto,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<StreamableFile> {
+    const { filename, buffer } = await this.exporter.build(query);
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="analiz.xlsx"; filename*=UTF-8''${encodeURIComponent(filename)}`,
+    );
+    return new StreamableFile(buffer);
   }
 }

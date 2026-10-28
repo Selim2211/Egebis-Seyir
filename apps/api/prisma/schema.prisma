@@ -277,6 +277,7 @@ model Workspace {
   videoFolders            VideoFolder[]
   videos                  Video[]
   ticketSettings          TicketSettings?
+  analyticsSettings       AnalyticsSettings?
   ticketCompanies         TicketCompany[]
   ticketCompanyDomains    TicketCompanyDomain[]
   ticketRules             TicketRule[]
@@ -1822,4 +1823,17 @@ model TicketRule {
 
   @@index([workspaceId, position])
   @@map("ticket_rules")
+}
+
+/// Analiz modülü ayarları (ADR-149): haftalık özet e-postası. Kayıt yoksa kapalıdır.
+model AnalyticsSettings {
+  workspaceId      String    @id @db.Uuid
+  workspace        Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  digestEnabled    Boolean   @default(false)
+  /// Son gönderilen özetin haftasının Pazartesisi (Europe/Istanbul); aynı hafta için tekrar gönderilmez.
+  digestLastWeek   DateTime? @db.Date
+  digestLastSentAt DateTime? @db.Timestamptz
+  updatedAt        DateTime  @updatedAt @db.Timestamptz
+
+  @@map("analytics_settings")
 }

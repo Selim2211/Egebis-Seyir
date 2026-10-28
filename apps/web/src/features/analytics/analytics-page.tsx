@@ -9,10 +9,11 @@ import { useTranslation } from 'react-i18next';
 import { useMe } from '@/features/auth/queries';
 import { useHierarchy } from '@/features/spaces/queries';
 import { useCan, useCurrentWorkspace } from '@/features/workspace/queries';
-import { todayDay } from '@/lib/format';
+import { formatShortDate, todayDay } from '@/lib/format';
 import { cn } from '@/lib/utils';
 import { CapacityView } from './capacity-view';
 import { CompareView } from './compare-view';
+import { ExportBar } from './export-bar';
 import { FlowView } from './flow-view';
 import { ForecastView } from './forecast-view';
 import { addDays, Empty, FilterBar } from './parts';
@@ -127,16 +128,34 @@ export function AnalyticsPage({
   const peopleList = people.data?.people ?? [];
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6" data-testid="analytics-page">
-      <div className="mb-4">
-        <h1 className="text-[22px] font-semibold tracking-tight">{t('analytics.title')}</h1>
-        <p className="text-muted-foreground text-sm">
-          {admin ? t('analytics.subtitle') : t('analytics.subtitleSelf')}
-        </p>
+    <div className="doc-print mx-auto max-w-7xl px-4 py-6 sm:px-6" data-testid="analytics-page">
+      <div className="mb-4 flex flex-wrap items-start gap-3">
+        <div className="min-w-0 flex-1">
+          <h1 className="text-[22px] font-semibold tracking-tight">{t('analytics.title')}</h1>
+          <p className="text-muted-foreground text-sm">
+            {admin ? t('analytics.subtitle') : t('analytics.subtitleSelf')}
+          </p>
+          <p className="text-muted-foreground hidden text-xs print:block">
+            {formatShortDate(filters.from)} – {formatShortDate(filters.to)}
+          </p>
+        </div>
+        <ExportBar
+          view={tab}
+          filters={filters}
+          admin={admin}
+          userId={userId}
+          projectId={spaceId}
+          userIds={selected}
+          weeklyHours={weeklyHours}
+        />
       </div>
 
       {admin && (
-        <div className="mb-4 flex gap-1 border-b" role="tablist" aria-label={t('analytics.tabs')}>
+        <div
+          className="mb-4 flex gap-1 border-b print:hidden"
+          role="tablist"
+          aria-label={t('analytics.tabs')}
+        >
           {tabs.map((x) => (
             <button
               key={x}
@@ -158,7 +177,7 @@ export function AnalyticsPage({
         </div>
       )}
 
-      <div className="mb-5">
+      <div className="mb-5 print:hidden">
         <FilterBar filters={filters} onChange={setFilters} showProject={tab !== 'project'} />
       </div>
 

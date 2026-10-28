@@ -28,6 +28,8 @@ test.describe.serial('Analiz modülü', () => {
   test('kişi, Proje ve karşılaştırma sekmeleri gerçek veriyle açılır; süzgeçler adres çubuğuna yazılır', async ({
     page,
   }) => {
+    // Sekmelerin hepsi tek senaryoda gezildiği için süre payı geniş tutulur.
+    test.setTimeout(120_000);
     await page.goto('/login');
     await login(page, OWNER.email, OWNER.password);
     await expect(page.getByRole('heading', { name: /Hoş geldin/ })).toBeVisible();
@@ -143,6 +145,24 @@ test.describe.serial('Analiz modülü', () => {
     await page.getByTestId('tab-forecast').click();
     await expect(page.getByTestId('forecast-view')).toBeVisible();
     await expect(page.getByText(/Beklenmeyen bir hata|Bulunamadı/)).toHaveCount(0);
+
+    // Excel/PDF ve haftalık özet: indirme bağlantısı gerçek bir .xlsx döner; özet ayarı açılıp kapanır.
+    await page.getByTestId('tab-person').click();
+    await expect(page.getByTestId('export-bar')).toBeVisible();
+    const href = await page.getByTestId('export-xlsx').getAttribute('href');
+    expect(href).toContain('/analytics/export?view=person');
+    const xlsx = await page.request.get(href!);
+    expect(xlsx.status()).toBe(200);
+    expect(xlsx.headers()['content-type']).toContain('spreadsheetml');
+    await expect(page.getByTestId('export-pdf')).toBeVisible();
+    await page.getByTestId('digest-trigger').click();
+    const popover = page.getByTestId('digest-popover');
+    await expect(popover).toBeVisible();
+    await popover.getByRole('switch').click();
+    await expect(page.getByTestId('digest-next')).toBeVisible();
+    await popover.getByRole('switch').click();
+    await expect(page.getByTestId('digest-next')).toHaveCount(0);
+    await page.keyboard.press('Escape');
 
     // Karşılaştırma sekmesi: önce boş durum, kişi eklenince sayı güncellenir.
     await page.getByTestId('tab-compare').click();
