@@ -160,14 +160,18 @@ describe('DoD/DoR ve Sprint Review (gerçek veritabanı)', () => {
     it('Backlog satırları DoR durumunu taşır; madde yoksa null', async () => {
       const s = await space();
       const a = await item(s.listId, { type: 'TASK', title: 'A' });
-      const t = await item(s.listId, { type: 'BUG', title: 'T' });
-      expect((await backlog(s.id)).items.map((i) => i.dor)).toEqual([null, null]);
+      const t = await item(s.listId, { type: 'TASK', title: 'T' });
+      // Bug'lar Backlog'da listelenmez (ADR-135); kendi sekmelerinde yönetilir.
+      const bug = await item(s.listId, { type: 'BUG', title: 'Hata' });
+      const first = (await backlog(s.id)).items;
+      expect(first.map((i) => i.dor)).toEqual([null, null]);
+      expect(first.some((i) => i.id === bug.id)).toBe(false);
 
       await owner.patch(api(`/spaces/${s.id}`), { dorItems: DOR }).expect(204);
       await owner.put(api(`/items/${a.id}/dor`), { checked: [DOR[0]!, DOR[1]!] }).expect(204);
       const rows = (await backlog(s.id)).items;
       expect(rows.find((r) => r.id === a.id)!.dor).toEqual({ checked: 2, total: 3 });
-      expect(rows.find((r) => r.id === t.id)!.dor).toEqual({ checked: 0, total: 3 }); // Bug için de geçerli
+      expect(rows.find((r) => r.id === t.id)!.dor).toEqual({ checked: 0, total: 3 });
     });
   });
 

@@ -344,14 +344,22 @@ export class AnalyticsService {
     const h = cur(hours);
     const r = cur(reopens);
     const buckets = await this.bucketList(w, [...d, ...h, ...r]);
-    const key = (f: { day: string; sprintId: string | null }) =>
-      this.bucketKey(w.grain, f.day, f.sprintId);
+    // Olgular bir kez gruplanır (nokta × olgu taraması yerine): uzun aralıkta yüzlerce nokta olabilir.
+    const group = <T extends { day: string; sprintId: string | null }>(rows: T[]) => {
+      const out = new Map<string, T[]>();
+      for (const row of rows) {
+        const k = this.bucketKey(w.grain, row.day, row.sprintId);
+        const list = out.get(k);
+        if (list) list.push(row);
+        else out.set(k, [row]);
+      }
+      return out;
+    };
+    const gd = group(d);
+    const gh = group(h);
+    const gr = group(r);
     return buckets.map((b) => ({
-      ...this.metrics(
-        d.filter((f) => key(f) === b.key),
-        h.filter((f) => key(f) === b.key),
-        r.filter((f) => key(f) === b.key),
-      ),
+      ...this.metrics(gd.get(b.key) ?? [], gh.get(b.key) ?? [], gr.get(b.key) ?? []),
       key: b.key,
       label: b.label,
       from: b.from,
@@ -397,18 +405,27 @@ export class AnalyticsService {
     const members = await this.tenant.db.membership.findMany({ select: { userId: true } });
     const ids = [...new Set([...members.map((m) => m.userId)])];
     const users = await this.users(ids);
+    // Kişi başına olgular tek geçişte gruplanır (kişi × olgu taraması yerine).
+    const byUser = <T extends { userId: string | null }>(rows: T[]) => {
+      const out = new Map<string, T[]>();
+      for (const row of rows) {
+        if (!row.userId) continue;
+        const list = out.get(row.userId);
+        if (list) list.push(row);
+        else out.set(row.userId, [row]);
+      }
+      return out;
+    };
+    const doneBy = byUser(done);
+    const hoursBy = byUser(hours);
+    const reopensBy = byUser(reopens);
     const people = ids.flatMap((id) => {
       const u = users.get(id);
       if (!u) return [];
       return [
         {
           user: u,
-          ...this.totals(
-            w,
-            done.filter((f) => f.userId === id),
-            hours.filter((f) => f.userId === id),
-            reopens.filter((f) => f.userId === id),
-          ),
+          ...this.totals(w, doneBy.get(id) ?? [], hoursBy.get(id) ?? [], reopensBy.get(id) ?? []),
         },
       ];
     });

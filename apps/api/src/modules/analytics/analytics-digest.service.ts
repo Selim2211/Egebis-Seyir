@@ -80,10 +80,12 @@ export class AnalyticsDigestService implements OnModuleInit {
   /** Bir sonraki Pazartesi 09:00 (Istanbul); bu hafta henüz gönderilmediyse ve saat geçtiyse "şimdi". */
   private nextSend(now: Date, lastWeek: string | null): Date {
     const monday = weekStart(dayKey(now));
-    const slot = new Date(`${monday}T0${SEND_HOUR}:00:00+03:00`);
+    const at = (day: string) =>
+      new Date(`${day}T${String(SEND_HOUR).padStart(2, '0')}:00:00+03:00`);
+    const slot = at(monday);
     if (now >= slot) {
       const sentThisWeek = lastWeek !== null && lastWeek >= monday;
-      return sentThisWeek ? new Date(`${addDays(monday, 7)}T0${SEND_HOUR}:00:00+03:00`) : now;
+      return sentThisWeek ? at(addDays(monday, 7)) : now;
     }
     return slot;
   }

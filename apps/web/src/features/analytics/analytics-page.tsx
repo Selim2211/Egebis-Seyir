@@ -35,6 +35,9 @@ import {
   type AnalyticsFilters,
 } from './queries';
 
+/** Seçilebilecek en uzun aralık (gün); API 731 günü aşanı reddeder. */
+const MAX_RANGE_DAYS = 730;
+
 export type AnalyticsTab =
   'person' | 'project' | 'flow' | 'sprint' | 'capacity' | 'quality' | 'forecast' | 'compare';
 
@@ -81,7 +84,11 @@ export function AnalyticsPage({
   // Üye yalnızca kendi kişi analizini görür.
   const tab: AnalyticsTab = admin ? (search.av ?? 'person') : 'person';
 
-  const people = useQuery({ ...peopleQuery(ws, filters), enabled: admin });
+  // Kişi listesi yalnızca kişi seçicisi ve karşılaştırma için gerekir.
+  const people = useQuery({
+    ...peopleQuery(ws, filters),
+    enabled: admin && (tab === 'person' || tab === 'compare'),
+  });
   const userId = admin ? (search.ap ?? me.user.id) : me.user.id;
   const spaceId = search.aj ?? hierarchy.data?.spaces[0]?.id;
   const selected = (search.ac ?? '').split(',').filter(Boolean).slice(0, ANALYTICS_COMPARE_MAX);
@@ -114,13 +121,21 @@ export function AnalyticsPage({
     enabled: admin && tab === 'compare' && selected.length >= 2,
   });
 
-  const setFilters = (patch: Partial<AnalyticsFilters>) =>
+  const setFilters = (patch: Partial<AnalyticsFilters>) => {
+    // Aralık her zaman geçerli kalır: ters seçim düzeltilir, en çok 2 yıl (API sınırı 731 gün).
+    let from = patch.from ?? filters.from;
+    let to = patch.to ?? filters.to;
+    if (from > to) [from, to] = 'from' in patch ? [from, from] : [to, to];
+    if (from < addDays(to, -(MAX_RANGE_DAYS - 1))) {
+      if ('from' in patch) to = addDays(from, MAX_RANGE_DAYS - 1);
+      else from = addDays(to, -(MAX_RANGE_DAYS - 1));
+    }
     onSearch({
-      ...('from' in patch ? { af: patch.from } : {}),
-      ...('to' in patch ? { at: patch.to } : {}),
+      ...('from' in patch || 'to' in patch ? { af: from, at: to } : {}),
       ...('grain' in patch ? { ag: patch.grain } : {}),
       ...('spaceId' in patch ? { asp: patch.spaceId } : {}),
     });
+  };
 
   const tabs: AnalyticsTab[] = admin
     ? ['person', 'project', 'flow', 'sprint', 'capacity', 'quality', 'forecast', 'compare']

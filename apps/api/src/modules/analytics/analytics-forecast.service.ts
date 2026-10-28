@@ -126,13 +126,23 @@ export class AnalyticsForecastService {
       },
       take: SCAN_LIMIT,
     });
-    const rateOf = (spaceId: string) =>
-      finished
-        .filter((f) => f.spaceId === spaceId && f.completedAt && f.completedAt >= since28)
-        .reduce((n, f) => n + (f.points ?? 0), 0) / 4;
+    // Projenin son 28 günde biten puanı bir kez toplanır (Epic başına tarama yerine).
+    const points28 = new Map<string, number>();
+    for (const f of finished) {
+      if (f.completedAt && f.completedAt >= since28)
+        points28.set(f.spaceId, (points28.get(f.spaceId) ?? 0) + (f.points ?? 0));
+    }
+    const rateOf = (spaceId: string) => (points28.get(spaceId) ?? 0) / 4;
+    const childrenOf = new Map<string, typeof children>();
+    for (const c of children) {
+      if (!c.parentId) continue;
+      const list = childrenOf.get(c.parentId);
+      if (list) list.push(c);
+      else childrenOf.set(c.parentId, [c]);
+    }
     const epics = epicRows
       .map((e) => {
-        const mine = children.filter((c) => c.parentId === e.id);
+        const mine = childrenOf.get(e.id) ?? [];
         const total = mine.reduce((n, c) => n + (c.points ?? 0), 0);
         const done = mine
           .filter((c) => c.status.category === 'DONE')

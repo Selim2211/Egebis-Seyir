@@ -227,17 +227,23 @@ export class AnalyticsFlowService {
       (s): s is Segment[] => s !== null,
     );
     const step = w.from < addDays(w.to, -92) ? 7 : 1;
+    // Süpürme: "Yapılıyor" aralıklarının giriş/çıkışları sıralanır, her gün sonunda açık olanlar sayılır
+    // (gün × iş × aralık taraması yerine). Bir işin ardışık iki ACTIVE aralığı örtüşmez (yarı açık).
+    const edges: Array<[number, 1 | -1]> = [];
+    for (const segs of tracked) {
+      for (const s of segs) {
+        if (statuses.get(s.statusId)?.category !== 'ACTIVE' || s.end <= s.start) continue;
+        edges.push([s.start, 1], [s.end, -1]);
+      }
+    }
+    edges.sort((a, b) => a[0] - b[0] || a[1] - b[1]);
     const wipSeries: Array<{ day: string; count: number }> = [];
+    let activeNow = 0;
+    let e = 0;
     for (let d = w.from; d <= w.to && wipSeries.length < 400; d = addDays(d, step)) {
       const t = dayStart(addDays(d, 1)).getTime() - 1;
-      wipSeries.push({
-        day: d,
-        count: tracked.filter((segs) =>
-          segs.some(
-            (s) => statuses.get(s.statusId)?.category === 'ACTIVE' && s.start <= t && t < s.end,
-          ),
-        ).length,
-      });
+      while (e < edges.length && edges[e]![0] <= t) activeNow += edges[e++]![1];
+      wipSeries.push({ day: d, count: activeNow });
     }
     const current = open.filter((i) => i.status.category === 'ACTIVE');
 
