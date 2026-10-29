@@ -593,7 +593,7 @@ function Dashboard({ data }: { data: AdminOverview }) {
         </div>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <Panel title={t('admin.bugFlow')} hint={t('admin.bugFlowHint')} className="lg:col-span-2">
           <div className="h-64" data-testid="chart-bug-flow">
             <ResponsiveContainer width="100%" height="100%">
@@ -781,7 +781,7 @@ function Dashboard({ data }: { data: AdminOverview }) {
         )}
       </Panel>
 
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Panel title={t('admin.throughput')} hint={t('admin.throughputHint')}>
           <div className="h-60">
             <ResponsiveContainer width="100%" height="100%">

@@ -32,7 +32,7 @@ export function ForecastView({ data }: { data: AnalyticsForecast }) {
         {data.risks.length === 0 ? (
           <Empty text={t('analytics.forecast.noRisks')} />
         ) : (
-          <div className="grid gap-2 lg:grid-cols-2" data-testid="risk-list">
+          <div className="grid grid-cols-1 gap-2 lg:grid-cols-2" data-testid="risk-list">
             {data.risks.map((r) => (
               <RiskRow key={r.id} risk={r} />
             ))}
@@ -47,7 +47,7 @@ export function ForecastView({ data }: { data: AnalyticsForecast }) {
         {data.sprints.length === 0 ? (
           <Empty text={t('analytics.forecast.noSprints')} />
         ) : (
-          <div className="grid gap-3 lg:grid-cols-2" data-testid="forecast-sprints">
+          <div className="grid grid-cols-1 gap-3 lg:grid-cols-2" data-testid="forecast-sprints">
             {data.sprints.map((s) => {
               const donePct = s.totalPoints > 0 ? (s.donePoints / s.totalPoints) * 100 : 0;
               const projPct = s.totalPoints > 0 ? (s.projectedDone / s.totalPoints) * 100 : 0;

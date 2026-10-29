@@ -126,7 +126,7 @@ export function QualityView({ data }: { data: AnalyticsQuality }) {
         </Panel>
       ) : (
         <>
-          <div className="grid gap-4 lg:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             <Panel title={t('analytics.quality.flowTitle')} hint={t('analytics.quality.flowHint')}>
               <div className="h-60" data-testid="chart-bug-curve">
                 <ResponsiveContainer width="100%" height="100%">
@@ -244,7 +244,7 @@ export function QualityView({ data }: { data: AnalyticsQuality }) {
             </Panel>
           </div>
 
-          <div className="grid gap-4 lg:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             <Panel
               title={t('analytics.quality.projectTitle')}
               hint={t('analytics.quality.projectHint')}
@@ -299,48 +299,50 @@ export function QualityView({ data }: { data: AnalyticsQuality }) {
               title={t('analytics.quality.routingTitle')}
               hint={t('analytics.quality.routingHint')}
             >
-              <table className="w-full text-left text-sm" data-testid="routing-table">
-                <thead className="text-muted-foreground border-b text-xs">
-                  <tr>
-                    <th className="py-2 pr-3 font-medium">{t('analytics.quality.col.method')}</th>
-                    <th className="px-3 py-2 text-right font-medium">
-                      {t('analytics.quality.col.bugs')}
-                    </th>
-                    <th className="px-3 py-2 text-right font-medium">
-                      {t('analytics.quality.col.moved')}
-                    </th>
-                    <th className="px-3 py-2 text-right font-medium">
-                      {t('analytics.quality.col.movedPct')}
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {data.routing.map((r) => (
-                    <tr
-                      key={r.method}
-                      className="border-b last:border-0"
-                      data-testid={`routing-${r.method}`}
-                    >
-                      <td className="py-2 pr-3 font-medium">
-                        {t(`adminList.route.${r.method === 'unrouted' ? 'none' : r.method}`)}
-                      </td>
-                      <td className="px-3 py-2 text-right tabular-nums">{r.bugs}</td>
-                      <td className="px-3 py-2 text-right tabular-nums">{r.moved}</td>
-                      <td
-                        className={cn(
-                          'px-3 py-2 text-right tabular-nums',
-                          r.method !== 'unrouted' &&
-                            r.movedPct !== null &&
-                            r.movedPct >= 30 &&
-                            'font-semibold text-red-700 dark:text-red-300',
-                        )}
-                      >
-                        {r.movedPct === null ? '—' : `%${r.movedPct}`}
-                      </td>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-sm" data-testid="routing-table">
+                  <thead className="text-muted-foreground border-b text-xs">
+                    <tr>
+                      <th className="py-2 pr-3 font-medium">{t('analytics.quality.col.method')}</th>
+                      <th className="px-3 py-2 text-right font-medium">
+                        {t('analytics.quality.col.bugs')}
+                      </th>
+                      <th className="px-3 py-2 text-right font-medium">
+                        {t('analytics.quality.col.moved')}
+                      </th>
+                      <th className="px-3 py-2 text-right font-medium">
+                        {t('analytics.quality.col.movedPct')}
+                      </th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {data.routing.map((r) => (
+                      <tr
+                        key={r.method}
+                        className="border-b last:border-0"
+                        data-testid={`routing-${r.method}`}
+                      >
+                        <td className="py-2 pr-3 font-medium">
+                          {t(`adminList.route.${r.method === 'unrouted' ? 'none' : r.method}`)}
+                        </td>
+                        <td className="px-3 py-2 text-right tabular-nums">{r.bugs}</td>
+                        <td className="px-3 py-2 text-right tabular-nums">{r.moved}</td>
+                        <td
+                          className={cn(
+                            'px-3 py-2 text-right tabular-nums',
+                            r.method !== 'unrouted' &&
+                              r.movedPct !== null &&
+                              r.movedPct >= 30 &&
+                              'font-semibold text-red-700 dark:text-red-300',
+                          )}
+                        >
+                          {r.movedPct === null ? '—' : `%${r.movedPct}`}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
               <p className="text-muted-foreground mt-2 text-xs">
                 {t('analytics.quality.routingNote')}
               </p>

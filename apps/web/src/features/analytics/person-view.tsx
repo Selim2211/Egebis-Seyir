@@ -140,7 +140,7 @@ export function PersonView({
             </div>
           </Panel>
 
-          <div className="grid gap-4 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
             <Panel
               title={t('analytics.byProject')}
               hint={t('analytics.byProjectHint')}

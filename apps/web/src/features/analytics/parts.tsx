@@ -175,7 +175,8 @@ export function KpiCards({
         );
         const cls = cn(
           'bg-card flex flex-col gap-1 rounded-xl border p-3 text-left transition-colors',
-          onPick && 'hover:border-primary/60 cursor-pointer',
+          onPick &&
+            'hover:border-primary/60 focus-visible:ring-ring/60 cursor-pointer outline-none focus-visible:ring-2',
           active === m && 'border-primary ring-primary/30 ring-1',
         );
         return onPick ? (
@@ -212,7 +213,7 @@ export function Panel({
   right?: ReactNode;
 }) {
   return (
-    <section className={cn('bg-card rounded-xl border p-4', className)}>
+    <section className={cn('bg-card min-w-0 rounded-xl border p-4', className)}>
       <header className="mb-3 flex items-start gap-3">
         <div className="min-w-0 flex-1">
           <h2 className="text-sm font-semibold">{title}</h2>
@@ -266,7 +267,7 @@ export function FilterBar({
               onClick={() => onChange({ from: addDays(today, -(p - 1)), to: today })}
               aria-pressed={activePreset === p}
               className={cn(
-                'rounded-full border px-3 py-1 text-xs transition-colors',
+                'focus-visible:ring-ring/60 h-9 cursor-pointer rounded-full border px-3 text-xs whitespace-nowrap transition-colors outline-none focus-visible:ring-2 sm:h-7',
                 activePreset === p
                   ? 'bg-primary text-primary-foreground border-transparent'
                   : 'hover:bg-accent',
@@ -281,7 +282,7 @@ export function FilterBar({
             value={filters.from}
             max={filters.to}
             onChange={(e) => e.target.value && onChange({ from: e.target.value })}
-            className="bg-background h-8 rounded-md border px-2 text-xs"
+            className="bg-background h-9 rounded-md border px-2 text-base sm:h-8 sm:text-xs"
           />
           <span className="text-muted-foreground text-xs">–</span>
           <input
@@ -291,7 +292,7 @@ export function FilterBar({
             min={filters.from}
             max={today}
             onChange={(e) => e.target.value && onChange({ to: e.target.value })}
-            className="bg-background h-8 rounded-md border px-2 text-xs"
+            className="bg-background h-9 rounded-md border px-2 text-base sm:h-8 sm:text-xs"
           />
         </div>
       </div>

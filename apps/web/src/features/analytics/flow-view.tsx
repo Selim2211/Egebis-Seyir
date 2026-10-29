@@ -163,7 +163,7 @@ export function FlowView({ data }: { data: AnalyticsFlow }) {
         />
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Panel title={t('analytics.flow.trendTitle')} hint={t('analytics.flow.trendHint')}>
           <div className="h-60" data-testid="chart-flow-trend">
             <ResponsiveContainer width="100%" height="100%">
@@ -239,7 +239,7 @@ export function FlowView({ data }: { data: AnalyticsFlow }) {
         </Panel>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <Panel
           title={t('analytics.flow.wipTitle')}
           hint={t('analytics.flow.wipHint', {

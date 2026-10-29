@@ -128,7 +128,7 @@ export function SprintView({
         </Panel>
       ) : (
         <>
-          <div className="grid gap-4 lg:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             <Panel
               title={t('analytics.sprint.commitChart')}
               hint={t('analytics.sprint.commitChartHint')}
@@ -274,7 +274,7 @@ export function SprintView({
           </Panel>
 
           {active && (
-            <div className="grid gap-4 lg:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
               <Panel
                 title={t('analytics.sprint.burndown', { name: active.name })}
                 hint={t('analytics.sprint.burndownHint')}

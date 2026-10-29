@@ -327,7 +327,7 @@ export function CapacityView({
         )}
       </Panel>
 
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Panel
           title={t('analytics.capacity.weeklyChart')}
           hint={t('analytics.capacity.weeklyChartHint')}

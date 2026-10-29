@@ -35,7 +35,7 @@ export function RiskStrip() {
           <ArrowRight className="size-3.5" aria-hidden />
         </Link>
       </div>
-      <div className="grid gap-2 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-2 lg:grid-cols-2">
         {risks.slice(0, 4).map((r) => (
           <RiskRow key={r.id} risk={r} />
         ))}

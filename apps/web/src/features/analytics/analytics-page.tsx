@@ -145,7 +145,7 @@ export function AnalyticsPage({
   return (
     <div className="doc-print mx-auto max-w-7xl px-4 py-6 sm:px-6" data-testid="analytics-page">
       <div className="mb-4 flex flex-wrap items-start gap-3">
-        <div className="min-w-0 flex-1">
+        <div className="min-w-0 flex-1 basis-64">
           <h1 className="text-[22px] font-semibold tracking-tight">{t('analytics.title')}</h1>
           <p className="text-muted-foreground text-sm">
             {admin ? t('analytics.subtitle') : t('analytics.subtitleSelf')}
@@ -167,7 +167,7 @@ export function AnalyticsPage({
 
       {admin && (
         <div
-          className="mb-4 flex gap-1 border-b print:hidden"
+          className="mb-4 flex [scrollbar-width:none] gap-1 overflow-x-auto border-b print:hidden"
           role="tablist"
           aria-label={t('analytics.tabs')}
         >
@@ -178,9 +178,12 @@ export function AnalyticsPage({
               role="tab"
               aria-selected={tab === x}
               data-testid={`tab-${x}`}
-              onClick={() => onSearch({ av: x })}
+              onClick={(e) => {
+                e.currentTarget.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+                onSearch({ av: x });
+              }}
               className={cn(
-                '-mb-px border-b-2 px-4 py-2 text-sm font-medium transition-colors',
+                'focus-visible:ring-ring/60 shrink-0 cursor-pointer border-b-2 px-4 py-2.5 text-sm font-medium whitespace-nowrap transition-colors outline-none focus-visible:ring-2 focus-visible:ring-inset',
                 tab === x
                   ? 'border-primary text-foreground'
                   : 'text-muted-foreground hover:text-foreground border-transparent',

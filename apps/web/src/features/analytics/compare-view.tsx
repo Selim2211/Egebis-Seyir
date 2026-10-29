@@ -129,7 +129,7 @@ export function CompareView({
                   type="button"
                   aria-label={t('analytics.remove', { name: p?.user.name ?? '' })}
                   onClick={() => onSelected(selected.filter((x) => x !== id))}
-                  className="hover:bg-accent rounded-full p-0.5"
+                  className="hover:bg-accent focus-visible:ring-ring/60 -my-1 flex size-7 cursor-pointer items-center justify-center rounded-full outline-none focus-visible:ring-2"
                 >
                   <X className="size-3.5" aria-hidden />
                 </button>
@@ -212,7 +212,7 @@ export function CompareView({
             </div>
           </Panel>
 
-          <div className="grid gap-4 lg:grid-cols-5">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-5">
             <Panel
               title={t('analytics.table')}
               hint={t('analytics.tableHint')}

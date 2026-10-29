@@ -49,11 +49,12 @@ export function Topbar() {
       <button
         type="button"
         onClick={() => setSearchOpen(true)}
+        aria-label={t('topbar.search')}
         aria-keyshortcuts="Control+K /"
-        className="bg-muted/60 text-muted-foreground hover:bg-card hover:border-primary/30 hover:shadow-sm flex h-9 w-full max-w-md items-center gap-2 rounded-lg border px-3 text-sm"
+        className="bg-muted/60 text-muted-foreground hover:bg-card hover:border-primary/30 hover:shadow-sm flex size-9 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-lg border text-sm sm:w-full sm:max-w-md sm:shrink sm:justify-start sm:px-3"
       >
         <Search className="size-4" aria-hidden />
-        <span className="flex-1 truncate text-left">{t('topbar.search')}</span>
+        <span className="hidden flex-1 truncate text-left sm:inline">{t('topbar.search')}</span>
         <kbd className="bg-card text-muted-foreground hidden rounded-md border px-1.5 py-0.5 font-mono text-[10px] shadow-xs sm:inline">
           Ctrl K
         </kbd>
@@ -61,7 +62,7 @@ export function Topbar() {
 
       <SearchDialog open={searchOpen} onOpenChange={setSearchOpen} />
 
-      <div className="ml-auto flex items-center gap-1.5">
+      <div className="ml-auto flex shrink-0 items-center gap-1.5">
         <TimerIndicator />
         {import.meta.env.DEV && <ApiStatus />}
         <Link
