@@ -364,6 +364,8 @@ model ActivityEvent {
 
   @@index([workspaceId, entityType, entityId, createdAt])
   @@index([workspaceId, createdAt])
+  /// Denetim günlüğündeki kişi listesi (loose index scan).
+  @@index([workspaceId, actorId])
   @@map("activity_events")
 }
 
@@ -658,6 +660,9 @@ model WorkItem {
   @@index([workspaceId, accessRootId])
   @@index([statusId])
   @@index([workspaceId, externalSource, externalId])
+  /// Analiz ve yönetici paneli: tarih aralığında biten / açılan işler.
+  @@index([workspaceId, completedAt])
+  @@index([workspaceId, type, createdAt])
   @@map("work_items")
 }
 
@@ -1262,6 +1267,8 @@ model TimeEntry {
 
   @@index([workItemId])
   @@index([userId, day])
+  /// Analiz: workspace genelinde gün aralığı (kişi süzgeci olmadan).
+  @@index([workspaceId, day])
   @@map("time_entries")
 }
 
@@ -1732,6 +1739,7 @@ model InboundEmail {
   @@unique([workspaceId, messageId])
   @@index([workItemId])
   @@index([fromEmail, createdAt])
+  @@index([workspaceId, kind, createdAt])
   @@map("inbound_emails")
 }
 

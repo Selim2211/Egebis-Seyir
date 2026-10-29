@@ -174,14 +174,24 @@ export class ActivityFeedService {
     docs.forEach((d) => label.set(d.id, d.title));
     invitations.forEach((i) => label.set(i.id, i.email));
 
-    const actorIds = await db.activityEvent.findMany({
-      where: { actorId: { not: null } },
-      distinct: ['actorId'],
-      select: { actorId: true },
-      take: 200,
-    });
+    // Farklı kişiler: tüm olayları taramak yerine (workspaceId, actorId) indeksinde kişi başına bir adım
+    // ("loose index scan"). Olay sayısıyla değil, kişi sayısıyla büyür.
+    const workspaceId = this.cls.get('workspaceId')!;
+    const actorIds = await this.prisma.$queryRaw<Array<{ actorId: string }>>(Prisma.sql`
+      WITH RECURSIVE a AS (
+        (SELECT "actorId" FROM "activity_events"
+          WHERE "workspaceId" = ${workspaceId}::uuid AND "actorId" IS NOT NULL
+          ORDER BY "actorId" LIMIT 1)
+        UNION ALL
+        SELECT (SELECT e."actorId" FROM "activity_events" e
+                 WHERE e."workspaceId" = ${workspaceId}::uuid AND e."actorId" > a."actorId"
+                 ORDER BY e."actorId" LIMIT 1)
+        FROM a WHERE a."actorId" IS NOT NULL
+      )
+      SELECT "actorId" FROM a WHERE "actorId" IS NOT NULL LIMIT 200
+    `);
     const actors = await this.prisma.user.findMany({
-      where: { id: { in: actorIds.flatMap((a) => (a.actorId ? [a.actorId] : [])) } },
+      where: { id: { in: actorIds.map((a) => a.actorId) } },
       select: { id: true, name: true, avatarVersion: true },
       orderBy: { name: 'asc' },
     });
