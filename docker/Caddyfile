@@ -33,8 +33,10 @@
 		@assets path /assets/*
 		header @assets Cache-Control "public, max-age=31536000, immutable"
 
-		# index.html her zaman taze (yeni sürüm hemen görülsün).
-		@html path / /index.html
+		# index.html her zaman taze (yeni sürüm hemen görülsün). `header`, try_files yeniden yazmasından
+		# önce çalışır: /analytics gibi derin bağlantılar da index.html döndüğünden /assets dışı her yol
+		# no-cache alır; yoksa eski index.html silinmiş parçaları ister ve sayfa boş açılır.
+		@html not path /assets/*
 		header @html Cache-Control "no-cache"
 
 		# Tek sayfa uygulaması: bilinmeyen yollar index.html'e düşer.

@@ -12,6 +12,22 @@ import { routeTree } from './routeTree.gen';
 
 bindThemeToDocument();
 
+/**
+ * Yeni sürüm yayınlanınca açık sekmedeki eski index.html'in istediği parçalar artık yoktur: sayfa bir kez
+ * yenilenir ve güncel sürüm yüklenir. Döngüye girmemek için 60 sn içinde ikinci yenileme yapılmaz.
+ */
+window.addEventListener('vite:preloadError', (event) => {
+  const KEY = 'seyir.chunkReloadAt';
+  try {
+    if (Date.now() - Number(sessionStorage.getItem(KEY) ?? 0) < 60_000) return;
+    sessionStorage.setItem(KEY, String(Date.now()));
+  } catch {
+    // depolama kapalıysa yine de bir kez yenile
+  }
+  event.preventDefault();
+  window.location.reload();
+});
+
 /** Kullanım sırasında oturum düşerse (iptal, süre dolumu) giriş ekranına dön. */
 function onApiError(error: unknown): void {
   if (!isApiError(error, 'UNAUTHENTICATED')) return;
