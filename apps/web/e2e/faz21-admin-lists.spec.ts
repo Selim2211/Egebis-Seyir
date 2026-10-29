@@ -106,10 +106,8 @@ test.describe.serial('Yönetici paneli: tıklanabilir kutucuklar', () => {
 
     // Kişi etiketi: kişinin açık işleri.
     await page.goto('/admin');
-    await page
-      .getByRole('link', { name: /Zeynep Kaya/ })
-      .first()
-      .click();
+    // "Bugün" kartları da kişi adını taşır; ekip yükündeki kişi etiketi seçilir.
+    await page.getByTestId('admin-person-link').filter({ hasText: 'Zeynep Kaya' }).first().click();
     await expect(page).toHaveURL(/kind=person/);
     await expect(page.getByTestId('admin-list-title')).toContainText(
       'Kişinin açık işleri: Zeynep Kaya',

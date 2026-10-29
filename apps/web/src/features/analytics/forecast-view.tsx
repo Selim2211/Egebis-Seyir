@@ -54,7 +54,7 @@ export function ForecastView({ data }: { data: AnalyticsForecast }) {
               return (
                 <div
                   key={s.id}
-                  className="flex flex-col gap-2 rounded-lg border p-3"
+                  className="glass glass-strong flex flex-col gap-2 p-3"
                   data-testid="forecast-sprint"
                 >
                   <div className="flex items-center gap-2">

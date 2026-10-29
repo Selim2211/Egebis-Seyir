@@ -10,7 +10,7 @@ import { useMe } from '@/features/auth/queries';
 import { useHierarchy } from '@/features/spaces/queries';
 import { useCan, useCurrentWorkspace } from '@/features/workspace/queries';
 import { formatShortDate, todayDay } from '@/lib/format';
-import { cn } from '@/lib/utils';
+import { Pills } from '@/components/glass';
 import { CapacityView } from './capacity-view';
 import { CompareView } from './compare-view';
 import { ExportBar } from './export-bar';
@@ -143,152 +143,139 @@ export function AnalyticsPage({
   const peopleList = people.data?.people ?? [];
 
   return (
-    <div className="doc-print mx-auto max-w-7xl px-4 py-6 sm:px-6" data-testid="analytics-page">
-      <div className="mb-4 flex flex-wrap items-start gap-3">
-        <div className="min-w-0 flex-1 basis-64">
-          <h1 className="text-[22px] font-semibold tracking-tight">{t('analytics.title')}</h1>
-          <p className="text-muted-foreground text-sm">
-            {admin ? t('analytics.subtitle') : t('analytics.subtitleSelf')}
-          </p>
-          <p className="text-muted-foreground hidden text-xs print:block">
-            {formatShortDate(filters.from)} – {formatShortDate(filters.to)}
-          </p>
-        </div>
-        <ExportBar
-          view={tab}
-          filters={filters}
-          admin={admin}
-          userId={userId}
-          projectId={spaceId}
-          userIds={selected}
-          weeklyHours={weeklyHours}
-        />
-      </div>
-
-      {admin && (
-        <div
-          className="mb-4 flex [scrollbar-width:none] gap-1 overflow-x-auto border-b print:hidden"
-          role="tablist"
-          aria-label={t('analytics.tabs')}
-        >
-          {tabs.map((x) => (
-            <button
-              key={x}
-              type="button"
-              role="tab"
-              aria-selected={tab === x}
-              data-testid={`tab-${x}`}
-              onClick={(e) => {
-                e.currentTarget.scrollIntoView({ block: 'nearest', inline: 'nearest' });
-                onSearch({ av: x });
-              }}
-              className={cn(
-                'focus-visible:ring-ring/60 shrink-0 cursor-pointer border-b-2 px-4 py-2.5 text-sm font-medium whitespace-nowrap transition-colors outline-none focus-visible:ring-2 focus-visible:ring-inset',
-                tab === x
-                  ? 'border-primary text-foreground'
-                  : 'text-muted-foreground hover:text-foreground border-transparent',
-              )}
-            >
-              {t(`analytics.tab.${x}`)}
-            </button>
-          ))}
-        </div>
-      )}
-
-      <div className="mb-5 print:hidden">
-        <FilterBar filters={filters} onChange={setFilters} showProject={tab !== 'project'} />
-      </div>
-
-      {tab === 'person' &&
-        (person.data ? (
-          <PersonView
-            data={person.data}
-            people={admin ? peopleList : null}
-            onUser={(id) => onSearch({ ap: id })}
-            metric={metric}
-            onMetric={(m) => onSearch({ am: m })}
-          />
-        ) : (
-          <Empty text={person.isError ? t('analytics.loadFailed') : t('common.loading')} />
-        ))}
-
-      {tab === 'project' &&
-        (project.data ? (
-          <ProjectView
-            data={project.data}
-            onSpace={(id) => onSearch({ aj: id })}
-            onPerson={(id) => onSearch({ av: 'person', ap: id })}
-            metric={metric}
-            onMetric={(m) => onSearch({ am: m })}
-          />
-        ) : (
-          <Empty
-            text={
-              project.isError
-                ? t('analytics.loadFailed')
-                : spaceId
-                  ? t('common.loading')
-                  : t('analytics.noProjects')
-            }
-          />
-        ))}
-
-      {tab === 'flow' &&
-        (flow.data ? (
-          <FlowView data={flow.data} />
-        ) : (
-          <Empty text={flow.isError ? t('analytics.loadFailed') : t('common.loading')} />
-        ))}
-
-      {tab === 'sprint' &&
-        (sprints.data ? (
-          <SprintView
-            data={sprints.data}
-            selected={selectedSprint}
-            onSelect={(id) => onSearch({ asr: id })}
-            burndown={burndown.data}
-          />
-        ) : (
-          <Empty text={sprints.isError ? t('analytics.loadFailed') : t('common.loading')} />
-        ))}
-
-      {tab === 'capacity' &&
-        (capacity.data ? (
-          <CapacityView
-            data={capacity.data}
+    <div className="glass-scope min-h-full">
+      <div className="doc-print mx-auto max-w-7xl px-4 py-6 sm:px-6" data-testid="analytics-page">
+        <div className="mb-4 flex flex-wrap items-start gap-3">
+          <div className="min-w-0 flex-1 basis-64">
+            <h1 className="text-[22px] font-semibold tracking-tight">{t('analytics.title')}</h1>
+            <p className="text-muted-foreground text-sm">
+              {admin ? t('analytics.subtitle') : t('analytics.subtitleSelf')}
+            </p>
+            <p className="text-muted-foreground hidden text-xs print:block">
+              {formatShortDate(filters.from)} – {formatShortDate(filters.to)}
+            </p>
+          </div>
+          <ExportBar
+            view={tab}
+            filters={filters}
+            admin={admin}
+            userId={userId}
+            projectId={spaceId}
+            userIds={selected}
             weeklyHours={weeklyHours}
-            onWeeklyHours={(h) => onSearch({ awh: h })}
-            focus={search.acf}
-            onFocus={(id) => onSearch({ acf: id })}
           />
-        ) : (
-          <Empty text={capacity.isError ? t('analytics.loadFailed') : t('common.loading')} />
-        ))}
+        </div>
 
-      {tab === 'quality' &&
-        (quality.data ? (
-          <QualityView data={quality.data} />
-        ) : (
-          <Empty text={quality.isError ? t('analytics.loadFailed') : t('common.loading')} />
-        ))}
+        {admin && (
+          <Pills
+            kind="tabs"
+            className="mb-4 print:hidden"
+            label={t('analytics.tabs')}
+            value={tab}
+            options={tabs.map((x) => ({
+              value: x,
+              label: t(`analytics.tab.${x}`),
+              testId: `tab-${x}`,
+            }))}
+            onChange={(x) => onSearch({ av: x })}
+          />
+        )}
 
-      {tab === 'forecast' &&
-        (forecast.data ? (
-          <ForecastView data={forecast.data} />
-        ) : (
-          <Empty text={forecast.isError ? t('analytics.loadFailed') : t('common.loading')} />
-        ))}
+        <div className="mb-5 print:hidden">
+          <FilterBar filters={filters} onChange={setFilters} showProject={tab !== 'project'} />
+        </div>
 
-      {tab === 'compare' && (
-        <CompareView
-          data={compare.data}
-          people={peopleList}
-          selected={selected}
-          onSelected={(ids) => onSearch({ ac: ids.join(',') || undefined })}
-          metric={metric}
-          onMetric={(m) => onSearch({ am: m })}
-        />
-      )}
+        {tab === 'person' &&
+          (person.data ? (
+            <PersonView
+              data={person.data}
+              people={admin ? peopleList : null}
+              onUser={(id) => onSearch({ ap: id })}
+              metric={metric}
+              onMetric={(m) => onSearch({ am: m })}
+            />
+          ) : (
+            <Empty text={person.isError ? t('analytics.loadFailed') : t('common.loading')} />
+          ))}
+
+        {tab === 'project' &&
+          (project.data ? (
+            <ProjectView
+              data={project.data}
+              onSpace={(id) => onSearch({ aj: id })}
+              onPerson={(id) => onSearch({ av: 'person', ap: id })}
+              metric={metric}
+              onMetric={(m) => onSearch({ am: m })}
+            />
+          ) : (
+            <Empty
+              text={
+                project.isError
+                  ? t('analytics.loadFailed')
+                  : spaceId
+                    ? t('common.loading')
+                    : t('analytics.noProjects')
+              }
+            />
+          ))}
+
+        {tab === 'flow' &&
+          (flow.data ? (
+            <FlowView data={flow.data} />
+          ) : (
+            <Empty text={flow.isError ? t('analytics.loadFailed') : t('common.loading')} />
+          ))}
+
+        {tab === 'sprint' &&
+          (sprints.data ? (
+            <SprintView
+              data={sprints.data}
+              selected={selectedSprint}
+              onSelect={(id) => onSearch({ asr: id })}
+              burndown={burndown.data}
+            />
+          ) : (
+            <Empty text={sprints.isError ? t('analytics.loadFailed') : t('common.loading')} />
+          ))}
+
+        {tab === 'capacity' &&
+          (capacity.data ? (
+            <CapacityView
+              data={capacity.data}
+              weeklyHours={weeklyHours}
+              onWeeklyHours={(h) => onSearch({ awh: h })}
+              focus={search.acf}
+              onFocus={(id) => onSearch({ acf: id })}
+            />
+          ) : (
+            <Empty text={capacity.isError ? t('analytics.loadFailed') : t('common.loading')} />
+          ))}
+
+        {tab === 'quality' &&
+          (quality.data ? (
+            <QualityView data={quality.data} />
+          ) : (
+            <Empty text={quality.isError ? t('analytics.loadFailed') : t('common.loading')} />
+          ))}
+
+        {tab === 'forecast' &&
+          (forecast.data ? (
+            <ForecastView data={forecast.data} />
+          ) : (
+            <Empty text={forecast.isError ? t('analytics.loadFailed') : t('common.loading')} />
+          ))}
+
+        {tab === 'compare' && (
+          <CompareView
+            data={compare.data}
+            people={peopleList}
+            selected={selected}
+            onSelected={(ids) => onSearch({ ac: ids.join(',') || undefined })}
+            metric={metric}
+            onMetric={(m) => onSearch({ am: m })}
+          />
+        )}
+      </div>
     </div>
   );
 }

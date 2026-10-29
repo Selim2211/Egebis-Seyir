@@ -93,12 +93,15 @@ test.describe.serial('Analiz modülü', () => {
     );
 
     // Zaman dilimi ve tarih ön ayarı.
-    await page.getByLabel('Zaman dilimi').selectOption('month');
+    // Hap seçiciler (ADR-150): zaman dilimi ve ön ayarlar radyo düğmesidir.
+    const grain = page.getByRole('radiogroup', { name: 'Zaman dilimi' });
+    await grain.getByRole('radio', { name: 'Ay' }).click();
+    await expect(grain.getByRole('radio', { name: 'Ay' })).toHaveAttribute('aria-checked', 'true');
     await expect(page).toHaveURL(/ag=month/);
-    await page.getByRole('button', { name: 'Son 30 gün' }).click();
+    await page.getByRole('radio', { name: 'Son 30 gün' }).click();
     await expect(page).toHaveURL(/af=/);
     await expect(page.getByTestId('person-view')).toBeVisible();
-    await page.getByLabel('Zaman dilimi').selectOption('sprint');
+    await grain.getByRole('radio', { name: 'Sprint' }).click();
     await expect(page.getByTestId('person-view')).toBeVisible();
 
     // Proje sekmesi.

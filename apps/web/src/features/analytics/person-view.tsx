@@ -100,7 +100,13 @@ export function PersonView({
         )}
       </div>
 
-      <KpiCards totals={data.totals} previous={data.previous} active={metric} onPick={onMetric} />
+      <KpiCards
+        totals={data.totals}
+        previous={data.previous}
+        active={metric}
+        onPick={onMetric}
+        series={data.series}
+      />
 
       {!hasWork ? (
         <Panel title={t('analytics.trend')}>

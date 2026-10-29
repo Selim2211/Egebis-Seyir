@@ -660,3 +660,133 @@ button.bg-card.border:hover,
 .dnd-rise {
   animation: dnd-rise 180ms var(--ease-out) both;
 }
+
+/*
+ * Cam tasarım dili (ADR-150): Yönetici paneli ve Analiz. Marka renklerinden yumuşak bir "mesh" zemin,
+ * üstünde buzlu cam kartlar. Kartlar yazı kontrastı (≥ 4.5:1) için yeterince opaktır; telefonda bulanıklık
+ * hafifler, yazdırmada düz beyaz olur.
+ */
+@layer components {
+  .glass-scope {
+    --glass-card: color-mix(in oklab, white 62%, transparent);
+    --glass-strong: color-mix(in oklab, white 80%, transparent);
+    --glass-pill: color-mix(in oklab, white 50%, transparent);
+    --glass-border: color-mix(in oklab, white 75%, var(--border));
+    --glass-shadow:
+      inset 0 1px 0 0 rgb(255 255 255 / 0.7),
+      0 10px 30px -14px color-mix(in oklab, var(--brand-2) 35%, transparent);
+    --glass-shadow-hover:
+      inset 0 1px 0 0 rgb(255 255 255 / 0.8),
+      0 18px 40px -16px color-mix(in oklab, var(--brand-2) 45%, transparent);
+    background:
+      radial-gradient(
+        60% 38% at 12% 4%,
+        color-mix(in oklab, var(--brand-1) 34%, transparent),
+        transparent 70%
+      ),
+      radial-gradient(
+        55% 34% at 92% 22%,
+        color-mix(in oklab, var(--brand-3) 30%, transparent),
+        transparent 70%
+      ),
+      radial-gradient(
+        60% 34% at 18% 62%,
+        color-mix(in oklab, var(--brand-2) 24%, transparent),
+        transparent 70%
+      ),
+      radial-gradient(
+        55% 34% at 88% 92%,
+        color-mix(in oklab, var(--brand-4) 22%, transparent),
+        transparent 70%
+      ),
+      var(--background);
+  }
+  .dark .glass-scope {
+    --glass-card: color-mix(in oklab, oklch(0.2 0.03 280) 66%, transparent);
+    --glass-strong: color-mix(in oklab, oklch(0.22 0.03 280) 82%, transparent);
+    --glass-pill: color-mix(in oklab, oklch(0.24 0.03 280) 55%, transparent);
+    --glass-border: rgb(255 255 255 / 0.1);
+    --glass-shadow: inset 0 1px 0 0 rgb(255 255 255 / 0.06), 0 12px 32px -14px rgb(0 0 0 / 0.6);
+    --glass-shadow-hover:
+      inset 0 1px 0 0 rgb(255 255 255 / 0.1),
+      0 20px 44px -16px color-mix(in oklab, var(--brand-1) 30%, black);
+    background:
+      radial-gradient(
+        60% 38% at 12% 4%,
+        color-mix(in oklab, var(--brand-1) 30%, transparent),
+        transparent 70%
+      ),
+      radial-gradient(
+        55% 34% at 92% 22%,
+        color-mix(in oklab, var(--brand-3) 18%, transparent),
+        transparent 70%
+      ),
+      radial-gradient(
+        60% 34% at 18% 62%,
+        color-mix(in oklab, var(--brand-2) 24%, transparent),
+        transparent 70%
+      ),
+      radial-gradient(
+        55% 34% at 88% 92%,
+        color-mix(in oklab, var(--brand-4) 16%, transparent),
+        transparent 70%
+      ),
+      var(--background);
+  }
+  /* Zemin pürüzsüz bir gradyan: arkayı bulanıklaştırmak görsel fark yaratmaz ama büyük kartlarda kare
+   * süresini ikiye katlar (ölçüm: 16.7 → 33 ms). Cam hissi yarı saydamlık, parlak kenar ve gölgeden gelir;
+   * bulanıklık yalnızca küçük hap seçicilerde kalır. */
+  .glass-scope .glass {
+    background: var(--glass-card);
+    border: 1px solid var(--glass-border);
+    border-radius: 1rem;
+    box-shadow: var(--glass-shadow);
+  }
+  .glass-scope .glass-pill {
+    background: var(--glass-pill);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    -webkit-backdrop-filter: blur(14px) saturate(150%);
+    backdrop-filter: blur(14px) saturate(150%);
+  }
+  .glass-scope .glass-strong {
+    background: var(--glass-strong);
+  }
+  .glass-scope .glass-hover {
+    transition:
+      transform 200ms ease,
+      box-shadow 200ms ease,
+      border-color 200ms ease;
+  }
+  .glass-scope .glass-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--glass-shadow-hover);
+  }
+  @media (max-width: 640px) {
+    .glass-scope .glass-pill {
+      -webkit-backdrop-filter: blur(8px);
+      backdrop-filter: blur(8px);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .glass-scope .glass-hover:hover {
+      transform: none;
+    }
+  }
+  @media print {
+    /* Yazdırma/PDF: zemin ve gölge yok; kart temanın düz kart rengini alır (koyu temada açık yazı okunur kalır). */
+    .glass-scope,
+    .dark .glass-scope {
+      background: none;
+    }
+    .glass-scope .glass,
+    .glass-scope .glass-pill {
+      background: var(--card);
+      border-color: var(--border);
+      box-shadow: none;
+      transition: none;
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+  }
+}

@@ -1335,3 +1335,17 @@ Analiz modülüne "Öngörü" sekmesi (`GET analytics/forecast`, yalnızca Owner
 - **İçerik:** biten iş (önceki hafta ile), açılan/çözülen Bug ve çözüm süresi, ekip doluluğu ve zaman kaydı oranı, en önemli 5 uyarı, aktif sprintlerin durumu ve uygulamaya bağlantı. **Kişi sıralaması ya da kişi bazlı performans içermez.**
 - **Test e-postası:** "Kendime test gönder" özeti yalnızca düğmeye basana yollar ve gönderim hatasını (SMTP) olduğu gibi gösterir. Testlerde `MailService` belleğe yazar; gerçek e-posta gitmez.
 - **Sınır:** özet metni sabit Türkçe'dir; alıcı başına dil ya da saat seçimi yoktur. Zamanlayıcı pg-boss kuyruğunun açık olduğu ortamda çalışır.
+
+## ADR-150 — Yönetici paneli ve Analiz: cam tasarım dili
+
+**Durum:** Kabul · **Tarih:** 2026-10-29
+
+Yönetici paneli, liste sayfası ve 8 Analiz sekmesi "cam" (glassmorphism) görünüme geçti. Diğer sayfalar değişmedi; beğenilirse Ana Sayfa'ya taşınabilir.
+
+- **Zemin:** sayfanın arkasında marka renklerinden (`--brand-1..4`) dört yumuşak, hareketsiz radyal gradyan (`.glass-scope`). Fotoğraf yok: okunabilirlik ve sayfa ağırlığı için. Açık temada pastel, koyu temada derin tonlar.
+- **Cam kart (`.glass`):** yarı saydam kart rengi + parlak iç kenar + yumuşak marka gölgesi, köşe 1rem; tıklanabilir kartlarda üzerine gelince 2px yükselme (`.glass-hover`, "hareketi azalt"ta kapalı). Yazı kontrastı ≥ 4.5:1 olacak kadar opaktır.
+- **Bulanıklık yalnızca hap seçicilerde:** büyük kartlarda `backdrop-filter` kare süresini ikiye katladı (başsız Chromium ölçümü, kaydırma medyanı 16.7 → 33 ms). Zemin pürüzsüz gradyan olduğundan bulanıklık görsel fark yaratmıyordu; kaldırıldı. Hap seçicilerde (küçük alan) kalır, telefonda 8px'e iner.
+- **Bileşenler (`components/glass.tsx`):** `Pills` (Analiz sekmeleri `role=tab`; tarih ön ayarları ve zaman dilimi `role=radio`, dar ekranda kendi içinde kayar) ve `Sparkline` (KPI kartlarında eksensiz mini çizgi; Analiz'de dönemin serisi, panelde son 14 gün).
+- **Yönetici paneli ekleri:** saate göre selamlama ve tek cümlelik durum özeti (bugün açılan Bug, geciken iş, sahipsiz Bug; hepsi sıfırsa "her şey yolunda"); Bug akışında bugünün çubukları tam, önceki günler soluk; yanında **"Bugün" sütunu**: bugün açılan Bug'lar (bildiren) ve biten Task/Bug'lar (ilk atanan), saat sırasıyla, en çok 20. Veri `admin/overview` içindeki `today` alanından gelir ve zaten okunan iş listesinden üretilir (ek tarama yok, yalnızca kişi adları için bir sorgu).
+- **Yazdırma/PDF:** zemin, gölge ve bulanıklık kalkar; kartlar temanın düz kart rengini alır (koyu temada açık yazı okunur kalır).
+- **Katman:** cam kuralları `@layer components` içindedir; böylece uyarı tonları (sarı/kırmızı kart) gibi Tailwind yardımcıları cam arka planını ezebilir.

@@ -93,7 +93,8 @@ test.describe.serial('Yönetici paneli', () => {
     // Kenar çubuğundan açılır.
     await page.getByRole('link', { name: 'Yönetici paneli' }).click();
     await expect(page.getByTestId('admin-page')).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Yönetici paneli' })).toBeVisible();
+    // Başlık saate göre selamlar (ADR-150); kullanıcının ilk adı görünür.
+    await expect(page.getByTestId('admin-greeting')).toContainText('Zeynep');
 
     // Diğer testlerin bıraktığı veri sayıları değiştirebilir: ekrandaki değerler API ile aynı olmalı.
     const overview = await call<{

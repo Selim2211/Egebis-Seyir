@@ -4,8 +4,10 @@ import {
   type AdminListKind,
   type AdminOverview,
   type AdminProject,
+  type AdminTodayEvent,
   type BugSeverity,
 } from '@scrum/shared';
+import type { TFunction } from 'i18next';
 import { queryOptions, useQuery } from '@tanstack/react-query';
 import { Link, useNavigate } from '@tanstack/react-router';
 import {
@@ -35,9 +37,11 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import { Sparkline } from '@/components/glass';
 import { Button } from '@/components/ui/button';
 import { UserAvatar } from '@/components/user-avatar';
 import { RiskStrip } from '@/features/analytics/risk-strip';
+import { useMe } from '@/features/auth/queries';
 import { NotFoundState } from '@/features/spaces/container-header';
 import { useCan, useCurrentWorkspace } from '@/features/workspace/queries';
 import { apiRequest } from '@/lib/api';
@@ -113,6 +117,7 @@ function Kpi({
   icon,
   testId,
   to,
+  spark,
 }: {
   label: string;
   value: ReactNode;
@@ -121,13 +126,15 @@ function Kpi({
   icon?: ReactNode;
   testId?: string;
   to?: Target | { item: string };
+  /** Son 14 günün mini çizgisi (ADR-150). */
+  spark?: { data: number[]; color: string };
 }) {
   const card = (
     <div
       data-testid={testId}
       className={cn(
-        'bg-card flex h-full flex-col gap-1 rounded-xl border p-4 transition-colors',
-        to && 'hover:border-primary/60 hover:shadow-sm',
+        'glass flex h-full min-w-0 flex-col gap-1 p-4',
+        to && 'glass-hover',
         tone === 'bad' &&
           'border-red-300/70 bg-red-50/60 dark:border-red-500/30 dark:bg-red-500/10',
         tone === 'good' &&
@@ -142,10 +149,11 @@ function Kpi({
       </span>
       <span className="text-3xl font-semibold tracking-tight tabular-nums">{value}</span>
       {sub && <span className="text-muted-foreground text-xs">{sub}</span>}
+      {spark && <Sparkline className="mt-auto pt-1" data={spark.data} color={spark.color} />}
     </div>
   );
   if (!to) return card;
-  const className = 'focus-visible:ring-ring block rounded-xl outline-none focus-visible:ring-2';
+  const className = 'focus-visible:ring-ring block rounded-2xl outline-none focus-visible:ring-2';
   return 'item' in to ? (
     <Link to="/items/$key" params={{ key: to.item }} className={className}>
       {card}
@@ -174,7 +182,7 @@ function Panel({
   className?: string;
 }) {
   return (
-    <section className={cn('bg-card rounded-xl border p-4', className)}>
+    <section className={cn('glass min-w-0 p-4', className)}>
       <header className="mb-3">
         <h2 className="text-sm font-semibold">{title}</h2>
         {hint && <p className="text-muted-foreground text-xs">{hint}</p>}
@@ -206,7 +214,7 @@ function ProjectCard({ project }: { project: AdminProject }) {
       to="/spaces/$spaceId/backlog"
       params={{ spaceId: project.id }}
       data-testid="admin-project"
-      className="bg-card hover:border-primary/50 flex flex-col gap-3 rounded-xl border p-4 transition-colors"
+      className="glass glass-hover flex flex-col gap-3 p-4"
     >
       <div className="flex items-center gap-2">
         <span
@@ -360,6 +368,7 @@ function Dashboard({ data }: { data: AdminOverview }) {
             sub={t('admin.resolvedSub', { count: bugs.resolvedToday })}
             icon={<Bug className="size-3.5" aria-hidden />}
             to={{ kind: 'bugs-new-today' }}
+            spark={{ data: bugs.daily.map((d) => d.opened), color: RED }}
           />
           <Kpi
             testId="kpi-new-week"
@@ -367,6 +376,7 @@ function Dashboard({ data }: { data: AdminOverview }) {
             value={bugs.newThisWeek}
             sub={t('admin.resolvedSub', { count: bugs.resolvedThisWeek })}
             to={{ kind: 'bugs-new-week' }}
+            spark={{ data: bugs.daily.map((d) => d.opened), color: RED }}
           />
           <Kpi
             testId="kpi-open"
@@ -384,6 +394,7 @@ function Dashboard({ data }: { data: AdminOverview }) {
             sub={t('admin.resolvedTotal', { resolved: bugs.resolved, total: bugs.total })}
             icon={<CheckCircle2 className="size-3.5" aria-hidden />}
             to={{ kind: 'bugs-all' }}
+            spark={{ data: bugs.daily.map((d) => d.resolved), color: GREEN }}
           />
           <Kpi
             testId="kpi-avg"
@@ -444,7 +455,7 @@ function Dashboard({ data }: { data: AdminOverview }) {
             to={{ kind: 'bugs-unassigned' }}
           />
         </div>
-        <div className="mt-3 grid gap-4 lg:grid-cols-3">
+        <div className="mt-3 grid grid-cols-1 gap-4 lg:grid-cols-3">
           <Panel title={t('admin.agingTitle')} hint={t('admin.agingHint')}>
             {bugs.open === 0 ? (
               <Empty text={t('admin.noOpenBugs')} />
@@ -608,110 +619,119 @@ function Dashboard({ data }: { data: AdminOverview }) {
                 <YAxis allowDecimals={false} tick={{ fill: AXIS, fontSize: 11 }} tickLine={false} />
                 <Tooltip contentStyle={tooltipStyle} cursor={{ fill: 'var(--muted)' }} />
                 <Legend wrapperStyle={{ fontSize: 12 }} />
-                <Bar dataKey="opened" name={t('admin.opened')} fill={RED} radius={[3, 3, 0, 0]} />
+                <Bar dataKey="opened" name={t('admin.opened')} fill={RED} radius={[4, 4, 0, 0]}>
+                  {dailyData.map((d, i) => (
+                    <Cell key={d.date} fillOpacity={i === dailyData.length - 1 ? 1 : 0.45} />
+                  ))}
+                </Bar>
                 <Bar
                   dataKey="resolved"
                   name={t('admin.resolved')}
                   fill={GREEN}
-                  radius={[3, 3, 0, 0]}
-                />
+                  radius={[4, 4, 0, 0]}
+                >
+                  {dailyData.map((d, i) => (
+                    <Cell key={d.date} fillOpacity={i === dailyData.length - 1 ? 1 : 0.45} />
+                  ))}
+                </Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>
         </Panel>
+        <TodayPanel events={data.today} />
+      </div>
 
-        <div className="flex flex-col gap-4">
-          <Panel title={t('admin.severityTitle')} hint={t('admin.severityHint')}>
-            {bugs.open === 0 ? (
-              <Empty text={t('admin.noOpenBugs')} />
-            ) : (
-              <div className="h-32">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={severity}
-                    layout="vertical"
-                    margin={{ left: 0, right: 16, top: 0, bottom: 0 }}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <Panel title={t('admin.severityTitle')} hint={t('admin.severityHint')}>
+          {bugs.open === 0 ? (
+            <Empty text={t('admin.noOpenBugs')} />
+          ) : (
+            <div className="h-32">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={severity}
+                  layout="vertical"
+                  margin={{ left: 0, right: 16, top: 0, bottom: 0 }}
+                >
+                  <XAxis type="number" allowDecimals={false} hide />
+                  <YAxis
+                    type="category"
+                    dataKey="name"
+                    width={70}
+                    tick={{ fill: AXIS, fontSize: 11 }}
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <Tooltip contentStyle={tooltipStyle} cursor={{ fill: 'var(--muted)' }} />
+                  <Bar
+                    dataKey="count"
+                    name={t('admin.count')}
+                    radius={[0, 4, 4, 0]}
+                    cursor="pointer"
+                    label={{ position: 'right', fontSize: 11, fill: AXIS }}
+                    onClick={(d: unknown) =>
+                      pick(d, 'severity', (v) => go({ kind: 'bugs-severity', value: v }))
+                    }
                   >
-                    <XAxis type="number" allowDecimals={false} hide />
-                    <YAxis
-                      type="category"
-                      dataKey="name"
-                      width={70}
-                      tick={{ fill: AXIS, fontSize: 11 }}
-                      tickLine={false}
-                      axisLine={false}
-                    />
-                    <Tooltip contentStyle={tooltipStyle} cursor={{ fill: 'var(--muted)' }} />
-                    <Bar
-                      dataKey="count"
-                      name={t('admin.count')}
-                      radius={[0, 4, 4, 0]}
+                    {severity.map((s) => (
+                      <Cell key={s.severity} fill={SEVERITY_COLOR[s.severity]} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+        </Panel>
+        <Panel title={t('admin.sourceTitle')} hint={t('admin.sourceHint')}>
+          {bugs.total === 0 ? (
+            <Empty text={t('admin.noBugs')} />
+          ) : (
+            <div className="flex items-center gap-4">
+              <div className="size-24 shrink-0">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={source}
+                      dataKey="value"
+                      innerRadius={26}
+                      outerRadius={44}
+                      paddingAngle={2}
+                      stroke="none"
                       cursor="pointer"
-                      label={{ position: 'right', fontSize: 11, fill: AXIS }}
                       onClick={(d: unknown) =>
-                        pick(d, 'severity', (v) => go({ kind: 'bugs-severity', value: v }))
+                        pick(d, 'kind', (v) => go({ kind: v as 'bugs-email' | 'bugs-manual' }))
                       }
                     >
-                      {severity.map((s) => (
-                        <Cell key={s.severity} fill={SEVERITY_COLOR[s.severity]} />
+                      {source.map((s) => (
+                        <Cell key={s.name} fill={s.color} />
                       ))}
-                    </Bar>
-                  </BarChart>
+                    </Pie>
+                    <Tooltip contentStyle={tooltipStyle} />
+                  </PieChart>
                 </ResponsiveContainer>
               </div>
-            )}
-          </Panel>
-          <Panel title={t('admin.sourceTitle')} hint={t('admin.sourceHint')}>
-            {bugs.total === 0 ? (
-              <Empty text={t('admin.noBugs')} />
-            ) : (
-              <div className="flex items-center gap-4">
-                <div className="size-24 shrink-0">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={source}
-                        dataKey="value"
-                        innerRadius={26}
-                        outerRadius={44}
-                        paddingAngle={2}
-                        stroke="none"
-                        cursor="pointer"
-                        onClick={(d: unknown) =>
-                          pick(d, 'kind', (v) => go({ kind: v as 'bugs-email' | 'bugs-manual' }))
-                        }
-                      >
-                        {source.map((s) => (
-                          <Cell key={s.name} fill={s.color} />
-                        ))}
-                      </Pie>
-                      <Tooltip contentStyle={tooltipStyle} />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
-                <ul className="flex flex-col gap-1 text-sm">
-                  {source.map((s) => (
-                    <li key={s.name}>
-                      <Link
-                        to="/admin-list"
-                        search={{ kind: s.kind }}
-                        className="hover:bg-accent flex items-center gap-2 rounded px-1"
-                      >
-                        <span
-                          className="size-2.5 rounded-full"
-                          style={{ backgroundColor: s.color }}
-                          aria-hidden
-                        />
-                        {s.name}
-                        <span className="text-muted-foreground tabular-nums">{s.value}</span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </Panel>
-        </div>
+              <ul className="flex flex-col gap-1 text-sm">
+                {source.map((s) => (
+                  <li key={s.name}>
+                    <Link
+                      to="/admin-list"
+                      search={{ kind: s.kind }}
+                      className="hover:bg-accent flex items-center gap-2 rounded px-1"
+                    >
+                      <span
+                        className="size-2.5 rounded-full"
+                        style={{ backgroundColor: s.color }}
+                        aria-hidden
+                      />
+                      {s.name}
+                      <span className="text-muted-foreground tabular-nums">{s.value}</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </Panel>
       </div>
 
       <div>
@@ -737,6 +757,7 @@ function Dashboard({ data }: { data: AdminOverview }) {
             testId="kpi-completed-week"
             label={t('admin.completedWeek')}
             value={totals.completedThisWeek}
+            spark={{ data: data.throughput.map((d) => d.completed), color: BLUE }}
             tone="good"
             to={{ kind: 'completed-week' }}
           />
@@ -862,6 +883,7 @@ function Dashboard({ data }: { data: AdminOverview }) {
                     <Link
                       to="/admin-list"
                       search={{ kind: 'person', value: p.userId }}
+                      data-testid="admin-person-link"
                       className="bg-muted hover:bg-accent flex items-center gap-1.5 rounded-full py-0.5 pr-2.5 pl-0.5 text-xs"
                       title={t('admin.completed30', { count: p.completed30 })}
                     >
@@ -916,59 +938,168 @@ function Dashboard({ data }: { data: AdminOverview }) {
   );
 }
 
+type TFn = TFunction;
+
+/** Saate göre selamlama ve ilk ad (ADR-150). */
+function greeting(t: TFn, name: string): string {
+  const h = new Date().getHours();
+  const first = name.split(' ')[0] || name;
+  if (h >= 5 && h < 12) return t('admin.greeting.morning', { name: first });
+  if (h >= 12 && h < 18) return t('admin.greeting.day', { name: first });
+  if (h >= 18 && h < 23) return t('admin.greeting.evening', { name: first });
+  return t('admin.greeting.night', { name: first });
+}
+
+/** Tek cümlelik durum özeti: bugün açılan Bug, geciken iş, sahipsiz Bug. */
+function summary(t: TFn, data: AdminOverview): string {
+  const parts = [
+    data.bugs.newToday > 0 && t('admin.summary.newBugs', { count: data.bugs.newToday }),
+    data.totals.overdueItems > 0 && t('admin.summary.overdue', { count: data.totals.overdueItems }),
+    data.bugs.openUnassigned > 0 &&
+      t('admin.summary.unassigned', { count: data.bugs.openUnassigned }),
+  ].filter((p): p is string => typeof p === 'string');
+  return parts.length === 0 ? t('admin.summary.allGood') : `${parts.join(', ')}.`;
+}
+
+/** Bugün olanlar: açılan Bug'lar ve biten işler, saat sırasıyla (ADR-150). */
+function TodayPanel({ events }: { events: AdminTodayEvent[] }) {
+  const { t } = useTranslation();
+  return (
+    <Panel title={t('admin.today.title')} hint={t('admin.today.hint')}>
+      {events.length === 0 ? (
+        <Empty text={t('admin.today.empty')} />
+      ) : (
+        <ol
+          className="relative flex max-h-[19rem] flex-col gap-2 overflow-y-auto pr-1"
+          data-testid="admin-today"
+        >
+          <span className="bg-border absolute top-2 bottom-2 left-[2.6rem] w-px" aria-hidden />
+          {events.map((e) => (
+            <li key={`${e.kind}-${e.key}`} className="relative flex items-start gap-3">
+              <time
+                dateTime={e.at}
+                className="text-muted-foreground w-9 shrink-0 pt-2 text-right text-[11px] tabular-nums"
+              >
+                {new Date(e.at).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
+              </time>
+              <span
+                className={cn(
+                  'ring-background relative z-10 mt-2.5 size-2 shrink-0 rounded-full ring-4',
+                  e.kind === 'opened' ? 'bg-red-500' : 'bg-emerald-500',
+                )}
+                aria-hidden
+              />
+              <Link
+                to="/items/$key"
+                params={{ key: e.key }}
+                data-testid="admin-today-item"
+                className={cn(
+                  'glass glass-strong glass-hover flex min-w-0 flex-1 flex-col gap-1 rounded-xl border-l-4 px-3 py-2',
+                  e.kind === 'opened' ? 'border-l-red-500' : 'border-l-emerald-500',
+                )}
+              >
+                <span className="flex items-center gap-1.5 text-[11px] font-medium">
+                  <span
+                    className={
+                      e.kind === 'opened'
+                        ? 'text-red-700 dark:text-red-300'
+                        : 'text-emerald-700 dark:text-emerald-300'
+                    }
+                  >
+                    {t(`admin.today.${e.kind}`)}
+                  </span>
+                  <span className="text-muted-foreground font-mono">{e.key}</span>
+                  {e.severity && (
+                    <span className="text-muted-foreground">· {t(`severity.${e.severity}`)}</span>
+                  )}
+                </span>
+                <span className="truncate text-sm font-medium">{e.title}</span>
+                {e.user && (
+                  <span className="text-muted-foreground flex items-center gap-1.5 text-xs">
+                    <UserAvatar
+                      id={e.user.id}
+                      name={e.user.name}
+                      size={18}
+                      avatarVersion={e.user.avatarVersion}
+                    />
+                    {e.user.name}
+                  </span>
+                )}
+              </Link>
+            </li>
+          ))}
+        </ol>
+      )}
+    </Panel>
+  );
+}
+
 /** Yönetici paneli (ADR-139): Bug akışı, Projelerin sprint durumu, geciken işler, ekip yükü. Yalnızca Owner/Admin. */
 export function AdminPage() {
   const { t } = useTranslation();
+  const me = useMe();
   const { id: workspaceId } = useCurrentWorkspace();
   const allowed = useCan(WORKSPACE_PERMISSIONS.WORKSPACE_SETTINGS);
   const query = useQuery({ ...adminQuery(workspaceId), enabled: allowed });
   if (!allowed) return <NotFoundState />;
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6" data-testid="admin-page">
-      <div className="mb-5 flex flex-wrap items-center gap-3">
-        <div className="min-w-0 flex-1">
-          <h1 className="text-[22px] font-semibold tracking-tight">{t('admin.title')}</h1>
-          <p className="text-muted-foreground text-sm">
-            {query.data
-              ? t('admin.updated', {
-                  time: new Date(query.data.generatedAt).toLocaleTimeString('tr-TR', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  }),
-                })
-              : t('admin.subtitle')}
-          </p>
-        </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => void query.refetch()}
-          disabled={query.isFetching}
-        >
-          <RefreshCw className={cn(query.isFetching && 'animate-spin')} />
-          {t('admin.refresh')}
-        </Button>
-      </div>
-      {query.isPending ? (
-        <p className="text-muted-foreground py-10 text-sm">{t('common.loading')}</p>
-      ) : query.data ? (
-        <>
-          {/* Arka plandaki yenileme düşerse (ağ/sunucu yeniden başlıyor) eldeki veri silinmez. */}
-          {query.isError && (
-            <p
-              role="status"
-              className="mb-4 rounded-md border border-amber-300/60 bg-amber-50 px-3 py-2 text-xs text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200"
-              data-testid="admin-refresh-failed"
-            >
-              {t('admin.refreshFailed')}
+    <div className="glass-scope min-h-full">
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6" data-testid="admin-page">
+        <div className="mb-5 flex flex-wrap items-center gap-3">
+          <div className="min-w-0 flex-1 basis-64">
+            <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+              {t('admin.title')}
             </p>
-          )}
-          <Dashboard data={query.data} />
-        </>
-      ) : (
-        <NotFoundState />
-      )}
+            <h1 className="text-2xl font-semibold tracking-tight" data-testid="admin-greeting">
+              {greeting(t, me.user.name)}
+            </h1>
+            <p className="text-muted-foreground text-sm">
+              {query.data ? summary(t, query.data) : t('admin.subtitle')}
+              {query.data && (
+                <span className="ml-1 text-xs">
+                  ·{' '}
+                  {t('admin.updated', {
+                    time: new Date(query.data.generatedAt).toLocaleTimeString('tr-TR', {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    }),
+                  })}
+                </span>
+              )}
+            </p>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            className="glass-pill rounded-full"
+            onClick={() => void query.refetch()}
+            disabled={query.isFetching}
+          >
+            <RefreshCw className={cn(query.isFetching && 'animate-spin')} />
+            {t('admin.refresh')}
+          </Button>
+        </div>
+        {query.isPending ? (
+          <p className="text-muted-foreground py-10 text-sm">{t('common.loading')}</p>
+        ) : query.data ? (
+          <>
+            {/* Arka plandaki yenileme düşerse (ağ/sunucu yeniden başlıyor) eldeki veri silinmez. */}
+            {query.isError && (
+              <p
+                role="status"
+                className="mb-4 rounded-md border border-amber-300/60 bg-amber-50 px-3 py-2 text-xs text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200"
+                data-testid="admin-refresh-failed"
+              >
+                {t('admin.refreshFailed')}
+              </p>
+            )}
+            <Dashboard data={query.data} />
+          </>
+        ) : (
+          <NotFoundState />
+        )}
+      </div>
     </div>
   );
 }

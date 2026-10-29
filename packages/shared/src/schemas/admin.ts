@@ -166,6 +166,21 @@ export const AdminVelocitySchema = z.object({
 });
 
 /** GET /api/workspaces/:wid/admin/overview — yöneticinin tek bakışta gördüğü veriler (ADR-139). */
+/** Yönetici paneli "Bugün" sütunu (ADR-150): bugün açılan Bug'lar ve biten Task/Bug'lar, yeniden eskiye. */
+export const AdminTodayEventSchema = z.object({
+  kind: z.enum(['opened', 'completed']),
+  at: z.iso.datetime(),
+  key: z.string(),
+  title: z.string(),
+  type: z.enum(['TASK', 'BUG']),
+  severity: z.enum(BUG_SEVERITIES).nullable(),
+  /** Açılan Bug'da bildiren, bitende ilk atanan kişi. */
+  user: z
+    .object({ id: z.uuid(), name: z.string(), avatarVersion: z.string().nullable() })
+    .nullable(),
+});
+export type AdminTodayEvent = z.infer<typeof AdminTodayEventSchema>;
+
 export const AdminOverviewSchema = z.object({
   generatedAt: z.iso.datetime(),
   totals: z.object({
@@ -192,6 +207,8 @@ export const AdminOverviewSchema = z.object({
   workload: z.array(AdminPersonLoadSchema),
   /** Son 6 tamamlanan sprint (eskiden yeniye). */
   velocity: z.array(AdminVelocitySchema),
+  /** Bugün (Europe/Istanbul) olanlar; en çok 20. */
+  today: z.array(AdminTodayEventSchema),
 });
 export type AdminOverview = z.infer<typeof AdminOverviewSchema>;
 export type AdminProject = z.infer<typeof AdminProjectSchema>;

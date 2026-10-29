@@ -2629,7 +2629,29 @@
     "committed": "Taahhüt",
     "completedPoints": "Biten",
     "minutes": "{{value}} dk",
-    "refreshFailed": "Veri yenilenemedi, eldeki son veri gösteriliyor. Dakikada bir tekrar denenir."
+    "refreshFailed": "Veri yenilenemedi, eldeki son veri gösteriliyor. Dakikada bir tekrar denenir.",
+    "greeting": {
+      "morning": "Günaydın, {{name}}",
+      "day": "İyi günler, {{name}}",
+      "evening": "İyi akşamlar, {{name}}",
+      "night": "İyi geceler, {{name}}"
+    },
+    "summary": {
+      "newBugs_one": "Bugün {{count}} Bug açıldı",
+      "newBugs_other": "Bugün {{count}} Bug açıldı",
+      "overdue_one": "{{count}} iş gecikmede",
+      "overdue_other": "{{count}} iş gecikmede",
+      "unassigned_one": "{{count}} Bug sahipsiz",
+      "unassigned_other": "{{count}} Bug sahipsiz",
+      "allGood": "Her şey yolunda: yeni Bug, geciken ya da sahipsiz iş yok."
+    },
+    "today": {
+      "title": "Bugün",
+      "hint": "Bugün açılan Bug'lar ve biten işler",
+      "empty": "Bugün henüz hareket yok.",
+      "opened": "Bug açıldı",
+      "completed": "Tamamlandı"
+    }
   },
   "bugBox": {
     "title": "Bug Kutusu",

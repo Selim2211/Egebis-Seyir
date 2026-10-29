@@ -145,92 +145,94 @@ export function AdminListPage({
   const data = query.data;
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6" data-testid="admin-list-page">
-      <Link
-        to="/admin"
-        className="text-muted-foreground hover:text-foreground mb-2 inline-flex items-center gap-1 text-sm"
-      >
-        <ChevronLeft className="size-4" aria-hidden />
-        {t('adminList.back')}
-      </Link>
-      <div className="mb-4 flex flex-wrap items-baseline gap-3">
-        <h1 className="text-[22px] font-semibold tracking-tight" data-testid="admin-list-title">
-          {title}
-        </h1>
-        {data && (
-          <span className="text-muted-foreground text-sm" data-testid="admin-list-total">
-            {t('adminList.total', { count: data.total })}
-          </span>
+    <div className="glass-scope min-h-full">
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6" data-testid="admin-list-page">
+        <Link
+          to="/admin"
+          className="text-muted-foreground hover:text-foreground mb-2 inline-flex items-center gap-1 text-sm"
+        >
+          <ChevronLeft className="size-4" aria-hidden />
+          {t('adminList.back')}
+        </Link>
+        <div className="mb-4 flex flex-wrap items-baseline gap-3">
+          <h1 className="text-[22px] font-semibold tracking-tight" data-testid="admin-list-title">
+            {title}
+          </h1>
+          {data && (
+            <span className="text-muted-foreground text-sm" data-testid="admin-list-total">
+              {t('adminList.total', { count: data.total })}
+            </span>
+          )}
+        </div>
+
+        {!data ? (
+          query.isError ? (
+            <NotFoundState />
+          ) : (
+            <p className="text-muted-foreground py-10 text-sm">{t('common.loading')}</p>
+          )
+        ) : data.items.length === 0 ? (
+          <p className="text-muted-foreground py-16 text-center text-sm">{t('adminList.empty')}</p>
+        ) : (
+          <>
+            <div className="glass overflow-x-auto">
+              <table className="w-full min-w-[56rem] text-left text-sm">
+                <thead className="text-muted-foreground border-b text-xs">
+                  <tr>
+                    {(
+                      [
+                        'item',
+                        'project',
+                        'status',
+                        'severity',
+                        'assignee',
+                        'company',
+                        'date',
+                      ] as const
+                    ).map((c) => (
+                      <th key={c} className="px-3 py-2 font-medium">
+                        {t(`adminList.col.${c}`)}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.items.map((item) => (
+                    <Row key={item.id} item={item} />
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            {data.pages > 1 && (
+              <div className="mt-3 flex items-center justify-end gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={data.page <= 1}
+                  onClick={() => onPage(data.page - 1)}
+                  data-testid="admin-list-prev"
+                >
+                  <ChevronLeft aria-hidden />
+                  {t('bugBox.prev')}
+                </Button>
+                <span className="text-sm tabular-nums" data-testid="admin-list-page-info">
+                  {t('bugBox.pageOf', { page: data.page, pages: data.pages })}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={data.page >= data.pages}
+                  onClick={() => onPage(data.page + 1)}
+                  data-testid="admin-list-next"
+                >
+                  {t('bugBox.next')}
+                  <ChevronRight aria-hidden />
+                </Button>
+              </div>
+            )}
+          </>
         )}
       </div>
-
-      {!data ? (
-        query.isError ? (
-          <NotFoundState />
-        ) : (
-          <p className="text-muted-foreground py-10 text-sm">{t('common.loading')}</p>
-        )
-      ) : data.items.length === 0 ? (
-        <p className="text-muted-foreground py-16 text-center text-sm">{t('adminList.empty')}</p>
-      ) : (
-        <>
-          <div className="bg-card overflow-x-auto rounded-xl border">
-            <table className="w-full min-w-[56rem] text-left text-sm">
-              <thead className="text-muted-foreground border-b text-xs">
-                <tr>
-                  {(
-                    [
-                      'item',
-                      'project',
-                      'status',
-                      'severity',
-                      'assignee',
-                      'company',
-                      'date',
-                    ] as const
-                  ).map((c) => (
-                    <th key={c} className="px-3 py-2 font-medium">
-                      {t(`adminList.col.${c}`)}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {data.items.map((item) => (
-                  <Row key={item.id} item={item} />
-                ))}
-              </tbody>
-            </table>
-          </div>
-          {data.pages > 1 && (
-            <div className="mt-3 flex items-center justify-end gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={data.page <= 1}
-                onClick={() => onPage(data.page - 1)}
-                data-testid="admin-list-prev"
-              >
-                <ChevronLeft aria-hidden />
-                {t('bugBox.prev')}
-              </Button>
-              <span className="text-sm tabular-nums" data-testid="admin-list-page-info">
-                {t('bugBox.pageOf', { page: data.page, pages: data.pages })}
-              </span>
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={data.page >= data.pages}
-                onClick={() => onPage(data.page + 1)}
-                data-testid="admin-list-next"
-              >
-                {t('bugBox.next')}
-                <ChevronRight aria-hidden />
-              </Button>
-            </div>
-          )}
-        </>
-      )}
     </div>
   );
 }

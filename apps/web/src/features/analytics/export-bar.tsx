@@ -13,6 +13,7 @@ import { Switch } from '@/components/ui/switch';
 import { useCurrentWorkspace } from '@/features/workspace/queries';
 import { apiRequest } from '@/lib/api';
 import { useErrorMessage } from '@/lib/use-error-message';
+import { cn } from '@/lib/utils';
 import type { AnalyticsFilters } from './queries';
 
 const digestKey = (ws: string) => ['workspaces', ws, 'analytics', 'digest'];
@@ -58,7 +59,12 @@ function DigestPopover() {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="outline" size="sm" data-testid="digest-trigger">
+        <Button
+          variant="outline"
+          size="sm"
+          className="glass-pill rounded-full"
+          data-testid="digest-trigger"
+        >
           <Mail aria-hidden />
           {t('analytics.export.digest')}
           {d?.enabled && (
@@ -152,7 +158,7 @@ export function ExportBar({
         asChild
         variant="outline"
         size="sm"
-        className={unavailable ? 'pointer-events-none opacity-50' : undefined}
+        className={cn('glass-pill rounded-full', unavailable && 'pointer-events-none opacity-50')}
       >
         <a
           href={`/api/workspaces/${ws}/analytics/export?${params}`}
@@ -164,7 +170,13 @@ export function ExportBar({
           {t('analytics.export.excel')}
         </a>
       </Button>
-      <Button variant="outline" size="sm" onClick={() => window.print()} data-testid="export-pdf">
+      <Button
+        variant="outline"
+        size="sm"
+        className="glass-pill rounded-full"
+        onClick={() => window.print()}
+        data-testid="export-pdf"
+      >
         <Printer aria-hidden />
         {t('analytics.export.pdf')}
       </Button>

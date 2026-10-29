@@ -45,7 +45,7 @@ function Card({
   return (
     <div
       className={cn(
-        'bg-card flex flex-col gap-1 rounded-xl border p-3',
+        'glass glass-hover flex min-w-0 flex-col gap-1 p-3',
         tone === 'warn' &&
           'border-amber-300/70 bg-amber-50/60 dark:border-amber-500/30 dark:bg-amber-500/10',
         tone === 'bad' &&

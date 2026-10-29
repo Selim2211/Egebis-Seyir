@@ -65,6 +65,7 @@ export class AdminOverviewService {
         createdAt: true,
         completedAt: true,
         severity: true,
+        reporterId: true,
         status: { select: { category: true } },
         assignees: { select: { userId: true } },
         inboundEmails: { where: { kind: 'NEW' }, take: 1, select: { id: true } },
@@ -284,6 +285,27 @@ export class AdminOverviewService {
     const members = memberRows.length;
     const busy = new Set([...load.entries()].filter(([, l]) => l.open > 0).map(([id]) => id));
     const idleMembers = memberRows.filter((m) => !busy.has(m.userId)).length;
+    // "Bugün" sütunu: bugün açılan Bug'lar ve biten işler (zaten okunan listeden).
+    const todayRows = items
+      .flatMap((i) => {
+        const rows: Array<{ kind: 'opened' | 'completed'; at: Date; userId: string | null }> = [];
+        if (i.type === 'BUG' && dayKey(i.createdAt) === today)
+          rows.push({ kind: 'opened', at: i.createdAt, userId: i.reporterId });
+        if (isDone(i) && i.completedAt && dayKey(i.completedAt) === today)
+          rows.push({
+            kind: 'completed',
+            at: i.completedAt,
+            userId: i.assignees[0]?.userId ?? null,
+          });
+        return rows.map((r) => ({ ...r, item: i }));
+      })
+      .sort((a, b) => b.at.getTime() - a.at.getTime())
+      .slice(0, 20);
+    const todayUsers = await db.user.findMany({
+      where: { id: { in: [...new Set(todayRows.flatMap((r) => (r.userId ? [r.userId] : [])))] } },
+      select: { id: true, name: true, avatarVersion: true },
+    });
+
     const completedSprints = await db.sprint.findMany({
       where: { status: 'COMPLETED', spaceId: { in: spaces.map((s) => s.id) } },
       select: {
@@ -379,6 +401,15 @@ export class AdminOverviewService {
           completedAt: dayKey(s.completedAt ?? now),
         }))
         .reverse(),
+      today: todayRows.map((r) => ({
+        kind: r.kind,
+        at: r.at.toISOString(),
+        key: formatItemKey(r.item.keyPrefix, r.item.number),
+        title: r.item.title,
+        type: r.item.type as 'TASK' | 'BUG',
+        severity: r.item.type === 'BUG' ? r.item.severity : null,
+        user: todayUsers.find((u) => u.id === r.userId) ?? null,
+      })),
     };
   }
 }

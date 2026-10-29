@@ -35,7 +35,7 @@ function Card({
   testId: string;
 }) {
   return (
-    <div className="bg-card flex flex-col gap-1 rounded-xl border p-3">
+    <div className="glass glass-hover flex min-w-0 flex-col gap-1 p-3">
       <span className="text-muted-foreground text-xs font-medium">{label}</span>
       <span className="text-2xl font-semibold tracking-tight tabular-nums" data-testid={testId}>
         {value}

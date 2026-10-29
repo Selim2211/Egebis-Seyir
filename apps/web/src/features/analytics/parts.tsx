@@ -10,6 +10,7 @@ import { ArrowDown, ArrowRight, ArrowUp } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NativeSelect } from '@/components/form';
+import { Pills, Sparkline } from '@/components/glass';
 import { Label } from '@/components/ui/label';
 import { useHierarchy } from '@/features/spaces/queries';
 import { formatShortDate, todayDay } from '@/lib/format';
@@ -105,17 +106,19 @@ export function DeltaPct({
   const good = better === 'neutral' || dir === 'flat' ? null : better === dir;
   const Icon = dir === 'flat' ? ArrowRight : dir === 'up' ? ArrowUp : ArrowDown;
   return (
-    <span
-      className={cn(
-        'flex items-center gap-0.5 text-xs font-medium tabular-nums',
-        good === null && 'text-muted-foreground',
-        good === true && 'text-emerald-700 dark:text-emerald-300',
-        good === false && 'text-red-700 dark:text-red-300',
-      )}
-      data-testid={testId}
-    >
-      <Icon className="size-3" aria-hidden />%{Math.abs(pct)}
-      <span className="text-muted-foreground font-normal">{t('analytics.vsPrevious')}</span>
+    <span className="flex flex-wrap items-center gap-1 text-xs tabular-nums" data-testid={testId}>
+      <span
+        className={cn(
+          'inline-flex items-center gap-0.5 rounded-full px-1.5 py-px font-semibold',
+          good === null && 'bg-muted text-muted-foreground',
+          good === true &&
+            'bg-emerald-500/15 text-emerald-800 dark:bg-emerald-400/15 dark:text-emerald-300',
+          good === false && 'bg-red-500/15 text-red-800 dark:bg-red-400/15 dark:text-red-300',
+        )}
+      >
+        <Icon className="size-3" aria-hidden />%{Math.abs(pct)}
+      </span>
+      <span className="text-muted-foreground">{t('analytics.vsPrevious')}</span>
     </span>
   );
 }
@@ -145,11 +148,14 @@ export function KpiCards({
   previous,
   active,
   onPick,
+  series,
 }: {
   totals: AnalyticsMetrics;
   previous: AnalyticsMetrics;
   active?: AnalyticsMetric;
   onPick?: (m: AnalyticsMetric) => void;
+  /** Verilirse her kartta dönemin mini çizgisi (ADR-150). */
+  series?: readonly AnalyticsPoint[];
 }) {
   const { t } = useTranslation();
   const fmt = useFormatMetric();
@@ -171,13 +177,19 @@ export function KpiCards({
               {fmt(m, metricValue(totals, m))}
             </span>
             <Delta metric={m} value={metricValue(totals, m)} previous={metricValue(previous, m)} />
+            {series && (
+              <Sparkline
+                className="mt-1"
+                data={series.map((p) => pointValue(p, m))}
+                color={METRIC_META[m].color}
+              />
+            )}
           </>
         );
         const cls = cn(
-          'bg-card flex flex-col gap-1 rounded-xl border p-3 text-left transition-colors',
-          onPick &&
-            'hover:border-primary/60 focus-visible:ring-ring/60 cursor-pointer outline-none focus-visible:ring-2',
-          active === m && 'border-primary ring-primary/30 ring-1',
+          'glass glass-hover flex min-w-0 flex-col gap-1 p-3 text-left',
+          onPick && 'focus-visible:ring-ring/60 cursor-pointer outline-none focus-visible:ring-2',
+          active === m && 'ring-primary/70 ring-2',
         );
         return onPick ? (
           <button
@@ -213,7 +225,7 @@ export function Panel({
   right?: ReactNode;
 }) {
   return (
-    <section className={cn('bg-card min-w-0 rounded-xl border p-4', className)}>
+    <section className={cn('glass min-w-0 p-4', className)}>
       <header className="mb-3 flex items-start gap-3">
         <div className="min-w-0 flex-1">
           <h2 className="text-sm font-semibold">{title}</h2>
@@ -260,29 +272,23 @@ export function FilterBar({
       <div className="flex flex-col gap-1.5">
         <Label>{t('analytics.range')}</Label>
         <div className="flex flex-wrap items-center gap-1.5">
-          {PRESETS.map((p) => (
-            <button
-              key={p}
-              type="button"
-              onClick={() => onChange({ from: addDays(today, -(p - 1)), to: today })}
-              aria-pressed={activePreset === p}
-              className={cn(
-                'focus-visible:ring-ring/60 h-9 cursor-pointer rounded-full border px-3 text-xs whitespace-nowrap transition-colors outline-none focus-visible:ring-2 sm:h-7',
-                activePreset === p
-                  ? 'bg-primary text-primary-foreground border-transparent'
-                  : 'hover:bg-accent',
-              )}
-            >
-              {t('analytics.lastDays', { count: p })}
-            </button>
-          ))}
+          <Pills
+            size="sm"
+            label={t('analytics.range')}
+            value={activePreset === undefined ? undefined : String(activePreset)}
+            options={PRESETS.map((p) => ({
+              value: String(p),
+              label: t('analytics.lastDays', { count: p }),
+            }))}
+            onChange={(v) => onChange({ from: addDays(today, -(Number(v) - 1)), to: today })}
+          />
           <input
             type="date"
             aria-label={t('analytics.from')}
             value={filters.from}
             max={filters.to}
             onChange={(e) => e.target.value && onChange({ from: e.target.value })}
-            className="bg-background h-9 rounded-md border px-2 text-base sm:h-8 sm:text-xs"
+            className="glass-pill h-9 rounded-full px-3 text-base sm:h-8 sm:text-xs"
           />
           <span className="text-muted-foreground text-xs">–</span>
           <input
@@ -292,23 +298,19 @@ export function FilterBar({
             min={filters.from}
             max={today}
             onChange={(e) => e.target.value && onChange({ to: e.target.value })}
-            className="bg-background h-9 rounded-md border px-2 text-base sm:h-8 sm:text-xs"
+            className="glass-pill h-9 rounded-full px-3 text-base sm:h-8 sm:text-xs"
           />
         </div>
       </div>
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="an-grain">{t('analytics.grain')}</Label>
-        <NativeSelect
-          id="an-grain"
+        <Label>{t('analytics.grain')}</Label>
+        <Pills
+          size="sm"
+          label={t('analytics.grain')}
           value={filters.grain}
-          onChange={(e) => onChange({ grain: e.target.value as AnalyticsGrain })}
-        >
-          {ANALYTICS_GRAINS.map((g) => (
-            <option key={g} value={g}>
-              {t(`analytics.grains.${g}`)}
-            </option>
-          ))}
-        </NativeSelect>
+          options={ANALYTICS_GRAINS.map((g) => ({ value: g, label: t(`analytics.grains.${g}`) }))}
+          onChange={(g: AnalyticsGrain) => onChange({ grain: g })}
+        />
       </div>
       {showProject && (
         <div className="flex flex-col gap-1.5">

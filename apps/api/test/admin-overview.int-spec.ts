@@ -120,6 +120,19 @@ describe('Yönetici paneli (gerçek veritabanı)', { timeout: 30_000 }, () => {
     ]);
     expect(res.throughput.at(-1)!.completed).toBe(2);
     expect(bugOpen.key).toBeTruthy();
+
+    // "Bugün": iki Bug açıldı, bir Bug ve bir Task bitti; yeniden eskiye sıralı.
+    const opened = res.today.filter((e) => e.kind === 'opened');
+    const completed = res.today.filter((e) => e.kind === 'completed');
+    expect(opened.map((e) => e.key).sort()).toEqual([bugOpen.key, bugDone.key].sort());
+    expect(opened.find((e) => e.key === bugOpen.key)).toMatchObject({
+      type: 'BUG',
+      severity: 'CRITICAL',
+    });
+    expect(completed.map((e) => e.key).sort()).toEqual([bugDone.key, taskDone.key].sort());
+    expect(completed.find((e) => e.key === taskDone.key)!.severity).toBeNull();
+    const times = res.today.map((e) => Date.parse(e.at));
+    expect(times).toEqual([...times].sort((a, b) => b - a));
   });
 
   it('yalnızca Owner/Admin görür; Member erişemez', async () => {
