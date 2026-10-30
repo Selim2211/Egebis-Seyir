@@ -27,3 +27,7 @@ graphify-out/
 # ruflo (araç çalışma durumu)
 .claude-flow/
 .swarm/
+
+# Oracle dağıtım paketi (deploy/oracle/release.sh)
+.release/
+.release.tgz
