@@ -10,6 +10,8 @@ export default tseslint.config(
   {
     ignores: [
       'scripts/docs/**',
+      // Derlenmiş API ile çalışan bağımsız Node betikleri (TS projesine dahil değil).
+      'apps/api/scripts/*.cjs',
       '**/dist/**',
       '**/dist-e2e/**',
       '**/coverage/**',
