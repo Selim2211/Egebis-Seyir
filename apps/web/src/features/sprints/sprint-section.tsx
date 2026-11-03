@@ -7,7 +7,7 @@ import {
   Copy,
   FileJson,
   FileSpreadsheet,
-  Kanban,
+  IterationCw,
   Link2,
   MoreHorizontal,
   Pencil,
@@ -147,7 +147,7 @@ export function SprintSection({
                   params={{ spaceId: sprint.spaceId }}
                   search={{ sprint: sprint.id }}
                 >
-                  <Kanban />
+                  <IterationCw />
                   {t('sprintStats.openBoard')}
                 </Link>
               </DropdownMenuItem>
@@ -187,7 +187,7 @@ export function SprintSection({
                   {t('sprints.edit')}
                 </DropdownMenuItem>
               )}
-              {canPlan && sprint.status === 'PLANNED' && (
+              {canPlan && (
                 <>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem variant="destructive" onSelect={onDelete}>

@@ -1,14 +1,18 @@
 import { SPACE_PERMISSIONS as S, averageVelocity, type SprintSummary } from '@scrum/shared';
 import { useQuery } from '@tanstack/react-query';
+import { Trash2 } from 'lucide-react';
+import { useState } from 'react';
 import { Link } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { ContainerHeader, LoadingState, NotFoundState } from '@/features/spaces/container-header';
 import { spaceQuery } from '@/features/spaces/queries';
 import { useCurrentWorkspace } from '@/features/workspace/queries';
 import { formatShortDate } from '@/lib/format';
 import { sprintsQuery } from './queries';
 import { ScrumTabs } from './scrum-tabs';
+import { SprintDeleteDialog } from './sprint-delete-dialog';
 
 const STATUS_ORDER: Record<SprintSummary['status'], number> = {
   ACTIVE: 0,
@@ -23,6 +27,7 @@ export function HistoryPage({ spaceId }: { spaceId: string }) {
   const { id: workspaceId } = useCurrentWorkspace();
   const space = useQuery(spaceQuery(workspaceId, spaceId));
   const sprints = useQuery(sprintsQuery(workspaceId, spaceId));
+  const [deleting, setDeleting] = useState<SprintSummary | null>(null);
 
   if (space.isPending || sprints.isPending) return <LoadingState />;
   if (space.isError || sprints.isError) return <NotFoundState />;
@@ -33,6 +38,7 @@ export function HistoryPage({ spaceId }: { spaceId: string }) {
       (a.startDate < b.startDate ? 1 : a.startDate > b.startDate ? -1 : 0),
   );
   const velocity = averageVelocity(sprints.data.sprints);
+  const canPlan = space.data.permissions.includes(S.SPRINT_PLAN);
 
   return (
     <>
@@ -102,11 +108,24 @@ export function HistoryPage({ spaceId }: { spaceId: string }) {
                         total: sprint.itemCount,
                       })}
                 </span>
+                {canPlan && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-muted-foreground hover:text-destructive size-8"
+                    aria-label={t('sprints.deleteTitle', { name: sprint.name })}
+                    data-testid="history-delete"
+                    onClick={() => setDeleting(sprint)}
+                  >
+                    <Trash2 />
+                  </Button>
+                )}
               </li>
             ))}
           </ul>
         )}
       </div>
+      <SprintDeleteDialog sprint={deleting} onClose={() => setDeleting(null)} />
     </>
   );
 }

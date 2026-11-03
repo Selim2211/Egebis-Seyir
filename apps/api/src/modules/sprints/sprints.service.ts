@@ -269,15 +269,45 @@ export class SprintsService {
     });
   }
 
-  /** Yalnızca planlı sprint silinir; öğeleri Backlog'a döner (brief §6.1.5: havada öğe kalmaz). */
+  /**
+   * Planlı sprint silinince öğeleri Backlog'a döner (brief §6.1.5). Başlamış, bitmiş ya da iptal
+   * edilmiş sprint öğeleriyle (alt öğeler dahil) çöp kutusuna gider; geri getirilen öğe Backlog'a
+   * düşer (ADR-151).
+   */
   async remove(sprintId: string): Promise<void> {
     const { workspaceId, actorId } = this.ctx;
     const db = this.tenant.db;
     const sprint = await db.sprint.findFirst({ where: { id: sprintId } });
     if (!sprint) throw notFound();
     await loadScrumSpace(db, sprint.spaceId, true);
-    if (sprint.status !== 'PLANNED') throw conflict(ERROR_CODES.SPRINT_NOT_PLANNED);
     await db.$transaction(async (tx) => {
+      let trashed = 0;
+      if (sprint.status !== 'PLANNED') {
+        const now = new Date();
+        let frontier = (
+          await tx.workItem.findMany({
+            where: { sprintId, deletedAt: null },
+            select: { id: true },
+          })
+        ).map((r) => r.id);
+        const ids = [...frontier];
+        while (frontier.length > 0) {
+          frontier = (
+            await tx.workItem.findMany({
+              where: { parentId: { in: frontier }, deletedAt: null },
+              select: { id: true },
+            })
+          ).map((r) => r.id);
+          ids.push(...frontier);
+        }
+        if (ids.length > 0) {
+          const res = await tx.workItem.updateMany({
+            where: { id: { in: ids } },
+            data: { deletedAt: now, deletedById: actorId },
+          });
+          trashed = res.count;
+        }
+      }
       await tx.sprint.delete({ where: { id: sprintId } });
       await this.activity.record(tx, {
         workspaceId,
@@ -285,7 +315,12 @@ export class SprintsService {
         entityType: 'sprint',
         entityId: sprintId,
         action: 'sprint.deleted',
-        changes: asJson({ name: sprint.name, spaceId: sprint.spaceId }),
+        changes: asJson({
+          name: sprint.name,
+          spaceId: sprint.spaceId,
+          status: sprint.status,
+          trashedItems: trashed,
+        }),
       });
     });
   }

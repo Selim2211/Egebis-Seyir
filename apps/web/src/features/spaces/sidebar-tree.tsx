@@ -18,6 +18,7 @@ import {
   FolderInput,
   FolderPlus,
   GripVertical,
+  IterationCw,
   Kanban,
   FileText,
   ChartGantt as GanttChartIcon,
@@ -456,7 +457,7 @@ function ScrumLinks({ spaceId }: { spaceId: string }) {
         spaceId={spaceId}
         onNavigate={() => closeSidebar(false)}
       >
-        <Kanban className="text-muted-foreground size-4 shrink-0" aria-hidden />
+        <IterationCw className="text-muted-foreground size-4 shrink-0" aria-hidden />
         <span className="truncate">{t('board.link')}</span>
       </ScrumLink>
     </>

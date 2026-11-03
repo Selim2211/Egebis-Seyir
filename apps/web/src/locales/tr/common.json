@@ -1016,6 +1016,8 @@
     "deleted": "{{name}} silindi; öğeleri Backlog'a döndü.",
     "deleteTitle": "{{name}} silinsin mi?",
     "deleteBody": "Sprint silinir, içindeki öğeler Backlog'a geri döner.",
+    "deleteBodyWithItems": "Sprint ve içindeki {{count}} öğe (alt görevler dahil) çöp kutusuna taşınır. Öğeler 30 gün içinde geri getirilebilir; geri gelen öğe Backlog'a düşer.",
+    "deletedWithItems": "{{name}} ve öğeleri silindi.",
     "edit": "Düzenle",
     "actions": "{{name}} için işlemler",
     "totals": "{{count}} öğe · {{points}} puan",
@@ -2320,6 +2322,7 @@
     "fromEmail": "E-postadan geldi: {{name}} <{{email}}>",
     "fromEmailShort": "E-postadan",
     "convertedTo": "Task’a çevrildi: {{keys}}",
+    "delete": "{{key}} sil",
     "move": "{{key}} başka Projeye taşı"
   },
   "bugStatus": {

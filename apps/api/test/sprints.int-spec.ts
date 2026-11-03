@@ -134,13 +134,40 @@ describe('Sprint ve Product Backlog (gerçek veritabanı)', () => {
       await owner.get(api(`/spaces/${s.id}/backlog`)).expect(409);
     });
 
-    it('aktif sprint silinemez, tarihleri değişmez (brief §6.1.2); ad ve hedef değişir', async () => {
+    it("aktif sprint öğeleriyle çöp kutusuna gider (ADR-151); geri gelen öğe Backlog'a düşer", async () => {
+      const s = await space();
+      const { id } = await sprint(s.id);
+      const task = await item(s.listId, { type: 'TASK', title: 'Sepet' });
+      const sub = await item(s.listId, { type: 'SUBTASK', title: 'API', parentId: task.id });
+      const other = await item(s.listId, { type: 'TASK', title: 'Kalan' });
+      await move(s.id, { itemIds: [task.id], sprintId: id, afterId: null }).expect(204);
+      await ctx.prisma.sprint.update({ where: { id }, data: { status: 'ACTIVE' } });
+
+      await owner.delete(api(`/sprints/${id}`)).expect(204);
+      expect(await ctx.prisma.sprint.count({ where: { id } })).toBe(0);
+      const rows = await ctx.prisma.workItem.findMany({
+        where: { id: { in: [task.id, sub.id, other.id] } },
+        select: { id: true, deletedAt: true, sprintId: true },
+      });
+      const byId = new Map(rows.map((r) => [r.id, r]));
+      expect(byId.get(task.id)!.deletedAt).not.toBeNull();
+      expect(byId.get(sub.id)!.deletedAt).not.toBeNull();
+      expect(byId.get(other.id)!.deletedAt).toBeNull();
+      expect(byId.get(task.id)!.sprintId).toBeNull();
+      const event = await ctx.prisma.activityEvent.findFirst({
+        where: { entityId: id, action: 'sprint.deleted' },
+      });
+      expect(event!.changes).toMatchObject({ status: 'ACTIVE', trashedItems: 2 });
+
+      await owner.post(api(`/items/${task.id}/restore`)).expect(204);
+      expect(keys(await backlog(s.id))).toContain(task.key);
+    });
+
+    it('aktif sprint tarihleri değişmez (brief §6.1.2); ad ve hedef değişir', async () => {
       const s = await space();
       const { id } = await sprint(s.id);
       await ctx.prisma.sprint.update({ where: { id }, data: { status: 'ACTIVE' } });
 
-      const del = await owner.delete(api(`/sprints/${id}`)).expect(409);
-      expect(del.body).toEqual({ code: 'SPRINT_NOT_PLANNED' });
       const dates = await owner.patch(api(`/sprints/${id}`), { endDate: '2026-10-30' }).expect(409);
       expect(dates.body).toEqual({ code: 'SPRINT_DATES_LOCKED' });
       await owner.patch(api(`/sprints/${id}`), { goal: 'Yeni hedef' }).expect(204);

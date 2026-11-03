@@ -10,7 +10,7 @@ import {
 } from '@scrum/shared';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
-import { Bug as BugIcon, FolderInput, Mail, Paperclip, Plus, X } from 'lucide-react';
+import { Bug as BugIcon, FolderInput, Mail, Paperclip, Plus, Trash2, X } from 'lucide-react';
 import { type FormEvent, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -35,7 +35,7 @@ import { ItemOpenLink } from '@/features/work-items/detail/item-nav';
 import { ItemNavContext } from '@/features/work-items/detail/item-nav-context';
 import { ItemPanel } from '@/features/work-items/detail/item-panel';
 import { MoveItemDialog } from '@/features/work-items/move-item-dialog';
-import { useUploadAttachment } from '@/features/work-items/queries';
+import { useItemLifecycle, useUploadAttachment } from '@/features/work-items/queries';
 import { useCurrentWorkspace } from '@/features/workspace/queries';
 import { formatDate } from '@/lib/format';
 import { useErrorMessage } from '@/lib/use-error-message';
@@ -224,6 +224,21 @@ function BugRow({
   const onError = (error: unknown) => toast.error(errorMessage(error));
   const canMove = permissions.includes(S.WORK_ITEM_WRITE);
   const [moving, setMoving] = useState(false);
+  const lifecycle = useItemLifecycle();
+  const trash = () =>
+    lifecycle.mutate(
+      { itemId: bug.id, action: 'delete' },
+      {
+        onSuccess: () =>
+          toast.success(t('items.trashed', { key: bug.key }), {
+            action: {
+              label: t('structure.undo'),
+              onClick: () => lifecycle.mutate({ itemId: bug.id, action: 'restore' }),
+            },
+          }),
+        onError,
+      },
+    );
 
   return (
     <tr className="hover:bg-accent/40 border-b last:border-0">
@@ -370,6 +385,18 @@ function BugRow({
               open={moving}
               onOpenChange={setMoving}
             />
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-muted-foreground hover:text-destructive size-8"
+              data-testid="bug-delete"
+              aria-label={t('bugs.delete', { key: bug.key })}
+              title={t('bugs.delete', { key: bug.key })}
+              disabled={lifecycle.isPending}
+              onClick={trash}
+            >
+              <Trash2 />
+            </Button>
           </>
         )}
       </td>

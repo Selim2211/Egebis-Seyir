@@ -1,7 +1,7 @@
 import { SPACE_PERMISSIONS as S, sprintTotals } from '@scrum/shared';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
-import { BarChart3, Kanban, Link2 } from 'lucide-react';
+import { BarChart3, IterationCw, Link2 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -111,7 +111,7 @@ export function SprintBoardPage({
 
       {!selected ? (
         <div className="mx-auto flex max-w-md flex-col items-center gap-3 px-4 py-16 text-center">
-          <Kanban className="text-muted-foreground size-8" aria-hidden />
+          <IterationCw className="text-muted-foreground size-8" aria-hidden />
           <h2 className="font-semibold">{t('board.noSprintTitle')}</h2>
           <p className="text-muted-foreground text-sm">{t('board.noSprintBody')}</p>
           <Button asChild variant="outline" size="sm">

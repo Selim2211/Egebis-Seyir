@@ -1017,6 +1017,8 @@
     "deleted": "{{name}} deleted; its items went back to the Backlog.",
     "deleteTitle": "Delete {{name}}?",
     "deleteBody": "The sprint is deleted and its items return to the Backlog.",
+    "deleteBodyWithItems": "The sprint and its {{count}} items (including Sub-Tasks) move to the trash. Items can be restored within 30 days and return to the Backlog.",
+    "deletedWithItems": "{{name}} and its items were deleted.",
     "edit": "Edit",
     "actions": "Actions for {{name}}",
     "totals": "{{count}} items · {{points}} points",
@@ -2321,6 +2323,7 @@
     "fromEmail": "Came by email: {{name}} <{{email}}>",
     "fromEmailShort": "By email",
     "convertedTo": "Converted to Task: {{keys}}",
+    "delete": "Delete {{key}}",
     "move": "Move {{key}} to another Project"
   },
   "bugStatus": {

@@ -53,13 +53,13 @@ import { itemsToTsv } from './copy-list';
 import {
   backlogQuery,
   sprintQuery,
-  useDeleteSprint,
   useMoveBacklogItems,
   useBacklogUnnest,
   useGroupItems,
   useNestItem,
 } from './queries';
 import { SprintActions } from './sprint-actions';
+import { SprintDeleteDialog } from './sprint-delete-dialog';
 import { SprintDialog } from './sprint-dialog';
 import { RestoreSprintDialog } from '@/features/backup/backup';
 import { PromoteEpicDialog } from '@/features/work-items/promote-epic-dialog';
@@ -90,7 +90,6 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
   const space = useQuery(spaceQuery(workspaceId, spaceId));
   const backlog = useQuery(backlogQuery(workspaceId, spaceId));
   const move = useMoveBacklogItems(spaceId);
-  const remove = useDeleteSprint();
   const nestItem = useNestItem();
   const unnestItem = useBacklogUnnest();
   const groupItems = useGroupItems(spaceId);
@@ -946,27 +945,7 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
             setScopeChange(null);
           }}
         />
-        <ConfirmDialog
-          open={deleting !== null}
-          onOpenChange={(open) => !open && setDeleting(null)}
-          title={t('sprints.deleteTitle', { name: deleting?.name })}
-          description={t('sprints.deleteBody')}
-          confirmLabel={t('structure.delete')}
-          pending={remove.isPending}
-          onConfirm={() => {
-            if (!deleting) return;
-            remove.mutate(deleting.id, {
-              onSuccess: () => {
-                toast.success(t('sprints.deleted', { name: deleting.name }));
-                setDeleting(null);
-              },
-              onError: (error) => {
-                toast.error(errorMessage(error));
-                setDeleting(null);
-              },
-            });
-          }}
-        />
+        <SprintDeleteDialog sprint={deleting} onClose={() => setDeleting(null)} />
       </ItemNavContext.Provider>
     </SelectionContext.Provider>
   );

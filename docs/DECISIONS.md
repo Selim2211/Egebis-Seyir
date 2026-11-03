@@ -1349,3 +1349,15 @@ Yönetici paneli, liste sayfası ve 8 Analiz sekmesi "cam" (glassmorphism) gör�
 - **Yönetici paneli ekleri:** saate göre selamlama ve tek cümlelik durum özeti (bugün açılan Bug, geciken iş, sahipsiz Bug; hepsi sıfırsa "her şey yolunda"); Bug akışında bugünün çubukları tam, önceki günler soluk; yanında **"Bugün" sütunu**: bugün açılan Bug'lar (bildiren) ve biten Task/Bug'lar (ilk atanan), saat sırasıyla, en çok 20. Veri `admin/overview` içindeki `today` alanından gelir ve zaten okunan iş listesinden üretilir (ek tarama yok, yalnızca kişi adları için bir sorgu).
 - **Yazdırma/PDF:** zemin, gölge ve bulanıklık kalkar; kartlar temanın düz kart rengini alır (koyu temada açık yazı okunur kalır).
 - **Katman:** cam kuralları `@layer components` içindedir; böylece uyarı tonları (sarı/kırmızı kart) gibi Tailwind yardımcıları cam arka planını ezebilir.
+
+## ADR-151 — Her durumdaki sprint silinebilir; Sprint Panosu kendi simgesini alır
+
+**Durum:** Kabul · **Tarih:** 2026-11-03
+
+Yönetici notları (madde 1 ve 4).
+
+- **Planlı sprint:** davranış aynı; sprint silinir, öğeleri Backlog'a döner.
+- **Aktif, tamamlanmış ya da iptal edilmiş sprint:** artık silinebilir (yetki: `sprint.plan`). Sprint'e bağlı tüm öğeler alt öğeleriyle birlikte aynı zaman damgasıyla çöp kutusuna gider (ADR-046); sprint satırı, olayları, snapshot'ları ve retro kayıtları silinir. Çöp kutusundan geri getirilen öğe sprint'siz olduğundan Backlog'a düşer. Aktivite kaydı sprint durumunu ve çöpe giden öğe sayısını tutar.
+- **Arayüz:** Backlog'daki sprint menüsünde ve Sprint geçmişi sayfasında "Sil"; onay metni durumuna göre değişir (öğeler Backlog'a döner / öğeleriyle çöp kutusuna gider). `SPRINT_NOT_PLANNED` kodu yalnızca "başlat" için kalır.
+- **Epic ve Bug:** öğe detayındaki "Sil" zaten her türde vardı; Bugs listesine geri alınabilir hızlı silme düğmesi eklendi.
+- **Simgeler:** Sprint Panosu `IterationCw` (sprint döngüsü), Kanban panosu `Kanban` simgesini kullanır; kenar çubuğunda ikisi artık ayırt edilir.
