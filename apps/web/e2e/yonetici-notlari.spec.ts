@@ -31,7 +31,7 @@ async function api<T = unknown>(
         body: body === undefined ? undefined : JSON.stringify(body),
       });
       const text = await res.text();
-      return { status: res.status, body: (text ? JSON.parse(text) : null) as unknown };
+      return { status: res.status, body: (text ? JSON.parse(text) : null) as never };
     },
     { method, path, body },
   );
