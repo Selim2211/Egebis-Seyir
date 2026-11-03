@@ -1361,3 +1361,91 @@ Yönetici notları (madde 1 ve 4).
 - **Arayüz:** Backlog'daki sprint menüsünde ve Sprint geçmişi sayfasında "Sil"; onay metni durumuna göre değişir (öğeler Backlog'a döner / öğeleriyle çöp kutusuna gider). `SPRINT_NOT_PLANNED` kodu yalnızca "başlat" için kalır.
 - **Epic ve Bug:** öğe detayındaki "Sil" zaten her türde vardı; Bugs listesine geri alınabilir hızlı silme düğmesi eklendi.
 - **Simgeler:** Sprint Panosu `IterationCw` (sprint döngüsü), Kanban panosu `Kanban` simgesini kullanır; kenar çubuğunda ikisi artık ayırt edilir.
+
+## ADR-152 — Üç rol: Proje Üyesi, Proje Yöneticisi, Super Admin; dış kaynak
+
+**Durum:** Kabul · **Tarih:** 2026-11-03 · ADR-035, ADR-039 ve ADR-043'ün görünürlük kurallarının yerini alır.
+
+Yönetici notları (madde 5 ve 6).
+
+- **Super Admin:** workspace katmanında Owner ve Admin (arayüzde "Super Admin (Sahip)" ve "Super Admin"). Her Projeyi görür ve tüm Proje izinlerine sahiptir; kişileri, rolleri, doküman/video izinlerini ve dış kaynağın içerik erişimini yönetir.
+- **Proje rolleri ikiye indi:** `PROJECT_MANAGER` (eski Product Owner + Scrum Master izinleri: sprint planlama/başlatma/bitirme/iptal, Backlog sıralama, Proje ayarları ve üyeleri, öğe erişimi, Bug atama) ve `PROJECT_MEMBER` (iş öğesi, tahmin, yorum, liste, doküman ve video). Rol Proje bazındadır: bir kişi A'da yönetici, B'de üye olabilir. Özel roller (ADR-112) sürer.
+- **Görünürlük yalnızca üyelikle:** üyesi olmadığı Proje kullanıcıya hiç görünmez (404). Açık/gizli Proje ayrımı kalktı (`isPrivate` alanı veritabanında durur ama kurala girmez; formdan kaldırıldı). Kural shared `spacePermissions` içinde olduğundan arama, Analiz, takvim, bildirim, aktivite gibi Proje izin haritasını kullanan her yer kendiliğinden uyar.
+- **Doküman ve video izinleri ayrıştı:** `doc.view/create/edit/delete` ve `video.view/create/edit/delete` (eski `doc.write` kalktı). Super Admin, Ayarlar → Roller'den hangi rolün doküman/video görebileceğini, oluşturabileceğini, düzenleyebileceğini ve silebileceğini belirler.
+- **Dış kaynak (Guest katmanı):** arayüzde "Dış kaynak", avatarı her yerde turuncu halka ve dolguyla gösterilir. Yalnızca eklendiği Projeleri görür, yalnızca Proje Üyesi rolüyle eklenebilir (`OUTSOURCE_NOT_MANAGER`); hangi rol verilirse verilsin yönetici izinleri alınmaz. Doküman ve videolar varsayılan kapalıdır: `memberships.contentAccess` = `NONE` (kapalı), `VIEW` (yalnızca görüntüleme) ya da `FULL` (rolünün izinleri). Erişimi yalnızca Super Admin değiştirir.
+- **Dış kaynak penceresi (Ayarlar → Dış kaynak, `GET members/outsource`):** Super Admin tüm dış kaynakları, Proje Yöneticisi yalnızca yönettiği Projelerdekileri görür; Projelerine ekleyip çıkarabilir.
+- **Davet ve hesap açma:** Super Admin dışındaki her rolde Proje seçilebilir (kişi Proje Üyesi olarak eklenir); dış kaynakta en az bir Proje zorunlu.
+- **Geçiş (`20261103120000_project_roles`):** PRODUCT_OWNER → PROJECT_MANAGER, DEVELOPER → PROJECT_MEMBER anahtarı yeniden adlandırılır; Scrum Master üyeleri yönetici, Stakeholder üyeleri Proje Üyesi olur (öğe erişim kayıtları dahil), eski iki sistem rolü silinir; özel rollerde `doc.write` karşılıklarına açılır. Açık Projeleri üyeliksiz kullananlar erişimini birden kaybetmesin diye, bir öğede atanan ya da bildiren olarak geçen Member katmanındaki kişiler o Projeye Proje Üyesi olarak eklenir.
+
+## ADR-153 — Çıkarılan kişinin açık işleri devredilir
+
+**Durum:** Kabul · **Tarih:** 2026-11-03
+
+Yönetici notları (madde 7).
+
+- **Açık iş:** silinmemiş, durumu "bitti" kategorisinde olmayan ve kişinin atandığı öğe. Biten işlerin ataması geçmiş ve analiz için korunur (önceden tüm atamalar siliniyordu).
+- **Workspace'ten çıkarma (`DELETE members/:userId`, gövde `{ reassign: { spaceId: userId } }`):** her Projede açık işler varsayılan olarak o Projenin ilk Proje Yöneticisine geçer. Çıkarılan kişi o Projenin yöneticisiyse ya da Projede başka yönetici yoksa alıcıyı Super Admin seçer (`GET members/:userId/handover` planı verir; seçim yoksa `HANDOVER_TARGET_REQUIRED`). Dış kaynak alıcı olamaz.
+- **Projeden çıkarma:** aynı devir yalnızca o Projede yapılır; alıcı sırasıyla seçilen kişi, ilk yönetici, çıkaran kişi (üyeyse) ya da ilk üye. Proje Yöneticisini yalnızca Super Admin çıkarabilir (`MANAGER_REMOVAL_SUPER_ADMIN`).
+- **Arayüz:** Ayarlar → Kişiler'de çıkarma onayı devir penceresidir: Proje, açık iş sayısı ve devralan seçimi; yöneticisi olduğu Projeler için yeni yönetici hatırlatması. Aktivite kaydı devri (Proje, alıcı, iş sayısı) tutar.
+
+## ADR-154 — Akan aktivite penceresi ve yükleme sınırları
+
+**Durum:** Kabul · **Tarih:** 2026-11-03
+
+Yönetici notları (madde 2 ve 3).
+
+- **Akan aktivite:** üst çubuktaki "Akan aktivite" düğmesi sağdan bir panel açar (isteğe bağlı; kapalıyken istek atılmaz). Panel `GET activity` akışını kullanır: yalnızca kullanıcının görebildiği Projelerin öğe olayları gelir (ADR-152 kuralı: Super Admin hepsini, Proje Yöneticisi/Üyesi kendi Projelerini). Her satırda kişi, öğe anahtarı ve başlığı, ne yaptığı (başlattı, kapattı, atandı…), tarih-saat ve göreli zaman vardır; açıkken 15 sn'de bir yenilenir, "Daha fazla göster" ile geçmişe iner. Kişi adına tıklayınca mesaj gönderme (birebir konuşma açılır), Super Admin için kişi analizi ve ekip iş yükü bağlantıları çıkar. Esc ile kapanır.
+- **Yükleme sınırları (`upload_quotas`, Ayarlar → Yükleme sınırları, yalnızca Super Admin):** kişi ya da ekip için en çok dosya sayısı ve toplam boyut (MB); boş alan sınırsız. Dosya = iş öğesi/doküman eki ya da video. Kişinin kendi sınırı ve üyesi olduğu her ekibin sınırı ayrı ayrı denetlenir; ekip kullanımı ekip üyelerinin yüklemelerinin toplamıdır. Aşımda yükleme `413 UPLOAD_QUOTA_EXCEEDED` ile reddedilir (video için yükleme başlatılırken bildirilen boyutla). Sayfada her sınırın kullanım çubuğu görünür.
+
+## ADR-155 — AI ile Story Point önerisi
+
+**Durum:** Kabul · **Tarih:** 2026-11-03
+
+Yönetici notları (madde 8).
+
+- **Uç:** `POST items/:itemId/ai/estimate` (izin `estimate.write`): görevin başlığı, açıklaması, kabul kriterleri, alt işleri ve son yorumlarından Fibonacci puanı (1, 2, 3, 5, 8, 13, 21), güven düzeyi (düşük/orta/yüksek) ve 2-3 cümlelik gerekçe döner. Epic için kullanılamaz. Öneri yazılmaz; kullanıcı "Uygula" derse mevcut puan alanına kaydedilir.
+- **Asgari açıklama:** Super Admin Ayarlar → Genel'den özelliği açıp kapatır ve açıklamada gereken en az cümle sayısını belirler (varsayılan 5, 1–50; `workspaces.aiEstimateEnabled`, `aiEstimateMinSentences`). Cümle sayımı shared `countSentences` ile hem sunucuda hem arayüzde aynıdır: nokta/soru/ünlem/üç nokta ile biten ya da ayrı satırdaki, en az iki kelimeli parçalar. Eşik altında model çağrılmaz (`AI_ESTIMATE_TOO_SHORT`, ayrıntı: min, count); kapalıysa `AI_ESTIMATE_DISABLED`.
+- **Arayüz:** görev detayında puan alanının altında "AI ile tahmin et" düğmesi ve "Açıklama: 3 / 5 cümle" sayacı; eşik altında düğme pasif. Yalnızca Fibonacci ölçekli Projelerde ve puan alt görevlerden hesaplanmıyorsa görünür. Sunucuda AI anahtarı yoksa hiç çizilmez (ADR-090).
+- **Hata metinleri:** API hata ayrıntıları (`details`) çeviri metnine yerleşir (ör. "en az {{min}} cümle").
+
+## ADR-156 — Proje kuş bakışı: "Yatay" ve "Dikey" haritanın şekline göre
+
+**Durum:** Kabul · **Tarih:** 2026-11-03 · ADR-137'deki yön etiketlerini düzeltir.
+
+"Yatay" düğmesi `LR` düzenini seçiyordu: seviyeler soldan sağa akar ama kardeş işler alt alta dizildiği için harita uzun bir sütun olarak görünür; "Dikey" ise `TB` düzeninde kardeşleri yan yana dizip haritayı genişletiyordu. Kullanıcılar etiketi haritanın şekline göre okuduğundan ikisi ters algılanıyordu. Artık `TB` "Yatay" (simge `Columns3`), `LR` "Dikey" (simge `Rows3`); düzen algoritması ve kayıtlı tercih (`map.direction`) değişmedi.
+
+## ADR-157 — Yavaşlık tanısı: Server-Timing ve ölçüm betiği
+
+**Durum:** Kabul · **Tarih:** 2026-11-03
+
+Yönetici notları (madde 9): boş sistemde ofis sunucusunda yavaşlık. Yerel ölçümler hızlı olduğundan sorun büyük olasılıkla sunucu, ağ ya da kurulumda.
+
+- **`Server-Timing: app;dur=…`** başlığı her API yanıtına eklenir; tarayıcının Ağ sekmesinde sunucu süresi ile ağ/vekil süresi ayrı görünür.
+- **`scripts/perf-check.sh <adres>`:** sunucuda çalışır, hiçbir şeyi değiştirmez; bellek/takas, disk türü, konteyner durumu ve yeniden başlamalar, son 1 saatin en yavaş API istekleri (pino `responseTime`), veritabanı gecikmesi ve HTTP süreleri (DNS, bağlantı, TLS, ilk bayt, sıkıştırma, önbellek başlıkları) raporlanır.
+- **`docs/PERFORMANS-KONTROL.md`:** sunucu ve tarayıcı ölçümü adımları, bulguların anlamı ve sık nedenler (VPN, kurumsal vekil/SSL denetimi, DNS, swap/HDD, geliştirme modu).
+
+## ADR-158 — Yavaşlık araştırması: MTU kara deliği, parça sayısı, HTTP/2
+
+**Durum:** Kabul · **Tarih:** 2026-11-03 · ADR-157'yi tamamlar.
+
+Oracle'daki canlı sürüm ve ofis kurulumunun birebir kopyası (aynı docker-compose, demo veriyle) ölçüldü.
+
+- **Oracle — MTU kara deliği (altyapı):** VNIC MTU 9000, `tcp_mtu_probing=0`. İnternet yolunda "parçalanma gerekli" uyarısı ulaşmadığından büyük paketler düşüyordu: 35 KB JS aktarımı ortalama 0,93 sn, gönderilen paketlerin %12'si yeniden gönderildi. Yalnızca bir istemci rotasına MTU 1400 verilince 0,07 sn ve %0,3; `tcp_mtu_probing=1` ile 0,06 sn. Sunucuda `/etc/sysctl.d/60-seyir-net.conf` kalıcı yapıldı, `deploy/oracle/base.sh`'e eklendi. Ayrıca 1 GB RAM'de Node belleğinin ~100 MB'ı takasta (seyrek sayfaların ilk açılışı yavaş); bu ücretsiz makinenin sınırı.
+- **Konteynerler:** docker-compose'da api ve web için `net.ipv4.tcp_mtu_probing=1` ve `tcp_slow_start_after_idle=0` (konteynerin kendi ağ ad alanında; sunucuya dokunmaz). VPN gibi MTU'su küçük yollarda aynı kara deliği kendiliğinden aşar. Tüm servislere günlük dönüşümü (20 MB × 5) eklendi; varsayılan json-file sınırsız büyüyordu.
+- **Arayüz parçaları (bizim taraf):** rolldown her lucide simgesini ve her küçük paylaşılan modülü ayrı dosyaya bölüyordu; ana sayfa **97 dosya** istiyordu. HTTP/1.1'de tarayıcı aynı anda 6 istek açtığından her tur bir gidiş-dönüş gecikmesi ekler: yerelde görünmez, VPN'de belirgindir. Simgeler `icons`, küçük arayüz kütüphaneleri (Radix, dnd-kit, sonner…) `ui` parçasında toplandı (paket adı kesin çözülür; pnpm klasör adlarındaki eş bağımlılıklar yüzünden yol üzerinde arama editörü de yakalıyordu). Ana sayfa **50 dosya**, JS 381 → 370 KB. Uygulama kodunun küçük modüllerini toplamak denendi ve bırakıldı: toplanan modüller grafik ve editör parçalarını ana sayfaya statik olarak çekiyordu (~765 KB).
+- **Ölçüm (Playwright, önbelleksiz, demo veri; ~0,5 sn "ağ durgun" beklemesi dahil):** 40 ms gecikmede 2,68 → 2,08 sn; 80 ms'de 3,51 → 2,50 sn. HTTPS ile (HTTP/2) aynı yapı 1,81 / 2,03 sn.
+- **API:** ısınmış halde ana sayfanın 8 isteği paralelde 12–70 ms; yeniden başlatma sonrası ilk çağrılar 100–230 ms. Boş sistemde yavaşlığın kaynağı API değildir. Tek ağır uç Super Admin panelindeki `admin/overview` (~650 ms, 734 iş).
+- **Ofis için öneri:** uygulamayı HTTPS ile sunmak (şirket sertifikası ya da Caddy `tls internal` + kök sertifikanın GPO ile dağıtımı) HTTP/2'yi açar. Ölçüm için `scripts/perf-check.sh` (sunucu) ve `scripts/perf-check-client.ps1` (kullanıcı bilgisayarı: vekilli/vekilsiz, küçük/büyük dosya karşılaştırması).
+
+## ADR-159 — Ayarlar → Tanılama
+
+**Durum:** Kabul · **Tarih:** 2026-11-03
+
+Ofis sunucusuna yalnızca deploy ile erişilebiliyor; konsol ya da günlük okunamıyor. Yavaşlığın kaynağını (ağ, sunucu, veritabanı) uygulama içinden ölçmek için Super Admin'e (workspace ayar izni) açık bir sayfa:
+
+- **Sunucu raporu (`GET diagnostics`):** uygulama sürümü/çalışma süresi/bellek, olay döngüsü gecikmesi (`monitorEventLoopDelay`); makine (CPU, yük, bellek, takas, sanal makinede CPU çalınması); konteyner (Docker mı, bellek/CPU sınırı); ağ (arayüz MTU'ları, `tcp_mtu_probing`, `tcp_slow_start_after_idle`); yükleme diski doluluğu; veritabanı (5 × `SELECT 1` süresi, sürüm, boyut, bağlantı sayısı, `shared_buffers`, iş/kişi sayısı); son bir saatin istek istatistikleri (p50/p95/p99, 500 ms üstü, 5xx, en yavaş 15 uç). İsteğin sunucuya nasıl geldiği: HTTP sürümü, `X-Forwarded-*` sekme sayısı, `Via`.
+- **İstek kaydı:** `Server-Timing` ara katmanı her isteğin yol kalıbını (kimlikler `:id`), süresini ve durum kodunu bellekte 2000 kayıtlık halka tamponda tutar. Kimlik, gövde ya da sorgu parametresi tutulmaz.
+- **Tarayıcı ölçümleri:** 10 sıralı ping (ağ = toplam − `Server-Timing`), 12 paralel ping, 64 KB ve 1 MB sıkıştırılamayan veri indirme (`diagnostics/payload`, en çok 4 MB), sayfanın protokolü ve yüklediği dosya sayısı.
+- **Otomatik yorum:** eşikler ADR-158 ölçümlerinden: ağ gecikmesi > 60 ms, büyük yanıt takılması (MTU/vekil), HTTP/1.1, yavaş veritabanı, olay döngüsü, takas, CPU çalınması, disk, MTU riski.
+- **Rapor:** JSON olarak kopyalanır ya da indirilir. Şifre, bağlantı adresi ve anahtarlar girmez; yalnızca ayarın açık/kapalı ya da tanımlı olup olmadığı.
+- **Test güvenliği:** Playwright API sunucusu SMTP'yi açıkça Mailpit'e (127.0.0.1:1025) yönlendirir ve çağrı kutusu yapay zekâsını kapatır. Önceden eksik değerler `apps/api/.env`'den tamamlandığından gerçek bir SMTP sunucusu tanımlıysa davet testleri oraya gidiyordu.

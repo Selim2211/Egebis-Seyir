@@ -35,4 +35,12 @@ for port in $PORTS; do
   fi
 done
 netfilter-persistent save >/dev/null
+
+# Oracle VNIC'i MTU 9000 ile gelir; internet yolunda "parçalanma gerekli" uyarısı kaybolunca büyük
+# yanıtlar takılır (ölçüm: 35 KB JS ~0,9 sn, %12 yeniden gönderim). mtu_probing ile ~0,06 sn (ADR-158).
+cat >/etc/sysctl.d/60-seyir-net.conf <<'EOF'
+net.ipv4.tcp_mtu_probing = 1
+net.ipv4.tcp_slow_start_after_idle = 0
+EOF
+sysctl -q --system
 echo "base ok: $(hostname) ports=[$PORTS] from $SOURCE"
