@@ -23,6 +23,7 @@ import { TenantPrismaService } from '../../infra/prisma/tenant-prisma.service';
 import { StorageLimitError, StorageService } from '../../infra/storage/storage.service';
 import { notFound } from '../spaces/space-errors';
 import { fail } from '../work-items/item-support';
+import { QuotasService } from '../quotas/quotas.service';
 
 const HEADER_BYTES = 16;
 
@@ -74,6 +75,7 @@ export class VideosService {
     private readonly tenant: TenantPrismaService,
     private readonly cls: ClsService<AppClsStore>,
     private readonly storage: StorageService,
+    private readonly quotas: QuotasService,
     config: ConfigService<Env, true>,
   ) {
     this.maxBytes = config.get('MAX_VIDEO_MB', { infer: true }) * 1024 * 1024;
@@ -110,6 +112,7 @@ export class VideosService {
       });
     }
     await this.assertFolder(spaceId, input.folderId);
+    await this.quotas.assertCanUpload(this.cls.get('userId'), input.size);
     const workspaceId = this.cls.get('workspaceId')!;
     const storageKey = `${workspaceId}/videos/${crypto.randomUUID()}`;
     const row = await this.tenant.db.video.create({

@@ -111,13 +111,15 @@ export class WorkspaceSettingsService {
     const [workspace, member] = await Promise.all([
       this.tenant.db.workspace.findUniqueOrThrow({
         where: { id: this.cls.get('workspaceId')! },
-        select: { name: true },
+        select: { name: true, aiEstimateEnabled: true, aiEstimateMinSentences: true },
       }),
       this.memberRole(),
     ]);
     return {
       name: workspace.name,
       membersCanCreateSpaces: member.permissions.includes(W.SPACE_CREATE),
+      aiEstimateEnabled: workspace.aiEstimateEnabled,
+      aiEstimateMinSentences: workspace.aiEstimateMinSentences,
     };
   }
 
@@ -140,12 +142,26 @@ export class WorkspaceSettingsService {
         to: input.membersCanCreateSpaces,
       };
     }
+    for (const key of ['aiEstimateEnabled', 'aiEstimateMinSentences'] as const) {
+      if (input[key] !== undefined && input[key] !== current[key]) {
+        changes[key] = { from: current[key], to: input[key] };
+      }
+    }
     if (Object.keys(changes).length === 0) return;
 
     const member = await this.memberRole();
     await this.tenant.db.$transaction(async (tx) => {
-      if (changes.name) {
-        await tx.workspace.update({ where: { id: workspaceId }, data: { name: input.name } });
+      if (changes.name || changes.aiEstimateEnabled || changes.aiEstimateMinSentences) {
+        await tx.workspace.update({
+          where: { id: workspaceId },
+          data: {
+            ...(changes.name && { name: input.name }),
+            ...(changes.aiEstimateEnabled && { aiEstimateEnabled: input.aiEstimateEnabled }),
+            ...(changes.aiEstimateMinSentences && {
+              aiEstimateMinSentences: input.aiEstimateMinSentences,
+            }),
+          },
+        });
       }
       if (changes.membersCanCreateSpaces) {
         const others = member.permissions.filter((p) => p !== W.SPACE_CREATE);

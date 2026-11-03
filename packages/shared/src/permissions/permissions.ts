@@ -54,8 +54,20 @@ export const SPACE_PERMISSIONS = {
   REPORT_VIEW: 'report.view',
   /** Dokümanları görüntüleme. */
   DOC_VIEW: 'doc.view',
-  /** Doküman oluşturma/düzenleme. */
-  DOC_WRITE: 'doc.write',
+  /** Doküman oluşturma. */
+  DOC_CREATE: 'doc.create',
+  /** Doküman düzenleme, taşıma, sürüm geri alma, iş öğesine bağlama. */
+  DOC_EDIT: 'doc.edit',
+  /** Doküman silme ve çöp kutusundan geri getirme. */
+  DOC_DELETE: 'doc.delete',
+  /** Videoları görüntüleme. */
+  VIDEO_VIEW: 'video.view',
+  /** Video ve video klasörü yükleme/oluşturma. */
+  VIDEO_CREATE: 'video.create',
+  /** Video ve video klasörü düzenleme. */
+  VIDEO_EDIT: 'video.edit',
+  /** Video ve video klasörü silme. */
+  VIDEO_DELETE: 'video.delete',
 } as const;
 export type SpacePermission = (typeof SPACE_PERMISSIONS)[keyof typeof SPACE_PERMISSIONS];
 

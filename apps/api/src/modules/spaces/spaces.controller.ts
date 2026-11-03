@@ -49,6 +49,7 @@ import { SpaceMembersService } from './space-members.service';
 import { SpacesService } from './spaces.service';
 import { StatusesService } from './statuses.service';
 import { StructureService } from './structure.service';
+import { parseRemoveBody } from '../access/remove-body';
 
 class HierarchyDto extends createZodDto(HierarchyResponseSchema) {}
 class CreateSpaceDto extends createZodDto(CreateSpaceRequestSchema) {}
@@ -202,8 +203,9 @@ export class SpacesController {
   async removeMember(
     @Uuid('spaceId') spaceId: string,
     @Uuid('userId') userId: string,
+    @Body() body: unknown,
   ): Promise<void> {
-    await this.members.remove(spaceId, userId);
+    await this.members.remove(spaceId, userId, parseRemoveBody(body));
   }
 
   // ---------- Durumlar ----------

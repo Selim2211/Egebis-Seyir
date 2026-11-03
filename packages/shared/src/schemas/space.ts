@@ -253,6 +253,10 @@ export type ArchiveResponse = z.infer<typeof ArchiveResponseSchema>;
 export const WorkspaceSettingsSchema = z.object({
   name: ContainerNameSchema,
   membersCanCreateSpaces: z.boolean(),
+  /** AI ile Story Point önerisi açık mı (ADR-155). */
+  aiEstimateEnabled: z.boolean(),
+  /** Öneri için açıklamada gereken en az cümle sayısı. */
+  aiEstimateMinSentences: z.number().int().min(1).max(50),
 });
 export type WorkspaceSettings = z.infer<typeof WorkspaceSettingsSchema>;
 

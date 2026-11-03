@@ -21,6 +21,9 @@ import {
   CreateInvitationsRequestSchema,
   CreateMemberRequestSchema,
   CreatedMemberSchema,
+  HandoverPlanSchema,
+  OutsourceResponseSchema,
+  UpdateContentAccessRequestSchema,
   type CreatedMember,
   InvitationPreviewSchema,
   InvitationsResponseSchema,
@@ -55,9 +58,13 @@ import { SessionService } from '../auth/session.service';
 import { InvitationsService } from './invitations.service';
 import { MembersService } from './members.service';
 import { WorkspaceSettingsService } from './settings.service';
+import { parseRemoveBody } from '../access/remove-body';
 
 class MembersDto extends createZodDto(MembersResponseSchema) {}
 class UpdateMemberDto extends createZodDto(UpdateMemberRequestSchema) {}
+class HandoverPlanDto extends createZodDto(HandoverPlanSchema) {}
+class OutsourceDto extends createZodDto(OutsourceResponseSchema) {}
+class UpdateContentAccessDto extends createZodDto(UpdateContentAccessRequestSchema) {}
 class InvitationsDto extends createZodDto(InvitationsResponseSchema) {}
 class CreateInvitationsDto extends createZodDto(CreateInvitationsRequestSchema) {}
 class InvitationPreviewDto extends createZodDto(InvitationPreviewSchema) {}
@@ -101,11 +108,38 @@ export class MembersController {
     await this.members.change(userId, body.role);
   }
 
+  /** Dış kaynak penceresi: Super Admin ve Proje Yöneticileri (liste servis içinde süzülür). */
+  @Get('outsource')
+  @ZodResponse({ type: OutsourceDto })
+  outsource(): Promise<OutsourceDto> {
+    return this.members.outsource();
+  }
+
+  @Get(':userId/handover')
+  @RequirePermission(W.MEMBERS_MANAGE)
+  @ZodResponse({ type: HandoverPlanDto })
+  handover(@Param('userId', ParseUUIDPipe) userId: string): Promise<HandoverPlanDto> {
+    return this.members.handoverPlan(userId);
+  }
+
+  @Patch(':userId/content-access')
+  @RequirePermission(W.MEMBERS_MANAGE)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async contentAccess(
+    @Param('userId', ParseUUIDPipe) userId: string,
+    @Body() body: UpdateContentAccessDto,
+  ): Promise<void> {
+    await this.members.setContentAccess(userId, body.contentAccess);
+  }
+
   @Delete(':userId')
   @RequirePermission(W.MEMBERS_MANAGE)
   @HttpCode(HttpStatus.NO_CONTENT)
-  async remove(@Param('userId', ParseUUIDPipe) userId: string): Promise<void> {
-    await this.members.change(userId, null);
+  async remove(
+    @Param('userId', ParseUUIDPipe) userId: string,
+    @Body() body: unknown,
+  ): Promise<void> {
+    await this.members.change(userId, null, parseRemoveBody(body));
   }
 }
 

@@ -2,8 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { ALL_SPACE_PERMISSIONS, DEFAULT_SPACE_ROLE_PERMISSIONS } from '../permissions/roles';
 import { itemPermissions, type ItemAccessInput } from './item-access';
 
-const STAKEHOLDER = DEFAULT_SPACE_ROLE_PERMISSIONS.STAKEHOLDER;
-const DEVELOPER = DEFAULT_SPACE_ROLE_PERMISSIONS.DEVELOPER;
+// Salt okuma izinleri (eski Stakeholder karşılığı).
+const STAKEHOLDER = ['space.view', 'comment.write', 'report.view', 'bug.report'];
+const DEVELOPER = DEFAULT_SPACE_ROLE_PERMISSIONS.PROJECT_MEMBER;
 
 const base: ItemAccessInput = {
   workspaceRole: 'MEMBER',
@@ -11,7 +12,6 @@ const base: ItemAccessInput = {
   root: null,
   entryPermissions: null,
   userId: 'u1',
-  guestCap: STAKEHOLDER,
 };
 const run = (patch: Partial<ItemAccessInput>) => itemPermissions({ ...base, ...patch });
 
@@ -63,13 +63,14 @@ describe('itemPermissions (ADR-113)', () => {
     ).toEqual(DEVELOPER);
   });
 
-  it('Guest için giriş izinleri Stakeholder ile sınırlanır', () => {
+  it('dış kaynak için giriş izinlerinden yönetici ve içerik izinleri düşer (ADR-152)', () => {
     const permissions = run({
       workspaceRole: 'GUEST',
-      root: { isPrivate: false, createdById: null },
-      entryPermissions: DEVELOPER,
+      root: { isPrivate: true, createdById: null },
+      entryPermissions: DEFAULT_SPACE_ROLE_PERMISSIONS.PROJECT_MANAGER,
     });
-    expect(permissions).not.toContain('workItem.write');
-    expect(permissions).toEqual(expect.arrayContaining([...STAKEHOLDER]));
+    expect(permissions).toContain('workItem.write');
+    expect(permissions).not.toContain('space.settings');
+    expect(permissions).not.toContain('doc.view');
   });
 });

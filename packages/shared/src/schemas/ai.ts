@@ -1,6 +1,10 @@
 import { z } from 'zod';
 
-export const AiStatusSchema = z.object({ enabled: z.boolean() });
+export const AiStatusSchema = z.object({
+  enabled: z.boolean(),
+  /** Story Point önerisi (ADR-155): Ayarlar'da açık mı ve gereken en az cümle. */
+  estimate: z.object({ enabled: z.boolean(), minSentences: z.number().int() }),
+});
 export type AiStatus = z.infer<typeof AiStatusSchema>;
 
 /** POST .../items/:itemId/ai/summarize */
@@ -13,6 +17,20 @@ export const AiStorySuggestionSchema = z.object({
   acceptanceCriteria: z.array(z.string().max(500)).max(12),
 });
 export type AiStorySuggestion = z.infer<typeof AiStorySuggestionSchema>;
+
+/** POST .../items/:itemId/ai/estimate: açıklamadan Fibonacci Story Point önerisi (ADR-155). */
+export const AiEstimateSchema = z.object({
+  points: z.union(
+    [1, 2, 3, 5, 8, 13, 21].map((n) => z.literal(n)) as [
+      z.ZodLiteral<number>,
+      z.ZodLiteral<number>,
+      ...z.ZodLiteral<number>[],
+    ],
+  ),
+  confidence: z.enum(['LOW', 'MEDIUM', 'HIGH']),
+  reason: z.string().max(1000),
+});
+export type AiEstimate = z.infer<typeof AiEstimateSchema>;
 
 /** POST .../items/:itemId/ai/split-epic: Epic'i Task'lara bölme önerisi. */
 export const AiSplitSuggestionSchema = z.object({

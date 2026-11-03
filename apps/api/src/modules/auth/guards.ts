@@ -132,6 +132,7 @@ export class WorkspaceAccessGuard implements CanActivate {
 
     this.cls.set('workspaceId', workspaceId);
     this.cls.set('workspaceRole', roleTier(membership.role));
+    this.cls.set('contentAccess', membership.contentAccess);
     this.cls.set('permissions', membership.role.permissions);
     return true;
   }

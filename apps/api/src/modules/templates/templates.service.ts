@@ -473,7 +473,7 @@ export class TemplatesService {
         });
       }
       case 'DOC': {
-        this.need(S.DOC_WRITE);
+        this.need(S.DOC_CREATE);
         const { payload } = await this.load(spaceId, templateId, kind, DocTemplatePayloadSchema);
         return this.docs.create(spaceId, {
           title: input.title ?? payload.title,

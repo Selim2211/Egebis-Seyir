@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { CONTENT_ACCESS } from '../domain/space-access';
 import { ERROR_CODES } from '../errors/codes';
 import { RoleKeySchema } from './role';
 import { EmailSchema, LOCALES, PasswordSchema, PersonNameSchema } from './auth';
@@ -10,6 +11,10 @@ export const MemberSchema = z.object({
   title: z.string().nullable(),
   avatarVersion: z.string().nullable(),
   role: RoleKeySchema,
+  /** Rolün katmanı (özel rollerde baseKey): GUEST = dış kaynak. */
+  tier: z.enum(['OWNER', 'ADMIN', 'MEMBER', 'GUEST']),
+  /** Dış kaynağın doküman/video erişimi (ADR-152); diğerlerinde NONE. */
+  contentAccess: z.enum(CONTENT_ACCESS),
   joinedAt: z.iso.datetime(),
   lastSeenAt: z.iso.datetime().nullable(),
 });
@@ -22,6 +27,59 @@ export type MembersResponse = z.infer<typeof MembersResponseSchema>;
 /** PATCH /api/workspaces/:workspaceId/members/:userId */
 export const UpdateMemberRequestSchema = z.object({ role: RoleKeySchema });
 export type UpdateMemberRequest = z.infer<typeof UpdateMemberRequestSchema>;
+
+/**
+ * GET /members/:userId/handover — üye çıkarılırken açık işlerinin kime devredileceği (ADR-153).
+ * Her Proje için varsayılan alıcı Projenin (çıkarılan dışındaki) ilk Proje Yöneticisidir. Çıkarılan
+ * kişi o Projenin yöneticisiyse ya da başka yönetici yoksa `needsChoice`: alıcıyı Super Admin seçer.
+ */
+export const HandoverProjectSchema = z.object({
+  spaceId: z.uuid(),
+  name: z.string(),
+  key: z.string(),
+  openItems: z.number().int(),
+  isManager: z.boolean(),
+  defaultAssigneeId: z.uuid().nullable(),
+  needsChoice: z.boolean(),
+  /** Alıcı olabilecek Proje üyeleri (dış kaynak hariç). */
+  candidates: z.array(z.object({ userId: z.uuid(), name: z.string(), isManager: z.boolean() })),
+});
+export type HandoverProject = z.infer<typeof HandoverProjectSchema>;
+export const HandoverPlanSchema = z.object({ projects: z.array(HandoverProjectSchema) });
+export type HandoverPlan = z.infer<typeof HandoverPlanSchema>;
+
+/** DELETE /members/:userId ve DELETE /spaces/:spaceId/members/:userId gövdesi: Proje → alıcı. */
+export const RemoveMemberRequestSchema = z.object({
+  reassign: z.record(z.uuid(), z.uuid()).default({}),
+});
+export type RemoveMemberRequest = z.input<typeof RemoveMemberRequestSchema>;
+
+/** PATCH /members/:userId/content-access — dış kaynağın doküman/video erişimi (ADR-152). */
+export const UpdateContentAccessRequestSchema = z.object({ contentAccess: z.enum(CONTENT_ACCESS) });
+export type UpdateContentAccessRequest = z.infer<typeof UpdateContentAccessRequestSchema>;
+
+/**
+ * GET /outsource — dış kaynak kişiler (ADR-152). Super Admin hepsini, Proje Yöneticisi yalnızca
+ * yönettiği Projelerdekileri görür; `projects` da aynı süzgeçten geçer.
+ */
+export const OutsourcePersonSchema = z.object({
+  userId: z.uuid(),
+  name: z.string(),
+  email: z.string(),
+  avatarVersion: z.string().nullable(),
+  contentAccess: z.enum(CONTENT_ACCESS),
+  lastSeenAt: z.iso.datetime().nullable(),
+  projects: z.array(z.object({ spaceId: z.uuid(), name: z.string(), key: z.string() })),
+});
+export type OutsourcePerson = z.infer<typeof OutsourcePersonSchema>;
+export const OutsourceResponseSchema = z.object({
+  people: z.array(OutsourcePersonSchema),
+  /** İstekte bulunan Super Admin mi (içerik erişimini yalnızca o değiştirir). */
+  superAdmin: z.boolean(),
+  /** Kişi eklenebilecek Projeler (yönetilenler). */
+  projects: z.array(z.object({ spaceId: z.uuid(), name: z.string(), key: z.string() })),
+});
+export type OutsourceResponse = z.infer<typeof OutsourceResponseSchema>;
 
 export const InvitationSchema = z.object({
   id: z.uuid(),

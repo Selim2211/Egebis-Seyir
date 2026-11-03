@@ -1,4 +1,5 @@
 import { ALL_SPACE_PERMISSIONS, type WorkspaceRole } from '../permissions/roles';
+import { type ContentAccess, outsourcePermissions } from './space-access';
 
 /**
  * Öğe bazlı erişim (ADR-113). En yakın "özel erişimli" üst öğe (kök) Space kuralının yerini ya da
@@ -7,7 +8,7 @@ import { ALL_SPACE_PERMISSIONS, type WorkspaceRole } from '../permissions/roles'
  * - Owner/Admin: her zaman tüm izinler.
  * - Gizli kök: yalnızca listedekiler (kişi/takım rolleri birleşir) ve kökü oluşturan (Space izniyle).
  * - Açık (gizli olmayan) kök: Space izinleri ∪ listedeki rollerin izinleri.
- * - Guest: listedeki rol izinleri Stakeholder izinleriyle sınırlanır (`guestCap`).
+ * - Dış kaynak (Guest): listedeki rol izinleri `outsourcePermissions` ile sınırlanır (ADR-152).
  * `null` = öğe görünmez.
  */
 export interface ItemAccessInput {
@@ -19,8 +20,8 @@ export interface ItemAccessInput {
   /** Kullanıcının (doğrudan veya takımı üzerinden) aldığı rollerin izinlerinin birleşimi; yoksa null. */
   entryPermissions: readonly string[] | null;
   userId: string;
-  /** Guest için üst sınır: Stakeholder izinleri. */
-  guestCap: readonly string[];
+  /** Dış kaynağın doküman/video erişimi (yalnızca Guest için). */
+  contentAccess?: ContentAccess;
 }
 
 export function itemPermissions(input: ItemAccessInput): readonly string[] | null {
@@ -32,7 +33,7 @@ export function itemPermissions(input: ItemAccessInput): readonly string[] | nul
     input.entryPermissions === null
       ? null
       : workspaceRole === 'GUEST'
-        ? input.entryPermissions.filter((p) => input.guestCap.includes(p))
+        ? outsourcePermissions(input.entryPermissions, input.contentAccess)
         : input.entryPermissions;
 
   if (root.isPrivate) {

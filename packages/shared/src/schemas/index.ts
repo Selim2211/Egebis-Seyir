@@ -36,6 +36,7 @@ export * from './form';
 export * from './goal';
 export * from './message';
 export * from './team';
+export * from './quota';
 export * from './role';
 export * from './item-access';
 export * from './bug';

@@ -4,13 +4,17 @@ import {
   ForbiddenException,
   Injectable,
   NotFoundException,
+  UnprocessableEntityException,
 } from '@nestjs/common';
 import {
   checkMemberChange,
+  type ContentAccess,
   type CreatedMember,
   type CreateMemberData,
   ERROR_CODES,
+  type HandoverPlan,
   type Member,
+  type OutsourceResponse,
   type WorkspaceRole,
 } from '@scrum/shared';
 import { ClsService } from 'nestjs-cls';
@@ -21,6 +25,7 @@ import { PrismaService } from '../../infra/prisma/prisma.service';
 import { TenantPrismaService } from '../../infra/prisma/tenant-prisma.service';
 import { hashPassword } from '../../infra/security/password';
 import { AccessService } from '../access/access.service';
+import { HandoverService } from '../access/handover.service';
 import { ActivityService } from '../activity/activity.service';
 
 /** Karışması kolay karakterler (0/O, 1/l/I) olmayan, okunabilir geçici şifre. */
@@ -38,6 +43,7 @@ export class MembersService {
     private readonly activity: ActivityService,
     private readonly prisma: PrismaService,
     private readonly access: AccessService,
+    private readonly handover: HandoverService,
   ) {}
 
   /**
@@ -47,7 +53,7 @@ export class MembersService {
   async createAccount(input: CreateMemberData): Promise<CreatedMember> {
     const workspaceId = this.cls.get('workspaceId')!;
     const actorId = this.cls.get('userId')!;
-    const sharedSpaceIds = input.role === 'GUEST' ? [...new Set(input.spaceIds)] : [];
+    const sharedSpaceIds = [...new Set(input.spaceIds)];
     if (sharedSpaceIds.length > 0) {
       const found = await this.tenant.db.space.count({
         where: { id: { in: sharedSpaceIds }, deletedAt: null },
@@ -92,10 +98,10 @@ export class MembersService {
         ).id;
       await tx.membership.create({ data: { workspaceId, userId: id, roleId } });
       if (sharedSpaceIds.length > 0) {
-        // Guest, paylaşılan Space'lere Stakeholder olarak eklenir (ADR-035, ADR-043).
+        // Davetli, seçilen Projelere Proje Üyesi olarak eklenir (ADR-152).
         const stakeholder = await tx.role.findUniqueOrThrow({
           where: {
-            workspaceId_scope_key: { workspaceId, scope: RoleScope.SPACE, key: 'STAKEHOLDER' },
+            workspaceId_scope_key: { workspaceId, scope: RoleScope.SPACE, key: 'PROJECT_MEMBER' },
           },
         });
         await tx.spaceMember.createMany({
@@ -124,7 +130,7 @@ export class MembersService {
   async list(): Promise<Member[]> {
     const memberships = await this.tenant.db.membership.findMany({
       include: {
-        role: { select: { key: true } },
+        role: { select: { key: true, baseKey: true } },
         user: {
           select: {
             id: true,
@@ -145,13 +151,113 @@ export class MembersService {
       title: m.user.title,
       avatarVersion: m.user.avatarVersion,
       role: m.role.key as WorkspaceRole,
+      tier: roleTier(m.role),
+      contentAccess: m.contentAccess,
       joinedAt: m.createdAt.toISOString(),
       lastSeenAt: m.user.sessions[0]?.lastSeenAt.toISOString() ?? null,
     }));
   }
 
-  /** Rol değiştirir (`newRole`) veya üyeyi çıkarır (`null`). Owner kuralları shared'dadır. */
-  async change(targetUserId: string, newRole: string | null): Promise<void> {
+  /** Dış kaynak kişiler ve Projeleri; Proje Yöneticisi yalnızca kendi Projelerini görür (ADR-152). */
+  async outsource(): Promise<OutsourceResponse> {
+    const userId = this.cls.get('userId')!;
+    const tier = this.cls.get('workspaceRole');
+    const superAdmin = tier === 'OWNER' || tier === 'ADMIN';
+    const db = this.tenant.db;
+    const managed = await db.space.findMany({
+      where: {
+        deletedAt: null,
+        ...(superAdmin
+          ? {}
+          : { members: { some: { userId, role: { permissions: { has: 'space.settings' } } } } }),
+      },
+      select: { id: true, name: true, key: true },
+      orderBy: { name: 'asc' },
+    });
+    const managedIds = new Set(managed.map((s) => s.id));
+    const guests = await db.membership.findMany({
+      where: {
+        role: { OR: [{ key: 'GUEST', baseKey: null }, { baseKey: 'GUEST' }] },
+        ...(superAdmin
+          ? {}
+          : { user: { spaceMembers: { some: { spaceId: { in: [...managedIds] } } } } }),
+      },
+      select: {
+        contentAccess: true,
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            avatarVersion: true,
+            sessions: { select: { lastSeenAt: true }, orderBy: { lastSeenAt: 'desc' }, take: 1 },
+            spaceMembers: {
+              where: { spaceId: { in: [...managedIds] } },
+              select: { space: { select: { id: true, name: true, key: true } } },
+            },
+          },
+        },
+      },
+      orderBy: { user: { name: 'asc' } },
+    });
+    return {
+      superAdmin,
+      projects: managed.map((s) => ({ spaceId: s.id, name: s.name, key: s.key })),
+      people: guests.map((g) => ({
+        userId: g.user.id,
+        name: g.user.name,
+        email: g.user.email,
+        avatarVersion: g.user.avatarVersion,
+        contentAccess: g.contentAccess,
+        lastSeenAt: g.user.sessions[0]?.lastSeenAt.toISOString() ?? null,
+        projects: g.user.spaceMembers.map((m) => ({
+          spaceId: m.space.id,
+          name: m.space.name,
+          key: m.space.key,
+        })),
+      })),
+    };
+  }
+
+  /** Çıkarmadan önce açık işlerin devir planı (ADR-153). */
+  handoverPlan(targetUserId: string): Promise<HandoverPlan> {
+    return this.handover.plan(targetUserId);
+  }
+
+  /** Dış kaynağın doküman/video erişimi (ADR-152); yalnızca Guest katmanına uygulanır. */
+  async setContentAccess(targetUserId: string, contentAccess: ContentAccess): Promise<void> {
+    const workspaceId = this.cls.get('workspaceId')!;
+    const actorId = this.cls.get('userId')!;
+    await this.tenant.db.$transaction(async (tx) => {
+      const target = await tx.membership.findFirst({
+        where: { userId: targetUserId },
+        include: { role: { select: { key: true, baseKey: true } } },
+      });
+      if (!target) throw new NotFoundException({ code: ERROR_CODES.NOT_FOUND });
+      if (roleTier(target.role) !== 'GUEST') {
+        throw new UnprocessableEntityException({ code: ERROR_CODES.VALIDATION_FAILED });
+      }
+      await tx.membership.update({ where: { id: target.id }, data: { contentAccess } });
+      await this.activity.record(tx, {
+        workspaceId,
+        actorId,
+        entityType: 'member',
+        entityId: targetUserId,
+        action: 'member.content_access',
+        changes: { contentAccess: { from: target.contentAccess, to: contentAccess } },
+      });
+    });
+  }
+
+  /**
+   * Rol değiştirir (`newRole`) veya üyeyi çıkarır (`null`). Owner kuralları shared'dadır.
+   * Çıkarmada açık işler `reassign` (Proje → alıcı) ya da Proje yöneticisine devredilir (ADR-153).
+   */
+  async change(
+    targetUserId: string,
+    newRole: string | null,
+    reassign: Record<string, string> = {},
+  ): Promise<void> {
     const workspaceId = this.cls.get('workspaceId')!;
     const actorRole = this.cls.get('workspaceRole')!;
     const actorId = this.cls.get('userId')!;
@@ -179,17 +285,18 @@ export class MembersService {
       const check = checkMemberChange({ actorRole, targetRole, newRole: newTier, ownerCount });
       if (!check.ok) throw new ForbiddenException({ code: check.code });
 
+      let handedOver: { spaceId: string; to: string; items: number }[] = [];
       if (newRole === null) {
+        handedOver = await this.handover.apply(tx, targetUserId, reassign);
         await tx.membership.delete({ where: { id: target.id } });
         await tx.spaceMember.deleteMany({ where: { userId: targetUserId } });
         await tx.favorite.deleteMany({ where: { userId: targetUserId } });
-        await tx.workItemAssignee.deleteMany({ where: { userId: targetUserId } });
       } else {
         await tx.membership.update({ where: { id: target.id }, data: { roleId: nextRole!.id } });
         if (newTier === 'GUEST') {
-          // Guest Space'lerde yalnızca Stakeholder olabilir (ADR-035, ADR-043).
+          // Dış kaynak Proje Yöneticisi olamaz; tüm Projelerde Proje Üyesi olur (ADR-152).
           const stakeholder = await tx.role.findFirstOrThrow({
-            where: { scope: RoleScope.SPACE, key: 'STAKEHOLDER' },
+            where: { scope: RoleScope.SPACE, key: 'PROJECT_MEMBER' },
           });
           await tx.spaceMember.updateMany({
             where: { userId: targetUserId },
@@ -203,7 +310,10 @@ export class MembersService {
         entityType: 'member',
         entityId: targetUserId,
         action: newRole === null ? 'member.removed' : 'member.role_changed',
-        changes: { role: { from: target.role.key, to: newRole } },
+        changes: {
+          role: { from: target.role.key, to: newRole },
+          ...(handedOver.length > 0 ? { handover: handedOver } : {}),
+        },
       });
     });
   }

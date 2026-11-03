@@ -303,11 +303,11 @@ export class SpacesService {
 
   private withCreator(members: SpaceMemberInput[], actorId: string): SpaceMemberInput[] {
     const unique = new Map(members.map((m) => [m.userId, m]));
-    if (!unique.has(actorId)) unique.set(actorId, { userId: actorId, role: 'PRODUCT_OWNER' });
+    if (!unique.has(actorId)) unique.set(actorId, { userId: actorId, role: 'PROJECT_MANAGER' });
     return [...unique.values()];
   }
 
-  /** Üyeler workspace üyesi olmalı; Guest yalnızca Stakeholder olabilir (ADR-035). */
+  /** Üyeler workspace üyesi olmalı; dış kaynak yalnızca Proje Üyesi olabilir (ADR-152). */
   private async validateMembers(members: SpaceMemberInput[]): Promise<SpaceMemberInput[]> {
     const memberships = await this.tenant.db.membership.findMany({
       where: { userId: { in: members.map((m) => m.userId) } },

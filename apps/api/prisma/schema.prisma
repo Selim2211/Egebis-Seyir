@@ -16,6 +16,12 @@ enum RoleScope {
   SPACE
 }
 
+enum ContentAccess {
+  NONE
+  VIEW
+  FULL
+}
+
 enum EstimationScale {
   FIBONACCI
   TSHIRT
@@ -163,6 +169,7 @@ model User {
   reminders               Reminder[]
   goalsOwned              Goal[]
   teamMemberships         TeamMember[]
+  uploadQuotas            UploadQuota[]
   conversationsLow        Conversation[]           @relation("ConversationLow")
   conversationsHigh       Conversation[]           @relation("ConversationHigh")
   messagesSent            Message[]
@@ -215,10 +222,13 @@ model PasswordResetToken {
 }
 
 model Workspace {
-  id        String   @id @default(uuid(7)) @db.Uuid
-  name      String
-  createdAt DateTime @default(now()) @db.Timestamptz
-  updatedAt DateTime @updatedAt @db.Timestamptz
+  id                     String   @id @default(uuid(7)) @db.Uuid
+  name                   String
+  /// AI ile Story Point önerisi ve gereken en az açıklama cümlesi (ADR-155).
+  aiEstimateEnabled      Boolean  @default(true)
+  aiEstimateMinSentences Int      @default(5)
+  createdAt              DateTime @default(now()) @db.Timestamptz
+  updatedAt              DateTime @updatedAt @db.Timestamptz
 
   roles             Role[]
   memberships       Membership[]
@@ -272,6 +282,7 @@ model Workspace {
   reminders               Reminder[]
   goals                   Goal[]
   teams                   Team[]
+  uploadQuotas            UploadQuota[]
   conversations           Conversation[]
   messages                Message[]
   videoFolders            VideoFolder[]
@@ -312,14 +323,16 @@ model Role {
 }
 
 model Membership {
-  id          String    @id @default(uuid(7)) @db.Uuid
-  workspaceId String    @db.Uuid
-  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  userId      String    @db.Uuid
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  roleId      String    @db.Uuid
-  role        Role      @relation(fields: [roleId], references: [id])
-  createdAt   DateTime  @default(now()) @db.Timestamptz
+  id            String        @id @default(uuid(7)) @db.Uuid
+  workspaceId   String        @db.Uuid
+  workspace     Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  userId        String        @db.Uuid
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  roleId        String        @db.Uuid
+  role          Role          @relation(fields: [roleId], references: [id])
+  /// Dış kaynağın (Guest) doküman/video erişimi; Super Admin verir (ADR-152).
+  contentAccess ContentAccess @default(NONE)
+  createdAt     DateTime      @default(now()) @db.Timestamptz
 
   @@unique([workspaceId, userId])
   @@index([userId])
@@ -333,7 +346,7 @@ model Invitation {
   email       String
   roleId      String    @db.Uuid
   role        Role      @relation(fields: [roleId], references: [id])
-  /// Guest daveti için paylaşılan Space'ler (ADR-035, ADR-043).
+  /// Davetle eklenecek Projeler (Proje Üyesi olarak, ADR-152).
   spaceIds    String[]  @db.Uuid
   tokenHash   String    @unique
   invitedById String    @db.Uuid
@@ -1036,9 +1049,30 @@ model Team {
 
   members       TeamMember[]
   accessEntries WorkItemAccessEntry[]
+  uploadQuota   UploadQuota?
 
   @@unique([workspaceId, name])
   @@map("teams")
+}
+
+/// Kişi ya da ekip başına doküman/video yükleme sınırı (ADR-154). Tam olarak biri dolu: userId | teamId.
+/// Boş sınır = o boyutta sınır yok.
+model UploadQuota {
+  id          String    @id @default(uuid(7)) @db.Uuid
+  workspaceId String    @db.Uuid
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  userId      String?   @db.Uuid
+  user        User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  teamId      String?   @unique @db.Uuid
+  team        Team?     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  /// En çok dosya (ek + video) sayısı.
+  maxFiles    Int?
+  /// En çok toplam boyut (MB).
+  maxMb       Int?
+  updatedAt   DateTime  @updatedAt @db.Timestamptz
+
+  @@unique([workspaceId, userId])
+  @@map("upload_quotas")
 }
 
 model TeamMember {

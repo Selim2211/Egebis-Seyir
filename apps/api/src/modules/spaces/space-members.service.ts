@@ -1,8 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { checkSpaceRole, ERROR_CODES, type SpaceMember } from '@scrum/shared';
+import {
+  checkSpaceRole,
+  ERROR_CODES,
+  SPACE_PERMISSIONS as S,
+  type SpaceMember,
+} from '@scrum/shared';
 import { ClsService } from 'nestjs-cls';
 import { RoleScope } from '../../generated/prisma/client';
 import type { AppClsStore } from '../../infra/cls/request-context';
+import { HandoverService } from '../access/handover.service';
 import { roleTier } from '../access/role-tier';
 import { TenantPrismaService } from '../../infra/prisma/tenant-prisma.service';
 import { ActivityService } from '../activity/activity.service';
@@ -15,6 +21,7 @@ export class SpaceMembersService {
     private readonly tenant: TenantPrismaService,
     private readonly cls: ClsService<AppClsStore>,
     private readonly activity: ActivityService,
+    private readonly handover: HandoverService,
   ) {}
 
   async list(spaceId: string): Promise<SpaceMember[]> {
@@ -86,23 +93,59 @@ export class SpaceMembersService {
     });
   }
 
-  async remove(spaceId: string, userId: string): Promise<void> {
+  /**
+   * Projeden çıkarır; açık işleri devredilir (ADR-153): `reassign[spaceId]`, yoksa Projenin ilk
+   * yöneticisi, o da yoksa çıkaran kişi (üyeyse) ya da Projenin ilk üyesi. Proje Yöneticisini
+   * yalnızca Super Admin çıkarabilir.
+   */
+  async remove(
+    spaceId: string,
+    userId: string,
+    reassign: Record<string, string> = {},
+  ): Promise<void> {
     const workspaceId = this.cls.get('workspaceId')!;
+    const actorId = this.cls.get('userId')!;
+    const tier = this.cls.get('workspaceRole');
     await this.ensureSpace(spaceId);
     await this.tenant.db.$transaction(async (tx) => {
       const existing = await tx.spaceMember.findFirst({
         where: { spaceId, userId },
-        include: { role: { select: { key: true } } },
+        include: { role: { select: { key: true, permissions: true } } },
       });
       if (!existing) throw notFound();
+      if (
+        existing.role.permissions.includes(S.SPACE_SETTINGS) &&
+        tier !== 'OWNER' &&
+        tier !== 'ADMIN'
+      ) {
+        throw forbidden(ERROR_CODES.MANAGER_REMOVAL_SUPER_ADMIN);
+      }
+      const plan = await this.handover.plan(userId, spaceId, tx);
+      const project = plan.projects[0];
+      const target =
+        reassign[spaceId] ??
+        project?.defaultAssigneeId ??
+        (project?.candidates.some((c) => c.userId === actorId)
+          ? actorId
+          : project?.candidates[0]?.userId);
+      const handedOver = await this.handover.apply(
+        tx,
+        userId,
+        target ? { [spaceId]: target } : {},
+        spaceId,
+      );
       await tx.spaceMember.delete({ where: { id: existing.id } });
       await this.activity.record(tx, {
         workspaceId,
-        actorId: this.cls.get('userId')!,
+        actorId,
         entityType: 'space',
         entityId: spaceId,
         action: 'space.member_removed',
-        changes: { userId, role: { from: existing.role.key, to: null } },
+        changes: {
+          userId,
+          role: { from: existing.role.key, to: null },
+          ...(handedOver.length > 0 ? { handover: handedOver } : {}),
+        },
       });
     });
   }

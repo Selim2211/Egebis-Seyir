@@ -17,6 +17,7 @@ import { StorageService } from '../../infra/storage/storage.service';
 import { ActivityService } from '../activity/activity.service';
 import { notFound } from '../spaces/space-errors';
 import { fail } from '../work-items/item-support';
+import { QuotasService } from '../quotas/quotas.service';
 
 const HEADER_BYTES = 16;
 
@@ -66,6 +67,7 @@ export class AttachmentsService {
     private readonly cls: ClsService<AppClsStore>,
     private readonly storage: StorageService,
     private readonly activity: ActivityService,
+    private readonly quotas: QuotasService,
     config: ConfigService<Env, true>,
   ) {
     this.maxBytes = config.get('MAX_UPLOAD_MB', { infer: true }) * 1024 * 1024;
@@ -113,6 +115,7 @@ export class AttachmentsService {
       header: file.buffer.subarray(0, HEADER_BYTES),
     });
     if (!check.ok) throw fail(check.code, check.code === 'ATTACHMENT_TOO_LARGE' ? 413 : 422);
+    await this.quotas.assertCanUpload(actorId, file.size);
 
     const storageKey = await this.storage.put(workspaceId, file.buffer);
     try {

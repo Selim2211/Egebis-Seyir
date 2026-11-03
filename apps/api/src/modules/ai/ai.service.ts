@@ -1,12 +1,15 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
+  type AiEstimate,
+  AiEstimateSchema,
   type AiSplitSuggestion,
   AiSplitSuggestionSchema,
   type AiStatus,
   type AiStorySuggestion,
   AiStorySuggestionSchema,
   type AiSummary,
+  countSentences,
   ERROR_CODES,
 } from '@scrum/shared';
 import { ClsService } from 'nestjs-cls';
@@ -53,8 +56,15 @@ export class AiService {
     this.limit = config.get('AI_RATE_LIMIT', { infer: true });
   }
 
-  status(): AiStatus {
-    return { enabled: !!this.key };
+  async status(): Promise<AiStatus> {
+    const ws = await this.tenant.db.workspace.findUniqueOrThrow({
+      where: { id: this.cls.get('workspaceId')! },
+      select: { aiEstimateEnabled: true, aiEstimateMinSentences: true },
+    });
+    return {
+      enabled: !!this.key,
+      estimate: { enabled: ws.aiEstimateEnabled, minSentences: ws.aiEstimateMinSentences },
+    };
   }
 
   // ---------- Model çağrısı ----------
@@ -191,6 +201,34 @@ export class AiService {
       1200,
     );
     return this.parse(AiStorySuggestionSchema, answer);
+  }
+
+  /**
+   * Açıklamadan Fibonacci Story Point önerisi (ADR-155). Ayar kapalıysa ya da açıklama Super
+   * Admin'in belirlediği cümle sayısından kısaysa model çağrılmaz.
+   */
+  async estimate(itemId: string): Promise<AiEstimate> {
+    const settings = await this.tenant.db.workspace.findUniqueOrThrow({
+      where: { id: this.cls.get('workspaceId')! },
+      select: { aiEstimateEnabled: true, aiEstimateMinSentences: true },
+    });
+    if (!settings.aiEstimateEnabled) throw fail(ERROR_CODES.AI_ESTIMATE_DISABLED);
+    const { item, text } = await this.context(itemId);
+    if (item.type === 'EPIC') throw fail(ERROR_CODES.AI_NOT_APPLICABLE);
+    const count = countSentences(item.descriptionText ?? '');
+    if (count < settings.aiEstimateMinSentences) {
+      throw fail(ERROR_CODES.AI_ESTIMATE_TOO_SHORT, HttpStatus.UNPROCESSABLE_ENTITY, {
+        min: settings.aiEstimateMinSentences,
+        count,
+      });
+    }
+    const lang = LANGUAGE[await this.locale()];
+    const answer = await this.complete(
+      `You are an experienced Scrum team estimating effort with relative Story Points on the Fibonacci scale (1, 2, 3, 5, 8, 13, 21). 1 = trivial change, 3 = a typical small task, 8 = several days with some unknowns, 13+ = large or risky and probably worth splitting. Consider complexity, amount of work, uncertainty and dependencies described in the item. Reply in ${lang}. Output ONLY a JSON object: {"points": one of 1,2,3,5,8,13,21, "confidence": "LOW" | "MEDIUM" | "HIGH", "reason": string (2-3 short sentences explaining the estimate)}. ${SAFETY}`,
+      `<item>\n${text}\n</item>`,
+      500,
+    );
+    return this.parse(AiEstimateSchema, answer);
   }
 
   async splitEpic(itemId: string): Promise<AiSplitSuggestion> {

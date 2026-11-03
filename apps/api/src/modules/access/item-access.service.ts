@@ -1,7 +1,6 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import {
   checkSpaceRole,
-  DEFAULT_SPACE_ROLE_PERMISSIONS,
   ERROR_CODES,
   type ItemAccess,
   itemPermissions,
@@ -69,7 +68,6 @@ export class ItemAccessService {
     const mine = root.entries.filter(
       (e) => e.userId === userId || (e.teamId !== null && teams.has(e.teamId)),
     );
-    const stakeholder = DEFAULT_SPACE_ROLE_PERMISSIONS.STAKEHOLDER;
     return itemPermissions({
       workspaceRole: tier,
       spacePermissions: spacePerms,
@@ -77,7 +75,7 @@ export class ItemAccessService {
       entryPermissions:
         mine.length === 0 ? null : [...new Set(mine.flatMap((e) => e.role.permissions))],
       userId,
-      guestCap: stakeholder,
+      contentAccess: this.cls.get('contentAccess'),
     });
   }
 
@@ -198,7 +196,7 @@ export class ItemAccessService {
         select: { roleId: true },
       });
       const fallback = await db.role.findFirstOrThrow({
-        where: { scope: RoleScope.SPACE, key: 'STAKEHOLDER' },
+        where: { scope: RoleScope.SPACE, key: 'PROJECT_MEMBER' },
         select: { id: true },
       });
       selfRoleId = own?.roleId ?? fallback.id;

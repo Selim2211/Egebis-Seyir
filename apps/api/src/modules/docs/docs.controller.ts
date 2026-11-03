@@ -84,7 +84,7 @@ export class DocsController {
   }
 
   @Post('spaces/:spaceId/docs')
-  @RequireSpacePermission(S.DOC_WRITE)
+  @RequireSpacePermission(S.DOC_CREATE)
   @ZodResponse({ type: CreatedDto, status: HttpStatus.CREATED })
   create(@Uuid('spaceId') spaceId: string, @Body() body: CreateDocDto): Promise<Created> {
     return this.docs.create(spaceId, body);
@@ -98,28 +98,28 @@ export class DocsController {
   }
 
   @Patch('docs/:docId')
-  @RequireSpacePermission(S.DOC_WRITE)
+  @RequireSpacePermission(S.DOC_EDIT)
   @ZodResponse({ type: UpdateDocResponseDto })
   update(@Uuid('docId') docId: string, @Body() body: UpdateDocDto): Promise<UpdateDocResponse> {
     return this.docs.update(docId, body);
   }
 
   @Post('docs/:docId/move')
-  @RequireSpacePermission(S.DOC_WRITE)
+  @RequireSpacePermission(S.DOC_EDIT)
   @HttpCode(NO_CONTENT)
   move(@Uuid('docId') docId: string, @Body() body: MoveDocDto): Promise<void> {
     return this.docs.move(docId, body);
   }
 
   @Delete('docs/:docId')
-  @RequireSpacePermission(S.DOC_WRITE)
+  @RequireSpacePermission(S.DOC_DELETE)
   @HttpCode(NO_CONTENT)
   remove(@Uuid('docId') docId: string): Promise<void> {
     return this.docs.remove(docId);
   }
 
   @Post('docs/:docId/restore')
-  @RequireSpacePermission(S.DOC_WRITE)
+  @RequireSpacePermission(S.DOC_DELETE)
   @HttpCode(NO_CONTENT)
   restore(@Uuid('docId') docId: string): Promise<void> {
     return this.docs.restore(docId);
@@ -143,7 +143,7 @@ export class DocsController {
   }
 
   @Post('docs/:docId/versions/:version/restore')
-  @RequireSpacePermission(S.DOC_WRITE)
+  @RequireSpacePermission(S.DOC_EDIT)
   @ZodResponse({ type: UpdateDocResponseDto })
   restoreVersion(
     @Uuid('docId') docId: string,
@@ -155,14 +155,14 @@ export class DocsController {
   // ---------- Bağlantılar (ADR-070) ----------
 
   @Put('docs/:docId/links/:itemId')
-  @RequireSpacePermission(S.DOC_WRITE)
+  @RequireSpacePermission(S.DOC_EDIT)
   @HttpCode(NO_CONTENT)
   link(@Uuid('docId') docId: string, @Uuid('itemId') itemId: string): Promise<void> {
     return this.links.link(docId, itemId);
   }
 
   @Delete('docs/:docId/links/:itemId')
-  @RequireSpacePermission(S.DOC_WRITE)
+  @RequireSpacePermission(S.DOC_EDIT)
   @HttpCode(NO_CONTENT)
   unlink(@Uuid('docId') docId: string, @Uuid('itemId') itemId: string): Promise<void> {
     return this.links.unlink(docId, itemId);

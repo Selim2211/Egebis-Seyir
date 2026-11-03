@@ -46,7 +46,7 @@ class CreatedDto extends createZodDto(CreatedSchema) {}
 const Uuid = (name: string) => Param(name, ParseUUIDPipe);
 const NO_CONTENT = HttpStatus.NO_CONTENT;
 
-/** Video arşivi (Faz 15, ADR-129). Görme `doc.view`, yükleme/düzenleme `doc.write`. */
+/** Video arşivi (Faz 15, ADR-129). İzinler `video.view/create/edit/delete` (ADR-152). */
 @Controller('workspaces/:workspaceId')
 export class VideosController {
   constructor(
@@ -55,7 +55,7 @@ export class VideosController {
   ) {}
 
   @Get('spaces/:spaceId/videos')
-  @RequireSpacePermission(S.DOC_VIEW)
+  @RequireSpacePermission(S.VIDEO_VIEW)
   @ZodResponse({ type: VideosDto })
   list(@Uuid('spaceId') spaceId: string): Promise<VideosResponse> {
     return this.videos.list(spaceId);
@@ -63,7 +63,7 @@ export class VideosController {
 
   /** Yüklemeyi başlatır; dosya ardından parça parça `content` ucuna gönderilir. */
   @Post('spaces/:spaceId/videos')
-  @RequireSpacePermission(S.DOC_WRITE)
+  @RequireSpacePermission(S.VIDEO_CREATE)
   @ZodResponse({ type: CreatedDto, status: HttpStatus.CREATED })
   create(@Uuid('spaceId') spaceId: string, @Body() body: CreateVideoDto): Promise<Created> {
     return this.videos.create(spaceId, body);
@@ -71,7 +71,7 @@ export class VideosController {
 
   /** Bir parça (application/octet-stream gövde): bellekte tutulmadan diske eklenir. */
   @Put('videos/:videoId/content')
-  @RequireSpacePermission(S.DOC_WRITE)
+  @RequireSpacePermission(S.VIDEO_CREATE)
   @ZodResponse({ type: ProgressDto })
   appendChunk(
     @Uuid('videoId') videoId: string,
@@ -82,7 +82,7 @@ export class VideosController {
   }
 
   @Post('videos/:videoId/complete')
-  @RequireSpacePermission(S.DOC_WRITE)
+  @RequireSpacePermission(S.VIDEO_CREATE)
   @HttpCode(NO_CONTENT)
   async complete(@Uuid('videoId') videoId: string): Promise<void> {
     await this.videos.complete(videoId);
@@ -90,7 +90,7 @@ export class VideosController {
 
   /** Oynatma: HTTP Range (ileri/geri sarma) desteklenir; içerik türü sabit, tarayıcı tahmin etmez. */
   @Get('videos/:videoId/stream')
-  @RequireSpacePermission(S.DOC_VIEW)
+  @RequireSpacePermission(S.VIDEO_VIEW)
   async stream(
     @Uuid('videoId') videoId: string,
     @Req() req: Request,
@@ -117,14 +117,14 @@ export class VideosController {
   }
 
   @Patch('videos/:videoId')
-  @RequireSpacePermission(S.DOC_WRITE)
+  @RequireSpacePermission(S.VIDEO_EDIT)
   @HttpCode(NO_CONTENT)
   async update(@Uuid('videoId') videoId: string, @Body() body: UpdateVideoDto): Promise<void> {
     await this.videos.update(videoId, body);
   }
 
   @Delete('videos/:videoId')
-  @RequireSpacePermission(S.DOC_WRITE)
+  @RequireSpacePermission(S.VIDEO_DELETE)
   @HttpCode(NO_CONTENT)
   async remove(@Uuid('videoId') videoId: string): Promise<void> {
     await this.videos.remove(videoId);
@@ -133,14 +133,14 @@ export class VideosController {
   // ---------- Klasörler ----------
 
   @Post('spaces/:spaceId/video-folders')
-  @RequireSpacePermission(S.DOC_WRITE)
+  @RequireSpacePermission(S.VIDEO_CREATE)
   @ZodResponse({ type: CreatedDto, status: HttpStatus.CREATED })
   createFolder(@Uuid('spaceId') spaceId: string, @Body() body: CreateFolderDto): Promise<Created> {
     return this.videos.createFolder(spaceId, body);
   }
 
   @Patch('video-folders/:videoFolderId')
-  @RequireSpacePermission(S.DOC_WRITE)
+  @RequireSpacePermission(S.VIDEO_EDIT)
   @HttpCode(NO_CONTENT)
   async renameFolder(
     @Uuid('videoFolderId') folderId: string,
@@ -150,7 +150,7 @@ export class VideosController {
   }
 
   @Delete('video-folders/:videoFolderId')
-  @RequireSpacePermission(S.DOC_WRITE)
+  @RequireSpacePermission(S.VIDEO_DELETE)
   @HttpCode(NO_CONTENT)
   async removeFolder(@Uuid('videoFolderId') folderId: string): Promise<void> {
     await this.videos.removeFolder(folderId);

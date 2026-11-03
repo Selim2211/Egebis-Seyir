@@ -166,7 +166,7 @@ export class CollabController {
   // ---------- Doküman sayfası ekleri (Faz 7.5) ----------
 
   @Post('docs/:docId/attachments')
-  @RequireSpacePermission(S.DOC_WRITE)
+  @RequireSpacePermission(S.DOC_EDIT)
   @UseInterceptors(FileInterceptor('file'))
   @ZodResponse({ type: CreatedDto, status: HttpStatus.CREATED })
   uploadDocAttachment(
@@ -196,7 +196,7 @@ export class CollabController {
   }
 
   @Delete('docs/:docId/attachments/:attachmentId')
-  @RequireSpacePermission(S.DOC_WRITE)
+  @RequireSpacePermission(S.DOC_EDIT)
   @HttpCode(NO_CONTENT)
   async deleteDocAttachment(
     @Uuid('docId') docId: string,

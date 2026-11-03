@@ -383,12 +383,17 @@ async function main() {
     const team = P.team.map(person);
     await db.spaceMember.createMany({
       data: [
-        { workspaceId: ws, spaceId, userId: owner.userId, roleId: role('SPACE', 'PRODUCT_OWNER') },
+        {
+          workspaceId: ws,
+          spaceId,
+          userId: owner.userId,
+          roleId: role('SPACE', 'PROJECT_MANAGER'),
+        },
         ...team.map((t, i) => ({
           workspaceId: ws,
           spaceId,
           userId: t.id,
-          roleId: role('SPACE', i === 0 ? 'SCRUM_MASTER' : 'DEVELOPER'),
+          roleId: role('SPACE', i === 0 ? 'PROJECT_MANAGER' : 'PROJECT_MEMBER'),
         })),
       ],
     });

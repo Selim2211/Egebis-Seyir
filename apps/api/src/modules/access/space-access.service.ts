@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { spacePermissions, type WorkspaceRole } from '@scrum/shared';
 import { ClsService } from 'nestjs-cls';
-import { RoleScope } from '../../generated/prisma/client';
 import type { AppClsStore } from '../../infra/cls/request-context';
 import { TenantPrismaService } from '../../infra/prisma/tenant-prisma.service';
 import { roleTier } from './role-tier';
@@ -102,15 +101,15 @@ export class SpaceAccessService {
   async viewers(spaceId: string, userIds: string[]): Promise<Set<string>> {
     if (userIds.length === 0) return new Set();
     const db = this.tenant.db;
-    const [space, stakeholder, memberships, spaceMembers] = await Promise.all([
-      db.space.findFirst({ where: { id: spaceId }, select: { isPrivate: true } }),
-      db.role.findFirstOrThrow({
-        where: { scope: RoleScope.SPACE, key: 'STAKEHOLDER' },
-        select: { permissions: true },
-      }),
+    const [space, memberships, spaceMembers] = await Promise.all([
+      db.space.findFirst({ where: { id: spaceId }, select: { id: true } }),
       db.membership.findMany({
         where: { userId: { in: userIds } },
-        select: { userId: true, role: { select: { key: true, baseKey: true } } },
+        select: {
+          userId: true,
+          contentAccess: true,
+          role: { select: { key: true, baseKey: true } },
+        },
       }),
       db.spaceMember.findMany({
         where: { spaceId, userId: { in: userIds } },
@@ -125,9 +124,8 @@ export class SpaceAccessService {
           (m) =>
             spacePermissions({
               workspaceRole: roleTier(m.role),
-              isPrivate: space.isPrivate,
               memberPermissions: memberPerms.get(m.userId) ?? null,
-              stakeholderPermissions: stakeholder.permissions,
+              contentAccess: m.contentAccess,
             }) !== null,
         )
         .map((m) => m.userId),
@@ -147,28 +145,21 @@ export class SpaceAccessService {
   async permissionMap(where: { id?: string | { in: string[] }; deletedAt?: null } = {}) {
     const userId = this.cls.get('userId')!;
     const workspaceRole: WorkspaceRole = this.cls.get('workspaceRole');
-    const [spaces, stakeholder] = await Promise.all([
-      this.tenant.db.space.findMany({
-        where,
-        select: {
-          id: true,
-          isPrivate: true,
-          members: { where: { userId }, select: { role: { select: { permissions: true } } } },
-        },
-      }),
-      this.tenant.db.role.findFirstOrThrow({
-        where: { scope: RoleScope.SPACE, key: 'STAKEHOLDER' },
-        select: { permissions: true },
-      }),
-    ]);
+    const contentAccess = this.cls.get('contentAccess');
+    const spaces = await this.tenant.db.space.findMany({
+      where,
+      select: {
+        id: true,
+        members: { where: { userId }, select: { role: { select: { permissions: true } } } },
+      },
+    });
 
     const result = new Map<string, readonly string[]>();
     for (const space of spaces) {
       const perms = spacePermissions({
         workspaceRole,
-        isPrivate: space.isPrivate,
         memberPermissions: space.members[0]?.role.permissions ?? null,
-        stakeholderPermissions: stakeholder.permissions,
+        contentAccess,
       });
       if (perms) result.set(space.id, perms);
     }

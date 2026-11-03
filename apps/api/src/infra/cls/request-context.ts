@@ -1,4 +1,4 @@
-import type { WorkspaceRole } from '@scrum/shared';
+import type { ContentAccess, WorkspaceRole } from '@scrum/shared';
 import type { ClsStore } from 'nestjs-cls';
 
 /** İstek boyunca taşınan bağlam (ADR-012). Guard'lar doldurur, servisler okur. */
@@ -8,6 +8,8 @@ export interface AppClsStore extends ClsStore {
   /** Yalnızca /workspaces/:workspaceId/... rotalarında dolu. */
   workspaceId?: string;
   workspaceRole?: WorkspaceRole;
+  /** Dış kaynağın doküman/video erişimi (ADR-152). */
+  contentAccess?: ContentAccess;
   permissions?: readonly string[];
   /** Yalnızca @RequireSpacePermission uçlarında dolu (SpaceAccessGuard). */
   spaceId?: string;

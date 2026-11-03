@@ -32,7 +32,17 @@ export const ERROR_CODES = {
   OWNER_ONLY: 'OWNER_ONLY',
 
   SPACE_KEY_TAKEN: 'SPACE_KEY_TAKEN',
-  GUEST_STAKEHOLDER_ONLY: 'GUEST_STAKEHOLDER_ONLY',
+  OUTSOURCE_NOT_MANAGER: 'OUTSOURCE_NOT_MANAGER',
+  /** Çıkarılan kişinin işleri için alıcı seçilmeli (yönetici ya da yöneticisiz Proje, ADR-153). */
+  HANDOVER_TARGET_REQUIRED: 'HANDOVER_TARGET_REQUIRED',
+  /** Proje Yöneticisini yalnızca Super Admin çıkarabilir (ADR-153). */
+  MANAGER_REMOVAL_SUPER_ADMIN: 'MANAGER_REMOVAL_SUPER_ADMIN',
+  /** Kişi ya da ekip doküman/video sınırını aşıyor (ADR-154); ayrıntı: scope, limit. */
+  UPLOAD_QUOTA_EXCEEDED: 'UPLOAD_QUOTA_EXCEEDED',
+  /** AI Story Point önerisi Ayarlar'dan kapatılmış (ADR-155). */
+  AI_ESTIMATE_DISABLED: 'AI_ESTIMATE_DISABLED',
+  /** Açıklama yeterli cümle içermiyor; ayrıntı: min, count (ADR-155). */
+  AI_ESTIMATE_TOO_SHORT: 'AI_ESTIMATE_TOO_SHORT',
   GUEST_SPACES_REQUIRED: 'GUEST_SPACES_REQUIRED',
   CONTAINER_ARCHIVED: 'CONTAINER_ARCHIVED',
 

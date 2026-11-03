@@ -2,6 +2,7 @@ export * from './hierarchy';
 export * from './members';
 export * from './rank';
 export * from './space-access';
+export * from './sentences';
 export * from './space-key';
 export * from './work-item-estimate';
 export * from './work-item-key';

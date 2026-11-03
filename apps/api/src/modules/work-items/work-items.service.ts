@@ -869,11 +869,12 @@ export class WorkItemsService {
     const db = this.tenant.db;
     const users = [...new Set(assigneeIds)];
     const labels = [...new Set(labelIds)];
-    const [members, found] = await Promise.all([
-      users.length ? db.membership.count({ where: { userId: { in: users } } }) : 0,
+    // Atanan Projeyi görebilmeli: üye olmayan (Super Admin hariç) atanamaz (ADR-152).
+    const [viewers, found] = await Promise.all([
+      users.length ? this.access.viewers(spaceId, users) : new Set<string>(),
       labels.length ? db.label.count({ where: { id: { in: labels }, spaceId } }) : 0,
     ]);
-    if (members !== users.length || found !== labels.length) throw notFound();
+    if (viewers.size !== users.length || found !== labels.length) throw notFound();
   }
 
   /** Engelleyeni bitmemiş öğe başlatılırken uyarı (ADR-050): `details.keys` engelleyenlerdir. */

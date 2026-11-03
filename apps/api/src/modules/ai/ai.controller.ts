@@ -1,10 +1,12 @@
 import { Controller, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post } from '@nestjs/common';
 import {
+  AiEstimateSchema,
   AiSplitSuggestionSchema,
   AiStatusSchema,
   AiStorySuggestionSchema,
   AiSummarySchema,
   SPACE_PERMISSIONS as S,
+  type AiEstimate,
   type AiSplitSuggestion,
   type AiStatus,
   type AiStorySuggestion,
@@ -18,6 +20,7 @@ class StatusDto extends createZodDto(AiStatusSchema) {}
 class SummaryDto extends createZodDto(AiSummarySchema) {}
 class StoryDto extends createZodDto(AiStorySuggestionSchema) {}
 class SplitDto extends createZodDto(AiSplitSuggestionSchema) {}
+class EstimateDto extends createZodDto(AiEstimateSchema) {}
 
 const Uuid = (name: string) => Param(name, ParseUUIDPipe);
 
@@ -28,7 +31,7 @@ export class AiController {
 
   @Get('ai/status')
   @ZodResponse({ type: StatusDto })
-  status(): AiStatus {
+  status(): Promise<AiStatus> {
     return this.ai.status();
   }
 
@@ -46,6 +49,14 @@ export class AiController {
   @ZodResponse({ type: StoryDto })
   suggestStory(@Uuid('itemId') itemId: string): Promise<AiStorySuggestion> {
     return this.ai.suggestStory(itemId);
+  }
+
+  @Post('items/:itemId/ai/estimate')
+  @HttpCode(HttpStatus.OK)
+  @RequireSpacePermission(S.ESTIMATE_WRITE)
+  @ZodResponse({ type: EstimateDto })
+  estimate(@Uuid('itemId') itemId: string): Promise<AiEstimate> {
+    return this.ai.estimate(itemId);
   }
 
   @Post('items/:itemId/ai/split-epic')

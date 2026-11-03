@@ -1,64 +1,67 @@
 import { describe, expect, it } from 'vitest';
 import { SPACE_PERMISSIONS as S } from '../permissions/permissions';
 import { ALL_SPACE_PERMISSIONS, DEFAULT_SPACE_ROLE_PERMISSIONS } from '../permissions/roles';
-import { checkSpaceRole, spacePermissions, type SpaceAccessInput } from './space-access';
+import {
+  checkSpaceRole,
+  outsourcePermissions,
+  spacePermissions,
+  type SpaceAccessInput,
+} from './space-access';
 
-const STAKEHOLDER = DEFAULT_SPACE_ROLE_PERMISSIONS.STAKEHOLDER;
-const DEVELOPER = DEFAULT_SPACE_ROLE_PERMISSIONS.DEVELOPER;
+const MANAGER = DEFAULT_SPACE_ROLE_PERMISSIONS.PROJECT_MANAGER;
+const MEMBER = DEFAULT_SPACE_ROLE_PERMISSIONS.PROJECT_MEMBER;
 
 const access = (input: Partial<SpaceAccessInput>) =>
-  spacePermissions({
-    workspaceRole: 'MEMBER',
-    isPrivate: false,
-    memberPermissions: null,
-    stakeholderPermissions: STAKEHOLDER,
-    ...input,
-  });
+  spacePermissions({ workspaceRole: 'MEMBER', memberPermissions: null, ...input });
 
-describe('spacePermissions (ADR-039)', () => {
-  it('Owner ve Admin özel Space dahil her yerde tüm izinlere sahip', () => {
+describe('spacePermissions (ADR-039, ADR-152)', () => {
+  it('Super Admin (Owner/Admin) üye olmasa da her Projede tüm izinlere sahip', () => {
     for (const workspaceRole of ['OWNER', 'ADMIN'] as const) {
-      expect(access({ workspaceRole, isPrivate: true })).toEqual(ALL_SPACE_PERMISSIONS);
-      expect(access({ workspaceRole, memberPermissions: STAKEHOLDER })).toEqual(
-        ALL_SPACE_PERMISSIONS,
-      );
+      expect(access({ workspaceRole })).toEqual(ALL_SPACE_PERMISSIONS);
+      expect(access({ workspaceRole, memberPermissions: MEMBER })).toEqual(ALL_SPACE_PERMISSIONS);
     }
   });
 
-  it('Space üyesi rolünün izinlerini alır', () => {
-    expect(access({ memberPermissions: DEVELOPER })).toEqual(DEVELOPER);
-    expect(access({ memberPermissions: DEVELOPER, isPrivate: true })).toEqual(DEVELOPER);
+  it('Proje üyesi rolünün izinlerini alır', () => {
+    expect(access({ memberPermissions: MEMBER })).toEqual(MEMBER);
+    expect(access({ memberPermissions: MANAGER })).toEqual(MANAGER);
   });
 
-  it('açık Space: üye olmayan Member Stakeholder olarak görür, yapı değiştiremez', () => {
-    const perms = access({});
-    expect(perms).toEqual(STAKEHOLDER);
-    expect(perms).toContain(S.COMMENT_WRITE);
-    expect(perms).not.toContain(S.LIST_MANAGE);
-    expect(perms).not.toContain(S.WORK_ITEM_WRITE);
-  });
-
-  it('özel Space: üye olmayan Member göremez', () => {
-    expect(access({ isPrivate: true })).toBeNull();
-  });
-
-  it('Guest yalnızca paylaşılan Space görür, her zaman Stakeholder izinleriyle', () => {
+  it('üye olmayan kullanıcı Projeyi göremez', () => {
+    expect(access({})).toBeNull();
     expect(access({ workspaceRole: 'GUEST' })).toBeNull();
-    expect(access({ workspaceRole: 'GUEST', memberPermissions: STAKEHOLDER })).toEqual(STAKEHOLDER);
-    expect(access({ workspaceRole: 'GUEST', memberPermissions: DEVELOPER })).toEqual(STAKEHOLDER);
+  });
+
+  it('dış kaynak: yönetici izinleri yok, içerik varsayılan kapalı', () => {
+    const perms = access({ workspaceRole: 'GUEST', memberPermissions: MANAGER })!;
+    expect(perms).toContain(S.WORK_ITEM_WRITE);
+    expect(perms).not.toContain(S.SPACE_SETTINGS);
+    expect(perms).not.toContain(S.SPRINT_PLAN);
+    expect(perms).not.toContain(S.DOC_VIEW);
+    expect(perms).not.toContain(S.VIDEO_VIEW);
+  });
+
+  it('dış kaynağın içerik erişimi: VIEW yalnızca görüntüleme, FULL rolünün izinleri', () => {
+    const view = outsourcePermissions(MEMBER, 'VIEW');
+    expect(view).toContain(S.DOC_VIEW);
+    expect(view).toContain(S.VIDEO_VIEW);
+    expect(view).not.toContain(S.DOC_EDIT);
+    const full = outsourcePermissions(MEMBER, 'FULL');
+    expect(full).toContain(S.DOC_EDIT);
+    expect(full).toContain(S.VIDEO_DELETE);
   });
 });
 
-describe('checkSpaceRole (ADR-035)', () => {
-  it('Guest yalnızca Stakeholder olabilir', () => {
-    expect(checkSpaceRole('GUEST', 'STAKEHOLDER')).toEqual({ ok: true });
-    expect(checkSpaceRole('GUEST', 'DEVELOPER')).toEqual({
+describe('checkSpaceRole (ADR-152)', () => {
+  it('dış kaynak yalnızca Proje Üyesi olabilir', () => {
+    expect(checkSpaceRole('GUEST', 'PROJECT_MEMBER')).toEqual({ ok: true });
+    expect(checkSpaceRole('GUEST', 'PROJECT_MANAGER')).toEqual({
       ok: false,
-      code: 'GUEST_STAKEHOLDER_ONLY',
+      code: 'OUTSOURCE_NOT_MANAGER',
     });
   });
 
-  it('Member her Space rolünü alabilir', () => {
-    expect(checkSpaceRole('MEMBER', 'PRODUCT_OWNER')).toEqual({ ok: true });
+  it('kullanıcı her Proje rolünü alabilir', () => {
+    expect(checkSpaceRole('MEMBER', 'PROJECT_MANAGER')).toEqual({ ok: true });
   });
 });

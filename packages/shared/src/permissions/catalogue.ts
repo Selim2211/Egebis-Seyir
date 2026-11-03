@@ -35,5 +35,11 @@ export const PERMISSION_CATALOGUE: readonly PermissionEntry[] = [
   { scope: 'SPACE', group: 'sprints', key: S.SPRINT_CANCEL },
   { scope: 'SPACE', group: 'content', key: S.REPORT_VIEW },
   { scope: 'SPACE', group: 'content', key: S.DOC_VIEW },
-  { scope: 'SPACE', group: 'content', key: S.DOC_WRITE },
+  { scope: 'SPACE', group: 'content', key: S.DOC_CREATE },
+  { scope: 'SPACE', group: 'content', key: S.DOC_EDIT },
+  { scope: 'SPACE', group: 'content', key: S.DOC_DELETE },
+  { scope: 'SPACE', group: 'content', key: S.VIDEO_VIEW },
+  { scope: 'SPACE', group: 'content', key: S.VIDEO_CREATE },
+  { scope: 'SPACE', group: 'content', key: S.VIDEO_EDIT },
+  { scope: 'SPACE', group: 'content', key: S.VIDEO_DELETE },
 ];

@@ -69,7 +69,7 @@ export class InvitationsService {
     const actorId = this.cls.get('userId')!;
     const unique = [...new Set(emails)];
     // Space paylaşımı yalnızca Guest daveti içindir (ADR-043).
-    const sharedSpaceIds = role === 'GUEST' ? [...new Set(spaceIds)] : [];
+    const sharedSpaceIds = [...new Set(spaceIds)];
     if (sharedSpaceIds.length > 0) {
       const found = await this.tenant.db.space.count({
         where: { id: { in: sharedSpaceIds }, deletedAt: null },
@@ -225,14 +225,14 @@ export class InvitationsService {
         update: {},
       });
       if (inv.spaceIds.length > 0) {
-        // Guest, paylaşılan Space'lere Stakeholder olarak eklenir (ADR-035, ADR-043).
+        // Davetli, seçilen Projelere Proje Üyesi olarak eklenir (ADR-152).
         const [stakeholder, spaces] = await Promise.all([
           tx.role.findUniqueOrThrow({
             where: {
               workspaceId_scope_key: {
                 workspaceId: inv.workspaceId,
                 scope: RoleScope.SPACE,
-                key: 'STAKEHOLDER',
+                key: 'PROJECT_MEMBER',
               },
             },
           }),
