@@ -2,11 +2,14 @@ import type { MapNode } from '@scrum/shared';
 
 export const COLUMN_WIDTH = 340;
 export const ROW_HEIGHT = 96;
-/** Dikey düzende: yan yana kutular arası ve seviyeler arası uzaklık. */
+/** TB düzeninde: yan yana kutular arası ve seviyeler arası uzaklık. */
 export const TB_COLUMN_WIDTH = 300;
 export const TB_ROW_HEIGHT = 170;
 
-/** LR: soldan sağa (yatay), TB: yukarıdan aşağıya (dikey). */
+/**
+ * LR: seviyeler soldan sağa, kardeşler alt alta; harita uzun bir sütun olur (arayüzde "Dikey").
+ * TB: seviyeler yukarıdan aşağıya, kardeşler yan yana; harita geniş yayılır (arayüzde "Yatay").
+ */
 export type MapDirection = 'LR' | 'TB';
 const ROOT_GAP = 0.6;
 
@@ -17,7 +20,7 @@ const TYPE_ORDER: Record<string, number> = { EPIC: 0, TASK: 1, BUG: 2, SUBTASK: 
 const keyNumber = (key: string) => Number(key.slice(key.lastIndexOf('-') + 1)) || 0;
 
 /**
- * Otomatik düzen. Yatay (LR): Epic'ler solda, Task'lar ortada, Sub-Task'lar sağda. Dikey (TB): Epic'ler üstte,
+ * Otomatik düzen. LR ("Dikey"): Epic'ler solda, Task'lar ortada, Sub-Task'lar sağda. TB ("Yatay"): Epic'ler üstte,
  * Task'lar ortada, Sub-Task'lar altta. Her ebeveyn,
  * çocuklarının dikey ortasında durur; kökler arasında küçük bir boşluk kalır. Ebeveyni görünmeyen
  * (süzgeçle gizlenmiş ya da yok) iş kök sayılır.

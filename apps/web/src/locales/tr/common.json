@@ -102,16 +102,16 @@
     "help": "Yardım ve kılavuz"
   },
   "roles": {
-    "OWNER": "Owner",
-    "ADMIN": "Admin",
-    "MEMBER": "Member",
-    "GUEST": "Guest"
+    "OWNER": "Super Admin (Sahip)",
+    "ADMIN": "Super Admin",
+    "MEMBER": "Kullanıcı",
+    "GUEST": "Dış kaynak"
   },
   "roleHelp": {
-    "OWNER": "Her şeyi yönetir; workspace'i silebilir.",
-    "ADMIN": "Üyeleri ve ayarları yönetir.",
-    "MEMBER": "Proje oluşturur ve atandığı Projelerde çalışır.",
-    "GUEST": "Yalnızca paylaşılan Projeleri görür ve yorum yapar.",
+    "OWNER": "Her şeyi yönetir; tüm Projeleri görür, workspace'i silebilir.",
+    "ADMIN": "Tüm Projeleri görür; kişileri, rolleri, doküman/video izinlerini ve ayarları yönetir.",
+    "MEMBER": "Yalnızca üyesi olduğu Projeleri görür; Projedeki rolü (Proje Yöneticisi / Proje Üyesi) yetkisini belirler.",
+    "GUEST": "Şirket dışı kişi: yalnızca eklendiği Projeleri görür, Proje Yöneticisi olamaz; doküman ve videolar Super Admin izin verene kadar kapalıdır.",
     "custom": "Özel roller, Ayarlar → Roles içinde belirlenen izinleri izler."
   },
   "auth": {
@@ -195,6 +195,9 @@
     "api": "API erişimi",
     "integrations": "Entegrasyonlar",
     "teams": "Ekipler",
+    "outsource": "Dış kaynak",
+    "quotas": "Yükleme sınırları",
+    "diagnostics": "Tanılama",
     "audit": "Denetim günlüğü",
     "roles": "Roles",
     "email": "E-posta ayarları"
@@ -227,9 +230,10 @@
     "removed": "Üye çıkarıldı.",
     "roleChanged": "Rol güncellendi.",
     "invalidEmails": "Geçersiz e-posta: {{emails}}",
-    "guestSpaces": "Paylaşılacak Projeler",
-    "guestSpacesHint": "Guest yalnızca seçilen Projeleri görür ve orada yorum yapabilir.",
-    "guestSpacesRequired": "Guest daveti için en az bir Proje seç.",
+    "guestSpaces": "Projeler",
+    "guestSpacesHint": "Dış kaynak yalnızca seçilen Projeleri görür ve orada Proje Üyesi olarak çalışır.",
+    "memberSpacesHint": "Kişi seçilen Projelere Proje Üyesi olarak eklenir; üyesi olmadığı Projeleri göremez. Sonradan Proje ayarlarından eklenebilir.",
+    "guestSpacesRequired": "Dış kaynak için en az bir Proje seç.",
     "noSpacesToShare": "Önce bir Proje oluştur.",
     "createTitle": "Hesap oluştur",
     "createHint": "E-posta göndermeden hesabı doğrudan açar. Kişiye e-posta adresini ve şifresini sen iletirsin; kişi giriş yapıp şifresini profilinden değiştirebilir.",
@@ -336,8 +340,10 @@
     "WORK_ITEM_PARENT_REQUIRED": "Sub-task bir üst öğeye bağlı olmalı.",
     "WORK_ITEM_PARENT_NOT_ALLOWED": "Bu öğe seçilen üst öğeye bağlanamaz.",
     "SPACE_KEY_TAKEN": "Bu anahtar daha önce kullanılmış; başka bir anahtar seç.",
-    "GUEST_STAKEHOLDER_ONLY": "Guest bir Projeye yalnızca Stakeholder olarak eklenebilir.",
-    "GUEST_SPACES_REQUIRED": "Guest daveti için en az bir Proje seç.",
+    "OUTSOURCE_NOT_MANAGER": "Dış kaynak bir Projeye yalnızca Proje Üyesi olarak eklenebilir.",
+    "HANDOVER_TARGET_REQUIRED": "Açık işleri devralacak kişiyi seç.",
+    "MANAGER_REMOVAL_SUPER_ADMIN": "Proje Yöneticisini yalnızca Super Admin çıkarabilir.",
+    "GUEST_SPACES_REQUIRED": "Dış kaynak için en az bir Proje seç.",
     "CONTAINER_ARCHIVED": "Arşivdeki bir öğeye ekleme yapılamaz.",
     "WORK_ITEM_PARENT_SPACE": "Üst öğe aynı Projede olmalı.",
     "WORK_ITEM_ESTIMATE_NOT_ALLOWED": "Saat tahmini yalnızca Task ve Sub-task için girilir.",
@@ -412,6 +418,8 @@
     "AI_DISABLED": "Yapay zekâ bu kurulumda kapalı.",
     "AI_RATE_LIMITED": "Çok fazla istek; bir dakika sonra tekrar dene.",
     "AI_FAILED": "Yapay zekâ servisinden geçerli bir yanıt alınamadı.",
+    "AI_ESTIMATE_DISABLED": "AI ile Story Point önerisi Ayarlar'dan kapatılmış.",
+    "AI_ESTIMATE_TOO_SHORT": "Öneri için açıklama en az {{min}} cümle olmalı (şu an {{count}}).",
     "AI_NOT_APPLICABLE": "Bu öneri bu iş tipi için kullanılamaz.",
     "RECURRENCE_NEEDS_DUE_DATE": "Tekrar için bitiş tarihi gerekir.",
     "RECURRENCE_NOT_ALLOWED": "Epic tekrarlayamaz.",
@@ -439,6 +447,7 @@
     "BUG_STATUS_FORBIDDEN": "Bu durumu yalnızca atanan kişi veya Bug’ları yöneten biri değiştirebilir.",
     "VIDEO_TYPE_UNSUPPORTED": "Bu video biçimi desteklenmiyor. MP4, MOV ya da WebM yükleyin.",
     "VIDEO_TOO_LARGE": "Video izin verilen boyuttan büyük.",
+    "UPLOAD_QUOTA_EXCEEDED": "Yükleme sınırı doldu (kişi ya da ekip için dosya sayısı veya toplam boyut). Super Admin'den sınırı artırmasını iste.",
     "VIDEO_UPLOAD_OFFSET": "Yükleme sırası kaydı; kaldığı yerden devam ediliyor.",
     "VIDEO_UPLOAD_INCOMPLETE": "Video yüklemesi tamamlanmadı.",
     "VIDEO_INVALID": "Dosya geçerli bir video değil.",
@@ -452,10 +461,8 @@
     "TICKET_SPACE_INVALID": "Seçilen proje geçerli değil (silinmiş, arşivde ya da gelen kutusu)."
   },
   "spaceRoles": {
-    "PRODUCT_OWNER": "Product Owner",
-    "SCRUM_MASTER": "Scrum Master",
-    "DEVELOPER": "Developer",
-    "STAKEHOLDER": "Stakeholder"
+    "PROJECT_MANAGER": "Proje Yöneticisi",
+    "PROJECT_MEMBER": "Proje Üyesi"
   },
   "estimationScale": {
     "FIBONACCI": "Fibonacci · 1, 2, 3, 5, 8, 13, 21",
@@ -580,6 +587,11 @@
     "name": "Workspace adı",
     "membersCanCreateSpaces": "Member'lar Proje oluşturabilir",
     "membersCanCreateSpacesHelp": "Kapatılırsa yalnızca Owner ve Admin Proje oluşturur.",
+    "aiEstimate": "AI ile Story Point önerisi",
+    "aiEstimateEnabled": "Açıklamadan Story Point önerisi",
+    "aiEstimateHelp": "Görev detayında \"AI ile tahmin et\" düğmesi açıklamaya bakarak Fibonacci puan önerir; puan yalnızca kullanıcı uygularsa yazılır.",
+    "aiEstimateMin": "Açıklamada en az cümle",
+    "aiEstimateMinHelp": "Açıklama bu kadar cümle içermiyorsa öneri kullanılamaz ({{min}}–{{max}}).",
     "saved": "Ayarlar kaydedildi."
   },
   "archive": {
@@ -2215,7 +2227,13 @@
     "sprint.cancel": "Sprint iptal etme",
     "report.view": "Raporları görme",
     "doc.view": "Dokümanları görme",
-    "doc.write": "Doküman oluşturma ve düzenleme",
+    "doc.create": "Doküman oluşturma",
+    "doc.edit": "Doküman düzenleme",
+    "doc.delete": "Doküman silme",
+    "video.view": "Videoları görme",
+    "video.create": "Video yükleme",
+    "video.edit": "Video düzenleme",
+    "video.delete": "Video silme",
     "workItem.access.manage": "İş öğesine kimin erişeceğini yönetme",
     "bug.report": "Bug açma",
     "bug.assign": "Bug’ı birine atama"
@@ -3162,6 +3180,115 @@
       "last": "Son gönderim: {{when}}",
       "testSend": "Kendime test gönder",
       "testSent": "Özet {{to}} adresine gönderildi."
+    }
+  },
+  "handover": {
+    "intro": "{{name}} çıkarılınca açık işleri aşağıdaki kişilere devredilir. Biten işlerin geçmişi korunur.",
+    "nothing": "Açık işi yok; devredilecek bir şey bulunmuyor.",
+    "openItems_one": "{{count}} açık iş",
+    "openItems_other": "{{count}} açık iş",
+    "isManager": "Proje Yöneticisi",
+    "to": "{{project}} için devralan",
+    "choose": "Devralacak kişiyi seç",
+    "noCandidates": "Projede devralabilecek kimse yok",
+    "managerOf": "Yöneticisi olduğu Projeler: {{projects}}. Bu Projelere yeni bir yönetici atamayı unutma.",
+    "confirm": "Devret ve çıkar"
+  },
+  "outsource": {
+    "title": "Dış kaynak",
+    "description": "Şirket dışı kişiler. Yalnızca eklendikleri Projeleri görürler ve Proje Yöneticisi olamazlar. Doküman ve video erişimini Super Admin belirler.",
+    "empty": "Görebileceğin bir dış kaynak kişi yok. Ayarlar → Kişiler'den \"Dış kaynak\" rolüyle hesap açabilir ya da davet edebilirsin.",
+    "content": "Doküman ve video",
+    "contentFor": "{{name}} için doküman ve video erişimi",
+    "contentSaved": "Erişim güncellendi.",
+    "access": {
+      "NONE": "Kapalı",
+      "VIEW": "Yalnızca görüntüleme",
+      "FULL": "Rolüne göre tam"
+    },
+    "removeFrom": "{{name}} kişisini {{project}} Projesinden çıkar",
+    "removed": "Projeden çıkarıldı; açık işleri devredildi.",
+    "addTo": "{{name}} için Proje seç",
+    "addProject": "Projeye ekle…",
+    "add": "Ekle",
+    "added": "Projeye eklendi."
+  },
+  "livefeed": {
+    "title": "Akan aktivite",
+    "hint": "Üyesi olduğun Projelerde kim ne yapıyor; 15 saniyede bir yenilenir. İsme tıklayıp mesaj gönderebilirsin.",
+    "message": "Mesaj gönder",
+    "profile": "Kişi analizi",
+    "workload": "Ekip iş yükü"
+  },
+  "quotas": {
+    "title": "Yükleme sınırları",
+    "description": "Kişi ya da ekip başına yüklenebilecek doküman/video (iş öğesi ve doküman ekleri, videolar) sayısı ve toplam boyutu. Boş bırakılan alan sınırsızdır; ekip sınırı ekip üyelerinin toplamına uygulanır.",
+    "empty": "Henüz sınır yok; herkes sınırsız yükleyebilir.",
+    "target": "Kişi / ekip",
+    "choose": "Seç…",
+    "people": "Kişiler",
+    "teams": "Ekipler",
+    "files": "Dosya",
+    "size": "Toplam boyut",
+    "maxFiles": "En çok dosya",
+    "maxMb": "En çok MB",
+    "filesUnit": "dosya",
+    "unlimited": "sınırsız",
+    "save": "Kaydet",
+    "saved": "Sınır kaydedildi.",
+    "remove": "{{name}} sınırını kaldır",
+    "removed": "Sınır kaldırıldı.",
+    "kind": { "USER": "Kişi", "TEAM": "Ekip" }
+  },
+  "aiEstimate": {
+    "button": "AI ile tahmin et",
+    "sentences": "Açıklama: {{count}} / {{min}} cümle",
+    "suggested": "Öneri: {{points}} puan",
+    "confidence": { "LOW": "düşük güven", "MEDIUM": "orta güven", "HIGH": "yüksek güven" },
+    "apply": "Uygula",
+    "dismiss": "Vazgeç"
+  },
+  "diagnostics": {
+    "title": "Tanılama",
+    "description": "Yavaşlığın nereden geldiğini ölçer: senin bilgisayarınla sunucu arasındaki ağ, sunucunun kendisi ve veritabanı. Testi yavaşlığı yaşadığın bilgisayarda (VPN açıksa açıkken) çalıştır, sonra raporu kopyalayıp geliştiriciye gönder. Rapor şifre ya da anahtar içermez.",
+    "run": "Testi çalıştır",
+    "running": "Ölçülüyor… (~15 sn)",
+    "copy": "Raporu kopyala",
+    "download": "İndir",
+    "copied": "Rapor panoya kopyalandı.",
+    "copyFailed": "Kopyalanamadı; \"İndir\" ile dosya olarak alabilirsin.",
+    "summary": "Özet",
+    "raw": "Rapor (geliştiriciye gönderilecek)",
+    "files": "dosya",
+    "metric": {
+      "network": "Ağ gecikmesi (gidiş-dönüş)",
+      "download": "İndirme hızı (1 MB)",
+      "protocol": "Bağlantı · sayfa dosyaları"
+    },
+    "verdict": {
+      "serverUnreachable": "Sunucu raporu alınamadı: {{error}}",
+      "networkOk": "Ağ gecikmesi düşük ({{ms}} ms).",
+      "networkMedium": "Ağ gecikmesi orta ({{ms}} ms); VPN/uzak bağlantı her isteğe bu kadar ekliyor.",
+      "networkHigh": "Ağ gecikmesi yüksek ({{ms}} ms): yavaşlığın büyük kısmı ağdan (VPN, vekil ya da uzak bağlantı).",
+      "serverSlowPing": "Sunucu en basit isteğe bile {{ms}} ms harcıyor; sunucu meşgul ya da kaynak yetersiz.",
+      "downloadOk": "İndirme hızı iyi ({{mbps}} Mbit/sn).",
+      "downloadMedium": "İndirme hızı orta ({{mbps}} Mbit/sn).",
+      "downloadSlow": "İndirme hızı düşük ({{mbps}} Mbit/sn): bant genişliği ya da vekil denetimi.",
+      "bigTransferStalls": "Küçük yanıtlar hızlı ama büyük yanıt takılıyor: ağda MTU (paket boyutu) ya da vekil sorunu olabilir.",
+      "http11": "Bağlantı HTTP/1.1 ({{files}} dosya): HTTPS ile HTTP/2 açılırsa sayfalar daha hızlı yüklenir.",
+      "parallelQueued": "Aynı anda giden istekler sırada bekliyor ({{ms}} ms).",
+      "dbOk": "Veritabanı hızlı ({{ms}} ms).",
+      "dbSlow": "Veritabanı yanıtı yavaş ({{ms}} ms).",
+      "dbDown": "Veritabanına ulaşılamıyor.",
+      "eventLoop": "Uygulama sunucusu zaman zaman tıkanıyor (olay döngüsü gecikmesi {{ms}} ms).",
+      "apiSlow": "Son bir saatte isteklerin %5'i {{ms}} ms'den uzun sürdü.",
+      "apiErrors": "Son bir saatte {{count}} sunucu hatası (5xx) oldu.",
+      "memLow": "Sunucuda boş bellek az ({{free}} / {{total}} MB).",
+      "swapUsed": "Sunucu takas (swap) kullanıyor ({{mb}} MB): RAM yetmiyor olabilir.",
+      "cpuSteal": "Sanal makinede CPU çalınması %{{pct}}: barındırma CPU kotası dolu.",
+      "cpuBusy": "Sunucu yükü yüksek (yük {{load}}, {{cpus}} çekirdek).",
+      "diskFull": "Disk %{{pct}} dolu.",
+      "mtuRisk": "Ağ kartı MTU'su 1500'den büyük ve MTU yoklaması kapalı: büyük yanıtlar takılabilir."
     }
   }
 }

@@ -13,7 +13,7 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { FormError, NativeSelect } from '@/components/form';
 import { PageHeading } from '@/components/layout/page-heading';
-import { ConfirmDialog } from '@/components/confirm-dialog';
+import { HandoverDialog } from '@/features/workspace/handover-dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -73,7 +73,9 @@ function CreateAccountForm() {
     password: string | null;
     existing: boolean;
   } | null>(null);
-  const guest = role === 'GUEST';
+  const guest = workspaceTier(role) === 'GUEST';
+  // Super Admin her Projeyi görür; diğerleri yalnızca eklendikleri Projeleri (ADR-152).
+  const pickSpaces = guest || workspaceTier(role) === 'MEMBER';
   const shortPassword = password.length > 0 && password.length < 8;
 
   const submit = (e: FormEvent) => {
@@ -89,7 +91,7 @@ function CreateAccountForm() {
         email: parsed.data,
         role,
         ...(password ? { password } : {}),
-        spaceIds: guest ? spaceIds : [],
+        spaceIds: pickSpaces ? spaceIds : [],
       },
       {
         onSuccess: (created) => {
@@ -169,8 +171,13 @@ function CreateAccountForm() {
             </p>
           </div>
         </div>
-        {guest && (
-          <GuestSpaces selected={spaceIds} missing={spacesMissing} onChange={setSpaceIds} />
+        {pickSpaces && (
+          <GuestSpaces
+            selected={spaceIds}
+            missing={spacesMissing}
+            required={guest}
+            onChange={setSpaceIds}
+          />
         )}
         <div className="mt-3 flex items-center gap-3">
           <Button type="submit" disabled={create.isPending}>
@@ -236,7 +243,9 @@ function InviteForm() {
   const [invalid, setInvalid] = useState<string[]>([]);
   const [spaceIds, setSpaceIds] = useState<string[]>([]);
   const [spacesMissing, setSpacesMissing] = useState(false);
-  const guest = role === 'GUEST';
+  const guest = workspaceTier(role) === 'GUEST';
+  // Super Admin her Projeyi görür; diğerleri yalnızca eklendikleri Projeleri (ADR-152).
+  const pickSpaces = guest || workspaceTier(role) === 'MEMBER';
 
   const submit = (e: FormEvent) => {
     e.preventDefault();
@@ -250,7 +259,7 @@ function InviteForm() {
     if (raw.length === 0 || bad.length > 0 || missing) return;
     const list = parsed.map((p) => p.data!);
     invite.mutate(
-      { emails: list, role, spaceIds: guest ? spaceIds : [] },
+      { emails: list, role, spaceIds: pickSpaces ? spaceIds : [] },
       {
         onSuccess: () => {
           toast.success(t('members.invited', { count: list.length }));
@@ -306,10 +315,11 @@ function InviteForm() {
           `${t('members.inviteHint')} ${isCustomRoleKey(role) ? t('roleHelp.custom') : t(`roleHelp.${role}` as 'roleHelp.MEMBER')}`
         )}
       </p>
-      {guest && (
+      {pickSpaces && (
         <GuestSpaces
           selected={spaceIds}
           missing={spacesMissing}
+          required={guest}
           onChange={(ids) => {
             setSpaceIds(ids);
             setSpacesMissing(false);
@@ -329,10 +339,12 @@ function InviteForm() {
 function GuestSpaces({
   selected,
   missing,
+  required,
   onChange,
 }: {
   selected: string[];
   missing: boolean;
+  required: boolean;
   onChange: (ids: string[]) => void;
 }) {
   const { t } = useTranslation();
@@ -346,7 +358,11 @@ function GuestSpaces({
           missing ? 'text-destructive mt-0.5 text-xs' : 'text-muted-foreground mt-0.5 text-xs'
         }
       >
-        {missing ? t('members.guestSpacesRequired') : t('members.guestSpacesHint')}
+        {missing
+          ? t('members.guestSpacesRequired')
+          : required
+            ? t('members.guestSpacesHint')
+            : t('members.memberSpacesHint')}
       </p>
       {spaces.length === 0 ? (
         <p className="text-muted-foreground mt-2 text-sm">{t('members.noSpacesToShare')}</p>
@@ -530,14 +546,17 @@ function MemberRow({
     );
 
   const [confirmingRemove, setConfirmingRemove] = useState(false);
-  const onRemove = () => {
-    remove.mutate(member.userId, {
-      onSuccess: () => {
-        setConfirmingRemove(false);
-        toast.success(t('members.removed'));
+  const onRemove = (reassign: Record<string, string>) => {
+    remove.mutate(
+      { userId: member.userId, reassign },
+      {
+        onSuccess: () => {
+          setConfirmingRemove(false);
+          toast.success(t('members.removed'));
+        },
+        onError: (e) => toast.error(errorMessage(e)),
       },
-      onError: (e) => toast.error(errorMessage(e)),
-    });
+    );
   };
 
   return (
@@ -598,12 +617,10 @@ function MemberRow({
               <UserMinus />
             </Button>
           )}
-          <ConfirmDialog
+          <HandoverDialog
+            person={member}
             open={confirmingRemove}
             onOpenChange={setConfirmingRemove}
-            title={t('members.removeTitle', { name: member.name })}
-            description={t('members.removeConfirm', { name: member.name })}
-            confirmLabel={t('members.remove')}
             pending={remove.isPending}
             onConfirm={onRemove}
           />

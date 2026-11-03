@@ -11,6 +11,10 @@ function packageName(id: string): string | undefined {
   )?.[1];
 }
 
+/** Kabuğun kullandığı küçük arayüz kütüphaneleri (tek `ui` parçası). */
+const UI_PACKAGES =
+  /^(@radix-ui\/|radix-ui$|@floating-ui\/|sonner$|clsx$|tailwind-merge$|class-variance-authority$|@dnd-kit\/)/;
+
 export default defineConfig({
   plugins: [
     // Router eklentisi react eklentisinden önce gelmeli (dosya tabanlı rotalar).
@@ -23,17 +27,40 @@ export default defineConfig({
   },
   build: {
     target: 'es2022',
-    // Sık değişmeyen kütüphaneler ayrı parçada: uygulama güncellense de tarayıcı önbelleği geçerli kalır.
-    rollupOptions: {
+    rolldownOptions: {
       output: {
-        manualChunks(id: string) {
-          const name = packageName(id);
-          if (!name) return undefined;
-          if (name === 'react' || name === 'react-dom' || name === 'scheduler') return 'react';
-          if (name.startsWith('@tanstack/')) return 'tanstack';
-          if (name === 'i18next' || name === 'react-i18next') return 'i18n';
-          if (name === 'zod') return 'zod';
-          return undefined;
+        codeSplitting: {
+          groups: [
+            // Sık değişmeyen kütüphaneler ayrı parçada: uygulama güncellense de tarayıcı önbelleği geçerli kalır.
+            {
+              priority: 30,
+              name(id: string) {
+                const name = packageName(id);
+                if (!name) return null;
+                if (name === 'react' || name === 'react-dom' || name === 'scheduler')
+                  return 'react';
+                if (name.startsWith('@tanstack/')) return 'tanstack';
+                if (name === 'i18next' || name === 'react-i18next') return 'i18n';
+                if (name === 'zod') return 'zod';
+                return null;
+              },
+            },
+            // Her simge ve her küçük arayüz modülü ayrı dosya olmasın (ADR-158): ana sayfa ~100 ayrı dosya
+            // istiyordu. HTTP/1.1'de tarayıcı aynı anda 6 istek açar; VPN gecikmesinde her tur bekleme ekler.
+            // Kabuk bunların hepsini zaten kullandığından tek parça olmaları ilk yüklemeyi büyütmez.
+            {
+              priority: 20,
+              name(id: string) {
+                // Paket adı kesin çözülür: pnpm klasör adları eş bağımlılıkları da içerdiğinden
+                // (ör. `@tiptap+react@3_@floating-ui+dom`) yol üzerinde arama editörü de yakalıyordu.
+                const name = packageName(id);
+                if (!name) return null;
+                if (name === 'lucide-react') return 'icons';
+                if (UI_PACKAGES.test(name)) return 'ui';
+                return null;
+              },
+            },
+          ],
         },
       },
     },

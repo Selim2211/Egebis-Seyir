@@ -125,7 +125,8 @@ export function VideoArchivePage({ spaceId }: { spaceId: string }) {
   if (space.isPending || data.isPending) return <LoadingState />;
   if (space.isError || data.isError) return <NotFoundState />;
 
-  const canWrite = space.data.permissions.includes(S.DOC_WRITE) && !space.data.archived;
+  const canWrite = space.data.permissions.includes(S.VIDEO_EDIT) && !space.data.archived;
+  const canUpload = space.data.permissions.includes(S.VIDEO_CREATE) && !space.data.archived;
   const { maxBytes, chunkBytes } = data.data;
   const folderId = scope === 'all' || scope === 'none' ? null : scope;
 
@@ -179,7 +180,7 @@ export function VideoArchivePage({ spaceId }: { spaceId: string }) {
   const onDrop = (e: DragEvent) => {
     e.preventDefault();
     setDragOver(false);
-    if (canWrite) upload(Array.from(e.dataTransfer.files));
+    if (canUpload) upload(Array.from(e.dataTransfer.files));
   };
 
   const scopeTitle =
@@ -202,7 +203,7 @@ export function VideoArchivePage({ spaceId }: { spaceId: string }) {
         <aside aria-label={t('videos.folders')} className="flex flex-col gap-1">
           <div className="mb-1 flex items-center gap-1">
             <h2 className="flex-1 text-sm font-semibold">{t('videos.folders')}</h2>
-            {canWrite && (
+            {canUpload && (
               <Button
                 size="icon"
                 variant="ghost"
@@ -245,7 +246,7 @@ export function VideoArchivePage({ spaceId }: { spaceId: string }) {
         <section
           aria-label={t('videos.title')}
           onDragOver={(e) => {
-            if (!canWrite) return;
+            if (!canUpload) return;
             e.preventDefault();
             setDragOver(true);
           }}
@@ -271,7 +272,7 @@ export function VideoArchivePage({ spaceId }: { spaceId: string }) {
                 className="h-9 pl-8"
               />
             </div>
-            {canWrite && (
+            {canUpload && (
               <Button onClick={() => fileInput.current?.click()}>
                 <Upload /> {t('videos.upload')}
               </Button>
@@ -309,7 +310,7 @@ export function VideoArchivePage({ spaceId }: { spaceId: string }) {
             <div className="text-muted-foreground flex flex-col items-center gap-2 rounded-xl border border-dashed px-6 py-16 text-center text-sm">
               <Clapperboard className="size-8 opacity-50" aria-hidden />
               <p>{query ? t('videos.noResults') : t('videos.empty')}</p>
-              {canWrite && !query && (
+              {canUpload && !query && (
                 <p className="text-xs">
                   {t('videos.dropHint', {
                     max: formatBytes(maxBytes),

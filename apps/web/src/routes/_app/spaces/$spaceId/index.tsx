@@ -2,7 +2,7 @@ import { SPACE_PERMISSIONS as S } from '@scrum/shared';
 import { useQuery } from '@tanstack/react-query';
 import { useRoleLabel } from '@/features/roles/queries';
 import { createFileRoute, Link } from '@tanstack/react-router';
-import { Folder, FolderPlus, List, ListOrdered, ListPlus, Lock, Settings2 } from 'lucide-react';
+import { Folder, FolderPlus, List, ListOrdered, ListPlus, Settings2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -48,12 +48,6 @@ function SpacePage() {
             <Badge variant="outline" className="font-mono">
               {space.key}
             </Badge>
-            {space.isPrivate && (
-              <Badge variant="secondary">
-                <Lock />
-                {t('spaceForm.private')}
-              </Badge>
-            )}
           </>
         }
         actions={

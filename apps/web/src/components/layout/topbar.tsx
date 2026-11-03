@@ -1,8 +1,9 @@
 import { Link } from '@tanstack/react-router';
-import { Bell, CircleHelp, Menu, Search } from 'lucide-react';
+import { Activity, Bell, CircleHelp, Menu, Search } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
+import { ActivityPanel } from '@/features/activity/activity-panel';
 import { useUnreadCount } from '@/features/notifications/queries';
 import { TimerIndicator } from '@/features/time/timer-indicator';
 import { SearchDialog } from '@/features/search/search-dialog';
@@ -16,6 +17,7 @@ export function Topbar() {
   const { t } = useTranslation();
   const setSidebarOpen = useUiStore((s) => s.setSidebarOpen);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [feedOpen, setFeedOpen] = useState(false);
 
   // Ctrl/Cmd+K veya (metin girişi dışında) "/" aramayı açar (brief §11).
   useEffect(() => {
@@ -61,9 +63,21 @@ export function Topbar() {
       </button>
 
       <SearchDialog open={searchOpen} onOpenChange={setSearchOpen} />
+      {feedOpen && <ActivityPanel onClose={() => setFeedOpen(false)} />}
 
       <div className="ml-auto flex shrink-0 items-center gap-1.5">
         <TimerIndicator />
+        <button
+          type="button"
+          aria-label={t('livefeed.title')}
+          title={t('livefeed.title')}
+          aria-pressed={feedOpen}
+          data-testid="livefeed-toggle"
+          onClick={() => setFeedOpen((v) => !v)}
+          className="hover:bg-accent aria-pressed:bg-primary/10 aria-pressed:text-primary flex size-9 items-center justify-center rounded-lg"
+        >
+          <Activity className="size-4" aria-hidden />
+        </button>
         {import.meta.env.DEV && <ApiStatus />}
         <Link
           to="/help"

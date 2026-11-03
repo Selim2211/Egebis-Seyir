@@ -17,8 +17,8 @@ test.describe.serial('Roller ve izinler', () => {
     await page.goto('/settings/roles');
     await expect(page.getByRole('heading', { name: 'Roles and permissions' })).toBeVisible();
     // Sistem rolü sütunları.
-    await expect(page.getByRole('columnheader', { name: /Developer/ })).toBeVisible();
-    await expect(page.getByRole('columnheader', { name: /Stakeholder/ })).toBeVisible();
+    await expect(page.getByRole('columnheader', { name: /Proje Üyesi/ })).toBeVisible();
+    await expect(page.getByRole('columnheader', { name: /Proje Yöneticisi/ })).toBeVisible();
 
     await page.getByRole('button', { name: 'New role' }).click();
     const dialog = page.getByRole('dialog');

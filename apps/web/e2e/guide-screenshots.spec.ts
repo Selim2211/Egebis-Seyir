@@ -640,9 +640,9 @@ test.describe.serial('Kılavuz görselleri', () => {
     await shot(page, '24-roles', [
       { at: page.getByRole('tab', { name: t('rolesPage.scope.SPACE') }), n: 1, badge: 'tl' },
       { at: page.getByRole('button', { name: t('rolesPage.newRole') }), n: 2, badge: 'bl' },
-      { at: page.getByRole('columnheader', { name: /Developer/ }), n: 3, badge: 't' },
+      { at: page.getByRole('columnheader', { name: /Proje Üyesi/ }), n: 3, badge: 't' },
       {
-        at: page.getByRole('checkbox', { name: 'DEVELOPER: workItem.write' }).first(),
+        at: page.getByRole('checkbox', { name: 'PROJECT_MEMBER: workItem.write' }).first(),
         n: 4,
         badge: 'r',
       },

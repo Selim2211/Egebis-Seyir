@@ -61,7 +61,7 @@ function CreateSpaceForm({ onDone }: { onDone: () => void }) {
   const [keyEdited, setKeyEdited] = useState(false);
   const [errors, setErrors] = useState<SpaceFormErrors>({});
   const [members, setMembers] = useState<Array<{ userId: string; role: string }>>([
-    { userId: user.id, role: 'PRODUCT_OWNER' },
+    { userId: user.id, role: 'PROJECT_MANAGER' },
   ]);
 
   const change = (patch: Partial<SpaceFormValues>) => {
@@ -176,7 +176,7 @@ function MemberPicker({
                 }
               >
                 {spaceRoleKeys
-                  .filter((r) => !guest || r === 'STAKEHOLDER')
+                  .filter((r) => !guest || r === 'PROJECT_MEMBER')
                   .map((r) => (
                     <option key={r} value={r}>
                       {roleLabel('SPACE', r)}
@@ -220,10 +220,7 @@ function MemberPicker({
             onClick={() => {
               const person = byId.get(adding);
               if (!person) return;
-              onChange([
-                ...members,
-                { userId: adding, role: person.role === 'GUEST' ? 'STAKEHOLDER' : 'DEVELOPER' },
-              ]);
+              onChange([...members, { userId: adding, role: 'PROJECT_MEMBER' }]);
               setAdding('');
             }}
           >

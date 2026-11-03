@@ -5,8 +5,11 @@ import {
   type AcceptInvitationRequest,
   type CreateInvitationsRequest,
   InvitationPreviewSchema,
+  type ContentAccess,
+  HandoverPlanSchema,
   InvitationsResponseSchema,
   MembersResponseSchema,
+  OutsourceResponseSchema,
   type MyWorkspace,
   type Permission,
 } from '@scrum/shared';
@@ -90,9 +93,49 @@ export const useChangeMemberRole = () =>
     }),
   );
 
-export const useRemoveMember = () =>
-  useWorkspaceMutation((id, userId: string) =>
-    apiRequest(`${ws(id)}/members/${userId}`, NoContent, { method: 'DELETE' }),
+/** Üyeyi çıkarır; açık işler `reassign` (Proje → alıcı) ile devredilir (ADR-153). */
+export function useRemoveMember() {
+  const qc = useQueryClient();
+  const { id } = useCurrentWorkspace();
+  return useMutation({
+    mutationFn: (input: { userId: string; reassign?: Record<string, string> }) =>
+      apiRequest(`${ws(id)}/members/${input.userId}`, NoContent, {
+        method: 'DELETE',
+        body: { reassign: input.reassign ?? {} },
+      }),
+    // Atamalar değiştiği için tüm önbellek tazelenir.
+    onSettled: () => qc.invalidateQueries(),
+  });
+}
+
+export const handoverQuery = (workspaceId: string, userId: string) =>
+  queryOptions({
+    queryKey: ['workspaces', workspaceId, 'members', userId, 'handover'],
+    queryFn: () => apiRequest(`${ws(workspaceId)}/members/${userId}/handover`, HandoverPlanSchema),
+  });
+
+export function useHandoverPlan(userId: string, enabled: boolean) {
+  const { id } = useCurrentWorkspace();
+  return useQuery({ ...handoverQuery(id, userId), enabled, staleTime: 0 });
+}
+
+export const outsourceQuery = (workspaceId: string) =>
+  queryOptions({
+    queryKey: ['workspaces', workspaceId, 'outsource'],
+    queryFn: () => apiRequest(`${ws(workspaceId)}/members/outsource`, OutsourceResponseSchema),
+  });
+
+export function useOutsource(enabled = true) {
+  const { id } = useCurrentWorkspace();
+  return useQuery({ ...outsourceQuery(id), enabled });
+}
+
+export const useSetContentAccess = () =>
+  useWorkspaceMutation((id, input: { userId: string; contentAccess: ContentAccess }) =>
+    apiRequest(`${ws(id)}/members/${input.userId}/content-access`, NoContent, {
+      method: 'PATCH',
+      body: { contentAccess: input.contentAccess },
+    }),
   );
 
 // ---------- Davet bağlantısı (oturumsuz) ----------

@@ -23,7 +23,7 @@ import {
 } from '@xyflow/react';
 import { queryOptions, useMutation, useQuery } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
-import { ArrowDown, ArrowRight, LayoutDashboard, Maximize2, Search, X } from 'lucide-react';
+import { Columns3, LayoutDashboard, Maximize2, Rows3, Search, X } from 'lucide-react';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NativeSelect } from '@/components/form';
@@ -416,7 +416,9 @@ function MapCanvas({ spaceId, data }: { spaceId: string; data: ProjectMap }) {
             aria-label={t('projectMap.direction')}
             className="flex overflow-hidden rounded-md border"
           >
-            {(['LR', 'TB'] as const).map((dir) => (
+            {/* Etiket haritanın görünen şeklidir: TB'de kardeşler yan yana (geniş, "Yatay"),
+                LR'de alt alta dizilir (uzun, "Dikey"). */}
+            {(['TB', 'LR'] as const).map((dir) => (
               <button
                 key={dir}
                 type="button"
@@ -429,12 +431,8 @@ function MapCanvas({ spaceId, data }: { spaceId: string; data: ProjectMap }) {
                     : 'hover:bg-muted text-muted-foreground',
                 )}
               >
-                {dir === 'LR' ? (
-                  <ArrowRight className="size-4" />
-                ) : (
-                  <ArrowDown className="size-4" />
-                )}
-                {t(dir === 'LR' ? 'projectMap.horizontal' : 'projectMap.vertical')}
+                {dir === 'TB' ? <Columns3 className="size-4" /> : <Rows3 className="size-4" />}
+                {t(dir === 'TB' ? 'projectMap.horizontal' : 'projectMap.vertical')}
               </button>
             ))}
           </div>

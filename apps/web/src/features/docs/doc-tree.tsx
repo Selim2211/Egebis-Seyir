@@ -28,16 +28,23 @@ export interface DocTreeActions {
   onDelete: (doc: DocNodeDto) => void;
 }
 
-/** Sayfa ağacı: girintili liste; yazma yetkisi varsa satır menüsü ve alt sayfa ekleme. */
+/**
+ * Sayfa ağacı: girintili liste. Oluşturma izniyle alt sayfa ekleme, düzenleme izniyle taşıma,
+ * silme izniyle silme (ADR-152).
+ */
 export function DocTree({
   docs,
   selectedId,
-  canWrite,
+  canCreate,
+  canEdit,
+  canDelete,
   actions,
 }: {
   docs: readonly DocNodeDto[];
   selectedId: string | null;
-  canWrite: boolean;
+  canCreate: boolean;
+  canEdit: boolean;
+  canDelete: boolean;
   actions: DocTreeActions;
 }) {
   const { t } = useTranslation();
@@ -63,50 +70,65 @@ export function DocTree({
             >
               {doc.title}
             </button>
-            {canWrite && (
+            {(canCreate || canEdit || canDelete) && (
               <>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="size-6 opacity-0 group-focus-within:opacity-100 group-hover:opacity-100"
-                  aria-label={t('docs.addChild', { title: doc.title })}
-                  onClick={() => actions.onAddChild(doc.id)}
-                >
-                  <Plus className="size-3.5" />
-                </Button>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="size-6 opacity-0 group-focus-within:opacity-100 group-hover:opacity-100 data-[state=open]:opacity-100"
-                      aria-label={t('docs.actions', { title: doc.title })}
-                    >
-                      <MoreHorizontal className="size-3.5" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-48">
-                    <DropdownMenuItem
-                      disabled={!prevSibling}
-                      onSelect={() => actions.onReorder(doc.id, prevPrevSibling?.id ?? null)}
-                    >
-                      <ArrowUp /> {t('docs.moveUp')}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      disabled={!nextSibling}
-                      onSelect={() => nextSibling && actions.onReorder(doc.id, nextSibling.id)}
-                    >
-                      <ArrowDown /> {t('docs.moveDown')}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onSelect={() => actions.onMoveTo(doc)}>
-                      <FolderInput /> {t('docs.moveTo')}
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem variant="destructive" onSelect={() => actions.onDelete(doc)}>
-                      <Trash2 /> {t('docs.delete')}
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                {canCreate && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-6 opacity-0 group-focus-within:opacity-100 group-hover:opacity-100"
+                    aria-label={t('docs.addChild', { title: doc.title })}
+                    onClick={() => actions.onAddChild(doc.id)}
+                  >
+                    <Plus className="size-3.5" />
+                  </Button>
+                )}
+                {(canEdit || canDelete) && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="size-6 opacity-0 group-focus-within:opacity-100 group-hover:opacity-100 data-[state=open]:opacity-100"
+                        aria-label={t('docs.actions', { title: doc.title })}
+                      >
+                        <MoreHorizontal className="size-3.5" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-48">
+                      {canEdit && (
+                        <>
+                          <DropdownMenuItem
+                            disabled={!prevSibling}
+                            onSelect={() => actions.onReorder(doc.id, prevPrevSibling?.id ?? null)}
+                          >
+                            <ArrowUp /> {t('docs.moveUp')}
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            disabled={!nextSibling}
+                            onSelect={() =>
+                              nextSibling && actions.onReorder(doc.id, nextSibling.id)
+                            }
+                          >
+                            <ArrowDown /> {t('docs.moveDown')}
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onSelect={() => actions.onMoveTo(doc)}>
+                            <FolderInput /> {t('docs.moveTo')}
+                          </DropdownMenuItem>
+                        </>
+                      )}
+                      {canEdit && canDelete && <DropdownMenuSeparator />}
+                      {canDelete && (
+                        <DropdownMenuItem
+                          variant="destructive"
+                          onSelect={() => actions.onDelete(doc)}
+                        >
+                          <Trash2 /> {t('docs.delete')}
+                        </DropdownMenuItem>
+                      )}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
               </>
             )}
           </div>

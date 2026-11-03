@@ -172,7 +172,6 @@ function GeneralSummary({ space }: { space: SpaceDetail }) {
   const rows: Array<[string, string]> = [
     [t('spaceForm.name'), space.name],
     [t('spaceForm.key'), space.key],
-    [t('spaceForm.visibility'), t(space.isPrivate ? 'spaceForm.private' : 'spaceForm.public')],
     [t('spaceForm.mode'), t(space.scrumEnabled ? 'spaceForm.modeScrum' : 'spaceForm.modeSimple')],
   ];
   if (space.scrumEnabled) {
@@ -216,7 +215,7 @@ function MembersSection({ spaceId, canEdit }: { spaceId: string; canEdit: boolea
       {
         spaceId,
         userId: person.userId,
-        role: person.role === 'GUEST' ? 'STAKEHOLDER' : 'DEVELOPER',
+        role: 'PROJECT_MEMBER',
       },
       { onSuccess: () => setAdding(''), onError },
     );
@@ -245,7 +244,7 @@ function MembersSection({ spaceId, canEdit }: { spaceId: string; canEdit: boolea
                   }
                 >
                   {spaceRoleKeys
-                    .filter((r) => m.workspaceRole !== 'GUEST' || r === 'STAKEHOLDER')
+                    .filter((r) => m.workspaceRole !== 'GUEST' || r === 'PROJECT_MEMBER')
                     .map((r) => (
                       <option key={r} value={r}>
                         {roleLabel('SPACE', r)}

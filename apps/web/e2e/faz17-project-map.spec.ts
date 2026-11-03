@@ -140,9 +140,9 @@ test.describe.serial('Proje Kuş Bakışı', () => {
       )
       .toBe(0);
 
-    // Dikey düzen: Epic üstte, Task altında (yatayda Epic solda).
-    await page.getByRole('button', { name: 'Dikey' }).click();
-    await expect(page.getByRole('button', { name: 'Dikey' })).toHaveAttribute(
+    // Yatay düzen (TB): Epic üstte, Task altında, kardeşler yan yana; dikeyde (LR) Epic solda.
+    await page.getByRole('button', { name: 'Yatay' }).click();
+    await expect(page.getByRole('button', { name: 'Yatay' })).toHaveAttribute(
       'aria-pressed',
       'true',
     );
@@ -158,6 +158,6 @@ test.describe.serial('Proje Kuş Bakışı', () => {
         );
       })
       .toBe(true);
-    await page.getByRole('button', { name: 'Yatay' }).click();
+    await page.getByRole('button', { name: 'Dikey' }).click();
   });
 });

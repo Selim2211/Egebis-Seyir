@@ -36,7 +36,10 @@ export function DocsPage({ spaceId, docId }: { spaceId: string; docId: string | 
   if (space.isPending || docs.isPending) return <LoadingState />;
   if (space.isError || docs.isError) return <NotFoundState />;
 
-  const canWrite = space.data.permissions.includes(S.DOC_WRITE) && !space.data.archived;
+  const open = !space.data.archived;
+  const canWrite = space.data.permissions.includes(S.DOC_EDIT) && open;
+  const canCreate = space.data.permissions.includes(S.DOC_CREATE) && open;
+  const canDelete = space.data.permissions.includes(S.DOC_DELETE) && open;
   const canComment = space.data.permissions.includes(S.COMMENT_WRITE) && !space.data.archived;
   const select = (id: string | null) =>
     void navigate({
@@ -67,7 +70,7 @@ export function DocsPage({ spaceId, docId }: { spaceId: string; docId: string | 
         <aside aria-label={t('docs.pages')} className="flex flex-col gap-2">
           <div className="flex items-center gap-1">
             <h2 className="flex-1 text-sm font-semibold">{t('docs.pages')}</h2>
-            {canWrite && (
+            {canCreate && (
               <Button
                 size="sm"
                 variant="outline"
@@ -93,7 +96,9 @@ export function DocsPage({ spaceId, docId }: { spaceId: string; docId: string | 
             <DocTree
               docs={docs.data.docs}
               selectedId={docId}
-              canWrite={canWrite}
+              canCreate={canCreate}
+              canEdit={canWrite}
+              canDelete={canDelete}
               actions={{
                 onSelect: select,
                 onAddChild: add,
@@ -128,7 +133,7 @@ export function DocsPage({ spaceId, docId }: { spaceId: string; docId: string | 
             <div className="text-muted-foreground flex flex-col items-center gap-2 py-20 text-sm">
               <FileText className="size-8" aria-hidden />
               <p>{docs.data.docs.length === 0 ? t('docs.emptyHint') : t('docs.pickHint')}</p>
-              {canWrite && docs.data.docs.length === 0 && (
+              {canCreate && docs.data.docs.length === 0 && (
                 <Button size="sm" onClick={() => add(null)}>
                   <FilePlus /> {t('docs.newPage')}
                 </Button>
@@ -158,7 +163,7 @@ export function DocsPage({ spaceId, docId }: { spaceId: string; docId: string | 
       {showTrash && (
         <TrashDialog
           spaceId={spaceId}
-          canWrite={canWrite}
+          canWrite={canDelete}
           onClose={() => setShowTrash(false)}
           onRestored={(id) => {
             setShowTrash(false);

@@ -12,6 +12,9 @@ import {
   Users,
   type LucideIcon,
   Bell,
+  Handshake,
+  HardDrive,
+  Stethoscope,
   ScrollText,
   ShieldCheck,
 } from 'lucide-react';
@@ -81,7 +84,20 @@ function SettingsLayout() {
           <SubLink to="/settings/teams" icon={Users} label={t('settings.teams')} />
         )}
         {canViewMembers && (
+          <SubLink to="/settings/outsource" icon={Handshake} label={t('settings.outsource')} />
+        )}
+        {canViewMembers && (
           <SubLink to="/settings/roles" icon={ShieldCheck} label={t('settings.roles')} />
+        )}
+        {canEditWorkspace && (
+          <SubLink to="/settings/quotas" icon={HardDrive} label={t('settings.quotas')} />
+        )}
+        {canEditWorkspace && (
+          <SubLink
+            to="/settings/diagnostics"
+            icon={Stethoscope}
+            label={t('settings.diagnostics')}
+          />
         )}
         {canViewAudit && (
           <SubLink to="/settings/audit" icon={ScrollText} label={t('settings.audit')} />

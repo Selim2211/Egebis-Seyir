@@ -5,7 +5,6 @@ import {
   SPACE_ICONS,
   SPRINT_LENGTH_WEEKS,
 } from '@scrum/shared';
-import { Lock, Users } from 'lucide-react';
 import { useId } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Field, SelectField } from '@/components/form';
@@ -134,26 +133,6 @@ export function SpaceFields({
           onChange={(e) => onChange({ description: e.target.value })}
         />
       </div>
-
-      <ChoiceGroup
-        legend={t('spaceForm.visibility')}
-        options={[
-          {
-            selected: !values.isPrivate,
-            icon: Users,
-            title: t('spaceForm.public'),
-            description: t('spaceForm.publicHelp'),
-            onSelect: () => onChange({ isPrivate: false }),
-          },
-          {
-            selected: values.isPrivate,
-            icon: Lock,
-            title: t('spaceForm.private'),
-            description: t('spaceForm.privateHelp'),
-            onSelect: () => onChange({ isPrivate: true }),
-          },
-        ]}
-      />
 
       <ChoiceGroup
         legend={t('spaceForm.mode')}

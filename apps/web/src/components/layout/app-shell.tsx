@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { StructureActionsProvider } from '@/features/spaces/structure-actions';
+import { OutsourceProvider } from '@/features/workspace/outsource-provider';
 import { RouteProgress } from './route-progress';
 import { Sidebar } from './sidebar';
 import { Topbar } from './topbar';
@@ -8,14 +9,16 @@ import { Topbar } from './topbar';
 export function AppShell({ children }: { children: ReactNode }) {
   return (
     <StructureActionsProvider>
-      <RouteProgress />
-      <div className="flex h-dvh overflow-hidden">
-        <Sidebar />
-        <div className="flex min-w-0 flex-1 flex-col">
-          <Topbar />
-          <main className="page-enter flex-1 overflow-y-auto">{children}</main>
+      <OutsourceProvider>
+        <RouteProgress />
+        <div className="flex h-dvh overflow-hidden">
+          <Sidebar />
+          <div className="flex min-w-0 flex-1 flex-col">
+            <Topbar />
+            <main className="page-enter flex-1 overflow-y-auto">{children}</main>
+          </div>
         </div>
-      </div>
+      </OutsourceProvider>
     </StructureActionsProvider>
   );
 }

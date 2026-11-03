@@ -27,7 +27,6 @@ import {
   List,
   ListOrdered,
   ListPlus,
-  Lock,
   MoreHorizontal,
   Pencil,
   Plus,
@@ -252,14 +251,6 @@ function SpaceNode({
         expanded={open}
         onToggle={() => setExpanded(space.id, !open)}
         handle={handle}
-        aside={
-          space.isPrivate ? (
-            <Lock
-              className="text-muted-foreground size-3"
-              aria-label={t('structure.privateSpace')}
-            />
-          ) : null
-        }
         quickAdd={
           canManage
             ? {

@@ -46,6 +46,7 @@ import { labelsQuery, useCreateLabel } from '../queries';
 import { Reminders } from './reminders';
 import { useSaveItem } from './use-save-item';
 import { useStatusGuard } from '../status-guard';
+import { AiEstimateButton } from '@/features/ai/ai-estimate';
 
 function Row({ label, children }: { label: string; children: ReactNode }) {
   return (
@@ -340,6 +341,9 @@ export function Properties({
         />
         {item.pointsLocked && (
           <p className="text-muted-foreground mt-1 text-xs">{t('detail.pointsFromSubtasks')}</p>
+        )}
+        {canEstimate && !item.pointsLocked && space.estimationScale === 'FIBONACCI' && (
+          <AiEstimateButton item={item} onApply={(points) => save({ points })} />
         )}
       </Row>
 

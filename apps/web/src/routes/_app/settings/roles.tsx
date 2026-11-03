@@ -369,7 +369,7 @@ function DeleteRoleDialog({
     (r) => r.scope === scope && r.id !== role.id && r.key !== 'OWNER',
   );
   const [reassign, setReassign] = useState(
-    targets.find((r) => r.key === (scope === 'SPACE' ? 'STAKEHOLDER' : 'MEMBER'))?.id ?? '',
+    targets.find((r) => r.key === (scope === 'SPACE' ? 'PROJECT_MEMBER' : 'MEMBER'))?.id ?? '',
   );
   const inUse = role.memberCount > 0;
   return (

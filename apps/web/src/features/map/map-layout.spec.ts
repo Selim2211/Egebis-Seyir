@@ -21,7 +21,7 @@ describe('autoLayout', () => {
     expect(pos.e!.y).toBe((pos.t1!.y + pos.t2!.y) / 2);
   });
 
-  it('dikey düzende seviyeler yukarıdan aşağıya, kardeşler yan yana dizilir', () => {
+  it('TB ("Yatay") düzende seviyeler yukarıdan aşağıya, kardeşler yan yana dizilir', () => {
     const pos = autoLayout(
       [
         n('e', 'EPIC', null, 'P-1'),

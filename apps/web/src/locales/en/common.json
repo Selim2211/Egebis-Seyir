@@ -102,16 +102,16 @@
     "help": "Help and guide"
   },
   "roles": {
-    "OWNER": "Owner",
-    "ADMIN": "Admin",
-    "MEMBER": "Member",
-    "GUEST": "Guest"
+    "OWNER": "Super Admin (Owner)",
+    "ADMIN": "Super Admin",
+    "MEMBER": "User",
+    "GUEST": "Outsource"
   },
   "roleHelp": {
-    "OWNER": "Manages everything; can delete the workspace.",
-    "ADMIN": "Manages members and settings.",
-    "MEMBER": "Creates projects and works in the projects they belong to.",
-    "GUEST": "Sees only shared projects and can comment.",
+    "OWNER": "Manages everything; sees every project and can delete the workspace.",
+    "ADMIN": "Sees every project; manages people, roles, doc/video permissions and settings.",
+    "MEMBER": "Sees only the projects they belong to; their project role (Project Manager / Project Member) sets what they can do.",
+    "GUEST": "External person: sees only the projects they are added to and cannot be a Project Manager; docs and videos stay closed until a Super Admin allows them.",
     "custom": "Custom roles follow the permissions set in Settings → Roles."
   },
   "auth": {
@@ -195,6 +195,9 @@
     "api": "API access",
     "integrations": "Integrations",
     "teams": "Teams",
+    "outsource": "Outsource",
+    "quotas": "Upload limits",
+    "diagnostics": "Diagnostics",
     "audit": "Audit log",
     "roles": "Roles",
     "email": "Email settings"
@@ -227,9 +230,10 @@
     "removed": "Member removed.",
     "roleChanged": "Role updated.",
     "invalidEmails": "Invalid email: {{emails}}",
-    "guestSpaces": "Projects to share",
-    "guestSpacesHint": "Guests only see the selected Projects and can comment there.",
-    "guestSpacesRequired": "Choose at least one Project for a guest invitation.",
+    "guestSpaces": "Projects",
+    "guestSpacesHint": "Outsource people only see the selected projects and work there as Project Member.",
+    "memberSpacesHint": "The person joins the selected projects as Project Member and cannot see other projects. You can add more later from project settings.",
+    "guestSpacesRequired": "Choose at least one project for an outsource person.",
     "noSpacesToShare": "Create a Project first.",
     "createTitle": "Create account",
     "createHint": "Creates the account directly, without sending any e-mail. You give the person their e-mail address and password; they can sign in and change the password in their profile.",
@@ -336,8 +340,10 @@
     "WORK_ITEM_PARENT_REQUIRED": "A sub-task must have a parent item.",
     "WORK_ITEM_PARENT_NOT_ALLOWED": "This item can't be placed under the selected parent.",
     "SPACE_KEY_TAKEN": "This key has been used before; choose another.",
-    "GUEST_STAKEHOLDER_ONLY": "Guests can only be added to a Project as Stakeholder.",
-    "GUEST_SPACES_REQUIRED": "Choose at least one Project for a guest invitation.",
+    "OUTSOURCE_NOT_MANAGER": "Outsource people can only join a project as Project Member.",
+    "HANDOVER_TARGET_REQUIRED": "Choose who takes over the open work.",
+    "MANAGER_REMOVAL_SUPER_ADMIN": "Only a Super Admin can remove a Project Manager.",
+    "GUEST_SPACES_REQUIRED": "Pick at least one project for an outsource person.",
     "CONTAINER_ARCHIVED": "You cannot add to an archived item.",
     "WORK_ITEM_PARENT_SPACE": "The parent must be in the same Project.",
     "WORK_ITEM_ESTIMATE_NOT_ALLOWED": "Hour estimates apply to Tasks and Sub-tasks only.",
@@ -412,6 +418,8 @@
     "AI_DISABLED": "AI is turned off on this installation.",
     "AI_RATE_LIMITED": "Too many requests; try again in a minute.",
     "AI_FAILED": "Could not get a valid answer from the AI service.",
+    "AI_ESTIMATE_DISABLED": "AI Story Point suggestions are turned off in Settings.",
+    "AI_ESTIMATE_TOO_SHORT": "The description needs at least {{min}} sentences for a suggestion (now {{count}}).",
     "AI_NOT_APPLICABLE": "This suggestion is not available for this item type.",
     "RECURRENCE_NEEDS_DUE_DATE": "A due date is required for recurrence.",
     "RECURRENCE_NOT_ALLOWED": "Epics cannot recur.",
@@ -439,6 +447,7 @@
     "BUG_STATUS_FORBIDDEN": "Only the assignee or someone who manages bugs can change this status.",
     "VIDEO_TYPE_UNSUPPORTED": "This video format isn't supported. Upload MP4, MOV or WebM.",
     "VIDEO_TOO_LARGE": "The video is larger than allowed.",
+    "UPLOAD_QUOTA_EXCEEDED": "Upload limit reached (file count or total size for you or your team). Ask a Super Admin to raise it.",
     "VIDEO_UPLOAD_OFFSET": "Upload got out of order; resuming where it left off.",
     "VIDEO_UPLOAD_INCOMPLETE": "The video upload isn't complete.",
     "VIDEO_INVALID": "The file isn't a valid video.",
@@ -452,10 +461,8 @@
     "TICKET_SPACE_INVALID": "The selected project is not valid (deleted, archived or the inbox)."
   },
   "spaceRoles": {
-    "PRODUCT_OWNER": "Product Owner",
-    "SCRUM_MASTER": "Scrum Master",
-    "DEVELOPER": "Developer",
-    "STAKEHOLDER": "Stakeholder"
+    "PROJECT_MANAGER": "Project Manager",
+    "PROJECT_MEMBER": "Project Member"
   },
   "estimationScale": {
     "FIBONACCI": "Fibonacci · 1, 2, 3, 5, 8, 13, 21",
@@ -580,6 +587,11 @@
     "name": "Workspace name",
     "membersCanCreateSpaces": "Members can create Projects",
     "membersCanCreateSpacesHelp": "When off, only Owners and Admins can create Projects.",
+    "aiEstimate": "AI Story Point suggestion",
+    "aiEstimateEnabled": "Suggest Story Points from the description",
+    "aiEstimateHelp": "The \"Estimate with AI\" button in task details suggests Fibonacci points from the description; points are written only when the user applies them.",
+    "aiEstimateMin": "Minimum sentences in the description",
+    "aiEstimateMinHelp": "The suggestion is unavailable until the description has this many sentences ({{min}}–{{max}}).",
     "saved": "Settings saved."
   },
   "archive": {
@@ -2216,7 +2228,13 @@
     "sprint.cancel": "Cancel sprints",
     "report.view": "View reports",
     "doc.view": "View docs",
-    "doc.write": "Create and edit docs",
+    "doc.create": "Create docs",
+    "doc.edit": "Edit docs",
+    "doc.delete": "Delete docs",
+    "video.view": "View videos",
+    "video.create": "Upload videos",
+    "video.edit": "Edit videos",
+    "video.delete": "Delete videos",
     "workItem.access.manage": "Manage who can access a work item",
     "bug.report": "Report bugs",
     "bug.assign": "Assign bugs to people"
@@ -3163,6 +3181,119 @@
       "last": "Last sent: {{when}}",
       "testSend": "Send a test to me",
       "testSent": "The digest was sent to {{to}}."
+    }
+  },
+  "handover": {
+    "intro": "When {{name}} is removed, their open work goes to the people below. History of finished work is kept.",
+    "nothing": "No open work to hand over.",
+    "openItems_one": "{{count}} open item",
+    "openItems_other": "{{count}} open items",
+    "isManager": "Project Manager",
+    "to": "Takes over in {{project}}",
+    "choose": "Choose who takes over",
+    "noCandidates": "Nobody in the project can take over",
+    "managerOf": "Project Manager of: {{projects}}. Remember to assign a new manager there.",
+    "confirm": "Hand over and remove"
+  },
+  "outsource": {
+    "title": "Outsource",
+    "description": "People outside the company. They only see the projects they are added to and cannot be Project Managers. A Super Admin decides their access to docs and videos.",
+    "empty": "There are no outsource people you can see. Create or invite one with the \"Outsource\" role in Settings → People.",
+    "content": "Docs and videos",
+    "contentFor": "Docs and videos access for {{name}}",
+    "contentSaved": "Access updated.",
+    "access": {
+      "NONE": "Closed",
+      "VIEW": "View only",
+      "FULL": "Full, per role"
+    },
+    "removeFrom": "Remove {{name}} from {{project}}",
+    "removed": "Removed from the project; open work was handed over.",
+    "addTo": "Choose a project for {{name}}",
+    "addProject": "Add to project…",
+    "add": "Add",
+    "added": "Added to the project."
+  },
+  "livefeed": {
+    "title": "Live activity",
+    "hint": "Who is doing what in your projects; refreshes every 15 seconds. Click a name to send a message.",
+    "message": "Send a message",
+    "profile": "Person analytics",
+    "workload": "Team workload"
+  },
+  "quotas": {
+    "title": "Upload limits",
+    "description": "How many docs/videos (work item and doc attachments, videos) a person or team can upload, and their total size. Empty means unlimited; a team limit applies to the team members combined.",
+    "empty": "No limits yet; everyone can upload without limits.",
+    "target": "Person / team",
+    "choose": "Choose…",
+    "people": "People",
+    "teams": "Teams",
+    "files": "Files",
+    "size": "Total size",
+    "maxFiles": "Max files",
+    "maxMb": "Max MB",
+    "filesUnit": "files",
+    "unlimited": "unlimited",
+    "save": "Save",
+    "saved": "Limit saved.",
+    "remove": "Remove the limit for {{name}}",
+    "removed": "Limit removed.",
+    "kind": { "USER": "Person", "TEAM": "Team" }
+  },
+  "aiEstimate": {
+    "button": "Estimate with AI",
+    "sentences": "Description: {{count}} / {{min}} sentences",
+    "suggested": "Suggestion: {{points}} points",
+    "confidence": {
+      "LOW": "low confidence",
+      "MEDIUM": "medium confidence",
+      "HIGH": "high confidence"
+    },
+    "apply": "Apply",
+    "dismiss": "Dismiss"
+  },
+  "diagnostics": {
+    "title": "Diagnostics",
+    "description": "Measures where slowness comes from: the network between your computer and the server, the server itself and the database. Run it on the computer that feels slow (with VPN on if you use it), then copy the report and send it to the developer. The report contains no passwords or keys.",
+    "run": "Run test",
+    "running": "Measuring… (~15 s)",
+    "copy": "Copy report",
+    "download": "Download",
+    "copied": "Report copied to clipboard.",
+    "copyFailed": "Could not copy; use \"Download\" to save it as a file.",
+    "summary": "Summary",
+    "raw": "Report (send to the developer)",
+    "files": "files",
+    "metric": {
+      "network": "Network latency (round trip)",
+      "download": "Download speed (1 MB)",
+      "protocol": "Connection · page files"
+    },
+    "verdict": {
+      "serverUnreachable": "Could not get the server report: {{error}}",
+      "networkOk": "Network latency is low ({{ms}} ms).",
+      "networkMedium": "Network latency is moderate ({{ms}} ms); VPN/remote access adds this to every request.",
+      "networkHigh": "Network latency is high ({{ms}} ms): most of the slowness comes from the network (VPN, proxy or remote link).",
+      "serverSlowPing": "The server spends {{ms}} ms even on the simplest request; it is busy or short on resources.",
+      "downloadOk": "Download speed is good ({{mbps}} Mbit/s).",
+      "downloadMedium": "Download speed is moderate ({{mbps}} Mbit/s).",
+      "downloadSlow": "Download speed is low ({{mbps}} Mbit/s): bandwidth or proxy inspection.",
+      "bigTransferStalls": "Small responses are fast but large ones stall: possible MTU (packet size) or proxy problem on the network.",
+      "http11": "Connection is HTTP/1.1 ({{files}} files): serving over HTTPS enables HTTP/2 and faster page loads.",
+      "parallelQueued": "Parallel requests wait in a queue ({{ms}} ms).",
+      "dbOk": "Database is fast ({{ms}} ms).",
+      "dbSlow": "Database responds slowly ({{ms}} ms).",
+      "dbDown": "Database is unreachable.",
+      "eventLoop": "The app server stalls at times (event loop delay {{ms}} ms).",
+      "apiSlow": "In the last hour 5% of requests took longer than {{ms}} ms.",
+      "apiErrors": "{{count}} server errors (5xx) in the last hour.",
+      "memLow": "Little free memory on the server ({{free}} / {{total}} MB).",
+      "swapUsed": "The server is using swap ({{mb}} MB): RAM may be insufficient.",
+      "cpuSteal": "CPU steal on the VM is {{pct}}%: the host CPU quota is exhausted.",
+      "cpuBusy": "Server load is high (load {{load}}, {{cpus}} cores).",
+      "diskFull": "Disk is {{pct}}% full.",
+      "mtuRisk": "Network MTU is above 1500 and MTU probing is off: large responses may stall."
     }
   }
 }

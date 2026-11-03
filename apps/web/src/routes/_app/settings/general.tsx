@@ -9,12 +9,13 @@ import { AppUrlSection } from '@/features/mail/app-url';
 import { MailTestSection } from '@/features/mail/mail-test';
 import { PageHeading } from '@/components/layout/page-heading';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { LoadingState } from '@/features/spaces/container-header';
 import { useUpdateWorkspaceSettings, workspaceSettingsQuery } from '@/features/spaces/queries';
 import { useCurrentWorkspace } from '@/features/workspace/queries';
-import type { WorkspaceSettings } from '@scrum/shared';
+import { AI_ESTIMATE_MIN_SENTENCES, type WorkspaceSettings } from '@scrum/shared';
 
 export const Route = createFileRoute('/_app/settings/general')({
   component: GeneralSettingsPage,
@@ -49,15 +50,30 @@ function SettingsForm({ initial }: { initial: WorkspaceSettings }) {
   const [membersCanCreateSpaces, setMembersCanCreateSpaces] = useState(
     initial.membersCanCreateSpaces,
   );
-  const invalid = name.trim().length === 0;
+  const [aiEnabled, setAiEnabled] = useState(initial.aiEstimateEnabled);
+  const [aiMin, setAiMin] = useState(String(initial.aiEstimateMinSentences));
+  const aiMinValue = Number(aiMin);
+  const aiMinInvalid =
+    !Number.isInteger(aiMinValue) ||
+    aiMinValue < AI_ESTIMATE_MIN_SENTENCES.min ||
+    aiMinValue > AI_ESTIMATE_MIN_SENTENCES.max;
+  const invalid = name.trim().length === 0 || aiMinInvalid;
   const dirty =
-    name.trim() !== initial.name || membersCanCreateSpaces !== initial.membersCanCreateSpaces;
+    name.trim() !== initial.name ||
+    membersCanCreateSpaces !== initial.membersCanCreateSpaces ||
+    aiEnabled !== initial.aiEstimateEnabled ||
+    aiMinValue !== initial.aiEstimateMinSentences;
 
   const submit = (e: FormEvent) => {
     e.preventDefault();
     if (invalid) return;
     update.mutate(
-      { name: name.trim(), membersCanCreateSpaces },
+      {
+        name: name.trim(),
+        membersCanCreateSpaces,
+        aiEstimateEnabled: aiEnabled,
+        aiEstimateMinSentences: aiMinValue,
+      },
       { onSuccess: () => toast.success(t('generalSettings.saved')) },
     );
   };
@@ -93,6 +109,45 @@ function SettingsForm({ initial }: { initial: WorkspaceSettings }) {
           </p>
         </div>
       </div>
+      <fieldset className="flex flex-col gap-3 border-t pt-4">
+        <legend className="mb-2 text-sm font-semibold">{t('generalSettings.aiEstimate')}</legend>
+        <div className="flex items-start gap-3">
+          <Switch
+            id="ai-estimate"
+            checked={aiEnabled}
+            onCheckedChange={setAiEnabled}
+            aria-describedby="ai-estimate-help"
+            className="mt-0.5"
+          />
+          <div>
+            <Label htmlFor="ai-estimate">{t('generalSettings.aiEstimateEnabled')}</Label>
+            <p id="ai-estimate-help" className="text-muted-foreground mt-0.5 text-xs">
+              {t('generalSettings.aiEstimateHelp')}
+            </p>
+          </div>
+        </div>
+        <div className="flex max-w-md flex-col gap-1">
+          <Label htmlFor="ai-estimate-min">{t('generalSettings.aiEstimateMin')}</Label>
+          <Input
+            id="ai-estimate-min"
+            type="number"
+            inputMode="numeric"
+            min={AI_ESTIMATE_MIN_SENTENCES.min}
+            max={AI_ESTIMATE_MIN_SENTENCES.max}
+            className="w-28"
+            disabled={!aiEnabled}
+            value={aiMin}
+            aria-invalid={aiMinInvalid || undefined}
+            onChange={(e) => setAiMin(e.target.value)}
+          />
+          <p className="text-muted-foreground text-xs">
+            {t('generalSettings.aiEstimateMinHelp', {
+              min: AI_ESTIMATE_MIN_SENTENCES.min,
+              max: AI_ESTIMATE_MIN_SENTENCES.max,
+            })}
+          </p>
+        </div>
+      </fieldset>
       {update.error && <FormError error={update.error} />}
       <div>
         <Button type="submit" disabled={!dirty || invalid || update.isPending}>

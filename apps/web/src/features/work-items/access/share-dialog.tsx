@@ -92,7 +92,7 @@ function ShareForm({
     access.own ? access.entries.map((e: ItemAccessEntry) => ({ ...e })) : [],
   );
   const [adding, setAdding] = useState('');
-  const [addRole, setAddRole] = useState('DEVELOPER');
+  const [addRole, setAddRole] = useState('PROJECT_MEMBER');
   const [error, setError] = useState<unknown>(null);
 
   const listed = new Set(entries.map((e) => e.userId ?? `t:${e.teamId}`));
