@@ -3,6 +3,7 @@ import { infiniteQueryOptions, useInfiniteQuery } from '@tanstack/react-query';
 import { Link, useNavigate } from '@tanstack/react-router';
 import { BarChart3, Loader2, MessageSquare, Radio, X } from 'lucide-react';
 import { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -52,7 +53,9 @@ export function ActivityPanel({ onClose }: { onClose: () => void }) {
     return () => window.removeEventListener('keydown', onKey);
   }, [onClose]);
 
-  return (
+  // Üst çubuk backdrop-blur kullanır; fixed öğe ona göre konumlanır ve panel çubuk yüksekliğine
+  // sıkışırdı. Bu yüzden doğrudan body'ye çizilir.
+  return createPortal(
     <aside
       aria-label={t('livefeed.title')}
       data-testid="activity-panel"
@@ -104,7 +107,8 @@ export function ActivityPanel({ onClose }: { onClose: () => void }) {
           </div>
         )}
       </div>
-    </aside>
+    </aside>,
+    document.body,
   );
 }
 
