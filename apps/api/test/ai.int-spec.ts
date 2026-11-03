@@ -78,7 +78,10 @@ describe('Yapay zekâ destekli öneriler (sahte model sunucusu)', () => {
   };
 
   it('durum: anahtar varsa etkin', async () => {
-    expect((await owner.get(api('/ai/status')).expect(200)).body).toEqual({ enabled: true });
+    expect((await owner.get(api('/ai/status')).expect(200)).body).toEqual({
+      enabled: true,
+      estimate: { enabled: true, minSentences: 5 },
+    });
   });
 
   it('özet: işin metni <item> içinde modele gider; yanıt döner', async () => {
@@ -163,9 +166,7 @@ describe('Yapay zekâ destekli öneriler (sahte model sunucusu)', () => {
     const id = await s.add({ type: 'TASK', title: 'Hikaye' });
     const elif = await inviteAndAccept(ctx, owner, ws, ELIF);
     const elifId = (await ctx.prisma.user.findUniqueOrThrow({ where: { email: ELIF.email } })).id;
-    await owner
-      .put(api(`/spaces/${s.spaceId}/members/${elifId}`), { role: 'STAKEHOLDER' })
-      .expect(204);
+    await owner.put(api(`/spaces/${s.spaceId}/members/${elifId}`), { role: 'VIEWER' }).expect(204);
     await elif.post(api(`/items/${id}/ai/summarize`), {}).expect(200);
     await elif.post(api(`/items/${id}/ai/suggest-story`), {}).expect(403);
     await owner

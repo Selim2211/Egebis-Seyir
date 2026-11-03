@@ -52,6 +52,10 @@ describe('Analiz modülü (gerçek veritabanı)', { timeout: 60_000 }, () => {
       .post(api('/spaces'), { name: 'Mobil', key: 'MOB', color: '#7C3AED' })
       .expect(201);
     spaceId = (created.body as Created).id;
+    // Atanan Projeyi görmeli (ADR-152).
+    await owner
+      .put(api(`/spaces/${spaceId}/members/${elifId}`), { role: 'PROJECT_MEMBER' })
+      .expect(204);
     const detail = (await owner.get(api(`/spaces/${spaceId}`)).expect(200)).body as SpaceDetail;
     const tree = (await owner.get(api('/hierarchy')).expect(200)).body as HierarchyResponse;
     const listId = tree.spaces.find((s) => s.id === spaceId)!.lists[0]!.id;

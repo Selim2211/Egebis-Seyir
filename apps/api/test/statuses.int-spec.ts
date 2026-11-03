@@ -92,7 +92,9 @@ describe('Durumlar: WIP limiti ve özel akış (gerçek veritabanı)', () => {
       ).body as Created;
       const elif = await inviteAndAccept(ctx, owner, ws, ELIF);
       const elifId = (await ctx.prisma.user.findUniqueOrThrow({ where: { email: ELIF.email } })).id;
-      await owner.put(api(`/spaces/${id}/members/${elifId}`), { role: 'DEVELOPER' }).expect(204);
+      await owner
+        .put(api(`/spaces/${id}/members/${elifId}`), { role: 'PROJECT_MEMBER' })
+        .expect(204);
       const first = (await detail(id)).statuses[0]!;
       await elif.patch(status(id, first.id), { wipLimit: 2 }).expect(403);
       await owner.patch(status(other.id, first.id), { wipLimit: 2 }).expect(404);

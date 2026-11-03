@@ -63,7 +63,7 @@ describe('Space / Folder / List (gerçek veritabanı)', () => {
         scrumEnabled: true,
         sprintLengthWeeks: 2,
         estimationScale: 'FIBONACCI',
-        myRole: 'PRODUCT_OWNER',
+        myRole: 'PROJECT_MANAGER',
         archived: false,
       });
       expect(space.statuses.map((s) => [s.name, s.category])).toEqual([
@@ -113,7 +113,7 @@ describe('Space / Folder / List (gerçek veritabanı)', () => {
       await elif.get(api('/settings')).expect(403);
     });
 
-    it("Guest Space'e yalnızca Stakeholder olarak eklenebilir", async () => {
+    it('dış kaynak Projeye yalnızca Proje Üyesi olarak eklenebilir (ADR-152)', async () => {
       const id = await createSpace(owner);
       await owner
         .post(api('/invitations'), { emails: [GUEST.email], role: 'GUEST', spaceIds: [id] })
@@ -127,25 +127,34 @@ describe('Space / Folder / List (gerçek veritabanı)', () => {
         .id;
 
       const res = await owner
-        .put(api(`/spaces/${id}/members/${guestId}`), { role: 'DEVELOPER' })
+        .put(api(`/spaces/${id}/members/${guestId}`), { role: 'PROJECT_MANAGER' })
         .expect(403);
-      expect(res.body).toEqual({ code: 'GUEST_STAKEHOLDER_ONLY' });
+      expect(res.body).toEqual({ code: 'OUTSOURCE_NOT_MANAGER' });
+      await owner
+        .put(api(`/spaces/${id}/members/${guestId}`), { role: 'PROJECT_MEMBER' })
+        .expect(204);
     });
   });
 
   describe('görünürlük ve izinler (ADR-039)', () => {
-    it('açık Space: üye olmayan Member görür ama yapı değiştiremez', async () => {
+    it('Proje yalnızca üyelerine görünür; açık/gizli ayrımı yok (ADR-152)', async () => {
       const id = await createSpace(owner);
-      const elif = await inviteAndAccept(ctx, owner, ws, ELIF);
+      const elif = await inviteAndAccept(ctx, owner, ws, ELIF, 'MEMBER', []);
+      const elifId = (await ctx.prisma.user.findUniqueOrThrow({ where: { email: ELIF.email } })).id;
 
+      expect((await tree(elif)).spaces).toEqual([]);
+      await elif.get(api(`/spaces/${id}`)).expect(404);
+      await elif.get(api(`/spaces/${id}/members`)).expect(404);
+
+      await owner
+        .put(api(`/spaces/${id}/members/${elifId}`), { role: 'PROJECT_MEMBER' })
+        .expect(204);
       const { spaces } = await tree(elif);
       expect(spaces.map((s) => s.id)).toEqual([id]);
-      expect(spaces[0]!.permissions).toContain('comment.write');
-      expect(spaces[0]!.permissions).not.toContain('space.lists.manage');
+      expect(spaces[0]!.permissions).toContain('space.lists.manage');
+      expect(spaces[0]!.permissions).not.toContain('space.settings');
       const space = (await elif.get(api(`/spaces/${id}`)).expect(200)).body as SpaceDetail;
-      expect(space.myRole).toBeNull();
-
-      await elif.post(api(`/spaces/${id}/lists`), { name: 'Yeni' }).expect(403);
+      expect(space.myRole).toBe('PROJECT_MEMBER');
       await elif.patch(api(`/spaces/${id}`), { name: 'Değişti' }).expect(403);
     });
 
@@ -157,19 +166,21 @@ describe('Space / Folder / List (gerçek veritabanı)', () => {
       expect((await tree(elif)).spaces).toEqual([]);
       await elif.get(api(`/spaces/${id}`)).expect(404);
 
-      await owner.put(api(`/spaces/${id}/members/${elifId}`), { role: 'DEVELOPER' }).expect(204);
+      await owner
+        .put(api(`/spaces/${id}/members/${elifId}`), { role: 'PROJECT_MEMBER' })
+        .expect(204);
       const members = (await elif.get(api(`/spaces/${id}/members`)).expect(200))
         .body as SpaceMembersResponse;
       expect(members.members.map((m) => [m.name, m.role])).toEqual([
-        ['Zeynep Kaya', 'PRODUCT_OWNER'],
-        ['Elif Demir', 'DEVELOPER'],
+        ['Zeynep Kaya', 'PROJECT_MANAGER'],
+        ['Elif Demir', 'PROJECT_MEMBER'],
       ]);
       await elif.post(api(`/spaces/${id}/lists`), { name: 'Hatalar' }).expect(201);
       // Developer Space ayarlarını değiştiremez.
       await elif.patch(api(`/spaces/${id}`), { isPrivate: false }).expect(403);
     });
 
-    it("Guest yalnızca davette paylaşılan Space'i Stakeholder olarak görür (ADR-035)", async () => {
+    it('dış kaynak yalnızca eklendiği Projeyi görür; yönetici izni ve içerik varsayılan kapalı (ADR-152)', async () => {
       const shared = await createSpace(owner);
       await createSpace(owner, { name: 'Web', key: 'WEB' });
 
@@ -181,21 +192,48 @@ describe('Space / Folder / List (gerçek veritabanı)', () => {
       const guest = await inviteGuest(shared);
       const { spaces } = await tree(guest);
       expect(spaces.map((s) => s.key)).toEqual(['MOB']);
-      expect(spaces[0]!.permissions).not.toContain('workItem.write');
-      await guest.post(api(`/spaces/${shared}/folders`), { name: 'X' }).expect(403);
+      const perms = spaces[0]!.permissions;
+      expect(perms).toContain('workItem.write');
+      expect(perms).not.toContain('space.settings');
+      expect(perms).not.toContain('sprint.plan');
+      expect(perms).not.toContain('doc.view');
+      expect(perms).not.toContain('video.view');
+      await guest.get(api(`/spaces/${shared}/docs`)).expect(403);
+
+      // Super Admin görüntüleme izni verince dokümanlar açılır, yazma kapalı kalır.
+      const guestId = (await ctx.prisma.user.findUniqueOrThrow({ where: { email: GUEST.email } }))
+        .id;
+      await owner
+        .patch(api(`/members/${guestId}/content-access`), { contentAccess: 'VIEW' })
+        .expect(204);
+      await guest.get(api(`/spaces/${shared}/docs`)).expect(200);
+      await guest.post(api(`/spaces/${shared}/docs`), { title: 'X', parentId: null }).expect(403);
+      // Dış kaynak penceresi: Super Admin kişiyi ve Projesini görür.
+      const list = (await owner.get(api('/members/outsource')).expect(200)).body as {
+        people: Array<{ userId: string; contentAccess: string; projects: Array<{ key: string }> }>;
+      };
+      expect(list.people).toEqual([
+        expect.objectContaining({
+          userId: guestId,
+          contentAccess: 'VIEW',
+          projects: [expect.objectContaining({ key: 'MOB' })],
+        }),
+      ]);
     });
 
-    it("üye Guest'e düşürülünce Space rolleri Stakeholder olur; çıkarılınca Space üyeliği silinir", async () => {
-      const id = await createSpace(owner, { isPrivate: true });
-      const elif = await inviteAndAccept(ctx, owner, ws, ELIF);
+    it('dış kaynağa düşürülen kişi her Projede Proje Üyesi olur; çıkarılınca üyelikleri silinir', async () => {
+      const id = await createSpace(owner);
+      const elif = await inviteAndAccept(ctx, owner, ws, ELIF, 'MEMBER', []);
       const elifId = (await ctx.prisma.user.findUniqueOrThrow({ where: { email: ELIF.email } })).id;
-      await owner.put(api(`/spaces/${id}/members/${elifId}`), { role: 'DEVELOPER' }).expect(204);
+      await owner
+        .put(api(`/spaces/${id}/members/${elifId}`), { role: 'PROJECT_MANAGER' })
+        .expect(204);
 
       await owner.patch(api(`/members/${elifId}`), { role: 'GUEST' }).expect(204);
       const members = (await owner.get(api(`/spaces/${id}/members`)).expect(200))
         .body as SpaceMembersResponse;
-      expect(members.members.find((m) => m.userId === elifId)?.role).toBe('STAKEHOLDER');
-      await elif.post(api(`/spaces/${id}/lists`), { name: 'X' }).expect(403);
+      expect(members.members.find((m) => m.userId === elifId)?.role).toBe('PROJECT_MEMBER');
+      await elif.patch(api(`/spaces/${id}`), { name: 'X' }).expect(403);
 
       await owner.delete(api(`/members/${elifId}`)).expect(204);
       expect(await ctx.prisma.spaceMember.count({ where: { userId: elifId } })).toBe(0);

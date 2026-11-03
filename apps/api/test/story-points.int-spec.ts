@@ -43,7 +43,7 @@ describe('Story Point, alt görev toplamı ve yüzde (ADR-107)', () => {
     const client = await inviteAndAccept(ctx, owner, ws, ELIF);
     const user = await ctx.prisma.user.findUniqueOrThrow({ where: { email: ELIF.email } });
     await owner
-      .put(api(`/spaces/${spaceId}/members/${user.id}`), { role: 'DEVELOPER' })
+      .put(api(`/spaces/${spaceId}/members/${user.id}`), { role: 'PROJECT_MEMBER' })
       .expect(204);
     return { client, id: user.id };
   };

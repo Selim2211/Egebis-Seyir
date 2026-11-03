@@ -322,10 +322,10 @@ describe('İş öğeleri (gerçek veritabanı)', () => {
         ),
       ) as Record<string, string>;
       await owner
-        .put(api(`/spaces/${s.id}/members/${ids[ELIF.email]}`), { role: 'DEVELOPER' })
+        .put(api(`/spaces/${s.id}/members/${ids[ELIF.email]}`), { role: 'PROJECT_MEMBER' })
         .expect(204);
       await owner
-        .put(api(`/spaces/${s.id}/members/${ids[MERT.email]}`), { role: 'STAKEHOLDER' })
+        .put(api(`/spaces/${s.id}/members/${ids[MERT.email]}`), { role: 'VIEWER' })
         .expect(204);
 
       const active = s.statuses.find((x) => x.category === 'ACTIVE')!;
@@ -431,7 +431,9 @@ describe('İş öğeleri (gerçek veritabanı)', () => {
       const privateSpace = await space({ name: 'Gizli', key: 'GIZ', isPrivate: true });
       const elif = await inviteAndAccept(ctx, owner, ws, ELIF);
       const elifId = (await ctx.prisma.user.findUniqueOrThrow({ where: { email: ELIF.email } })).id;
-      await owner.put(api(`/spaces/${a.id}/members/${elifId}`), { role: 'DEVELOPER' }).expect(204);
+      await owner
+        .put(api(`/spaces/${a.id}/members/${elifId}`), { role: 'PROJECT_MEMBER' })
+        .expect(204);
       await elif
         .post(api(`/items/${task.id}/move`), { listId: privateSpace.listId, afterId: null })
         .expect(404);

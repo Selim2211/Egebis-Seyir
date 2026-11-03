@@ -262,7 +262,9 @@ describe('Giden webhook’lar (gerçek veritabanı)', () => {
 
     const elif = await inviteAndAccept(ctx, owner, ws, ELIF);
     const elifId = (await ctx.prisma.user.findUniqueOrThrow({ where: { email: ELIF.email } })).id;
-    await owner.put(api(`/spaces/${s.id}/members/${elifId}`), { role: 'DEVELOPER' }).expect(204);
+    await owner
+      .put(api(`/spaces/${s.id}/members/${elifId}`), { role: 'PROJECT_MEMBER' })
+      .expect(204);
     await elif.get(api(`/spaces/${s.id}/webhooks`)).expect(403);
     const list = (await owner.get(api(`/spaces/${s.id}/webhooks`)).expect(200))
       .body as WebhooksResponse;

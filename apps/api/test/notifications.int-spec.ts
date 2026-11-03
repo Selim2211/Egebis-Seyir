@@ -72,13 +72,14 @@ describe('Bildirimler (gerçek veritabanı)', () => {
     ctx.mail.outbox.length = 0;
   });
 
-  /** Elif'i Space'e Developer olarak ekler. */
+  /** Elif'i Space'e Proje Üyesi olarak ekler. */
   const addElif = (spaceId: string) =>
-    owner.put(api(`/spaces/${spaceId}/members/${elifId}`), { role: 'DEVELOPER' }).expect(204);
+    owner.put(api(`/spaces/${spaceId}/members/${elifId}`), { role: 'PROJECT_MEMBER' }).expect(204);
 
   describe('atama (ASSIGNED)', () => {
     it('atanan kişi uygulama içi bildirim ve e-posta alır; atayan almaz', async () => {
       const s = await space();
+      await addElif(s.id);
       const it1 = await item(s.listId);
       await owner.patch(api(`/items/${it1.id}`), { assigneeIds: [elifId] }).expect(204);
 
@@ -99,6 +100,7 @@ describe('Bildirimler (gerçek veritabanı)', () => {
 
     it('oluştururken atama da bildirir; kendine atama bildirmez', async () => {
       const s = await space();
+      await addElif(s.id);
       await item(s.listId, { assigneeIds: [elifId] });
       expect((await inbox(elif)).items.map((n) => n.type)).toEqual(['ASSIGNED']);
 
@@ -108,6 +110,7 @@ describe('Bildirimler (gerçek veritabanı)', () => {
 
     it('zaten atanmış kişi tekrar bildirilmez', async () => {
       const s = await space();
+      await addElif(s.id);
       const it1 = await item(s.listId, { assigneeIds: [elifId] });
       await owner.patch(api(`/items/${it1.id}`), { assigneeIds: [elifId, ownerId] }).expect(204);
       expect((await inbox(elif)).items).toHaveLength(1);
@@ -225,6 +228,7 @@ describe('Bildirimler (gerçek veritabanı)', () => {
   describe('kutu', () => {
     it('okundu işaretlenir, tümü okundu yapılır, yalnızca okunmamış süzülür', async () => {
       const s = await space();
+      await addElif(s.id);
       for (const title of ['A', 'B', 'C']) {
         await item(s.listId, { title, assigneeIds: [elifId] });
       }
@@ -244,6 +248,7 @@ describe('Bildirimler (gerçek veritabanı)', () => {
 
     it('başkasının bildirimi okunamaz', async () => {
       const s = await space();
+      await addElif(s.id);
       await item(s.listId, { assigneeIds: [elifId] });
       const [n] = (await inbox(elif)).items;
       await owner.post(api(`/notifications/${n!.id}/read`), {}).expect(204);
@@ -252,6 +257,7 @@ describe('Bildirimler (gerçek veritabanı)', () => {
 
     it('sayfalama: 30’dan çoğunda hasMore ve before ile devam', async () => {
       const s = await space();
+      await addElif(s.id);
       const it1 = await item(s.listId);
       for (let i = 0; i < 32; i += 1) {
         await ctx.prisma.notification.create({
@@ -292,6 +298,7 @@ describe('Bildirimler (gerçek veritabanı)', () => {
 
     it('e-posta kapalıysa yalnızca uygulama içi; uygulama içi kapalıysa yalnızca e-posta', async () => {
       const s = await space();
+      await addElif(s.id);
       await elif
         .put(api('/notifications/preferences'), {
           preferences: [{ type: 'ASSIGNED', inApp: true, email: false }],

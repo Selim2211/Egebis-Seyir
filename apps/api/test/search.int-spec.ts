@@ -185,7 +185,12 @@ describe('Global arama ve Benim işlerim (gerçek veritabanı)', () => {
       const hidden = await space({ name: 'Gizli', key: 'GIZ', isPrivate: true });
       const elif = await inviteAndAccept(ctx, owner, ws, ELIF);
       const elifId = (await ctx.prisma.user.findUniqueOrThrow({ where: { email: ELIF.email } })).id;
+      // Atama için üye olmalı (ADR-152); sonra üyelik doğrudan silinir, atama kalır.
+      await owner
+        .put(api(`/spaces/${hidden.id}/members/${elifId}`), { role: 'PROJECT_MEMBER' })
+        .expect(204);
       await create(hidden.listId, { type: 'TASK', title: 'Gizli iş', assigneeIds: [elifId] });
+      await ctx.prisma.spaceMember.deleteMany({ where: { spaceId: hidden.id, userId: elifId } });
       expect(await myWork('assigned', elif)).toEqual([]);
       expect(await myWork('created')).toEqual(['GIZ-1']);
     });

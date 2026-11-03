@@ -18,7 +18,10 @@ describe('Yapay zekâ kapalıyken (anahtar yok)', () => {
 
   it('durum kapalı; özellikler 503 AI_DISABLED', async () => {
     const api = (path: string) => `/api/workspaces/${ws}${path}`;
-    expect((await owner.get(api('/ai/status')).expect(200)).body).toEqual({ enabled: false });
+    expect((await owner.get(api('/ai/status')).expect(200)).body).toEqual({
+      enabled: false,
+      estimate: { enabled: true, minSentences: 5 },
+    });
     const space = (
       await owner.post(api('/spaces'), { name: 'Mobil', key: 'MOB', color: '#7C3AED' }).expect(201)
     ).body as Created;

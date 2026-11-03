@@ -53,6 +53,10 @@ describe('Analiz: iş yükü ve kapasite (gerçek veritabanı)', { timeout: 60_0
       .post(api('/spaces'), { name: 'Kapasite', key: 'KAP', color: '#7C3AED' })
       .expect(201);
     const spaceId = (created.body as Created).id;
+    // Atanan Projeyi görmeli (ADR-152).
+    await owner
+      .put(api(`/spaces/${spaceId}/members/${elifId}`), { role: 'PROJECT_MEMBER' })
+      .expect(204);
     const tree = (await owner.get(api('/hierarchy')).expect(200)).body as HierarchyResponse;
     const listId = tree.spaces.find((s) => s.id === spaceId)!.lists[0]!.id;
     const item = async (body: Record<string, unknown>) =>

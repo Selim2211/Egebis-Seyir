@@ -376,7 +376,7 @@ describe('Sprint ve Product Backlog (gerçek veritabanı)', () => {
   });
 
   describe('yetkiler (brief §7.2)', () => {
-    it('sprint planlama SM/PO ister; sıralama yalnızca PO; Developer ikisini de yapamaz', async () => {
+    it('sprint planlama ve sıralama Proje Yöneticisinin; Proje Üyesi yapamaz (ADR-152)', async () => {
       const s = await space();
       const a = await item(s.listId, { type: 'TASK', title: 'A' });
       const b = await item(s.listId, { type: 'TASK', title: 'B' });
@@ -384,7 +384,7 @@ describe('Sprint ve Product Backlog (gerçek veritabanı)', () => {
       const elif = await inviteAndAccept(ctx, owner, ws, ELIF);
       const elifId = (await ctx.prisma.user.findUniqueOrThrow({ where: { email: ELIF.email } })).id;
 
-      // Açık Space'te üye olmayan Stakeholder: görür ama değiştiremez.
+      // Salt okuma rolü: görür ama değiştiremez.
       await elif.get(api(`/spaces/${s.id}/backlog`)).expect(200);
       await elif
         .post(api(`/spaces/${s.id}/sprints`), {
@@ -394,21 +394,18 @@ describe('Sprint ve Product Backlog (gerçek veritabanı)', () => {
         })
         .expect(403);
 
-      await owner.put(api(`/spaces/${s.id}/members/${elifId}`), { role: 'DEVELOPER' }).expect(204);
+      await owner
+        .put(api(`/spaces/${s.id}/members/${elifId}`), { role: 'PROJECT_MEMBER' })
+        .expect(204);
       await move(s.id, { itemIds: [a.id], sprintId: id }, elif).expect(403);
       await move(s.id, { itemIds: [a.id], sprintId: null, afterId: b.id }, elif).expect(403);
       await elif.patch(api(`/sprints/${id}`), { name: 'Z' }).expect(403);
 
       await owner
-        .put(api(`/spaces/${s.id}/members/${elifId}`), { role: 'SCRUM_MASTER' })
+        .put(api(`/spaces/${s.id}/members/${elifId}`), { role: 'PROJECT_MANAGER' })
         .expect(204);
       await move(s.id, { itemIds: [a.id], sprintId: id }, elif).expect(204); // sprint.plan
-      await move(s.id, { itemIds: [b.id], sprintId: null, afterId: null }, elif).expect(403); // backlog.rank yok
-
-      await owner
-        .put(api(`/spaces/${s.id}/members/${elifId}`), { role: 'PRODUCT_OWNER' })
-        .expect(204);
-      await move(s.id, { itemIds: [b.id], sprintId: null, afterId: null }, elif).expect(204);
+      await move(s.id, { itemIds: [b.id], sprintId: null, afterId: null }, elif).expect(204); // backlog.rank
     });
 
     it("özel Space'in sprint ve backlog'u üye olmayana görünmez (404)", async () => {

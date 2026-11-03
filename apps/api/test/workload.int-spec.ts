@@ -113,7 +113,9 @@ describe('Kişi bazlı iş yükü (gerçek veritabanı)', () => {
     const s = await space();
     const elif = await inviteAndAccept(ctx, owner, ws, ELIF);
     const elifId = (await ctx.prisma.user.findUniqueOrThrow({ where: { email: ELIF.email } })).id;
-    await owner.put(api(`/spaces/${s.id}/members/${elifId}`), { role: 'DEVELOPER' }).expect(204);
+    await owner
+      .put(api(`/spaces/${s.id}/members/${elifId}`), { role: 'PROJECT_MEMBER' })
+      .expect(204);
     await item(s.listId, {
       type: 'TASK',
       title: 'Ortak',

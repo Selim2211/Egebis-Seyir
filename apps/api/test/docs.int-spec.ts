@@ -315,7 +315,9 @@ describe('Doküman sayfaları (gerçek veritabanı)', () => {
       await save(id, { revision: 1, title: 'X' }, elif).expect(403);
       await elif.delete(api(`/docs/${id}`)).expect(403);
 
-      await owner.put(api(`/spaces/${s.id}/members/${elifId}`), { role: 'DEVELOPER' }).expect(204);
+      await owner
+        .put(api(`/spaces/${s.id}/members/${elifId}`), { role: 'PROJECT_MEMBER' })
+        .expect(204);
       await elif.post(api(`/spaces/${s.id}/docs`), { title: 'İzinli' }).expect(201);
     });
 

@@ -147,7 +147,9 @@ describe('Özel alanlar (gerçek veritabanı)', () => {
 
       const elif = await inviteAndAccept(ctx, owner, ws, ELIF);
       const elifId = (await ctx.prisma.user.findUniqueOrThrow({ where: { email: ELIF.email } })).id;
-      await owner.put(api(`/spaces/${s.id}/members/${elifId}`), { role: 'DEVELOPER' }).expect(204);
+      await owner
+        .put(api(`/spaces/${s.id}/members/${elifId}`), { role: 'PROJECT_MEMBER' })
+        .expect(204);
       await elif
         .post(api(`/spaces/${s.id}/custom-fields`), { name: 'Yeni', type: 'TEXT' })
         .expect(403);
@@ -261,9 +263,7 @@ describe('Özel alanlar (gerçek veritabanı)', () => {
       const itemId = await addItem(s.listId);
       const elif = await inviteAndAccept(ctx, owner, ws, ELIF);
       const elifId = (await ctx.prisma.user.findUniqueOrThrow({ where: { email: ELIF.email } })).id;
-      await owner
-        .put(api(`/spaces/${s.id}/members/${elifId}`), { role: 'STAKEHOLDER' })
-        .expect(204);
+      await owner.put(api(`/spaces/${s.id}/members/${elifId}`), { role: 'VIEWER' }).expect(204);
       await setValues(itemId, { [text]: 'x' }, elif).expect(403);
     });
 

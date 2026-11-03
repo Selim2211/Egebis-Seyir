@@ -112,7 +112,26 @@ export async function setupOwner(
     })
     .expect(201);
   const me = res.body as MeResponse;
-  return { owner, workspaceId: me.workspaces[0]!.id };
+  const workspaceId = me.workspaces[0]!.id;
+  // Salt okuma senaryoları için testlere özel Proje rolü (eski Stakeholder karşılığı, ADR-152).
+  await ctx.prisma.role.create({
+    data: {
+      workspaceId,
+      scope: 'SPACE',
+      key: 'VIEWER',
+      name: 'İzleyici',
+      isSystem: false,
+      permissions: [
+        'space.view',
+        'comment.write',
+        'report.view',
+        'doc.view',
+        'video.view',
+        'bug.report',
+      ],
+    },
+  });
+  return { owner, workspaceId };
 }
 
 /** Son gönderilen e-postadan bağlantı token'ını çıkarır. */
@@ -136,8 +155,24 @@ export async function inviteAndAccept(
   role: string = 'MEMBER',
   spaceIds?: string[],
 ): Promise<Client> {
+  // Proje verilmezse kişi o anki açık Projelere Proje Üyesi olarak katılır: ADR-152 öncesi
+  // "açık Proje herkese görünür" varsayımıyla yazılmış testler bu yolla aynı kalır.
+  const shared =
+    spaceIds ??
+    (role === 'GUEST'
+      ? undefined
+      : (
+          await ctx.prisma.space.findMany({
+            where: { workspaceId, isPrivate: false, deletedAt: null },
+            select: { id: true },
+          })
+        ).map((s) => s.id));
   await owner
-    .post(`/api/workspaces/${workspaceId}/invitations`, { emails: [person.email], role, spaceIds })
+    .post(`/api/workspaces/${workspaceId}/invitations`, {
+      emails: [person.email],
+      role,
+      spaceIds: shared,
+    })
     .expect(204);
   const token = tokenFromMail(ctx, INVITE_LINK);
   const client = await Client.create(ctx.app);
@@ -148,5 +183,16 @@ export async function inviteAndAccept(
       locale: 'tr',
     })
     .expect(200);
+  if (!spaceIds && shared && shared.length > 0) {
+    // Eski kuralda üye olmayan açık Projeyi Stakeholder izinleriyle görürdü: salt okuma rolü.
+    const viewer = await ctx.prisma.role.findFirstOrThrow({
+      where: { workspaceId, scope: 'SPACE', key: 'VIEWER' },
+    });
+    const user = await ctx.prisma.user.findUniqueOrThrow({ where: { email: person.email } });
+    await ctx.prisma.spaceMember.updateMany({
+      where: { userId: user.id, spaceId: { in: shared } },
+      data: { roleId: viewer.id },
+    });
+  }
   return client;
 }

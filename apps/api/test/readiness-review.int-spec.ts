@@ -263,7 +263,9 @@ describe('DoD/DoR ve Sprint Review (gerçek veritabanı)', () => {
 
       const elif = await inviteAndAccept(ctx, owner, ws, ELIF);
       const elifId = (await ctx.prisma.user.findUniqueOrThrow({ where: { email: ELIF.email } })).id;
-      await owner.put(api(`/spaces/${s.id}/members/${elifId}`), { role: 'DEVELOPER' }).expect(204);
+      await owner
+        .put(api(`/spaces/${s.id}/members/${elifId}`), { role: 'PROJECT_MEMBER' })
+        .expect(204);
       await elif.put(api(`/sprints/${id}/review-notes`), { notes: 'x' }).expect(403);
       expect((await review(id, elif)).notes).toBe('Demo iyi geçti.');
 

@@ -147,7 +147,9 @@ describe('Sprint retrospektifi (gerçek veritabanı)', () => {
     await add(id, 'WENT_WELL', 'x', elif).expect(403);
     await elif.put(api(`/sprints/${id}/retro/items/${mine}/vote`), {}).expect(403);
 
-    await owner.put(api(`/spaces/${s.id}/members/${elifId}`), { role: 'DEVELOPER' }).expect(204);
+    await owner
+      .put(api(`/spaces/${s.id}/members/${elifId}`), { role: 'PROJECT_MEMBER' })
+      .expect(204);
     await elif.put(api(`/sprints/${id}/retro/items/${mine}/vote`), {}).expect(204);
     expect((await retro(id, elif)).items[0]).toMatchObject({ canDelete: false, voted: true });
     await elif.delete(api(`/sprints/${id}/retro/items/${mine}`)).expect(403);

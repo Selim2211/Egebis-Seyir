@@ -253,7 +253,9 @@ describe('Şablonlar (gerçek veritabanı)', () => {
 
     const elif = await inviteAndAccept(ctx, owner, ws, ELIF);
     const elifId = (await ctx.prisma.user.findUniqueOrThrow({ where: { email: ELIF.email } })).id;
-    await owner.put(api(`/spaces/${s.id}/members/${elifId}`), { role: 'DEVELOPER' }).expect(204);
+    await owner
+      .put(api(`/spaces/${s.id}/members/${elifId}`), { role: 'PROJECT_MEMBER' })
+      .expect(204);
     await saveTemplate(s.id, { kind: 'ITEM', name: 'Elif', sourceId: item }, elif).expect(201);
     await saveTemplate(s.id, { kind: 'LIST', name: 'Liste', sourceId: s.listId }, elif).expect(403);
 

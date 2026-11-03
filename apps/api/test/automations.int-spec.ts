@@ -75,7 +75,9 @@ describe('Otomasyonlar (gerçek veritabanı)', () => {
     const elif = await inviteAndAccept(ctx, owner, ws, ELIF);
     void elif;
     const elifId = (await ctx.prisma.user.findUniqueOrThrow({ where: { email: ELIF.email } })).id;
-    await owner.put(api(`/spaces/${s.id}/members/${elifId}`), { role: 'DEVELOPER' }).expect(204);
+    await owner
+      .put(api(`/spaces/${s.id}/members/${elifId}`), { role: 'PROJECT_MEMBER' })
+      .expect(204);
 
     const created = (
       await rule(s.id, {
@@ -219,7 +221,9 @@ describe('Otomasyonlar (gerçek veritabanı)', () => {
 
     const elif = await inviteAndAccept(ctx, owner, ws, ELIF);
     const elifId = (await ctx.prisma.user.findUniqueOrThrow({ where: { email: ELIF.email } })).id;
-    await owner.put(api(`/spaces/${s.id}/members/${elifId}`), { role: 'DEVELOPER' }).expect(204);
+    await owner
+      .put(api(`/spaces/${s.id}/members/${elifId}`), { role: 'PROJECT_MEMBER' })
+      .expect(204);
     await elif
       .post(api(`/spaces/${s.id}/automations`), {
         name: 'Yetkisiz',

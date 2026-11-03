@@ -68,6 +68,10 @@ describe('Space/Sprint yedek ve geri yükleme (gerçek veritabanı)', () => {
         members: Array<{ userId: string; email: string }>;
       }
     ).members.find((m) => m.email === ELIF.email)!.userId;
+    // Atanan Projeyi görmeli (ADR-152).
+    await owner
+      .put(api(`/spaces/${mob.id}/members/${elifId}`), { role: 'PROJECT_MEMBER' })
+      .expect(204);
     const label = (
       await owner
         .post(api(`/spaces/${mob.id}/labels`), { name: 'Acil', color: '#DC2626' })

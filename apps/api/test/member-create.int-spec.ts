@@ -93,7 +93,7 @@ describe('Yönetici hesabı doğrudan oluşturur (gerçek veritabanı)', () => {
       .expect(400);
   });
 
-  it('Guest en az bir Space ile açılır ve Stakeholder olur', async () => {
+  it('dış kaynak en az bir Proje ile açılır ve Proje Üyesi olur (ADR-152)', async () => {
     const space = (
       await owner.post(api('/spaces'), { name: 'Mobil', key: 'MOB', color: '#7C3AED' }).expect(201)
     ).body as Created;
@@ -114,7 +114,7 @@ describe('Yönetici hesabı doğrudan oluşturur (gerçek veritabanı)', () => {
       where: { userId: created.userId, spaceId: space.id },
       include: { role: true },
     });
-    expect(member.role.key).toBe('STAKEHOLDER');
+    expect(member.role.key).toBe('PROJECT_MEMBER');
     await owner
       .post(api('/members'), {
         name: 'Misafir 2',

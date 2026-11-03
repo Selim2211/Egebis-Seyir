@@ -58,8 +58,14 @@ describe('Özel roller ve izin matrisi (ADR-112)', () => {
     expect(list.filter((r) => r.scope === 'WORKSPACE').map((r) => r.key)).toEqual(
       expect.arrayContaining(['OWNER', 'ADMIN', 'MEMBER', 'GUEST']),
     );
-    expect(list.filter((r) => r.scope === 'SPACE')).toHaveLength(4);
-    expect(list.every((r) => r.isSystem)).toBe(true);
+    expect(
+      list
+        .filter((r) => r.scope === 'SPACE' && r.isSystem)
+        .map((r) => r.key)
+        .sort(),
+    ).toEqual(['PROJECT_MANAGER', 'PROJECT_MEMBER']);
+    // Sistem dışı tek rol, test yardımcısının salt okuma rolüdür (helpers.setupOwner).
+    expect(list.filter((r) => !r.isSystem).map((r) => r.key)).toEqual(['VIEWER']);
     expect((await byKey('OWNER')).memberCount).toBe(1);
 
     const elif = await inviteAndAccept(ctx, owner, ws, ELIF);
@@ -125,8 +131,8 @@ describe('Özel roller ve izin matrisi (ADR-112)', () => {
 
   it('sistem rolü düzenlenir ve varsayılana döner; OWNER kilitli; ADMIN yönetimi kaybedemez', async () => {
     const s = await space();
-    const developer = await byKey('DEVELOPER');
-    const member = await memberOf(s.id, 'DEVELOPER');
+    const developer = await byKey('PROJECT_MEMBER');
+    const member = await memberOf(s.id, 'PROJECT_MEMBER');
     await member.client
       .post(api(`/lists/${s.listId}/items`), { type: 'TASK', title: 'a' })
       .expect(201);
@@ -141,7 +147,9 @@ describe('Özel roller ve izin matrisi (ADR-112)', () => {
       .expect(403);
 
     await owner.post(api(`/roles/${developer.id}/reset`)).expect(204);
-    expect((await byKey('DEVELOPER')).permissions.sort()).toEqual(developer.permissions.sort());
+    expect((await byKey('PROJECT_MEMBER')).permissions.sort()).toEqual(
+      developer.permissions.sort(),
+    );
     await member.client
       .post(api(`/lists/${s.listId}/items`), { type: 'TASK', title: 'c' })
       .expect(201);
@@ -182,7 +190,13 @@ describe('Özel roller ve izin matrisi (ADR-112)', () => {
     // Space oluşturma izni yok; Admin ayrıcalığı da yok (Space'leri görmez).
     await elif.post(api('/spaces'), { name: 'S', key: 'SSS', color: '#7C3AED' }).expect(403);
     const s = await space();
-    await elif.get(api(`/spaces/${s.id}`)).expect(200); // açık Space: Stakeholder olarak görünür
+    // Üye olmadığı Proje görünmez (ADR-152); Proje Üyesi olunca görür ama ayar değiştiremez.
+    await elif.get(api(`/spaces/${s.id}`)).expect(404);
+    const elifId = (await ctx.prisma.user.findUniqueOrThrow({ where: { email: ELIF.email } })).id;
+    await owner
+      .put(api(`/spaces/${s.id}/members/${elifId}`), { role: 'PROJECT_MEMBER' })
+      .expect(204);
+    await elif.get(api(`/spaces/${s.id}`)).expect(200);
     await elif.patch(api(`/spaces/${s.id}`), { name: 'Yeni' }).expect(403);
   });
 
@@ -200,15 +214,15 @@ describe('Özel roller ve izin matrisi (ADR-112)', () => {
     expect((await owner.delete(api(`/roles/${roleId}`)).expect(409)).body).toEqual({
       code: 'ROLE_IN_USE',
     });
-    const stakeholder = await byKey('STAKEHOLDER');
+    const stakeholder = await byKey('VIEWER');
     await owner.delete(api(`/roles/${roleId}?reassignToRoleId=${stakeholder.id}`)).expect(204);
     expect((await roles()).some((r) => r.id === roleId)).toBe(false);
     const members = (await owner.get(api(`/spaces/${s.id}/members`)).expect(200)).body as {
       members: Array<{ userId: string; role: string }>;
     };
-    expect(members.members.find((m) => m.userId === member.id)!.role).toBe('STAKEHOLDER');
+    expect(members.members.find((m) => m.userId === member.id)!.role).toBe('VIEWER');
 
-    const system = await byKey('DEVELOPER');
+    const system = await byKey('PROJECT_MEMBER');
     expect((await owner.delete(api(`/roles/${system.id}`)).expect(403)).body).toEqual({
       code: 'ROLE_LOCKED',
     });

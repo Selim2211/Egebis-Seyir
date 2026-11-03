@@ -93,7 +93,9 @@ describe('Kayıtlı görünümler (gerçek veritabanı)', () => {
     const s = await space();
     const elif = await inviteAndAccept(ctx, owner, ws, ELIF);
     const elifId = (await ctx.prisma.user.findUniqueOrThrow({ where: { email: ELIF.email } })).id;
-    await owner.put(api(`/spaces/${s.id}/members/${elifId}`), { role: 'DEVELOPER' }).expect(204);
+    await owner
+      .put(api(`/spaces/${s.id}/members/${elifId}`), { role: 'PROJECT_MEMBER' })
+      .expect(204);
 
     const personal = (await create(s.listId, { name: 'Kişisel', config: CONFIG }).expect(201))
       .body as Created;
@@ -127,7 +129,9 @@ describe('Kayıtlı görünümler (gerçek veritabanı)', () => {
     const s = await space();
     const elif = await inviteAndAccept(ctx, owner, ws, ELIF);
     const elifId = (await ctx.prisma.user.findUniqueOrThrow({ where: { email: ELIF.email } })).id;
-    await owner.put(api(`/spaces/${s.id}/members/${elifId}`), { role: 'DEVELOPER' }).expect(204);
+    await owner
+      .put(api(`/spaces/${s.id}/members/${elifId}`), { role: 'PROJECT_MEMBER' })
+      .expect(204);
     const shared = (
       await create(s.listId, { name: 'Ekip', shared: true, config: CONFIG }, elif).expect(201)
     ).body as Created;

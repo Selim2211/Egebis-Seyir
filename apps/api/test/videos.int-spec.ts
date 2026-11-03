@@ -141,8 +141,14 @@ describe('Video arşivi (gerçek veritabanı, ADR-129)', () => {
     expect((await list()).videos).toEqual([]);
   });
 
-  it('izleyici listeyi görür ama yükleyemez', async () => {
+  it('dış kaynak videoları izin verilince görür ama yükleyemez (ADR-152)', async () => {
     const viewer = await inviteAndAccept(ctx, owner, ws, VIEWER, 'GUEST', [spaceId]);
+    await viewer.get(api(`/spaces/${spaceId}/videos`)).expect(403);
+    const viewerId = (await ctx.prisma.user.findUniqueOrThrow({ where: { email: VIEWER.email } }))
+      .id;
+    await owner
+      .patch(api(`/members/${viewerId}/content-access`), { contentAccess: 'VIEW' })
+      .expect(204);
     await viewer.get(api(`/spaces/${spaceId}/videos`)).expect(200);
     await viewer
       .post(api(`/spaces/${spaceId}/videos`), { title: 'X', fileName: 'x.mp4', size: 10 })

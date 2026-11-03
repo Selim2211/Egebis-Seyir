@@ -119,7 +119,7 @@ describe('Doküman bağlantıları ve yorumları (gerçek veritabanı)', () => {
       const elifId = (await ctx.prisma.user.findUniqueOrThrow({ where: { email: ELIF.email } })).id;
       expect((await detail(d.id, elif)).links).toEqual([]);
       await owner
-        .put(api(`/spaces/${open.id}/members/${elifId}`), { role: 'DEVELOPER' })
+        .put(api(`/spaces/${open.id}/members/${elifId}`), { role: 'PROJECT_MEMBER' })
         .expect(204);
       await elif.put(api(`/docs/${d.id}/links/${secret.id}`), {}).expect(404);
     });
@@ -168,7 +168,9 @@ describe('Doküman bağlantıları ve yorumları (gerçek veritabanı)', () => {
         .body as Created;
       const elif = await inviteAndAccept(ctx, owner, ws, ELIF);
       const elifId = (await ctx.prisma.user.findUniqueOrThrow({ where: { email: ELIF.email } })).id;
-      await owner.put(api(`/spaces/${s.id}/members/${elifId}`), { role: 'DEVELOPER' }).expect(204);
+      await owner
+        .put(api(`/spaces/${s.id}/members/${elifId}`), { role: 'PROJECT_MEMBER' })
+        .expect(204);
       await elif.patch(api(`/docs/${d.id}/comments/${c.id}`), { body: text('y') }).expect(403);
       await elif.delete(api(`/docs/${d.id}/comments/${c.id}`)).expect(403);
     });

@@ -193,7 +193,9 @@ describe('Zaman takibi (gerçek veritabanı)', () => {
       await log(task.id, { day: TODAY, minutes: 10 }, elif).expect(403);
       await elif.post(api(`/items/${task.id}/timer/start`), {}).expect(403);
 
-      await owner.put(api(`/spaces/${s.id}/members/${elifId}`), { role: 'DEVELOPER' }).expect(204);
+      await owner
+        .put(api(`/spaces/${s.id}/members/${elifId}`), { role: 'PROJECT_MEMBER' })
+        .expect(204);
       await log(task.id, { day: TODAY, minutes: 10 }, elif).expect(201);
       const entries = (await time(task.id, elif)).entries;
       const others = entries.find((e) => e.user?.name === 'Zeynep Kaya')!;

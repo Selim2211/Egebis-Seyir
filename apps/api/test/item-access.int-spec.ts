@@ -99,7 +99,7 @@ describe('Öğe bazlı erişim: miras, ekleme, gizli öğe (ADR-113)', () => {
 
   it('ekleme modu: Stakeholder, Epic ve altında Developer olur; başka öğede olmaz', async () => {
     const s = await space();
-    const elif = await person(ELIF, s.id, 'STAKEHOLDER');
+    const elif = await person(ELIF, s.id, 'VIEWER');
     const epic = await item(owner, s.listId, { type: 'EPIC', title: 'Ortak Epic' });
     const task = await item(owner, s.listId, { type: 'TASK', title: 'Alt', parentId: epic.id });
     const other = await item(owner, s.listId, { type: 'TASK', title: 'Başka' });
@@ -107,7 +107,7 @@ describe('Öğe bazlı erişim: miras, ekleme, gizli öğe (ADR-113)', () => {
     await elif.client.patch(api(`/items/${epic.id}`), { title: 'x' }).expect(403);
     await share(owner, epic.id, {
       isPrivate: false,
-      entries: [{ userId: elif.id, roleKey: 'DEVELOPER' }],
+      entries: [{ userId: elif.id, roleKey: 'PROJECT_MEMBER' }],
     }).expect(204);
 
     await elif.client.patch(api(`/items/${epic.id}`), { title: 'Yeni ad' }).expect(204);
@@ -127,8 +127,8 @@ describe('Öğe bazlı erişim: miras, ekleme, gizli öğe (ADR-113)', () => {
 
   it('gizli öğe: dışarıdakine 404, listede/aramada/akışta yok; listedekiler ve Owner görür', async () => {
     const s = await space();
-    const elif = await person(ELIF, s.id, 'DEVELOPER');
-    const mehmet = await person(MEHMET, s.id, 'DEVELOPER');
+    const elif = await person(ELIF, s.id, 'PROJECT_MEMBER');
+    const mehmet = await person(MEHMET, s.id, 'PROJECT_MEMBER');
     const epic = await item(owner, s.listId, { type: 'EPIC', title: 'Gizli Epic' });
     const task = await item(owner, s.listId, {
       type: 'TASK',
@@ -144,7 +144,7 @@ describe('Öğe bazlı erişim: miras, ekleme, gizli öğe (ADR-113)', () => {
 
     await share(owner, epic.id, {
       isPrivate: true,
-      entries: [{ userId: mehmet.id, roleKey: 'DEVELOPER' }],
+      entries: [{ userId: mehmet.id, roleKey: 'PROJECT_MEMBER' }],
     }).expect(204);
 
     const endpoints = [
@@ -196,8 +196,8 @@ describe('Öğe bazlı erişim: miras, ekleme, gizli öğe (ADR-113)', () => {
 
   it('takım üyesi gizli öğeyi görür; gizliyi oluşturan kendini dışarıda bırakmaz', async () => {
     const s = await space();
-    const elif = await person(ELIF, s.id, 'DEVELOPER');
-    const mehmet = await person(MEHMET, s.id, 'SCRUM_MASTER');
+    const elif = await person(ELIF, s.id, 'PROJECT_MEMBER');
+    const mehmet = await person(MEHMET, s.id, 'PROJECT_MANAGER');
     const team = (
       await owner
         .post(api('/teams'), { name: 'Mobil Takım', color: '#2563EB', memberIds: [elif.id] })
@@ -208,7 +208,7 @@ describe('Öğe bazlı erişim: miras, ekleme, gizli öğe (ADR-113)', () => {
     const epic = await item(mehmet.client, s.listId, { type: 'EPIC', title: 'Takım Epic' });
     await share(mehmet.client, epic.id, {
       isPrivate: true,
-      entries: [{ teamId: team.id, roleKey: 'DEVELOPER' }],
+      entries: [{ teamId: team.id, roleKey: 'PROJECT_MEMBER' }],
     }).expect(204);
     await detail(elif.client, epic.id).expect(200); // takım üzerinden
     await detail(mehmet.client, epic.id).expect(200); // kendini kilitlemedi
@@ -220,31 +220,45 @@ describe('Öğe bazlı erişim: miras, ekleme, gizli öğe (ADR-113)', () => {
 
   it('yükseltme yok, yetkisiz kişi yönetemez, geçersiz kişi/rol reddedilir', async () => {
     const s = await space();
-    const elif = await person(ELIF, s.id, 'DEVELOPER');
-    const mehmet = await person(MEHMET, s.id, 'SCRUM_MASTER');
+    // Erişim yönetebilen ama yönetici olmayan özel rol: Proje Üyesi + öğe erişimi.
+    const member = await ctx.prisma.role.findFirstOrThrow({
+      where: { workspaceId: ws, scope: 'SPACE', key: 'PROJECT_MEMBER' },
+    });
+    await ctx.prisma.role.create({
+      data: {
+        workspaceId: ws,
+        scope: 'SPACE',
+        key: 'ACCESS_LEAD',
+        name: 'Erişim sorumlusu',
+        isSystem: false,
+        permissions: [...member.permissions, 'workItem.access.manage'],
+      },
+    });
+    const elif = await person(ELIF, s.id, 'PROJECT_MEMBER');
+    const mehmet = await person(MEHMET, s.id, 'ACCESS_LEAD');
     const epic = await item(owner, s.listId, { type: 'EPIC', title: 'E' });
 
-    // Developer erişim yönetemez.
+    // Proje Üyesi erişim yönetemez.
     await share(elif.client, epic.id, { isPrivate: false, entries: [] }).expect(403);
-    // Scrum Master, sahip olmadığı izinleri (Product Owner) veremez.
+    // Sahip olmadığı izinleri (Proje Yöneticisi) veremez.
     expect(
       (
         await share(mehmet.client, epic.id, {
           isPrivate: false,
-          entries: [{ userId: elif.id, roleKey: 'PRODUCT_OWNER' }],
+          entries: [{ userId: elif.id, roleKey: 'PROJECT_MANAGER' }],
         }).expect(403)
       ).body,
     ).toEqual({ code: 'ITEM_ACCESS_ESCALATION' });
     // Kendi izinleri kadarını verebilir.
     await share(mehmet.client, epic.id, {
       isPrivate: false,
-      entries: [{ userId: elif.id, roleKey: 'DEVELOPER' }],
+      entries: [{ userId: elif.id, roleKey: 'PROJECT_MEMBER' }],
     }).expect(204);
     // Workspace üyesi olmayan kişi, olmayan rol, yinelenen giriş.
     const stranger = '0190c0de-0000-7000-8000-000000000000';
     await share(owner, epic.id, {
       isPrivate: false,
-      entries: [{ userId: stranger, roleKey: 'DEVELOPER' }],
+      entries: [{ userId: stranger, roleKey: 'PROJECT_MEMBER' }],
     }).expect(403);
     await share(owner, epic.id, {
       isPrivate: false,
@@ -253,8 +267,8 @@ describe('Öğe bazlı erişim: miras, ekleme, gizli öğe (ADR-113)', () => {
     await share(owner, epic.id, {
       isPrivate: false,
       entries: [
-        { userId: elif.id, roleKey: 'DEVELOPER' },
-        { userId: elif.id, roleKey: 'STAKEHOLDER' },
+        { userId: elif.id, roleKey: 'PROJECT_MEMBER' },
+        { userId: elif.id, roleKey: 'VIEWER' },
       ],
     }).expect(403);
   });

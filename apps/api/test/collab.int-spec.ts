@@ -126,7 +126,7 @@ describe('Yorum, ek, aktivite ve profil fotoğrafı (gerçek veritabanı)', () =
       const spaceId = (await ctx.prisma.workItem.findUniqueOrThrow({ where: { id: itemId } }))
         .spaceId;
       await owner
-        .put(api(`/spaces/${spaceId}/members/${elifId}`), { role: 'DEVELOPER' })
+        .put(api(`/spaces/${spaceId}/members/${elifId}`), { role: 'PROJECT_MEMBER' })
         .expect(204);
 
       await owner
@@ -156,7 +156,9 @@ describe('Yorum, ek, aktivite ve profil fotoğrafı (gerçek veritabanı)', () =
       await inviteAndAccept(ctx, owner, ws, ELIF);
       await inviteAndAccept(ctx, owner, ws, MERT);
       await owner
-        .put(api(`/spaces/${spaceId}/members/${await userId(ELIF.email)}`), { role: 'DEVELOPER' })
+        .put(api(`/spaces/${spaceId}/members/${await userId(ELIF.email)}`), {
+          role: 'PROJECT_MEMBER',
+        })
         .expect(204);
 
       const all = (await owner.get(api(`/items/${itemId}/mention-candidates`)).expect(200))
@@ -172,7 +174,9 @@ describe('Yorum, ek, aktivite ve profil fotoğrafı (gerçek veritabanı)', () =
       const { itemId, spaceId } = await makeItem();
       const elif = await inviteAndAccept(ctx, owner, ws, ELIF);
       await owner
-        .put(api(`/spaces/${spaceId}/members/${await userId(ELIF.email)}`), { role: 'DEVELOPER' })
+        .put(api(`/spaces/${spaceId}/members/${await userId(ELIF.email)}`), {
+          role: 'PROJECT_MEMBER',
+        })
         .expect(204);
       const mine = (
         (

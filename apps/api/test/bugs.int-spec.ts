@@ -57,7 +57,7 @@ describe('Bug ekranı: açma, atama, durum ve bildirimler (ADR-117)', () => {
 
   it('Stakeholder Bug açar (sahibi olur); yöneticiye bildirim ve e-posta gider', async () => {
     const s = await space();
-    const elif = await person(ELIF, s.id, 'STAKEHOLDER');
+    const elif = await person(ELIF, s.id, 'VIEWER');
     const mailsBefore = ctx.mail.outbox.length;
     const created = (
       await elif.client
@@ -99,8 +99,8 @@ describe('Bug ekranı: açma, atama, durum ve bildirimler (ADR-117)', () => {
 
   it('yalnızca bug.assign atar; atanınca ASSIGNED ve atanan bildirim alır', async () => {
     const s = await space();
-    const elif = await person(ELIF, s.id, 'DEVELOPER');
-    const mehmet = await person(MEHMET, s.id, 'DEVELOPER');
+    const elif = await person(ELIF, s.id, 'PROJECT_MEMBER');
+    const mehmet = await person(MEHMET, s.id, 'PROJECT_MEMBER');
     const bug = (
       await elif.client.post(api(`/spaces/${s.id}/bugs`), { title: 'Çöküyor' }).expect(201)
     ).body as CreatedItem;
@@ -123,8 +123,8 @@ describe('Bug ekranı: açma, atama, durum ve bildirimler (ADR-117)', () => {
 
   it('atanan işleniyor ve çözüldü yapar; pano durumu eşlenir; sahibe bildirim gider', async () => {
     const s = await space();
-    const elif = await person(ELIF, s.id, 'STAKEHOLDER');
-    const mehmet = await person(MEHMET, s.id, 'STAKEHOLDER');
+    const elif = await person(ELIF, s.id, 'VIEWER');
+    const mehmet = await person(MEHMET, s.id, 'VIEWER');
     const bug = (
       await elif.client.post(api(`/spaces/${s.id}/bugs`), { title: 'Yavaş' }).expect(201)
     ).body as CreatedItem;

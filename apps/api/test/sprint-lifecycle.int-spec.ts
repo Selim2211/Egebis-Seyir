@@ -140,10 +140,12 @@ describe('Sprint yaşam döngüsü (gerçek veritabanı)', () => {
       const { id } = await sprint(s.id);
       const elif = await inviteAndAccept(ctx, owner, ws, ELIF);
       const elifId = (await ctx.prisma.user.findUniqueOrThrow({ where: { email: ELIF.email } })).id;
-      await owner.put(api(`/spaces/${s.id}/members/${elifId}`), { role: 'DEVELOPER' }).expect(204);
+      await owner
+        .put(api(`/spaces/${s.id}/members/${elifId}`), { role: 'PROJECT_MEMBER' })
+        .expect(204);
       await start(id, elif).expect(403);
       await owner
-        .put(api(`/spaces/${s.id}/members/${elifId}`), { role: 'SCRUM_MASTER' })
+        .put(api(`/spaces/${s.id}/members/${elifId}`), { role: 'PROJECT_MANAGER' })
         .expect(204);
       await start(id, elif).expect(204);
     });
@@ -225,16 +227,19 @@ describe('Sprint yaşam döngüsü (gerçek veritabanı)', () => {
   });
 
   describe('iptal (brief §6.1.6)', () => {
-    it("yalnızca Product Owner iptal eder; öğeler Backlog'a döner", async () => {
+    it("yalnızca Proje Yöneticisi iptal eder; öğeler Backlog'a döner", async () => {
       const { s, id, done, open } = await activeSprint();
       const elif = await inviteAndAccept(ctx, owner, ws, ELIF);
       const elifId = (await ctx.prisma.user.findUniqueOrThrow({ where: { email: ELIF.email } })).id;
       await owner
-        .put(api(`/spaces/${s.id}/members/${elifId}`), { role: 'SCRUM_MASTER' })
+        .put(api(`/spaces/${s.id}/members/${elifId}`), { role: 'PROJECT_MEMBER' })
         .expect(204);
       await elif.post(api(`/sprints/${id}/cancel`), {}).expect(403);
+      await owner
+        .put(api(`/spaces/${s.id}/members/${elifId}`), { role: 'PROJECT_MANAGER' })
+        .expect(204);
 
-      await owner.post(api(`/sprints/${id}/cancel`), {}).expect(204);
+      await elif.post(api(`/sprints/${id}/cancel`), {}).expect(204);
       const [summary] = await summaries(s.id);
       expect(summary).toMatchObject({ status: 'CANCELLED', itemCount: 0 });
       expect(summary!.cancelledAt).not.toBeNull();

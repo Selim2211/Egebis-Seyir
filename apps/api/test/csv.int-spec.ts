@@ -242,7 +242,7 @@ describe('CSV içe/dışa aktarma (gerçek veritabanı)', () => {
 
     const elif = await inviteAndAccept(ctx, owner, ws, ELIF);
     const elifId = (await ctx.prisma.user.findUniqueOrThrow({ where: { email: ELIF.email } })).id;
-    await owner.put(api(`/spaces/${s.id}/members/${elifId}`), { role: 'STAKEHOLDER' }).expect(204);
+    await owner.put(api(`/spaces/${s.id}/members/${elifId}`), { role: 'VIEWER' }).expect(204);
     await importCsv(s.listId, 'Başlık\nA', { title: 'Başlık' }, elif).expect(403);
     await elif.get(api(`/lists/${s.listId}/export`)).expect(200);
 
