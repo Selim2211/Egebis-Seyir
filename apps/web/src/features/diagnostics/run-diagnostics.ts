@@ -15,6 +15,20 @@ export interface DiagnosticsReport {
       assetFiles: number;
       assetKb: number;
       loadMs: number | null;
+      /** Sayfanın ilk açılışının aşamaları (ms): sunucu adı, bağlantı, TLS, ilk bayt, HTML, DOM. */
+      navigation: Record<string, number | string> | null;
+      /** Dosyaların nereden geldiği: tarayıcı önbelleği, 304 doğrulama ya da ağdan tam indirme. */
+      cache: { cached: number; revalidated: number; downloaded: number };
+      /** Sıkıştırılmadan gelen JS/CSS dosya sayısı. */
+      uncompressed: number;
+      slowestFiles: Array<{
+        file: string;
+        ms: number;
+        kb: number;
+        source: 'cache' | '304' | 'network';
+        compressed: boolean;
+        protocol: string;
+      }>;
     };
     browser: {
       userAgent: string;
@@ -49,15 +63,62 @@ async function timed(url: string): Promise<{ total: number; server: number; byte
   return { total: performance.now() - start, server: serverTiming(res), bytes: body.byteLength };
 }
 
+const pathOf = (url: string) => {
+  try {
+    return new URL(url).pathname;
+  } catch {
+    return url;
+  }
+};
+
+/** Uygulamanın kendi JS/CSS/font/görsel dosyaları (üretimde /assets/, geliştirmede kaynak yolları). */
+function isAsset(url: string): boolean {
+  try {
+    const u = new URL(url);
+    if (u.origin !== location.origin || u.pathname.startsWith('/api/')) return false;
+    return (
+      /\.(js|mjs|css|woff2?|svg|png|webp|ts|tsx)$/.test(u.pathname) ||
+      u.pathname.startsWith('/assets/')
+    );
+  } catch {
+    return false;
+  }
+}
+
+function fileSource(e: PerformanceResourceTiming): 'cache' | '304' | 'network' {
+  if (e.transferSize === 0 && e.decodedBodySize > 0) return 'cache';
+  // 304: yalnızca başlıklar (~300 B) gelir, gövde önbellekten okunur.
+  if (e.encodedBodySize > 0 && e.transferSize < Math.min(e.encodedBodySize, 1000)) return '304';
+  return 'network';
+}
+
+const compressed = (e: PerformanceResourceTiming) =>
+  e.decodedBodySize > 0 && e.encodedBodySize > 0 && e.encodedBodySize < e.decodedBodySize * 0.9;
+
+function navigationPhases(nav: PerformanceNavigationTiming): Record<string, number | string> {
+  const ms = (n: number) => Math.round(Math.max(n, 0));
+  return {
+    type: nav.type,
+    dnsMs: ms(nav.domainLookupEnd - nav.domainLookupStart),
+    connectMs: ms(nav.connectEnd - nav.connectStart),
+    tlsMs: nav.secureConnectionStart > 0 ? ms(nav.connectEnd - nav.secureConnectionStart) : 0,
+    ttfbMs: ms(nav.responseStart - nav.requestStart),
+    htmlMs: ms(nav.responseEnd - nav.responseStart),
+    domReadyMs: ms(nav.domContentLoadedEventEnd),
+    loadMs: ms(nav.loadEventEnd),
+    htmlKb: Math.round((nav.transferSize || 0) / 1024),
+  };
+}
+
 export async function runDiagnostics(workspaceId: string): Promise<DiagnosticsReport> {
   const base = `/api/workspaces/${workspaceId}/diagnostics`;
 
   // Sayfanın yüklenişi (oturumun başından beri).
   const nav = performance.getEntriesByType('navigation')[0] as
     PerformanceNavigationTiming | undefined;
-  const assets = performance
-    .getEntriesByType('resource')
-    .filter((e) => e.name.includes('/assets/')) as PerformanceResourceTiming[];
+  const assets = (performance.getEntriesByType('resource') as PerformanceResourceTiming[]).filter(
+    (e) => isAsset(e.name),
+  );
 
   // Gidiş-dönüş: ilk istek bağlantıyı ısıtır, sayılmaz.
   await timed(`${base}/ping`);
@@ -104,6 +165,26 @@ export async function runDiagnostics(workspaceId: string): Promise<DiagnosticsRe
       assetFiles: assets.length,
       assetKb: Math.round(assets.reduce((s, e) => s + (e.encodedBodySize || 0), 0) / 1024),
       loadMs: nav ? Math.round(nav.loadEventEnd || nav.domContentLoadedEventEnd) : null,
+      navigation: nav ? navigationPhases(nav) : null,
+      cache: {
+        cached: assets.filter((e) => fileSource(e) === 'cache').length,
+        revalidated: assets.filter((e) => fileSource(e) === '304').length,
+        downloaded: assets.filter((e) => fileSource(e) === 'network').length,
+      },
+      uncompressed: assets.filter(
+        (e) => fileSource(e) === 'network' && /\.(js|css)$/.test(pathOf(e.name)) && !compressed(e),
+      ).length,
+      slowestFiles: [...assets]
+        .sort((a, b) => b.duration - a.duration)
+        .slice(0, 10)
+        .map((e) => ({
+          file: pathOf(e.name).split('/').pop() ?? e.name,
+          ms: round(e.duration),
+          kb: round((e.encodedBodySize || 0) / 1024),
+          source: fileSource(e),
+          compressed: compressed(e),
+          protocol: e.nextHopProtocol,
+        })),
     },
     browser: {
       userAgent: navigator.userAgent,
@@ -176,7 +257,18 @@ function verdicts(server: DiagnosticsReport['server'], client: DiagnosticsReport
     out.push({ level: 'bad', key: 'bigTransferStalls' });
   }
 
-  if (client.page.protocol === 'http/1.1') {
+  const ttfb = Number(client.page.navigation?.ttfbMs ?? 0);
+  if (ttfb > 800) out.push({ level: 'warn', key: 'slowFirstByte', values: { ms: ttfb } });
+  if (client.page.uncompressed > 0) {
+    out.push({ level: 'warn', key: 'notCompressed', values: { files: client.page.uncompressed } });
+  }
+  const slowFile = client.page.slowestFiles.find(
+    (f) => f.source === 'network' && f.ms > 2000 && f.kb < 300,
+  );
+  if (slowFile) {
+    out.push({ level: 'warn', key: 'slowAsset', values: { file: slowFile.file, ms: slowFile.ms } });
+  }
+  if (client.page.protocol === 'http/1.1' && client.page.assetFiles > 20) {
     out.push({ level: 'warn', key: 'http11', values: { files: client.page.assetFiles } });
   }
   if (client.parallel.wallMs > Math.max(net, 1) * 4 + 200) {
