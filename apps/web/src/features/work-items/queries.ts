@@ -10,6 +10,7 @@ import {
   LabelsResponseSchema,
   SplitItemResponseSchema,
   MyWorkResponseSchema,
+  MySprintWorkResponseSchema,
   RemindersResponseSchema,
   type CreateReminderRequest,
   SearchResponseSchema,
@@ -307,6 +308,17 @@ export const useChecklist = () =>
   });
 
 // ---------- Görünümler, arama, benim işlerim (Faz 1.5) ----------
+
+/** Bana atananlar → Proje görünümü: son sprint'ler ve bana atanan işler (ADR-163). */
+export const mySprintWorkQuery = (workspaceId: string, spaceId: string) =>
+  queryOptions({
+    queryKey: ['workspaces', workspaceId, 'my-work', 'sprints', spaceId],
+    queryFn: () =>
+      apiRequest(
+        `${ws(workspaceId)}/my-work/sprints?spaceId=${spaceId}`,
+        MySprintWorkResponseSchema,
+      ),
+  });
 
 export const myWorkQuery = (workspaceId: string, scope: MyWorkScope, includeDone: boolean) =>
   queryOptions({

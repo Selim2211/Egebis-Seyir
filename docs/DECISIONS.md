@@ -1469,3 +1469,9 @@ Yönetici kararı: Proje menüsünde Raporlar sekmesi, Formlar (menü ve Proje a
 **Durum:** Kabul · **Tarih:** 2026-11-04 · ADR-136'yı değiştirir.
 
 Tüm Projenin haritası büyük Projelerde okunmuyordu. Harita artık yalnızca seçili sprint'i gösterir: sprint'teki işler, onların alt görevleri ve bağlam için üstlerindeki Epic'ler (Epic'in sprint dışı diğer işleri gelmez). Sprint seçici İş yükü sayfasındakiyle aynı (ADR-132): açılınca son 3 sprint, yazınca tüm sprint'lerde arama; "tüm proje" seçeneği yok. Varsayılan aktif sprint, yoksa en son sprint. Sprint yoksa harita yerine bilgi notu gösterilir. Kayıtlı kutu konumları değişmedi.
+
+## ADR-163 — Bana atananlar: Proje seçimi ve sprint grupları
+
+**Durum:** Kabul · **Tarih:** 2026-11-04 · ADR-054'ü genişletir.
+
+"Bana atananlar" sekmesinin üstünde Projeler (Scrum açık, görülebilen) çip olarak listelenir. "Tümü" eski tarih gruplu görünümdür. Bir Proje seçilince (`?space=`) Projenin son 3 sprint'i gösterilir: aktif sprint önce, sonra tamamlananlar en yeniden eskiye; 3'e yetmezse en yakın planlananlar. İptal edilenler sayılmaz. Her sprint'in altında bana atanan işler (biten de) Backlog sırasıyla listelenir; alt görev üst Task'ının sprint'inde sayılır. Uç: `GET my-work/sprints?spaceId=` (göremediği Projede 404).

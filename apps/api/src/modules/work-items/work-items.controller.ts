@@ -26,6 +26,7 @@ import {
   PutItemAccessRequestSchema,
   MY_WORK_SCOPES,
   MyWorkResponseSchema,
+  MySprintWorkResponseSchema,
   SearchResponseSchema,
   RenameChecklistRequestSchema,
   SplitItemRequestSchema,
@@ -57,6 +58,7 @@ import {
   type ItemAccess,
   type ItemSearchResponse,
   type MyWorkResponse,
+  type MySprintWorkResponse,
   type MyWorkScope,
   type SearchResponse,
   type LabelsResponse,
@@ -104,6 +106,7 @@ class SplitItemDto extends createZodDto(SplitItemRequestSchema) {}
 class SplitItemResponseDto extends createZodDto(SplitItemResponseSchema) {}
 class ItemSearchDto extends createZodDto(ItemSearchResponseSchema) {}
 class MyWorkDto extends createZodDto(MyWorkResponseSchema) {}
+class MySprintWorkDto extends createZodDto(MySprintWorkResponseSchema) {}
 class SearchDto extends createZodDto(SearchResponseSchema) {}
 class ItemAccessDto extends createZodDto(ItemAccessSchema) {}
 class BugsDto extends createZodDto(BugsResponseSchema) {}
@@ -149,6 +152,15 @@ export class WorkItemsController {
     @Query('includeDone') includeDone?: string,
   ): Promise<MyWorkResponse> {
     return this.queries.myWork(scope, includeDone === 'true');
+  }
+
+  /** Bana atananlar → Proje görünümü: son sprint'ler ve bana atanan işler (ADR-163). */
+  @Get('my-work/sprints')
+  @ZodResponse({ type: MySprintWorkDto })
+  mySprintWork(
+    @Query('spaceId', new ParseUUIDPipe()) spaceId: string,
+  ): Promise<MySprintWorkResponse> {
+    return this.queries.mySprintWork(spaceId);
   }
 
   /** Space'in Epic'leri: ilerleme ve puan özeti (brief §5.7). */

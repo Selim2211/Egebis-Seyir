@@ -872,6 +872,17 @@
       "assigned": "No open work is assigned to you.",
       "created": "You have no open work you created.",
       "watching": "You are not watching any open work."
+    },
+    "projects": "Projects",
+    "allProjects": "All",
+    "noSprints": "This Project has no sprints yet.",
+    "sprintEmpty": "Nothing assigned to you in this sprint.",
+    "sprintDone": "{{done}}/{{total}} done",
+    "sprintStatus": {
+      "PLANNED": "Planned",
+      "ACTIVE": "Active",
+      "COMPLETED": "Completed",
+      "CANCELLED": "Cancelled"
     }
   },
   "search": {

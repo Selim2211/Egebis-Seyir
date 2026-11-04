@@ -872,6 +872,17 @@
       "assigned": "Sana atanmış açık iş yok.",
       "created": "Oluşturduğun açık iş yok.",
       "watching": "İzlediğin açık iş yok."
+    },
+    "projects": "Projeler",
+    "allProjects": "Tümü",
+    "noSprints": "Bu Projede henüz sprint yok.",
+    "sprintEmpty": "Bu sprintte sana atanan iş yok.",
+    "sprintDone": "{{done}}/{{total}} bitti",
+    "sprintStatus": {
+      "PLANNED": "Planlandı",
+      "ACTIVE": "Aktif",
+      "COMPLETED": "Tamamlandı",
+      "CANCELLED": "İptal"
     }
   },
   "search": {

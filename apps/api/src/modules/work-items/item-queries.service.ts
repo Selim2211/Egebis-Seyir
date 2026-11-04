@@ -1,8 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import {
+  ERROR_CODES,
+  MY_SPRINT_WORK_SPRINTS,
   parseItemKey,
   SEARCH_LIMIT,
   SPACE_PERMISSIONS as S,
+  type MySprintWorkResponse,
   type MyWorkResponse,
   type MyWorkScope,
   type SearchResponse,
@@ -52,6 +55,62 @@ export class ItemQueriesService {
       take: MY_WORK_LIMIT,
     });
     return { items: rows.map(toRow) };
+  }
+
+  /**
+   * Bana atananlar → Proje görünümü (ADR-163): Projenin son sprint'leri (aktif ve tamamlananlar en
+   * yeniden eskiye, yetmezse en yakın planlananlar) ve her birinde bana atanan işler. Alt görev
+   * üst Task'ının sprint'inde sayılır; biten işler de gösterilir.
+   */
+  async mySprintWork(spaceId: string): Promise<MySprintWorkResponse> {
+    const userId = this.cls.get('userId')!;
+    if (!(await this.access.permissionsIn(spaceId))) {
+      throw new NotFoundException({ code: ERROR_CODES.NOT_FOUND });
+    }
+    const db = this.tenant.db;
+    const all = await db.sprint.findMany({
+      where: { spaceId, status: { not: 'CANCELLED' } },
+      select: { id: true, name: true, status: true, startDate: true, endDate: true },
+    });
+    const started = all
+      .filter((s) => s.status !== 'PLANNED')
+      .sort(
+        (a, b) =>
+          Number(b.status === 'ACTIVE') - Number(a.status === 'ACTIVE') ||
+          b.startDate.getTime() - a.startDate.getTime(),
+      );
+    const planned = all
+      .filter((s) => s.status === 'PLANNED')
+      .sort((a, b) => a.startDate.getTime() - b.startDate.getTime());
+    const sprints = [...started, ...planned].slice(0, MY_SPRINT_WORK_SPRINTS);
+    const ids = sprints.map((s) => s.id);
+    const rows =
+      ids.length === 0
+        ? []
+        : await db.workItem.findMany({
+            where: {
+              spaceId,
+              deletedAt: null,
+              archivedAt: null,
+              list: { deletedAt: null },
+              assignees: { some: { userId } },
+              OR: [{ sprintId: { in: ids } }, { parent: { sprintId: { in: ids } } }],
+            },
+            include: { ...rowInclude, parent: { select: { sprintId: true } } },
+            orderBy: [{ rank: 'asc' }, { createdAt: 'asc' }],
+            take: MY_WORK_LIMIT,
+          });
+    const day = (d: Date) => d.toISOString().slice(0, 10);
+    return {
+      sprints: sprints.map((s) => ({
+        id: s.id,
+        name: s.name,
+        status: s.status,
+        startDate: day(s.startDate),
+        endDate: day(s.endDate),
+        items: rows.filter((r) => (r.sprintId ?? r.parent?.sprintId) === s.id).map((r) => toRow(r)),
+      })),
+    };
   }
 
   /**

@@ -459,6 +459,24 @@ export type MyWorkScope = (typeof MY_WORK_SCOPES)[number];
 export const MyWorkResponseSchema = z.object({ items: z.array(WorkItemRowSchema) });
 export type MyWorkResponse = z.infer<typeof MyWorkResponseSchema>;
 
+/** Bana atananlar → Proje görünümünde gösterilen sprint sayısı (ADR-163). */
+export const MY_SPRINT_WORK_SPRINTS = 3;
+
+/** GET /api/workspaces/:wid/my-work/sprints?spaceId= — son sprint'ler ve her birinde bana atanan işler. */
+export const MySprintWorkResponseSchema = z.object({
+  sprints: z.array(
+    z.object({
+      id: z.uuid(),
+      name: z.string(),
+      status: z.enum(['PLANNED', 'ACTIVE', 'COMPLETED', 'CANCELLED']),
+      startDate: z.string(),
+      endDate: z.string(),
+      items: z.array(WorkItemRowSchema),
+    }),
+  ),
+});
+export type MySprintWorkResponse = z.infer<typeof MySprintWorkResponseSchema>;
+
 export const SEARCH_LIMIT = 20;
 
 /** GET /api/workspaces/:wid/search?q= — görülebilen Space'lerde başlık, açıklama ve kimlik araması. */

@@ -14,7 +14,8 @@ import {
 } from '@/components/work-item/work-item-visuals';
 import { ItemOpenLink } from '@/features/work-items/detail/item-nav';
 import { ItemNavContext } from '@/features/work-items/detail/item-nav-context';
-import { myWorkQuery } from '@/features/work-items/queries';
+import { hierarchyQuery } from '@/features/spaces/queries';
+import { mySprintWorkQuery, myWorkQuery } from '@/features/work-items/queries';
 import { AssigneeStack, DueCell } from '@/features/work-items/view/cells';
 import { SpaceAvatar } from '@/features/spaces/space-avatar';
 import { type DueBucket, dueBucket } from '@/features/work-items/view/view-state';
@@ -26,6 +27,8 @@ export const Route = createFileRoute('/_app/my-work')({
   validateSearch: z.object({
     scope: z.enum(MY_WORK_SCOPES).optional(),
     done: z.boolean().optional(),
+    /** Bana atananlar → seçili Proje: sprint gruplu görünüm (ADR-163). */
+    space: z.uuid().optional(),
   }),
   component: MyWorkPage,
 });
@@ -37,8 +40,12 @@ function MyWorkPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { id: workspaceId } = useCurrentWorkspace();
-  const { scope = 'assigned', done = false } = Route.useSearch();
-  const { data, isPending } = useQuery(myWorkQuery(workspaceId, scope, done));
+  const { scope = 'assigned', done = false, space } = Route.useSearch();
+  const projectView = scope === 'assigned' && !!space;
+  const { data, isPending } = useQuery({
+    ...myWorkQuery(workspaceId, scope, done),
+    enabled: !projectView,
+  });
   const today = todayDay();
 
   const groups = BUCKETS.map((bucket) => ({
@@ -94,7 +101,11 @@ function MyWorkPage() {
           </label>
         </div>
 
-        {isPending ? (
+        {scope === 'assigned' && <ProjectChips current={space ?? null} done={done} />}
+
+        {projectView ? (
+          <SprintGroups spaceId={space} />
+        ) : isPending ? (
           <p className="text-muted-foreground text-sm">{t('common.loading')}</p>
         ) : groups.length === 0 ? (
           <div className="flex flex-col items-center gap-2 py-16 text-center">
@@ -124,6 +135,125 @@ function MyWorkPage() {
       </div>
     </ItemNavContext.Provider>
   );
+}
+
+/** Bana atananlar → Proje seçimi: "Tümü" tarih gruplarını, bir Proje son sprint'lerini gösterir. */
+function ProjectChips({ current, done }: { current: string | null; done: boolean }) {
+  const { t } = useTranslation();
+  const { id: workspaceId } = useCurrentWorkspace();
+  const spaces = (useQuery(hierarchyQuery(workspaceId)).data?.spaces ?? []).filter(
+    (s) => s.scrumEnabled,
+  );
+  if (spaces.length === 0) return null;
+  const chip = (active: boolean) =>
+    cn(
+      'flex h-8 shrink-0 items-center gap-1.5 rounded-full border px-3 text-sm transition-colors',
+      active
+        ? 'border-primary bg-primary/10 text-primary font-medium'
+        : 'text-muted-foreground hover:text-foreground hover:border-primary/40',
+    );
+  return (
+    <nav
+      aria-label={t('myWork.projects')}
+      className="mb-4 flex gap-2 overflow-x-auto pb-1"
+      data-testid="mywork-projects"
+    >
+      <Link
+        to="/my-work"
+        search={{ done: done || undefined }}
+        replace
+        aria-current={current === null ? 'page' : undefined}
+        className={chip(current === null)}
+      >
+        {t('myWork.allProjects')}
+      </Link>
+      {spaces.map((s) => (
+        <Link
+          key={s.id}
+          to="/my-work"
+          search={{ space: s.id, done: done || undefined }}
+          replace
+          aria-current={current === s.id ? 'page' : undefined}
+          className={chip(current === s.id)}
+        >
+          <SpaceAvatar space={{ ...s, icon: null }} size={16} />
+          {s.name}
+        </Link>
+      ))}
+    </nav>
+  );
+}
+
+/** Seçili Projenin son sprint'leri ve her birinde bana atanan işler (ADR-163). */
+function SprintGroups({ spaceId }: { spaceId: string }) {
+  const { t } = useTranslation();
+  const { id: workspaceId } = useCurrentWorkspace();
+  const { data, isPending } = useQuery(mySprintWorkQuery(workspaceId, spaceId));
+  const today = todayDay();
+  if (isPending) return <p className="text-muted-foreground text-sm">{t('common.loading')}</p>;
+  const sprints = data?.sprints ?? [];
+  if (sprints.length === 0) {
+    return (
+      <div className="flex flex-col items-center gap-2 py-16 text-center">
+        <Inbox className="text-muted-foreground size-8" aria-hidden />
+        <p className="text-sm">{t('myWork.noSprints')}</p>
+      </div>
+    );
+  }
+  return sprints.map((sprint) => {
+    const done = sprint.items.filter((i) => i.status.category === 'DONE').length;
+    return (
+      <section
+        key={sprint.id}
+        className="mb-5"
+        aria-labelledby={`mws-${sprint.id}`}
+        data-testid="mywork-sprint"
+      >
+        <h2
+          id={`mws-${sprint.id}`}
+          className="mb-1 flex flex-wrap items-center gap-2 text-sm font-semibold"
+        >
+          <Link
+            to="/spaces/$spaceId/board"
+            params={{ spaceId }}
+            search={{ sprint: sprint.id }}
+            className="hover:underline"
+          >
+            {sprint.name}
+          </Link>
+          <span
+            className={cn(
+              'rounded px-1.5 py-0.5 text-[10px] font-medium',
+              sprint.status === 'ACTIVE'
+                ? 'bg-primary/15 text-primary'
+                : 'bg-muted text-muted-foreground',
+            )}
+          >
+            {t(`myWork.sprintStatus.${sprint.status}`)}
+          </span>
+          <span className="text-muted-foreground text-xs font-normal">
+            {sprint.startDate} – {sprint.endDate} ·{' '}
+            {t('myWork.sprintDone', { done, total: sprint.items.length })}
+          </span>
+        </h2>
+        {sprint.items.length === 0 ? (
+          <p className="text-muted-foreground bg-card rounded-lg border px-3 py-3 text-sm">
+            {t('myWork.sprintEmpty')}
+          </p>
+        ) : (
+          <ul className="bg-card divide-y rounded-lg border">
+            {sprint.items.map((item) => (
+              <Row
+                key={item.id}
+                item={item}
+                overdue={dueBucket(item, item.status.category, today) === 'overdue'}
+              />
+            ))}
+          </ul>
+        )}
+      </section>
+    );
+  });
 }
 
 function Row({ item, overdue }: { item: WorkItemRow; overdue: boolean }) {
