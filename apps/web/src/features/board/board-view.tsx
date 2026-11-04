@@ -1,10 +1,16 @@
 import { statusName } from '@/lib/default-names';
 import {
+  closestCenter,
+  type CollisionDetection,
+  defaultDropAnimationSideEffects,
   DndContext,
   type DragEndEvent,
   DragOverlay,
-  PointerSensor,
+  type DropAnimation,
+  KeyboardSensor,
+  MouseSensor,
   pointerWithin,
+  TouchSensor,
   useDraggable,
   useDroppable,
   useSensor,
@@ -29,6 +35,19 @@ import {
 
 const CELL_SEPARATOR = '|';
 const COLUMN_MIN_REM = 15;
+
+/** Bırakınca kart yeni yerine kısa ve yumuşak süzülür (ADR-166). */
+const DROP_ANIMATION: DropAnimation = {
+  duration: 180,
+  easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)',
+  sideEffects: defaultDropAnimationSideEffects({ styles: { active: { opacity: '0' } } }),
+};
+
+/** İmleç bir hücrenin içindeyse o; hücre arasındaki boşluktaysa en yakın hücre. */
+const collision: CollisionDetection = (args) => {
+  const inside = pointerWithin(args);
+  return inside.length > 0 ? inside : closestCenter(args);
+};
 
 /**
  * Kanban panosu (brief §5.8, §5.9): sütunlar = durumlar, kart sürükleyince durum değişir.
@@ -56,20 +75,49 @@ export function BoardView({
   onAddCard?: (statusId: string, title: string) => void;
 }) {
   const { t } = useTranslation();
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
-  const [activeId, setActiveId] = useState<string | null>(null);
-  const lanes = useMemo(
-    () => buildBoard(items, statuses, swimlane, epicTitles),
-    [items, statuses, swimlane, epicTitles],
+  // Fare küçük kıpırtıda sürüklemez (başlığa tıklama öğeyi açar); dokunmatikte basılı tutunca başlar.
+  const sensors = useSensors(
+    useSensor(MouseSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 6 } }),
+    useSensor(KeyboardSensor),
   );
-  const byId = useMemo(() => new Map(items.map((i) => [i.id, i])), [items]);
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const [overStatus, setOverStatus] = useState<string | null>(null);
+  // Bırakılan kart sunucu yanıtını beklemeden yeni sütunda çizilir; veri gelince (ya da hata
+  // dönüşünde geri alınınca) yerel kayıt silinir.
+  const [moved, setMoved] = useState<ReadonlyMap<string, string>>(new Map());
+  const [seenItems, setSeenItems] = useState(items);
+  if (seenItems !== items) {
+    setSeenItems(items);
+    setMoved(new Map());
+  }
+  const shown = useMemo(
+    () =>
+      moved.size === 0
+        ? items
+        : items.map((i) => {
+            const statusId = moved.get(i.id);
+            return statusId ? { ...i, statusId } : i;
+          }),
+    [items, moved],
+  );
+  const lanes = useMemo(
+    () => buildBoard(shown, statuses, swimlane, epicTitles),
+    [shown, statuses, swimlane, epicTitles],
+  );
+  const byId = useMemo(() => new Map(shown.map((i) => [i.id, i])), [shown]);
   const active = activeId ? byId.get(activeId) : undefined;
 
-  const onDragEnd = ({ active: dragged, over }: DragEndEvent) => {
+  const reset = () => {
     setActiveId(null);
+    setOverStatus(null);
+  };
+  const onDragEnd = ({ active: dragged, over }: DragEndEvent) => {
+    reset();
     const item = byId.get(String(dragged.id));
     const target = over ? String(over.id).split(CELL_SEPARATOR)[1] : undefined;
     if (item && target && target !== item.statusId) {
+      setMoved((m) => new Map(m).set(item.id, target));
       const column = statuses.find((s) => s.id === target);
       const count = columnTotals(lanes, target).count;
       // WIP limiti engellemez; aşıldıysa yalnızca uyarır (ADR-080).
@@ -87,10 +135,13 @@ export function BoardView({
   return (
     <DndContext
       sensors={sensors}
-      collisionDetection={pointerWithin}
+      collisionDetection={collision}
       onDragStart={({ active: a }) => setActiveId(String(a.id))}
+      onDragOver={({ over }) =>
+        setOverStatus(over ? (String(over.id).split(CELL_SEPARATOR)[1] ?? null) : null)
+      }
       onDragEnd={onDragEnd}
-      onDragCancel={() => setActiveId(null)}
+      onDragCancel={reset}
     >
       <div className="overflow-x-auto px-4 pb-6 sm:px-6">
         <div
@@ -135,7 +186,8 @@ export function BoardView({
               showHeader={swimlane !== 'none'}
               canMove={canMove}
               onStatus={onStatus}
-              activeId={activeId}
+              active={active ?? null}
+              overStatus={overStatus}
             />
           ))}
           {onAddCard &&
@@ -144,7 +196,7 @@ export function BoardView({
             ))}
         </div>
       </div>
-      <DragOverlay>
+      <DragOverlay dropAnimation={DROP_ANIMATION}>
         {active && <BoardCard item={active} statuses={statuses} canMove overlay />}
       </DragOverlay>
     </DndContext>
@@ -179,14 +231,16 @@ function LaneRows({
   showHeader,
   canMove,
   onStatus,
-  activeId,
+  active,
+  overStatus,
 }: {
   lane: BoardLane<WorkItemSummary>;
   statuses: readonly BoardStatus[];
   showHeader: boolean;
   canMove: (item: WorkItemSummary) => boolean;
   onStatus: (itemId: string, statusId: string) => void;
-  activeId: string | null;
+  active: WorkItemSummary | null;
+  overStatus: string | null;
 }) {
   return (
     <>
@@ -200,7 +254,8 @@ function LaneRows({
           statuses={statuses}
           canMove={canMove}
           onStatus={onStatus}
-          activeId={activeId}
+          active={active}
+          columnOver={overStatus === status.id}
         />
       ))}
     </>
@@ -244,7 +299,8 @@ function Cell({
   statuses,
   canMove,
   onStatus,
-  activeId,
+  active,
+  columnOver,
 }: {
   laneId: string;
   status: BoardStatus;
@@ -252,17 +308,22 @@ function Cell({
   statuses: readonly BoardStatus[];
   canMove: (item: WorkItemSummary) => boolean;
   onStatus: (itemId: string, statusId: string) => void;
-  activeId: string | null;
+  active: WorkItemSummary | null;
+  /** Sürüklenen kart bu sütunun (herhangi bir satırının) üstünde. */
+  columnOver: boolean;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: `${laneId}${CELL_SEPARATOR}${status.id}` });
+  // Kartın gideceği yer: başka sütundan gelen kart için hücrenin altında kesikli bir boşluk.
+  const incoming = isOver && active !== null && active.statusId !== status.id;
   return (
     <div
       ref={setNodeRef}
       data-status-id={status.id}
       className={cn(
-        'bg-muted/40 flex min-h-24 flex-col gap-2 rounded-lg p-1.5 transition-colors duration-200 dark:bg-white/[0.02]',
+        'bg-muted/40 flex min-h-24 flex-col gap-2 rounded-lg p-1.5 transition-[background-color,box-shadow] duration-150 dark:bg-white/[0.02]',
         status.category === 'DONE' && 'bg-emerald-50/50 dark:bg-emerald-500/5',
-        isOver && 'bg-primary/[0.06] ring-primary/40 ring-2 ring-inset',
+        active && columnOver && !isOver && 'bg-primary/[0.03]',
+        isOver && 'bg-primary/[0.07] ring-primary/50 ring-2 ring-inset',
       )}
     >
       {items.map((item) => (
@@ -272,9 +333,16 @@ function Cell({
           statuses={statuses}
           canMove={canMove(item)}
           onStatus={onStatus}
-          dragging={activeId === item.id}
+          dragging={active?.id === item.id}
         />
       ))}
+      {incoming && (
+        <div
+          aria-hidden
+          data-testid="board-drop-slot"
+          className="border-primary/50 bg-primary/5 animate-in fade-in zoom-in-95 h-16 rounded-lg border-2 border-dashed duration-150"
+        />
+      )}
     </div>
   );
 }
@@ -292,9 +360,14 @@ function DraggableCard({
   onStatus: (itemId: string, statusId: string) => void;
   dragging: boolean;
 }) {
-  const { setNodeRef, listeners } = useDraggable({ id: item.id, disabled: !canMove });
+  const { setNodeRef, listeners, attributes } = useDraggable({ id: item.id, disabled: !canMove });
   return (
-    <div ref={setNodeRef} {...listeners}>
+    <div
+      ref={setNodeRef}
+      {...listeners}
+      {...attributes}
+      className="touch-manipulation outline-none"
+    >
       <BoardCard
         item={item}
         statuses={statuses}

@@ -1487,3 +1487,15 @@ Yönetici kararı: efor saatle değil Story Point ile izlenir. Zaman çizelgesi 
 **Durum:** Kabul · **Tarih:** 2026-11-04
 
 Proje Yöneticisi (ve Super Admin; `space.settings`) Proje ana sayfasındaki ya da Proje ayarlarındaki üye adına tıklayınca `/spaces/:id/people/:userId` açılır: kişinin bu Projede biten puan/iş, açık puan, çözdüğü Bug sayısı; son 12 sprint'te üstlendiği ve bitirdiği puan, iş sayısı ve sprint'in atanmış puanındaki payı (çubuk); açık işleri (en çok 30) ve bu Projedeki hareketleri (aktivite akışı, sayfalı). Puan kuralları ADR-164 ile aynıdır (yaprak işler, ortak işte eşit pay; atama bugünkü haliyle). Uçlar: `GET spaces/:id/members/:userId/profile` ve `.../activity`. Proje Üyesi başkasının profilini göremez (403).
+
+## ADR-166 — Panoda sürükle-bırak akıcılığı
+
+**Durum:** Kabul · **Tarih:** 2026-11-04 · ADR-063 ve ADR-123'ü iyileştirir.
+
+Yönetici notu: sprint panosunda durumu sürükleyerek değiştirmek akıcı olsun. Tüm panolar (Sprint panosu, Kanban, liste panosu) ortak `BoardView`'u kullandığından değişiklik hepsine uygulanır.
+
+- **Anında yerleşme:** bırakılan kart sunucu yanıtını beklemeden yeni sütunda çizilir (yerel geçici kayıt). Eskiden iyimser güncelleme `await` sonrasına kaldığı için kart önce eski yerine süzülüp sonra atlıyordu. Veri yenilenince ya da hata nedeniyle geri alınınca yerel kayıt silinir.
+- **Bırakma animasyonu:** 180 ms, yumuşak eğri; kartın kalktığı yer kesikli bir boşluk olarak kalır, imlecin altındaki kopya hafif büyür ve eğilir.
+- **Hedef geri bildirimi:** üstünde durulan hücre çerçevelenir, aynı sütunun diğer satırları hafifçe renklenir; başka sütundan gelen kart için hücrenin altında kesikli "buraya düşecek" yeri görünür. İmleç hücreler arasındaki boşluktaysa en yakın hücre hedef alınır.
+- **Girdi:** fare 5 px hareketle başlar (başlığa tıklama işi açar), dokunmatikte 150 ms basılı tutunca başlar, klavye ile de sürüklenebilir.
+- **Yenileme:** bırakmadan sonra yalnızca pano yeniden yüklenir; diğer sorgular bayat işaretlenir (açıldıklarında yenilenir), böylece tüm sayfa yeniden çizilmez.

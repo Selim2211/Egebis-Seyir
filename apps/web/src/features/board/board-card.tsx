@@ -48,8 +48,10 @@ export function BoardCard({
         'bg-card card-hover rounded-lg border p-3 text-sm shadow-xs',
         priorityTint(item.priority, colored),
         canMove && !overlay && 'cursor-grab active:cursor-grabbing',
-        dragging && 'opacity-40',
-        overlay && 'ring-primary/30 scale-[1.02] rotate-2 shadow-lg ring-2',
+        // Kartın kalktığı yer kesikli bir boşluk olarak kalır (ADR-166).
+        dragging && 'border-primary/40 bg-primary/5 border-dashed shadow-none [&>*]:invisible',
+        overlay &&
+          'ring-primary/30 animate-in zoom-in-95 cursor-grabbing scale-[1.03] rotate-[1.5deg] shadow-2xl ring-2 duration-100',
       )}
     >
       <div className="flex items-center gap-1.5">
