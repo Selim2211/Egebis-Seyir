@@ -4,6 +4,7 @@ import {
   type MapNode,
   type ProjectMap,
   ProjectMapSchema,
+  type SprintSummary,
 } from '@scrum/shared';
 import {
   Background,
@@ -33,7 +34,10 @@ import { UserAvatar } from '@/components/user-avatar';
 import { WorkItemTypeIcon } from '@/components/work-item/work-item-visuals';
 import { ContainerHeader, LoadingState, NotFoundState } from '@/features/spaces/container-header';
 import { spaceQuery } from '@/features/spaces/queries';
+import { sprintsQuery } from '@/features/sprints/queries';
 import { ScrumTabs } from '@/features/sprints/scrum-tabs';
+import { latestSprint } from '@/features/time/sprint-pick';
+import { SprintPicker } from '@/features/time/sprint-picker';
 import { useCurrentWorkspace } from '@/features/workspace/queries';
 import { apiRequest, NoContent } from '@/lib/api';
 import { cn } from '@/lib/utils';
@@ -169,7 +173,6 @@ function onHandle(event: React.MouseEvent): boolean {
 
 interface Filters {
   q: string;
-  sprint: string;
   assignee: string;
   category: string;
   subtasks: boolean;
@@ -177,7 +180,6 @@ interface Filters {
 }
 const NO_FILTERS: Filters = {
   q: '',
-  sprint: '',
   assignee: '',
   category: '',
   subtasks: true,
@@ -196,7 +198,50 @@ function useDarkMode() {
   return dark;
 }
 
-function MapCanvas({ spaceId, data }: { spaceId: string; data: ProjectMap }) {
+/**
+ * Seçili sprint'in kapsamı (ADR-162): sprint'teki işler, alt görevleri ve bağlam için üstlerindeki Epic'ler.
+ */
+function sprintScope(nodes: readonly MapNode[], sprintId: string): Set<string> {
+  const byId = new Map(nodes.map((n) => [n.id, n]));
+  const scope = new Set(nodes.filter((n) => n.sprint?.id === sprintId).map((n) => n.id));
+  for (const id of [...scope]) {
+    let parent = byId.get(id)?.parentId;
+    while (parent && !scope.has(parent)) {
+      scope.add(parent);
+      parent = byId.get(parent)?.parentId;
+    }
+  }
+  let grew = true;
+  while (grew) {
+    grew = false;
+    for (const n of nodes) {
+      if (
+        n.parentId &&
+        scope.has(n.parentId) &&
+        !scope.has(n.id) &&
+        byId.get(n.parentId)?.type !== 'EPIC'
+      ) {
+        scope.add(n.id);
+        grew = true;
+      }
+    }
+  }
+  return scope;
+}
+
+function MapCanvas({
+  spaceId,
+  data,
+  sprints,
+  sprintId,
+  onSprint,
+}: {
+  spaceId: string;
+  data: ProjectMap;
+  sprints: readonly SprintSummary[];
+  sprintId: string;
+  onSprint: (sprintId: string) => void;
+}) {
   const { t } = useTranslation();
   const { id: workspaceId } = useCurrentWorkspace();
   const navigate = useNavigate();
@@ -231,33 +276,36 @@ function MapCanvas({ spaceId, data }: { spaceId: string; data: ProjectMap }) {
     [],
   );
 
+  const scope = useMemo(() => sprintScope(data.nodes, sprintId), [data.nodes, sprintId]);
   const shown = useMemo(
     () =>
       data.nodes.filter(
-        (n) => (filters.subtasks || n.type !== 'SUBTASK') && (filters.bugs || n.type !== 'BUG'),
+        (n) =>
+          scope.has(n.id) &&
+          (filters.subtasks || n.type !== 'SUBTASK') &&
+          (filters.bugs || n.type !== 'BUG'),
       ),
-    [data.nodes, filters.subtasks, filters.bugs],
+    [data.nodes, scope, filters.subtasks, filters.bugs],
   );
   const auto = useMemo(() => autoLayout(shown, direction), [shown, direction]);
+  // Sprint değişince yeni kapsam ekrana sığdırılır.
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => void flow.fitView({ duration: 300, padding: 0.15 }));
+    return () => cancelAnimationFrame(frame);
+  }, [sprintId, flow]);
 
-  const sprints = useMemo(() => {
-    const map = new Map<string, string>();
-    for (const n of data.nodes) if (n.sprint) map.set(n.sprint.id, n.sprint.name);
-    return [...map];
-  }, [data.nodes]);
   const people = useMemo(() => {
     const map = new Map<string, string>();
-    for (const n of data.nodes) for (const a of n.assignees) map.set(a.id, a.name);
+    for (const n of shown) for (const a of n.assignees) map.set(a.id, a.name);
     return [...map].sort((a, b) => a[1].localeCompare(b[1]));
-  }, [data.nodes]);
+  }, [shown]);
 
-  const active = !!(filters.q || filters.sprint || filters.assignee || filters.category);
+  const active = !!(filters.q || filters.assignee || filters.category);
   const matches = useCallback(
     (n: MapNode) => {
       const q = filters.q.trim().toLowerCase();
       return (
         (!q || n.title.toLowerCase().includes(q) || n.key.toLowerCase().includes(q)) &&
-        (!filters.sprint || n.sprint?.id === filters.sprint) &&
         (!filters.assignee || n.assignees.some((a) => a.id === filters.assignee)) &&
         (!filters.category || n.status.category === filters.category)
       );
@@ -349,19 +397,12 @@ function MapCanvas({ spaceId, data }: { spaceId: string; data: ProjectMap }) {
             className="h-8 pl-8"
           />
         </div>
-        <NativeSelect
-          value={filters.sprint}
-          onChange={(e) => set({ sprint: e.target.value })}
-          aria-label={t('projectMap.sprint')}
-          className="h-8 max-w-44"
-        >
-          <option value="">{t('projectMap.allSprints')}</option>
-          {sprints.map(([id, name]) => (
-            <option key={id} value={id}>
-              {name}
-            </option>
-          ))}
-        </NativeSelect>
+        <SprintPicker
+          sprints={sprints}
+          value={sprintId}
+          onChange={(id) => id && onSprint(id)}
+          allowWhole={false}
+        />
         <NativeSelect
           value={filters.assignee}
           onChange={(e) => set({ assignee: e.target.value })}
@@ -451,6 +492,11 @@ function MapCanvas({ spaceId, data }: { spaceId: string; data: ProjectMap }) {
         </div>
       </div>
 
+      {shown.length === 0 && (
+        <p className="text-muted-foreground bg-card rounded-lg border px-4 py-3 text-center text-sm">
+          {t('projectMap.sprintEmpty')}
+        </p>
+      )}
       <div
         className="bg-card h-[calc(100vh-15rem)] min-h-[28rem] overflow-hidden rounded-lg border"
         data-testid="project-map"
@@ -519,15 +565,22 @@ function Legend() {
   );
 }
 
-/** Proje Kuş Bakışı (ADR-136): Epic → Task → Sub-Task ağacı; yakınlaştır, kaydır, kutuları taşı. */
+/**
+ * Proje Kuş Bakışı (ADR-136): Epic → Task → Sub-Task ağacı; yakınlaştır, kaydır, kutuları taşı.
+ * Yalnızca seçilen sprint gösterilir (ADR-162); varsayılan aktif ya da en son sprint.
+ */
 export function ProjectMapPage({ spaceId }: { spaceId: string }) {
   const { t } = useTranslation();
   const { id: workspaceId } = useCurrentWorkspace();
   const space = useQuery(spaceQuery(workspaceId, spaceId));
   const map = useQuery(mapQuery(workspaceId, spaceId));
+  const sprintList = useQuery(sprintsQuery(workspaceId, spaceId));
+  const [picked, setPicked] = useState<string | null>(null);
 
-  if (space.isPending || map.isPending) return <LoadingState />;
-  if (space.isError || map.isError) return <NotFoundState />;
+  if (space.isPending || map.isPending || sprintList.isPending) return <LoadingState />;
+  if (space.isError || map.isError || sprintList.isError) return <NotFoundState />;
+  const sprints = sprintList.data.sprints;
+  const sprintId = picked ?? latestSprint(sprints)?.id ?? null;
 
   return (
     <>
@@ -540,13 +593,19 @@ export function ProjectMapPage({ spaceId }: { spaceId: string }) {
       >
         <ScrumTabs spaceId={spaceId} current="map" />
       </ContainerHeader>
-      {map.data.nodes.length === 0 ? (
+      {map.data.nodes.length === 0 || !sprintId ? (
         <p className="text-muted-foreground bg-card mx-auto mt-6 max-w-5xl rounded-lg border px-4 py-10 text-center text-sm">
-          {t('projectMap.empty')}
+          {t(sprintId ? 'projectMap.empty' : 'projectMap.noSprint')}
         </p>
       ) : (
         <ReactFlowProvider>
-          <MapCanvas spaceId={spaceId} data={map.data} />
+          <MapCanvas
+            spaceId={spaceId}
+            data={map.data}
+            sprints={sprints}
+            sprintId={sprintId}
+            onSprint={setPicked}
+          />
         </ReactFlowProvider>
       )}
     </>

@@ -55,11 +55,29 @@ test.describe.serial('Proje Kuş Bakışı', () => {
     const epic = await item('Ödeme altyapısı', 'EPIC', null);
     const task = await item('Kart ekleme', 'TASK', epic.id);
     await item('Kart doğrulama API', 'SUBTASK', task.id);
-    await item('Ödeme düşüyor', 'BUG', null);
+    const bug = await item('Ödeme düşüyor', 'BUG', null);
+    await item('Sprint dışı iş', 'TASK', null);
+    // Harita yalnızca seçili sprint'i gösterir (ADR-162): Epic bağlam olarak, alt görev Task'la gelir.
+    const sprint = await call<{ id: string }>(
+      page,
+      'POST',
+      `/workspaces/${ws}/spaces/${space.id}/sprints`,
+      {
+        name: 'Harita S1',
+        startDate: '2026-11-02',
+        endDate: '2026-11-13',
+      },
+    );
+    await call(page, 'POST', `/workspaces/${ws}/spaces/${space.id}/backlog/move`, {
+      itemIds: [task.id, bug.id],
+      sprintId: sprint.id,
+    });
 
     await page.goto(`/spaces/${space.id}/map`);
+    await expect(page.getByTestId('sprint-picker')).toHaveText('Harita S1');
     const nodes = page.getByTestId('map-node');
     await expect(nodes).toHaveCount(4);
+    await expect(nodes.filter({ hasText: 'Sprint dışı iş' })).toHaveCount(0);
     await expect(page.getByRole('link', { name: 'Proje Kuş Bakışı' })).toBeVisible();
     await expect(page.locator('.react-flow__edge')).toHaveCount(2);
     await page.waitForTimeout(800);

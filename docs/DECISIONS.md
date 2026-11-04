@@ -1463,3 +1463,9 @@ Yönetici kararı: Proje menüsünde Raporlar sekmesi, Formlar (menü ve Proje a
 - **Rol ayarı:** `spaces.roleOverrides` (JSON) Proje Yöneticisi ve Proje Üyesi için Projeye özel izin listesi tutar. Yalnızca `PROJECT_CONFIGURABLE_PERMISSIONS` (iş yazma, durum, tahmin, puan değiştirme, yorum, erişim, Bug, liste, backlog ve sprint, doküman/video yazma) Proje bazında değişir; görüntüleme ve Proje ayarları rolün kendisinden gelir. Ayar olmayan rol Workspace'teki rol matrisini kullanır. Etkin izin `projectRolePermissions` ile hesaplanır, dış kaynak sınırı (ADR-152) sonra uygulanır.
 - **Kim değiştirir:** Proje ayarı izni olan (Proje Yöneticisi, Super Admin) Proje Üyesi rolünü; Proje Yöneticisi rolünü yalnızca Super Admin. Uç: `GET/PUT spaces/:id/role-permissions` (`permissions: null` varsayılana döndürür). Değişiklik aktivite akışına yazılır.
 - **Story Point kilidi:** yeni `estimate.override` izni (varsayılan yalnızca Proje Yöneticisi; mevcut roller migration ile güncellendi). Boş puanı `estimate.write` olan herkes girer; belirlenmiş puanı değiştirmek `estimate.override` ister, yoksa 403 `POINTS_LOCKED`. Alt görevlerden hesaplanan puan bu kurala girmez. Arayüzde alan pasif olur ve not gösterilir.
+
+## ADR-162 — Proje Kuş Bakışı sprint bazında
+
+**Durum:** Kabul · **Tarih:** 2026-11-04 · ADR-136'yı değiştirir.
+
+Tüm Projenin haritası büyük Projelerde okunmuyordu. Harita artık yalnızca seçili sprint'i gösterir: sprint'teki işler, onların alt görevleri ve bağlam için üstlerindeki Epic'ler (Epic'in sprint dışı diğer işleri gelmez). Sprint seçici İş yükü sayfasındakiyle aynı (ADR-132): açılınca son 3 sprint, yazınca tüm sprint'lerde arama; "tüm proje" seçeneği yok. Varsayılan aktif sprint, yoksa en son sprint. Sprint yoksa harita yerine bilgi notu gösterilir. Kayıtlı kutu konumları değişmedi.

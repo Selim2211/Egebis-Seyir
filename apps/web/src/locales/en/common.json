@@ -2521,7 +2521,6 @@
     "title": "Project Overview",
     "search": "Search (title or key)",
     "sprint": "Filter by sprint",
-    "allSprints": "All sprints",
     "person": "Filter by person",
     "allPeople": "Everyone",
     "status": "Filter by status",
@@ -2538,7 +2537,9 @@
     "empty": "This Project has no items yet.",
     "direction": "Layout direction",
     "horizontal": "Horizontal",
-    "vertical": "Vertical"
+    "vertical": "Vertical",
+    "sprintEmpty": "This sprint has no work.",
+    "noSprint": "The bird's-eye view is shown per sprint; this Project has no sprints yet."
   },
   "tickets": {
     "title": "Ticket details",

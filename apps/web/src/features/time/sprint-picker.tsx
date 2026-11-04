@@ -8,16 +8,18 @@ import { sprintChoices } from './sprint-pick';
 
 /**
  * Aranabilir sprint seçici (ADR-132): açılınca son 3 sprint, yazınca tüm sprint'lerde ada göre arama.
- * `null` seçimi "proje geneli" demektir (sprint süzgeci yok).
+ * `null` seçimi "proje geneli" demektir (sprint süzgeci yok); `allowWhole` kapalıysa bu seçenek yoktur.
  */
 export function SprintPicker({
   sprints,
   value,
   onChange,
+  allowWhole = true,
 }: {
   sprints: readonly SprintSummary[];
   value: string | null;
   onChange: (sprintId: string | null) => void;
+  allowWhole?: boolean;
 }) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -46,7 +48,7 @@ export function SprintPicker({
           className="border-input bg-card hover:border-primary/40 flex h-9 min-w-48 items-center gap-2 rounded-md border px-3 text-left text-sm shadow-xs"
         >
           <span className="min-w-0 flex-1 truncate">
-            {current ? current.name : t('workload.wholeProject')}
+            {current ? current.name : t(allowWhole ? 'workload.wholeProject' : 'workload.sprint')}
           </span>
           <ChevronDown className="text-muted-foreground size-4 shrink-0" aria-hidden />
         </button>
@@ -94,10 +96,14 @@ export function SprintPicker({
           {choices.length === 0 && (
             <p className="text-muted-foreground px-2 py-2 text-sm">{t('workload.noSprint')}</p>
           )}
-          <div className="my-1 border-t" />
-          <Option selected={value === null} onClick={() => pick(null)}>
-            <span className="flex-1">{t('workload.wholeProject')}</span>
-          </Option>
+          {allowWhole && (
+            <>
+              <div className="my-1 border-t" />
+              <Option selected={value === null} onClick={() => pick(null)}>
+                <span className="flex-1">{t('workload.wholeProject')}</span>
+              </Option>
+            </>
+          )}
         </div>
       </PopoverContent>
     </Popover>

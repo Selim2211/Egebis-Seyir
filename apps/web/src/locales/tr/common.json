@@ -2520,7 +2520,6 @@
     "title": "Proje Kuş Bakışı",
     "search": "Ara (başlık ya da anahtar)",
     "sprint": "Sprint süz",
-    "allSprints": "Tüm sprint’ler",
     "person": "Kişi süz",
     "allPeople": "Tüm kişiler",
     "status": "Durum süz",
@@ -2537,7 +2536,9 @@
     "empty": "Bu Projede henüz iş yok.",
     "direction": "Düzen yönü",
     "horizontal": "Yatay",
-    "vertical": "Dikey"
+    "vertical": "Dikey",
+    "sprintEmpty": "Bu sprintte iş yok.",
+    "noSprint": "Kuş bakışı sprint bazında gösterilir; bu Projede henüz sprint yok."
   },
   "tickets": {
     "title": "Çağrı bilgileri",
