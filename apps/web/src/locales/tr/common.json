@@ -3335,5 +3335,21 @@
     "empty": "Bu sprintte kişiye atanmış iş yok.",
     "noSprint": "Zaman çizelgesi sprint bazında gösterilir; bu Projede henüz sprint yok.",
     "unassigned": "{{points}} puan kimseye atanmamış"
+  },
+  "memberProfile": {
+    "donePoints": "Biten puan",
+    "doneItems": "Biten iş",
+    "openPoints": "Açık puan",
+    "resolvedBugs": "Çözülen Bug",
+    "sprints": "Sprint sprint",
+    "noSprints": "Bu Projede henüz sprint yok.",
+    "load": "Üstlenilen / biten",
+    "items": "İş",
+    "share": "Sprint payı",
+    "openItems": "Açık işleri ({{count}})",
+    "noOpen": "Açık işi yok.",
+    "activity": "Bu Projedeki hareketleri",
+    "noActivity": "Bu Projede kaydı yok.",
+    "notMember": "Projeden çıkarılmış"
   }
 }

@@ -165,7 +165,19 @@ function SpacePage() {
                     size={24}
                     avatarVersion={m.avatarVersion}
                   />
-                  <span className="min-w-0 flex-1 truncate">{m.name}</span>
+                  {/* Proje Yöneticisi kişinin Projedeki profilini açar (ADR-165). */}
+                  {space.permissions.includes(S.SPACE_SETTINGS) ? (
+                    <Link
+                      to="/spaces/$spaceId/people/$userId"
+                      params={{ spaceId, userId: m.userId }}
+                      className="min-w-0 flex-1 truncate hover:underline"
+                      data-testid="member-profile-link"
+                    >
+                      {m.name}
+                    </Link>
+                  ) : (
+                    <span className="min-w-0 flex-1 truncate">{m.name}</span>
+                  )}
                   <span className="text-muted-foreground text-xs">
                     {roleLabel('SPACE', m.role)}
                   </span>

@@ -217,6 +217,18 @@ export class CollabController {
     return this.feed.forItem(itemId, before);
   }
 
+  /** Kişinin Projedeki öğe olayları; Proje Yöneticisi ve Super Admin görür (ADR-165). */
+  @Get('spaces/:spaceId/members/:userId/activity')
+  @RequireSpacePermission(S.SPACE_SETTINGS)
+  @ZodResponse({ type: ActivityDto })
+  personActivity(
+    @Uuid('spaceId') spaceId: string,
+    @Uuid('userId') userId: string,
+    @Query('before') before?: string,
+  ): Promise<ActivityResponse> {
+    return this.feed.forPersonInSpace(spaceId, userId, before);
+  }
+
   /** Ana sayfa "Son aktivite": görülebilen Space'lerdeki öğe olayları. */
   @Get('activity')
   @ZodResponse({ type: ActivityDto })

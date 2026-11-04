@@ -112,7 +112,7 @@ export function ActivityPanel({ onClose }: { onClose: () => void }) {
   );
 }
 
-function FeedRow({ event }: { event: ActivityEvent }) {
+export function FeedRow({ event }: { event: ActivityEvent }) {
   const { t } = useTranslation();
   const lines = describeEvent(event, t);
   return (

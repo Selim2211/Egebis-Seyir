@@ -68,9 +68,14 @@ export class ActivityFeedService {
   }
 
   /** Görülebilen Space'lerdeki öğe olayları (Ana sayfa "Son aktivite"). Ham SQL: ADR-053 ile aynı istisna. */
-  async recent(cursor?: string, limit = ACTIVITY_PAGE_SIZE): Promise<ActivityResponse> {
+  async recent(
+    cursor?: string,
+    limit = ACTIVITY_PAGE_SIZE,
+    scope?: { spaceId: string; actorId: string },
+  ): Promise<ActivityResponse> {
     const workspaceId = this.cls.get('workspaceId')!;
-    const spaceIds = [...(await this.access.permissionMap({ deletedAt: null })).keys()];
+    const visible = [...(await this.access.permissionMap({ deletedAt: null })).keys()];
+    const spaceIds = scope ? visible.filter((id) => id === scope.spaceId) : visible;
     if (spaceIds.length === 0) return { events: [], next: null };
     const size = Math.min(Math.max(limit, 1), ACTIVITY_PAGE_SIZE);
     const at = decodeCursor(cursor);
@@ -86,6 +91,7 @@ export class ActivityFeedService {
         AND w."spaceId" = ANY(${spaceIds}::uuid[])
         AND w."deletedAt" IS NULL
         AND (w."accessRootId" IS NULL OR w."accessRootId" <> ALL(${hidden}::uuid[]))
+        ${scope ? Prisma.sql`AND e."actorId" = ${scope.actorId}::uuid` : Prisma.empty}
         ${at ? Prisma.sql`AND (e."createdAt" < ${at.at} OR (e."createdAt" = ${at.at} AND e."id" < ${at.id}::uuid))` : Prisma.empty}
       ORDER BY e."createdAt" DESC, e."id" DESC
       LIMIT ${size + 1}
@@ -95,6 +101,11 @@ export class ActivityFeedService {
       orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
     });
     return this.present(rows, size);
+  }
+
+  /** Kişinin bir Projedeki öğe olayları (kişi proje profili, ADR-165). */
+  forPersonInSpace(spaceId: string, actorId: string, cursor?: string): Promise<ActivityResponse> {
+    return this.recent(cursor, ACTIVITY_PAGE_SIZE, { spaceId, actorId });
   }
 
   /**

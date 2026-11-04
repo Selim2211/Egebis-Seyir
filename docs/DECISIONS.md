@@ -1481,3 +1481,9 @@ Tüm Projenin haritası büyük Projelerde okunmuyordu. Harita artık yalnızca 
 **Durum:** Kabul · **Tarih:** 2026-11-04 · Faz 4.3 zaman çizelgesinin yerini alır.
 
 Yönetici kararı: efor saatle değil Story Point ile izlenir. Zaman çizelgesi sayfası sprint seçer (ADR-132 seçicisi, varsayılan aktif ya da en son sprint) ve gösterir: kişi × sprint günü biten puan (iş bittiği gün, Europe/Istanbul), kişi başına üstlenilen / biten / kalan puan ve ilerleme çubuğu, özet kutuları, kimseye atanmamış puan ve en büyük 10 iş. Yalnızca yaprak işler sayılır (alt görevi olan Task'ın puanı alt görevlerin toplamıdır); birden çok kişiye atanan işin puanı eşit paylaştırılır. Uç: `GET spaces/:id/effort?sprintId=` (`report.view`). Saat kaydı (sayaç, elle giriş) ve eski `timesheet` ucu yerinde durur.
+
+## ADR-165 — Kişinin Proje profili
+
+**Durum:** Kabul · **Tarih:** 2026-11-04
+
+Proje Yöneticisi (ve Super Admin; `space.settings`) Proje ana sayfasındaki ya da Proje ayarlarındaki üye adına tıklayınca `/spaces/:id/people/:userId` açılır: kişinin bu Projede biten puan/iş, açık puan, çözdüğü Bug sayısı; son 12 sprint'te üstlendiği ve bitirdiği puan, iş sayısı ve sprint'in atanmış puanındaki payı (çubuk); açık işleri (en çok 30) ve bu Projedeki hareketleri (aktivite akışı, sayfalı). Puan kuralları ADR-164 ile aynıdır (yaprak işler, ortak işte eşit pay; atama bugünkü haliyle). Uçlar: `GET spaces/:id/members/:userId/profile` ve `.../activity`. Proje Üyesi başkasının profilini göremez (403).

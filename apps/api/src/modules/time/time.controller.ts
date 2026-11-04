@@ -23,6 +23,7 @@ import {
   SPACE_PERMISSIONS as S,
   TimesheetSchema,
   EffortSheetSchema,
+  MemberProfileSchema,
   WorkloadSchema,
   type Created,
   type Dashboard,
@@ -31,6 +32,7 @@ import {
   type MyTimer,
   type Timesheet,
   type EffortSheet,
+  type MemberProfile,
   type Workload,
 } from '@scrum/shared';
 import { createZodDto, ZodResponse } from 'nestjs-zod';
@@ -56,6 +58,7 @@ class WorkspaceWorkloadQueryDto extends createZodDto(
 ) {}
 class TimesheetDto extends createZodDto(TimesheetSchema) {}
 class EffortSheetDto extends createZodDto(EffortSheetSchema) {}
+class MemberProfileDto extends createZodDto(MemberProfileSchema) {}
 class StoppedDto extends createZodDto(z.object({ minutes: z.int() })) {}
 class TimesheetQueryDto extends createZodDto(
   z.object({ from: DateOnlySchema.optional(), to: DateOnlySchema.optional() }),
@@ -114,6 +117,17 @@ export class TimeController {
   @ZodResponse({ type: StoppedDto, status: HttpStatus.OK })
   stop(): Promise<{ minutes: number }> {
     return this.time.stop();
+  }
+
+  /** Kişinin Projedeki profili: sprint sprint puan, açık işler; Proje Yöneticisi görür (ADR-165). */
+  @Get('spaces/:spaceId/members/:userId/profile')
+  @RequireSpacePermission(S.SPACE_SETTINGS)
+  @ZodResponse({ type: MemberProfileDto })
+  memberProfile(
+    @Uuid('spaceId') spaceId: string,
+    @Uuid('userId') userId: string,
+  ): Promise<MemberProfile> {
+    return this.effortSheets.profile(spaceId, userId);
   }
 
   /** Story Point tabanlı zaman çizelgesi (ADR-164). */

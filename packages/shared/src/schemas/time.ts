@@ -92,6 +92,51 @@ export const EffortSheetSchema = z.object({
 });
 export type EffortSheet = z.infer<typeof EffortSheetSchema>;
 
+/** GET /api/workspaces/:wid/spaces/:spaceId/members/:userId/profile — kişinin Projedeki özeti (ADR-165). */
+export const MemberProfileSchema = z.object({
+  user: z.object({
+    id: z.uuid(),
+    name: z.string(),
+    title: z.string().nullable(),
+    avatarVersion: z.string().nullable(),
+  }),
+  /** Proje rolü; Projeden çıkarılmışsa null. */
+  role: z.string().nullable(),
+  totals: z.object({
+    doneItems: z.int(),
+    donePoints: z.number(),
+    openItems: z.int(),
+    openPoints: z.number(),
+    resolvedBugs: z.int(),
+  }),
+  sprints: z.array(
+    z.object({
+      id: z.uuid(),
+      name: z.string(),
+      status: z.enum(['PLANNED', 'ACTIVE', 'COMPLETED', 'CANCELLED']),
+      startDate: DateOnlySchema,
+      endDate: DateOnlySchema,
+      committed: z.number(),
+      done: z.number(),
+      items: z.int(),
+      doneItems: z.int(),
+      /** Sprint'teki tüm atanmış puan içindeki payı (0–1). */
+      share: z.number(),
+    }),
+  ),
+  openItems: z.array(
+    z.object({
+      key: z.string(),
+      type: z.enum(['EPIC', 'TASK', 'SUBTASK', 'BUG']),
+      title: z.string(),
+      points: z.number().nullable(),
+      status: z.object({ name: z.string(), color: z.string(), category: z.string() }),
+      sprint: z.string().nullable(),
+    }),
+  ),
+});
+export type MemberProfile = z.infer<typeof MemberProfileSchema>;
+
 /** GET /api/workspaces/:wid/spaces/:spaceId/timesheet?from=&to= */
 export const TimesheetSchema = z.object({
   from: DateOnlySchema,

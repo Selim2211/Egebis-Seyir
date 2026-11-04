@@ -3336,5 +3336,21 @@
     "empty": "No work assigned to people in this sprint.",
     "noSprint": "The timesheet is shown per sprint; this Project has no sprints yet.",
     "unassigned": "{{points}} points are unassigned"
+  },
+  "memberProfile": {
+    "donePoints": "Points done",
+    "doneItems": "Items done",
+    "openPoints": "Open points",
+    "resolvedBugs": "Bugs resolved",
+    "sprints": "Sprint by sprint",
+    "noSprints": "This Project has no sprints yet.",
+    "load": "Committed / done",
+    "items": "Items",
+    "share": "Sprint share",
+    "openItems": "Open items ({{count}})",
+    "noOpen": "No open items.",
+    "activity": "Activity in this Project",
+    "noActivity": "No activity in this Project.",
+    "notMember": "Removed from Project"
   }
 }

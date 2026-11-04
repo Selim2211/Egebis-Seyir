@@ -228,7 +228,17 @@ function MembersSection({ spaceId, canEdit }: { spaceId: string; canEdit: boolea
           <li key={m.userId} className="flex items-center gap-2.5 py-2">
             <UserAvatar id={m.userId} name={m.name} size={28} avatarVersion={m.avatarVersion} />
             <span className="min-w-0 flex-1">
-              <span className="block truncate text-sm font-medium">{m.name}</span>
+              {canEdit ? (
+                <Link
+                  to="/spaces/$spaceId/people/$userId"
+                  params={{ spaceId, userId: m.userId }}
+                  className="block truncate text-sm font-medium hover:underline"
+                >
+                  {m.name}
+                </Link>
+              ) : (
+                <span className="block truncate text-sm font-medium">{m.name}</span>
+              )}
               <span className="text-muted-foreground block text-xs">
                 {roleLabel('WORKSPACE', m.workspaceRole)}
               </span>
