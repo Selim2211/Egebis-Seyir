@@ -1475,3 +1475,9 @@ Tüm Projenin haritası büyük Projelerde okunmuyordu. Harita artık yalnızca 
 **Durum:** Kabul · **Tarih:** 2026-11-04 · ADR-054'ü genişletir.
 
 "Bana atananlar" sekmesinin üstünde Projeler (Scrum açık, görülebilen) çip olarak listelenir. "Tümü" eski tarih gruplu görünümdür. Bir Proje seçilince (`?space=`) Projenin son 3 sprint'i gösterilir: aktif sprint önce, sonra tamamlananlar en yeniden eskiye; 3'e yetmezse en yakın planlananlar. İptal edilenler sayılmaz. Her sprint'in altında bana atanan işler (biten de) Backlog sırasıyla listelenir; alt görev üst Task'ının sprint'inde sayılır. Uç: `GET my-work/sprints?spaceId=` (göremediği Projede 404).
+
+## ADR-164 — Zaman çizelgesi Story Point tabanlı
+
+**Durum:** Kabul · **Tarih:** 2026-11-04 · Faz 4.3 zaman çizelgesinin yerini alır.
+
+Yönetici kararı: efor saatle değil Story Point ile izlenir. Zaman çizelgesi sayfası sprint seçer (ADR-132 seçicisi, varsayılan aktif ya da en son sprint) ve gösterir: kişi × sprint günü biten puan (iş bittiği gün, Europe/Istanbul), kişi başına üstlenilen / biten / kalan puan ve ilerleme çubuğu, özet kutuları, kimseye atanmamış puan ve en büyük 10 iş. Yalnızca yaprak işler sayılır (alt görevi olan Task'ın puanı alt görevlerin toplamıdır); birden çok kişiye atanan işin puanı eşit paylaştırılır. Uç: `GET spaces/:id/effort?sprintId=` (`report.view`). Saat kaydı (sayaç, elle giriş) ve eski `timesheet` ucu yerinde durur.

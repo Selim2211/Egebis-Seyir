@@ -51,6 +51,47 @@ export type LogTimeRequest = z.infer<typeof LogTimeRequestSchema>;
 export const MyTimerSchema = z.object({ timer: RunningTimerSchema.nullable() });
 export type MyTimer = z.infer<typeof MyTimerSchema>;
 
+/** GET /api/workspaces/:wid/spaces/:spaceId/effort?sprintId= — Story Point tabanlı çizelge (ADR-164). */
+export const EffortSheetSchema = z.object({
+  sprint: z.object({
+    id: z.uuid(),
+    name: z.string(),
+    status: z.enum(['PLANNED', 'ACTIVE', 'COMPLETED', 'CANCELLED']),
+    startDate: DateOnlySchema,
+    endDate: DateOnlySchema,
+  }),
+  days: z.array(DateOnlySchema),
+  rows: z.array(
+    z.object({
+      user: z.object({ id: z.uuid(), name: z.string(), avatarVersion: z.string().nullable() }),
+      /** Üstlenilen puan (birden çok kişiye atanan işte eşit pay). */
+      committed: z.number(),
+      done: z.number(),
+      remaining: z.number(),
+      items: z.int(),
+      doneItems: z.int(),
+      /** Gün gün biten puan. */
+      perDay: z.array(z.number()),
+    }),
+  ),
+  dayTotals: z.array(z.number()),
+  committed: z.number(),
+  done: z.number(),
+  /** Kimseye atanmamış işlerin puanı. */
+  unassigned: z.number(),
+  /** En çok puanlı işler. */
+  topItems: z.array(
+    z.object({
+      key: z.string(),
+      title: z.string(),
+      points: z.number(),
+      done: z.boolean(),
+      assignees: z.array(z.string()),
+    }),
+  ),
+});
+export type EffortSheet = z.infer<typeof EffortSheetSchema>;
+
 /** GET /api/workspaces/:wid/spaces/:spaceId/timesheet?from=&to= */
 export const TimesheetSchema = z.object({
   from: DateOnlySchema,

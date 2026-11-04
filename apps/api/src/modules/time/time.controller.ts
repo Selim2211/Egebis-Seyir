@@ -22,6 +22,7 @@ import {
   MyTimerSchema,
   SPACE_PERMISSIONS as S,
   TimesheetSchema,
+  EffortSheetSchema,
   WorkloadSchema,
   type Created,
   type Dashboard,
@@ -29,12 +30,14 @@ import {
   type ItemTime,
   type MyTimer,
   type Timesheet,
+  type EffortSheet,
   type Workload,
 } from '@scrum/shared';
 import { createZodDto, ZodResponse } from 'nestjs-zod';
 import { z } from 'zod';
 import { RequireSpacePermission } from '../auth/decorators';
 import { DashboardService } from './dashboard.service';
+import { EffortService } from './effort.service';
 import { FlowService } from './flow.service';
 import { TimeService } from './time.service';
 import { WorkloadService } from './workload.service';
@@ -52,6 +55,7 @@ class WorkspaceWorkloadQueryDto extends createZodDto(
   z.object({ spaceId: z.uuid().optional(), sprintId: z.uuid().optional() }),
 ) {}
 class TimesheetDto extends createZodDto(TimesheetSchema) {}
+class EffortSheetDto extends createZodDto(EffortSheetSchema) {}
 class StoppedDto extends createZodDto(z.object({ minutes: z.int() })) {}
 class TimesheetQueryDto extends createZodDto(
   z.object({ from: DateOnlySchema.optional(), to: DateOnlySchema.optional() }),
@@ -68,6 +72,7 @@ export class TimeController {
     private readonly workload: WorkloadService,
     private readonly flow: FlowService,
     private readonly dashboard: DashboardService,
+    private readonly effortSheets: EffortService,
   ) {}
 
   @Get('items/:itemId/time')
@@ -109,6 +114,17 @@ export class TimeController {
   @ZodResponse({ type: StoppedDto, status: HttpStatus.OK })
   stop(): Promise<{ minutes: number }> {
     return this.time.stop();
+  }
+
+  /** Story Point tabanlı zaman çizelgesi (ADR-164). */
+  @Get('spaces/:spaceId/effort')
+  @RequireSpacePermission(S.REPORT_VIEW)
+  @ZodResponse({ type: EffortSheetDto })
+  effort(
+    @Uuid('spaceId') spaceId: string,
+    @Query('sprintId', new ParseUUIDPipe()) sprintId: string,
+  ): Promise<EffortSheet> {
+    return this.effortSheets.sheet(spaceId, sprintId);
   }
 
   @Get('spaces/:spaceId/timesheet')

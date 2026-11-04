@@ -58,18 +58,64 @@ test.describe.serial('Zaman takibi', () => {
     await expect(section.getByText('Harcanan: 1s 31dk')).toBeVisible();
   });
 
-  test('zaman çizelgesi haftalık toplamı gösterir', async ({ page }) => {
+  test('zaman çizelgesi sprint bazında Story Point gösterir (ADR-164)', async ({ page }) => {
+    const api = <T>(method: string, path: string, body?: unknown) =>
+      page.evaluate(
+        async ({ method, path, body }) => {
+          const csrf =
+            document.cookie
+              .split('; ')
+              .find((c) => c.startsWith('sm_csrf='))
+              ?.split('=')[1] ?? '';
+          const res = await fetch('/api' + path, {
+            method,
+            headers: { 'content-type': 'application/json', 'x-csrf-token': csrf },
+            body: body === undefined ? undefined : JSON.stringify(body),
+          });
+          const text = await res.text();
+          return (text ? JSON.parse(text) : null) as T;
+        },
+        { method, path, body },
+      );
+    const me = await api<{ user: { id: string }; workspaces: Array<{ id: string }> }>(
+      'GET',
+      '/auth/me',
+    );
+    const ws = me.workspaces[0]!.id;
+    const tree = await api<{ spaces: Array<{ id: string; key: string }> }>(
+      'GET',
+      `/workspaces/${ws}/hierarchy`,
+    );
+    const space = tree.spaces.find((s) => s.key === 'ZMN')!;
+    await api('PATCH', `/workspaces/${ws}/spaces/${space.id}`, { scrumEnabled: true });
+    const item = await api<{ id: string; statusId: string }>(
+      'GET',
+      `/workspaces/${ws}/items/key/ZMN-1`,
+    );
+    const sprint = await api<{ id: string }>(
+      'POST',
+      `/workspaces/${ws}/spaces/${space.id}/sprints`,
+      {
+        name: 'Efor S1',
+        startDate: '2026-11-02',
+        endDate: '2026-11-13',
+      },
+    );
+    await api('POST', `/workspaces/${ws}/spaces/${space.id}/backlog/move`, {
+      itemIds: [item.id],
+      sprintId: sprint.id,
+    });
+    await api('PATCH', `/workspaces/${ws}/items/${item.id}`, {
+      points: 5,
+      assigneeIds: [me.user.id],
+    });
+
     await page.getByRole('complementary').getByRole('link', { name: 'Zaman Testi' }).click();
     await page.getByRole('complementary').getByRole('link', { name: 'Zaman çizelgesi' }).click();
     await expect(page.getByRole('heading', { name: 'Zaman çizelgesi' })).toBeVisible();
-
+    await expect(page.getByTestId('sprint-picker')).toHaveText('Efor S1');
     const table = page.getByRole('table', { name: 'Zaman çizelgesi' });
-    await expect(table.getByRole('row', { name: /Zeynep/ })).toContainText('1s 31dk');
-    await expect(page.getByRole('region', { name: 'En çok zaman harcanan işler' })).toContainText(
-      'ZMN-1',
-    );
-
-    await page.getByRole('button', { name: 'Önceki hafta' }).click();
-    await expect(page.getByText('Bu hafta için süre girişi yok.')).toBeVisible();
+    await expect(table.getByRole('row', { name: /Zeynep/ })).toContainText('5');
+    await expect(page.getByRole('region', { name: 'En büyük işler' })).toContainText('ZMN-1');
   });
 });

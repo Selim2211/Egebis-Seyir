@@ -3325,5 +3325,16 @@
     "reset": "Reset to default",
     "saved": "Role permission saved.",
     "managerOnlySuperAdmin": "Only a Super Admin can change Project Manager permissions."
+  },
+  "effort": {
+    "subtitle": "Story Points per sprint: who committed how much and how much they finished. Finished points count on the day they were completed.",
+    "committed": "Committed",
+    "done": "Done",
+    "remaining": "Remaining",
+    "progress": "Progress",
+    "topItems": "Largest items",
+    "empty": "No work assigned to people in this sprint.",
+    "noSprint": "The timesheet is shown per sprint; this Project has no sprints yet.",
+    "unassigned": "{{points}} points are unassigned"
   }
 }

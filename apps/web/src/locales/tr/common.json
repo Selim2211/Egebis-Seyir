@@ -3324,5 +3324,16 @@
     "reset": "Varsayılana dön",
     "saved": "Rol yetkisi kaydedildi.",
     "managerOnlySuperAdmin": "Proje Yöneticisi yetkilerini yalnızca Super Admin değiştirebilir."
+  },
+  "effort": {
+    "subtitle": "Sprint bazında Story Point: kim ne kadar üstlendi, ne kadarını bitirdi. Biten puan bittiği güne yazılır.",
+    "committed": "Üstlenilen",
+    "done": "Biten",
+    "remaining": "Kalan",
+    "progress": "İlerleme",
+    "topItems": "En büyük işler",
+    "empty": "Bu sprintte kişiye atanmış iş yok.",
+    "noSprint": "Zaman çizelgesi sprint bazında gösterilir; bu Projede henüz sprint yok.",
+    "unassigned": "{{points}} puan kimseye atanmamış"
   }
 }
