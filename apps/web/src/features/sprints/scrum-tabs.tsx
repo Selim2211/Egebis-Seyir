@@ -12,13 +12,13 @@ const TABS = [
   { key: 'epics', to: '/spaces/$spaceId/epics', label: 'epics.title' },
   { key: 'roadmap', to: '/spaces/$spaceId/roadmap', label: 'roadmap.title' },
   { key: 'map', to: '/spaces/$spaceId/map', label: 'projectMap.title' },
-  { key: 'reports', to: '/spaces/$spaceId/reports', label: 'reports.title' },
   { key: 'bugs', to: '/spaces/$spaceId/bugs', label: 'bugs.title' },
 ] as const;
 
-export type ScrumTab = (typeof TABS)[number]['key'];
+// Raporlar sekmesi gizli (ADR-160); sayfası kodda durur.
+export type ScrumTab = (typeof TABS)[number]['key'] | 'reports';
 
-/** Scrum sayfaları arasında gezinme: Backlog, Planlama, Sprint panosu, Geçmiş, Raporlar, Bugs. */
+/** Scrum sayfaları arasında gezinme: Backlog, Planlama, Sprint panosu, Geçmiş, Bugs. */
 export function ScrumTabs({ spaceId, current }: { spaceId: string; current: ScrumTab }) {
   const { t } = useTranslation();
   return (

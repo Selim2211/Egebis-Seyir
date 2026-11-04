@@ -1449,3 +1449,9 @@ Ofis sunucusuna yalnızca deploy ile erişilebiliyor; konsol ya da günlük okun
 - **Otomatik yorum:** eşikler ADR-158 ölçümlerinden: ağ gecikmesi > 60 ms, büyük yanıt takılması (MTU/vekil), ilk bayt > 800 ms, sıkıştırmasız dosya, küçük dosyanın > 2 sn inmesi, HTTP/1.1 (20+ dosyada), yavaş veritabanı, olay döngüsü, takas, CPU çalınması, disk, MTU riski.
 - **Rapor:** JSON olarak kopyalanır ya da indirilir. Şifre, bağlantı adresi ve anahtarlar girmez; yalnızca ayarın açık/kapalı ya da tanımlı olup olmadığı.
 - **Test güvenliği:** Playwright API sunucusu SMTP'yi açıkça Mailpit'e (127.0.0.1:1025) yönlendirir ve çağrı kutusu yapay zekâsını kapatır. Önceden eksik değerler `apps/api/.env`'den tamamlandığından gerçek bir SMTP sunucusu tanımlıysa davet testleri oraya gidiyordu.
+
+## ADR-160 — Raporlar, Formlar, Panel ve Gantt gizlendi
+
+**Durum:** Kabul · **Tarih:** 2026-11-04
+
+Yönetici kararı: Proje menüsünde Raporlar sekmesi, Formlar (menü ve Proje ayarları bölümü), Panel ve Gantt bağlantıları kaldırıldı. Kod, API ve veri silinmedi; rotalar `beforeLoad` ile Projenin ana sayfasına yönlenir. Geri açmak için bağlantıyı ve `beforeLoad`'u geri almak yeterli.

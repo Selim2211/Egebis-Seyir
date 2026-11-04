@@ -21,9 +21,7 @@ import {
   IterationCw,
   Kanban,
   FileText,
-  ChartGantt as GanttChartIcon,
   Layers,
-  LayoutDashboard,
   List,
   ListOrdered,
   ListPlus,
@@ -36,7 +34,6 @@ import {
   Trash2,
   Users,
   Clapperboard,
-  ClipboardList,
 } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -316,10 +313,7 @@ function SpaceNode({
           <KanbanLink spaceId={space.id} />
           <DocsLink spaceId={space.id} />
           <VideosLink spaceId={space.id} />
-          <FormsLink spaceId={space.id} />
           <TimesheetLink spaceId={space.id} />
-          <DashboardLink spaceId={space.id} />
-          <GanttLink spaceId={space.id} />
           <WorkloadLink spaceId={space.id} />
           <SortableGroup
             items={space.folders}
@@ -471,34 +465,6 @@ function KanbanLink({ spaceId }: { spaceId: string }) {
   );
 }
 
-/** Space panosu (Faz 4.6). */
-function DashboardLink({ spaceId }: { spaceId: string }) {
-  const { t } = useTranslation();
-  const closeSidebar = useUiStore((s) => s.setSidebarOpen);
-  return (
-    <ScrumLink
-      to="/spaces/$spaceId/dashboard"
-      spaceId={spaceId}
-      onNavigate={() => closeSidebar(false)}
-    >
-      <LayoutDashboard className="text-muted-foreground size-4 shrink-0" aria-hidden />
-      <span className="truncate">{t('dashboard.link')}</span>
-    </ScrumLink>
-  );
-}
-
-/** Space Gantt görünümü (Faz 4.5). */
-function GanttLink({ spaceId }: { spaceId: string }) {
-  const { t } = useTranslation();
-  const closeSidebar = useUiStore((s) => s.setSidebarOpen);
-  return (
-    <ScrumLink to="/spaces/$spaceId/gantt" spaceId={spaceId} onNavigate={() => closeSidebar(false)}>
-      <GanttChartIcon className="text-muted-foreground size-4 shrink-0" aria-hidden />
-      <span className="truncate">{t('gantt.link')}</span>
-    </ScrumLink>
-  );
-}
-
 /** Space iş yükü (Faz 4.4). */
 function WorkloadLink({ spaceId }: { spaceId: string }) {
   const { t } = useTranslation();
@@ -559,18 +525,6 @@ function VideosLink({ spaceId }: { spaceId: string }) {
   );
 }
 
-/** Space'in formları (Faz 7.4). */
-function FormsLink({ spaceId }: { spaceId: string }) {
-  const { t } = useTranslation();
-  const closeSidebar = useUiStore((s) => s.setSidebarOpen);
-  return (
-    <ScrumLink to="/spaces/$spaceId/forms" spaceId={spaceId} onNavigate={() => closeSidebar(false)}>
-      <ClipboardList className="text-muted-foreground size-4 shrink-0" aria-hidden />
-      <span className="truncate">{t('forms.link')}</span>
-    </ScrumLink>
-  );
-}
-
 function ScrumLink({
   to,
   spaceId,
@@ -583,11 +537,8 @@ function ScrumLink({
     | '/spaces/$spaceId/kanban'
     | '/spaces/$spaceId/docs'
     | '/spaces/$spaceId/videos'
-    | '/spaces/$spaceId/forms'
     | '/spaces/$spaceId/timesheet'
-    | '/spaces/$spaceId/workload'
-    | '/spaces/$spaceId/gantt'
-    | '/spaces/$spaceId/dashboard';
+    | '/spaces/$spaceId/workload';
   spaceId: string;
   onNavigate: () => void;
   children: ReactNode;
