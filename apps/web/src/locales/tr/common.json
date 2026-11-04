@@ -458,7 +458,8 @@
     "TICKET_DOMAIN_TAKEN": "Bu alan adı başka bir firmada tanımlı.",
     "TICKET_COMPANY_EXISTS": "Bu adla bir firma zaten var.",
     "TICKET_COMPANY_CYCLE": "Üst firma seçimi döngü oluşturuyor.",
-    "TICKET_SPACE_INVALID": "Seçilen proje geçerli değil (silinmiş, arşivde ya da gelen kutusu)."
+    "TICKET_SPACE_INVALID": "Seçilen proje geçerli değil (silinmiş, arşivde ya da gelen kutusu).",
+    "POINTS_LOCKED": "Belirlenmiş Story Point'i yalnızca Proje Yöneticisi değiştirebilir."
   },
   "spaceRoles": {
     "PROJECT_MANAGER": "Proje Yöneticisi",
@@ -724,6 +725,7 @@
     "epicTotals": "Toplam",
     "linkedDocs": "Dokümanlar",
     "pointsFromSubtasks": "Alt görevlerin toplamı; alt görevlerden değişir.",
+    "pointsFixed": "Story Point belirlendi; yalnızca Proje Yöneticisi değiştirebilir.",
     "percentDone": "Tamamlanma",
     "percentFromSubtasks": "Alt görevlerden hesaplanır."
   },
@@ -2076,7 +2078,8 @@
       "doc_item_unlinked": "sayfadan görev bağlantısını kaldırdı.",
       "team_created": "ekip oluşturdu.",
       "team_updated": "ekibi güncelledi.",
-      "team_deleted": "ekibi sildi."
+      "team_deleted": "ekibi sildi.",
+      "space_role_permissions_changed": "Proje rol yetkilerini değiştirdi."
     }
   },
   "sprintImport": {
@@ -2219,6 +2222,7 @@
     "workItem.write": "İş öğesi oluşturma ve düzenleme",
     "workItem.status.own": "Kendi iş öğesinin durumunu değiştirme",
     "estimate.write": "Tahmin ve Story Point girme",
+    "estimate.override": "Belirlenmiş Story Point'i değiştirme",
     "comment.write": "Yorum yazma",
     "backlog.rank": "Backlog sıralama",
     "sprint.plan": "Sprint planlama",
@@ -3238,13 +3242,20 @@
     "saved": "Sınır kaydedildi.",
     "remove": "{{name}} sınırını kaldır",
     "removed": "Sınır kaldırıldı.",
-    "kind": { "USER": "Kişi", "TEAM": "Ekip" }
+    "kind": {
+      "USER": "Kişi",
+      "TEAM": "Ekip"
+    }
   },
   "aiEstimate": {
     "button": "AI ile tahmin et",
     "sentences": "Açıklama: {{count}} / {{min}} cümle",
     "suggested": "Öneri: {{points}} puan",
-    "confidence": { "LOW": "düşük güven", "MEDIUM": "orta güven", "HIGH": "yüksek güven" },
+    "confidence": {
+      "LOW": "düşük güven",
+      "MEDIUM": "orta güven",
+      "HIGH": "yüksek güven"
+    },
     "apply": "Uygula",
     "dismiss": "Vazgeç"
   },
@@ -3293,5 +3304,13 @@
       "diskFull": "Disk %{{pct}} dolu.",
       "mtuRisk": "Ağ kartı MTU'su 1500'den büyük ve MTU yoklaması kapalı: büyük yanıtlar takılabilir."
     }
+  },
+  "projectRoles": {
+    "title": "Rol yetkileri",
+    "description": "Bu Projede Proje Yöneticisi ve Proje Üyesinin neler yapabileceği. Değişiklik yalnızca bu Projeyi etkiler.",
+    "permission": "Yetki",
+    "reset": "Varsayılana dön",
+    "saved": "Rol yetkisi kaydedildi.",
+    "managerOnlySuperAdmin": "Proje Yöneticisi yetkilerini yalnızca Super Admin değiştirebilir."
   }
 }

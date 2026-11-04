@@ -409,6 +409,8 @@ model Space {
   /// Açıkken eksik DoD ile Done'a geçilemez; kapalıyken yalnızca uyarı.
   dodEnforced        Boolean         @default(false)
   estimationScale    EstimationScale @default(FIBONACCI)
+  /// Proje bazında rol ayarı (ADR-161): { PROJECT_MANAGER?: string[], PROJECT_MEMBER?: string[] }.
+  roleOverrides      Json?
   rank               String
   /// Okunabilir ID sayacı (ADR-044); öğe oluşturulurken atomik artırılır.
   itemCounter        Int             @default(0)

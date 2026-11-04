@@ -1,12 +1,20 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import {
   checkSpaceRole,
+  DEFAULT_SPACE_ROLE_PERMISSIONS,
   ERROR_CODES,
+  PROJECT_CONFIGURABLE_PERMISSIONS,
   SPACE_PERMISSIONS as S,
+  SPACE_ROLES,
+  type ProjectRoleOverrides,
+  type ProjectRolesResponse,
+  type PutProjectRoleRequest,
   type SpaceMember,
 } from '@scrum/shared';
 import { ClsService } from 'nestjs-cls';
-import { RoleScope } from '../../generated/prisma/client';
+import { Prisma, RoleScope } from '../../generated/prisma/client';
+
+const DbNull = Prisma.DbNull;
 import type { AppClsStore } from '../../infra/cls/request-context';
 import { HandoverService } from '../access/handover.service';
 import { roleTier } from '../access/role-tier';
@@ -148,6 +156,77 @@ export class SpaceMembersService {
         },
       });
     });
+  }
+
+  /** Projenin rol ayarı (ADR-161): ayarlanabilir izinlerin etkin hali ve Workspace varsayılanı. */
+  async roleSettings(spaceId: string): Promise<ProjectRolesResponse> {
+    const db = this.tenant.db;
+    const space = await db.space.findFirst({
+      where: { id: spaceId, deletedAt: null },
+      select: { roleOverrides: true },
+    });
+    if (!space) throw notFound();
+    const roles = await db.role.findMany({
+      where: { scope: RoleScope.SPACE, key: { in: [...SPACE_ROLES] } },
+      select: { key: true, permissions: true },
+    });
+    const overrides = (space.roleOverrides ?? {}) as ProjectRoleOverrides;
+    const configurable = PROJECT_CONFIGURABLE_PERMISSIONS as readonly string[];
+    const superAdmin = this.isSuperAdmin();
+    return {
+      configurable: [...configurable],
+      roles: SPACE_ROLES.map((role) => {
+        const base = roles.find((r) => r.key === role)?.permissions ?? [
+          ...DEFAULT_SPACE_ROLE_PERMISSIONS[role],
+        ];
+        const defaults = base.filter((p) => configurable.includes(p));
+        const custom = overrides[role];
+        return {
+          role,
+          permissions: custom ? custom.filter((p) => configurable.includes(p)) : defaults,
+          defaults,
+          customized: Boolean(custom),
+          editable: role === 'PROJECT_MEMBER' || superAdmin,
+        };
+      }),
+    };
+  }
+
+  /** Bir rolün Proje ayarını değiştirir; Proje Yöneticisi rolünü yalnızca Super Admin ayarlar. */
+  async putRoleSetting(spaceId: string, input: PutProjectRoleRequest): Promise<void> {
+    if (input.role === 'PROJECT_MANAGER' && !this.isSuperAdmin()) {
+      throw forbidden(ERROR_CODES.FORBIDDEN);
+    }
+    const workspaceId = this.cls.get('workspaceId')!;
+    const actorId = this.cls.get('userId')!;
+    await this.tenant.db.$transaction(async (tx) => {
+      const space = await tx.space.findFirst({
+        where: { id: spaceId, deletedAt: null },
+        select: { roleOverrides: true },
+      });
+      if (!space) throw notFound();
+      const overrides = { ...((space.roleOverrides ?? {}) as ProjectRoleOverrides) };
+      const before = overrides[input.role] ?? null;
+      if (input.permissions === null) delete overrides[input.role];
+      else overrides[input.role] = [...new Set(input.permissions)];
+      await tx.space.update({
+        where: { id: spaceId },
+        data: { roleOverrides: Object.keys(overrides).length > 0 ? overrides : DbNull },
+      });
+      await this.activity.record(tx, {
+        workspaceId,
+        actorId,
+        entityType: 'space',
+        entityId: spaceId,
+        action: 'space.role_permissions_changed',
+        changes: { role: input.role, permissions: { from: before, to: input.permissions } },
+      });
+    });
+  }
+
+  private isSuperAdmin(): boolean {
+    const tier = this.cls.get('workspaceRole');
+    return tier === 'OWNER' || tier === 'ADMIN';
   }
 
   private async ensureSpace(spaceId: string): Promise<void> {

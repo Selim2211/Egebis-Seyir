@@ -35,6 +35,8 @@ export const ERROR_CODES = {
   OUTSOURCE_NOT_MANAGER: 'OUTSOURCE_NOT_MANAGER',
   /** Çıkarılan kişinin işleri için alıcı seçilmeli (yönetici ya da yöneticisiz Proje, ADR-153). */
   HANDOVER_TARGET_REQUIRED: 'HANDOVER_TARGET_REQUIRED',
+  /** Belirlenmiş Story Point'i yalnızca Proje Yöneticisi değiştirir (ADR-161). */
+  POINTS_LOCKED: 'POINTS_LOCKED',
   /** Proje Yöneticisini yalnızca Super Admin çıkarabilir (ADR-153). */
   MANAGER_REMOVAL_SUPER_ADMIN: 'MANAGER_REMOVAL_SUPER_ADMIN',
   /** Kişi ya da ekip doküman/video sınırını aşıyor (ADR-154); ayrıntı: scope, limit. */

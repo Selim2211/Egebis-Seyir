@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { ESTIMATION_SCALES, SPRINT_LENGTH_WEEKS } from '../constants/estimation';
 import { SPACE_ICONS, SPACE_KEY_PATTERN } from '../constants/space';
 import { STATUS_CATEGORIES } from '../constants/work-item';
+import { PROJECT_CONFIGURABLE_PERMISSIONS, SPACE_ROLES } from '../permissions/roles';
 import { RoleKeySchema } from './role';
 
 /** Space, Folder ve List adları. */
@@ -219,6 +220,40 @@ export type SpaceMembersResponse = z.infer<typeof SpaceMembersResponseSchema>;
 /** PUT .../spaces/:spaceId/members/:userId — ekler veya rolünü değiştirir. */
 export const PutSpaceMemberRequestSchema = z.object({ role: RoleKeySchema });
 export type PutSpaceMemberRequest = z.infer<typeof PutSpaceMemberRequestSchema>;
+
+// ---------- Proje bazında rol ayarı (ADR-161) ----------
+
+export const ProjectRoleSettingSchema = z.object({
+  role: z.enum(SPACE_ROLES),
+  /** Açık olan ayarlanabilir izinler (etkin). */
+  permissions: z.array(z.string()),
+  /** Workspace rolünden gelen varsayılan ayarlanabilir izinler. */
+  defaults: z.array(z.string()),
+  /** Proje kendi ayarını mı kullanıyor. */
+  customized: z.boolean(),
+  /** İstek sahibi bu rolün ayarını değiştirebilir mi (Proje Yöneticisi rolünü yalnızca Super Admin). */
+  editable: z.boolean(),
+});
+export type ProjectRoleSetting = z.infer<typeof ProjectRoleSettingSchema>;
+
+/** GET .../spaces/:spaceId/role-permissions */
+export const ProjectRolesResponseSchema = z.object({
+  configurable: z.array(z.string()),
+  roles: z.array(ProjectRoleSettingSchema),
+});
+export type ProjectRolesResponse = z.infer<typeof ProjectRolesResponseSchema>;
+
+/** PUT .../spaces/:spaceId/role-permissions — `permissions: null` varsayılana döndürür. */
+export const PutProjectRoleRequestSchema = z.object({
+  role: z.enum(SPACE_ROLES),
+  permissions: z
+    .array(
+      z.string().refine((p) => (PROJECT_CONFIGURABLE_PERMISSIONS as readonly string[]).includes(p)),
+    )
+    .max(50)
+    .nullable(),
+});
+export type PutProjectRoleRequest = z.infer<typeof PutProjectRoleRequestSchema>;
 
 // ---------- Arşiv ve çöp kutusu (ADR-041) ----------
 

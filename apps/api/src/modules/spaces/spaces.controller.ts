@@ -26,6 +26,9 @@ import {
   MoveRequestSchema,
   NameRequestSchema,
   PutSpaceMemberRequestSchema,
+  ProjectRolesResponseSchema,
+  PutProjectRoleRequestSchema,
+  type ProjectRolesResponse,
   SPACE_PERMISSIONS as S,
   SpaceDetailSchema,
   SpaceMembersResponseSchema,
@@ -66,6 +69,8 @@ class FolderDetailDto extends createZodDto(FolderDetailSchema) {}
 class ListDetailDto extends createZodDto(ListDetailSchema) {}
 class SpaceMembersDto extends createZodDto(SpaceMembersResponseSchema) {}
 class PutSpaceMemberDto extends createZodDto(PutSpaceMemberRequestSchema) {}
+class ProjectRolesDto extends createZodDto(ProjectRolesResponseSchema) {}
+class PutProjectRoleDto extends createZodDto(PutProjectRoleRequestSchema) {}
 class ArchiveDto extends createZodDto(ArchiveResponseSchema) {}
 
 const Uuid = (name: string) => Param(name, ParseUUIDPipe);
@@ -206,6 +211,25 @@ export class SpacesController {
     @Body() body: unknown,
   ): Promise<void> {
     await this.members.remove(spaceId, userId, parseRemoveBody(body));
+  }
+
+  // ---------- Proje bazında rol ayarı (ADR-161) ----------
+
+  @Get(':spaceId/role-permissions')
+  @RequireSpacePermission(S.SPACE_SETTINGS)
+  @ZodResponse({ type: ProjectRolesDto })
+  async roleSettings(@Uuid('spaceId') spaceId: string): Promise<ProjectRolesResponse> {
+    return this.members.roleSettings(spaceId);
+  }
+
+  @Put(':spaceId/role-permissions')
+  @RequireSpacePermission(S.SPACE_SETTINGS)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async putRoleSetting(
+    @Uuid('spaceId') spaceId: string,
+    @Body() body: PutProjectRoleDto,
+  ): Promise<void> {
+    await this.members.putRoleSetting(spaceId, body);
   }
 
   // ---------- Durumlar ----------

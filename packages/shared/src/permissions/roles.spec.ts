@@ -12,6 +12,7 @@ import {
   WORKSPACE_ROLES,
   type SpaceRole,
   type WorkspaceRole,
+  projectRolePermissions,
 } from './roles';
 
 const spaceRolesWith = (p: SpacePermission) => SPACE_ROLES.filter((r) => SPACE[r].includes(p));
@@ -31,6 +32,7 @@ describe('Varsayılan Proje rol matrisi (ADR-152)', () => {
     [S.BUG_REPORT, ['PROJECT_MANAGER', 'PROJECT_MEMBER']],
     [S.BUG_ASSIGN, ['PROJECT_MANAGER']],
     [S.ESTIMATE_WRITE, ['PROJECT_MANAGER', 'PROJECT_MEMBER']],
+    [S.ESTIMATE_OVERRIDE, ['PROJECT_MANAGER']],
     [S.COMMENT_WRITE, ['PROJECT_MANAGER', 'PROJECT_MEMBER']],
     [S.REPORT_VIEW, ['PROJECT_MANAGER', 'PROJECT_MEMBER']],
     [S.SPACE_SETTINGS, ['PROJECT_MANAGER']],
@@ -78,5 +80,24 @@ describe('Varsayılan workspace rol matrisi (brief §7.1)', () => {
   it('her workspace izni matriste test edilmiş', () => {
     const tested = new Set(expected.map(([p]) => p));
     expect(Object.values(W).filter((p) => !tested.has(p))).toEqual([]);
+  });
+});
+
+describe('Proje bazında rol ayarı (ADR-161)', () => {
+  it('ayar yoksa rolün izinleri aynen kalır', () => {
+    expect(projectRolePermissions('PROJECT_MEMBER', SPACE.PROJECT_MEMBER, null)).toBe(
+      SPACE.PROJECT_MEMBER,
+    );
+  });
+
+  it('ayarlanabilir izinler Projenin ayarından, diğerleri rolden gelir', () => {
+    const result = projectRolePermissions('PROJECT_MEMBER', SPACE.PROJECT_MEMBER, {
+      PROJECT_MEMBER: [S.SPRINT_PLAN, S.SPACE_SETTINGS],
+    });
+    expect(result).toContain(S.SPACE_VIEW);
+    expect(result).toContain(S.SPRINT_PLAN);
+    expect(result).not.toContain(S.WORK_ITEM_WRITE);
+    // Proje ayarları Proje bazında verilemez.
+    expect(result).not.toContain(S.SPACE_SETTINGS);
   });
 });

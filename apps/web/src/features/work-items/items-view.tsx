@@ -98,6 +98,7 @@ export function ItemsView({
   const isTable = search.view === 'table';
   const canWrite = space.permissions.includes(S.WORK_ITEM_WRITE) && !archived;
   const canEstimate = space.permissions.includes(S.ESTIMATE_WRITE) && !archived;
+  const canOverridePoints = space.permissions.includes(S.ESTIMATE_OVERRIDE);
 
   const ctx = useMemo<ViewContext>(
     () => ({
@@ -136,6 +137,7 @@ export function ItemsView({
     space,
     canWrite,
     canEstimate,
+    canOverridePoints,
     canChangeStatus: (item) =>
       !archived &&
       (canWrite ||

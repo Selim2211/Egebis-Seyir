@@ -18,6 +18,7 @@ import {
   useSpaceMembers,
   useUpdateSpace,
 } from '@/features/spaces/queries';
+import { ProjectRolesSection } from '@/features/spaces/project-roles-section';
 import { SpaceAvatar } from '@/features/spaces/space-avatar';
 import { ReadinessFields } from '@/features/spaces/readiness-fields';
 import { BackupSection } from '@/features/backup/backup';
@@ -73,6 +74,7 @@ function SpaceSettingsPage() {
 
       {canEdit ? <GeneralForm space={space} /> : <GeneralSummary space={space} />}
       <MembersSection spaceId={spaceId} canEdit={canEdit} />
+      {canEdit && <ProjectRolesSection spaceId={spaceId} />}
       <StatusesSection space={space} canEdit={canEdit} />
       <CustomFieldsSection spaceId={spaceId} canEdit={canEdit} />
       <TemplatesSection space={space} canEdit={canEdit} />

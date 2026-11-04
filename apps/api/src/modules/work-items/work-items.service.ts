@@ -782,7 +782,11 @@ export class WorkItemsService {
 
   /** Alan bazlı yetki: yapı alanları `workItem.write`, tahmin `estimate.write`, durum "kendi" kuralı. */
   private authorize(
-    item: { reporterId: string | null; assignees: Array<{ userId: string }> },
+    item: {
+      reporterId: string | null;
+      assignees: Array<{ userId: string }>;
+      points: number | null;
+    },
     fields: Record<string, unknown>,
   ): void {
     // Otomasyon eylemleri sistem adına çalışır; yetki otomasyonu tanımlayan Space yöneticisine aittir.
@@ -796,6 +800,15 @@ export class WorkItemsService {
     if (others.length > 0 && !this.can(S.WORK_ITEM_WRITE)) throw forbidden(ERROR_CODES.FORBIDDEN);
     if (keys.some((k) => estimateKeys.includes(k)) && !this.can(S.ESTIMATE_WRITE)) {
       throw forbidden(ERROR_CODES.FORBIDDEN);
+    }
+    // Belirlenmiş Story Point'i yalnızca Proje Yöneticisi değiştirir (ADR-161).
+    if (
+      keys.includes('points') &&
+      item.points !== null &&
+      fields.points !== item.points &&
+      !this.can(S.ESTIMATE_OVERRIDE)
+    ) {
+      throw forbidden(ERROR_CODES.POINTS_LOCKED);
     }
     // Yüzdeyi atanan kişi (ya da yazma yetkisi olan) girer; durum için de geçerli "kendi işim" kuralı.
     if (

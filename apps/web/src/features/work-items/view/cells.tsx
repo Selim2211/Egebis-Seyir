@@ -28,6 +28,8 @@ export interface CellContext {
   space: SpaceDetail;
   canWrite: boolean;
   canEstimate: boolean;
+  /** Belirlenmiş Story Point'i değiştirebilir mi (ADR-161). */
+  canOverridePoints: boolean;
   canChangeStatus: (item: WorkItemSummary) => boolean;
   onStatus: (itemId: string, statusId: string) => void;
   onPatch: (itemId: string, body: UpdateWorkItemRequest) => void;
@@ -172,7 +174,8 @@ export function EstimateCell({
 }) {
   const { t } = useTranslation();
   const scale = ctx.space.estimationScale;
-  if (!editable || !ctx.canEstimate || item.pointsLocked) {
+  const fixed = item.points !== null && !ctx.canOverridePoints;
+  if (!editable || !ctx.canEstimate || item.pointsLocked || fixed) {
     return <span className="text-muted-foreground text-xs">{estimateLabel(item, scale)}</span>;
   }
   const inputClass =

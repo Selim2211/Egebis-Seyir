@@ -40,6 +40,8 @@ export const SPACE_PERMISSIONS = {
   WORK_ITEM_STATUS_OWN: 'workItem.status.own',
   /** Story point / tahmin girme. */
   ESTIMATE_WRITE: 'estimate.write',
+  /** Belirlenmiş Story Point'i değiştirme; varsayılan yalnızca Proje Yöneticisi (ADR-161). */
+  ESTIMATE_OVERRIDE: 'estimate.override',
   /** Sprint oluşturma ve planlama (sprint backlog'unu değiştirme). */
   SPRINT_PLAN: 'sprint.plan',
   /** Sprint başlatma. */

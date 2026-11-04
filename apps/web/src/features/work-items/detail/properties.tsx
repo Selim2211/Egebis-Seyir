@@ -205,6 +205,8 @@ export function Properties({
   const perms = space.permissions;
   const canWrite = perms.includes(S.WORK_ITEM_WRITE) && !archived;
   const canEstimate = perms.includes(S.ESTIMATE_WRITE) && !archived;
+  // Belirlenmiş Story Point'i yalnızca Proje Yöneticisi değiştirir (ADR-161).
+  const pointsFixed = item.points !== null && !perms.includes(S.ESTIMATE_OVERRIDE);
   const mine = item.reporter?.id === user.id || item.assignees.some((a) => a.id === user.id);
   const canStatus = !archived && (canWrite || (perms.includes(S.WORK_ITEM_STATUS_OWN) && mine));
   const status = space.statuses.find((s) => s.id === item.statusId);
@@ -336,15 +338,23 @@ export function Properties({
         <PointsInput
           scale={space.estimationScale}
           value={item.points}
-          disabled={!canEstimate || item.pointsLocked}
+          disabled={!canEstimate || item.pointsLocked || pointsFixed}
           onChange={(points) => save({ points })}
         />
         {item.pointsLocked && (
           <p className="text-muted-foreground mt-1 text-xs">{t('detail.pointsFromSubtasks')}</p>
         )}
-        {canEstimate && !item.pointsLocked && space.estimationScale === 'FIBONACCI' && (
-          <AiEstimateButton item={item} onApply={(points) => save({ points })} />
+        {!item.pointsLocked && pointsFixed && (
+          <p className="text-muted-foreground mt-1 text-xs" data-testid="points-fixed">
+            {t('detail.pointsFixed')}
+          </p>
         )}
+        {canEstimate &&
+          !item.pointsLocked &&
+          !pointsFixed &&
+          space.estimationScale === 'FIBONACCI' && (
+            <AiEstimateButton item={item} onApply={(points) => save({ points })} />
+          )}
       </Row>
 
       {kind === 'HOURS' && (

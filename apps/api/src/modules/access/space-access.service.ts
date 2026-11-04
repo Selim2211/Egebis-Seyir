@@ -1,5 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { spacePermissions, type WorkspaceRole } from '@scrum/shared';
+import {
+  projectRolePermissions,
+  spacePermissions,
+  type ProjectRoleOverrides,
+  type WorkspaceRole,
+} from '@scrum/shared';
 import { ClsService } from 'nestjs-cls';
 import type { AppClsStore } from '../../infra/cls/request-context';
 import { TenantPrismaService } from '../../infra/prisma/tenant-prisma.service';
@@ -102,7 +107,7 @@ export class SpaceAccessService {
     if (userIds.length === 0) return new Set();
     const db = this.tenant.db;
     const [space, memberships, spaceMembers] = await Promise.all([
-      db.space.findFirst({ where: { id: spaceId }, select: { id: true } }),
+      db.space.findFirst({ where: { id: spaceId }, select: { id: true, roleOverrides: true } }),
       db.membership.findMany({
         where: { userId: { in: userIds } },
         select: {
@@ -113,11 +118,17 @@ export class SpaceAccessService {
       }),
       db.spaceMember.findMany({
         where: { spaceId, userId: { in: userIds } },
-        select: { userId: true, role: { select: { permissions: true } } },
+        select: { userId: true, role: { select: { key: true, permissions: true } } },
       }),
     ]);
     if (!space) return new Set();
-    const memberPerms = new Map(spaceMembers.map((m) => [m.userId, m.role.permissions]));
+    const overrides = space.roleOverrides as ProjectRoleOverrides | null;
+    const memberPerms = new Map(
+      spaceMembers.map((m) => [
+        m.userId,
+        projectRolePermissions(m.role.key, m.role.permissions, overrides),
+      ]),
+    );
     return new Set(
       memberships
         .filter(
@@ -150,15 +161,26 @@ export class SpaceAccessService {
       where,
       select: {
         id: true,
-        members: { where: { userId }, select: { role: { select: { permissions: true } } } },
+        roleOverrides: true,
+        members: {
+          where: { userId },
+          select: { role: { select: { key: true, permissions: true } } },
+        },
       },
     });
 
     const result = new Map<string, readonly string[]>();
     for (const space of spaces) {
+      const role = space.members[0]?.role;
       const perms = spacePermissions({
         workspaceRole,
-        memberPermissions: space.members[0]?.role.permissions ?? null,
+        memberPermissions: role
+          ? projectRolePermissions(
+              role.key,
+              role.permissions,
+              space.roleOverrides as ProjectRoleOverrides | null,
+            )
+          : null,
         contentAccess,
       });
       if (perms) result.set(space.id, perms);

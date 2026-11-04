@@ -385,6 +385,7 @@ export class BackupService {
               dorItems: (src.dorItems as string[]) ?? [],
               dodEnforced: Boolean(src.dodEnforced),
               estimationScale: src.estimationScale as 'FIBONACCI' | 'TSHIRT' | 'NUMBER',
+              roleOverrides: (src.roleOverrides as Prisma.InputJsonValue | null) ?? Prisma.DbNull,
               rank: rankBetween(last?.rank ?? null, null),
               itemCounter: Number(src.itemCounter ?? 0),
               createdById: actorId,

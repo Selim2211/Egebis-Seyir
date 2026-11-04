@@ -458,7 +458,8 @@
     "TICKET_DOMAIN_TAKEN": "This domain is already assigned to another company.",
     "TICKET_COMPANY_EXISTS": "A company with this name already exists.",
     "TICKET_COMPANY_CYCLE": "That parent company would create a cycle.",
-    "TICKET_SPACE_INVALID": "The selected project is not valid (deleted, archived or the inbox)."
+    "TICKET_SPACE_INVALID": "The selected project is not valid (deleted, archived or the inbox).",
+    "POINTS_LOCKED": "Only the Project Manager can change Story Points once set."
   },
   "spaceRoles": {
     "PROJECT_MANAGER": "Project Manager",
@@ -724,6 +725,7 @@
     "epicTotals": "Totals",
     "linkedDocs": "Docs",
     "pointsFromSubtasks": "Sum of the sub-tasks; changes with them.",
+    "pointsFixed": "Story Points are set; only the Project Manager can change them.",
     "percentDone": "Completion",
     "percentFromSubtasks": "Calculated from the sub-tasks."
   },
@@ -2077,7 +2079,8 @@
       "doc_item_unlinked": "unlinked a task from the page.",
       "team_created": "created the team.",
       "team_updated": "updated the team.",
-      "team_deleted": "deleted the team."
+      "team_deleted": "deleted the team.",
+      "space_role_permissions_changed": "changed Project role permissions."
     }
   },
   "sprintImport": {
@@ -2220,6 +2223,7 @@
     "workItem.write": "Create and edit work items",
     "workItem.status.own": "Change the status of own work items",
     "estimate.write": "Enter estimates and Story Points",
+    "estimate.override": "Change Story Points once set",
     "comment.write": "Comment",
     "backlog.rank": "Order the backlog",
     "sprint.plan": "Plan sprints",
@@ -3239,7 +3243,10 @@
     "saved": "Limit saved.",
     "remove": "Remove the limit for {{name}}",
     "removed": "Limit removed.",
-    "kind": { "USER": "Person", "TEAM": "Team" }
+    "kind": {
+      "USER": "Person",
+      "TEAM": "Team"
+    }
   },
   "aiEstimate": {
     "button": "Estimate with AI",
@@ -3298,5 +3305,13 @@
       "diskFull": "Disk is {{pct}}% full.",
       "mtuRisk": "Network MTU is above 1500 and MTU probing is off: large responses may stall."
     }
+  },
+  "projectRoles": {
+    "title": "Role permissions",
+    "description": "What the Project Manager and Project Members can do in this Project. Changes affect this Project only.",
+    "permission": "Permission",
+    "reset": "Reset to default",
+    "saved": "Role permission saved.",
+    "managerOnlySuperAdmin": "Only a Super Admin can change Project Manager permissions."
   }
 }
