@@ -40,6 +40,7 @@ import { capacityOf } from './capacity';
 import { backlogQuery, sprintQuery, sprintsQuery, useMoveBacklogItems } from './queries';
 import { SprintActions } from './sprint-actions';
 import { ScrumTabs } from './scrum-tabs';
+import { createPortal } from 'react-dom';
 
 const BACKLOG_PANE = 'pane:backlog';
 const SPRINT_PANE = 'pane:sprint';
@@ -235,13 +236,22 @@ export function PlanningPage({
               }
             />
           </div>
-          <DragOverlay>
-            {dragging && (
-              <div className="bg-card rounded-md border shadow-lg">
-                <BacklogRow item={dragging} targets={[]} canPlan={false} onMove={() => undefined} />
-              </div>
-            )}
-          </DragOverlay>
+          {/* Kopya body'ye çizilir; sayfa giriş animasyonu kaydırmasını ezmesin (ADR-166). */}
+          {createPortal(
+            <DragOverlay>
+              {dragging && (
+                <div className="bg-card rounded-md border shadow-lg">
+                  <BacklogRow
+                    item={dragging}
+                    targets={[]}
+                    canPlan={false}
+                    onMove={() => undefined}
+                  />
+                </div>
+              )}
+            </DragOverlay>,
+            document.body,
+          )}
         </DndContext>
       )}
 

@@ -73,15 +73,38 @@ test.describe.serial('Board', () => {
     await expect(cell(page, 1).getByRole('link', { name: 'Sepet' })).toBeVisible();
     await expect(cell(page, 0).getByRole('link', { name: 'Sepet' })).toHaveCount(0);
 
+    // Menü kapanırken sayfa tıklamaları kısa süre kapalı kalır; sürüklemeden önce tamamen kapansın.
+    await expect(page.getByRole('menu')).toHaveCount(0);
+    await expect(page.locator('body')).not.toHaveCSS('pointer-events', 'none');
+
     // Sürükle-bırak.
-    const card = cell(page, 0).getByRole('link', { name: 'Kargo takibi' });
-    const from = (await card.boundingBox())!;
-    const to = (await cell(page, 2).boundingBox())!;
-    await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2);
+    // Pano yenilenince kart yer değiştirebilir; konum ölçülmez, kartın üzerine gelinip basılır.
+    await cell(page, 0).getByRole('link', { name: 'Kargo takibi' }).hover();
     await page.mouse.down();
+    const to = (await cell(page, 2).boundingBox())!;
     await page.mouse.move(to.x + to.width / 2, to.y + 40, { steps: 12 });
+    // Sürüklerken hedef hücrede "buraya düşecek" yeri görünür (ADR-166).
+    await expect(cell(page, 2).getByTestId('board-drop-slot')).toBeVisible();
+    await page.screenshot({ path: 'test-results/board-dragging.png' });
+    // Sürüklenen kopya imleci izler (sayfa animasyonu kaydırmayı ezmez).
+    const ghost = (await page
+      .locator('body > *')
+      .filter({ has: page.getByRole('link', { name: 'Kargo takibi' }) })
+      .last()
+      .boundingBox())!;
+    expect(Math.abs(ghost.x + ghost.width / 2 - (to.x + to.width / 2))).toBeLessThan(60);
+    // Sunucu yanıtı gecikse de kart bırakıldığı anda yeni sütundadır (geri sıçramaz).
+    await page.route('**/api/workspaces/*/items/*', async (route) => {
+      if (route.request().method() === 'PATCH') await new Promise((r) => setTimeout(r, 1500));
+      await route.continue();
+    });
     await page.mouse.up();
-    await expect(cell(page, 2).getByRole('link', { name: 'Kargo takibi' })).toBeVisible();
+    await expect(cell(page, 2).getByRole('link', { name: 'Kargo takibi' })).toBeVisible({
+      timeout: 500,
+    });
+    await expect(cell(page, 0).getByRole('link', { name: 'Kargo takibi' })).toHaveCount(0);
+    await expect(page.getByTestId('board-drop-slot')).toHaveCount(0);
+    await page.unrouteAll({ behavior: 'wait' });
 
     // Yenileyince kalıcıdır.
     await page.reload();

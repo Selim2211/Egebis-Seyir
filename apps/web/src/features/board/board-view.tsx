@@ -7,7 +7,6 @@ import {
   type DragEndEvent,
   DragOverlay,
   type DropAnimation,
-  KeyboardSensor,
   MouseSensor,
   pointerWithin,
   TouchSensor,
@@ -19,6 +18,7 @@ import {
 import { type WipState, type WorkItemSummary, wipState } from '@scrum/shared';
 import { Plus } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { UserAvatar } from '@/components/user-avatar';
@@ -76,10 +76,10 @@ export function BoardView({
 }) {
   const { t } = useTranslation();
   // Fare küçük kıpırtıda sürüklemez (başlığa tıklama öğeyi açar); dokunmatikte basılı tutunca başlar.
+  // Klavye yolu kartın "Durumu değiştir" menüsüdür.
   const sensors = useSensors(
     useSensor(MouseSensor, { activationConstraint: { distance: 5 } }),
     useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 6 } }),
-    useSensor(KeyboardSensor),
   );
   const [activeId, setActiveId] = useState<string | null>(null);
   const [overStatus, setOverStatus] = useState<string | null>(null);
@@ -196,9 +196,14 @@ export function BoardView({
             ))}
         </div>
       </div>
-      <DragOverlay dropAnimation={DROP_ANIMATION}>
-        {active && <BoardCard item={active} statuses={statuses} canMove overlay />}
-      </DragOverlay>
+      {/* Kopya body'ye çizilir: sayfa giriş animasyonu (`.page-enter > *`, fill-mode both) doğrudan
+          alt öğelerde `transform: none` bırakır ve kopyanın kaydırmasını ezerdi; kart imleci izlemezdi. */}
+      {createPortal(
+        <DragOverlay dropAnimation={DROP_ANIMATION}>
+          {active && <BoardCard item={active} statuses={statuses} canMove overlay />}
+        </DragOverlay>,
+        document.body,
+      )}
     </DndContext>
   );
 }
@@ -360,13 +365,16 @@ function DraggableCard({
   onStatus: (itemId: string, statusId: string) => void;
   dragging: boolean;
 }) {
-  const { setNodeRef, listeners, attributes } = useDraggable({ id: item.id, disabled: !canMove });
+  const { setNodeRef, listeners } = useDraggable({ id: item.id, disabled: !canMove });
   return (
+    // Karttaki bağlantı ve resimlerin tarayıcıdaki kendi sürüklemesi hiç başlamaz (Chromium/Safari:
+    // -webkit-user-drag; Firefox: dragstart iptali). Başlarsa tarayıcı fare hareketlerini keser ve
+    // başlıktan tutulan kartın sürüklemesi bazen hiç başlamıyordu (ADR-166).
     <div
       ref={setNodeRef}
       {...listeners}
-      {...attributes}
-      className="touch-manipulation outline-none"
+      onDragStart={(e) => e.preventDefault()}
+      className="touch-manipulation [&_a]:[-webkit-user-drag:none] [&_img]:[-webkit-user-drag:none]"
     >
       <BoardCard
         item={item}
