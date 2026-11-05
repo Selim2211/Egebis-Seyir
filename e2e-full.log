@@ -1,2 +1,0 @@
-[WebServer] $ nest build -p tsconfig.e2e.json
-

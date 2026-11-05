@@ -31,3 +31,6 @@ graphify-out/
 # Oracle dağıtım paketi (deploy/oracle/release.sh)
 .release/
 .release.tgz
+demo-hesaplar.local.txt
+e2e-full.log
+int-full.log
