@@ -34,3 +34,4 @@ graphify-out/
 demo-hesaplar.local.txt
 e2e-full.log
 int-full.log
+e2e-rerun*.log

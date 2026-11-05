@@ -2,7 +2,9 @@ import { expect, type Page, test } from '@playwright/test';
 import { ensureOwner, login, OWNER } from './accounts';
 
 /** Faz 4.6: pano widget'ları, özelleştirme (gizle/göster/sırala/boyutlandır) ve CSV dışa aktarma. */
-test.describe.serial('Pano', () => {
+// Sayfa yönetici kararıyla gizlendi (ADR-160): menüde yok, adresi Projeye döner; kod durur.
+// Yeniden açılırsa `.skip` kaldırılır. Gizlemenin kendisi `hidden-pages.spec.ts`'te denetlenir.
+test.describe.skip('Pano', () => {
   test.beforeAll(async ({ request }) => {
     await ensureOwner(request);
   });

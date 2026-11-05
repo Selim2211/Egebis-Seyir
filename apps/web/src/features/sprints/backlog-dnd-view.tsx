@@ -66,8 +66,12 @@ export function SortableRow({
       onPointerDown={
         enabled ? dragFromRow(onPointerDown as PointerEventHandler | undefined) : undefined
       }
+      // Bağlantının tarayıcıdaki kendi sürüklemesi imleç olaylarını iptal eder (pointercancel);
+      // satır başlıktan tutulunca sürükleme bazen başlamıyordu (ADR-166).
+      onDragStart={(e) => e.preventDefault()}
       className={cn(
         'relative',
+        '[&_a]:[-webkit-user-drag:none] [&_img]:[-webkit-user-drag:none]',
         enabled && 'cursor-grab',
         'data-[drop-state=nest]:ring-primary data-[drop-state=nest]:bg-primary/[0.06] data-[drop-state=nest]:rounded-md data-[drop-state=nest]:ring-2 data-[drop-state=nest]:ring-inset',
         'data-[drop-after]:shadow-[inset_0_-3px_0_0_var(--primary)]',

@@ -16,7 +16,9 @@ function sql(statement: string): void {
 }
 
 /** Faz 4.5: Gantt: çubuklar, bağımlılık okları, kritik yol ve sürükleyerek tarih kaydırma. */
-test.describe.serial('Gantt', () => {
+// Sayfa yönetici kararıyla gizlendi (ADR-160): menüde yok, adresi Projeye döner; kod durur.
+// Yeniden açılırsa `.skip` kaldırılır. Gizlemenin kendisi `hidden-pages.spec.ts`'te denetlenir.
+test.describe.skip('Gantt', () => {
   test.beforeAll(async ({ request }) => {
     await ensureOwner(request);
   });

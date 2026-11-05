@@ -43,11 +43,8 @@ export function useSprintBoardStatus(sprintId: string, statuses: readonly BoardS
     onError: (_error, _input, context) => {
       if (context?.previous) qc.setQueryData(key, context.previous);
     },
-    // Pano hemen tazelenir; diğer sorgular yalnızca bayat işaretlenir (açıldıklarında yenilenir),
-    // böylece bırakmanın ardından tüm sayfa yeniden çizilmez (ADR-166).
-    onSettled: async () => {
-      await qc.invalidateQueries({ queryKey: ['workspaces', workspaceId], refetchType: 'none' });
-      await qc.refetchQueries({ queryKey: key });
-    },
+    // Açık olan tüm sorgular yenilenir: aynı sayfadaki sprint özeti ("Tamamla" penceresindeki biten
+    // sayısı) da güncel kalmalı. Kartın anında yerine oturması bu yenilemeye bağlı değildir (ADR-166).
+    onSettled: () => qc.invalidateQueries({ queryKey: ['workspaces', workspaceId] }),
   });
 }

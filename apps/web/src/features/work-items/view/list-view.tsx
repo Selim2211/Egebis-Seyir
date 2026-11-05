@@ -372,10 +372,13 @@ function ItemRow({
           ? dragFromRow(listeners?.onPointerDown as React.PointerEventHandler | undefined)
           : undefined
       }
+      // Bağlantının tarayıcıdaki kendi sürüklemesi imleç olaylarını iptal eder (ADR-166).
+      onDragStart={(e) => e.preventDefault()}
       data-item-row={item.key}
       // Sürükleme sırasında hedef vurgusu ve soluklaşma doğrudan DOM özniteliğiyle verilir
       // (data-drop-state / data-drop-invalid): satırlar yeniden çizilmez.
       className={cn(
+        '[&_a]:[-webkit-user-drag:none] [&_img]:[-webkit-user-drag:none]',
         'group/item hover:bg-accent/50 relative flex flex-wrap items-center gap-x-3 gap-y-1 border-b px-3 py-2 md:flex-nowrap md:py-1.5',
         'data-[drop-invalid]:opacity-45',
         'data-[drop-state=nest]:bg-primary/10 data-[drop-state=nest]:ring-primary data-[drop-state=nest]:ring-2 data-[drop-state=nest]:ring-inset',

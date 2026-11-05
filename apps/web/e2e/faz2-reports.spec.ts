@@ -18,7 +18,9 @@ function setPoints(key: number, points: number): void {
 }
 
 /** Faz 2.6: sprint burndown ve velocity raporları. */
-test.describe.serial('Raporlar', () => {
+// Sayfa yönetici kararıyla gizlendi (ADR-160): menüde yok, adresi Projeye döner; kod durur.
+// Yeniden açılırsa `.skip` kaldırılır. Gizlemenin kendisi `hidden-pages.spec.ts`'te denetlenir.
+test.describe.skip('Raporlar', () => {
   test.beforeAll(async ({ request }) => {
     await ensureOwner(request);
   });

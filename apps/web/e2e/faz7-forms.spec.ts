@@ -2,7 +2,9 @@ import { expect, test } from '@playwright/test';
 import { ensureOwner, login, OWNER } from './accounts';
 
 /** Faz 7.4: formlar: yönetici tanımlar, doldurulunca hedef List'te görev açılır. */
-test.describe.serial('Formlar', () => {
+// Sayfa yönetici kararıyla gizlendi (ADR-160): menüde yok, adresi Projeye döner; kod durur.
+// Yeniden açılırsa `.skip` kaldırılır. Gizlemenin kendisi `hidden-pages.spec.ts`'te denetlenir.
+test.describe.skip('Formlar', () => {
   test.beforeAll(async ({ request }) => {
     await ensureOwner(request);
   });
