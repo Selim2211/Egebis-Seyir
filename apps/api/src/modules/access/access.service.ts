@@ -69,7 +69,8 @@ export class AccessService {
       id: m.workspace.id,
       name: m.workspace.name,
       role: m.role.key as WorkspaceRole,
-      permissions: m.role.permissions,
+      permissions: m.lockedAt ? [] : m.role.permissions,
+      locked: m.lockedAt !== null,
     }));
     return { user: toUserDto(user), workspaces };
   }

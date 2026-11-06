@@ -1501,3 +1501,24 @@ Yönetici notu: sprint panosunda durumu sürükleyerek değiştirmek akıcı ols
 - **Bulunan iki hata:** (1) Sürüklenen kopya imleci izlemiyordu: sayfa giriş animasyonu (`.page-enter > *`, fill-mode `both`) sayfanın doğrudan alt öğelerinde `transform: none` bırakıyor ve kopyanın kaydırmasını eziyordu; kopya `body`'ye portal ile çizilir (Planlama sayfasındaki kopya da). (2) Kart başlığından tutulunca sürükleme bazen hiç başlamıyordu: bağlantının tarayıcıdaki kendi sürüklemesi (`dragstart`) fare hareketlerini kesiyordu; kart içindeki bağlantı ve resimlerde `-webkit-user-drag: none` ve `dragstart` iptali.
 - **Test:** `faz2-board` sürükleme sırasında hedefte boşluğun görünmesini, kopyanın imleç altında olmasını ve sunucu yanıtı 1,5 sn geciktirildiğinde kartın bırakıldığı anda yeni sütunda olmasını denetler; 6 ardışık koşuda kararlı.
 - **Yenileme:** bırakmadan sonra yalnızca pano yeniden yüklenir; diğer sorgular bayat işaretlenir (açıldıklarında yenilenir), böylece tüm sayfa yeniden çizilmez.
+
+## ADR-167 — Pano: hızlı art arda taşımada sonuç kaybı ve geri atlama
+
+**Durum:** Kabul · **Tarih:** 2026-11-06 · ADR-166'yı düzeltir.
+
+Yönetici: panoda kartlar takılıyor, bazen yer değiştirmiyor. Üç neden bulundu. (1) `mutate(vars, {onError})` yalnızca **son** çağrının geri çağrılarını çalıştırır; ilk kart sunucu yanıtı gelmeden ikinci kart bırakılırsa ilkinin hatası/uyarısı ("açık alt görev var, yine de tamamla?") kaybolur, kart sessizce eski yerine dönerdi. Artık `mutateAsync(...).then(onSuccess, onError)` kullanılır. (2) İlk taşımanın `onSettled` yenilemesi, ikinci taşıma sunucuya ulaşmadan eski veriyi getirip ikinci kartı geri atardı; yenileme artık yalnızca son taşıma bitince yapılır (`isMutating`). (3) Her fare hareketinde tüm kartlar yeniden çiziliyordu; `BoardCard` `memo` ile sarıldı ve `useStatusGuard().change` kimliği sabit tutuldu.
+
+## ADR-168 — Yönetici 3. tur notları
+
+**Durum:** Kabul · **Tarih:** 2026-11-06
+
+- **Menü:** sol menüden "Üye davet et" kalktı (davet Sistem Yönetimi → Üyeler'de); "Ayarlar" → "Sistem Yönetimi"; üst menü bloğuna "Menü" başlığı ve geniş aralık (PROJELER bölümüyle görsel uyum). "Sunucu ayarına dön" düğmeleri çerçeveli (`outline`). Üyeler sayfası: üye listesi son etkinliği tek `groupBy` ile alır ve `sessions(userId, lastSeenAt)` dizini eklendi.
+- **Şirket Çalışanı Üyeler Proje Oluşturabilir** (`space.create` Member rolünde) varsayılan **kapalı**. Var olan workspace'lerin rol matrisi migration ile değiştirilmez; Super Admin Genel ayarlardan kapatır.
+- **Davet rolü:** davetle yalnızca Member/Guest (ve özel roller) verilir; `OWNER/ADMIN` isteği `INVITE_ROLE_NOT_ALLOWED` (403). Admin'i sonradan Super Admin üye listesinden atar.
+- **Üye kilidi:** `memberships.lockedAt`; kilitli üye giriş yapabilir ama her workspace isteği `MEMBER_LOCKED` (403) alır; veri ve atamalar durur. Kendini kilitleyemez, Owner'ı yalnızca Owner kilitler. Üye silme (devirli) zaten vardı.
+- **Denetim günlüğü CSV:** düğme "Bitiş tarihi" yanında; menüden "Yalnızca filtrelenmiş sonuçlar" (tüm sayfalar çekilir) ya da "Tüm kayıtlar".
+- **Product Owner / Scrum Master:** `spaces.productOwnerId/scrumMasterId` (tek kişi; bir kişi birden çok Projede olabilir; Projenin üyesi olmalı; üyelikten çıkınca boşalır). Backlog'a açılan **Epik ve Task'ın `reporter`'ı** (sahip) PO olur; Bug'da değişmez.
+- **Bug gönderen listesi:** `spaces.bugSenders` (isim kısmında `*` ve `?`; alan adı birebir; boş = kısıtlama yok). Çağrı sistemi yönlendirmeden sonra Projenin listesine bakar; gönderen yoksa Bug Projeye girmez, "Gelen Çağrılar" kutusuna düşer ve gerekçe yazılır. Kalıp eşleştirme `senderAllowed` (paylaşılan, testli).
+- **Proje silme:** yalnızca Super Admin (`SPACE_DELETE_SUPER_ADMIN`); son 7 gün içinde `space.backup_created` etkinliği yoksa `SPACE_DELETE_BACKUP_REQUIRED` (409). Diğer roller için düğme pasif.
+- **Sprint askıya alma:** `SprintStatus.SUSPENDED`; yalnızca Super Admin ve Projenin Scrum Master'ı askıya alır/geri açar/siler (`SPRINT_SCRUM_MASTER_ONLY`). Askıdaki sprint salt-okunurdur (`isSprintOpen` false) ve içindeki işlerde değişiklik `SPRINT_SUSPENDED` (409). Geri açınca başlamışsa Aktif, başlamamışsa Planlı olur.
+- **Mesaj eki:** `message_attachments`; `POST conversations/:id/messages/upload` (multipart `body` + en çok 5 `files`, **toplam 16 MB**); yalnızca konuşmanın tarafları indirir.

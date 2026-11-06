@@ -19,6 +19,7 @@ import {
   useUpdateSpace,
 } from '@/features/spaces/queries';
 import { ProjectRolesSection } from '@/features/spaces/project-roles-section';
+import { BugSendersSection, ScrumRolesSection } from '@/features/spaces/scrum-roles-section';
 import { SpaceAvatar } from '@/features/spaces/space-avatar';
 import { ReadinessFields } from '@/features/spaces/readiness-fields';
 import { BackupSection } from '@/features/backup/backup';
@@ -74,6 +75,8 @@ function SpaceSettingsPage() {
 
       {canEdit ? <GeneralForm space={space} /> : <GeneralSummary space={space} />}
       <MembersSection spaceId={spaceId} canEdit={canEdit} />
+      <ScrumRolesSection space={space} canEdit={canEdit} />
+      {canEdit && <BugSendersSection space={space} />}
       {canEdit && <ProjectRolesSection spaceId={spaceId} />}
       <StatusesSection space={space} canEdit={canEdit} />
       <CustomFieldsSection spaceId={spaceId} canEdit={canEdit} />
@@ -308,6 +311,9 @@ function MembersSection({ spaceId, canEdit }: { spaceId: string; canEdit: boolea
 function DangerZone({ space }: { space: SpaceDetail }) {
   const { t } = useTranslation();
   const actions = useStructureActions();
+  const { role } = useCurrentWorkspace();
+  // Projeyi yalnızca Super Admin siler; son 7 gün içinde yedeği alınmamış Proje hiç silinmez.
+  const canDelete = role === 'OWNER' || role === 'ADMIN';
   return (
     <Section title={t('spaceSettings.danger')}>
       <div className="flex flex-wrap gap-2">
@@ -324,6 +330,8 @@ function DangerZone({ space }: { space: SpaceDetail }) {
         )}
         <Button
           variant="destructive"
+          disabled={!canDelete}
+          title={canDelete ? undefined : t('spaceSettings.deleteSuperAdminOnly')}
           onClick={() =>
             actions.open({ kind: 'delete', type: 'SPACE', id: space.id, name: space.name })
           }
@@ -332,6 +340,9 @@ function DangerZone({ space }: { space: SpaceDetail }) {
           {t('spaceSettings.deleteSpace')}
         </Button>
       </div>
+      <p className="text-muted-foreground text-xs">
+        {canDelete ? t('spaceSettings.deleteBackupHint') : t('spaceSettings.deleteSuperAdminOnly')}
+      </p>
     </Section>
   );
 }

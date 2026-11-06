@@ -24,6 +24,7 @@ import {
   HandoverPlanSchema,
   OutsourceResponseSchema,
   UpdateContentAccessRequestSchema,
+  SetMemberLockRequestSchema,
   type CreatedMember,
   InvitationPreviewSchema,
   InvitationsResponseSchema,
@@ -64,6 +65,7 @@ class MembersDto extends createZodDto(MembersResponseSchema) {}
 class UpdateMemberDto extends createZodDto(UpdateMemberRequestSchema) {}
 class HandoverPlanDto extends createZodDto(HandoverPlanSchema) {}
 class OutsourceDto extends createZodDto(OutsourceResponseSchema) {}
+class SetMemberLockDto extends createZodDto(SetMemberLockRequestSchema) {}
 class UpdateContentAccessDto extends createZodDto(UpdateContentAccessRequestSchema) {}
 class InvitationsDto extends createZodDto(InvitationsResponseSchema) {}
 class CreateInvitationsDto extends createZodDto(CreateInvitationsRequestSchema) {}
@@ -120,6 +122,16 @@ export class MembersController {
   @ZodResponse({ type: HandoverPlanDto })
   handover(@Param('userId', ParseUUIDPipe) userId: string): Promise<HandoverPlanDto> {
     return this.members.handoverPlan(userId);
+  }
+
+  @Patch(':userId/lock')
+  @RequirePermission(W.MEMBERS_MANAGE)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async lock(
+    @Param('userId', ParseUUIDPipe) userId: string,
+    @Body() body: SetMemberLockDto,
+  ): Promise<void> {
+    await this.members.setLocked(userId, body.locked);
   }
 
   @Patch(':userId/content-access')

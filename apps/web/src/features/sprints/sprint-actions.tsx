@@ -1,5 +1,5 @@
 import { SPACE_PERMISSIONS as S, type SprintSummary } from '@scrum/shared';
-import { Flag, Play, XCircle } from 'lucide-react';
+import { Flag, Pause, Play, XCircle } from 'lucide-react';
 import { type ReactNode, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -17,7 +17,14 @@ import {
 } from '@/components/ui/dialog';
 import { formatShortDate } from '@/lib/format';
 import { useErrorMessage } from '@/lib/use-error-message';
-import { useCancelSprint, useCompleteSprint, useStartSprint } from './queries';
+import { useSprintAdmin } from './use-sprint-admin';
+import {
+  useCancelSprint,
+  useCompleteSprint,
+  useResumeSprint,
+  useStartSprint,
+  useSuspendSprint,
+} from './queries';
 
 /**
  * Sprint yaşam döngüsü düğmeleri (brief §6.1): planlıda Başlat, aktifte Tamamla, ikisinde İptal.
@@ -29,6 +36,7 @@ export function SprintActions({
   goalRequired,
   plannedOthers,
   archived,
+  scrumMasterId,
 }: {
   sprint: SprintSummary;
   permissions: readonly string[];
@@ -36,11 +44,36 @@ export function SprintActions({
   /** Devredilebilecek diğer planlı sprint'ler. */
   plannedOthers: readonly SprintSummary[];
   archived: boolean;
+  /** Projenin Scrum Master'ı; sprint askıya alma/geri açma ona ve Super Admin'e açıktır. */
+  scrumMasterId?: string | null;
 }) {
   const { t } = useTranslation();
+  const sprintAdmin = useSprintAdmin(scrumMasterId);
+  const errorMessage = useErrorMessage();
+  const suspend = useSuspendSprint();
+  const resume = useResumeSprint();
   const [open, setOpen] = useState<'start' | 'complete' | 'cancel' | null>(null);
   const isOpen = sprint.status === 'PLANNED' || sprint.status === 'ACTIVE';
-  if (archived || !isOpen) return null;
+  if (archived) return null;
+  if (sprint.status === 'SUSPENDED') {
+    return sprintAdmin ? (
+      <Button
+        size="sm"
+        variant="outline"
+        disabled={resume.isPending}
+        onClick={() =>
+          void resume
+            .mutateAsync(sprint.id)
+            .then(() => toast.success(t('sprints.resumed', { name: sprint.name })))
+            .catch((e: unknown) => toast.error(errorMessage(e)))
+        }
+      >
+        <Play />
+        {t('sprints.resume')}
+      </Button>
+    ) : null;
+  }
+  if (!isOpen) return null;
 
   const canStart = permissions.includes(S.SPRINT_START) && sprint.status === 'PLANNED';
   const canComplete = permissions.includes(S.SPRINT_COMPLETE) && sprint.status === 'ACTIVE';
@@ -58,6 +91,22 @@ export function SprintActions({
         <Button size="sm" variant="outline" onClick={() => setOpen('complete')}>
           <Flag />
           {t('sprints.complete')}
+        </Button>
+      )}
+      {sprintAdmin && (
+        <Button
+          size="sm"
+          variant="ghost"
+          disabled={suspend.isPending}
+          onClick={() =>
+            void suspend
+              .mutateAsync(sprint.id)
+              .then(() => toast.success(t('sprints.suspended', { name: sprint.name })))
+              .catch((e: unknown) => toast.error(errorMessage(e)))
+          }
+        >
+          <Pause />
+          <span className="max-sm:sr-only">{t('sprints.suspend')}</span>
         </Button>
       )}
       {canCancel && (

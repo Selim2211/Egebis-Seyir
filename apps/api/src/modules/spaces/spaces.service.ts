@@ -210,6 +210,8 @@ export class SpacesService {
       where: { id: spaceId, deletedAt: null },
       include: {
         statuses: { where: { archivedAt: null }, orderBy: { rank: 'asc' } },
+        productOwner: { select: { id: true, name: true } },
+        scrumMaster: { select: { id: true, name: true } },
         members: {
           where: { userId: this.ctx.actorId },
           select: { role: { select: { key: true } } },
@@ -232,6 +234,9 @@ export class SpacesService {
       dorItems: space.dorItems,
       dodEnforced: space.dodEnforced,
       estimationScale: space.estimationScale,
+      productOwner: space.productOwner,
+      scrumMaster: space.scrumMaster,
+      bugSenders: space.bugSenders,
       archived: space.archivedAt !== null,
       myRole: (space.members[0]?.role.key as SpaceRole | undefined) ?? null,
       permissions: [...(this.cls.get('spacePermissions') ?? [])],

@@ -29,7 +29,7 @@
     "spaces": "Projects",
     "designSystem": "Design system",
     "inviteMembers": "Invite members",
-    "settings": "Settings",
+    "settings": "System administration",
     "openMenu": "Open menu",
     "closeMenu": "Close menu",
     "comingSoon": "Coming in the next step",
@@ -39,7 +39,8 @@
     "workload": "Workload",
     "admin": "Admin dashboard",
     "bugBox": "Bug Box",
-    "analytics": "Analytics"
+    "analytics": "Analytics",
+    "menu": "Menu"
   },
   "spaces": {
     "emptyTitle": "No projects yet",
@@ -226,6 +227,12 @@
     "colActions": "Actions",
     "roleFor": "Role for {{name}}",
     "remove": "Remove from workspace",
+    "lock": "Lock",
+    "unlock": "Unlock",
+    "locked": "Locked",
+    "lockConfirm": "Lock {{name}}? They can sign in but cannot access anything; their data and assignments stay.",
+    "lockedDone": "Member locked.",
+    "unlockedDone": "Member unlocked.",
     "removeConfirm": "Remove {{name}} from the workspace? They will lose all access.",
     "removed": "Member removed.",
     "roleChanged": "Role updated.",
@@ -335,8 +342,11 @@
     "ALREADY_MEMBER": "This person is already a workspace member.",
     "INVITE_REQUIRES_LOGIN": "Sign in to accept the invitation.",
     "INVITE_EMAIL_MISMATCH": "This invitation was sent to a different email address.",
+    "INVITE_ROLE_NOT_ALLOWED": "Invitations can only grant Member or Guest; a Super Admin can promote the person from the list afterwards.",
     "LAST_OWNER": "The workspace must keep at least one Owner.",
     "OWNER_ONLY": "Only an Owner can do this.",
+    "MEMBER_LOCKED": "Your account is locked; contact a Super Admin.",
+    "CANNOT_LOCK_SELF": "You cannot lock your own account.",
     "WORK_ITEM_PARENT_REQUIRED": "A sub-task must have a parent item.",
     "WORK_ITEM_PARENT_NOT_ALLOWED": "This item can't be placed under the selected parent.",
     "SPACE_KEY_TAKEN": "This key has been used before; choose another.",
@@ -366,7 +376,7 @@
     "ATTACHMENT_LIMIT": "An item can have at most 50 attachments.",
     "AVATAR_INVALID": "The photo must be PNG, JPEG or WebP and at most 2 MB.",
     "SCRUM_DISABLED": "Scrum is turned off in this Project; sprints and the Backlog are unavailable.",
-    "SPRINT_READONLY": "A completed or cancelled sprint cannot be changed.",
+    "SPRINT_READONLY": "A completed, cancelled or suspended sprint cannot be changed.",
     "SPRINT_NOT_PLANNED": "Only planned sprints can be deleted.",
     "SPRINT_DATES_LOCKED": "The dates of an active sprint cannot be changed.",
     "SPRINT_ITEM_NOT_ELIGIBLE": "Only top-level Tasks and Bugs can join a sprint; completed items cannot.",
@@ -459,7 +469,15 @@
     "TICKET_COMPANY_EXISTS": "A company with this name already exists.",
     "TICKET_COMPANY_CYCLE": "That parent company would create a cycle.",
     "TICKET_SPACE_INVALID": "The selected project is not valid (deleted, archived or the inbox).",
-    "POINTS_LOCKED": "Only the Project Manager can change Story Points once set."
+    "POINTS_LOCKED": "Only the Project Manager can change Story Points once set.",
+    "SPRINT_SUSPENDED": "This sprint is suspended; nothing can be changed until it is resumed.",
+    "SPRINT_SCRUM_MASTER_ONLY": "Only a Super Admin or the Project's Scrum Master can delete or suspend a sprint.",
+    "SPRINT_NOT_SUSPENDED": "This sprint is not suspended.",
+    "SCRUM_ROLE_NOT_MEMBER": "The Product Owner and Scrum Master must be members of the Project.",
+    "SPACE_DELETE_SUPER_ADMIN": "Only a Super Admin can delete a Project.",
+    "SPACE_DELETE_BACKUP_REQUIRED": "A Project without a backup from the last 7 days cannot be deleted. Take a backup from the Project settings' Backup section first.",
+    "MESSAGE_ATTACHMENTS_TOO_BIG": "A message’s attachments can total at most 16 MB.",
+    "MESSAGE_ATTACHMENTS_LIMIT": "A message can have at most 5 attachments."
   },
   "spaceRoles": {
     "PROJECT_MANAGER": "Project Manager",
@@ -543,7 +561,8 @@
     "archivedBanner": "This item is archived and hidden from the sidebar.",
     "breadcrumb": "Location",
     "notFoundTitle": "Not found",
-    "notFoundBody": "This item may have been deleted, or you do not have access."
+    "notFoundBody": "This item may have been deleted, or you do not have access.",
+    "deleteSpaceBackup": "A Project without a backup from the last 7 days cannot be deleted; take one from the Project settings Backup section first."
   },
   "spacePage": {
     "lists": "Folders and lists",
@@ -580,13 +599,15 @@
     "statusesHelp": "Status names, colors and workflow become customizable in Phase 2.",
     "danger": "Archive and delete",
     "archiveSpace": "Archive Project",
-    "deleteSpace": "Delete Project"
+    "deleteSpace": "Delete Project",
+    "deleteSuperAdminOnly": "Only a Super Admin can delete a Project.",
+    "deleteBackupHint": "A backup from the last 7 days must exist (Backup section) before the Project can be deleted."
   },
   "generalSettings": {
     "title": "General",
     "subtitle": "Workspace name and Project creation permission.",
     "name": "Workspace name",
-    "membersCanCreateSpaces": "Members can create Projects",
+    "membersCanCreateSpaces": "Company employee members can create Projects",
     "membersCanCreateSpacesHelp": "When off, only Owners and Admins can create Projects.",
     "aiEstimate": "AI Story Point suggestion",
     "aiEstimateEnabled": "Suggest Story Points from the description",
@@ -882,7 +903,8 @@
       "PLANNED": "Planned",
       "ACTIVE": "Active",
       "COMPLETED": "Completed",
-      "CANCELLED": "Cancelled"
+      "CANCELLED": "Cancelled",
+      "SUSPENDED": "Suspended"
     }
   },
   "search": {
@@ -1053,7 +1075,8 @@
       "PLANNED": "Planned",
       "ACTIVE": "Active",
       "COMPLETED": "Completed",
-      "CANCELLED": "Cancelled"
+      "CANCELLED": "Cancelled",
+      "SUSPENDED": "Suspended"
     },
     "errors": {
       "required": "This field is required.",
@@ -1087,7 +1110,11 @@
     "scopeChangeRemove": "{{name}} is active; removing {{count}} items counts as a scope change and shows in reports.",
     "scopeChangeConfirm": "Continue",
     "notReadyWarn": "{{count}} items do not meet the Definition of Ready.",
-    "treeEmpty": "No sprints yet"
+    "treeEmpty": "No sprints yet",
+    "suspend": "Suspend",
+    "resume": "Resume",
+    "suspended": "{{name}} suspended.",
+    "resumed": "{{name}} resumed."
   },
   "board": {
     "title": "Sprint board",
@@ -1116,7 +1143,8 @@
       "ok": "WIP: {{count}} / {{limit}}",
       "full": "WIP limit reached: {{count}} / {{limit}}",
       "over": "WIP limit exceeded: {{count}} / {{limit}}"
-    }
+    },
+    "readOnlySuspended": "This sprint is suspended: nothing can be changed until it is resumed. A Super Admin or the Scrum Master can resume it."
   },
   "scrumTabs": {
     "label": "Scrum"
@@ -1970,7 +1998,13 @@
     "delete": "Delete message",
     "write": "Write a message",
     "placeholder": "Write a message… (Enter sends, Shift+Enter for a new line)",
-    "send": "Send"
+    "send": "Send",
+    "attach": "Attach files",
+    "attachHint": "Up to 5 files, 16 MB total.",
+    "removeFile": "Remove {{name}}",
+    "attachmentsTooMany": "A message can have at most 5 attachments.",
+    "attachmentsTooBig": "Attachments cannot total more than 16 MB.",
+    "download": "Download {{name}}"
   },
   "teams": {
     "title": "Teams",
@@ -2012,6 +2046,9 @@
     "forbidden": "Only Owners and Admins can view the audit log.",
     "empty": "No entries match this filter.",
     "export": "Download CSV",
+    "exportFiltered": "Filtered results only",
+    "exportAll": "All records",
+    "exportFailed": "Could not download the CSV.",
     "all": "All",
     "from": "From date",
     "to": "To date",
@@ -3352,5 +3389,26 @@
     "activity": "Activity in this Project",
     "noActivity": "No activity in this Project.",
     "notMember": "Removed from Project"
+  },
+  "scrumRoles": {
+    "title": "Product Owner and Scrum Master",
+    "description": "Each Project has one Product Owner and one Scrum Master (a person can hold the role in several Projects). Epics and Tasks created in the Backlog are owned by the Product Owner automatically; deleting or suspending a sprint belongs to the Scrum Master.",
+    "productOwner": "Product Owner",
+    "scrumMaster": "Scrum Master",
+    "none": "Not assigned",
+    "saved": "Saved."
+  },
+  "bugSenders": {
+    "title": "Email addresses allowed to send Bugs",
+    "description": "Incoming addresses that may open Bugs in this Project by email. Use * (any length) and ? (one character) in the name part. An empty list means no restriction; if the sender is not listed the Bug does not enter this Project and lands in the Incoming Tickets inbox.",
+    "placeholder": "support@company.com\n*@customer.com\nreport?@company.com",
+    "hint": "One address per line. Example: support*@company.com",
+    "invalid": "Invalid address: {{list}}",
+    "saved": "Sender list saved.",
+    "save": "Save list"
+  },
+  "locked": {
+    "title": "Your account is locked",
+    "body": "An administrator locked your account; your data and assignments are kept. Contact a Super Admin to get access back."
   }
 }

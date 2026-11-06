@@ -27,7 +27,9 @@ import {
   NameRequestSchema,
   PutSpaceMemberRequestSchema,
   ProjectRolesResponseSchema,
+  PutBugSendersRequestSchema,
   PutProjectRoleRequestSchema,
+  PutScrumRolesRequestSchema,
   type ProjectRolesResponse,
   SPACE_PERMISSIONS as S,
   SpaceDetailSchema,
@@ -70,6 +72,8 @@ class ListDetailDto extends createZodDto(ListDetailSchema) {}
 class SpaceMembersDto extends createZodDto(SpaceMembersResponseSchema) {}
 class PutSpaceMemberDto extends createZodDto(PutSpaceMemberRequestSchema) {}
 class ProjectRolesDto extends createZodDto(ProjectRolesResponseSchema) {}
+class PutScrumRolesDto extends createZodDto(PutScrumRolesRequestSchema) {}
+class PutBugSendersDto extends createZodDto(PutBugSendersRequestSchema) {}
 class PutProjectRoleDto extends createZodDto(PutProjectRoleRequestSchema) {}
 class ArchiveDto extends createZodDto(ArchiveResponseSchema) {}
 
@@ -211,6 +215,26 @@ export class SpacesController {
     @Body() body: unknown,
   ): Promise<void> {
     await this.members.remove(spaceId, userId, parseRemoveBody(body));
+  }
+
+  @Put(':spaceId/scrum-roles')
+  @RequireSpacePermission(S.SPACE_SETTINGS)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async putScrumRoles(
+    @Uuid('spaceId') spaceId: string,
+    @Body() body: PutScrumRolesDto,
+  ): Promise<void> {
+    await this.members.putScrumRoles(spaceId, body);
+  }
+
+  @Put(':spaceId/bug-senders')
+  @RequireSpacePermission(S.SPACE_SETTINGS)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async putBugSenders(
+    @Uuid('spaceId') spaceId: string,
+    @Body() body: PutBugSendersDto,
+  ): Promise<void> {
+    await this.members.putBugSenders(spaceId, body);
   }
 
   // ---------- Proje bazında rol ayarı (ADR-161) ----------

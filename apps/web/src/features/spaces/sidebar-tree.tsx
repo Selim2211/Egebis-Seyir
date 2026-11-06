@@ -232,6 +232,9 @@ function SpaceNode({
   const setExpanded = useUiStore((s) => s.setExpanded);
   const canManage = space.permissions.includes(S.LIST_MANAGE);
   const canSettings = space.permissions.includes(S.SPACE_SETTINGS);
+  // Projeyi yalnızca Super Admin siler (sunucu da denetler).
+  const { role: workspaceRole } = useCurrentWorkspace();
+  const canDeleteSpace = workspaceRole === 'OWNER' || workspaceRole === 'ADMIN';
   const favorite = favorites.has(favKey('SPACE', space.id));
   const updateSpace = (fn: (s: TreeSpace) => TreeSpace) => (h: HierarchyResponse) => ({
     ...h,
@@ -293,15 +296,22 @@ function SpaceNode({
                   <Archive />
                   {t('structure.archive')}
                 </DropdownMenuItem>
-                <DropdownMenuItem
-                  variant="destructive"
-                  onSelect={() =>
-                    actions.open({ kind: 'delete', type: 'SPACE', id: space.id, name: space.name })
-                  }
-                >
-                  <Trash2 />
-                  {t('structure.delete')}
-                </DropdownMenuItem>
+                {canDeleteSpace && (
+                  <DropdownMenuItem
+                    variant="destructive"
+                    onSelect={() =>
+                      actions.open({
+                        kind: 'delete',
+                        type: 'SPACE',
+                        id: space.id,
+                        name: space.name,
+                      })
+                    }
+                  >
+                    <Trash2 />
+                    {t('structure.delete')}
+                  </DropdownMenuItem>
+                )}
               </>
             )}
           </>
@@ -798,9 +808,17 @@ function ArchiveDeleteItems({
   );
 }
 
-function SectionTitle({ children, action }: { children: ReactNode; action?: ReactNode }) {
+export function SectionTitle({
+  children,
+  action,
+  className,
+}: {
+  children: ReactNode;
+  action?: ReactNode;
+  className?: string;
+}) {
   return (
-    <div className="mt-4 mb-1 flex h-6 items-center px-2">
+    <div className={cn('mt-4 mb-1 flex h-6 items-center px-2', className)}>
       <span className="text-muted-foreground text-[11px] font-semibold tracking-wide uppercase">
         {children}
       </span>

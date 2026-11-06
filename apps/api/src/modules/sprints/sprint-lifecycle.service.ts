@@ -9,7 +9,7 @@ import { NotificationsService } from '../notifications/notifications.service';
 import { isUniqueViolation, notFound } from '../spaces/space-errors';
 import { asJson, fail, type TenantTx } from '../work-items/item-support';
 import { SprintReportsService } from './sprint-reports.service';
-import { conflict, countedItems, loadScrumSpace } from './sprint-support';
+import { assertSprintAdmin, conflict, countedItems, loadScrumSpace } from './sprint-support';
 
 /** Sprint başlatma, tamamlama ve iptal (Faz 2.3, brief §6.1, ADR-064). */
 @Injectable()
@@ -169,6 +169,60 @@ export class SprintLifecycleService {
         entityId: sprintId,
         action: 'sprint.cancelled',
         changes: asJson({ name: sprint.name, returnedItems: items.length }),
+      });
+    });
+  }
+
+  /** Planlı/aktif sprint askıya alınır; geri açılana kadar hiçbir işlem yapılamaz. Yalnızca Super Admin ve Scrum Master. */
+  async suspend(sprintId: string): Promise<void> {
+    const { workspaceId, actorId } = this.ctx;
+    const { sprint } = await this.load(sprintId);
+    await assertSprintAdmin(this.tenant.db, sprint.spaceId, {
+      id: actorId,
+      tier: this.cls.get('workspaceRole'),
+    });
+    if (sprint.status !== 'PLANNED' && sprint.status !== 'ACTIVE') {
+      throw conflict(ERROR_CODES.SPRINT_READONLY);
+    }
+    await this.tenant.db.$transaction(async (tx) => {
+      await tx.sprint.update({ where: { id: sprintId }, data: { status: 'SUSPENDED' } });
+      await this.activity.record(tx, {
+        workspaceId,
+        actorId,
+        entityType: 'sprint',
+        entityId: sprintId,
+        action: 'sprint.suspended',
+        changes: asJson({ name: sprint.name, from: sprint.status }),
+      });
+    });
+  }
+
+  /** Askıdaki sprint, başlamışsa Aktif, başlamamışsa Planlı durumuna döner. */
+  async resume(sprintId: string): Promise<void> {
+    const { workspaceId, actorId } = this.ctx;
+    const db = this.tenant.db;
+    const { sprint } = await this.load(sprintId);
+    await assertSprintAdmin(db, sprint.spaceId, {
+      id: actorId,
+      tier: this.cls.get('workspaceRole'),
+    });
+    if (sprint.status !== 'SUSPENDED') throw conflict(ERROR_CODES.SPRINT_NOT_SUSPENDED);
+    const next = sprint.startedAt ? 'ACTIVE' : 'PLANNED';
+    if (next === 'ACTIVE') {
+      const active = await db.sprint.findFirst({
+        where: { spaceId: sprint.spaceId, status: 'ACTIVE' },
+      });
+      if (active) throw conflict(ERROR_CODES.SPRINT_ACTIVE_EXISTS, { name: active.name });
+    }
+    await db.$transaction(async (tx) => {
+      await tx.sprint.update({ where: { id: sprintId }, data: { status: next } });
+      await this.activity.record(tx, {
+        workspaceId,
+        actorId,
+        entityType: 'sprint',
+        entityId: sprintId,
+        action: 'sprint.resumed',
+        changes: asJson({ name: sprint.name, to: next }),
       });
     });
   }

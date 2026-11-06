@@ -460,13 +460,13 @@ export class BacklogService {
       sprint: {
         id: string;
         name: string;
-        status: 'PLANNED' | 'ACTIVE' | 'COMPLETED' | 'CANCELLED';
+        status: 'PLANNED' | 'ACTIVE' | 'COMPLETED' | 'CANCELLED' | 'SUSPENDED';
       } | null;
     },
     target: {
       id: string;
       name: string;
-      status: 'PLANNED' | 'ACTIVE' | 'COMPLETED' | 'CANCELLED';
+      status: 'PLANNED' | 'ACTIVE' | 'COMPLETED' | 'CANCELLED' | 'SUSPENDED';
     } | null,
     workspaceId: string,
     actorId: string,

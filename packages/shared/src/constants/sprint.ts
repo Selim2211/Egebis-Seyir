@@ -1,5 +1,11 @@
 /** Sprint durumları (brief §5.6). */
-export const SPRINT_STATUSES = ['PLANNED', 'ACTIVE', 'COMPLETED', 'CANCELLED'] as const;
+export const SPRINT_STATUSES = [
+  'PLANNED',
+  'ACTIVE',
+  'COMPLETED',
+  'CANCELLED',
+  'SUSPENDED',
+] as const;
 export type SprintStatus = (typeof SPRINT_STATUSES)[number];
 
 /** Sprint'e eklenme nedeni (ADR-061): aktif sprint'e sonradan ekleme/çıkarma scope change sayılır. */

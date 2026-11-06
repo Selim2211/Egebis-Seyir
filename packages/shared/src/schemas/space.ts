@@ -3,6 +3,7 @@ import { ESTIMATION_SCALES, SPRINT_LENGTH_WEEKS } from '../constants/estimation'
 import { SPACE_ICONS, SPACE_KEY_PATTERN } from '../constants/space';
 import { STATUS_CATEGORIES } from '../constants/work-item';
 import { PROJECT_CONFIGURABLE_PERMISSIONS, SPACE_ROLES } from '../permissions/roles';
+import { BUG_SENDER_PATTERN } from '../domain/bug-senders';
 import { RoleKeySchema } from './role';
 
 /** Space, Folder ve List adları. */
@@ -85,6 +86,8 @@ const spaceSummary = {
   permissions: z.array(z.string()),
 };
 
+const personRef = z.object({ id: z.uuid(), name: z.string() });
+
 /** GET /api/workspaces/:workspaceId/spaces/:spaceId */
 export const SpaceDetailSchema = z.object({
   ...spaceSummary,
@@ -95,6 +98,11 @@ export const SpaceDetailSchema = z.object({
   dorItems: z.array(z.string()),
   dodEnforced: z.boolean(),
   estimationScale: z.enum(ESTIMATION_SCALES),
+  /** Projenin tek Product Owner'ı ve Scrum Master'ı. */
+  productOwner: personRef.nullable(),
+  scrumMaster: personRef.nullable(),
+  /** Bug gönderebilecek gelen e-posta adresleri; boşsa kısıtlama yok. */
+  bugSenders: z.array(z.string()),
   archived: z.boolean(),
   myRole: RoleKeySchema.nullable(),
   statuses: z.array(StatusSchema),
@@ -220,6 +228,22 @@ export type SpaceMembersResponse = z.infer<typeof SpaceMembersResponseSchema>;
 /** PUT .../spaces/:spaceId/members/:userId — ekler veya rolünü değiştirir. */
 export const PutSpaceMemberRequestSchema = z.object({ role: RoleKeySchema });
 export type PutSpaceMemberRequest = z.infer<typeof PutSpaceMemberRequestSchema>;
+
+/** PUT .../spaces/:spaceId/scrum-roles — Projenin Product Owner'ı ve Scrum Master'ı (üye olmalı). */
+export const PutScrumRolesRequestSchema = z.object({
+  productOwnerId: z.uuid().nullable(),
+  scrumMasterId: z.uuid().nullable(),
+});
+export type PutScrumRolesRequest = z.infer<typeof PutScrumRolesRequestSchema>;
+
+/** PUT .../spaces/:spaceId/bug-senders — izinli gönderen kalıpları (isim kısmında * ve ?). */
+export const PutBugSendersRequestSchema = z.object({
+  senders: z
+    .array(z.string().trim().toLowerCase().regex(BUG_SENDER_PATTERN).max(200))
+    .max(200)
+    .refine((l) => new Set(l).size === l.length, { message: 'DUPLICATE_ITEMS' }),
+});
+export type PutBugSendersRequest = z.infer<typeof PutBugSendersRequestSchema>;
 
 // ---------- Proje bazında rol ayarı (ADR-161) ----------
 

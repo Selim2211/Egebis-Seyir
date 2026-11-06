@@ -100,6 +100,8 @@ enum SprintStatus {
   ACTIVE
   COMPLETED
   CANCELLED
+  /// Askıya alınmış: yalnızca Super Admin ve Scrum Master geri açabilir; başka işlem yapılamaz.
+  SUSPENDED
 }
 
 enum SprintItemAction {
@@ -156,6 +158,8 @@ model User {
   spaceMembers     SpaceMember[]
   favorites        Favorite[]
   reportedItems    WorkItem[]           @relation("Reporter")
+  productOwnerOf   Space[]              @relation("SpaceProductOwner")
+  scrumMasterOf    Space[]              @relation("SpaceScrumMaster")
   assignedItems    WorkItemAssignee[]
   watchedItems     WorkItemWatcher[]
   comments         Comment[]
@@ -205,6 +209,8 @@ model Session {
   revokedAt  DateTime? @db.Timestamptz
 
   @@index([userId])
+  /// Üye listesindeki "son etkinlik" için (kişi başına en yeni oturum).
+  @@index([userId, lastSeenAt])
   @@map("sessions")
 }
 
@@ -332,6 +338,8 @@ model Membership {
   role          Role          @relation(fields: [roleId], references: [id])
   /// Dış kaynağın (Guest) doküman/video erişimi; Super Admin verir (ADR-152).
   contentAccess ContentAccess @default(NONE)
+  /// Kilitli üye workspace'e erişemez; veri ve atamalar durur.
+  lockedAt      DateTime?     @db.Timestamptz
   createdAt     DateTime      @default(now()) @db.Timestamptz
 
   @@unique([workspaceId, userId])
@@ -411,6 +419,13 @@ model Space {
   estimationScale    EstimationScale @default(FIBONACCI)
   /// Proje bazında rol ayarı (ADR-161): { PROJECT_MANAGER?: string[], PROJECT_MEMBER?: string[] }.
   roleOverrides      Json?
+  /// Projenin Product Owner'ı ve Scrum Master'ı: her biri tek kişi (bir kişi birden çok Projede olabilir).
+  productOwnerId     String?         @db.Uuid
+  productOwner       User?           @relation("SpaceProductOwner", fields: [productOwnerId], references: [id], onDelete: SetNull)
+  scrumMasterId      String?         @db.Uuid
+  scrumMaster        User?           @relation("SpaceScrumMaster", fields: [scrumMasterId], references: [id], onDelete: SetNull)
+  /// Bu Projeye Bug gönderebilecek gelen e-posta adresleri; ad kısmında * ve ? joker kullanılabilir.
+  bugSenders         String[]        @default([])
   rank               String
   /// Okunabilir ID sayacı (ADR-044); öğe oluşturulurken atomik artırılır.
   itemCounter        Int             @default(0)
@@ -1036,8 +1051,26 @@ model Message {
   /// Gönderen sildiğinde dolar; içerik arayüze gönderilmez.
   deletedAt      DateTime?    @db.Timestamptz
 
+  attachments MessageAttachment[]
+
   @@index([conversationId, createdAt])
   @@map("messages")
+}
+
+/// Mesaja eklenen dosya (en çok 5 dosya, toplam 16 MB); yalnızca konuşmanın tarafları indirebilir.
+model MessageAttachment {
+  id          String   @id @default(uuid(7)) @db.Uuid
+  workspaceId String   @db.Uuid
+  messageId   String   @db.Uuid
+  message     Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  fileName    String
+  mimeType    String
+  size        Int
+  storageKey  String   @unique
+  createdAt   DateTime @default(now()) @db.Timestamptz
+
+  @@index([messageId])
+  @@map("message_attachments")
 }
 
 /// Ekip (Faz 7.7, ADR-101): kullanıcıları gruplar; göreve toplu atamada kısayol olarak kullanılır.

@@ -121,7 +121,7 @@ function AppUrlForm({ initial }: { initial: AppUrlSettings }) {
         {initial.custom && (
           <Button
             type="button"
-            variant="ghost"
+            variant="outline"
             disabled={save.isPending}
             onClick={() => save.mutate(null)}
             className="ml-auto"

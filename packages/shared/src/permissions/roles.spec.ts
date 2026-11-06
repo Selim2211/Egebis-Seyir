@@ -70,7 +70,7 @@ describe('Varsayılan workspace rol matrisi (brief §7.1)', () => {
     [W.MEMBERS_MANAGE, ['OWNER', 'ADMIN']],
     [W.WORKSPACE_SETTINGS, ['OWNER', 'ADMIN']],
     [W.AUDIT_VIEW, ['OWNER', 'ADMIN']],
-    [W.SPACE_CREATE, ['OWNER', 'ADMIN', 'MEMBER']],
+    [W.SPACE_CREATE, ['OWNER', 'ADMIN']],
   ];
 
   it.each(expected)('%s → %j', (permission, roles) => {

@@ -7,7 +7,7 @@ import {
   WORKSPACE_ROLES,
 } from '@scrum/shared';
 import { createFileRoute } from '@tanstack/react-router';
-import { Clock, Copy, Mail, Send, UserMinus, UserPlus } from 'lucide-react';
+import { Clock, Copy, Lock, LockOpen, Mail, Send, UserMinus, UserPlus } from 'lucide-react';
 import { type FormEvent, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -31,6 +31,7 @@ import {
   useInvite,
   useMembers,
   useRemoveMember,
+  useSetMemberLock,
   useResendInvitation,
   useRevokeInvitation,
 } from '@/features/workspace/queries';
@@ -523,6 +524,7 @@ function MemberRow({
   const roleLabel = useRoleLabel();
   const changeRole = useChangeMemberRole();
   const remove = useRemoveMember();
+  const setLock = useSetMemberLock();
   const errorMessage = useErrorMessage();
   const isYou = member.userId === user.id;
   const ownerCount = members.filter((m) => m.role === 'OWNER').length;
@@ -541,6 +543,16 @@ function MemberRow({
       { userId: member.userId, role },
       {
         onSuccess: () => toast.success(t('members.roleChanged')),
+        onError: (e) => toast.error(errorMessage(e)),
+      },
+    );
+
+  const onLock = () =>
+    setLock.mutate(
+      { userId: member.userId, locked: !member.locked },
+      {
+        onSuccess: () =>
+          toast.success(t(member.locked ? 'members.unlockedDone' : 'members.lockedDone')),
         onError: (e) => toast.error(errorMessage(e)),
       },
     );
@@ -575,6 +587,11 @@ function MemberRow({
               {isYou && (
                 <span className="text-muted-foreground font-normal"> ({t('common.you')})</span>
               )}
+              {member.locked && (
+                <span className="ml-2 rounded bg-amber-100 px-1.5 py-0.5 text-[11px] font-medium text-amber-800 dark:bg-amber-500/20 dark:text-amber-300">
+                  {t('members.locked')}
+                </span>
+              )}
             </span>
             <span className="text-muted-foreground block truncate text-xs">{member.email}</span>
           </span>
@@ -606,6 +623,18 @@ function MemberRow({
       </td>
       {canManage && (
         <td className="px-4 py-2.5 text-right">
+          {!isYou && allowed(member.role === 'OWNER' ? 'ADMIN' : member.role) && (
+            <Button
+              variant="ghost"
+              size="icon"
+              title={t(member.locked ? 'members.unlock' : 'members.lock')}
+              aria-label={`${t(member.locked ? 'members.unlock' : 'members.lock')}: ${member.name}`}
+              disabled={setLock.isPending}
+              onClick={onLock}
+            >
+              {member.locked ? <LockOpen /> : <Lock />}
+            </Button>
+          )}
           {!isYou && allowed(null) && (
             <Button
               variant="ghost"

@@ -68,6 +68,10 @@ export class InvitationsService {
     const workspaceId = this.cls.get('workspaceId')!;
     const actorId = this.cls.get('userId')!;
     const unique = [...new Set(emails)];
+    // Davetle yalnızca Member/Guest (ve özel roller) verilir; Admin'i sonradan Super Admin atar.
+    if (role === 'OWNER' || role === 'ADMIN') {
+      throw new ForbiddenException({ code: ERROR_CODES.INVITE_ROLE_NOT_ALLOWED });
+    }
     // Space paylaşımı yalnızca Guest daveti içindir (ADR-043).
     const sharedSpaceIds = [...new Set(spaceIds)];
     if (sharedSpaceIds.length > 0) {

@@ -56,7 +56,7 @@ export const EffortSheetSchema = z.object({
   sprint: z.object({
     id: z.uuid(),
     name: z.string(),
-    status: z.enum(['PLANNED', 'ACTIVE', 'COMPLETED', 'CANCELLED']),
+    status: z.enum(['PLANNED', 'ACTIVE', 'COMPLETED', 'CANCELLED', 'SUSPENDED']),
     startDate: DateOnlySchema,
     endDate: DateOnlySchema,
   }),
@@ -113,7 +113,7 @@ export const MemberProfileSchema = z.object({
     z.object({
       id: z.uuid(),
       name: z.string(),
-      status: z.enum(['PLANNED', 'ACTIVE', 'COMPLETED', 'CANCELLED']),
+      status: z.enum(['PLANNED', 'ACTIVE', 'COMPLETED', 'CANCELLED', 'SUSPENDED']),
       startDate: DateOnlySchema,
       endDate: DateOnlySchema,
       committed: z.number(),

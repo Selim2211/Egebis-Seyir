@@ -31,7 +31,23 @@ export async function loadScrumSpace(db: TenantClient, spaceId: string, write: b
   return space;
 }
 
-/** Tamamlanmış/iptal sprint salt-okunurdur (brief §6.1.8). */
+/** Sprint silme ve askıya alma yalnızca Super Admin ve Projenin Scrum Master'ına açıktır. */
+export async function assertSprintAdmin(
+  db: TenantClient,
+  spaceId: string,
+  actor: { id: string; tier: string | undefined },
+): Promise<void> {
+  if (actor.tier === 'OWNER' || actor.tier === 'ADMIN') return;
+  const space = await db.space.findFirst({
+    where: { id: spaceId },
+    select: { scrumMasterId: true },
+  });
+  if (space?.scrumMasterId !== actor.id) {
+    throw new HttpException({ code: ERROR_CODES.SPRINT_SCRUM_MASTER_ONLY }, HttpStatus.FORBIDDEN);
+  }
+}
+
+/** Tamamlanmış/iptal/askıdaki sprint salt-okunurdur (brief §6.1.8). */
 export function assertOpen(sprint: Pick<Sprint, 'status'>): void {
   if (!isSprintOpen(sprint.status)) throw conflict(ERROR_CODES.SPRINT_READONLY);
 }

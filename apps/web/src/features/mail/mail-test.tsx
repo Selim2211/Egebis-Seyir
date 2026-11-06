@@ -240,7 +240,7 @@ function MailForm({ initial }: { initial: MailSettings }) {
         {initial.source === 'APP' && (
           <Button
             type="button"
-            variant="ghost"
+            variant="outline"
             onClick={() => reset.mutate()}
             disabled={busy}
             className="ml-auto"

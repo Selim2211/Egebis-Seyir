@@ -60,6 +60,7 @@ import {
 } from './queries';
 import { SprintActions } from './sprint-actions';
 import { SprintDeleteDialog } from './sprint-delete-dialog';
+import { useSprintAdmin } from './use-sprint-admin';
 import { SprintDialog } from './sprint-dialog';
 import { RestoreSprintDialog } from '@/features/backup/backup';
 import { PromoteEpicDialog } from '@/features/work-items/promote-epic-dialog';
@@ -134,6 +135,7 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
   const [collapsed, setCollapsed] = useState<ReadonlySet<string>>(new Set());
   const [dialog, setDialog] = useState<DialogState>(null);
   const [deleting, setDeleting] = useState<SprintSummary | null>(null);
+  const sprintAdmin = useSprintAdmin(space.data?.scrumMaster?.id);
   const [importing, setImporting] = useState(false);
   const [grouping, setGrouping] = useState(false);
   const [nestingSelected, setNestingSelected] = useState(false);
@@ -663,7 +665,7 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
                   onCopy={() => copyList(detail?.data?.items ?? [])}
                   onMove={(itemId, target) => moveItems([itemId], target)}
                   onEdit={() => setDialog({ kind: 'edit', sprint })}
-                  onDelete={() => setDeleting(sprint)}
+                  onDelete={sprintAdmin ? () => setDeleting(sprint) : undefined}
                   actions={
                     <SprintActions
                       sprint={sprint}
@@ -673,6 +675,7 @@ export function BacklogPage({ spaceId }: { spaceId: string }) {
                         (s) => s.status === 'PLANNED' && s.id !== sprint.id,
                       )}
                       archived={space.data.archived}
+                      scrumMasterId={space.data.scrumMaster?.id ?? null}
                     />
                   }
                 />

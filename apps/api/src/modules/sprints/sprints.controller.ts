@@ -168,6 +168,21 @@ export class SprintsController {
   }
 
   /** Yalnızca Product Owner ve yöneticiler (brief §6.1.6). */
+  /** Askıya alma ve geri açma: Super Admin ve Scrum Master (servis içinde denetlenir). */
+  @Post('sprints/:sprintId/suspend')
+  @RequireSpacePermission(S.SPACE_VIEW)
+  @HttpCode(NO_CONTENT)
+  suspend(@Uuid('sprintId') sprintId: string): Promise<void> {
+    return this.lifecycle.suspend(sprintId);
+  }
+
+  @Post('sprints/:sprintId/resume')
+  @RequireSpacePermission(S.SPACE_VIEW)
+  @HttpCode(NO_CONTENT)
+  resume(@Uuid('sprintId') sprintId: string): Promise<void> {
+    return this.lifecycle.resume(sprintId);
+  }
+
   @Post('sprints/:sprintId/cancel')
   @RequireSpacePermission(S.SPRINT_CANCEL)
   @HttpCode(NO_CONTENT)

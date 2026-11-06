@@ -468,7 +468,7 @@ export const MySprintWorkResponseSchema = z.object({
     z.object({
       id: z.uuid(),
       name: z.string(),
-      status: z.enum(['PLANNED', 'ACTIVE', 'COMPLETED', 'CANCELLED']),
+      status: z.enum(['PLANNED', 'ACTIVE', 'COMPLETED', 'CANCELLED', 'SUSPENDED']),
       startDate: z.string(),
       endDate: z.string(),
       items: z.array(WorkItemRowSchema),

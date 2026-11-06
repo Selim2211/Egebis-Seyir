@@ -213,6 +213,7 @@ export function PlanningPage({
                           (s) => s.status === 'PLANNED' && s.id !== selected.id,
                         )}
                         archived={space.data.archived}
+                        scrumMasterId={space.data.scrumMaster?.id ?? null}
                       />
                     </span>
                   </div>

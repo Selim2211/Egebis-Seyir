@@ -1,4 +1,4 @@
-import { AuditResponseSchema, type AuditQuery } from '@scrum/shared';
+import { AuditResponseSchema, type AuditQuery, type AuditResponse } from '@scrum/shared';
 import { infiniteQueryOptions } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/api';
 
@@ -22,3 +22,26 @@ export const auditQuery = (workspaceId: string, filter: AuditFilter) =>
     },
     getNextPageParam: (last) => last.next ?? undefined,
   });
+
+const EXPORT_MAX_PAGES = 400;
+
+/** Dışa aktarma için süzgece uyan tüm kayıtları sayfa sayfa çeker. */
+export async function fetchAllAudit(workspaceId: string, filter: AuditFilter) {
+  const events: AuditResponse['events'] = [];
+  let before: string | undefined;
+  for (let page = 0; page < EXPORT_MAX_PAGES; page += 1) {
+    const params = new URLSearchParams();
+    for (const [name, value] of Object.entries({ ...filter, before })) {
+      if (value) params.set(name, value);
+    }
+    const qs = params.toString();
+    const res = await apiRequest(
+      `/workspaces/${workspaceId}/audit${qs ? `?${qs}` : ''}`,
+      AuditResponseSchema,
+    );
+    events.push(...res.events);
+    if (!res.next) break;
+    before = res.next;
+  }
+  return events;
+}

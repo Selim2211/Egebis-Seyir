@@ -138,12 +138,18 @@ export class MembersService {
             email: true,
             title: true,
             avatarVersion: true,
-            sessions: { select: { lastSeenAt: true }, orderBy: { lastSeenAt: 'desc' }, take: 1 },
           },
         },
       },
       orderBy: { createdAt: 'asc' },
     });
+    // Kişi başına tek sorgu: son etkinlik = en yeni oturumun zamanı (üye başına ayrı sorgu yok).
+    const seen = await this.prisma.session.groupBy({
+      by: ['userId'],
+      where: { userId: { in: memberships.map((m) => m.user.id) } },
+      _max: { lastSeenAt: true },
+    });
+    const lastSeen = new Map(seen.map((s) => [s.userId, s._max.lastSeenAt]));
     return memberships.map((m) => ({
       userId: m.user.id,
       name: m.user.name,
@@ -154,7 +160,8 @@ export class MembersService {
       tier: roleTier(m.role),
       contentAccess: m.contentAccess,
       joinedAt: m.createdAt.toISOString(),
-      lastSeenAt: m.user.sessions[0]?.lastSeenAt.toISOString() ?? null,
+      locked: m.lockedAt !== null,
+      lastSeenAt: lastSeen.get(m.user.id)?.toISOString() ?? null,
     }));
   }
 
@@ -253,6 +260,39 @@ export class MembersService {
    * Rol değiştirir (`newRole`) veya üyeyi çıkarır (`null`). Owner kuralları shared'dadır.
    * Çıkarmada açık işler `reassign` (Proje → alıcı) ya da Proje yöneticisine devredilir (ADR-153).
    */
+  /** Üyeyi kilitler/açar. Kendini kilitleyemez; Owner'ı yalnızca Owner kilitler. */
+  async setLocked(targetUserId: string, locked: boolean): Promise<void> {
+    const workspaceId = this.cls.get('workspaceId')!;
+    const actorRole = this.cls.get('workspaceRole')!;
+    const actorId = this.cls.get('userId')!;
+    if (targetUserId === actorId) {
+      throw new ForbiddenException({ code: ERROR_CODES.CANNOT_LOCK_SELF });
+    }
+    await this.tenant.db.$transaction(async (tx) => {
+      const target = await tx.membership.findFirst({
+        where: { userId: targetUserId },
+        include: { role: { select: { key: true, baseKey: true } } },
+      });
+      if (!target) throw new NotFoundException({ code: ERROR_CODES.NOT_FOUND });
+      if (roleTier(target.role) === 'OWNER' && actorRole !== 'OWNER') {
+        throw new ForbiddenException({ code: ERROR_CODES.OWNER_ONLY });
+      }
+      if ((target.lockedAt !== null) === locked) return;
+      await tx.membership.update({
+        where: { id: target.id },
+        data: { lockedAt: locked ? new Date() : null },
+      });
+      await this.activity.record(tx, {
+        workspaceId,
+        actorId,
+        entityType: 'member',
+        entityId: targetUserId,
+        action: locked ? 'member.locked' : 'member.unlocked',
+        changes: {},
+      });
+    });
+  }
+
   async change(
     targetUserId: string,
     newRole: string | null,
@@ -290,6 +330,14 @@ export class MembersService {
         handedOver = await this.handover.apply(tx, targetUserId, reassign);
         await tx.membership.delete({ where: { id: target.id } });
         await tx.spaceMember.deleteMany({ where: { userId: targetUserId } });
+        await tx.space.updateMany({
+          where: { productOwnerId: targetUserId },
+          data: { productOwnerId: null },
+        });
+        await tx.space.updateMany({
+          where: { scrumMasterId: targetUserId },
+          data: { scrumMasterId: null },
+        });
         await tx.favorite.deleteMany({ where: { userId: targetUserId } });
       } else {
         await tx.membership.update({ where: { id: target.id }, data: { roleId: nextRole!.id } });

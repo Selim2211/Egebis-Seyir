@@ -66,13 +66,13 @@ export const useDeleteRole = () =>
 export const workspaceTier = (key: string): WorkspaceRole =>
   isCustomRoleKey(key) ? 'MEMBER' : (key as WorkspaceRole);
 
-/** Davet/hesap formlarında seçilebilir workspace rolleri: Member, Admin, Guest + özel roller. */
+/** Davet/hesap formlarında seçilebilir workspace rolleri: Member, Guest + özel roller (Admin sonradan listeden atanır). */
 export function useAssignableWorkspaceRoles(): string[] {
   const { data } = useRoles();
   const custom = (data?.roles ?? [])
     .filter((r) => r.scope === 'WORKSPACE' && isCustomRoleKey(r.key))
     .map((r) => r.key);
-  return ['MEMBER', 'ADMIN', 'GUEST', ...custom];
+  return ['MEMBER', 'GUEST', ...custom];
 }
 
 /** Space üyesi olarak seçilebilir roller (sistem + özel). */

@@ -109,7 +109,7 @@ export class ItemTreeService {
     // Hepsi Backlog'daysa ya da hedefte aktif sprint yoksa hedefin Backlog'una gider.
     let epicSprint: {
       id: string;
-      status: 'PLANNED' | 'ACTIVE' | 'COMPLETED' | 'CANCELLED';
+      status: 'PLANNED' | 'ACTIVE' | 'COMPLETED' | 'CANCELLED' | 'SUSPENDED';
     } | null = null;
     let epicTasks: Array<{ id: string; points: number | null }> = [];
     if (crossSpace && item.type === 'EPIC') {

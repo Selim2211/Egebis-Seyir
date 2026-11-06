@@ -3,6 +3,7 @@ import { createFileRoute, Outlet, redirect } from '@tanstack/react-router';
 import { useEffect } from 'react';
 import { AppShell } from '@/components/layout/app-shell';
 import { meQuery, setupStatusQuery, useMe } from '@/features/auth/queries';
+import { LockedScreen } from '@/features/auth/locked-screen';
 import { isApiError } from '@/lib/api';
 import { useUiStore } from '@/lib/ui-store';
 
@@ -24,7 +25,11 @@ export const Route = createFileRoute('/_app')({
 function AppLayout() {
   // Çıkışta önbellek temizlenince yönlendirme tamamlanana kadar kabuk render edilmez.
   const { data: me } = useQuery(meQuery);
+  const selected = useUiStore((s) => s.workspaceId);
   if (!me) return null;
+  const current = me.workspaces.find((w) => w.id === selected) ?? me.workspaces[0];
+  // Kilitli üye giriş yapabilir ama hiçbir şeye erişemez (ADR-168).
+  if (current?.locked) return <LockedScreen />;
   return <SignedInApp />;
 }
 

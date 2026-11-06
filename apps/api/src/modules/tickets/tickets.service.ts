@@ -4,6 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import {
   CreateSpaceRequestSchema,
   MAX_ATTACHMENTS_PER_ITEM,
+  senderAllowed,
   formatItemKey,
   type RichTextNode,
 } from '@scrum/shared';
@@ -255,6 +256,20 @@ export class TicketsService {
       };
     } else if (!routing.spaceId && verdict) {
       routing = { ...routing, reason: `${routing.reason} · YZ de emin olamadı` };
+    }
+    // Projenin izinli gönderen listesi doluysa ve gönderen listede yoksa Bug o Projeye girmez.
+    if (routing.spaceId) {
+      const space = await this.prisma.space.findFirst({
+        where: { id: routing.spaceId },
+        select: { bugSenders: true },
+      });
+      if (space && !senderAllowed(space.bugSenders, fromEmail)) {
+        routing = {
+          spaceId: null,
+          spaceName: null,
+          reason: `${fromEmail} ${routing.spaceName ?? 'Proje'} Projesinin izinli gönderen listesinde değil`,
+        };
+      }
     }
     const box = routing.spaceId ? null : await this.inbox(workspaceId, actorId);
     const description = textToRichText(rawText);

@@ -111,7 +111,11 @@ export function StructureActionsProvider({ children }: { children: ReactNode }) 
           open
           onOpenChange={(open) => !open && close()}
           title={t('structure.deleteTitle', { name: dialog.name })}
-          description={t('structure.deleteBody')}
+          description={
+            dialog.type === 'SPACE'
+              ? `${t('structure.deleteBody')} ${t('structure.deleteSpaceBackup')}`
+              : t('structure.deleteBody')
+          }
           confirmLabel={t('structure.delete')}
           pending={lifecycle.isPending}
           onConfirm={() => confirmDelete(dialog)}

@@ -3,16 +3,24 @@ import {
   Controller,
   Delete,
   Get,
+  Header,
   HttpCode,
   HttpStatus,
   Param,
   ParseUUIDPipe,
   Post,
   Query,
+  Res,
+  StreamableFile,
+  UploadedFiles,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FilesInterceptor } from '@nestjs/platform-express';
+import type { Response } from 'express';
 import {
   ConversationsResponseSchema,
   CreatedSchema,
+  MESSAGE_MAX_ATTACHMENTS,
   MessagesResponseSchema,
   OpenConversationRequestSchema,
   SendMessageRequestSchema,
@@ -61,6 +69,42 @@ export class MessagesController {
   @ZodResponse({ type: CreatedDto, status: HttpStatus.CREATED })
   send(@Uuid('conversationId') conversationId: string, @Body() body: SendDto): Promise<Created> {
     return this.messages.send(conversationId, body);
+  }
+
+  /** Dosya ekli mesaj: multipart `body` (metin) ve en çok 5 `files`. */
+  @Post(':conversationId/messages/upload')
+  @UseInterceptors(FilesInterceptor('files', MESSAGE_MAX_ATTACHMENTS + 1))
+  @ZodResponse({ type: CreatedDto, status: HttpStatus.CREATED })
+  sendWithFiles(
+    @Uuid('conversationId') conversationId: string,
+    @Body() body: { body?: string },
+    @UploadedFiles() files: Express.Multer.File[] | undefined,
+  ): Promise<Created> {
+    return this.messages.sendWithFiles(
+      conversationId,
+      typeof body?.body === 'string' ? body.body : '',
+      files ?? [],
+    );
+  }
+
+  @Get(':conversationId/messages/:messageId/attachments/:attachmentId')
+  @Header('X-Content-Type-Options', 'nosniff')
+  @Header('Cache-Control', 'private, max-age=0, must-revalidate')
+  async attachment(
+    @Uuid('conversationId') conversationId: string,
+    @Uuid('messageId') messageId: string,
+    @Uuid('attachmentId') attachmentId: string,
+    @Query('preview') preview: string | undefined,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<StreamableFile> {
+    const { file, csp } = await this.messages.openAttachment(
+      conversationId,
+      messageId,
+      attachmentId,
+      preview === '1',
+    );
+    if (csp) res.setHeader('Content-Security-Policy', csp);
+    return file;
   }
 
   @Post(':conversationId/read')

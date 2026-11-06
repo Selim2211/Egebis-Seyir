@@ -34,6 +34,8 @@ export const MyWorkspaceSchema = z.object({
   name: z.string(),
   role: RoleKeySchema,
   permissions: z.array(z.string()),
+  /** Üye kilitli: workspace'e erişemez, izin listesi boştur. */
+  locked: z.boolean(),
 });
 export type MyWorkspace = z.infer<typeof MyWorkspaceSchema>;
 

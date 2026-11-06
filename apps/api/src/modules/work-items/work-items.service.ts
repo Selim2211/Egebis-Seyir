@@ -1,4 +1,4 @@
-import { BadRequestException, HttpStatus, Injectable } from '@nestjs/common';
+import { BadRequestException, HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import {
   checkEstimate,
   checkParent,
@@ -387,6 +387,7 @@ export class WorkItemsService {
             scrumEnabled: true,
             estimationScale: true,
             archivedAt: true,
+            productOwnerId: true,
           },
         },
         folder: { select: { archivedAt: true } },
@@ -429,7 +430,11 @@ export class WorkItemsService {
           title: input.title,
           statusId,
           priority: input.priority,
-          reporterId: actorId,
+          // Backlog'taki Epik ve Task'ların sahibi Projenin Product Owner'ıdır; yoksa oluşturan kişi.
+          reporterId:
+            (input.type === 'EPIC' || input.type === 'TASK') && space.productOwnerId
+              ? space.productOwnerId
+              : actorId,
           startDate: toDate(input.startDate),
           dueDate: toDate(input.dueDate),
           points: input.points,
@@ -498,6 +503,7 @@ export class WorkItemsService {
         status: { select: { category: true } },
         assignees: { select: { userId: true } },
         labels: { select: { labelId: true } },
+        sprint: { select: { status: true } },
         space: {
           select: {
             scrumEnabled: true,
@@ -509,6 +515,10 @@ export class WorkItemsService {
       },
     });
     if (!item) throw notFound();
+    // Askıdaki sprint'in işlerinde hiçbir değişiklik yapılamaz.
+    if (item.sprint?.status === 'SUSPENDED') {
+      throw new HttpException({ code: ERROR_CODES.SPRINT_SUSPENDED }, HttpStatus.CONFLICT);
+    }
     const type = item.type;
 
     this.authorize(item, fields);

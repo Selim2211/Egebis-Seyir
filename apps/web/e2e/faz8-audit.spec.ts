@@ -34,8 +34,13 @@ test.describe('Denetim günlüğü', () => {
     await page.getByRole('button', { name: 'Temizle' }).click();
     await expect(row).toBeVisible();
 
+    // CSV: düğme Bitiş tarihi yanında; menüden filtrelenmiş sonuçlar ya da tüm kayıtlar seçilir.
+    const csvBox = (await page.getByRole('button', { name: 'CSV indir' }).boundingBox())!;
+    const toBox = (await page.locator('label', { hasText: 'Bitiş tarihi' }).boundingBox())!;
+    expect(csvBox.x).toBeGreaterThan(toBox.x);
     const download = page.waitForEvent('download');
     await page.getByRole('button', { name: 'CSV indir' }).click();
+    await page.getByRole('menuitem', { name: 'Yalnızca filtrelenmiş sonuçlar' }).click();
     expect((await download).suggestedFilename()).toMatch(
       /^denetim-gunlugu-\d{4}-\d{2}-\d{2}\.csv$/,
     );

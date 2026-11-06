@@ -1,5 +1,6 @@
-import { Injectable, Logger, type OnModuleInit } from '@nestjs/common';
+import { ConflictException, Injectable, Logger, type OnModuleInit } from '@nestjs/common';
 import {
+  ERROR_CODES,
   SPACE_PERMISSIONS as S,
   TRASH_RETENTION_DAYS,
   type ArchiveEntry,
@@ -16,7 +17,10 @@ import { TenantPrismaService } from '../../infra/prisma/tenant-prisma.service';
 import { QueueService } from '../../infra/queue/queue.service';
 import { SpaceAccessService } from '../access/space-access.service';
 import { ActivityService } from '../activity/activity.service';
-import { notFound } from './space-errors';
+import { forbidden, notFound } from './space-errors';
+
+/** Silinecek Projenin son yedeği bu süreden eski olamaz. */
+const BACKUP_MAX_AGE_DAYS = 7;
 
 export type LifecycleAction = 'archive' | 'unarchive' | 'delete' | 'restore';
 
@@ -65,6 +69,7 @@ export class LifecycleService implements OnModuleInit {
   async change(type: FavoriteType, id: string, action: LifecycleAction): Promise<void> {
     const workspaceId = this.cls.get('workspaceId')!;
     const actorId = this.cls.get('userId')!;
+    if (type === 'SPACE' && action === 'delete') await this.assertProjectDeletable(id);
     await this.tenant.db.$transaction(async (tx) => {
       const delegate = (type === 'SPACE'
         ? tx.space
@@ -97,6 +102,30 @@ export class LifecycleService implements OnModuleInit {
         action: `${ENTITY[type]}.${action === 'delete' ? 'trashed' : action === 'restore' ? 'restored' : `${action}d`}`,
       });
     });
+  }
+
+  /** Projeyi yalnızca Super Admin siler ve son 7 gün içinde yedeği alınmamış Proje silinemez. */
+  private async assertProjectDeletable(spaceId: string): Promise<void> {
+    const tier = this.cls.get('workspaceRole');
+    if (tier !== 'OWNER' && tier !== 'ADMIN') {
+      throw forbidden(ERROR_CODES.SPACE_DELETE_SUPER_ADMIN);
+    }
+    const since = new Date(Date.now() - BACKUP_MAX_AGE_DAYS * 86_400_000);
+    const backup = await this.tenant.db.activityEvent.findFirst({
+      where: {
+        entityType: 'space',
+        entityId: spaceId,
+        action: 'space.backup_created',
+        createdAt: { gte: since },
+      },
+      select: { id: true },
+    });
+    if (!backup) {
+      throw new ConflictException({
+        code: ERROR_CODES.SPACE_DELETE_BACKUP_REQUIRED,
+        details: { days: BACKUP_MAX_AGE_DAYS },
+      });
+    }
   }
 
   /** Kullanıcının geri getirebildiği arşivlenmiş ve silinmiş öğeler. */

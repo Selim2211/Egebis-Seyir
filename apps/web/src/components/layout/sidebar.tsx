@@ -11,7 +11,6 @@ import {
   Target,
   Users,
   Settings2,
-  UserPlus,
   X,
   type LucideIcon,
   ChartColumn,
@@ -21,7 +20,7 @@ import { BrandMark } from '@/components/logo';
 import { Button } from '@/components/ui/button';
 import { useConversations } from '@/features/messages/queries';
 import { useUnreadCount } from '@/features/notifications/queries';
-import { SidebarTree } from '@/features/spaces/sidebar-tree';
+import { SectionTitle, SidebarTree } from '@/features/spaces/sidebar-tree';
 import { useCan, useCurrentWorkspace } from '@/features/workspace/queries';
 import { useUiStore } from '@/lib/ui-store';
 import { cn } from '@/lib/utils';
@@ -77,7 +76,6 @@ export function Sidebar() {
   const { t } = useTranslation();
   const { sidebarOpen, setSidebarOpen } = useUiStore();
   const workspace = useCurrentWorkspace();
-  const canManageMembers = useCan(WORKSPACE_PERMISSIONS.MEMBERS_MANAGE);
   const isAdmin = useCan(WORKSPACE_PERMISSIONS.WORKSPACE_SETTINGS);
   // Misafirler mesajlaşamaz (ADR-098); onlar için yoklama da yapılmaz.
   const canMessage = workspace.role !== 'GUEST';
@@ -123,7 +121,8 @@ export function Sidebar() {
           </Button>
         </div>
 
-        <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto p-2">
+        <nav className="flex flex-1 flex-col gap-1 overflow-y-auto p-2">
+          <SectionTitle className="mt-1">{t('nav.menu')}</SectionTitle>
           <NavLink to="/" icon={House} label={t('nav.home')} />
           <NavLink to="/my-work" icon={ListTodo} label={t('nav.myWork')} />
           <NavLink to="/bug-box" icon={Bug} label={t('nav.bugBox')} />
@@ -145,9 +144,6 @@ export function Sidebar() {
         </nav>
 
         <div className="border-sidebar-border flex flex-col gap-0.5 border-t p-2">
-          {canManageMembers && (
-            <NavLink to="/settings/members" icon={UserPlus} label={t('nav.inviteMembers')} />
-          )}
           <NavLink to="/settings" icon={Settings2} label={t('nav.settings')} exact={false} />
           {import.meta.env.DEV && (
             <NavLink to="/design" icon={Palette} label={t('nav.designSystem')} />

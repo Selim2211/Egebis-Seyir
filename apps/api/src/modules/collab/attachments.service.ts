@@ -31,7 +31,7 @@ const ownerWhere = (owner: Owner) =>
 const decodeName = (name: string) => Buffer.from(name, 'latin1').toString('utf8');
 
 /** RFC 6266/5987: ASCII yedek ad + UTF-8 ad; `'()*` karakterleri de yüzde-kodlanır. */
-const contentDisposition = (inline: boolean, name: string) => {
+export const contentDisposition = (inline: boolean, name: string) => {
   const ascii = name.replace(/[^ -~]/g, '_').replace(/["%;\\]/g, '_');
   const encoded = encodeURIComponent(name).replace(
     /['()*]/g,

@@ -204,6 +204,16 @@ export const useCancelSprint = () =>
     apiRequest(`${ws(id)}/sprints/${sprintId}/cancel`, NoContent, { method: 'POST' }),
   );
 
+export const useSuspendSprint = () =>
+  useWorkspaceMutation((id, sprintId: string) =>
+    apiRequest(`${ws(id)}/sprints/${sprintId}/suspend`, NoContent, { method: 'POST' }),
+  );
+
+export const useResumeSprint = () =>
+  useWorkspaceMutation((id, sprintId: string) =>
+    apiRequest(`${ws(id)}/sprints/${sprintId}/resume`, NoContent, { method: 'POST' }),
+  );
+
 export const useSetReviewNotes = () =>
   useWorkspaceMutation((id, input: { sprintId: string; notes: string | null }) =>
     apiRequest(`${ws(id)}/sprints/${input.sprintId}/review-notes`, NoContent, {

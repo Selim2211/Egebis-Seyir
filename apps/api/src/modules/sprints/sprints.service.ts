@@ -25,7 +25,14 @@ import {
   toDate,
   toRow,
 } from '../work-items/item-support';
-import { assertOpen, conflict, countedItems, loadScrumSpace, summarize } from './sprint-support';
+import {
+  assertOpen,
+  assertSprintAdmin,
+  conflict,
+  countedItems,
+  loadScrumSpace,
+  summarize,
+} from './sprint-support';
 
 /** Epic > Task > Sub-task en fazla bu kadar iner. */
 const MAX_TREE_DEPTH = 4;
@@ -280,6 +287,10 @@ export class SprintsService {
     const sprint = await db.sprint.findFirst({ where: { id: sprintId } });
     if (!sprint) throw notFound();
     await loadScrumSpace(db, sprint.spaceId, true);
+    await assertSprintAdmin(db, sprint.spaceId, {
+      id: actorId,
+      tier: this.cls.get('workspaceRole'),
+    });
     await db.$transaction(async (tx) => {
       let trashed = 0;
       if (sprint.status !== 'PLANNED') {

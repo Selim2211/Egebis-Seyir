@@ -16,6 +16,8 @@ export const MemberSchema = z.object({
   /** Dış kaynağın doküman/video erişimi (ADR-152); diğerlerinde NONE. */
   contentAccess: z.enum(CONTENT_ACCESS),
   joinedAt: z.iso.datetime(),
+  /** Üye kilitli mi (workspace'e erişemez). */
+  locked: z.boolean(),
   lastSeenAt: z.iso.datetime().nullable(),
 });
 export type Member = z.infer<typeof MemberSchema>;
@@ -53,6 +55,10 @@ export const RemoveMemberRequestSchema = z.object({
   reassign: z.record(z.uuid(), z.uuid()).default({}),
 });
 export type RemoveMemberRequest = z.input<typeof RemoveMemberRequestSchema>;
+
+/** PATCH /members/:userId/lock — üyeyi kilitler ya da kilidini açar. */
+export const SetMemberLockRequestSchema = z.object({ locked: z.boolean() });
+export type SetMemberLockRequest = z.infer<typeof SetMemberLockRequestSchema>;
 
 /** PATCH /members/:userId/content-access — dış kaynağın doküman/video erişimi (ADR-152). */
 export const UpdateContentAccessRequestSchema = z.object({ contentAccess: z.enum(CONTENT_ACCESS) });

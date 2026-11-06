@@ -104,6 +104,9 @@ describe('Space / Folder / List (gerçek veritabanı)', () => {
 
     it('Member Space oluşturabilir; ayar kapatılınca oluşturamaz (ADR-042)', async () => {
       const elif = await inviteAndAccept(ctx, owner, ws, ELIF);
+      // Varsayılan kapalı (ADR-168): önce açılır.
+      await elif.post(api('/spaces'), { name: 'Ops', key: 'OPS', color: '#4F46E5' }).expect(403);
+      await owner.patch(api('/settings'), { membersCanCreateSpaces: true }).expect(204);
       await createSpace(elif);
 
       await owner.patch(api('/settings'), { membersCanCreateSpaces: false }).expect(204);
@@ -392,6 +395,8 @@ describe('Space / Folder / List (gerçek veritabanı)', () => {
     it('30 günden eski çöp kalıcı silinir, yenisi kalır', async () => {
       const space = await createSpace(owner);
       const old = await createSpace(owner, { name: 'Eski', key: 'OLD' });
+      // Proje silmek için son 7 günde yedek gerekir (ADR-168).
+      for (const id of [old, space]) await owner.get(api(`/spaces/${id}/backup.zip`)).expect(200);
       await owner.delete(api(`/spaces/${old}`)).expect(204);
       await owner.delete(api(`/spaces/${space}`)).expect(204);
       await ctx.prisma.space.update({

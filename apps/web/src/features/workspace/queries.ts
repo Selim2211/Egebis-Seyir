@@ -93,6 +93,14 @@ export const useChangeMemberRole = () =>
     }),
   );
 
+export const useSetMemberLock = () =>
+  useWorkspaceMutation((id, input: { userId: string; locked: boolean }) =>
+    apiRequest(`${ws(id)}/members/${input.userId}/lock`, NoContent, {
+      method: 'PATCH',
+      body: { locked: input.locked },
+    }),
+  );
+
 /** Üyeyi çıkarır; açık işler `reassign` (Proje → alıcı) ile devredilir (ADR-153). */
 export function useRemoveMember() {
   const qc = useQueryClient();

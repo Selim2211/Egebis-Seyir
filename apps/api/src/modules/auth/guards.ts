@@ -129,6 +129,7 @@ export class WorkspaceAccessGuard implements CanActivate {
         })
       : null;
     if (!membership) throw new NotFoundException({ code: ERROR_CODES.NOT_FOUND });
+    if (membership.lockedAt) throw new ForbiddenException({ code: ERROR_CODES.MEMBER_LOCKED });
 
     this.cls.set('workspaceId', workspaceId);
     this.cls.set('workspaceRole', roleTier(membership.role));

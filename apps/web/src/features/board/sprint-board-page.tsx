@@ -50,7 +50,7 @@ export function SprintBoardPage({
   const all = useQuery(sprintsQuery(workspaceId, spaceId));
   // Açık sprint'ler önce (aktif, sonra başlangıç sırasıyla planlılar), ardından geçmiş.
   const sprints = useMemo(() => {
-    const rank = { ACTIVE: 0, PLANNED: 1, COMPLETED: 2, CANCELLED: 3 } as const;
+    const rank = { ACTIVE: 0, PLANNED: 1, SUSPENDED: 2, COMPLETED: 3, CANCELLED: 4 } as const;
     return [...(all.data?.sprints ?? [])].sort(
       (a, b) =>
         rank[a.status] - rank[b.status] ||
@@ -190,6 +190,7 @@ export function SprintBoardPage({
                   (s) => s.status === 'PLANNED' && s.id !== selected.id,
                 )}
                 archived={space.data.archived}
+                scrumMasterId={space.data.scrumMaster?.id ?? null}
               />
             </span>
           </div>
@@ -202,7 +203,9 @@ export function SprintBoardPage({
               {t(
                 selected.status === 'COMPLETED'
                   ? 'board.readOnlyCompleted'
-                  : 'board.readOnlyCancelled',
+                  : selected.status === 'SUSPENDED'
+                    ? 'board.readOnlySuspended'
+                    : 'board.readOnlyCancelled',
               )}
             </p>
           )}

@@ -77,6 +77,17 @@ export class Client {
     for (const [name, value] of Object.entries(fields)) req.field(name, value);
     return req.attach('file', buffer, fileName);
   }
+  /** Birden çok dosya (alan adı `files`) ve metin alanlarıyla çok parçalı gönderim. */
+  uploadMany(
+    path: string,
+    files: Array<{ buffer: Buffer; name: string }>,
+    fields: Record<string, string> = {},
+  ) {
+    const req = this.agent.post(path).set('x-csrf-token', this.csrf);
+    for (const [name, value] of Object.entries(fields)) req.field(name, value);
+    for (const f of files) req.attach('files', f.buffer, f.name);
+    return req;
+  }
   /** İkili yanıtı Buffer olarak okur. */
   download(path: string) {
     return this.agent
@@ -170,7 +181,8 @@ export async function inviteAndAccept(
   await owner
     .post(`/api/workspaces/${workspaceId}/invitations`, {
       emails: [person.email],
-      role,
+      // Davetle Admin verilmez; Admin istenirse önce Member davet edilip sonra yükseltilir.
+      role: role === 'ADMIN' || role === 'OWNER' ? 'MEMBER' : role,
       spaceIds: shared,
     })
     .expect(204);
@@ -183,6 +195,15 @@ export async function inviteAndAccept(
       locale: 'tr',
     })
     .expect(200);
+  if (role === 'ADMIN' || role === 'OWNER') {
+    const promoted = await ctx.prisma.role.findFirstOrThrow({
+      where: { workspaceId, scope: 'WORKSPACE', key: role },
+    });
+    await ctx.prisma.membership.updateMany({
+      where: { workspaceId, user: { email: person.email } },
+      data: { roleId: promoted.id },
+    });
+  }
   if (!spaceIds && shared && shared.length > 0) {
     // Eski kuralda üye olmayan açık Projeyi Stakeholder izinleriyle görürdü: salt okuma rolü.
     const viewer = await ctx.prisma.role.findFirstOrThrow({

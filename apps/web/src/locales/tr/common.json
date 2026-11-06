@@ -29,7 +29,7 @@
     "spaces": "Projeler",
     "designSystem": "Tasarım sistemi",
     "inviteMembers": "Üye davet et",
-    "settings": "Ayarlar",
+    "settings": "Sistem Yönetimi",
     "openMenu": "Menüyü aç",
     "closeMenu": "Menüyü kapat",
     "comingSoon": "Sonraki adımda gelecek",
@@ -39,7 +39,8 @@
     "workload": "İş yükü",
     "admin": "Yönetici paneli",
     "bugBox": "Bug Kutusu",
-    "analytics": "Analiz"
+    "analytics": "Analiz",
+    "menu": "Menü"
   },
   "spaces": {
     "emptyTitle": "Henüz Proje yok",
@@ -182,7 +183,7 @@
     "recent": "Son aktivite"
   },
   "settings": {
-    "title": "Ayarlar",
+    "title": "Sistem Yönetimi",
     "workspaceSection": "Workspace",
     "accountSection": "Hesabım",
     "members": "Üyeler",
@@ -226,6 +227,12 @@
     "colActions": "İşlemler",
     "roleFor": "{{name}} için rol",
     "remove": "Workspace'ten çıkar",
+    "lock": "Kilitle",
+    "unlock": "Kilidi aç",
+    "locked": "Kilitli",
+    "lockConfirm": "{{name}} kilitlensin mi? Giriş yapabilir ama hiçbir şeye erişemez; verileri ve atamaları durur.",
+    "lockedDone": "Üye kilitlendi.",
+    "unlockedDone": "Üyenin kilidi açıldı.",
     "removeConfirm": "{{name}} workspace'ten çıkarılsın mı? Tüm erişimini kaybeder.",
     "removed": "Üye çıkarıldı.",
     "roleChanged": "Rol güncellendi.",
@@ -335,8 +342,11 @@
     "ALREADY_MEMBER": "Bu kişi zaten workspace üyesi.",
     "INVITE_REQUIRES_LOGIN": "Daveti kabul etmek için giriş yapmalısın.",
     "INVITE_EMAIL_MISMATCH": "Bu davet başka bir e-posta adresine gönderilmiş.",
+    "INVITE_ROLE_NOT_ALLOWED": "Davetle yalnızca Member veya Guest rolü verilebilir; Admin yapmak için Super Admin üyeyi sonradan listeden ayarlar.",
     "LAST_OWNER": "Workspace'te en az bir Owner kalmalı.",
     "OWNER_ONLY": "Bu işlemi yalnızca bir Owner yapabilir.",
+    "MEMBER_LOCKED": "Hesabın kilitlendi; erişim için Super Admin ile görüş.",
+    "CANNOT_LOCK_SELF": "Kendi hesabını kilitleyemezsin.",
     "WORK_ITEM_PARENT_REQUIRED": "Sub-task bir üst öğeye bağlı olmalı.",
     "WORK_ITEM_PARENT_NOT_ALLOWED": "Bu öğe seçilen üst öğeye bağlanamaz.",
     "SPACE_KEY_TAKEN": "Bu anahtar daha önce kullanılmış; başka bir anahtar seç.",
@@ -366,7 +376,7 @@
     "ATTACHMENT_LIMIT": "Bir öğeye en çok 50 dosya eklenebilir.",
     "AVATAR_INVALID": "Fotoğraf PNG, JPEG veya WebP olmalı ve 2 MB'ı aşmamalı.",
     "SCRUM_DISABLED": "Bu Projede Scrum kapalı; sprint ve Backlog kullanılamaz.",
-    "SPRINT_READONLY": "Tamamlanmış veya iptal edilmiş sprint değiştirilemez.",
+    "SPRINT_READONLY": "Tamamlanmış, iptal edilmiş veya askıya alınmış sprint değiştirilemez.",
     "SPRINT_NOT_PLANNED": "Yalnızca planlanmış sprint silinebilir.",
     "SPRINT_DATES_LOCKED": "Aktif sprint'in tarihleri değiştirilemez.",
     "SPRINT_ITEM_NOT_ELIGIBLE": "Yalnızca üst düzey Task ve Bug'lar sprint'e alınabilir; tamamlananlar alınamaz.",
@@ -459,7 +469,15 @@
     "TICKET_COMPANY_EXISTS": "Bu adla bir firma zaten var.",
     "TICKET_COMPANY_CYCLE": "Üst firma seçimi döngü oluşturuyor.",
     "TICKET_SPACE_INVALID": "Seçilen proje geçerli değil (silinmiş, arşivde ya da gelen kutusu).",
-    "POINTS_LOCKED": "Belirlenmiş Story Point'i yalnızca Proje Yöneticisi değiştirebilir."
+    "POINTS_LOCKED": "Belirlenmiş Story Point'i yalnızca Proje Yöneticisi değiştirebilir.",
+    "SPRINT_SUSPENDED": "Bu sprint askıya alınmış; geri açılana kadar hiçbir işlem yapılamaz.",
+    "SPRINT_SCRUM_MASTER_ONLY": "Sprint silme ve askıya alma yalnızca Super Admin ve Projenin Scrum Master'ı tarafından yapılabilir.",
+    "SPRINT_NOT_SUSPENDED": "Bu sprint askıda değil.",
+    "SCRUM_ROLE_NOT_MEMBER": "Product Owner ve Scrum Master Projenin üyesi olmalı.",
+    "SPACE_DELETE_SUPER_ADMIN": "Projeyi yalnızca Super Admin silebilir.",
+    "SPACE_DELETE_BACKUP_REQUIRED": "Son 7 gün içinde yedeği alınmamış Proje silinemez. Önce Proje ayarlarındaki Yedek bölümünden yedek al.",
+    "MESSAGE_ATTACHMENTS_TOO_BIG": "Bir mesajın ekleri toplamda en fazla 16 MB olabilir.",
+    "MESSAGE_ATTACHMENTS_LIMIT": "Bir mesaja en fazla 5 dosya eklenebilir."
   },
   "spaceRoles": {
     "PROJECT_MANAGER": "Proje Yöneticisi",
@@ -543,7 +561,8 @@
     "archivedBanner": "Bu öğe arşivde; kenar çubuğunda görünmez.",
     "breadcrumb": "Konum",
     "notFoundTitle": "Bulunamadı",
-    "notFoundBody": "Bu öğe silinmiş olabilir ya da görme yetkin yok."
+    "notFoundBody": "Bu öğe silinmiş olabilir ya da görme yetkin yok.",
+    "deleteSpaceBackup": "Son 7 gün içinde yedeği alınmamış Proje silinemez; önce Proje ayarlarındaki Yedek bölümünden yedek al."
   },
   "spacePage": {
     "lists": "Folder ve listeler",
@@ -580,13 +599,15 @@
     "statusesHelp": "Durum adları, renkleri ve akışı Faz 2'de özelleştirilebilecek.",
     "danger": "Arşiv ve silme",
     "archiveSpace": "Projeyi arşivle",
-    "deleteSpace": "Projeyi sil"
+    "deleteSpace": "Projeyi sil",
+    "deleteSuperAdminOnly": "Projeyi yalnızca Super Admin silebilir.",
+    "deleteBackupHint": "Silmeden önce Yedek bölümünden son 7 gün içinde bir yedek alınmış olmalı; yoksa Proje silinmez."
   },
   "generalSettings": {
     "title": "Genel",
     "subtitle": "Workspace adı ve Proje oluşturma izni.",
     "name": "Workspace adı",
-    "membersCanCreateSpaces": "Member'lar Proje oluşturabilir",
+    "membersCanCreateSpaces": "Şirket Çalışanı Üyeler Proje Oluşturabilir",
     "membersCanCreateSpacesHelp": "Kapatılırsa yalnızca Owner ve Admin Proje oluşturur.",
     "aiEstimate": "AI ile Story Point önerisi",
     "aiEstimateEnabled": "Açıklamadan Story Point önerisi",
@@ -882,7 +903,8 @@
       "PLANNED": "Planlandı",
       "ACTIVE": "Aktif",
       "COMPLETED": "Tamamlandı",
-      "CANCELLED": "İptal"
+      "CANCELLED": "İptal",
+      "SUSPENDED": "Askıda"
     }
   },
   "search": {
@@ -1052,7 +1074,8 @@
       "PLANNED": "Planlandı",
       "ACTIVE": "Aktif",
       "COMPLETED": "Tamamlandı",
-      "CANCELLED": "İptal"
+      "CANCELLED": "İptal",
+      "SUSPENDED": "Askıda"
     },
     "errors": {
       "required": "Bu alan zorunlu.",
@@ -1086,7 +1109,11 @@
     "scopeChangeRemove": "{{name}} aktif; {{count}} öğeyi çıkarmak kapsam değişikliği sayılır ve raporlarda görünür.",
     "scopeChangeConfirm": "Devam et",
     "notReadyWarn": "{{count}} öğe Definition of Ready'ye uymuyor.",
-    "treeEmpty": "Henüz sprint yok"
+    "treeEmpty": "Henüz sprint yok",
+    "suspend": "Askıya al",
+    "resume": "Geri aç",
+    "suspended": "{{name}} askıya alındı.",
+    "resumed": "{{name}} yeniden açıldı."
   },
   "board": {
     "title": "Sprint panosu",
@@ -1115,7 +1142,8 @@
       "ok": "WIP: {{count}} / {{limit}}",
       "full": "WIP limitine ulaşıldı: {{count}} / {{limit}}",
       "over": "WIP limiti aşıldı: {{count}} / {{limit}}"
-    }
+    },
+    "readOnlySuspended": "Bu sprint askıda: geri açılana kadar hiçbir işlem yapılamaz. Geri açmayı Super Admin veya Scrum Master yapar."
   },
   "scrumTabs": {
     "label": "Scrum"
@@ -1969,7 +1997,13 @@
     "delete": "Mesajı sil",
     "write": "Mesaj yaz",
     "placeholder": "Mesajını yaz… (Enter gönderir, Shift+Enter yeni satır)",
-    "send": "Gönder"
+    "send": "Gönder",
+    "attach": "Dosya ekle",
+    "attachHint": "En çok 5 dosya, toplam 16 MB.",
+    "removeFile": "{{name}} dosyasını çıkar",
+    "attachmentsTooMany": "Bir mesaja en fazla 5 dosya eklenebilir.",
+    "attachmentsTooBig": "Eklerin toplamı 16 MB’ı geçemez.",
+    "download": "{{name}} dosyasını indir"
   },
   "teams": {
     "title": "Ekipler",
@@ -2011,6 +2045,9 @@
     "forbidden": "Denetim günlüğünü yalnızca Sahip ve Yöneticiler görebilir.",
     "empty": "Bu süzgeçle eşleşen kayıt yok.",
     "export": "CSV indir",
+    "exportFiltered": "Yalnızca filtrelenmiş sonuçlar",
+    "exportAll": "Tüm kayıtlar",
+    "exportFailed": "CSV indirilemedi.",
     "all": "Tümü",
     "from": "Başlangıç tarihi",
     "to": "Bitiş tarihi",
@@ -2737,7 +2774,7 @@
     "passwordHint": "Boş bırakırsan kayıtlı şifre korunur.",
     "address": "Gönderen e-posta adresi",
     "fromName": "Gönderen adı",
-    "poll": "Kutuyu kontrol sıklığı (sn)",
+    "poll": "Posta kutusu kontrol sıklığı (sn)",
     "autoReply": "Müşteriye otomatik yanıt gönder",
     "test": "Kaydet ve bağlantıyı dene",
     "testing": "Deneniyor…",
@@ -3351,5 +3388,26 @@
     "activity": "Bu Projedeki hareketleri",
     "noActivity": "Bu Projede kaydı yok.",
     "notMember": "Projeden çıkarılmış"
+  },
+  "scrumRoles": {
+    "title": "Product Owner ve Scrum Master",
+    "description": "Her Projede bir Product Owner ve bir Scrum Master olur (bir kişi birden çok Projede bu görevi alabilir). Backlog'a açılan Epik ve Task'ların sahibi otomatik Product Owner olur; sprint silme ve askıya alma Scrum Master'dadır.",
+    "productOwner": "Product Owner",
+    "scrumMaster": "Scrum Master",
+    "none": "Atanmadı",
+    "saved": "Kaydedildi."
+  },
+  "bugSenders": {
+    "title": "Bug gönderebilecek e-posta adresleri",
+    "description": "Bu Projeye e-postayla Bug açabilecek gelen adresler. İsim kısmında * (her uzunlukta) ve ? (tek karakter) kullanılabilir. Liste boşsa kısıtlama yoktur; gönderen listede değilse Bug bu Projeye girmez, Gelen Çağrılar kutusuna düşer.",
+    "placeholder": "destek@firma.com\n*@musteri.com\nrapor?@firma.com",
+    "hint": "Her satıra bir adres yaz. Örnek: destek*@firma.com",
+    "invalid": "Geçersiz adres: {{list}}",
+    "saved": "Gönderen listesi kaydedildi.",
+    "save": "Listeyi kaydet"
+  },
+  "locked": {
+    "title": "Hesabın kilitlendi",
+    "body": "Hesabın bir yönetici tarafından kilitlendi; verilerin ve atamaların duruyor. Erişimin açılması için Super Admin ile görüş."
   }
 }

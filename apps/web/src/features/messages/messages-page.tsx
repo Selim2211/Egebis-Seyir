@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { Link, useNavigate } from '@tanstack/react-router';
-import { MessageSquarePlus, Send, Trash2 } from 'lucide-react';
+import { Download, MessageSquarePlus, Paperclip, Send, Trash2, X } from 'lucide-react';
+import { MESSAGE_MAX_ATTACHMENT_BYTES, MESSAGE_MAX_ATTACHMENTS } from '@scrum/shared';
 import { type FormEvent, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -19,9 +20,15 @@ import {
   useConversations,
   useDeleteMessage,
   useMarkRead,
+  messageAttachmentUrl,
   useOpenConversation,
   useSendMessage,
 } from './queries';
+
+const formatBytes = (bytes: number): string =>
+  bytes < 1024 * 1024
+    ? `${Math.max(1, Math.round(bytes / 1024))} KB`
+    : `${(bytes / 1024 / 1024).toFixed(1)} MB`;
 
 /** Birebir mesajlar (Faz 7.8, ADR-098): sol konuşma listesi, sağ yazışma. `?c=` açık konuşma. */
 export function MessagesPage({ conversationId }: { conversationId: string | null }) {
@@ -147,6 +154,8 @@ function Thread({ conversationId }: { conversationId: string }) {
   const markRead = useMarkRead();
   const remove = useDeleteMessage();
   const [body, setBody] = useState('');
+  const [files, setFiles] = useState<File[]>([]);
+  const picker = useRef<HTMLInputElement>(null);
   const bottom = useRef<HTMLDivElement>(null);
   const lastId = data?.messages.at(-1)?.id;
   const lastMine = data?.messages.at(-1)?.mine ?? true;
@@ -161,14 +170,32 @@ function Thread({ conversationId }: { conversationId: string }) {
   const submit = (e: FormEvent) => {
     e.preventDefault();
     const text = body.trim();
-    if (!text) return;
+    if (!text && files.length === 0) return;
     send.mutate(
-      { conversationId, body: text },
+      { conversationId, body: text, files },
       {
-        onSuccess: () => setBody(''),
+        onSuccess: () => {
+          setBody('');
+          setFiles([]);
+        },
         onError: (error) => toast.error(errorMessage(error)),
       },
     );
+  };
+
+  /** Seçilen dosyalar mevcut listeye eklenir; 5 dosya ve 16 MB sınırı burada da denetlenir. */
+  const addFiles = (picked: FileList | null) => {
+    if (!picked) return;
+    const next = [...files, ...picked];
+    if (next.length > MESSAGE_MAX_ATTACHMENTS) {
+      toast.error(t('messages.attachmentsTooMany'));
+      return;
+    }
+    if (next.reduce((sum, f) => sum + f.size, 0) > MESSAGE_MAX_ATTACHMENT_BYTES) {
+      toast.error(t('messages.attachmentsTooBig'));
+      return;
+    }
+    setFiles(next);
   };
 
   return (
@@ -195,6 +222,23 @@ function Thread({ conversationId }: { conversationId: string }) {
               )}
             >
               {m.deleted ? t('messages.deleted') : m.body}
+              {!m.deleted && m.attachments.length > 0 && (
+                <span className="mt-1 flex flex-col gap-1" data-testid="message-attachments">
+                  {m.attachments.map((a) => (
+                    <a
+                      key={a.id}
+                      href={messageAttachmentUrl(workspaceId, conversationId, m.id, a.id)}
+                      download={a.fileName}
+                      aria-label={t('messages.download', { name: a.fileName })}
+                      className="bg-background/20 flex items-center gap-1.5 rounded px-2 py-1 text-xs underline-offset-2 hover:underline"
+                    >
+                      <Download className="size-3.5 shrink-0" aria-hidden />
+                      <span className="truncate">{a.fileName}</span>
+                      <span className="shrink-0 opacity-70">{formatBytes(a.size)}</span>
+                    </a>
+                  ))}
+                </span>
+              )}
               <span className="mt-0.5 block text-[10px] opacity-70">{relativeTime(m.at)}</span>
             </div>
             {m.mine && !m.deleted && (
@@ -217,25 +261,73 @@ function Thread({ conversationId }: { conversationId: string }) {
         ))}
         <div ref={bottom} />
       </ul>
-      <form onSubmit={submit} className="flex items-end gap-2 border-t p-3">
-        <Textarea
-          value={body}
-          rows={2}
-          maxLength={4000}
-          aria-label={t('messages.write')}
-          placeholder={t('messages.placeholder')}
-          onChange={(e) => setBody(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-              e.preventDefault();
-              submit(e);
-            }
-          }}
-        />
-        <Button type="submit" disabled={send.isPending || body.trim() === ''}>
-          <Send />
-          {t('messages.send')}
-        </Button>
+      <form onSubmit={submit} className="flex flex-col gap-2 border-t p-3">
+        {files.length > 0 && (
+          <ul className="flex flex-wrap gap-1.5" aria-label={t('messages.attach')}>
+            {files.map((f, i) => (
+              <li
+                key={`${f.name}-${i}`}
+                className="bg-muted flex items-center gap-1 rounded-md px-2 py-1 text-xs"
+              >
+                <Paperclip className="size-3" aria-hidden />
+                <span className="max-w-40 truncate">{f.name}</span>
+                <span className="text-muted-foreground">{formatBytes(f.size)}</span>
+                <button
+                  type="button"
+                  aria-label={t('messages.removeFile', { name: f.name })}
+                  className="hover:text-destructive"
+                  onClick={() => setFiles(files.filter((_, j) => j !== i))}
+                >
+                  <X className="size-3" />
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+        <div className="flex items-end gap-2">
+          <input
+            ref={picker}
+            type="file"
+            multiple
+            hidden
+            data-testid="message-file-input"
+            onChange={(e) => {
+              addFiles(e.target.files);
+              e.target.value = '';
+            }}
+          />
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            title={`${t('messages.attach')} · ${t('messages.attachHint')}`}
+            aria-label={t('messages.attach')}
+            onClick={() => picker.current?.click()}
+          >
+            <Paperclip />
+          </Button>
+          <Textarea
+            value={body}
+            rows={2}
+            maxLength={4000}
+            aria-label={t('messages.write')}
+            placeholder={t('messages.placeholder')}
+            onChange={(e) => setBody(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                submit(e);
+              }
+            }}
+          />
+          <Button
+            type="submit"
+            disabled={send.isPending || (body.trim() === '' && files.length === 0)}
+          >
+            <Send />
+            {t('messages.send')}
+          </Button>
+        </div>
       </form>
     </>
   );

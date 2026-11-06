@@ -61,7 +61,8 @@ export function SprintSection({
   canPlan: boolean;
   onMove: (itemId: string, sprintId: string | null) => void;
   onEdit: () => void;
-  onDelete: () => void;
+  /** Yalnızca Super Admin ve Scrum Master verir; yoksa silme seçeneği görünmez. */
+  onDelete?: () => void;
   onCopy: () => void;
   /** Sürükle-bırak: izin ve alt öğe olarak vurgulanacak satır (ADR-102). */
   dnd: { enabled: boolean };
@@ -187,7 +188,7 @@ export function SprintSection({
                   {t('sprints.edit')}
                 </DropdownMenuItem>
               )}
-              {canPlan && (
+              {canPlan && onDelete && (
                 <>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem variant="destructive" onSelect={onDelete}>

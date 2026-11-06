@@ -5,6 +5,7 @@
  */
 export const TENANT_MODELS: ReadonlySet<string> = new Set([
   'Role',
+  'MessageAttachment',
   'Membership',
   'Invitation',
   'ActivityEvent',

@@ -8,7 +8,9 @@ import {
   SPACE_ROLES,
   type ProjectRoleOverrides,
   type ProjectRolesResponse,
+  type PutBugSendersRequest,
   type PutProjectRoleRequest,
+  type PutScrumRolesRequest,
   type SpaceMember,
 } from '@scrum/shared';
 import { ClsService } from 'nestjs-cls';
@@ -143,6 +145,15 @@ export class SpaceMembersService {
         spaceId,
       );
       await tx.spaceMember.delete({ where: { id: existing.id } });
+      // Çıkan kişi Projenin Product Owner/Scrum Master'ıysa o görev boşalır.
+      await tx.space.updateMany({
+        where: { id: spaceId, productOwnerId: userId },
+        data: { productOwnerId: null },
+      });
+      await tx.space.updateMany({
+        where: { id: spaceId, scrumMasterId: userId },
+        data: { scrumMasterId: null },
+      });
       await this.activity.record(tx, {
         workspaceId,
         actorId,
@@ -220,6 +231,61 @@ export class SpaceMembersService {
         entityId: spaceId,
         action: 'space.role_permissions_changed',
         changes: { role: input.role, permissions: { from: before, to: input.permissions } },
+      });
+    });
+  }
+
+  /** Projenin tek Product Owner'ı ve Scrum Master'ı; ikisi de Projenin üyesi olmalı. */
+  async putScrumRoles(spaceId: string, input: PutScrumRolesRequest): Promise<void> {
+    const workspaceId = this.cls.get('workspaceId')!;
+    const actorId = this.cls.get('userId')!;
+    await this.tenant.db.$transaction(async (tx) => {
+      const space = await tx.space.findFirst({
+        where: { id: spaceId, deletedAt: null },
+        select: { productOwnerId: true, scrumMasterId: true },
+      });
+      if (!space) throw notFound();
+      for (const userId of [input.productOwnerId, input.scrumMasterId]) {
+        if (userId && !(await tx.spaceMember.findFirst({ where: { spaceId, userId } }))) {
+          throw forbidden(ERROR_CODES.SCRUM_ROLE_NOT_MEMBER);
+        }
+      }
+      await tx.space.update({
+        where: { id: spaceId },
+        data: { productOwnerId: input.productOwnerId, scrumMasterId: input.scrumMasterId },
+      });
+      await this.activity.record(tx, {
+        workspaceId,
+        actorId,
+        entityType: 'space',
+        entityId: spaceId,
+        action: 'space.scrum_roles_changed',
+        changes: {
+          productOwner: { from: space.productOwnerId, to: input.productOwnerId },
+          scrumMaster: { from: space.scrumMasterId, to: input.scrumMasterId },
+        },
+      });
+    });
+  }
+
+  /** Bu Projeye Bug gönderebilecek gelen e-posta kalıpları (isim kısmında * ve ?). */
+  async putBugSenders(spaceId: string, input: PutBugSendersRequest): Promise<void> {
+    const workspaceId = this.cls.get('workspaceId')!;
+    const actorId = this.cls.get('userId')!;
+    await this.tenant.db.$transaction(async (tx) => {
+      const space = await tx.space.findFirst({
+        where: { id: spaceId, deletedAt: null },
+        select: { bugSenders: true },
+      });
+      if (!space) throw notFound();
+      await tx.space.update({ where: { id: spaceId }, data: { bugSenders: input.senders } });
+      await this.activity.record(tx, {
+        workspaceId,
+        actorId,
+        entityType: 'space',
+        entityId: spaceId,
+        action: 'space.bug_senders_changed',
+        changes: { bugSenders: { from: space.bugSenders, to: input.senders } },
       });
     });
   }

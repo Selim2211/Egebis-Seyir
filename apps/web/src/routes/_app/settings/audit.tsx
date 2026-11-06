@@ -1,7 +1,7 @@
 import { AUDIT_ENTITY_TYPES, WORKSPACE_PERMISSIONS, type AuditEntityType } from '@scrum/shared';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
-import { Download, X } from 'lucide-react';
+import { ChevronDown, Download, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DateField } from '@/components/date-field';
@@ -10,7 +10,14 @@ import { PageHeading } from '@/components/layout/page-heading';
 import { Button } from '@/components/ui/button';
 import { UserAvatar } from '@/components/user-avatar';
 import { auditCsvRows, describeAudit } from '@/features/audit/audit-text';
-import { auditQuery, type AuditFilter } from '@/features/audit/queries';
+import { auditQuery, type AuditFilter, fetchAllAudit } from '@/features/audit/queries';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { toast } from 'sonner';
 import { ItemOpenLink } from '@/features/work-items/detail/item-nav';
 import { useCan, useCurrentWorkspace } from '@/features/workspace/queries';
 import { downloadCsv } from '@/lib/download';
@@ -34,6 +41,23 @@ function AuditPage() {
       ),
     );
 
+  const [exporting, setExporting] = useState(false);
+  /** Süzgece uyan tüm kayıtlar (all=true ise süzgeçsiz hepsi) dosyaya yazılır; yüklenen sayfayla sınırlı değildir. */
+  const exportCsv = async (all: boolean) => {
+    setExporting(true);
+    try {
+      const rows = await fetchAllAudit(workspaceId, all ? {} : filter);
+      downloadCsv(
+        `denetim-gunlugu-${new Date().toISOString().slice(0, 10)}.csv`,
+        auditCsvRows(rows, t),
+      );
+    } catch {
+      toast.error(t('audit.exportFailed'));
+    } finally {
+      setExporting(false);
+    }
+  };
+
   if (!allowed) {
     return <p className="text-muted-foreground text-sm">{t('audit.forbidden')}</p>;
   }
@@ -44,20 +68,6 @@ function AuditPage() {
         <div className="flex-1">
           <PageHeading title={t('audit.title')} subtitle={t('audit.subtitle')} />
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          disabled={events.length === 0}
-          onClick={() =>
-            downloadCsv(
-              `denetim-gunlugu-${new Date().toISOString().slice(0, 10)}.csv`,
-              auditCsvRows(events, t),
-            )
-          }
-        >
-          <Download />
-          {t('audit.export')}
-        </Button>
       </div>
 
       <div className="mb-4 flex flex-wrap items-end gap-3">
@@ -66,7 +76,7 @@ function AuditPage() {
           <NativeSelect
             value={filter.actorId ?? ''}
             onChange={(e) => set({ actorId: e.target.value || undefined })}
-            className="h-8 min-w-40"
+            className="h-8 w-32"
           >
             <option value="">{t('audit.all')}</option>
             {actors.map((a) => (
@@ -81,7 +91,7 @@ function AuditPage() {
           <NativeSelect
             value={filter.entityType ?? ''}
             onChange={(e) => set({ entityType: (e.target.value || undefined) as AuditEntityType })}
-            className="h-8 min-w-36"
+            className="h-8 w-32"
           >
             <option value="">{t('audit.all')}</option>
             {AUDIT_ENTITY_TYPES.map((type) => (
@@ -96,7 +106,7 @@ function AuditPage() {
           <DateField
             value={filter.from ?? null}
             onCommit={(from) => set({ from: from ?? '' })}
-            className="border-input bg-card h-8 w-40 rounded-md border px-2 text-sm"
+            className="border-input bg-card h-8 w-32 rounded-md border px-2 text-sm"
           />
         </label>
         <label className="flex flex-col gap-1 text-xs font-medium">
@@ -104,9 +114,26 @@ function AuditPage() {
           <DateField
             value={filter.to ?? null}
             onCommit={(to) => set({ to: to ?? '' })}
-            className="border-input bg-card h-8 w-40 rounded-md border px-2 text-sm"
+            className="border-input bg-card h-8 w-32 rounded-md border px-2 text-sm"
           />
         </label>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="sm" disabled={exporting} className="h-8">
+              <Download />
+              {t('audit.export')}
+              <ChevronDown />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start">
+            <DropdownMenuItem onSelect={() => void exportCsv(false)}>
+              {t('audit.exportFiltered')}
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => void exportCsv(true)}>
+              {t('audit.exportAll')}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
         {Object.keys(filter).length > 0 && (
           <Button variant="ghost" size="sm" onClick={() => setFilter({})}>
             <X />

@@ -7,6 +7,10 @@ export const MESSAGES_PAGE_SIZE = 50;
 export const OpenConversationRequestSchema = z.object({ userId: z.uuid() });
 export type OpenConversationRequest = z.infer<typeof OpenConversationRequestSchema>;
 
+/** Mesaja en çok bu kadar dosya eklenir; toplam boyut sınırı bayt cinsindendir. */
+export const MESSAGE_MAX_ATTACHMENTS = 5;
+export const MESSAGE_MAX_ATTACHMENT_BYTES = 16 * 1024 * 1024;
+
 export const SendMessageRequestSchema = z.object({
   body: z.string().trim().min(1).max(MESSAGE_MAX),
 });
@@ -39,9 +43,19 @@ export const ConversationsResponseSchema = z.object({
 });
 export type ConversationsResponse = z.infer<typeof ConversationsResponseSchema>;
 
+export const MessageAttachmentSchema = z.object({
+  id: z.uuid(),
+  fileName: z.string(),
+  mimeType: z.string(),
+  size: z.int(),
+  previewable: z.boolean(),
+});
+export type MessageAttachment = z.infer<typeof MessageAttachmentSchema>;
+
 export const MessageSchema = z.object({
   id: z.uuid(),
   mine: z.boolean(),
+  attachments: z.array(MessageAttachmentSchema),
   body: z.string(),
   at: z.iso.datetime(),
   deleted: z.boolean(),

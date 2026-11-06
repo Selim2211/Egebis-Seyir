@@ -49,12 +49,32 @@ export const useOpenConversation = () =>
   );
 
 export const useSendMessage = () =>
-  useMessageMutation((id, input: { conversationId: string; body: SendMessageRequest['body'] }) =>
-    apiRequest(`${base(id)}/${input.conversationId}/messages`, CreatedSchema, {
-      method: 'POST',
-      body: { body: input.body },
-    }),
+  useMessageMutation(
+    (id, input: { conversationId: string; body: SendMessageRequest['body']; files?: File[] }) => {
+      // Dosya varsa multipart (en çok 5 dosya, toplam 16 MB); yoksa düz JSON.
+      if (input.files && input.files.length > 0) {
+        const form = new FormData();
+        form.append('body', input.body);
+        for (const file of input.files) form.append('files', file);
+        return apiRequest(`${base(id)}/${input.conversationId}/messages/upload`, CreatedSchema, {
+          method: 'POST',
+          body: form,
+        });
+      }
+      return apiRequest(`${base(id)}/${input.conversationId}/messages`, CreatedSchema, {
+        method: 'POST',
+        body: { body: input.body },
+      });
+    },
   );
+
+/** Mesaj ekinin indirme adresi (`?preview=1` resim/PDF'i tarayıcıda açar). */
+export const messageAttachmentUrl = (
+  workspaceId: string,
+  conversationId: string,
+  messageId: string,
+  attachmentId: string,
+) => `/api${base(workspaceId)}/${conversationId}/messages/${messageId}/attachments/${attachmentId}`;
 
 export const useMarkRead = () =>
   useMessageMutation((id, conversationId: string) =>

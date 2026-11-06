@@ -13,12 +13,14 @@ import { formatShortDate } from '@/lib/format';
 import { sprintsQuery } from './queries';
 import { ScrumTabs } from './scrum-tabs';
 import { SprintDeleteDialog } from './sprint-delete-dialog';
+import { useSprintAdmin } from './use-sprint-admin';
 
 const STATUS_ORDER: Record<SprintSummary['status'], number> = {
   ACTIVE: 0,
   PLANNED: 1,
-  COMPLETED: 2,
-  CANCELLED: 3,
+  SUSPENDED: 2,
+  COMPLETED: 3,
+  CANCELLED: 4,
 };
 
 /** Tüm sprint'ler: aktif ve planlılar üstte, ardından geçmiş (brief §5.6 "geçmiş sprintleri incele"). */
@@ -28,6 +30,7 @@ export function HistoryPage({ spaceId }: { spaceId: string }) {
   const space = useQuery(spaceQuery(workspaceId, spaceId));
   const sprints = useQuery(sprintsQuery(workspaceId, spaceId));
   const [deleting, setDeleting] = useState<SprintSummary | null>(null);
+  const sprintAdmin = useSprintAdmin(space.data?.scrumMaster?.id);
 
   if (space.isPending || sprints.isPending) return <LoadingState />;
   if (space.isError || sprints.isError) return <NotFoundState />;
@@ -108,7 +111,7 @@ export function HistoryPage({ spaceId }: { spaceId: string }) {
                         total: sprint.itemCount,
                       })}
                 </span>
-                {canPlan && (
+                {canPlan && sprintAdmin && (
                   <Button
                     variant="ghost"
                     size="icon"
