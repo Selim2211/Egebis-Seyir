@@ -70,7 +70,11 @@ export function SprintBoardPage({
   const statuses = useMemo(() => (space.data ? toBoardStatuses(space.data) : []), [space.data]);
   const update = useSprintBoardStatus(selected?.id ?? '', statuses);
   const guard = useStatusGuard(
-    (itemId, statusId, force, handlers) => update.mutate({ itemId, statusId, force }, handlers),
+    // mutateAsync: arka arkaya bırakılan her kartın kendi sonucu (uyarı penceresi dahil) işlenir.
+    (itemId, statusId, force, handlers) =>
+      void update
+        .mutateAsync({ itemId, statusId, force })
+        .then(handlers.onSuccess, handlers.onError),
     update.isPending,
   );
   const epicTitles = useMemo(

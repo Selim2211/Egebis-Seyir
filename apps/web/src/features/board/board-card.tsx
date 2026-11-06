@@ -1,6 +1,7 @@
 import { statusName } from '@/lib/default-names';
 import type { WorkItemSummary } from '@scrum/shared';
 import { MoreHorizontal } from 'lucide-react';
+import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import {
@@ -24,7 +25,7 @@ const MAX_AVATARS = 3;
  * Board kartı. Sürükleme dinleyicileri dış sarmalayıcıdadır; başlığa/kimliğe tıklamak
  * (sürüklemeden) öğeyi açar. Klavye ve dokunmatik için "Durumu değiştir" menüsü vardır.
  */
-export function BoardCard({
+export const BoardCard = memo(function BoardCard({
   item,
   statuses,
   canMove,
@@ -138,4 +139,4 @@ export function BoardCard({
       </div>
     </div>
   );
-}
+});

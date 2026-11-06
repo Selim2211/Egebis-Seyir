@@ -1,4 +1,4 @@
-import { type ReactNode, useState } from 'react';
+import { type ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { ConfirmDialog } from '@/components/confirm-dialog';
@@ -83,5 +83,15 @@ export function useStatusGuard(
     />
   );
 
-  return { change: (itemId, statusId) => send(itemId, statusId, false), dialog };
+  // `change` kimliği sabit kalır: panodaki kartlar her render'da yeniden çizilmesin.
+  const latest = useRef(send);
+  useEffect(() => {
+    latest.current = send;
+  });
+  const change = useCallback(
+    (itemId: string, statusId: string) => latest.current(itemId, statusId, false),
+    [],
+  );
+
+  return { change, dialog };
 }

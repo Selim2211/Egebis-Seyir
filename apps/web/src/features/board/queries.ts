@@ -44,7 +44,12 @@ export function useSprintBoardStatus(sprintId: string, statuses: readonly BoardS
       if (context?.previous) qc.setQueryData(key, context.previous);
     },
     // Açık olan tüm sorgular yenilenir: aynı sayfadaki sprint özeti ("Tamamla" penceresindeki biten
-    // sayısı) da güncel kalmalı. Kartın anında yerine oturması bu yenilemeye bağlı değildir (ADR-166).
-    onSettled: () => qc.invalidateQueries({ queryKey: ['workspaces', workspaceId] }),
+    // sayısı) da güncel kalmalı. Başka bir taşıma sürerken yenilenmez; yoksa sunucudan dönen eski
+    // veri ikinci kartı bir an eski yerine geri atardı. Son taşıma bitince yenilenir (ADR-166).
+    mutationKey: ['board-status', sprintId],
+    onSettled: () => {
+      if (qc.isMutating({ mutationKey: ['board-status', sprintId] }) > 1) return;
+      return qc.invalidateQueries({ queryKey: ['workspaces', workspaceId] });
+    },
   });
 }

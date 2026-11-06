@@ -57,7 +57,10 @@ export function KanbanPage({
   const statuses = useMemo(() => (space.data ? toBoardStatuses(space.data) : []), [space.data]);
   const update = useKanbanStatus(spaceId);
   const guard = useStatusGuard(
-    (itemId, statusId, force, handlers) => update.mutate({ itemId, statusId, force }, handlers),
+    (itemId, statusId, force, handlers) =>
+      void update
+        .mutateAsync({ itemId, statusId, force })
+        .then(handlers.onSuccess, handlers.onError),
     update.isPending,
   );
   const canMove = useCanMove(space.data?.permissions ?? [], space.data?.archived ?? true);
