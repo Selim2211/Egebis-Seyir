@@ -1,0 +1,1538 @@
+{
+  "label": "S-384-opt",
+  "takenAt": "2026-11-13T22:04:09.147Z",
+  "rows": [
+    {
+      "who": "SuperAdmin",
+      "endpoint": "hierarchy (ağaç)",
+      "status": 200,
+      "bytesKB": 16.5,
+      "coldMs": 18.6,
+      "warm": {
+        "n": 8,
+        "min": 9.4,
+        "p50": 26.4,
+        "p95": 36.4,
+        "p99": 36.4,
+        "max": 36.4,
+        "mean": 22.7
+      },
+      "server": {
+        "n": 8,
+        "min": 8.4,
+        "p50": 24.1,
+        "p95": 34.7,
+        "p99": 34.7,
+        "max": 34.7,
+        "mean": 20.8
+      }
+    },
+    {
+      "who": "SuperAdmin",
+      "endpoint": "my-work (bana atananlar)",
+      "status": 200,
+      "bytesKB": 0,
+      "coldMs": 66.7,
+      "warm": {
+        "n": 8,
+        "min": 8.8,
+        "p50": 15.1,
+        "p95": 40.2,
+        "p99": 40.2,
+        "max": 40.2,
+        "mean": 19.6
+      },
+      "server": {
+        "n": 8,
+        "min": 7.4,
+        "p50": 14.1,
+        "p95": 39.3,
+        "p99": 39.3,
+        "max": 39.3,
+        "mean": 18.6
+      }
+    },
+    {
+      "who": "SuperAdmin",
+      "endpoint": "activity (son aktivite)",
+      "status": 200,
+      "bytesKB": 12.7,
+      "coldMs": 64.6,
+      "warm": {
+        "n": 8,
+        "min": 8.7,
+        "p50": 12.9,
+        "p95": 30.8,
+        "p99": 30.8,
+        "max": 30.8,
+        "mean": 14.3
+      },
+      "server": {
+        "n": 8,
+        "min": 7.9,
+        "p50": 11.9,
+        "p95": 29.9,
+        "p99": 29.9,
+        "max": 29.9,
+        "mean": 13.4
+      }
+    },
+    {
+      "who": "SuperAdmin",
+      "endpoint": "audit (denetim)",
+      "status": 200,
+      "bytesKB": 32,
+      "coldMs": 66.7,
+      "warm": {
+        "n": 8,
+        "min": 14.6,
+        "p50": 20.1,
+        "p95": 32,
+        "p99": 32,
+        "max": 32,
+        "mean": 20.6
+      },
+      "server": {
+        "n": 8,
+        "min": 13.5,
+        "p50": 18.1,
+        "p95": 30.8,
+        "p99": 30.8,
+        "max": 30.8,
+        "mean": 19.1
+      }
+    },
+    {
+      "who": "SuperAdmin",
+      "endpoint": "notifications (liste)",
+      "status": 200,
+      "bytesKB": 0,
+      "coldMs": 11,
+      "warm": {
+        "n": 8,
+        "min": 4.6,
+        "p50": 5.6,
+        "p95": 6.1,
+        "p99": 6.1,
+        "max": 6.1,
+        "mean": 5.5
+      },
+      "server": {
+        "n": 8,
+        "min": 3.5,
+        "p50": 4.8,
+        "p95": 5.1,
+        "p99": 5.1,
+        "max": 5.1,
+        "mean": 4.5
+      }
+    },
+    {
+      "who": "SuperAdmin",
+      "endpoint": "notifications unread-count",
+      "status": 200,
+      "bytesKB": 0,
+      "coldMs": 5.7,
+      "warm": {
+        "n": 8,
+        "min": 3.7,
+        "p50": 4.6,
+        "p95": 5.4,
+        "p99": 5.4,
+        "max": 5.4,
+        "mean": 4.6
+      },
+      "server": {
+        "n": 8,
+        "min": 2.9,
+        "p50": 3.8,
+        "p95": 4.6,
+        "p99": 4.6,
+        "max": 4.6,
+        "mean": 3.8
+      }
+    },
+    {
+      "who": "SuperAdmin",
+      "endpoint": "conversations (liste)",
+      "status": 200,
+      "bytesKB": 0,
+      "coldMs": 7.5,
+      "warm": {
+        "n": 8,
+        "min": 5,
+        "p50": 6,
+        "p95": 9.6,
+        "p99": 9.6,
+        "max": 9.6,
+        "mean": 6.2
+      },
+      "server": {
+        "n": 8,
+        "min": 4.2,
+        "p50": 5.3,
+        "p95": 8.8,
+        "p99": 8.8,
+        "max": 8.8,
+        "mean": 5.4
+      }
+    },
+    {
+      "who": "SuperAdmin",
+      "endpoint": "search (\"görev\")",
+      "status": 200,
+      "bytesKB": 9.1,
+      "coldMs": 137.3,
+      "warm": {
+        "n": 8,
+        "min": 91.6,
+        "p50": 125.4,
+        "p95": 195.2,
+        "p99": 195.2,
+        "max": 195.2,
+        "mean": 134.7
+      },
+      "server": {
+        "n": 8,
+        "min": 90.7,
+        "p50": 123.3,
+        "p95": 192.8,
+        "p99": 192.8,
+        "max": 192.8,
+        "mean": 133.1
+      }
+    },
+    {
+      "who": "SuperAdmin",
+      "endpoint": "liste/tablo (lists/:id/items)",
+      "status": 200,
+      "bytesKB": 244.9,
+      "coldMs": 37.9,
+      "warm": {
+        "n": 8,
+        "min": 28.1,
+        "p50": 42.3,
+        "p95": 53.8,
+        "p99": 53.8,
+        "max": 53.8,
+        "mean": 39.6
+      },
+      "server": {
+        "n": 8,
+        "min": 25.7,
+        "p50": 34.6,
+        "p95": 41.6,
+        "p99": 41.6,
+        "max": 41.6,
+        "mean": 34.6
+      }
+    },
+    {
+      "who": "SuperAdmin",
+      "endpoint": "space items (spaces/:id/items)",
+      "status": 404,
+      "bytesKB": 0,
+      "coldMs": 2.9,
+      "warm": {
+        "n": 0
+      },
+      "server": null
+    },
+    {
+      "who": "SuperAdmin",
+      "endpoint": "backlog",
+      "status": 200,
+      "bytesKB": 115.8,
+      "coldMs": 44.8,
+      "warm": {
+        "n": 8,
+        "min": 34.6,
+        "p50": 58.5,
+        "p95": 93,
+        "p99": 93,
+        "max": 93,
+        "mean": 60.6
+      },
+      "server": {
+        "n": 8,
+        "min": 32.6,
+        "p50": 54.9,
+        "p95": 89.8,
+        "p99": 89.8,
+        "max": 89.8,
+        "mean": 57.6
+      }
+    },
+    {
+      "who": "SuperAdmin",
+      "endpoint": "kanban",
+      "status": 200,
+      "bytesKB": 697.4,
+      "coldMs": 99.7,
+      "warm": {
+        "n": 8,
+        "min": 57.8,
+        "p50": 66.5,
+        "p95": 75.7,
+        "p99": 75.7,
+        "max": 75.7,
+        "mean": 66.4
+      },
+      "server": {
+        "n": 8,
+        "min": 54.3,
+        "p50": 63.3,
+        "p95": 70.7,
+        "p99": 70.7,
+        "max": 70.7,
+        "mean": 62.5
+      }
+    },
+    {
+      "who": "SuperAdmin",
+      "endpoint": "sprint listesi",
+      "status": 200,
+      "bytesKB": 25,
+      "coldMs": 30.5,
+      "warm": {
+        "n": 8,
+        "min": 21.1,
+        "p50": 29.1,
+        "p95": 56.8,
+        "p99": 56.8,
+        "max": 56.8,
+        "mean": 30.1
+      },
+      "server": {
+        "n": 8,
+        "min": 20,
+        "p50": 28.1,
+        "p95": 54.8,
+        "p99": 54.8,
+        "max": 54.8,
+        "mean": 29
+      }
+    },
+    {
+      "who": "SuperAdmin",
+      "endpoint": "sprint detayı (board)",
+      "status": 200,
+      "bytesKB": 73.8,
+      "coldMs": 46.7,
+      "warm": {
+        "n": 8,
+        "min": 20.7,
+        "p50": 60.7,
+        "p95": 74.7,
+        "p99": 74.7,
+        "max": 74.7,
+        "mean": 53.7
+      },
+      "server": {
+        "n": 8,
+        "min": 19.6,
+        "p50": 58.7,
+        "p95": 70.8,
+        "p99": 70.8,
+        "max": 70.8,
+        "mean": 51
+      }
+    },
+    {
+      "who": "SuperAdmin",
+      "endpoint": "sprint burndown",
+      "status": 200,
+      "bytesKB": 1.4,
+      "coldMs": 22.2,
+      "warm": {
+        "n": 8,
+        "min": 7.7,
+        "p50": 11.3,
+        "p95": 17.4,
+        "p99": 17.4,
+        "max": 17.4,
+        "mean": 11.3
+      },
+      "server": {
+        "n": 8,
+        "min": 6.9,
+        "p50": 10.3,
+        "p95": 15.7,
+        "p99": 15.7,
+        "max": 15.7,
+        "mean": 10.3
+      }
+    },
+    {
+      "who": "SuperAdmin",
+      "endpoint": "gantt",
+      "status": 200,
+      "bytesKB": 105.2,
+      "coldMs": 36.4,
+      "warm": {
+        "n": 8,
+        "min": 17.2,
+        "p50": 28.7,
+        "p95": 41.2,
+        "p99": 41.2,
+        "max": 41.2,
+        "mean": 27.9
+      },
+      "server": {
+        "n": 8,
+        "min": 16.1,
+        "p50": 27.4,
+        "p95": 39.3,
+        "p99": 39.3,
+        "max": 39.3,
+        "mean": 26.3
+      }
+    },
+    {
+      "who": "SuperAdmin",
+      "endpoint": "proje haritası",
+      "status": 200,
+      "bytesKB": 421.7,
+      "coldMs": 38.8,
+      "warm": {
+        "n": 8,
+        "min": 27,
+        "p50": 31,
+        "p95": 57.4,
+        "p99": 57.4,
+        "max": 57.4,
+        "mean": 33.5
+      },
+      "server": {
+        "n": 8,
+        "min": 24.9,
+        "p50": 28.7,
+        "p95": 54.4,
+        "p99": 54.4,
+        "max": 54.4,
+        "mean": 31.2
+      }
+    },
+    {
+      "who": "SuperAdmin",
+      "endpoint": "epikler",
+      "status": 200,
+      "bytesKB": 15.7,
+      "coldMs": 26,
+      "warm": {
+        "n": 8,
+        "min": 16.6,
+        "p50": 18.7,
+        "p95": 20.3,
+        "p99": 20.3,
+        "max": 20.3,
+        "mean": 18.6
+      },
+      "server": {
+        "n": 8,
+        "min": 15.8,
+        "p50": 17.2,
+        "p95": 19.4,
+        "p99": 19.4,
+        "max": 19.4,
+        "mean": 17
+      }
+    },
+    {
+      "who": "SuperAdmin",
+      "endpoint": "doküman listesi",
+      "status": 200,
+      "bytesKB": 7.4,
+      "coldMs": 7.3,
+      "warm": {
+        "n": 8,
+        "min": 5.9,
+        "p50": 6.7,
+        "p95": 9.6,
+        "p99": 9.6,
+        "max": 9.6,
+        "mean": 7
+      },
+      "server": {
+        "n": 8,
+        "min": 4.8,
+        "p50": 5.9,
+        "p95": 8.4,
+        "p99": 8.4,
+        "max": 8.4,
+        "mean": 6.1
+      }
+    },
+    {
+      "who": "SuperAdmin",
+      "endpoint": "doküman detayı",
+      "status": 200,
+      "bytesKB": 2.1,
+      "coldMs": 40.1,
+      "warm": {
+        "n": 8,
+        "min": 9,
+        "p50": 33,
+        "p95": 37.1,
+        "p99": 37.1,
+        "max": 37.1,
+        "mean": 29.5
+      },
+      "server": {
+        "n": 8,
+        "min": 8.1,
+        "p50": 31,
+        "p95": 35,
+        "p99": 35,
+        "max": 35,
+        "mean": 27.7
+      }
+    },
+    {
+      "who": "SuperAdmin",
+      "endpoint": "öğe detayı",
+      "status": 200,
+      "bytesKB": 19.1,
+      "coldMs": 148.2,
+      "warm": {
+        "n": 8,
+        "min": 29.8,
+        "p50": 37.8,
+        "p95": 44.4,
+        "p99": 44.4,
+        "max": 44.4,
+        "mean": 37.2
+      },
+      "server": {
+        "n": 8,
+        "min": 29,
+        "p50": 36.8,
+        "p95": 43.5,
+        "p99": 43.5,
+        "max": 43.5,
+        "mean": 36.2
+      }
+    },
+    {
+      "who": "SuperAdmin",
+      "endpoint": "flow raporu (proje)",
+      "status": 200,
+      "bytesKB": 1.4,
+      "coldMs": 128.9,
+      "warm": {
+        "n": 8,
+        "min": 66.8,
+        "p50": 91.8,
+        "p95": 107.5,
+        "p99": 107.5,
+        "max": 107.5,
+        "mean": 87.7
+      },
+      "server": {
+        "n": 8,
+        "min": 65,
+        "p50": 91,
+        "p95": 103,
+        "p99": 103,
+        "max": 103,
+        "mean": 85.3
+      }
+    },
+    {
+      "who": "SuperAdmin",
+      "endpoint": "workload (proje)",
+      "status": 200,
+      "bytesKB": 2.2,
+      "coldMs": 86.7,
+      "warm": {
+        "n": 8,
+        "min": 13.1,
+        "p50": 23.3,
+        "p95": 53,
+        "p99": 53,
+        "max": 53,
+        "mean": 27.1
+      },
+      "server": {
+        "n": 8,
+        "min": 12.3,
+        "p50": 22.3,
+        "p95": 51.2,
+        "p99": 51.2,
+        "max": 51.2,
+        "mean": 25.8
+      }
+    },
+    {
+      "who": "SuperAdmin",
+      "endpoint": "timesheet (proje)",
+      "status": 200,
+      "bytesKB": 2.9,
+      "coldMs": 20.1,
+      "warm": {
+        "n": 8,
+        "min": 8.8,
+        "p50": 9.8,
+        "p95": 11.9,
+        "p99": 11.9,
+        "max": 11.9,
+        "mean": 10
+      },
+      "server": {
+        "n": 8,
+        "min": 7.9,
+        "p50": 9,
+        "p95": 11.1,
+        "p99": 11.1,
+        "max": 11.1,
+        "mean": 9.1
+      }
+    },
+    {
+      "who": "SuperAdmin",
+      "endpoint": "workload (genel)",
+      "status": 200,
+      "bytesKB": 7.4,
+      "coldMs": 190.8,
+      "warm": {
+        "n": 8,
+        "min": 127.1,
+        "p50": 158.2,
+        "p95": 210.9,
+        "p99": 210.9,
+        "max": 210.9,
+        "mean": 156.6
+      },
+      "server": {
+        "n": 8,
+        "min": 126.1,
+        "p50": 157.2,
+        "p95": 209.8,
+        "p99": 209.8,
+        "max": 209.8,
+        "mean": 155.4
+      }
+    },
+    {
+      "who": "SuperAdmin",
+      "endpoint": "admin overview",
+      "status": 200,
+      "bytesKB": 17.1,
+      "coldMs": 496.5,
+      "warm": {
+        "n": 8,
+        "min": 389.1,
+        "p50": 475.3,
+        "p95": 661.4,
+        "p99": 661.4,
+        "max": 661.4,
+        "mean": 472.6
+      },
+      "server": {
+        "n": 8,
+        "min": 387.5,
+        "p50": 474.4,
+        "p95": 659.6,
+        "p99": 659.6,
+        "max": 659.6,
+        "mean": 470.9
+      }
+    },
+    {
+      "who": "SuperAdmin",
+      "endpoint": "analiz: people",
+      "status": 200,
+      "bytesKB": 17.3,
+      "coldMs": 874.5,
+      "warm": {
+        "n": 8,
+        "min": 532.3,
+        "p50": 801.5,
+        "p95": 888.6,
+        "p99": 888.6,
+        "max": 888.6,
+        "mean": 762.6
+      },
+      "server": {
+        "n": 8,
+        "min": 530.6,
+        "p50": 800.4,
+        "p95": 887.2,
+        "p99": 887.2,
+        "max": 887.2,
+        "mean": 761.2
+      }
+    },
+    {
+      "who": "SuperAdmin",
+      "endpoint": "analiz: quality",
+      "status": 200,
+      "bytesKB": 6.2,
+      "coldMs": 280.4,
+      "warm": {
+        "n": 8,
+        "min": 174.1,
+        "p50": 206.6,
+        "p95": 333.4,
+        "p99": 333.4,
+        "max": 333.4,
+        "mean": 235.7
+      },
+      "server": {
+        "n": 8,
+        "min": 173.1,
+        "p50": 204.7,
+        "p95": 326.6,
+        "p99": 326.6,
+        "max": 326.6,
+        "mean": 233.7
+      }
+    },
+    {
+      "who": "SuperAdmin",
+      "endpoint": "analiz: flow",
+      "status": 200,
+      "bytesKB": 8.3,
+      "coldMs": 1328.1,
+      "warm": {
+        "n": 8,
+        "min": 1242.3,
+        "p50": 1368.2,
+        "p95": 1444.4,
+        "p99": 1444.4,
+        "max": 1444.4,
+        "mean": 1352.7
+      },
+      "server": {
+        "n": 8,
+        "min": 1241.4,
+        "p50": 1364.5,
+        "p95": 1443.5,
+        "p99": 1443.5,
+        "max": 1443.5,
+        "mean": 1351.3
+      }
+    },
+    {
+      "who": "SuperAdmin",
+      "endpoint": "analiz: capacity",
+      "status": 200,
+      "bytesKB": 123.3,
+      "coldMs": 193.3,
+      "warm": {
+        "n": 8,
+        "min": 142.5,
+        "p50": 201.5,
+        "p95": 354,
+        "p99": 354,
+        "max": 354,
+        "mean": 210.3
+      },
+      "server": {
+        "n": 8,
+        "min": 135.7,
+        "p50": 198.6,
+        "p95": 349.4,
+        "p99": 349.4,
+        "max": 349.4,
+        "mean": 206.4
+      }
+    },
+    {
+      "who": "SuperAdmin",
+      "endpoint": "analiz: forecast",
+      "status": 200,
+      "bytesKB": 26.5,
+      "coldMs": 257.4,
+      "warm": {
+        "n": 8,
+        "min": 166,
+        "p50": 197.9,
+        "p95": 295.2,
+        "p99": 295.2,
+        "max": 295.2,
+        "mean": 205.7
+      },
+      "server": {
+        "n": 8,
+        "min": 164.6,
+        "p50": 196.6,
+        "p95": 293.4,
+        "p99": 293.4,
+        "max": 293.4,
+        "mean": 204.2
+      }
+    },
+    {
+      "who": "SuperAdmin",
+      "endpoint": "analiz: sprints",
+      "status": 200,
+      "bytesKB": 13.2,
+      "coldMs": 38.2,
+      "warm": {
+        "n": 8,
+        "min": 28.8,
+        "p50": 41.2,
+        "p95": 48.4,
+        "p99": 48.4,
+        "max": 48.4,
+        "mean": 38.8
+      },
+      "server": {
+        "n": 8,
+        "min": 27.8,
+        "p50": 40.3,
+        "p95": 46.9,
+        "p99": 46.9,
+        "max": 46.9,
+        "mean": 37.7
+      }
+    },
+    {
+      "who": "SuperAdmin",
+      "endpoint": "analiz: project",
+      "status": 200,
+      "bytesKB": 6.3,
+      "coldMs": 140.5,
+      "warm": {
+        "n": 8,
+        "min": 126.2,
+        "p50": 139.1,
+        "p95": 202.8,
+        "p99": 202.8,
+        "max": 202.8,
+        "mean": 147.3
+      },
+      "server": {
+        "n": 8,
+        "min": 124.8,
+        "p50": 138.1,
+        "p95": 200.8,
+        "p99": 200.8,
+        "max": 200.8,
+        "mean": 145.7
+      }
+    },
+    {
+      "who": "SuperAdmin",
+      "endpoint": "analiz: digest",
+      "status": 200,
+      "bytesKB": 0.1,
+      "coldMs": 15.8,
+      "warm": {
+        "n": 8,
+        "min": 4.9,
+        "p50": 7.3,
+        "p95": 8.8,
+        "p99": 8.8,
+        "max": 8.8,
+        "mean": 7.2
+      },
+      "server": {
+        "n": 8,
+        "min": 4.2,
+        "p50": 6.1,
+        "p95": 7.5,
+        "p99": 7.5,
+        "max": 7.5,
+        "mean": 6
+      }
+    },
+    {
+      "who": "Üye",
+      "endpoint": "hierarchy (ağaç)",
+      "status": 200,
+      "bytesKB": 4.3,
+      "coldMs": 29.2,
+      "warm": {
+        "n": 8,
+        "min": 6.8,
+        "p50": 11,
+        "p95": 12.6,
+        "p99": 12.6,
+        "max": 12.6,
+        "mean": 9.9
+      },
+      "server": {
+        "n": 8,
+        "min": 6,
+        "p50": 9.9,
+        "p95": 11.2,
+        "p99": 11.2,
+        "max": 11.2,
+        "mean": 8.8
+      }
+    },
+    {
+      "who": "Üye",
+      "endpoint": "my-work (bana atananlar)",
+      "status": 200,
+      "bytesKB": 106.4,
+      "coldMs": 105.2,
+      "warm": {
+        "n": 8,
+        "min": 30.6,
+        "p50": 50.7,
+        "p95": 182.4,
+        "p99": 182.4,
+        "max": 182.4,
+        "mean": 71.3
+      },
+      "server": {
+        "n": 8,
+        "min": 29.4,
+        "p50": 48.4,
+        "p95": 179.4,
+        "p99": 179.4,
+        "max": 179.4,
+        "mean": 68.7
+      }
+    },
+    {
+      "who": "Üye",
+      "endpoint": "activity (son aktivite)",
+      "status": 200,
+      "bytesKB": 12,
+      "coldMs": 69.1,
+      "warm": {
+        "n": 8,
+        "min": 9.7,
+        "p50": 12.6,
+        "p95": 33.7,
+        "p99": 33.7,
+        "max": 33.7,
+        "mean": 14.9
+      },
+      "server": {
+        "n": 8,
+        "min": 8.5,
+        "p50": 11.9,
+        "p95": 32.5,
+        "p99": 32.5,
+        "max": 32.5,
+        "mean": 13.9
+      }
+    },
+    {
+      "who": "Üye",
+      "endpoint": "audit (denetim)",
+      "status": 403,
+      "bytesKB": 0,
+      "coldMs": 4,
+      "warm": {
+        "n": 0
+      },
+      "server": null
+    },
+    {
+      "who": "Üye",
+      "endpoint": "notifications (liste)",
+      "status": 200,
+      "bytesKB": 8.6,
+      "coldMs": 11.4,
+      "warm": {
+        "n": 8,
+        "min": 4.8,
+        "p50": 5.5,
+        "p95": 5.7,
+        "p99": 5.7,
+        "max": 5.7,
+        "mean": 5.4
+      },
+      "server": {
+        "n": 8,
+        "min": 4.1,
+        "p50": 4.7,
+        "p95": 5,
+        "p99": 5,
+        "max": 5,
+        "mean": 4.7
+      }
+    },
+    {
+      "who": "Üye",
+      "endpoint": "notifications unread-count",
+      "status": 200,
+      "bytesKB": 0,
+      "coldMs": 4.9,
+      "warm": {
+        "n": 8,
+        "min": 3.5,
+        "p50": 4.6,
+        "p95": 5.9,
+        "p99": 5.9,
+        "max": 5.9,
+        "mean": 4.6
+      },
+      "server": {
+        "n": 8,
+        "min": 2.7,
+        "p50": 3.8,
+        "p95": 5.1,
+        "p99": 5.1,
+        "max": 5.1,
+        "mean": 3.8
+      }
+    },
+    {
+      "who": "Üye",
+      "endpoint": "conversations (liste)",
+      "status": 200,
+      "bytesKB": 8.7,
+      "coldMs": 113.1,
+      "warm": {
+        "n": 8,
+        "min": 16.8,
+        "p50": 23.6,
+        "p95": 34.5,
+        "p99": 34.5,
+        "max": 34.5,
+        "mean": 24.3
+      },
+      "server": {
+        "n": 8,
+        "min": 14.7,
+        "p50": 21.7,
+        "p95": 33.3,
+        "p99": 33.3,
+        "max": 33.3,
+        "mean": 22.9
+      }
+    },
+    {
+      "who": "Üye",
+      "endpoint": "search (\"görev\")",
+      "status": 200,
+      "bytesKB": 9,
+      "coldMs": 69.7,
+      "warm": {
+        "n": 8,
+        "min": 38.4,
+        "p50": 64.8,
+        "p95": 150.8,
+        "p99": 150.8,
+        "max": 150.8,
+        "mean": 72.4
+      },
+      "server": {
+        "n": 8,
+        "min": 37.6,
+        "p50": 63.6,
+        "p95": 149.2,
+        "p99": 149.2,
+        "max": 149.2,
+        "mean": 71.2
+      }
+    },
+    {
+      "who": "Üye",
+      "endpoint": "liste/tablo (lists/:id/items)",
+      "status": 200,
+      "bytesKB": 244.9,
+      "coldMs": 72.6,
+      "warm": {
+        "n": 8,
+        "min": 31.1,
+        "p50": 38.5,
+        "p95": 74.4,
+        "p99": 74.4,
+        "max": 74.4,
+        "mean": 41.1
+      },
+      "server": {
+        "n": 8,
+        "min": 28.9,
+        "p50": 35,
+        "p95": 68.2,
+        "p99": 68.2,
+        "max": 68.2,
+        "mean": 37.7
+      }
+    },
+    {
+      "who": "Üye",
+      "endpoint": "space items (spaces/:id/items)",
+      "status": 404,
+      "bytesKB": 0,
+      "coldMs": 1.8,
+      "warm": {
+        "n": 0
+      },
+      "server": null
+    },
+    {
+      "who": "Üye",
+      "endpoint": "backlog",
+      "status": 200,
+      "bytesKB": 115.8,
+      "coldMs": 31.5,
+      "warm": {
+        "n": 8,
+        "min": 29.5,
+        "p50": 38.8,
+        "p95": 76,
+        "p99": 76,
+        "max": 76,
+        "mean": 42.9
+      },
+      "server": {
+        "n": 8,
+        "min": 27.9,
+        "p50": 37.5,
+        "p95": 74,
+        "p99": 74,
+        "max": 74,
+        "mean": 40.8
+      }
+    },
+    {
+      "who": "Üye",
+      "endpoint": "kanban",
+      "status": 200,
+      "bytesKB": 697.4,
+      "coldMs": 67.3,
+      "warm": {
+        "n": 8,
+        "min": 59.7,
+        "p50": 83.8,
+        "p95": 135.4,
+        "p99": 135.4,
+        "max": 135.4,
+        "mean": 85.6
+      },
+      "server": {
+        "n": 8,
+        "min": 56.4,
+        "p50": 76.5,
+        "p95": 129.2,
+        "p99": 129.2,
+        "max": 129.2,
+        "mean": 81.6
+      }
+    },
+    {
+      "who": "Üye",
+      "endpoint": "sprint listesi",
+      "status": 200,
+      "bytesKB": 25,
+      "coldMs": 29.7,
+      "warm": {
+        "n": 8,
+        "min": 18.9,
+        "p50": 21.7,
+        "p95": 59.5,
+        "p99": 59.5,
+        "max": 59.5,
+        "mean": 26.2
+      },
+      "server": {
+        "n": 8,
+        "min": 18,
+        "p50": 20.9,
+        "p95": 58.1,
+        "p99": 58.1,
+        "max": 58.1,
+        "mean": 25.3
+      }
+    },
+    {
+      "who": "Üye",
+      "endpoint": "sprint detayı (board)",
+      "status": 200,
+      "bytesKB": 73.8,
+      "coldMs": 26.4,
+      "warm": {
+        "n": 8,
+        "min": 25,
+        "p50": 34.5,
+        "p95": 47.4,
+        "p99": 47.4,
+        "max": 47.4,
+        "mean": 33.5
+      },
+      "server": {
+        "n": 8,
+        "min": 23.5,
+        "p50": 30.7,
+        "p95": 45.9,
+        "p99": 45.9,
+        "max": 45.9,
+        "mean": 31
+      }
+    },
+    {
+      "who": "Üye",
+      "endpoint": "sprint burndown",
+      "status": 200,
+      "bytesKB": 1.4,
+      "coldMs": 14.2,
+      "warm": {
+        "n": 8,
+        "min": 8,
+        "p50": 9.5,
+        "p95": 14.2,
+        "p99": 14.2,
+        "max": 14.2,
+        "mean": 10.1
+      },
+      "server": {
+        "n": 8,
+        "min": 7.2,
+        "p50": 8.8,
+        "p95": 13.2,
+        "p99": 13.2,
+        "max": 13.2,
+        "mean": 9.3
+      }
+    },
+    {
+      "who": "Üye",
+      "endpoint": "gantt",
+      "status": 200,
+      "bytesKB": 105.2,
+      "coldMs": 40.9,
+      "warm": {
+        "n": 8,
+        "min": 24.9,
+        "p50": 31.4,
+        "p95": 71.9,
+        "p99": 71.9,
+        "max": 71.9,
+        "mean": 40.8
+      },
+      "server": {
+        "n": 8,
+        "min": 23.7,
+        "p50": 30,
+        "p95": 67.8,
+        "p99": 67.8,
+        "max": 67.8,
+        "mean": 38.7
+      }
+    },
+    {
+      "who": "Üye",
+      "endpoint": "proje haritası",
+      "status": 200,
+      "bytesKB": 421.7,
+      "coldMs": 96.5,
+      "warm": {
+        "n": 8,
+        "min": 26.6,
+        "p50": 41.4,
+        "p95": 51.2,
+        "p99": 51.2,
+        "max": 51.2,
+        "mean": 39.7
+      },
+      "server": {
+        "n": 8,
+        "min": 23.5,
+        "p50": 38.3,
+        "p95": 47.5,
+        "p99": 47.5,
+        "max": 47.5,
+        "mean": 36.5
+      }
+    },
+    {
+      "who": "Üye",
+      "endpoint": "epikler",
+      "status": 200,
+      "bytesKB": 15.7,
+      "coldMs": 33.2,
+      "warm": {
+        "n": 8,
+        "min": 17.9,
+        "p50": 19.4,
+        "p95": 26.6,
+        "p99": 26.6,
+        "max": 26.6,
+        "mean": 19.9
+      },
+      "server": {
+        "n": 8,
+        "min": 16.6,
+        "p50": 18.4,
+        "p95": 25.6,
+        "p99": 25.6,
+        "max": 25.6,
+        "mean": 18.8
+      }
+    },
+    {
+      "who": "Üye",
+      "endpoint": "doküman listesi",
+      "status": 200,
+      "bytesKB": 7.4,
+      "coldMs": 7.9,
+      "warm": {
+        "n": 8,
+        "min": 6.6,
+        "p50": 8.3,
+        "p95": 11.1,
+        "p99": 11.1,
+        "max": 11.1,
+        "mean": 8.4
+      },
+      "server": {
+        "n": 8,
+        "min": 5.8,
+        "p50": 7.3,
+        "p95": 8.7,
+        "p99": 8.7,
+        "max": 8.7,
+        "mean": 7.1
+      }
+    },
+    {
+      "who": "Üye",
+      "endpoint": "doküman detayı",
+      "status": 200,
+      "bytesKB": 2.1,
+      "coldMs": 15.5,
+      "warm": {
+        "n": 8,
+        "min": 10.2,
+        "p50": 12.1,
+        "p95": 15,
+        "p99": 15,
+        "max": 15,
+        "mean": 12.3
+      },
+      "server": {
+        "n": 8,
+        "min": 9.5,
+        "p50": 11.3,
+        "p95": 14.3,
+        "p99": 14.3,
+        "max": 14.3,
+        "mean": 11.4
+      }
+    },
+    {
+      "who": "Üye",
+      "endpoint": "öğe detayı",
+      "status": 200,
+      "bytesKB": 19.1,
+      "coldMs": 63,
+      "warm": {
+        "n": 8,
+        "min": 25.6,
+        "p50": 33.6,
+        "p95": 41.6,
+        "p99": 41.6,
+        "max": 41.6,
+        "mean": 32.3
+      },
+      "server": {
+        "n": 8,
+        "min": 24.6,
+        "p50": 32.9,
+        "p95": 40.8,
+        "p99": 40.8,
+        "max": 40.8,
+        "mean": 31.4
+      }
+    },
+    {
+      "who": "Üye",
+      "endpoint": "flow raporu (proje)",
+      "status": 200,
+      "bytesKB": 1.4,
+      "coldMs": 101.6,
+      "warm": {
+        "n": 8,
+        "min": 66.2,
+        "p50": 91.3,
+        "p95": 199,
+        "p99": 199,
+        "max": 199,
+        "mean": 95.5
+      },
+      "server": {
+        "n": 8,
+        "min": 65.4,
+        "p50": 85.9,
+        "p95": 197.4,
+        "p99": 197.4,
+        "max": 197.4,
+        "mean": 93.4
+      }
+    },
+    {
+      "who": "Üye",
+      "endpoint": "workload (proje)",
+      "status": 200,
+      "bytesKB": 2.2,
+      "coldMs": 21.6,
+      "warm": {
+        "n": 8,
+        "min": 15,
+        "p50": 20.3,
+        "p95": 30.5,
+        "p99": 30.5,
+        "max": 30.5,
+        "mean": 20.5
+      },
+      "server": {
+        "n": 8,
+        "min": 14.1,
+        "p50": 19.5,
+        "p95": 27.4,
+        "p99": 27.4,
+        "max": 27.4,
+        "mean": 19.3
+      }
+    },
+    {
+      "who": "Üye",
+      "endpoint": "timesheet (proje)",
+      "status": 200,
+      "bytesKB": 2.9,
+      "coldMs": 18.2,
+      "warm": {
+        "n": 8,
+        "min": 10.4,
+        "p50": 12,
+        "p95": 30.2,
+        "p99": 30.2,
+        "max": 30.2,
+        "mean": 14.5
+      },
+      "server": {
+        "n": 8,
+        "min": 9.5,
+        "p50": 11.1,
+        "p95": 20.8,
+        "p99": 20.8,
+        "max": 20.8,
+        "mean": 12.5
+      }
+    },
+    {
+      "who": "Üye",
+      "endpoint": "workload (genel)",
+      "status": 200,
+      "bytesKB": 6.6,
+      "coldMs": 39.8,
+      "warm": {
+        "n": 8,
+        "min": 59.4,
+        "p50": 76.6,
+        "p95": 121.9,
+        "p99": 121.9,
+        "max": 121.9,
+        "mean": 86.1
+      },
+      "server": {
+        "n": 8,
+        "min": 58.2,
+        "p50": 75.6,
+        "p95": 120.4,
+        "p99": 120.4,
+        "max": 120.4,
+        "mean": 84.9
+      }
+    },
+    {
+      "who": "Üye",
+      "endpoint": "admin overview",
+      "status": 403,
+      "bytesKB": 0,
+      "coldMs": 9.1,
+      "warm": {
+        "n": 0
+      },
+      "server": null
+    },
+    {
+      "who": "Üye",
+      "endpoint": "analiz: people",
+      "status": 403,
+      "bytesKB": 0,
+      "coldMs": 7.8,
+      "warm": {
+        "n": 0
+      },
+      "server": null
+    },
+    {
+      "who": "Üye",
+      "endpoint": "analiz: quality",
+      "status": 403,
+      "bytesKB": 0,
+      "coldMs": 5.5,
+      "warm": {
+        "n": 0
+      },
+      "server": null
+    },
+    {
+      "who": "Üye",
+      "endpoint": "analiz: flow",
+      "status": 403,
+      "bytesKB": 0,
+      "coldMs": 4,
+      "warm": {
+        "n": 0
+      },
+      "server": null
+    },
+    {
+      "who": "Üye",
+      "endpoint": "analiz: capacity",
+      "status": 403,
+      "bytesKB": 0,
+      "coldMs": 4.8,
+      "warm": {
+        "n": 0
+      },
+      "server": null
+    },
+    {
+      "who": "Üye",
+      "endpoint": "analiz: forecast",
+      "status": 403,
+      "bytesKB": 0,
+      "coldMs": 5,
+      "warm": {
+        "n": 0
+      },
+      "server": null
+    },
+    {
+      "who": "Üye",
+      "endpoint": "analiz: sprints",
+      "status": 403,
+      "bytesKB": 0,
+      "coldMs": 4.1,
+      "warm": {
+        "n": 0
+      },
+      "server": null
+    },
+    {
+      "who": "Üye",
+      "endpoint": "analiz: project",
+      "status": 403,
+      "bytesKB": 0,
+      "coldMs": 4.2,
+      "warm": {
+        "n": 0
+      },
+      "server": null
+    },
+    {
+      "who": "Üye",
+      "endpoint": "analiz: digest",
+      "status": 403,
+      "bytesKB": 0,
+      "coldMs": 3.5,
+      "warm": {
+        "n": 0
+      },
+      "server": null
+    }
+  ]
+}

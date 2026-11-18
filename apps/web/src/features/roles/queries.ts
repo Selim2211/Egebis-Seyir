@@ -72,7 +72,7 @@ export function useAssignableWorkspaceRoles(): string[] {
   const custom = (data?.roles ?? [])
     .filter((r) => r.scope === 'WORKSPACE' && isCustomRoleKey(r.key))
     .map((r) => r.key);
-  return ['MEMBER', 'GUEST', ...custom];
+  return ['MEMBER', 'GUEST', 'VIEWER', ...custom];
 }
 
 /** Space üyesi olarak seçilebilir roller (sistem + özel). */

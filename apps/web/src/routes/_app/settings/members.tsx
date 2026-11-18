@@ -7,7 +7,17 @@ import {
   WORKSPACE_ROLES,
 } from '@scrum/shared';
 import { createFileRoute } from '@tanstack/react-router';
-import { Clock, Copy, Lock, LockOpen, Mail, Send, UserMinus, UserPlus } from 'lucide-react';
+import {
+  CalendarPlus,
+  Clock,
+  Copy,
+  Lock,
+  LockOpen,
+  Mail,
+  Send,
+  UserMinus,
+  UserPlus,
+} from 'lucide-react';
 import { type FormEvent, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -31,6 +41,7 @@ import {
   useInvite,
   useMembers,
   useRemoveMember,
+  useExtendExpiry,
   useSetMemberLock,
   useResendInvitation,
   useRevokeInvitation,
@@ -74,7 +85,7 @@ function CreateAccountForm() {
     password: string | null;
     existing: boolean;
   } | null>(null);
-  const guest = workspaceTier(role) === 'GUEST';
+  const guest = ['GUEST', 'VIEWER'].includes(workspaceTier(role));
   // Super Admin her Projeyi görür; diğerleri yalnızca eklendikleri Projeleri (ADR-152).
   const pickSpaces = guest || workspaceTier(role) === 'MEMBER';
   const shortPassword = password.length > 0 && password.length < 8;
@@ -244,7 +255,7 @@ function InviteForm() {
   const [invalid, setInvalid] = useState<string[]>([]);
   const [spaceIds, setSpaceIds] = useState<string[]>([]);
   const [spacesMissing, setSpacesMissing] = useState(false);
-  const guest = workspaceTier(role) === 'GUEST';
+  const guest = ['GUEST', 'VIEWER'].includes(workspaceTier(role));
   // Super Admin her Projeyi görür; diğerleri yalnızca eklendikleri Projeleri (ADR-152).
   const pickSpaces = guest || workspaceTier(role) === 'MEMBER';
 
@@ -547,6 +558,17 @@ function MemberRow({
       },
     );
 
+  const extend = useExtendExpiry();
+  const expired = member.expiresAt !== null && new Date(member.expiresAt) <= new Date();
+  const onExtend = () =>
+    extend.mutate(
+      { userId: member.userId },
+      {
+        onSuccess: () => toast.success(t('members.extended')),
+        onError: (e) => toast.error(errorMessage(e)),
+      },
+    );
+
   const onLock = () =>
     setLock.mutate(
       { userId: member.userId, locked: !member.locked },
@@ -589,11 +611,19 @@ function MemberRow({
               )}
               {member.locked && (
                 <span className="ml-2 rounded bg-amber-100 px-1.5 py-0.5 text-[11px] font-medium text-amber-800 dark:bg-amber-500/20 dark:text-amber-300">
-                  {t('members.locked')}
+                  {expired ? t('members.expired') : t('members.locked')}
                 </span>
               )}
             </span>
             <span className="text-muted-foreground block truncate text-xs">{member.email}</span>
+            {member.expiresAt && (
+              <span className="text-muted-foreground block truncate text-xs">
+                {t(expired ? 'members.expiredOn' : 'members.expiresOn', {
+                  date: new Date(member.expiresAt).toLocaleDateString(),
+                })}
+                {member.tier === 'VIEWER' && ` · ${t('members.fixedTerm')}`}
+              </span>
+            )}
           </span>
         </span>
       </td>
@@ -623,6 +653,18 @@ function MemberRow({
       </td>
       {canManage && (
         <td className="px-4 py-2.5 text-right">
+          {member.tier === 'GUEST' && (
+            <Button
+              variant="ghost"
+              size="icon"
+              title={t('members.extend')}
+              aria-label={`${t('members.extend')}: ${member.name}`}
+              disabled={extend.isPending}
+              onClick={onExtend}
+            >
+              <CalendarPlus />
+            </Button>
+          )}
           {!isYou && allowed(member.role === 'OWNER' ? 'ADMIN' : member.role) && (
             <Button
               variant="ghost"

@@ -1,6 +1,9 @@
 import { HealthResponseSchema } from '@scrum/shared';
 import { useQuery } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/api';
+import { pollEvery } from '@/lib/idle';
+
+const healthPoll = pollEvery(30_000);
 
 /** API ve veritabanı durumu. 503 (degraded) da geçerli bir yanıttır. */
 export function useHealth() {
@@ -8,7 +11,7 @@ export function useHealth() {
     queryKey: ['health'],
     queryFn: () => apiRequest('/health', HealthResponseSchema, { acceptStatuses: [503] }),
     // Sunucu yokken (ör. API yeniden başlıyor) daha sık dener.
-    refetchInterval: (query) => (query.state.status === 'error' ? 5_000 : 30_000),
+    refetchInterval: (query) => (query.state.status === 'error' ? 5_000 : healthPoll()),
     retry: false,
   });
 }

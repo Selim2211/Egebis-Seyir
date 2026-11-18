@@ -7,6 +7,7 @@ import {
 import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCurrentWorkspace } from '@/features/workspace/queries';
 import { apiRequest, NoContent } from '@/lib/api';
+import { pollEvery } from '@/lib/idle';
 
 const base = (workspaceId: string) => `/workspaces/${workspaceId}/conversations`;
 
@@ -18,7 +19,7 @@ export const conversationsQuery = (workspaceId: string) =>
   queryOptions({
     queryKey: ['workspaces', workspaceId, 'conversations'],
     queryFn: () => apiRequest(base(workspaceId), ConversationsResponseSchema),
-    refetchInterval: CONVERSATIONS_POLL_MS,
+    refetchInterval: pollEvery(CONVERSATIONS_POLL_MS),
   });
 
 export const threadQuery = (workspaceId: string, conversationId: string) =>
@@ -26,7 +27,7 @@ export const threadQuery = (workspaceId: string, conversationId: string) =>
     queryKey: ['workspaces', workspaceId, 'conversations', conversationId, 'messages'],
     queryFn: () =>
       apiRequest(`${base(workspaceId)}/${conversationId}/messages`, MessagesResponseSchema),
-    refetchInterval: THREAD_POLL_MS,
+    refetchInterval: pollEvery(THREAD_POLL_MS),
   });
 
 export function useConversations(enabled = true) {

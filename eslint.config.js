@@ -12,6 +12,8 @@ export default tseslint.config(
       'scripts/docs/**',
       // Derlenmiş API ile çalışan bağımsız Node betikleri (TS projesine dahil değil).
       'apps/api/scripts/*.cjs',
+      // Yük testi araçları (ADR-174): ayrı veritabanında çalışan bağımsız Node betikleri.
+      'apps/api/scripts/load/**',
       '**/dist/**',
       '**/dist-e2e/**',
       '**/coverage/**',

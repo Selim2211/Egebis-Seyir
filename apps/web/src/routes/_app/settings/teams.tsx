@@ -136,7 +136,9 @@ function TeamDialog({ team, onClose }: { team: Team | null; onClose: () => void 
   const { t } = useTranslation();
   const create = useCreateTeam();
   const update = useUpdateTeam();
-  const members = (useMembers().data?.members ?? []).filter((m) => m.role !== 'GUEST');
+  const members = (useMembers().data?.members ?? []).filter(
+    (m) => m.role !== 'GUEST' && m.role !== 'VIEWER',
+  );
   const [name, setName] = useState(team?.name ?? '');
   const [color, setColor] = useState(team?.color ?? COLORS[0]!);
   const [memberIds, setMemberIds] = useState<string[]>(team?.members.map((m) => m.id) ?? []);

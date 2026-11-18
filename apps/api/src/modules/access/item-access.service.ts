@@ -42,7 +42,7 @@ export class ItemAccessService {
 
     const item = await this.prisma.workItem.findFirst({
       where: { id: itemId, workspaceId },
-      select: { accessRootId: true },
+      select: { accessRootId: true, spaceId: true },
     });
     if (!item?.accessRootId) return spacePerms;
     const root = await this.prisma.workItemAccess.findUnique({
@@ -76,6 +76,15 @@ export class ItemAccessService {
         mine.length === 0 ? null : [...new Set(mine.flatMap((e) => e.role.permissions))],
       userId,
       contentAccess: this.cls.get('contentAccess'),
+      outsourceAccess:
+        tier === 'GUEST'
+          ? (
+              await this.prisma.spaceMember.findFirst({
+                where: { spaceId: item.spaceId, userId },
+                select: { outsourceAccess: true },
+              })
+            )?.outsourceAccess
+          : undefined,
     });
   }
 

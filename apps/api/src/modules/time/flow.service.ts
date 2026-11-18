@@ -73,10 +73,9 @@ export class FlowService {
       const toCategory = change?.to ? category.get(change.to) : undefined;
       if (!toCategory) continue;
       const fromCategory = change?.from ? (category.get(change.from) ?? null) : null;
-      byItem.set(event.entityId, [
-        ...(byItem.get(event.entityId) ?? []),
-        { day: day(event.createdAt), from: fromCategory, to: toCategory },
-      ]);
+      const list = byItem.get(event.entityId) ?? [];
+      list.push({ day: day(event.createdAt), from: fromCategory, to: toCategory });
+      byItem.set(event.entityId, list);
     }
 
     const flowItems: FlowItem[] = items.map((item) => {

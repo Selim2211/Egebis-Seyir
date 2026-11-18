@@ -214,13 +214,13 @@ describe('Özel roller ve izin matrisi (ADR-112)', () => {
     expect((await owner.delete(api(`/roles/${roleId}`)).expect(409)).body).toEqual({
       code: 'ROLE_IN_USE',
     });
-    const stakeholder = await byKey('VIEWER');
+    const stakeholder = await byKey('PROJECT_MEMBER');
     await owner.delete(api(`/roles/${roleId}?reassignToRoleId=${stakeholder.id}`)).expect(204);
     expect((await roles()).some((r) => r.id === roleId)).toBe(false);
     const members = (await owner.get(api(`/spaces/${s.id}/members`)).expect(200)).body as {
       members: Array<{ userId: string; role: string }>;
     };
-    expect(members.members.find((m) => m.userId === member.id)!.role).toBe('VIEWER');
+    expect(members.members.find((m) => m.userId === member.id)!.role).toBe('PROJECT_MEMBER');
 
     const system = await byKey('PROJECT_MEMBER');
     expect((await owner.delete(api(`/roles/${system.id}`)).expect(403)).body).toEqual({

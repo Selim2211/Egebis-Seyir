@@ -196,29 +196,24 @@ describe('Space / Folder / List (gerçek veritabanı)', () => {
       const { spaces } = await tree(guest);
       expect(spaces.map((s) => s.key)).toEqual(['MOB']);
       const perms = spaces[0]!.permissions;
-      expect(perms).toContain('workItem.write');
+      // ADR-172: yetkisi verilmemiş dış kaynak yalnızca Projeyi görür; yazma ve içerik izni Scrum Master'dan gelir.
+      expect(perms).toContain('space.view');
+      expect(perms).not.toContain('workItem.write');
       expect(perms).not.toContain('space.settings');
       expect(perms).not.toContain('sprint.plan');
       expect(perms).not.toContain('doc.view');
       expect(perms).not.toContain('video.view');
       await guest.get(api(`/spaces/${shared}/docs`)).expect(403);
 
-      // Super Admin görüntüleme izni verince dokümanlar açılır, yazma kapalı kalır.
+      // Doküman/video erişimi artık Projede kişi bazlı verilir (ADR-172); ayrıntılı senaryo dis-kaynak-yetki.int-spec.ts'te.
       const guestId = (await ctx.prisma.user.findUniqueOrThrow({ where: { email: GUEST.email } }))
         .id;
-      await owner
-        .patch(api(`/members/${guestId}/content-access`), { contentAccess: 'VIEW' })
-        .expect(204);
-      await guest.get(api(`/spaces/${shared}/docs`)).expect(200);
-      await guest.post(api(`/spaces/${shared}/docs`), { title: 'X', parentId: null }).expect(403);
-      // Dış kaynak penceresi: Super Admin kişiyi ve Projesini görür.
       const list = (await owner.get(api('/members/outsource')).expect(200)).body as {
-        people: Array<{ userId: string; contentAccess: string; projects: Array<{ key: string }> }>;
+        people: Array<{ userId: string; projects: Array<{ key: string }> }>;
       };
       expect(list.people).toEqual([
         expect.objectContaining({
           userId: guestId,
-          contentAccess: 'VIEW',
           projects: [expect.objectContaining({ key: 'MOB' })],
         }),
       ]);

@@ -89,11 +89,19 @@ export class WorkloadService {
     const itemIds = items.map((i) => i.id);
     const today = localDate(new Date(), REPORT_TIME_ZONE);
     const weekFrom = addDays(today, -weekdayIndex(today));
+    // Zaman kayıtları satır satır değil, öğe başına toplam olarak gelir (ADR-174).
     const [entries, users] = await Promise.all([
-      db.timeEntry.findMany({
-        where: { workItemId: { in: itemIds } },
-        select: { workItemId: true, minutes: true },
-      }),
+      itemIds.length
+        ? db.timeEntry
+            .groupBy({
+              by: ['workItemId'],
+              where: { workItemId: { in: itemIds } },
+              _sum: { minutes: true },
+            })
+            .then((rows) =>
+              rows.map((r) => ({ workItemId: r.workItemId, minutes: r._sum.minutes ?? 0 })),
+            )
+        : Promise.resolve([] as { workItemId: string; minutes: number }[]),
       db.user.findMany({
         where: { assignedItems: { some: { workItem: { spaceId: inSpaces } } } },
         select: { id: true, name: true },

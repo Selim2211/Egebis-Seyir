@@ -13,6 +13,8 @@ type Handler<T> = (data: T) => Promise<void>;
 export class QueueService implements OnModuleDestroy {
   private readonly logger = new Logger(QueueService.name);
   private readonly enabled: boolean;
+  /** Arka plan işçisi mi (ADR-174)? Değilse işleri yalnızca kuyruğa atar; işlemez ve zamanlamaz. */
+  private readonly worker: boolean;
   private readonly connectionString: string;
   private readonly handlers = new Map<string, Handler<unknown>>();
   private boss?: PgBoss;
@@ -20,6 +22,7 @@ export class QueueService implements OnModuleDestroy {
 
   constructor(config: ConfigService<Env, true>) {
     this.enabled = config.get('QUEUE_ENABLED', { infer: true });
+    this.worker = config.get('BACKGROUND_WORKER', { infer: true });
     this.connectionString = config.get('DATABASE_URL', { infer: true });
   }
 
@@ -29,6 +32,7 @@ export class QueueService implements OnModuleDestroy {
     if (!this.enabled) return;
     const boss = await this.start();
     await boss.createQueue(name, { retryLimit: 5, retryBackoff: true });
+    if (!this.worker) return;
     await boss.work<T>(name, async ([job]) => {
       if (job) await handler(job.data);
     });
@@ -40,7 +44,7 @@ export class QueueService implements OnModuleDestroy {
    */
   async schedule(name: string, cron: string, handler: () => Promise<void>): Promise<void> {
     await this.register(name, handler);
-    if (!this.enabled) return;
+    if (!this.enabled || !this.worker) return;
     const boss = await this.start();
     await boss.schedule(name, cron, {}, { tz: 'Europe/Istanbul' });
   }
@@ -62,7 +66,11 @@ export class QueueService implements OnModuleDestroy {
 
   private start(): Promise<PgBoss> {
     this.starting ??= (async () => {
-      const boss = new PgBoss(this.connectionString);
+      // pg-boss kendi havuzunu açar (varsayılan 10); API havuzuyla birlikte PG bağlantı sınırını aşmasın.
+      const boss = new PgBoss({
+        connectionString: this.connectionString,
+        max: this.worker ? 4 : 2,
+      });
       boss.on('error', (err) => this.logger.error(err));
       await boss.start();
       this.boss = boss;

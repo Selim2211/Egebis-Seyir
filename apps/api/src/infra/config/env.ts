@@ -48,8 +48,21 @@ export const EnvSchema = z.object({
   /** Birden fazla workspace varsa gelen kutusunun bağlı olduğu workspace; boşsa en eskisi. */
   TICKET_WORKSPACE_ID: z.string().optional(),
 
+  /** Süreç başına en çok veritabanı bağlantısı (ADR-174). Süreç sayısı × bu değer < PG max_connections olmalı. */
+  DB_POOL_MAX: z.coerce.number().int().min(2).max(100).default(15),
+  /** Transaction'ın havuzdan bağlantı beklerken en çok bekleyeceği ve en uzun sürebileceği süre (ms). */
+  DB_TX_MAX_WAIT_MS: z.coerce.number().int().positive().default(10_000),
+  DB_TX_TIMEOUT_MS: z.coerce.number().int().positive().default(20_000),
+  /** Verilirse bu kadar ms'den uzun süren sorgular uyarı olarak loglanır (teşhis; normalde boş). */
+  DB_LOG_SLOW_MS: z.coerce.number().int().positive().optional(),
+
   /** Arka plan kuyruğu (pg-boss). Kapalıysa işler istek içinde çalışır (testler). */
   QUEUE_ENABLED: z.stringbool().default(true),
+  /**
+   * Bu süreç arka plan işlerini (zamanlanmış görevler, kuyruk işçileri, gelen kutusu yoklaması) çalıştırır mı (ADR-174)?
+   * Birden çok API süreci varsa yalnızca biri `true` olmalı; diğerleri yalnızca HTTP isteklerine bakar ve işleri kuyruğa atar.
+   */
+  BACKGROUND_WORKER: z.stringbool().default(true),
 
   /** Webhook adresi dahili/özel ağda olabilir mi (ADR-087)? Verilmezse yalnızca production dışında. */
   WEBHOOK_ALLOW_PRIVATE_HOSTS: z.stringbool().optional(),

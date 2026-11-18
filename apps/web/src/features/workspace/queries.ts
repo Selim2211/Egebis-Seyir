@@ -1,5 +1,6 @@
 import {
   CreatedMemberSchema,
+  ExtendExpiryResponseSchema,
   type CreateMemberRequest,
   AcceptInvitationResponseSchema,
   type AcceptInvitationRequest,
@@ -137,6 +138,14 @@ export function useOutsource(enabled = true) {
   const { id } = useCurrentWorkspace();
   return useQuery({ ...outsourceQuery(id), enabled });
 }
+
+/** Dış kaynağın süresini 90 gün uzatır (yalnızca Super Admin, ADR-169). */
+export const useExtendExpiry = () =>
+  useWorkspaceMutation((id, input: { userId: string }) =>
+    apiRequest(`${ws(id)}/members/${input.userId}/extend-expiry`, ExtendExpiryResponseSchema, {
+      method: 'POST',
+    }),
+  );
 
 export const useSetContentAccess = () =>
   useWorkspaceMutation((id, input: { userId: string; contentAccess: ContentAccess }) =>

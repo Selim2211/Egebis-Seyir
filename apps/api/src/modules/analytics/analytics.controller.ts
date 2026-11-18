@@ -1,3 +1,4 @@
+import { ShortCache } from '../../infra/http/short-cache';
 import {
   Body,
   Controller,
@@ -89,6 +90,7 @@ export class AnalyticsController {
   ) {}
 
   @Get('people')
+  @ShortCache(30)
   @RequirePermission(W.WORKSPACE_SETTINGS)
   @ZodResponse({ type: PeopleDto })
   people(@Query() query: QueryDto): Promise<AnalyticsPeople> {
@@ -96,6 +98,7 @@ export class AnalyticsController {
   }
 
   @Get('person/:userId')
+  @ShortCache(30)
   @ZodResponse({ type: PersonDto })
   person(
     @Param('userId', ParseUUIDPipe) userId: string,
@@ -105,6 +108,7 @@ export class AnalyticsController {
   }
 
   @Get('project/:spaceId')
+  @ShortCache(30)
   @RequirePermission(W.WORKSPACE_SETTINGS)
   @ZodResponse({ type: ProjectDto })
   project(
@@ -115,6 +119,7 @@ export class AnalyticsController {
   }
 
   @Get('compare')
+  @ShortCache(30)
   @RequirePermission(W.WORKSPACE_SETTINGS)
   @ZodResponse({ type: CompareDto })
   compare(@Query() query: QueryDto): Promise<AnalyticsCompare> {
@@ -122,6 +127,7 @@ export class AnalyticsController {
   }
   /** Akış ve darboğaz: bitirme süresi, durumlarda bekleme, WIP, yaşlanan işler (ADR-144). */
   @Get('flow')
+  @ShortCache(30)
   @RequirePermission(W.WORKSPACE_SETTINGS)
   @ZodResponse({ type: FlowDto })
   flowOf(@Query() query: QueryDto): Promise<AnalyticsFlow> {
@@ -130,6 +136,7 @@ export class AnalyticsController {
 
   /** Sprint derinliği: taahhüt, biten, kapsam değişimi ve devir (ADR-145). */
   @Get('sprints')
+  @ShortCache(30)
   @RequirePermission(W.WORKSPACE_SETTINGS)
   @ZodResponse({ type: SprintsDto })
   sprints(@Query() query: QueryDto): Promise<AnalyticsSprints> {
@@ -138,6 +145,7 @@ export class AnalyticsController {
 
   /** İş yükü ve kapasite: kişi başı açık iş, kalan tahmin, doluluk ve ısı haritası (ADR-146). */
   @Get('capacity')
+  @ShortCache(30)
   @RequirePermission(W.WORKSPACE_SETTINGS)
   @ZodResponse({ type: CapacityDto })
   capacity(@Query() query: CapacityQueryDto): Promise<AnalyticsCapacity> {
@@ -146,6 +154,7 @@ export class AnalyticsController {
 
   /** Kalite ve destek: Bug eğrisi, çözüm süresi, firma ve atama doğruluğu (ADR-147). */
   @Get('quality')
+  @ShortCache(30)
   @RequirePermission(W.WORKSPACE_SETTINGS)
   @ZodResponse({ type: QualityDto })
   quality(@Query() query: QueryDto): Promise<AnalyticsQuality> {
@@ -154,6 +163,7 @@ export class AnalyticsController {
 
   /** Öngörü ve risk uyarıları: sprint/Epic tahmini bitiş, yavaşlama, bekleyen kritik Bug (ADR-148). */
   @Get('forecast')
+  @ShortCache(30)
   @RequirePermission(W.WORKSPACE_SETTINGS)
   @ZodResponse({ type: ForecastDto })
   forecast(): Promise<AnalyticsForecast> {
@@ -162,6 +172,7 @@ export class AnalyticsController {
 
   /** Haftalık özet e-postası ayarı (ADR-149). */
   @Get('digest')
+  @ShortCache(30)
   @RequirePermission(W.WORKSPACE_SETTINGS)
   @ZodResponse({ type: DigestDto })
   digestSettings(

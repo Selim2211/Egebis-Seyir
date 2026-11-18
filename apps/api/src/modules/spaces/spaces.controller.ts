@@ -45,6 +45,9 @@ import {
   type ListDetail,
   type SpaceDetail,
   type SpaceMembersResponse,
+  OutsourceAccessResponseSchema,
+  PutOutsourceAccessRequestSchema,
+  type OutsourceAccessResponse,
 } from '@scrum/shared';
 import { createZodDto, ZodResponse, ZodValidationPipe } from 'nestjs-zod';
 import { RequirePermission, RequireSpacePermission } from '../auth/decorators';
@@ -69,6 +72,8 @@ class NameDto extends createZodDto(NameRequestSchema) {}
 class CreateListDto extends createZodDto(CreateListRequestSchema) {}
 class FolderDetailDto extends createZodDto(FolderDetailSchema) {}
 class ListDetailDto extends createZodDto(ListDetailSchema) {}
+class OutsourceAccessDto extends createZodDto(OutsourceAccessResponseSchema) {}
+class PutOutsourceAccessDto extends createZodDto(PutOutsourceAccessRequestSchema) {}
 class SpaceMembersDto extends createZodDto(SpaceMembersResponseSchema) {}
 class PutSpaceMemberDto extends createZodDto(PutSpaceMemberRequestSchema) {}
 class ProjectRolesDto extends createZodDto(ProjectRolesResponseSchema) {}
@@ -215,6 +220,26 @@ export class SpacesController {
     @Body() body: unknown,
   ): Promise<void> {
     await this.members.remove(spaceId, userId, parseRemoveBody(body));
+  }
+
+  // ---------- Dış kaynak yetkisi (ADR-172) ----------
+
+  @Get(':spaceId/outsource-access')
+  @RequireSpacePermission(S.SPACE_VIEW)
+  @ZodResponse({ type: OutsourceAccessDto })
+  outsourceAccess(@Uuid('spaceId') spaceId: string): Promise<OutsourceAccessResponse> {
+    return this.members.outsourceAccess(spaceId);
+  }
+
+  @Put(':spaceId/outsource-access/:userId')
+  @RequireSpacePermission(S.SPACE_VIEW)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async putOutsourceAccess(
+    @Uuid('spaceId') spaceId: string,
+    @Uuid('userId') userId: string,
+    @Body() body: PutOutsourceAccessDto,
+  ): Promise<void> {
+    await this.members.putOutsourceAccess(spaceId, userId, body);
   }
 
   @Put(':spaceId/scrum-roles')

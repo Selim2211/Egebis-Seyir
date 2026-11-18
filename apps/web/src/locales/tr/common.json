@@ -12,7 +12,8 @@
     "optional": "isteğe bağlı",
     "you": "sen",
     "never": "Hiç",
-    "close": "Kapat"
+    "close": "Kapat",
+    "back": "Geri"
   },
   "validation": {
     "required": "Bu alan zorunlu.",
@@ -40,7 +41,10 @@
     "admin": "Yönetici paneli",
     "bugBox": "Bug Kutusu",
     "analytics": "Analiz",
-    "menu": "Menü"
+    "menu": "Menü",
+    "autoHideMenu": "Menüyü daralt (yalnızca ikonlar)",
+    "pinMenu": "Menüyü açık hâlde sabitle",
+    "showMenu": "Menüyü aç"
   },
   "spaces": {
     "emptyTitle": "Henüz Proje yok",
@@ -106,14 +110,16 @@
     "OWNER": "Super Admin (Sahip)",
     "ADMIN": "Super Admin",
     "MEMBER": "Kullanıcı",
-    "GUEST": "Dış kaynak"
+    "GUEST": "Dış kaynak",
+    "VIEWER": "Guest"
   },
   "roleHelp": {
     "OWNER": "Her şeyi yönetir; tüm Projeleri görür, workspace'i silebilir.",
     "ADMIN": "Tüm Projeleri görür; kişileri, rolleri, doküman/video izinlerini ve ayarları yönetir.",
     "MEMBER": "Yalnızca üyesi olduğu Projeleri görür; Projedeki rolü (Proje Yöneticisi / Proje Üyesi) yetkisini belirler.",
     "GUEST": "Şirket dışı kişi: yalnızca eklendiği Projeleri görür, Proje Yöneticisi olamaz; doküman ve videolar Super Admin izin verene kadar kapalıdır.",
-    "custom": "Özel roller, Ayarlar → Roles içinde belirlenen izinleri izler."
+    "custom": "Özel roller, Ayarlar → Roles içinde belirlenen izinleri izler.",
+    "VIEWER": "Salt okunur kişi: yalnızca Super Admin'in eklediği Projeleri görür, yazamaz ve yönetemez; hesap 30 gün sürer ve uzatılamaz."
   },
   "auth": {
     "email": "E-posta",
@@ -201,7 +207,8 @@
     "diagnostics": "Tanılama",
     "audit": "Denetim günlüğü",
     "roles": "Roles",
-    "email": "E-posta ayarları"
+    "email": "E-posta ayarları",
+    "backupKey": "Yedek anahtarı"
   },
   "members": {
     "title": "Üyeler",
@@ -256,7 +263,13 @@
     "copyLogin": "E-posta ve şifreyi kopyala",
     "copied": "Kopyalandı.",
     "shareOnce": "Bu şifre bir daha gösterilmeyecek; şimdi kişiye ilet.",
-    "removeTitle": "{{name}} çıkarılsın mı?"
+    "removeTitle": "{{name}} çıkarılsın mı?",
+    "expiresOn": "Bitiş: {{date}}",
+    "expired": "Süresi doldu",
+    "expiredOn": "Süresi doldu: {{date}}",
+    "extend": "Süreyi 90 gün uzat",
+    "extended": "Süre 90 gün uzatıldı.",
+    "fixedTerm": "30 gün, uzatılamaz"
   },
   "profile": {
     "title": "Profil",
@@ -477,7 +490,16 @@
     "SPACE_DELETE_SUPER_ADMIN": "Projeyi yalnızca Super Admin silebilir.",
     "SPACE_DELETE_BACKUP_REQUIRED": "Son 7 gün içinde yedeği alınmamış Proje silinemez. Önce Proje ayarlarındaki Yedek bölümünden yedek al.",
     "MESSAGE_ATTACHMENTS_TOO_BIG": "Bir mesajın ekleri toplamda en fazla 16 MB olabilir.",
-    "MESSAGE_ATTACHMENTS_LIMIT": "Bir mesaja en fazla 5 dosya eklenebilir."
+    "MESSAGE_ATTACHMENTS_LIMIT": "Bir mesaja en fazla 5 dosya eklenebilir.",
+    "EXPIRY_NOT_EXTENDABLE": "Guest süresi uzatılamaz; Dış kaynak süresini yalnızca Super Admin uzatabilir.",
+    "VIEWER_ADMIN_ONLY": "Guest'i Projeye yalnızca Super Admin ekleyebilir.",
+    "ASSIGNEE_SCRUM_MASTER_ONLY": "Atanmış işin atananını Product Owner değiştiremez; bunu Scrum Master yapar.",
+    "BACKUP_KEY_MISMATCH": "Yedek başka bir anahtarla şifrelenmiş. Doğru (eski) anahtarla “Eski yedekleri yeniden şifrele”yi kullan.",
+    "BACKUP_KEY_CHANGE_UNCONFIRMED": "Anahtarı değiştirmek için eski yedeklerin etkilenebileceği uyarısını onaylamalısın.",
+    "OUTSOURCE_ACCESS_FORBIDDEN": "Dış kaynak yetkisini yalnızca Projenin Scrum Master’ı, yöneticisi ya da Super Admin ayarlar.",
+    "NOT_OUTSOURCE": "Bu kişi bir dış kaynak değil; yetki yalnızca dış kaynaklar için ayarlanır.",
+    "ROLLBACK_CONFIRM_MISMATCH": "Yazılan Proje anahtarı bu Projeyle uyuşmuyor.",
+    "BACKUP_WRONG_SPACE": "Bu yedek başka bir Projeye ait; yalnızca bu Projenin kendi yedeğine dönülebilir."
   },
   "spaceRoles": {
     "PROJECT_MANAGER": "Proje Yöneticisi",
@@ -2044,10 +2066,10 @@
     "subtitle": "Workspace’te kimin, ne zaman, neyi yaptığı. Kayıtlar silinemez ve değiştirilemez.",
     "forbidden": "Denetim günlüğünü yalnızca Sahip ve Yöneticiler görebilir.",
     "empty": "Bu süzgeçle eşleşen kayıt yok.",
-    "export": "CSV indir",
+    "export": "Excel indir",
     "exportFiltered": "Yalnızca filtrelenmiş sonuçlar",
     "exportAll": "Tüm kayıtlar",
-    "exportFailed": "CSV indirilemedi.",
+    "exportFailed": "Excel dosyası indirilemedi.",
     "all": "Tümü",
     "from": "Başlangıç tarihi",
     "to": "Bitiş tarihi",
@@ -2164,7 +2186,22 @@
     "newName": "Yeni Proje adı (boşsa yedektekiyle aynı)",
     "restoreAction": "Geri yükle",
     "restored": "Proje yedekten geri yüklendi.",
-    "sprintRestored": "Sprint yedekten geri yüklendi."
+    "sprintRestored": "Sprint yedekten geri yüklendi.",
+    "rollback": "Yedeğe geri dön",
+    "rollbackWarnTitle": "Dikkat: Projenin şu anki verileri değişecek",
+    "rollbackWarnBody": "Bu Proje yedeğe dönerse şu anki verileriniz değişecek. Proje, seçeceğiniz yedeğin alındığı ana eksiksiz döner.",
+    "rollbackWarn1": "Yedekten sonra eklenen iş öğeleri, yorumlar, dokümanlar, ekler, zaman kayıtları ve sprint verileri silinir.",
+    "rollbackWarn2": "Yedekten sonra silinen ya da değiştirilen her şey yedekteki haline döner (durumlar, etiketler, atamalar, sprint’ler dahil).",
+    "rollbackWarn3": "Bu işlem geri alınamaz. Yeni numaralar geri sarılmaz; silinen öğelerin anahtarları yeniden kullanılmaz.",
+    "rollbackWarnAdvice": "Önerilir: devam etmeden önce Projenin şu anki halini yedekleyin.",
+    "rollbackDownloadCurrent": "Şu anki halin yedeğini indir",
+    "rollbackContinue": "Devam et",
+    "rollbackPickTitle": "Yedek dosyasını seç",
+    "rollbackPickBody": "Bu Projenin kendi yedeğini (.zip.enc) seç. Başka bir Projenin yedeği kabul edilmez. Hata olursa hiçbir şey değişmez.",
+    "rollbackConfirmLabel": "Onaylamak için Proje anahtarını yaz ({{key}})",
+    "rollbackAction": "Yedeğe döndür",
+    "rollbackRunning": "Dönülüyor…",
+    "rollbackDone": "Proje yedeğe döndürüldü."
   },
   "priorityColors": {
     "toggle": "Önceliğe göre renklendir"
@@ -3249,7 +3286,7 @@
   },
   "outsource": {
     "title": "Dış kaynak",
-    "description": "Şirket dışı kişiler. Yalnızca eklendikleri Projeleri görürler ve Proje Yöneticisi olamazlar. Doküman ve video erişimini Super Admin belirler.",
+    "description": "Dış kaynaklar yalnızca Super Admin’in atadığı Projeleri görür. Okuma/yazma yetkisi her Projenin ayarlarında, o Projenin Scrum Master’ı ya da Super Admin tarafından kişi bazında belirlenir.",
     "empty": "Görebileceğin bir dış kaynak kişi yok. Ayarlar → Kişiler'den \"Dış kaynak\" rolüyle hesap açabilir ya da davet edebilirsin.",
     "content": "Doküman ve video",
     "contentFor": "{{name}} için doküman ve video erişimi",
@@ -3264,7 +3301,8 @@
     "addTo": "{{name}} için Proje seç",
     "addProject": "Projeye ekle…",
     "add": "Ekle",
-    "added": "Projeye eklendi."
+    "added": "Projeye eklendi.",
+    "noProject": "Hiçbir Projeye atanmadı; hiçbir Proje göremez."
   },
   "livefeed": {
     "title": "Akan aktivite",
@@ -3395,7 +3433,8 @@
     "productOwner": "Product Owner",
     "scrumMaster": "Scrum Master",
     "none": "Atanmadı",
-    "saved": "Kaydedildi."
+    "saved": "Kaydedildi.",
+    "scrumMasterHint": "Scrum metodolojisinde Scrum Master = Proje Yöneticisi. Backlog’daki işleri sprint’e alır ve işleri kişilere atar; atanmış işi Product Owner değiştiremez."
   },
   "bugSenders": {
     "title": "Bug gönderebilecek e-posta adresleri",
@@ -3409,5 +3448,62 @@
   "locked": {
     "title": "Hesabın kilitlendi",
     "body": "Hesabın bir yönetici tarafından kilitlendi; verilerin ve atamaların duruyor. Erişimin açılması için Super Admin ile görüş."
+  },
+  "backupKey": {
+    "pageTitle": "Yedek anahtarı",
+    "pageSubtitle": "Yedek dosyalarını şifreleyen AES-256 anahtarı. Yalnızca Super Admin görür.",
+    "forbidden": "Yedek anahtarını yalnızca Super Admin görebilir.",
+    "title": "Yedek şifreleme anahtarı",
+    "description": "Proje ve sprint yedekleri AES-256 ile şifrelenerek indirilir (.zip.enc). Anahtarı yalnızca Super Admin görür, üretir ve değiştirir; kaybedersen yedekler açılamaz.",
+    "status": "Durum",
+    "configured": "Anahtar tanımlı",
+    "notConfigured": "Henüz anahtar yok; ilk yedekte otomatik üretilir.",
+    "fingerprint": "Parmak izi",
+    "updatedAt": "Son değişiklik",
+    "create": "Anahtar üret",
+    "created": "Yedek anahtarı üretildi.",
+    "reveal": "Anahtarı göster",
+    "hide": "Gizle",
+    "copy": "Anahtarı kopyala",
+    "copied": "Anahtar panoya kopyalandı.",
+    "change": "Anahtarı değiştir",
+    "changed": "Yedek anahtarı değiştirildi.",
+    "reencrypt": "Eski yedekleri yeniden şifrele",
+    "warnTitle": "Dikkat: eski yedekleriniz etkilenebilir",
+    "warnBody": "Anahtarı değiştirdiğinde, eski anahtarla alınmış yedekler yeni anahtarla açılamaz ve geri yüklenemez.",
+    "warnSteps": "Değiştirdikten sonra eski yedeklerinizi bu ekrandan tarayıcı ile seçip yeni anahtarla yeniden yedekleyin (eski anahtarı bilmeniz gerekir). Eski anahtarı saklamadıysanız önce “Anahtarı göster” ile not alın.",
+    "customLabel": "Kendi anahtarım (isteğe bağlı)",
+    "customPlaceholder": "Boş bırakırsan rastgele 256 bit üretilir",
+    "customHint": "En az 16 karakter. Boş bırakırsan sunucu güçlü bir anahtar üretir.",
+    "tooShort": "Anahtar en az 16 karakter olmalı.",
+    "ack": "Eski yedeklerimin etkilenebileceğini anladım.",
+    "confirmChange": "Anahtarı değiştir",
+    "reencryptTitle": "Eski yedekleri yeni anahtarla yeniden şifrele",
+    "reencryptBody": "Eski yedek dosyalarını seç; yeni anahtarla şifrelenmiş olarak tek bir ZIP içinde indirilir. Şifresiz eski ZIP yedekleri de şifrelenir.",
+    "files": "Yedek dosyaları",
+    "oldKey": "Eski anahtar",
+    "oldKeyPlaceholder": "Eski yedeklerin şifrelendiği anahtar",
+    "oldKeyHint": "Yalnızca bu istekte kullanılır, sunucuda saklanmaz. Şifresiz ZIP’ler için gerekmez.",
+    "reencryptAction": "Yeniden şifrele ve indir",
+    "reencrypted": "Yedekler yeni anahtarla şifrelendi.",
+    "later": "Şimdi değil"
+  },
+  "outsourceAccess": {
+    "title": "Dış kaynak yetkileri",
+    "description": "Bu Projeye Super Admin’in atadığı dış kaynakların okuma ve yazma sınırları. Ayar yalnızca bu Proje ve bu kişi için geçerlidir; yönetici izinleri verilemez.",
+    "empty": "Bu Projeye atanmış dış kaynak yok. Super Admin, Sistem Yönetimi → Dış kaynak ekranından kişiyi Projeye atar.",
+    "saved": "Dış kaynak yetkisi kaydedildi.",
+    "areas": {
+      "items": "İş öğeleri, Backlog ve Sprint",
+      "comments": "Yorumlar",
+      "docs": "Dokümanlar",
+      "videos": "Videolar",
+      "reports": "Raporlar"
+    },
+    "levels": {
+      "NONE": "Yok",
+      "READ": "Okuma",
+      "WRITE": "Okuma + Yazma"
+    }
   }
 }

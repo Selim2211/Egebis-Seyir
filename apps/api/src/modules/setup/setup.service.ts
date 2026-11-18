@@ -22,7 +22,8 @@ export class SetupService {
   ) {}
 
   async needsSetup(): Promise<boolean> {
-    return (await this.prisma.user.count()) === 0;
+    // Tüm kullanıcıları saymak yerine tek kaydın varlığına bakılır; her sayfa açılışında çağrılır (ADR-174).
+    return (await this.prisma.user.findFirst({ select: { id: true } })) === null;
   }
 
   /** Kurulumu yapar ve Owner'ın kullanıcı id'sini döndürür. */

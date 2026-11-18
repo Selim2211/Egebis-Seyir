@@ -5,7 +5,8 @@ const ROLE_LABEL: Record<WorkspaceRole, string> = {
   OWNER: 'Owner',
   ADMIN: 'Admin',
   MEMBER: 'Member',
-  GUEST: 'Guest',
+  GUEST: 'Dış kaynak',
+  VIEWER: 'Guest',
 };
 
 export interface MailMessage {

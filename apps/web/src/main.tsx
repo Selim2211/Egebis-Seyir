@@ -7,6 +7,7 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import { meQuery } from '@/features/auth/queries';
 import { isApiError } from '@/lib/api';
 import { initI18n } from '@/lib/i18n';
+import { onWake } from '@/lib/idle';
 import { bindThemeToDocument } from '@/lib/ui-store';
 import { routeTree } from './routeTree.gen';
 
@@ -49,6 +50,9 @@ const queryClient = new QueryClient({
     },
   },
 });
+
+// Boştan dönen kullanıcı (ADR-174): seyrekleşmiş sorgular bir sonraki turu beklemeden tazelenir.
+onWake(() => void queryClient.refetchQueries({ type: 'active', stale: true }));
 
 const router = createRouter({
   routeTree,

@@ -4,13 +4,18 @@ import type { AnalyticsGrain } from '@scrum/shared';
 /** Analiz servislerinin ortak tarih ve sayı yardımcıları (ADR-143). Gün sınırları Europe/Istanbul. */
 
 export const DAY_MS = 86_400_000;
-const TZ = 'Europe/Istanbul';
 /** Aralık başına okunacak en çok iş/kayıt sayısı (bellek sınırı). */
 export const SCAN_LIMIT = 50_000;
 /** En çok kaç gün seçilebilir. */
 export const MAX_DAYS = 731;
 
-export const dayKey = (d: Date) => d.toLocaleDateString('sv-SE', { timeZone: TZ });
+/**
+ * Europe/Istanbul takvim günü (YYYY-MM-DD). Türkiye 2016'dan beri kalıcı +03:00'dır (yaz/kış saati yok),
+ * bu yüzden sabit kaydırma yeterlidir. `toLocaleDateString(..., { timeZone })` her çağrıda biçimleyici
+ * kurduğu için 50 bin satırlık raporlarda CPU'nun ~%15-25'ini yiyordu (yük testi profili, ADR-174).
+ */
+const TR_OFFSET_MS = 3 * 3_600_000;
+export const dayKey = (d: Date) => new Date(d.getTime() + TR_OFFSET_MS).toISOString().slice(0, 10);
 /** Türkiye'de yaz/kış saati yok: gün başı her zaman +03:00. */
 export const dayStart = (key: string) => new Date(`${key}T00:00:00+03:00`);
 export const addDays = (key: string, n: number) =>

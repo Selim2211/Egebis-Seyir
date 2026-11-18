@@ -9,6 +9,7 @@ import {
   type WorkspaceRole,
 } from '@scrum/shared';
 import { type Prisma, RoleScope } from '../../generated/prisma/client';
+import { isMembershipLocked } from './account-term';
 import { PrismaService } from '../../infra/prisma/prisma.service';
 
 type Tx = Prisma.TransactionClient;
@@ -69,8 +70,8 @@ export class AccessService {
       id: m.workspace.id,
       name: m.workspace.name,
       role: m.role.key as WorkspaceRole,
-      permissions: m.lockedAt ? [] : m.role.permissions,
-      locked: m.lockedAt !== null,
+      permissions: isMembershipLocked(m) ? [] : m.role.permissions,
+      locked: isMembershipLocked(m),
     }));
     return { user: toUserDto(user), workspaces };
   }

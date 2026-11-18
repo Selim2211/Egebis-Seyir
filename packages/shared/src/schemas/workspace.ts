@@ -12,12 +12,14 @@ export const MemberSchema = z.object({
   avatarVersion: z.string().nullable(),
   role: RoleKeySchema,
   /** Rolün katmanı (özel rollerde baseKey): GUEST = dış kaynak. */
-  tier: z.enum(['OWNER', 'ADMIN', 'MEMBER', 'GUEST']),
+  tier: z.enum(['OWNER', 'ADMIN', 'MEMBER', 'GUEST', 'VIEWER']),
   /** Dış kaynağın doküman/video erişimi (ADR-152); diğerlerinde NONE. */
   contentAccess: z.enum(CONTENT_ACCESS),
   joinedAt: z.iso.datetime(),
-  /** Üye kilitli mi (workspace'e erişemez). */
+  /** Üye kilitli mi (workspace'e erişemez); süresi dolan Dış kaynak/Guest da kilitli sayılır. */
   locked: z.boolean(),
+  /** Süreli hesapların (Dış kaynak, Guest) bitiş anı; diğerlerinde null (ADR-169). */
+  expiresAt: z.iso.datetime().nullable(),
   lastSeenAt: z.iso.datetime().nullable(),
 });
 export type Member = z.infer<typeof MemberSchema>;
@@ -68,12 +70,19 @@ export type UpdateContentAccessRequest = z.infer<typeof UpdateContentAccessReque
  * GET /outsource — dış kaynak kişiler (ADR-152). Super Admin hepsini, Proje Yöneticisi yalnızca
  * yönettiği Projelerdekileri görür; `projects` da aynı süzgeçten geçer.
  */
+/** POST /members/:userId/extend-expiry — yeni bitiş anı. */
+export const ExtendExpiryResponseSchema = z.object({ expiresAt: z.iso.datetime() });
+export type ExtendExpiryResponse = z.infer<typeof ExtendExpiryResponseSchema>;
+
 export const OutsourcePersonSchema = z.object({
   userId: z.uuid(),
   name: z.string(),
   email: z.string(),
   avatarVersion: z.string().nullable(),
   contentAccess: z.enum(CONTENT_ACCESS),
+  /** Hesap bitiş anı (90 gün; Super Admin +90 gün ekler) ve kilit durumu (ADR-169). */
+  expiresAt: z.iso.datetime().nullable(),
+  locked: z.boolean(),
   lastSeenAt: z.iso.datetime().nullable(),
   projects: z.array(z.object({ spaceId: z.uuid(), name: z.string(), key: z.string() })),
 });
@@ -111,7 +120,7 @@ export const CreateInvitationsRequestSchema = z
     role: RoleKeySchema.refine((key) => key !== 'OWNER'),
     spaceIds: z.array(z.uuid()).max(50).default([]),
   })
-  .refine((v) => v.role !== 'GUEST' || v.spaceIds.length > 0, {
+  .refine((v) => (v.role !== 'GUEST' && v.role !== 'VIEWER') || v.spaceIds.length > 0, {
     path: ['spaceIds'],
     message: ERROR_CODES.GUEST_SPACES_REQUIRED,
   });
@@ -155,7 +164,7 @@ export const CreateMemberRequestSchema = z
     spaceIds: z.array(z.uuid()).max(50).default([]),
     locale: z.enum(LOCALES).default('tr'),
   })
-  .refine((v) => v.role !== 'GUEST' || v.spaceIds.length > 0, {
+  .refine((v) => (v.role !== 'GUEST' && v.role !== 'VIEWER') || v.spaceIds.length > 0, {
     path: ['spaceIds'],
     message: ERROR_CODES.GUEST_SPACES_REQUIRED,
   });

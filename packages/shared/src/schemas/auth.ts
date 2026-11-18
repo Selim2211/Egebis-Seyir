@@ -6,8 +6,26 @@ export type Locale = (typeof LOCALES)[number];
 export const THEMES = ['light', 'dark', 'system'] as const;
 export type Theme = (typeof THEMES)[number];
 
+/**
+ * RFC 5321 sınırları: yerel kısım en çok 64, her etiket en çok 63 karakter; etiket tire ile
+ * başlayıp bitemez. zod'un e-posta kalıbı bunları denetlemez, burada ek olarak uygulanır.
+ */
+export function isStandardEmail(value: string): boolean {
+  const at = value.lastIndexOf('@');
+  if (at < 1 || value.length > 254) return false;
+  if (at > 64) return false;
+  return value
+    .slice(at + 1)
+    .split('.')
+    .every((label) => label.length >= 1 && label.length <= 63 && !/^-|-$/.test(label));
+}
+
 /** E-postalar her yerde küçük harfe çevrilip kırpılarak saklanır ve karşılaştırılır. */
-export const EmailSchema = z.string().trim().toLowerCase().pipe(z.email().max(254));
+export const EmailSchema = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .pipe(z.email().max(254).refine(isStandardEmail, { message: 'Invalid email' }));
 
 /**
  * Şifre politikası geliştirme aşamasında uygulanmaz (ADR-034 açık nokta).

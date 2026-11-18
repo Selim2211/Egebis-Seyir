@@ -1,4 +1,5 @@
 import { Controller, Get, Query } from '@nestjs/common';
+import { ShortCache } from '../../infra/http/short-cache';
 import {
   AdminListQuerySchema,
   AdminListResponseSchema,
@@ -25,6 +26,7 @@ export class AdminController {
   ) {}
 
   @Get('overview')
+  @ShortCache(30)
   @RequirePermission(W.WORKSPACE_SETTINGS)
   @ZodResponse({ type: AdminOverviewDto })
   get(): Promise<AdminOverview> {

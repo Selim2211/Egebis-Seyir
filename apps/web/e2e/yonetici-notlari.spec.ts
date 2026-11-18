@@ -288,10 +288,21 @@ test.describe.serial('Yönetici notları: 9 madde', () => {
     await expect(page.getByRole('heading', { name: 'Dış kaynak' })).toBeVisible();
     await expect(page.getByText(OUT.name)).toBeVisible();
     await page.screenshot({ path: `${SHOT}/06-dis-kaynak-penceresi.png` });
-    // İçerik erişimini aç → dokümanlar görünür olur.
-    const set = await api(page, 'PATCH', `/workspaces/${ws}/members/${ids.out}/content-access`, {
-      contentAccess: 'VIEW',
-    });
+    // Dokümanlar bu Projede, kişiye özel alan yetkisiyle açılır (ADR-172).
+    const set = await api(
+      page,
+      'PUT',
+      `/workspaces/${ws}/spaces/${ids.ALFA}/outsource-access/${ids.out}`,
+      {
+        access: {
+          items: 'WRITE',
+          comments: 'WRITE',
+          docs: 'READ',
+          videos: 'NONE',
+          reports: 'NONE',
+        },
+      },
+    );
     expect(set.status).toBe(204);
     const o2 = await asUser(browser, OUT.email);
     const docs2 = await api(o2.page, 'GET', `/workspaces/${ws}/spaces/${ids.ALFA}/docs`);

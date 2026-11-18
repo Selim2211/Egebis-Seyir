@@ -41,6 +41,16 @@ export const ERROR_CODES = {
 
   SPACE_KEY_TAKEN: 'SPACE_KEY_TAKEN',
   OUTSOURCE_NOT_MANAGER: 'OUTSOURCE_NOT_MANAGER',
+  /** Guest (VIEWER) süresi uzatılamaz; Dış kaynak uzatması yalnızca Super Admin'e aittir (ADR-169). */
+  EXPIRY_NOT_EXTENDABLE: 'EXPIRY_NOT_EXTENDABLE',
+  /** Guest'i Projeye yalnızca Super Admin ekler (ADR-169). */
+  VIEWER_ADMIN_ONLY: 'VIEWER_ADMIN_ONLY',
+  /** Atanmış işin atananını Product Owner değiştiremez; bu Scrum Master'ın işidir (ADR-170). */
+  ASSIGNEE_SCRUM_MASTER_ONLY: 'ASSIGNEE_SCRUM_MASTER_ONLY',
+  /** Dış kaynak yetkisini yalnızca Projenin Scrum Master'ı/yöneticisi ya da Super Admin ayarlar (ADR-172). */
+  OUTSOURCE_ACCESS_FORBIDDEN: 'OUTSOURCE_ACCESS_FORBIDDEN',
+  /** Yetki yalnızca Dış kaynak kişiler için ayarlanır (ADR-172). */
+  NOT_OUTSOURCE: 'NOT_OUTSOURCE',
   /** Çıkarılan kişinin işleri için alıcı seçilmeli (yönetici ya da yöneticisiz Proje, ADR-153). */
   HANDOVER_TARGET_REQUIRED: 'HANDOVER_TARGET_REQUIRED',
   /** Belirlenmiş Story Point'i yalnızca Proje Yöneticisi değiştirir (ADR-161). */
@@ -149,6 +159,14 @@ export const ERROR_CODES = {
   BACKUP_INVALID: 'BACKUP_INVALID',
   BACKUP_TOO_LARGE: 'BACKUP_TOO_LARGE',
   BACKUP_VERSION_UNSUPPORTED: 'BACKUP_VERSION_UNSUPPORTED',
+  /** Yedek başka bir anahtarla şifrelenmiş; anahtar uyuşmuyor (ADR-171). */
+  BACKUP_KEY_MISMATCH: 'BACKUP_KEY_MISMATCH',
+  /** Yedek başka bir Projenin yedeği; bu Proje o yedeğe döndürülemez (ADR-173). */
+  BACKUP_WRONG_SPACE: 'BACKUP_WRONG_SPACE',
+  /** Yedeğe dönüşte yazılan Proje anahtarı Projenin anahtarıyla uyuşmuyor (ADR-173). */
+  ROLLBACK_CONFIRM_MISMATCH: 'ROLLBACK_CONFIRM_MISMATCH',
+  /** Var olan anahtarı değiştirmek için eski yedeklerle ilgili uyarının onaylanması gerekir (ADR-171). */
+  BACKUP_KEY_CHANGE_UNCONFIRMED: 'BACKUP_KEY_CHANGE_UNCONFIRMED',
   IMPORT_TOO_LARGE: 'IMPORT_TOO_LARGE',
   IMPORT_TITLE_UNMAPPED: 'IMPORT_TITLE_UNMAPPED',
   AUTOMATION_LIMIT: 'AUTOMATION_LIMIT',

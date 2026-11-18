@@ -41,6 +41,8 @@ export class MailboxService implements OnModuleInit, OnModuleDestroy {
 
   onModuleInit(): void {
     if (this.config.get('NODE_ENV', { infer: true }) === 'test') return;
+    // Birden çok API süreci varsa kutuyu yalnızca arka plan işçisi yoklar; yoksa aynı e-posta iki kez çağrı olur (ADR-174).
+    if (!this.config.get('BACKGROUND_WORKER', { infer: true })) return;
     setTimeout(() => void this.tick(), 5_000).unref();
     this.timer = setInterval(() => void this.tick(), TICK_MS);
     this.timer.unref();

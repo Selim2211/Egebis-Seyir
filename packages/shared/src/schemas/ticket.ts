@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { TICKET_TEMPLATE_KEYS } from '../domain/ticket-templates';
 import { BUG_SEVERITIES, BUG_STATUSES } from '../constants/work-item';
+import { EmailSchema } from './auth';
 
 /** Alan adı: küçük harf, noktalarla ayrılmış etiketler (örn. alt.firma.com). */
 export const DOMAIN_PATTERN = /^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$/;
@@ -67,7 +68,7 @@ export const UpdateTicketSettingsRequestSchema = z.object({
   smtpSecure: z.boolean(),
   username: z.string().trim().max(255).nullable(),
   password: z.string().max(500).optional(),
-  address: z.string().trim().toLowerCase().email().max(255).nullable(),
+  address: EmailSchema.nullable(),
   fromName: z.string().trim().min(1).max(120),
   pollSeconds: z.int().min(15).max(3600),
   autoReply: z.boolean(),

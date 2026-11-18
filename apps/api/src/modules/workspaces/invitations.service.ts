@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { AppSettingsService } from '../../infra/settings/app-settings.service';
 import {
+  DEFAULT_OUTSOURCE_ACCESS,
   ERROR_CODES,
   type AcceptInvitationRequest,
   type Invitation,
@@ -25,7 +26,9 @@ import { PrismaService } from '../../infra/prisma/prisma.service';
 import { TenantPrismaService } from '../../infra/prisma/tenant-prisma.service';
 import { hashPassword } from '../../infra/security/password';
 import { generateToken, hashToken } from '../../infra/security/tokens';
+import { termEnd } from '../access/account-term';
 import { AccessService } from '../access/access.service';
+import { roleTier } from '../access/role-tier';
 import { ActivityService } from '../activity/activity.service';
 import { type AuthUser, INVITATION_TTL_DAYS } from '../auth/auth.constants';
 
@@ -223,9 +226,18 @@ export class InvitationsService {
           })
         ).id;
 
+      const invRole = await tx.role.findUniqueOrThrow({
+        where: { id: inv.roleId },
+        select: { key: true, baseKey: true },
+      });
       await tx.membership.upsert({
         where: { workspaceId_userId: { workspaceId: inv.workspaceId, userId } },
-        create: { workspaceId: inv.workspaceId, userId, roleId: inv.roleId },
+        create: {
+          workspaceId: inv.workspaceId,
+          userId,
+          roleId: inv.roleId,
+          expiresAt: termEnd(roleTier(invRole)),
+        },
         update: {},
       });
       if (inv.spaceIds.length > 0) {
@@ -251,6 +263,7 @@ export class InvitationsService {
             spaceId: s.id,
             userId,
             roleId: stakeholder.id,
+            ...(roleTier(invRole) === 'GUEST' ? { outsourceAccess: DEFAULT_OUTSOURCE_ACCESS } : {}),
           })),
           skipDuplicates: true,
         });

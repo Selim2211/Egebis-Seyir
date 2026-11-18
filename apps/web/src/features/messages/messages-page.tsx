@@ -104,7 +104,7 @@ function NewConversation() {
   const navigate = useNavigate();
   const { user } = useMe();
   const members = (useMembers().data?.members ?? []).filter(
-    (m) => m.userId !== user.id && m.role !== 'GUEST',
+    (m) => m.userId !== user.id && m.role !== 'GUEST' && m.role !== 'VIEWER',
   );
   const open = useOpenConversation();
   const errorMessage = useErrorMessage();

@@ -77,6 +77,7 @@ export function ScrumRolesSection({ space, canEdit }: { space: SpaceDetail; canE
     value: string,
     current: SpaceDetail['productOwner'],
     onChange: (v: string) => void,
+    hint?: string,
   ) => (
     <div className="flex flex-col gap-1.5">
       <label htmlFor={id} className="text-sm font-medium">
@@ -100,6 +101,7 @@ export function ScrumRolesSection({ space, canEdit }: { space: SpaceDetail; canE
       ) : (
         <p className="text-sm">{current?.name ?? t('scrumRoles.none')}</p>
       )}
+      {hint && <p className="text-muted-foreground text-xs">{hint}</p>}
     </div>
   );
 
@@ -113,8 +115,13 @@ export function ScrumRolesSection({ space, canEdit }: { space: SpaceDetail; canE
         {field('scrum-po', t('scrumRoles.productOwner'), po, space.productOwner, (v) =>
           change({ po: v }),
         )}
-        {field('scrum-sm', t('scrumRoles.scrumMaster'), sm, space.scrumMaster, (v) =>
-          change({ sm: v }),
+        {field(
+          'scrum-sm',
+          t('scrumRoles.scrumMaster'),
+          sm,
+          space.scrumMaster,
+          (v) => change({ sm: v }),
+          t('scrumRoles.scrumMasterHint'),
         )}
       </div>
     </Card>

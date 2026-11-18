@@ -11,6 +11,9 @@ interface UiState {
   workspaceId: string | null;
   /** Mobilde kenar çubuğu açık mı (kalıcı değil). */
   sidebarOpen: boolean;
+  /** Masaüstünde kenar çubuğu sabit mi; değilse yalnızca fareyle üstüne gelince açılır (cihaza özel). */
+  sidebarPinned: boolean;
+  setSidebarPinned: (pinned: boolean) => void;
   /** Kenar çubuğu ağacında açık Space/Folder'lar (cihaza özel). */
   expanded: Record<string, boolean>;
   /** Table görünümünde görünen sütunlar (cihaza özel). */
@@ -37,6 +40,8 @@ export const useUiStore = create<UiState>()(
       language: 'tr',
       workspaceId: null,
       sidebarOpen: false,
+      sidebarPinned: true,
+      setSidebarPinned: (sidebarPinned) => set({ sidebarPinned }),
       expanded: {},
       tableColumns: null,
       workloadSpace: {},
@@ -51,8 +56,17 @@ export const useUiStore = create<UiState>()(
     }),
     {
       name: 'scrum-ui',
-      partialize: ({ theme, language, workspaceId, expanded, tableColumns, workloadSpace }) => ({
+      partialize: ({
         theme,
+        language,
+        workspaceId,
+        sidebarPinned,
+        expanded,
+        tableColumns,
+        workloadSpace,
+      }) => ({
+        theme,
+        sidebarPinned,
         language,
         workspaceId,
         expanded,

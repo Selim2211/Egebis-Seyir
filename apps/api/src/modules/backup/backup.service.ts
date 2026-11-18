@@ -14,6 +14,7 @@ import { PrismaService } from '../../infra/prisma/prisma.service';
 import { StorageService } from '../../infra/storage/storage.service';
 import { TenantPrismaService } from '../../infra/prisma/tenant-prisma.service';
 import { ActivityService } from '../activity/activity.service';
+import { BackupKeyService } from './backup-key.service';
 import { forbidden, keyTaken, notFound } from '../spaces/space-errors';
 import { asJson, fail } from '../work-items/item-support';
 import {
@@ -28,6 +29,8 @@ type Row = Record<string, unknown>;
 type Delegate = {
   findMany(args: object): Promise<Row[]>;
   createMany(args: { data: Row[] }): Promise<unknown>;
+  deleteMany(args: object): Promise<unknown>;
+  update(args: { where: { id: unknown }; data: Row }): Promise<unknown>;
 };
 
 const MAX_ZIP_BYTES = 200 * 1024 * 1024;
@@ -58,6 +61,17 @@ interface Manifest {
   counts: Record<string, number>;
 }
 
+/** Satır yazma bağlamı (geri yükleme ve yedeğe dönüş). */
+interface InsertContext {
+  spaceKey: string;
+  spaceId: string;
+  overrides?: Map<string, Row>;
+  sprintToPlanned?: boolean;
+  /** Yedeğe dönüş: kimlikler, dış kaynak bağları ve var olan ek anahtarları korunur (ADR-173). */
+  keepIdentity?: boolean;
+  existingKeys?: Map<string, string>;
+}
+
 interface BackupData {
   space?: Row;
   tables: Record<string, Row[]>;
@@ -76,6 +90,7 @@ export class BackupService {
     private readonly cls: ClsService<AppClsStore>,
     private readonly storage: StorageService,
     private readonly activity: ActivityService,
+    private readonly keys: BackupKeyService,
   ) {}
 
   private get ctx() {
@@ -94,12 +109,11 @@ export class BackupService {
 
   // ---------- Yedek alma ----------
 
-  async backupSpace(spaceId: string): Promise<{ name: string; file: Buffer }> {
-    this.need(S.SPACE_SETTINGS);
-    const db = this.tenant.db;
-    const space = await db.space.findFirst({ where: { id: spaceId, deletedAt: null } });
-    if (!space) throw notFound();
-    const wheres: Record<string, object> = {
+  /** Bir Projeye ait satırların tablo bazında kapsamı; yedek alma ve yedeğe dönüş aynı kapsamı kullanır. */
+  private spaceWheres(spaceId: string): Record<string, object> {
+    const item = { workItem: { spaceId } };
+    const commentScope = { OR: [{ workItem: { spaceId } }, { doc: { spaceId } }] };
+    return {
       status: { spaceId },
       folder: { spaceId },
       list: { spaceId },
@@ -107,18 +121,37 @@ export class BackupService {
       customField: { spaceId },
       sprint: { spaceId },
       workItem: { spaceId },
-      workItemAssignee: { workItem: { spaceId } },
-      workItemLabel: { workItem: { spaceId } },
-      checklist: { workItem: { spaceId } },
-      checklistItem: { checklist: { workItem: { spaceId } } },
+      workItemAssignee: item,
+      workItemLabel: item,
+      checklist: item,
+      checklistItem: { checklist: item },
       workItemLink: { from: { spaceId } },
       doc: { spaceId },
       docVersion: { doc: { spaceId } },
-      comment: { OR: [{ workItem: { spaceId } }, { doc: { spaceId } }] },
-      attachment: { OR: [{ workItem: { spaceId } }, { doc: { spaceId } }] },
+      comment: commentScope,
+      attachment: commentScope,
       sprintItemEvent: { sprint: { spaceId } },
+      sprintSnapshot: { sprint: { spaceId } },
+      retroItem: { sprint: { spaceId } },
+      retroVote: { retroItem: { sprint: { spaceId } } },
+      timeEntry: item,
+      workItemWatcher: item,
+      docItemLink: { doc: { spaceId } },
+      commentReaction: { comment: commentScope },
+      commentMention: { comment: commentScope },
+      gitLink: item,
     };
-    const file = await this.pack('space', { name: space.name, key: space.key }, space, wheres);
+  }
+
+  async backupSpace(spaceId: string): Promise<{ name: string; file: Buffer }> {
+    this.need(S.SPACE_SETTINGS);
+    const db = this.tenant.db;
+    const space = await db.space.findFirst({ where: { id: spaceId, deletedAt: null } });
+    if (!space) throw notFound();
+    const wheres = this.spaceWheres(spaceId);
+    const file = await this.keys.seal(
+      await this.pack('space', { name: space.name, key: space.key }, space, wheres),
+    );
     await this.record(spaceId, 'space', 'space.backup_created', { name: space.name });
     return { name: `${space.key}-yedek`, file };
   }
@@ -159,11 +192,13 @@ export class BackupService {
       attachment: { workItemId: { in: items } },
       sprintItemEvent: { sprintId },
     };
-    const file = await this.pack(
-      'sprint',
-      { name: sprint.space.name, key: sprint.space.key, sprintName: sprint.name },
-      null,
-      wheres,
+    const file = await this.keys.seal(
+      await this.pack(
+        'sprint',
+        { name: sprint.space.name, key: sprint.space.key, sprintName: sprint.name },
+        null,
+        wheres,
+      ),
     );
     await this.record(sprintId, 'sprint', 'sprint.backup_created', { name: sprint.name });
     return { name: `${sprint.name}-yedek`, file };
@@ -345,7 +380,7 @@ export class BackupService {
     file: Buffer | undefined,
     input: { key: string; name?: string },
   ): Promise<RestoreResult> {
-    const { manifest, data, files } = this.unpack(file);
+    const { manifest, data, files } = this.unpack(await this.keys.open(file));
     if (manifest.kind !== 'space' || !data.space) throw fail(ERROR_CODES.BACKUP_INVALID);
     if (!KEY_PATTERN.test(input.key)) throw fail(ERROR_CODES.BACKUP_INVALID);
     const { workspaceId, actorId } = this.ctx;
@@ -428,7 +463,7 @@ export class BackupService {
   ): Promise<RestoreResult> {
     this.need(S.SPRINT_PLAN);
     this.need(S.WORK_ITEM_WRITE);
-    const { manifest, data, files } = this.unpack(file);
+    const { manifest, data, files } = this.unpack(await this.keys.open(file));
     if (manifest.kind !== 'sprint') throw fail(ERROR_CODES.BACKUP_INVALID);
     const { workspaceId, actorId } = this.ctx;
     const db = this.tenant.db;
@@ -541,14 +576,30 @@ export class BackupService {
     maps: Map<string, Map<string, string>>,
     users: Map<string, string>,
     manifest: Manifest,
-    context: {
-      spaceKey: string;
-      spaceId: string;
-      overrides?: Map<string, Row>;
-      sprintToPlanned?: boolean;
-    },
+    context: InsertContext,
   ): Promise<number> {
     if (rows.length === 0) return 0;
+    const { out, skipped } = this.prepareRows(spec, rows, maps, users, manifest, context);
+    for (let i = 0; i < out.length; i += CHUNK) {
+      await this.delegate(tx, spec).createMany({ data: out.slice(i, i + CHUNK) });
+    }
+    return skipped;
+  }
+
+  /**
+   * Yedek satırlarını yazılacak hale getirir: kimlikler `maps` ile eşlenir, kullanıcılar e-postayla
+   * bulunur, zorunlu bağı eksik satırlar atlanır. `context.keepIdentity` (yedeğe dönüş) kimlikleri,
+   * dış kaynak bağlarını ve var olan ek anahtarlarını korur.
+   */
+  private prepareRows(
+    spec: TableSpec,
+    rows: Row[],
+    maps: Map<string, Map<string, string>>,
+    users: Map<string, string>,
+    manifest: Manifest,
+    context: InsertContext,
+  ): { out: Row[]; skipped: number } {
+    if (rows.length === 0) return { out: [], skipped: 0 };
     const { workspaceId } = this.ctx;
     const own = maps.get(spec.name) ?? new Map<string, string>();
     maps.set(spec.name, own);
@@ -601,8 +652,10 @@ export class BackupService {
             return mapped ? [[mapped, value]] : [];
           }),
         );
-        row.externalSource = null;
-        row.externalId = null;
+        if (!context.keepIdentity) {
+          row.externalSource = null;
+          row.externalId = null;
+        }
         Object.assign(row, override ?? {});
       }
       if (spec.name === 'sprint' && context.sprintToPlanned && row.status === 'ACTIVE') {
@@ -614,7 +667,8 @@ export class BackupService {
         row[imageField] = this.rewriteImages(row[imageField], maps, workspaceId);
       }
       if (spec.name === 'attachment') {
-        row.storageKey = `${workspaceId}/${randomUUID()}`;
+        row.storageKey =
+          context.existingKeys?.get(String(source.id)) ?? `${workspaceId}/${randomUUID()}`;
         keys.set(String(source.id), String(row.storageKey));
       }
       for (const field of spec.nullableJson ?? []) {
@@ -623,11 +677,7 @@ export class BackupService {
       if (drop) skipped += 1;
       else out.push(row);
     }
-    // Sprint geri yüklemede yedekteki sprint tablosu tek satırdır; tablolar arası haritalar yukarıda dolar.
-    for (let i = 0; i < out.length; i += CHUNK) {
-      await this.delegate(tx, spec).createMany({ data: out.slice(i, i + CHUNK) });
-    }
-    return skipped;
+    return { out, skipped };
   }
 
   /** Üst öğesi önce gelecek şekilde sıralar (döngü ya da dışarıdaki üst: kök sayılır). */
@@ -657,6 +707,143 @@ export class BackupService {
       const bytes = files[`files/${oldId}`];
       if (bytes) await this.storage.write(key, Buffer.from(bytes));
     }
+  }
+
+  /**
+   * Projeyi yedeğin alındığı ana döndürür (ADR-173). Yalnızca Super Admin; yedek bu Projenin kendi
+   * yedeği olmalı ve Proje anahtarı onay olarak yazılmalıdır. Kimlikler korunur: yedekteki satırlar
+   * var olanın üzerine yazılır, yedekte olmayanlar (yedekten sonra eklenenler) silinir, yedekte olup
+   * silinenler geri gelir. Bağlı veriler (yorum, ek, zaman kaydı, sprint geçmişi, retro…) yedekteki
+   * hâline döner; hepsi tek işlemde yapılır, hata olursa hiçbir şey değişmez.
+   */
+  async rollbackSpace(
+    spaceId: string,
+    file: Buffer | undefined,
+    input: { confirmKey: string },
+  ): Promise<RestoreResult> {
+    const tier = this.cls.get('workspaceRole');
+    if (tier !== 'OWNER' && tier !== 'ADMIN') throw forbidden(ERROR_CODES.FORBIDDEN);
+    const { workspaceId, actorId } = this.ctx;
+    const db = this.tenant.db;
+    const space = await db.space.findFirst({ where: { id: spaceId, deletedAt: null } });
+    if (!space) throw notFound();
+    if (input.confirmKey.trim().toUpperCase() !== space.key) {
+      throw fail(ERROR_CODES.ROLLBACK_CONFIRM_MISMATCH, HttpStatus.BAD_REQUEST);
+    }
+    const { manifest, data, files } = this.unpack(await this.keys.open(file));
+    if (manifest.kind !== 'space' || !data.space) throw fail(ERROR_CODES.BACKUP_INVALID);
+    if (String(data.space.id) !== spaceId) throw fail(ERROR_CODES.BACKUP_WRONG_SPACE);
+
+    const users = await this.memberIds(Object.values(manifest.users));
+    const wheres = this.spaceWheres(spaceId);
+    // Kimlikler olduğu gibi korunur: eşleme "kendisi → kendisi".
+    const maps = new Map<string, Map<string, string>>([['space', new Map([[spaceId, spaceId]])]]);
+    for (const spec of TABLES) {
+      if (spec.noId) continue;
+      maps.set(
+        spec.name,
+        new Map((data.tables[spec.name] ?? []).map((r) => [String(r.id), String(r.id)])),
+      );
+    }
+    const keptAttachments = new Set((data.tables.attachment ?? []).map((r) => String(r.id)));
+    const currentAttachments = await db.attachment.findMany({
+      where: wheres.attachment,
+      select: { id: true, storageKey: true },
+    });
+    const existingKeys = new Map(currentAttachments.map((a) => [a.id, a.storageKey]));
+    const removedFiles = currentAttachments
+      .filter((a) => !keptAttachments.has(a.id))
+      .map((a) => a.storageKey);
+    const skipped: Record<string, number> = {};
+
+    try {
+      await db.$transaction(
+        async (tx) => {
+          const src = data.space!;
+          await tx.space.update({
+            where: { id: spaceId },
+            data: {
+              name: String(src.name),
+              color: String(src.color),
+              icon: (src.icon as string | null) ?? null,
+              description: (src.description as string | null) ?? null,
+              isPrivate: Boolean(src.isPrivate),
+              scrumEnabled: Boolean(src.scrumEnabled),
+              sprintLengthWeeks: Number(src.sprintLengthWeeks ?? 2),
+              sprintGoalRequired: Boolean(src.sprintGoalRequired),
+              dodItems: (src.dodItems as string[]) ?? [],
+              dorItems: (src.dorItems as string[]) ?? [],
+              dodEnforced: Boolean(src.dodEnforced),
+              estimationScale: src.estimationScale as 'FIBONACCI' | 'TSHIRT' | 'NUMBER',
+              roleOverrides: (src.roleOverrides as Prisma.InputJsonValue | null) ?? Prisma.DbNull,
+              // Numara asla geri sarılmaz: silinen öğelerin anahtarları yeniden kullanılmaz (ADR-033).
+              itemCounter: Math.max(space.itemCounter, Number(src.itemCounter ?? 0)),
+            },
+          });
+
+          const extras: { spec: TableSpec; ids: string[] }[] = [];
+          for (const spec of TABLES) {
+            const rows = data.tables[spec.name];
+            // Eski yedekte bulunmayan tabloya dokunulmaz.
+            if (rows === undefined) continue;
+            const delegate = this.delegate(tx, spec);
+            const { out, skipped: n } = this.prepareRows(spec, rows, maps, users, manifest, {
+              spaceKey: space.key,
+              spaceId,
+              keepIdentity: true,
+              existingKeys,
+            });
+            skipped[spec.name] = n;
+            const where = wheres[spec.name]!;
+            if (spec.noId) {
+              // Birleşik anahtarlı tablolar: kapsamı silip yedektekini yazmak yeterlidir.
+              await delegate.deleteMany({ where });
+              for (let i = 0; i < out.length; i += CHUNK) {
+                await delegate.createMany({ data: out.slice(i, i + CHUNK) });
+              }
+              continue;
+            }
+            const have = new Set(
+              (await delegate.findMany({ where, select: { id: true } })).map((r) => String(r.id)),
+            );
+            const toCreate = out.filter((r) => !have.has(String(r.id)));
+            for (let i = 0; i < toCreate.length; i += CHUNK) {
+              await delegate.createMany({ data: toCreate.slice(i, i + CHUNK) });
+            }
+            for (const row of out) {
+              if (!have.has(String(row.id))) continue;
+              const { id, ...rest } = row;
+              await delegate.update({ where: { id }, data: rest });
+            }
+            const keep = new Set(out.map((r) => String(r.id)));
+            extras.push({ spec, ids: [...have].filter((id) => !keep.has(id)) });
+          }
+          // Yedekte olmayanlar (yedekten sonra eklenenler) silinir; çocuklar önce.
+          for (const { spec, ids } of extras.reverse()) {
+            for (let i = 0; i < ids.length; i += CHUNK) {
+              await this.delegate(tx, spec).deleteMany({
+                where: { id: { in: ids.slice(i, i + CHUNK) } },
+              });
+            }
+          }
+          await this.activity.record(tx, {
+            workspaceId,
+            actorId,
+            entityType: 'space',
+            entityId: spaceId,
+            action: 'space.rolled_back',
+            changes: asJson({ backupCreatedAt: manifest.createdAt, counts: manifest.counts }),
+          });
+        },
+        { timeout: 300_000, maxWait: 10_000 },
+      );
+    } catch (error) {
+      throw this.restoreError(error);
+    }
+    // Ek dosyaları: yedektekiler yazılır; yedekte olmayanların dosyası silinir.
+    await this.restoreFiles(maps, files);
+    for (const key of removedFiles) await this.storage.remove(key).catch(() => undefined);
+    return { spaceId, sprintId: null, counts: manifest.counts, skipped };
   }
 
   private restoreError(error: unknown): unknown {

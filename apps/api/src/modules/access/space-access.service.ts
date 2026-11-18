@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import {
   projectRolePermissions,
+  SCRUM_MASTER_EXTRA_PERMISSIONS,
   spacePermissions,
   type ProjectRoleOverrides,
   type WorkspaceRole,
@@ -118,7 +119,11 @@ export class SpaceAccessService {
       }),
       db.spaceMember.findMany({
         where: { spaceId, userId: { in: userIds } },
-        select: { userId: true, role: { select: { key: true, permissions: true } } },
+        select: {
+          userId: true,
+          outsourceAccess: true,
+          role: { select: { key: true, permissions: true } },
+        },
       }),
     ]);
     if (!space) return new Set();
@@ -129,6 +134,7 @@ export class SpaceAccessService {
         projectRolePermissions(m.role.key, m.role.permissions, overrides),
       ]),
     );
+    const outsource = new Map(spaceMembers.map((m) => [m.userId, m.outsourceAccess]));
     return new Set(
       memberships
         .filter(
@@ -137,6 +143,7 @@ export class SpaceAccessService {
               workspaceRole: roleTier(m.role),
               memberPermissions: memberPerms.get(m.userId) ?? null,
               contentAccess: m.contentAccess,
+              outsourceAccess: outsource.get(m.userId),
             }) !== null,
         )
         .map((m) => m.userId),
@@ -162,9 +169,10 @@ export class SpaceAccessService {
       select: {
         id: true,
         roleOverrides: true,
+        scrumMasterId: true,
         members: {
           where: { userId },
-          select: { role: { select: { key: true, permissions: true } } },
+          select: { outsourceAccess: true, role: { select: { key: true, permissions: true } } },
         },
       },
     });
@@ -172,16 +180,26 @@ export class SpaceAccessService {
     const result = new Map<string, readonly string[]>();
     for (const space of spaces) {
       const role = space.members[0]?.role;
+      const base = role
+        ? projectRolePermissions(
+            role.key,
+            role.permissions,
+            space.roleOverrides as ProjectRoleOverrides | null,
+          )
+        : null;
+      // Projenin Scrum Master'ı (Proje Üyesi rolündeyse bile) sprint planlar ve atama yapar (ADR-170).
+      const memberPermissions =
+        base &&
+        space.scrumMasterId === userId &&
+        workspaceRole !== 'GUEST' &&
+        workspaceRole !== 'VIEWER'
+          ? [...new Set([...base, ...SCRUM_MASTER_EXTRA_PERMISSIONS])]
+          : base;
       const perms = spacePermissions({
         workspaceRole,
-        memberPermissions: role
-          ? projectRolePermissions(
-              role.key,
-              role.permissions,
-              space.roleOverrides as ProjectRoleOverrides | null,
-            )
-          : null,
+        memberPermissions,
         contentAccess,
+        outsourceAccess: space.members[0]?.outsourceAccess,
       });
       if (perms) result.set(space.id, perms);
     }

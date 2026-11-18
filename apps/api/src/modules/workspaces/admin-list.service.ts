@@ -9,10 +9,9 @@ import {
 } from '@scrum/shared';
 import type { Prisma } from '../../generated/prisma/client';
 import { TenantPrismaService } from '../../infra/prisma/tenant-prisma.service';
+import { dayKey } from '../analytics/analytics-util';
 
 const DAY_MS = 86_400_000;
-const TZ = 'Europe/Istanbul';
-const dayKey = (d: Date) => d.toLocaleDateString('sv-SE', { timeZone: TZ });
 /** Türkiye'de yaz/kış saati yok: gün başlangıcı her zaman +03:00. */
 const dayStart = (key: string) => new Date(`${key}T00:00:00+03:00`);
 

@@ -19,6 +19,7 @@ import {
   useUpdateSpace,
 } from '@/features/spaces/queries';
 import { ProjectRolesSection } from '@/features/spaces/project-roles-section';
+import { OutsourceAccessSection } from '@/features/spaces/outsource-access-section';
 import { BugSendersSection, ScrumRolesSection } from '@/features/spaces/scrum-roles-section';
 import { SpaceAvatar } from '@/features/spaces/space-avatar';
 import { ReadinessFields } from '@/features/spaces/readiness-fields';
@@ -35,6 +36,7 @@ import {
   toSpaceBody,
   validateSpace,
 } from '@/features/spaces/space-form-model';
+import { useMe } from '@/features/auth/queries';
 import { useCurrentWorkspace, useMembers } from '@/features/workspace/queries';
 import { useErrorMessage } from '@/lib/use-error-message';
 
@@ -47,6 +49,7 @@ function SpaceSettingsPage() {
   const { t } = useTranslation();
   const { spaceId } = Route.useParams();
   const { id: workspaceId } = useCurrentWorkspace();
+  const me = useMe();
   const { data: space, isPending, isError } = useQuery(spaceQuery(workspaceId, spaceId));
 
   if (isPending) return <LoadingState />;
@@ -76,6 +79,9 @@ function SpaceSettingsPage() {
       {canEdit ? <GeneralForm space={space} /> : <GeneralSummary space={space} />}
       <MembersSection spaceId={spaceId} canEdit={canEdit} />
       <ScrumRolesSection space={space} canEdit={canEdit} />
+      {(canEdit || space.scrumMaster?.id === me.user.id) && (
+        <OutsourceAccessSection spaceId={spaceId} />
+      )}
       {canEdit && <BugSendersSection space={space} />}
       {canEdit && <ProjectRolesSection spaceId={spaceId} />}
       <StatusesSection space={space} canEdit={canEdit} />
@@ -83,7 +89,7 @@ function SpaceSettingsPage() {
       <TemplatesSection space={space} canEdit={canEdit} />
       {canEdit && <AutomationsSection space={space} />}
       {canEdit && <WebhooksSection spaceId={spaceId} />}
-      {canEdit && <BackupSection spaceId={spaceId} />}
+      {canEdit && <BackupSection spaceId={spaceId} spaceKey={space.key} />}
       {canEdit && <DangerZone space={space} />}
     </div>
   );
@@ -208,7 +214,12 @@ function MembersSection({ spaceId, canEdit }: { spaceId: string; canEdit: boolea
   const remove = useRemoveSpaceMember();
   const [adding, setAdding] = useState('');
   const members = data?.members ?? [];
-  const candidates = workspaceMembers.filter((m) => !members.some((x) => x.userId === m.userId));
+  const wsRole = useCurrentWorkspace().role;
+  const superAdmin = wsRole === 'OWNER' || wsRole === 'ADMIN';
+  // Guest'i Projeye yalnızca Super Admin ekler (ADR-169).
+  const candidates = workspaceMembers.filter(
+    (m) => !members.some((x) => x.userId === m.userId) && (m.tier !== 'VIEWER' || superAdmin),
+  );
   const onError = (error: unknown) => toast.error(errorMessage(error));
 
   const add = () => {
@@ -257,7 +268,11 @@ function MembersSection({ spaceId, canEdit }: { spaceId: string; canEdit: boolea
                   }
                 >
                   {spaceRoleKeys
-                    .filter((r) => m.workspaceRole !== 'GUEST' || r === 'PROJECT_MEMBER')
+                    .filter(
+                      (r) =>
+                        (m.workspaceRole !== 'GUEST' && m.workspaceRole !== 'VIEWER') ||
+                        r === 'PROJECT_MEMBER',
+                    )
                     .map((r) => (
                       <option key={r} value={r}>
                         {roleLabel('SPACE', r)}

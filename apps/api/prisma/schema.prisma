@@ -233,6 +233,11 @@ model Workspace {
   /// AI ile Story Point önerisi ve gereken en az açıklama cümlesi (ADR-155).
   aiEstimateEnabled      Boolean  @default(true)
   aiEstimateMinSentences Int      @default(5)
+  /// Yedek şifreleme anahtarı (AES-256, ADR-171): sunucu sırrıyla mühürlü; yalnızca Super Admin görür.
+  backupKeySealed        String?
+  /// Anahtarın kısa parmak izi (hangi anahtarın kullanıldığını ayırt eder; anahtarı vermez).
+  backupKeyFingerprint   String?
+  backupKeyUpdatedAt     DateTime? @db.Timestamptz
   createdAt              DateTime @default(now()) @db.Timestamptz
   updatedAt              DateTime @updatedAt @db.Timestamptz
 
@@ -340,6 +345,8 @@ model Membership {
   contentAccess ContentAccess @default(NONE)
   /// Kilitli üye workspace'e erişemez; veri ve atamalar durur.
   lockedAt      DateTime?     @db.Timestamptz
+  /// Süreli hesaplar (Dış kaynak 90 gün, Guest 30 gün): bitişte hesap kilitlenir (ADR-169).
+  expiresAt     DateTime?     @db.Timestamptz
   createdAt     DateTime      @default(now()) @db.Timestamptz
 
   @@unique([workspaceId, userId])
@@ -488,6 +495,8 @@ model SpaceMember {
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   roleId      String    @db.Uuid
   role        Role      @relation(fields: [roleId], references: [id])
+  /// Dış kaynağın (GUEST) bu Projedeki kişiye özel alan yetkisi (ADR-172); diğerlerinde null.
+  outsourceAccess Json?
   createdAt   DateTime  @default(now()) @db.Timestamptz
 
   @@unique([spaceId, userId])

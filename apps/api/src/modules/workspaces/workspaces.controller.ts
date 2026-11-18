@@ -43,8 +43,10 @@ import {
   type MailSettings,
   type MailTestResult,
   type MembersResponse,
+  type ExtendExpiryResponse,
   type WorkspaceSettings,
 } from '@scrum/shared';
+
 import type { Request, Response } from 'express';
 import { createZodDto, ZodResponse } from 'nestjs-zod';
 import type { AuthUser } from '../auth/auth.constants';
@@ -132,6 +134,13 @@ export class MembersController {
     @Body() body: SetMemberLockDto,
   ): Promise<void> {
     await this.members.setLocked(userId, body.locked);
+  }
+
+  @Post(':userId/extend-expiry')
+  @RequirePermission(W.MEMBERS_MANAGE)
+  @HttpCode(HttpStatus.OK)
+  extendExpiry(@Param('userId', ParseUUIDPipe) userId: string): Promise<ExtendExpiryResponse> {
+    return this.members.extendExpiry(userId);
   }
 
   @Patch(':userId/content-access')

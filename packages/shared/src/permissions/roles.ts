@@ -5,7 +5,11 @@ import {
   type WorkspacePermission,
 } from './permissions';
 
-export const WORKSPACE_ROLES = ['OWNER', 'ADMIN', 'MEMBER', 'GUEST'] as const;
+/**
+ * GUEST = "Dış kaynak" (Projeyi yöneten Proje Yöneticisi ekler, 90 gün); VIEWER = "Guest"
+ * (yalnızca Super Admin ekler, yalnızca okur, 30 gün, uzatılamaz) — ADR-169.
+ */
+export const WORKSPACE_ROLES = ['OWNER', 'ADMIN', 'MEMBER', 'GUEST', 'VIEWER'] as const;
 export type WorkspaceRole = (typeof WORKSPACE_ROLES)[number];
 
 /**
@@ -34,6 +38,7 @@ export const DEFAULT_WORKSPACE_ROLE_PERMISSIONS: Record<
   ADMIN: [W.MEMBERS_VIEW, W.MEMBERS_MANAGE, W.WORKSPACE_SETTINGS, W.AUDIT_VIEW, W.SPACE_CREATE],
   MEMBER: [W.MEMBERS_VIEW],
   GUEST: [],
+  VIEWER: [],
 };
 
 const CONTENT = [
@@ -132,3 +137,24 @@ export function projectRolePermissions(
 
 /** Workspace Owner/Admin her Space'te tüm Space izinlerine sahiptir (ADR-038). */
 export const ALL_SPACE_PERMISSIONS: readonly SpacePermission[] = Object.values(S);
+
+/** Süreli hesaplar (ADR-169): Dış kaynak 90 gün (Super Admin +90 gün uzatır), Guest 30 gün (uzatılamaz). */
+export const OUTSOURCE_TERM_DAYS = 90;
+export const OUTSOURCE_EXTEND_DAYS = 90;
+export const VIEWER_TERM_DAYS = 30;
+
+/** Katmanın standart hesap süresi (gün); süresiz katmanlarda null. */
+export function accountTermDays(tier: WorkspaceRole): number | null {
+  if (tier === 'GUEST') return OUTSOURCE_TERM_DAYS;
+  if (tier === 'VIEWER') return VIEWER_TERM_DAYS;
+  return null;
+}
+
+/**
+ * Scrum metodolojisinde Scrum Master = Proje Yöneticisi'dir (ADR-170). Projenin Scrum Master'ı,
+ * Proje rolü ne olursa olsun, Backlog'daki işleri sprint'e alabilir (sprint planlama) ve atama yapabilir.
+ */
+export const SCRUM_MASTER_EXTRA_PERMISSIONS: readonly SpacePermission[] = [
+  S.SPRINT_PLAN,
+  S.BUG_ASSIGN,
+];

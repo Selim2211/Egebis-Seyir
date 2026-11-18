@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { ensureOwner, login, OWNER } from './accounts';
 
-/** Faz 8.5: Space yedeği ZIP olarak alınır ve yeni Space olarak geri yüklenir. */
+/** Faz 8.5: Space yedeği şifreli alınır, yeni Space olarak geri yüklenir ya da Proje yedeğe döndürülür (ADR-173). */
 test.describe.serial('Proje yedek ve geri yükleme', () => {
   let backupFile = '';
 
@@ -42,8 +42,9 @@ test.describe.serial('Proje yedek ve geri yükleme', () => {
     const download = page.waitForEvent('download');
     await page.getByRole('link', { name: 'Proje yedeğini indir (ZIP)' }).click();
     const file = await download;
-    expect(file.suggestedFilename()).toMatch(/\.zip$/);
-    backupFile = test.info().outputPath('yedek.zip');
+    // Yedek AES-256 ile şifreli iner (ADR-171).
+    expect(file.suggestedFilename()).toMatch(/\.zip\.enc$/);
+    backupFile = test.info().outputPath('yedek.zip.enc');
     await file.saveAs(backupFile);
   });
 
@@ -72,5 +73,56 @@ test.describe.serial('Proje yedek ve geri yükleme', () => {
     await dialog.getByLabel('Yeni Proje anahtarı').fill('BKP');
     await dialog.getByRole('button', { name: 'Geri yükle' }).click();
     await expect(dialog.getByRole('alert')).toBeVisible();
+  });
+
+  test('Proje yedeğe döndürülür: uyarı, dosya seçimi, anahtar onayı, eski hâl', async ({
+    page,
+  }) => {
+    await page.goto('/');
+    await page.getByRole('link', { name: 'Yedek Kaynak' }).first().click();
+    // Yedekten sonra yeni bir iş eklenir.
+    await page.getByRole('link', { name: 'Görevler' }).first().click();
+    const quick = page.getByRole('textbox', { name: 'Başlık' });
+    await page.getByLabel('Tip').first().selectOption('TASK');
+    await quick.fill('Yedekten sonra eklenen');
+    await quick.press('Enter');
+    await expect(page.getByText('BKP-3 oluşturuldu.')).toBeVisible();
+
+    await page.goto('/');
+    await page.getByRole('link', { name: 'Yedek Kaynak' }).first().click();
+    await page.getByRole('link', { name: 'Proje ayarları' }).click();
+    await page.getByRole('button', { name: 'Yedeğe geri dön' }).click();
+
+    // 1) Önemli uyarı penceresi.
+    const warn = page.getByTestId('rollback-warn');
+    await expect(warn).toContainText('şu anki verileriniz değişecek');
+    await expect(warn.getByRole('link', { name: 'Şu anki halin yedeğini indir' })).toBeVisible();
+    await page.screenshot({ path: test.info().outputPath('rollback-uyari.png') });
+    await warn.getByRole('button', { name: 'Devam et' }).click();
+
+    // 2) Yedek seçme ekranı: anahtar yazılana kadar düğme kapalı.
+    const pick = page.getByTestId('rollback-pick');
+    await pick.getByLabel('Yedek dosyası (.zip)').setInputFiles(backupFile);
+    const submit = pick.getByRole('button', { name: 'Yedeğe döndür' });
+    await expect(submit).toBeDisabled();
+    await pick.getByLabel(/Proje anahtarını yaz/).fill('YANLIS');
+    await expect(submit).toBeDisabled();
+    await pick.getByLabel(/Proje anahtarını yaz/).fill('BKP');
+    await page.screenshot({ path: test.info().outputPath('rollback-secim.png') });
+    await expect(submit).toBeEnabled();
+    await submit.click();
+    await expect(page.getByText('Proje yedeğe döndürüldü.')).toBeVisible();
+
+    // 3) Yedekteki hâle döndü: sonradan eklenen yok, yedektekiler var; Proje çalışmaya devam ediyor.
+    await page.goto('/');
+    await page.getByRole('link', { name: 'Yedek Kaynak' }).first().click();
+    await page.getByRole('link', { name: 'Görevler' }).first().click();
+    await expect(page.getByRole('link', { name: 'Yedeklenecek hikâye' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'İkinci hikâye' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Yedekten sonra eklenen' })).toHaveCount(0);
+    await page.getByLabel('Tip').first().selectOption('TASK');
+    await page.getByRole('textbox', { name: 'Başlık' }).fill('Dönüşten sonra yeni iş');
+    await page.getByRole('textbox', { name: 'Başlık' }).press('Enter');
+    await expect(page.getByText(/BKP-\d+ oluşturuldu\./)).toBeVisible();
   });
 });

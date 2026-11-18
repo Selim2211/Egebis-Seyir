@@ -7,7 +7,7 @@ test.describe('Denetim günlüğü', () => {
     await ensureOwner(request);
   });
 
-  test('Sahip günlüğü görür, türe göre süzer ve CSV indirir', async ({ page }) => {
+  test('Sahip günlüğü görür, türe göre süzer ve Excel indirir', async ({ page }) => {
     await page.goto('/login');
     await login(page, OWNER.email, OWNER.password);
     await expect(page.getByRole('heading', { name: /Hoş geldin/ })).toBeVisible();
@@ -34,15 +34,15 @@ test.describe('Denetim günlüğü', () => {
     await page.getByRole('button', { name: 'Temizle' }).click();
     await expect(row).toBeVisible();
 
-    // CSV: düğme Bitiş tarihi yanında; menüden filtrelenmiş sonuçlar ya da tüm kayıtlar seçilir.
-    const csvBox = (await page.getByRole('button', { name: 'CSV indir' }).boundingBox())!;
+    // Excel: düğme Bitiş tarihi yanında; menüden filtrelenmiş sonuçlar ya da tüm kayıtlar seçilir.
+    const csvBox = (await page.getByRole('button', { name: 'Excel indir' }).boundingBox())!;
     const toBox = (await page.locator('label', { hasText: 'Bitiş tarihi' }).boundingBox())!;
     expect(csvBox.x).toBeGreaterThan(toBox.x);
     const download = page.waitForEvent('download');
-    await page.getByRole('button', { name: 'CSV indir' }).click();
+    await page.getByRole('button', { name: 'Excel indir' }).click();
     await page.getByRole('menuitem', { name: 'Yalnızca filtrelenmiş sonuçlar' }).click();
     expect((await download).suggestedFilename()).toMatch(
-      /^denetim-gunlugu-\d{4}-\d{2}-\d{2}\.csv$/,
+      /^denetim-gunlugu-\d{4}-\d{2}-\d{2}\.xlsx$/,
     );
   });
 });

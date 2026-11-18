@@ -15,11 +15,15 @@ import {
   type HandoverPlan,
   type Member,
   type OutsourceResponse,
+  type ExtendExpiryResponse,
+  DEFAULT_OUTSOURCE_ACCESS,
+  OUTSOURCE_EXTEND_DAYS,
   type WorkspaceRole,
 } from '@scrum/shared';
 import { ClsService } from 'nestjs-cls';
-import { RoleScope } from '../../generated/prisma/client';
+import { Prisma, RoleScope } from '../../generated/prisma/client';
 import type { AppClsStore } from '../../infra/cls/request-context';
+import { isMembershipLocked, termEnd } from '../access/account-term';
 import { roleTier } from '../access/role-tier';
 import { PrismaService } from '../../infra/prisma/prisma.service';
 import { TenantPrismaService } from '../../infra/prisma/tenant-prisma.service';
@@ -96,7 +100,9 @@ export class MembersService {
             },
           })
         ).id;
-      await tx.membership.create({ data: { workspaceId, userId: id, roleId } });
+      await tx.membership.create({
+        data: { workspaceId, userId: id, roleId, expiresAt: termEnd(input.role as WorkspaceRole) },
+      });
       if (sharedSpaceIds.length > 0) {
         // Davetli, seçilen Projelere Proje Üyesi olarak eklenir (ADR-152).
         const stakeholder = await tx.role.findUniqueOrThrow({
@@ -110,6 +116,7 @@ export class MembersService {
             spaceId,
             userId: id,
             roleId: stakeholder.id,
+            ...(input.role === 'GUEST' ? { outsourceAccess: DEFAULT_OUTSOURCE_ACCESS } : {}),
           })),
           skipDuplicates: true,
         });
@@ -160,7 +167,8 @@ export class MembersService {
       tier: roleTier(m.role),
       contentAccess: m.contentAccess,
       joinedAt: m.createdAt.toISOString(),
-      locked: m.lockedAt !== null,
+      locked: isMembershipLocked(m),
+      expiresAt: m.expiresAt?.toISOString() ?? null,
       lastSeenAt: lastSeen.get(m.user.id)?.toISOString() ?? null,
     }));
   }
@@ -191,6 +199,8 @@ export class MembersService {
       },
       select: {
         contentAccess: true,
+        lockedAt: true,
+        expiresAt: true,
         user: {
           select: {
             id: true,
@@ -216,6 +226,8 @@ export class MembersService {
         email: g.user.email,
         avatarVersion: g.user.avatarVersion,
         contentAccess: g.contentAccess,
+        expiresAt: g.expiresAt?.toISOString() ?? null,
+        locked: isMembershipLocked(g),
         lastSeenAt: g.user.sessions[0]?.lastSeenAt.toISOString() ?? null,
         projects: g.user.spaceMembers.map((m) => ({
           spaceId: m.space.id,
@@ -224,6 +236,40 @@ export class MembersService {
         })),
       })),
     };
+  }
+
+  /**
+   * Dış kaynağın süresini 90 gün uzatır (ADR-169). Süre bitmişse bugünden sayılır. Yalnızca Super Admin
+   * (MEMBERS_MANAGE); Guest ve süresiz katmanlar uzatılamaz.
+   */
+  async extendExpiry(targetUserId: string): Promise<ExtendExpiryResponse> {
+    const workspaceId = this.cls.get('workspaceId')!;
+    const actorId = this.cls.get('userId')!;
+    return this.tenant.db.$transaction(async (tx) => {
+      const target = await tx.membership.findFirst({
+        where: { userId: targetUserId },
+        include: { role: { select: { key: true, baseKey: true } } },
+      });
+      if (!target) throw new NotFoundException({ code: ERROR_CODES.NOT_FOUND });
+      if (roleTier(target.role) !== 'GUEST') {
+        throw new UnprocessableEntityException({ code: ERROR_CODES.EXPIRY_NOT_EXTENDABLE });
+      }
+      const now = new Date();
+      const base = target.expiresAt && target.expiresAt > now ? target.expiresAt : now;
+      const next = new Date(base.getTime() + OUTSOURCE_EXTEND_DAYS * 86_400_000);
+      await tx.membership.update({ where: { id: target.id }, data: { expiresAt: next } });
+      await this.activity.record(tx, {
+        workspaceId,
+        actorId,
+        entityType: 'member',
+        entityId: targetUserId,
+        action: 'member.expiry_extended',
+        changes: {
+          expiresAt: { from: target.expiresAt?.toISOString() ?? null, to: next.toISOString() },
+        },
+      });
+      return { expiresAt: next.toISOString() };
+    });
   }
 
   /** Çıkarmadan önce açık işlerin devir planı (ADR-153). */
@@ -241,7 +287,7 @@ export class MembersService {
         include: { role: { select: { key: true, baseKey: true } } },
       });
       if (!target) throw new NotFoundException({ code: ERROR_CODES.NOT_FOUND });
-      if (roleTier(target.role) !== 'GUEST') {
+      if (roleTier(target.role) !== 'VIEWER') {
         throw new UnprocessableEntityException({ code: ERROR_CODES.VALIDATION_FAILED });
       }
       await tx.membership.update({ where: { id: target.id }, data: { contentAccess } });
@@ -340,8 +386,22 @@ export class MembersService {
         });
         await tx.favorite.deleteMany({ where: { userId: targetUserId } });
       } else {
-        await tx.membership.update({ where: { id: target.id }, data: { roleId: nextRole!.id } });
-        if (newTier === 'GUEST') {
+        await tx.membership.update({
+          where: { id: target.id },
+          data: {
+            roleId: nextRole!.id,
+            // Katman değişince süre yeniden başlar; süreli katmandan çıkınca süre kalkar (ADR-169).
+            ...(newTier !== targetRole ? { expiresAt: termEnd(newTier!) } : {}),
+          },
+        });
+        if (newTier !== 'GUEST') {
+          // Kişiye özel Proje yetkisi yalnızca Dış kaynakta anlamlıdır (ADR-172).
+          await tx.spaceMember.updateMany({
+            where: { userId: targetUserId },
+            data: { outsourceAccess: Prisma.DbNull },
+          });
+        }
+        if (newTier === 'GUEST' || newTier === 'VIEWER') {
           // Dış kaynak Proje Yöneticisi olamaz; tüm Projelerde Proje Üyesi olur (ADR-152).
           const stakeholder = await tx.role.findFirstOrThrow({
             where: { scope: RoleScope.SPACE, key: 'PROJECT_MEMBER' },
@@ -350,6 +410,12 @@ export class MembersService {
             where: { userId: targetUserId },
             data: { roleId: stakeholder.id },
           });
+          if (newTier === 'GUEST' && targetRole !== 'GUEST') {
+            await tx.spaceMember.updateMany({
+              where: { userId: targetUserId },
+              data: { outsourceAccess: DEFAULT_OUTSOURCE_ACCESS as Prisma.InputJsonValue },
+            });
+          }
         }
       }
       await this.activity.record(tx, {

@@ -153,7 +153,7 @@ function MemberPicker({
         {members.map((m) => {
           const person = byId.get(m.userId);
           if (!person) return null;
-          const guest = person.role === 'GUEST';
+          const guest = person.role === 'GUEST' || person.role === 'VIEWER';
           return (
             <li key={m.userId} className="flex items-center gap-2.5 py-1.5">
               <UserAvatar

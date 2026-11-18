@@ -13,8 +13,10 @@ import { ERROR_CODES, type Permission, type SpacePermission } from '@scrum/share
 import { ClsService } from 'nestjs-cls';
 import type { AppClsStore } from '../../infra/cls/request-context';
 import { ItemAccessService } from '../access/item-access.service';
+import { isMembershipLocked } from '../access/account-term';
 import { roleTier } from '../access/role-tier';
 import { PrismaService } from '../../infra/prisma/prisma.service';
+import { loadHiddenRoots } from '../../infra/prisma/item-visibility';
 import { safeEqual } from '../../infra/security/tokens';
 import { type AuthedRequest, CSRF_COOKIE, CSRF_HEADER, SESSION_COOKIE } from './auth.constants';
 import { SpaceAccessService } from '../access/space-access.service';
@@ -129,12 +131,16 @@ export class WorkspaceAccessGuard implements CanActivate {
         })
       : null;
     if (!membership) throw new NotFoundException({ code: ERROR_CODES.NOT_FOUND });
-    if (membership.lockedAt) throw new ForbiddenException({ code: ERROR_CODES.MEMBER_LOCKED });
+    if (isMembershipLocked(membership))
+      throw new ForbiddenException({ code: ERROR_CODES.MEMBER_LOCKED });
 
     this.cls.set('workspaceId', workspaceId);
     this.cls.set('workspaceRole', roleTier(membership.role));
     this.cls.set('contentAccess', membership.contentAccess);
     this.cls.set('permissions', membership.role.permissions);
+    // Yazma isteklerinde gizli kök listesi (ADR-113) transaction başlamadan hesaplanır. Yoksa transaction içindeki
+    // ilk WorkItem sorgusu ikinci bir havuz bağlantısı ister; yük altında havuz kilitlenir (yük testi, ADR-174).
+    if (req.method !== 'GET' && req.method !== 'HEAD') await loadHiddenRoots(this.prisma, this.cls);
     return true;
   }
 }

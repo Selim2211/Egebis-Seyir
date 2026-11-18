@@ -141,13 +141,15 @@ describe('Video arşivi (gerçek veritabanı, ADR-129)', () => {
     expect((await list()).videos).toEqual([]);
   });
 
-  it('dış kaynak videoları izin verilince görür ama yükleyemez (ADR-152)', async () => {
+  it('dış kaynak videoları Projede okuma izni verilince görür ama yükleyemez (ADR-172)', async () => {
     const viewer = await inviteAndAccept(ctx, owner, ws, VIEWER, 'GUEST', [spaceId]);
     await viewer.get(api(`/spaces/${spaceId}/videos`)).expect(403);
     const viewerId = (await ctx.prisma.user.findUniqueOrThrow({ where: { email: VIEWER.email } }))
       .id;
     await owner
-      .patch(api(`/members/${viewerId}/content-access`), { contentAccess: 'VIEW' })
+      .put(api(`/spaces/${spaceId}/outsource-access/${viewerId}`), {
+        access: { items: 'READ', comments: 'NONE', docs: 'NONE', videos: 'READ', reports: 'NONE' },
+      })
       .expect(204);
     await viewer.get(api(`/spaces/${spaceId}/videos`)).expect(200);
     await viewer

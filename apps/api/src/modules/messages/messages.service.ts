@@ -73,22 +73,6 @@ export class MessagesService {
     return row.userLowId === this.ctx.me ? row.userHigh : row.userLow;
   }
 
-  private lastReadOf(row: ConversationRow): Date | null {
-    return row.userLowId === this.ctx.me ? row.lastReadLowAt : row.lastReadHighAt;
-  }
-
-  private unreadOf(row: ConversationRow): Promise<number> {
-    const lastRead = this.lastReadOf(row);
-    return this.tenant.db.message.count({
-      where: {
-        conversationId: row.id,
-        senderId: { not: this.ctx.me },
-        deletedAt: null,
-        ...(lastRead && { createdAt: { gt: lastRead } }),
-      },
-    });
-  }
-
   async list(): Promise<ConversationsResponse> {
     this.assertMember();
     const { me } = this.ctx;
@@ -98,25 +82,51 @@ export class MessagesService {
       orderBy: [{ lastMessageAt: 'desc' }, { id: 'desc' }],
       take: CONVERSATION_LIMIT,
     });
-    const conversations: Conversation[] = await Promise.all(
-      rows.map(async (row) => {
-        const [last, unreadCount] = await Promise.all([
-          this.tenant.db.message.findFirst({
-            where: { conversationId: row.id, deletedAt: null },
-            orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
-          }),
-          this.unreadOf(row),
-        ]);
-        return {
-          id: row.id,
-          with: this.other(row),
-          lastMessage: last
-            ? { body: last.body, at: last.createdAt.toISOString(), mine: last.senderId === me }
-            : null,
-          unreadCount,
-        };
-      }),
-    );
+    // Konuşma başına iki sorgu yerine (N+1; liste 15 sn'de bir yoklanır) son mesaj ve okunmamış sayısı
+    // tek seferde gelir (ADR-174). Ham SQL tenant kapsamına girmez: workspaceId açıkça süzülür.
+    const { workspaceId } = this.ctx;
+    const ids = rows.map((r) => r.id);
+    const [lastRows, unreadRows] = ids.length
+      ? await Promise.all([
+          this.tenant.db.$queryRaw<
+            { id: string; body: string; createdAt: Date; senderId: string }[]
+          >`
+            SELECT c.id, l.body, l."createdAt", l."senderId"
+            FROM unnest(${ids}::uuid[]) AS c(id)
+            CROSS JOIN LATERAL (
+              SELECT m.body, m."createdAt", m."senderId" FROM messages m
+              WHERE m."conversationId" = c.id AND m."workspaceId" = ${workspaceId}::uuid AND m."deletedAt" IS NULL
+              ORDER BY m."createdAt" DESC, m.id DESC LIMIT 1
+            ) l`,
+          this.tenant.db.$queryRaw<{ id: string; n: number }[]>`
+            SELECT c.id, count(m.id)::int AS n
+            FROM conversations c
+            JOIN messages m ON m."conversationId" = c.id AND m."workspaceId" = c."workspaceId"
+              AND m."deletedAt" IS NULL AND m."senderId" <> ${me}::uuid
+              AND m."createdAt" > COALESCE(
+                CASE WHEN c."userLowId" = ${me}::uuid THEN c."lastReadLowAt" ELSE c."lastReadHighAt" END,
+                '-infinity'::timestamptz)
+            WHERE c.id = ANY(${ids}::uuid[]) AND c."workspaceId" = ${workspaceId}::uuid
+            GROUP BY c.id`,
+        ])
+      : [[], []];
+    const lastOf = new Map(lastRows.map((r) => [r.id, r]));
+    const unreadOf = new Map(unreadRows.map((r) => [r.id, r.n]));
+    const conversations: Conversation[] = rows.map((row) => {
+      const last = lastOf.get(row.id);
+      return {
+        id: row.id,
+        with: this.other(row),
+        lastMessage: last
+          ? {
+              body: last.body,
+              at: new Date(last.createdAt).toISOString(),
+              mine: last.senderId === me,
+            }
+          : null,
+        unreadCount: unreadOf.get(row.id) ?? 0,
+      };
+    });
     return {
       conversations,
       unreadCount: conversations.reduce((sum, c) => sum + c.unreadCount, 0),

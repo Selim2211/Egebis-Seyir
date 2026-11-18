@@ -12,7 +12,8 @@
     "optional": "optional",
     "you": "you",
     "never": "Never",
-    "close": "Close"
+    "close": "Close",
+    "back": "Back"
   },
   "validation": {
     "required": "This field is required.",
@@ -40,7 +41,10 @@
     "admin": "Admin dashboard",
     "bugBox": "Bug Box",
     "analytics": "Analytics",
-    "menu": "Menu"
+    "menu": "Menu",
+    "autoHideMenu": "Collapse the menu (icons only)",
+    "pinMenu": "Pin the menu open",
+    "showMenu": "Open the menu"
   },
   "spaces": {
     "emptyTitle": "No projects yet",
@@ -106,14 +110,16 @@
     "OWNER": "Super Admin (Owner)",
     "ADMIN": "Super Admin",
     "MEMBER": "User",
-    "GUEST": "Outsource"
+    "GUEST": "Outsource",
+    "VIEWER": "Guest"
   },
   "roleHelp": {
     "OWNER": "Manages everything; sees every project and can delete the workspace.",
     "ADMIN": "Sees every project; manages people, roles, doc/video permissions and settings.",
     "MEMBER": "Sees only the projects they belong to; their project role (Project Manager / Project Member) sets what they can do.",
     "GUEST": "External person: sees only the projects they are added to and cannot be a Project Manager; docs and videos stay closed until a Super Admin allows them.",
-    "custom": "Custom roles follow the permissions set in Settings → Roles."
+    "custom": "Custom roles follow the permissions set in Settings → Roles.",
+    "VIEWER": "Read-only person: sees only the projects a Super Admin adds them to, cannot write or manage; the account lasts 30 days and cannot be extended."
   },
   "auth": {
     "email": "Email",
@@ -201,7 +207,8 @@
     "diagnostics": "Diagnostics",
     "audit": "Audit log",
     "roles": "Roles",
-    "email": "Email settings"
+    "email": "Email settings",
+    "backupKey": "Backup key"
   },
   "members": {
     "title": "Members",
@@ -256,7 +263,13 @@
     "copyLogin": "Copy e-mail and password",
     "copied": "Copied.",
     "shareOnce": "This password will not be shown again; hand it over now.",
-    "removeTitle": "Remove {{name}}?"
+    "removeTitle": "Remove {{name}}?",
+    "expiresOn": "Expires: {{date}}",
+    "expired": "Expired",
+    "expiredOn": "Expired: {{date}}",
+    "extend": "Extend by 90 days",
+    "extended": "Extended by 90 days.",
+    "fixedTerm": "30 days, not extendable"
   },
   "profile": {
     "title": "Profile",
@@ -477,7 +490,16 @@
     "SPACE_DELETE_SUPER_ADMIN": "Only a Super Admin can delete a Project.",
     "SPACE_DELETE_BACKUP_REQUIRED": "A Project without a backup from the last 7 days cannot be deleted. Take a backup from the Project settings' Backup section first.",
     "MESSAGE_ATTACHMENTS_TOO_BIG": "A message’s attachments can total at most 16 MB.",
-    "MESSAGE_ATTACHMENTS_LIMIT": "A message can have at most 5 attachments."
+    "MESSAGE_ATTACHMENTS_LIMIT": "A message can have at most 5 attachments.",
+    "EXPIRY_NOT_EXTENDABLE": "A Guest account cannot be extended; only a Super Admin can extend an Outsource account.",
+    "VIEWER_ADMIN_ONLY": "Only a Super Admin can add a Guest to a project.",
+    "ASSIGNEE_SCRUM_MASTER_ONLY": "A Product Owner cannot reassign an item that is already assigned; the Scrum Master does that.",
+    "BACKUP_KEY_MISMATCH": "The backup was encrypted with another key. Use “Re-encrypt old backups” with the correct (old) key.",
+    "BACKUP_KEY_CHANGE_UNCONFIRMED": "To change the key you must confirm that old backups may be affected.",
+    "OUTSOURCE_ACCESS_FORBIDDEN": "Only the project’s Scrum Master, a project manager or a Super Admin can set outsource access.",
+    "NOT_OUTSOURCE": "This person is not an outsource account; access is only set for outsource people.",
+    "ROLLBACK_CONFIRM_MISMATCH": "The project key you typed does not match this project.",
+    "BACKUP_WRONG_SPACE": "This backup belongs to another project; a project can only be rolled back to its own backup."
   },
   "spaceRoles": {
     "PROJECT_MANAGER": "Project Manager",
@@ -2045,10 +2067,10 @@
     "subtitle": "Who did what, and when, in this workspace. Entries cannot be edited or deleted.",
     "forbidden": "Only Owners and Admins can view the audit log.",
     "empty": "No entries match this filter.",
-    "export": "Download CSV",
+    "export": "Download Excel",
     "exportFiltered": "Filtered results only",
     "exportAll": "All records",
-    "exportFailed": "Could not download the CSV.",
+    "exportFailed": "Could not download the Excel file.",
     "all": "All",
     "from": "From date",
     "to": "To date",
@@ -2165,7 +2187,22 @@
     "newName": "New Project name (defaults to the backup’s)",
     "restoreAction": "Restore",
     "restored": "Project restored from backup.",
-    "sprintRestored": "Sprint restored from backup."
+    "sprintRestored": "Sprint restored from backup.",
+    "rollback": "Roll back to a backup",
+    "rollbackWarnTitle": "Warning: the project’s current data will change",
+    "rollbackWarnBody": "If this project is rolled back to a backup, your current data will change. The project returns completely to the moment the chosen backup was taken.",
+    "rollbackWarn1": "Work items, comments, docs, attachments, time entries and sprint data added after the backup are deleted.",
+    "rollbackWarn2": "Everything deleted or changed after the backup returns to its backed-up state (statuses, labels, assignments and sprints included).",
+    "rollbackWarn3": "This cannot be undone. Item numbers are never rewound; keys of deleted items are not reused.",
+    "rollbackWarnAdvice": "Recommended: back up the project’s current state before continuing.",
+    "rollbackDownloadCurrent": "Download a backup of the current state",
+    "rollbackContinue": "Continue",
+    "rollbackPickTitle": "Choose the backup file",
+    "rollbackPickBody": "Choose this project’s own backup (.zip.enc). A backup of another project is rejected. If anything fails, nothing changes.",
+    "rollbackConfirmLabel": "Type the project key to confirm ({{key}})",
+    "rollbackAction": "Roll back",
+    "rollbackRunning": "Rolling back…",
+    "rollbackDone": "The project was rolled back to the backup."
   },
   "priorityColors": {
     "toggle": "Color by priority"
@@ -3250,7 +3287,7 @@
   },
   "outsource": {
     "title": "Outsource",
-    "description": "People outside the company. They only see the projects they are added to and cannot be Project Managers. A Super Admin decides their access to docs and videos.",
+    "description": "Outsource people see only the projects a Super Admin assigns them. Read/write access is set per person in each project’s settings by that project’s Scrum Master or a Super Admin.",
     "empty": "There are no outsource people you can see. Create or invite one with the \"Outsource\" role in Settings → People.",
     "content": "Docs and videos",
     "contentFor": "Docs and videos access for {{name}}",
@@ -3265,7 +3302,8 @@
     "addTo": "Choose a project for {{name}}",
     "addProject": "Add to project…",
     "add": "Add",
-    "added": "Added to the project."
+    "added": "Added to the project.",
+    "noProject": "Not assigned to any project; sees no project."
   },
   "livefeed": {
     "title": "Live activity",
@@ -3396,7 +3434,8 @@
     "productOwner": "Product Owner",
     "scrumMaster": "Scrum Master",
     "none": "Not assigned",
-    "saved": "Saved."
+    "saved": "Saved.",
+    "scrumMasterHint": "In Scrum, the Scrum Master is the Project Manager. They move Backlog items into the sprint and assign work; the Product Owner cannot reassign an already-assigned item."
   },
   "bugSenders": {
     "title": "Email addresses allowed to send Bugs",
@@ -3410,5 +3449,62 @@
   "locked": {
     "title": "Your account is locked",
     "body": "An administrator locked your account; your data and assignments are kept. Contact a Super Admin to get access back."
+  },
+  "backupKey": {
+    "pageTitle": "Backup key",
+    "pageSubtitle": "The AES-256 key that encrypts backup files. Only a Super Admin can see it.",
+    "forbidden": "Only a Super Admin can see the backup key.",
+    "title": "Backup encryption key",
+    "description": "Project and sprint backups download encrypted with AES-256 (.zip.enc). Only a Super Admin can see, generate and change the key; if it is lost, backups cannot be opened.",
+    "status": "Status",
+    "configured": "Key configured",
+    "notConfigured": "No key yet; one is generated on the first backup.",
+    "fingerprint": "Fingerprint",
+    "updatedAt": "Last changed",
+    "create": "Generate key",
+    "created": "Backup key generated.",
+    "reveal": "Show key",
+    "hide": "Hide",
+    "copy": "Copy key",
+    "copied": "Key copied to the clipboard.",
+    "change": "Change key",
+    "changed": "Backup key changed.",
+    "reencrypt": "Re-encrypt old backups",
+    "warnTitle": "Warning: your old backups may be affected",
+    "warnBody": "After you change the key, backups taken with the old key cannot be opened or restored with the new one.",
+    "warnSteps": "After changing it, select your old backups in the browser here and back them up again with the new key (you need the old key). If you did not keep the old key, use “Show key” first and note it down.",
+    "customLabel": "My own key (optional)",
+    "customPlaceholder": "Leave empty to generate a random 256-bit key",
+    "customHint": "At least 16 characters. If empty, the server generates a strong key.",
+    "tooShort": "The key must be at least 16 characters.",
+    "ack": "I understand my old backups may be affected.",
+    "confirmChange": "Change key",
+    "reencryptTitle": "Re-encrypt old backups with the new key",
+    "reencryptBody": "Select the old backup files; they download re-encrypted with the new key in a single ZIP. Old unencrypted ZIP backups are encrypted too.",
+    "files": "Backup files",
+    "oldKey": "Old key",
+    "oldKeyPlaceholder": "The key the old backups were encrypted with",
+    "oldKeyHint": "Used only for this request and never stored. Not needed for unencrypted ZIPs.",
+    "reencryptAction": "Re-encrypt and download",
+    "reencrypted": "Backups were encrypted with the new key.",
+    "later": "Not now"
+  },
+  "outsourceAccess": {
+    "title": "Outsource access",
+    "description": "Read and write limits for the outsource people a Super Admin assigned to this project. The setting applies only to this project and person; manager permissions cannot be granted.",
+    "empty": "No outsource person is assigned to this project. A Super Admin assigns people under System Administration → Outsource.",
+    "saved": "Outsource access saved.",
+    "areas": {
+      "items": "Work items, Backlog and Sprint",
+      "comments": "Comments",
+      "docs": "Docs",
+      "videos": "Videos",
+      "reports": "Reports"
+    },
+    "levels": {
+      "NONE": "None",
+      "READ": "Read",
+      "WRITE": "Read + Write"
+    }
   }
 }

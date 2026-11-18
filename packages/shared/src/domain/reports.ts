@@ -1,13 +1,23 @@
 const DAY_MS = 86_400_000;
 
-/** Bir anı verilen saat diliminde YYYY-MM-DD yerel tarihine çevirir. */
+const dateFormatters = new Map<string, Intl.DateTimeFormat>();
+
+/**
+ * Bir anı verilen saat diliminde YYYY-MM-DD yerel tarihine çevirir. `Intl.DateTimeFormat` kurmak pahalıdır
+ * (binlerce satırlık raporlarda baskın CPU maliyeti çıktı), bu yüzden saat dilimi başına bir kez kurulur.
+ */
 export function localDate(instant: Date, timeZone: string): string {
-  return new Intl.DateTimeFormat('en-CA', {
-    timeZone,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).format(instant);
+  let format = dateFormatters.get(timeZone);
+  if (!format) {
+    format = new Intl.DateTimeFormat('en-CA', {
+      timeZone,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    });
+    dateFormatters.set(timeZone, format);
+  }
+  return format.format(instant);
 }
 
 export function addDays(date: string, days: number): string {

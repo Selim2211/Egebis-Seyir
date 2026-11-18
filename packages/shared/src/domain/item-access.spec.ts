@@ -63,14 +63,22 @@ describe('itemPermissions (ADR-113)', () => {
     ).toEqual(DEVELOPER);
   });
 
-  it('dış kaynak için giriş izinlerinden yönetici ve içerik izinleri düşer (ADR-152)', () => {
+  it('dış kaynak için öğeye özel erişim, Proje ayarındaki yetkiyi aşamaz (ADR-172)', () => {
     const permissions = run({
       workspaceRole: 'GUEST',
       root: { isPrivate: true, createdById: null },
       entryPermissions: DEFAULT_SPACE_ROLE_PERMISSIONS.PROJECT_MANAGER,
+      outsourceAccess: {
+        items: 'WRITE',
+        comments: 'NONE',
+        docs: 'NONE',
+        videos: 'NONE',
+        reports: 'NONE',
+      },
     });
     expect(permissions).toContain('workItem.write');
     expect(permissions).not.toContain('space.settings');
     expect(permissions).not.toContain('doc.view');
+    expect(permissions).not.toContain('comment.write');
   });
 });

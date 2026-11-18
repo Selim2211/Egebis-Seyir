@@ -31,11 +31,20 @@ export class EpicsService {
       select: { parentId: true, points: true, status: { select: { category: true } } },
     });
 
+    // Çocuklar bir kez gruplanır (epik × çocuk taraması yerine).
+    const byParent = new Map<
+      string,
+      { points: number | null; category: (typeof children)[number]['status']['category'] }[]
+    >();
+    for (const c of children) {
+      if (!c.parentId) continue;
+      const list = byParent.get(c.parentId) ?? [];
+      list.push({ points: c.points, category: c.status.category });
+      byParent.set(c.parentId, list);
+    }
     return {
       epics: epics.map((epic) => {
-        const own = children
-          .filter((c) => c.parentId === epic.id)
-          .map((c) => ({ points: c.points, category: c.status.category }));
+        const own = byParent.get(epic.id) ?? [];
         return {
           ...toSummary(epic),
           goal: epic.goal,

@@ -492,6 +492,29 @@ export class WorkItemsService {
 
   // ---------- Güncelleme ----------
 
+  /**
+   * Hali hazırda atanmış bir işin atananını Product Owner değiştiremez; bu Scrum Master'ın (ve
+   * Super Admin'in) işidir (ADR-170). Otomasyon zinciri etkilenmez.
+   */
+  private assertPoDoesNotReassign(
+    item: {
+      assignees: { userId: string }[];
+      space: { productOwnerId: string | null; scrumMasterId: string | null };
+    },
+    next: string[] | undefined,
+  ): void {
+    if (next === undefined || item.assignees.length === 0) return;
+    const current = new Set(item.assignees.map((a) => a.userId));
+    const unchanged = next.length === current.size && next.every((id) => current.has(id));
+    if (unchanged || this.cls.get('automationChain')?.length) return;
+    const tier = this.cls.get('workspaceRole');
+    if (tier === 'OWNER' || tier === 'ADMIN') return;
+    const { actorId } = this.ctx;
+    if (item.space.productOwnerId === actorId && item.space.scrumMasterId !== actorId) {
+      throw forbidden(ERROR_CODES.ASSIGNEE_SCRUM_MASTER_ONLY);
+    }
+  }
+
   async update(itemId: string, input: UpdateWorkItemRequest): Promise<void> {
     const { workspaceId, actorId } = this.ctx;
     const { force, customFields: customPatch, recurrence, ...fields } = input;
@@ -510,11 +533,14 @@ export class WorkItemsService {
             estimationScale: true,
             dodItems: true,
             dodEnforced: true,
+            productOwnerId: true,
+            scrumMasterId: true,
           },
         },
       },
     });
     if (!item) throw notFound();
+    this.assertPoDoesNotReassign(item, fields.assigneeIds);
     // Askıdaki sprint'in işlerinde hiçbir değişiklik yapılamaz.
     if (item.sprint?.status === 'SUSPENDED') {
       throw new HttpException({ code: ERROR_CODES.SPRINT_SUSPENDED }, HttpStatus.CONFLICT);

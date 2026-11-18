@@ -1,5 +1,12 @@
 import { ALL_SPACE_PERMISSIONS, type WorkspaceRole } from '../permissions/roles';
-import { type ContentAccess, outsourcePermissions } from './space-access';
+import { outsourceAccessPermissions } from './outsource-access';
+import { type ContentAccess, viewerPermissions } from './space-access';
+
+/** Öğeye özel erişim, dış kaynağın Proje ayarındaki yetkisini aşamaz (ADR-172). */
+function capToOutsource(entry: readonly string[], access: unknown): readonly string[] {
+  const allowed = new Set(outsourceAccessPermissions(access));
+  return entry.filter((p) => allowed.has(p));
+}
 
 /**
  * Öğe bazlı erişim (ADR-113). En yakın "özel erişimli" üst öğe (kök) Space kuralının yerini ya da
@@ -22,6 +29,8 @@ export interface ItemAccessInput {
   userId: string;
   /** Dış kaynağın doküman/video erişimi (yalnızca Guest için). */
   contentAccess?: ContentAccess;
+  /** Dış kaynağın bu Projedeki kişisel alan yetkisi (ADR-172). */
+  outsourceAccess?: unknown;
 }
 
 export function itemPermissions(input: ItemAccessInput): readonly string[] | null {
@@ -32,9 +41,11 @@ export function itemPermissions(input: ItemAccessInput): readonly string[] | nul
   const granted =
     input.entryPermissions === null
       ? null
-      : workspaceRole === 'GUEST'
-        ? outsourcePermissions(input.entryPermissions, input.contentAccess)
-        : input.entryPermissions;
+      : workspaceRole === 'VIEWER'
+        ? viewerPermissions(input.entryPermissions, input.contentAccess)
+        : workspaceRole === 'GUEST'
+          ? capToOutsource(input.entryPermissions, input.outsourceAccess)
+          : input.entryPermissions;
 
   if (root.isPrivate) {
     if (granted) return granted;

@@ -8,15 +8,14 @@ import {
   type BugSeverity,
 } from '@scrum/shared';
 import { TenantPrismaService } from '../../infra/prisma/tenant-prisma.service';
+import { dayKey } from '../analytics/analytics-util';
 
 const DAY_MS = 86_400_000;
 const DAYS = 14;
-const TZ = 'Europe/Istanbul';
 /** Tek sorguda okunacak en çok Bug/iş sayısı (çok büyük çalışma alanında bellek sınırı). */
 const SCAN_LIMIT = 50_000;
 
 /** Europe/Istanbul takvim günü, YYYY-MM-DD. */
-const dayKey = (d: Date) => d.toLocaleDateString('sv-SE', { timeZone: TZ });
 
 /** Bugün dahil son n günün anahtarları (eskiden yeniye). */
 function lastDays(n: number, now: Date): string[] {

@@ -99,6 +99,9 @@ function SettingsLayout() {
             label={t('settings.diagnostics')}
           />
         )}
+        {canEditWorkspace && (
+          <SubLink to="/settings/backup-key" icon={KeyRound} label={t('settings.backupKey')} />
+        )}
         {canViewAudit && (
           <SubLink to="/settings/audit" icon={ScrollText} label={t('settings.audit')} />
         )}

@@ -1,6 +1,6 @@
-import { CONTENT_ACCESS, type ContentAccess, type OutsourcePerson } from '@scrum/shared';
+import type { OutsourcePerson } from '@scrum/shared';
 import { createFileRoute } from '@tanstack/react-router';
-import { Plus, X } from 'lucide-react';
+import { CalendarPlus, Plus, X } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -9,7 +9,7 @@ import { PageHeading } from '@/components/layout/page-heading';
 import { Button } from '@/components/ui/button';
 import { UserAvatar } from '@/components/user-avatar';
 import { usePutSpaceMember, useRemoveSpaceMember } from '@/features/spaces/queries';
-import { useOutsource, useSetContentAccess } from '@/features/workspace/queries';
+import { useExtendExpiry, useOutsource } from '@/features/workspace/queries';
 import { relativeTime } from '@/lib/format';
 import { useErrorMessage } from '@/lib/use-error-message';
 
@@ -60,7 +60,8 @@ function PersonRow({
 }) {
   const { t } = useTranslation();
   const errorMessage = useErrorMessage();
-  const setAccess = useSetContentAccess();
+  const extend = useExtendExpiry();
+  const expired = person.expiresAt !== null && new Date(person.expiresAt) <= new Date();
   const put = usePutSpaceMember();
   const remove = useRemoveSpaceMember();
   const [adding, setAdding] = useState('');
@@ -82,58 +83,64 @@ function PersonRow({
           <p className="text-muted-foreground truncate text-xs">
             {person.email} ·{' '}
             {person.lastSeenAt ? relativeTime(person.lastSeenAt) : t('common.never')}
+            {person.expiresAt && (
+              <>
+                {' · '}
+                <span className={expired ? 'font-medium text-red-600 dark:text-red-400' : ''}>
+                  {t(expired ? 'members.expiredOn' : 'members.expiresOn', {
+                    date: new Date(person.expiresAt).toLocaleDateString(),
+                  })}
+                </span>
+              </>
+            )}
           </p>
         </div>
-        <label className="flex items-center gap-2 text-sm">
-          <span className="text-muted-foreground">{t('outsource.content')}</span>
-          {superAdmin ? (
-            <NativeSelect
-              aria-label={t('outsource.contentFor', { name: person.name })}
-              value={person.contentAccess}
-              className="h-8"
-              disabled={setAccess.isPending}
-              onChange={(e) =>
-                setAccess.mutate(
-                  { userId: person.userId, contentAccess: e.target.value as ContentAccess },
-                  { onSuccess: () => toast.success(t('outsource.contentSaved')), onError },
-                )
-              }
-            >
-              {CONTENT_ACCESS.map((a) => (
-                <option key={a} value={a}>
-                  {t(`outsource.access.${a}`)}
-                </option>
-              ))}
-            </NativeSelect>
-          ) : (
-            <span className="font-medium">{t(`outsource.access.${person.contentAccess}`)}</span>
-          )}
-        </label>
+        {superAdmin && (
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={extend.isPending}
+            onClick={() =>
+              extend.mutate(
+                { userId: person.userId },
+                { onSuccess: () => toast.success(t('members.extended')), onError },
+              )
+            }
+          >
+            <CalendarPlus aria-hidden />
+            {t('members.extend')}
+          </Button>
+        )}
       </div>
       <div className="flex flex-wrap items-center gap-1.5 pl-11">
+        {person.projects.length === 0 && (
+          <span className="text-muted-foreground text-xs">{t('outsource.noProject')}</span>
+        )}
         {person.projects.map((p) => (
           <span
             key={p.spaceId}
             className="bg-muted inline-flex items-center gap-1 rounded-full py-0.5 pr-1 pl-2.5 text-xs"
           >
             <span className="font-mono">{p.key}</span> {p.name}
-            <button
-              type="button"
-              className="hover:bg-background rounded-full p-0.5"
-              aria-label={t('outsource.removeFrom', { name: person.name, project: p.name })}
-              disabled={remove.isPending}
-              onClick={() =>
-                remove.mutate(
-                  { spaceId: p.spaceId, userId: person.userId },
-                  { onSuccess: () => toast.success(t('outsource.removed')), onError },
-                )
-              }
-            >
-              <X className="size-3" />
-            </button>
+            {superAdmin && (
+              <button
+                type="button"
+                className="hover:bg-background rounded-full p-0.5"
+                aria-label={t('outsource.removeFrom', { name: person.name, project: p.name })}
+                disabled={remove.isPending}
+                onClick={() =>
+                  remove.mutate(
+                    { spaceId: p.spaceId, userId: person.userId },
+                    { onSuccess: () => toast.success(t('outsource.removed')), onError },
+                  )
+                }
+              >
+                <X className="size-3" />
+              </button>
+            )}
           </span>
         ))}
-        {addable.length > 0 && (
+        {superAdmin && addable.length > 0 && (
           <span className="inline-flex items-center gap-1">
             <NativeSelect
               aria-label={t('outsource.addTo', { name: person.name })}

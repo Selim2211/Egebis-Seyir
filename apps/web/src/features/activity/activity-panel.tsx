@@ -16,6 +16,7 @@ import { ItemOpenLink } from '@/features/work-items/detail/item-nav';
 import { useCan, useCurrentWorkspace } from '@/features/workspace/queries';
 import { apiRequest } from '@/lib/api';
 import { formatDateTime, relativeTime } from '@/lib/format';
+import { pollEvery } from '@/lib/idle';
 import { useErrorMessage } from '@/lib/use-error-message';
 
 /** Akış 15 sn'de bir tazelenir (yalnızca panel açıkken). */
@@ -43,7 +44,7 @@ export function ActivityPanel({ onClose }: { onClose: () => void }) {
   const { id: workspaceId } = useCurrentWorkspace();
   const query = useInfiniteQuery({
     ...liveActivityQuery(workspaceId),
-    refetchInterval: ACTIVITY_POLL_MS,
+    refetchInterval: pollEvery(ACTIVITY_POLL_MS),
   });
   const events = query.data?.pages.flatMap((p) => p.events) ?? [];
 

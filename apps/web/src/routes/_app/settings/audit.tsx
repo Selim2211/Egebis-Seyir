@@ -20,7 +20,7 @@ import {
 import { toast } from 'sonner';
 import { ItemOpenLink } from '@/features/work-items/detail/item-nav';
 import { useCan, useCurrentWorkspace } from '@/features/workspace/queries';
-import { downloadCsv } from '@/lib/download';
+import { downloadXlsx } from '@/lib/download';
 import { formatDateTime } from '@/lib/format';
 
 export const Route = createFileRoute('/_app/settings/audit')({ component: AuditPage });
@@ -43,13 +43,14 @@ function AuditPage() {
 
   const [exporting, setExporting] = useState(false);
   /** Süzgece uyan tüm kayıtlar (all=true ise süzgeçsiz hepsi) dosyaya yazılır; yüklenen sayfayla sınırlı değildir. */
-  const exportCsv = async (all: boolean) => {
+  const exportXlsx = async (all: boolean) => {
     setExporting(true);
     try {
       const rows = await fetchAllAudit(workspaceId, all ? {} : filter);
-      downloadCsv(
-        `denetim-gunlugu-${new Date().toISOString().slice(0, 10)}.csv`,
+      downloadXlsx(
+        `denetim-gunlugu-${new Date().toISOString().slice(0, 10)}.xlsx`,
         auditCsvRows(rows, t),
+        t('audit.title'),
       );
     } catch {
       toast.error(t('audit.exportFailed'));
@@ -126,10 +127,10 @@ function AuditPage() {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start">
-            <DropdownMenuItem onSelect={() => void exportCsv(false)}>
+            <DropdownMenuItem onSelect={() => void exportXlsx(false)}>
               {t('audit.exportFiltered')}
             </DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => void exportCsv(true)}>
+            <DropdownMenuItem onSelect={() => void exportXlsx(true)}>
               {t('audit.exportAll')}
             </DropdownMenuItem>
           </DropdownMenuContent>

@@ -18,6 +18,7 @@ import {
   RestoreResultSchema,
   SPACE_PERMISSIONS as S,
   SpaceRestoreFieldsSchema,
+  SpaceRollbackFieldsSchema,
   SprintRestoreFieldsSchema,
   WORKSPACE_PERMISSIONS as W,
   type RestoreResult,
@@ -28,21 +29,25 @@ import { RequirePermission, RequireSpacePermission } from '../auth/decorators';
 import { BackupService } from './backup.service';
 
 class SpaceRestoreFieldsDto extends createZodDto(SpaceRestoreFieldsSchema) {}
+class SpaceRollbackFieldsDto extends createZodDto(SpaceRollbackFieldsSchema) {}
 class SprintRestoreFieldsDto extends createZodDto(SprintRestoreFieldsSchema) {}
 class RestoreResultDto extends createZodDto(RestoreResultSchema) {}
 
 const Uuid = (name: string) => Param(name, ParseUUIDPipe);
 const disposition = (name: string) =>
-  `attachment; filename="backup.zip"; filename*=UTF-8''${encodeURIComponent(name)}.zip`;
+  `attachment; filename="backup.zip.enc"; filename*=UTF-8''${encodeURIComponent(name)}.zip.enc`;
 
-/** Space ve Sprint yedeği / geri yükleme (Faz 8.5, ADR-105). Yedek ZIP'tir. */
+/**
+ * Space ve Sprint yedeği / geri yükleme (Faz 8.5, ADR-105). Yedek ZIP'tir ve indirilirken AES-256-GCM
+ * ile şifrelenir (`.zip.enc`, ADR-171); eski şifresiz ZIP'ler yine geri yüklenebilir.
+ */
 @Controller('workspaces/:workspaceId')
 export class BackupController {
   constructor(private readonly backup: BackupService) {}
 
   @Get('spaces/:spaceId/backup.zip')
   @RequireSpacePermission(S.SPACE_SETTINGS)
-  @Header('Content-Type', 'application/zip')
+  @Header('Content-Type', 'application/octet-stream')
   @Header('Cache-Control', 'private, no-store')
   async backupSpace(
     @Uuid('spaceId') spaceId: string,
@@ -55,7 +60,7 @@ export class BackupController {
 
   @Get('sprints/:sprintId/backup.zip')
   @RequireSpacePermission(S.SPRINT_PLAN)
-  @Header('Content-Type', 'application/zip')
+  @Header('Content-Type', 'application/octet-stream')
   @Header('Cache-Control', 'private, no-store')
   async backupSprint(
     @Uuid('sprintId') sprintId: string,
@@ -77,6 +82,20 @@ export class BackupController {
     @UploadedFile() file: Express.Multer.File | undefined,
   ): Promise<RestoreResult> {
     return this.backup.restoreSpace(file?.buffer, fields);
+  }
+
+  /** Projeyi yedeğin alındığı ana döndürür (yalnız Super Admin, ADR-173). */
+  @Post('spaces/:spaceId/rollback')
+  @HttpCode(HttpStatus.OK)
+  @RequireSpacePermission(S.SPACE_SETTINGS)
+  @UseInterceptors(FileInterceptor('file'))
+  @ZodResponse({ type: RestoreResultDto })
+  rollbackSpace(
+    @Uuid('spaceId') spaceId: string,
+    @Body() fields: SpaceRollbackFieldsDto,
+    @UploadedFile() file: Express.Multer.File | undefined,
+  ): Promise<RestoreResult> {
+    return this.backup.rollbackSpace(spaceId, file?.buffer, fields);
   }
 
   /** Sprint yedeğini bu Space'e yeni sprint olarak ekler. */

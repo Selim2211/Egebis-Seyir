@@ -200,7 +200,7 @@ function GroupRows({
             <code className="text-muted-foreground text-[11px]">{permission}</code>
           </th>
           {roles.map((role) => {
-            const locked = role.key === 'OWNER';
+            const locked = role.key === 'OWNER' || role.key === 'VIEWER';
             return (
               <td key={role.id} className="px-2 py-2 text-center">
                 <input
@@ -238,7 +238,7 @@ function RoleHeader({
   const [deleting, setDeleting] = useState(false);
   const [renaming, setRenaming] = useState(false);
   const custom = isCustomRoleKey(role.key);
-  const locked = role.key === 'OWNER';
+  const locked = role.key === 'OWNER' || role.key === 'VIEWER';
 
   return (
     <div className="flex flex-col items-center gap-0.5">

@@ -1,3 +1,4 @@
+import { ShortCache } from '../../infra/http/short-cache';
 import {
   Body,
   Controller,
@@ -174,6 +175,7 @@ export class TimeController {
 
   /** Akış raporları: CFD, throughput, lead/cycle time, bug trendi (ADR-078). */
   @Get('spaces/:spaceId/flow')
+  @ShortCache(30)
   @RequireSpacePermission(S.REPORT_VIEW)
   @ZodResponse({ type: FlowDto })
   flowOf(@Uuid('spaceId') spaceId: string, @Query() query: FlowQueryDto): Promise<Flow> {

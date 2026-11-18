@@ -19,6 +19,12 @@ x-net-sysctls: &net-sysctls
   net.ipv4.tcp_mtu_probing: 1
   net.ipv4.tcp_slow_start_after_idle: 0
 
+# Kaynak sınırları (ADR-174): sunucu başka uygulamalarla paylaşılır. cpu_shares 512 = CPU için yarış olduğunda
+# Seyir konteynerleri diğerlerinin (varsayılan 1024) yarı önceliğini alır, boşta kalan CPU'yu ise serbestçe kullanır.
+# Bellek tavanları aşılamaz; tümü .env ile değiştirilebilir.
+x-share: &share
+  cpu_shares: ${SEYIR_CPU_SHARES:-512}
+
 x-api-env: &api-env
   NODE_ENV: production
   PORT: 3000
@@ -36,6 +42,10 @@ x-api-env: &api-env
   SMTP_PASS: ${SMTP_PASS:-}
   MAIL_FROM: ${MAIL_FROM:-Egebis Seyir <egebisseyir@gmail.com>}
   QUEUE_ENABLED: 'true'
+  BACKGROUND_WORKER: 'true'
+  DB_POOL_MAX: ${DB_POOL_MAX:-15}
+  # Bellek tavanının altında kalsın diye V8 yığını sınırlanır (tavan API_MEM_LIMIT).
+  NODE_OPTIONS: --max-old-space-size=${API_HEAP_MB:-768}
   UPLOAD_DIR: /data/uploads
   MAX_UPLOAD_MB: ${MAX_UPLOAD_MB:-100}
   WEBHOOK_ALLOW_PRIVATE_HOSTS: ${WEBHOOK_ALLOW_PRIVATE_HOSTS:-false}
@@ -47,6 +57,9 @@ services:
     image: postgres:17
     restart: unless-stopped
     logging: *logging
+    <<: *share
+    mem_limit: ${PG_MEM_LIMIT:-2g}
+    shm_size: 256m
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-scrum}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD gerekli}
@@ -88,6 +101,10 @@ services:
     restart: unless-stopped
     logging: *logging
     sysctls: *net-sysctls
+    <<: *share
+    # Bu konteyner en çok API_CPUS çekirdek kullanır (varsayılan 1,5; Node tek iş parçacıklı olduğundan pratikte ~1).
+    cpus: ${API_CPUS:-1.5}
+    mem_limit: ${API_MEM_LIMIT:-1g}
     environment:
       # Boş bırakılan isteğe bağlı değişkenler verilmemiş sayılır (env doğrulaması).
       <<: *api-env
@@ -100,6 +117,30 @@ services:
         condition: service_completed_successfully
     networks: [internal]
 
+  # İkinci API süreci (ADR-174), varsayılan KAPALI. Açmak için .env'de
+  #   COMPOSE_PROFILES=scale
+  #   API_UPSTREAMS=api:3000 api-2:3000
+  # verip `docker compose up -d`. Yalnızca HTTP isteklerine bakar; zamanlanmış işleri, kuyruk işçilerini ve gelen
+  # kutusu yoklamasını birinci API yapar (BACKGROUND_WORKER=false).
+  api-2:
+    profiles: [scale]
+    image: scrum-manager-api:latest
+    restart: unless-stopped
+    logging: *logging
+    sysctls: *net-sysctls
+    <<: *share
+    cpus: ${API_CPUS:-1.5}
+    mem_limit: ${API_MEM_LIMIT:-1g}
+    environment:
+      <<: *api-env
+      BACKGROUND_WORKER: 'false'
+    volumes:
+      - uploads:/data/uploads
+    depends_on:
+      api:
+        condition: service_healthy
+    networks: [internal]
+
   web:
     build:
       context: .
@@ -108,8 +149,12 @@ services:
     restart: unless-stopped
     logging: *logging
     sysctls: *net-sysctls
+    <<: *share
+    mem_limit: 256m
     environment:
       SITE_ADDRESS: ${SITE_ADDRESS:-:80}
+      # API süreçleri (boşlukla ayrılır). İkinci API açılınca: "api:3000 api-2:3000".
+      API_UPSTREAMS: ${API_UPSTREAMS:-api:3000}
     ports:
       - '${HTTP_PORT:-8092}:80'
       - '${HTTPS_PORT:-8443}:443'
@@ -126,6 +171,8 @@ services:
     image: postgres:17
     restart: unless-stopped
     logging: *logging
+    <<: *share
+    mem_limit: 512m
     entrypoint: ['/bin/sh', '/backup.sh']
     environment:
       PGHOST: postgres

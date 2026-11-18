@@ -7,6 +7,7 @@ import type {
   WorkItemDetail,
 } from '@scrum/shared';
 import { unzipSync } from 'fflate';
+import { decryptBackup, isEncryptedBackup } from '../src/modules/backup/backup-crypto';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import {
   Client,
@@ -45,6 +46,15 @@ describe('Space/Sprint yedek ve geri yükleme (gerçek veritabanı)', () => {
     (await owner.get(api(`/items/${id}`)).expect(200)).body as WorkItemDetail;
   const download = async (path: string) =>
     (await owner.download(api(path)).expect(200)).body as Buffer;
+  /** İndirilen yedek AES-256-GCM ile şifrelidir (ADR-171); içeriği görmek için anahtarla çözülür. */
+  const plainZip = async (path: string) => {
+    const file = await download(path);
+    expect(isEncryptedBackup(file)).toBe(true);
+    const { key } = (await owner.get(api('/backup-key/reveal')).expect(200)).body as {
+      key: string;
+    };
+    return new Uint8Array(decryptBackup(file, key)!);
+  };
   const restoreSpace = (file: Buffer, fields: Record<string, string>, expected = 200) =>
     owner.upload(api('/restore/space'), file, 'yedek.zip', fields).expect(expected);
 
@@ -116,7 +126,7 @@ describe('Space/Sprint yedek ve geri yükleme (gerçek veritabanı)', () => {
 
   it('yedek ZIP: manifest, data.json ve ek dosyaları içerir', async () => {
     const { mob, att } = await seed();
-    const zip = unzipSync(new Uint8Array(await download(`/spaces/${mob.id}/backup.zip`)));
+    const zip = unzipSync(await plainZip(`/spaces/${mob.id}/backup.zip`));
     expect(Object.keys(zip).sort()).toEqual(['data.json', `files/${att.id}`, 'manifest.json']);
     const manifest = JSON.parse(new TextDecoder().decode(zip['manifest.json'])) as {
       format: string;
@@ -224,7 +234,7 @@ describe('Space/Sprint yedek ve geri yükleme (gerçek veritabanı)', () => {
 
   it("Sprint yedeği: öğeleri alt öğeleriyle başka Space'e yeni sprint olarak yükler", async () => {
     const { sprint } = await seed();
-    const zip = unzipSync(new Uint8Array(await download(`/sprints/${sprint.id}/backup.zip`)));
+    const zip = unzipSync(await plainZip(`/sprints/${sprint.id}/backup.zip`));
     const manifest = JSON.parse(new TextDecoder().decode(zip['manifest.json'])) as {
       kind: string;
       counts: Record<string, number>;

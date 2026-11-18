@@ -39,3 +39,4 @@ export * from './roles';
 export * from './item-access';
 export * from './videos';
 export * from './bug-senders';
+export * from './outsource-access';

@@ -107,7 +107,7 @@ export class RolesService {
     const role = await this.tenant.db.role.findFirst({ where: { id: roleId } });
     if (!role) throw notFound();
     const scope: RoleScopeName = role.scope;
-    if (role.isSystem && role.key === 'OWNER') {
+    if (role.isSystem && (role.key === 'OWNER' || role.key === 'VIEWER')) {
       throw new ForbiddenException({ code: ERROR_CODES.ROLE_LOCKED });
     }
     if (role.isSystem && input.name !== undefined) {
@@ -158,7 +158,7 @@ export class RolesService {
     >;
     const role = await this.tenant.db.role.findFirst({ where: { id: roleId } });
     if (!role) throw notFound();
-    if (!role.isSystem || role.key === 'OWNER') {
+    if (!role.isSystem || role.key === 'OWNER' || role.key === 'VIEWER') {
       throw new ForbiddenException({ code: ERROR_CODES.ROLE_LOCKED });
     }
     const defaults =

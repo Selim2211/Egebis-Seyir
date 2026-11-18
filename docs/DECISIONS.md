@@ -1522,3 +1522,74 @@ Yönetici: panoda kartlar takılıyor, bazen yer değiştirmiyor. Üç neden bul
 - **Proje silme:** yalnızca Super Admin (`SPACE_DELETE_SUPER_ADMIN`); son 7 gün içinde `space.backup_created` etkinliği yoksa `SPACE_DELETE_BACKUP_REQUIRED` (409). Diğer roller için düğme pasif.
 - **Sprint askıya alma:** `SprintStatus.SUSPENDED`; yalnızca Super Admin ve Projenin Scrum Master'ı askıya alır/geri açar/siler (`SPRINT_SCRUM_MASTER_ONLY`). Askıdaki sprint salt-okunurdur (`isSprintOpen` false) ve içindeki işlerde değişiklik `SPRINT_SUSPENDED` (409). Geri açınca başlamışsa Aktif, başlamamışsa Planlı olur.
 - **Mesaj eki:** `message_attachments`; `POST conversations/:id/messages/upload` (multipart `body` + en çok 5 `files`, **toplam 16 MB**); yalnızca konuşmanın tarafları indirir.
+
+## ADR-169 — Guest (VIEWER) ve Dış kaynak (GUEST): süreli hesaplar, e-posta standardı
+
+**Durum:** Kabul · **Tarih:** 2026-11-13 · ADR-152'yi genişletir.
+
+Yönetici 4. tur notları. İki ayrı "dışarıdan kişi" katmanı vardır:
+
+- **Dış kaynak (`GUEST`, değişmedi):** Proje Yöneticisi Projesine ekler/çıkarır; yalnızca Proje Üyesi rolü; yazabilir (rolünün izinleriyle), yönetici izinleri yok; doküman/video erişimini Super Admin verir. **Süre 90 gün**; yalnızca Super Admin **+90 gün ekler** (`POST members/:userId/extend-expiry`, bitmişse bugünden sayılır).
+- **Guest (`VIEWER`, yeni):** yalnızca Super Admin ekler ve Projeye alır (`VIEWER_ADMIN_ONLY`); **salt okunur**: Proje izinlerinden yalnızca `space.view`, `report.view` ve (içerik erişimi verilmişse) `doc.view`/`video.view` kalır — yazma ve yönetme izinleri `viewerPermissions` ile hiçbir koşulda gelmez, Super Admin bile yazma veremez. Rolü Roller ekranında kilitlidir (izin kutuları pasif). **Süre 30 gün, uzatılamaz** (`EXPIRY_NOT_EXTENDABLE`); mesajlaşma ve takım dışıdır.
+- **Süre ve kilit:** `memberships.expiresAt`; hesap açılırken/davet kabulünde/rol değişiminde yeniden başlar (`termEnd`), süreli katmandan çıkınca kalkar. Süre bitince üyelik **kilitli** sayılır (`isMembershipLocked`: elle kilit ya da `expiresAt` geçti) → her workspace isteği `MEMBER_LOCKED`. Geçiş `20261113100000_account_expiry`: her workspace'e `VIEWER` rolü eklenir, mevcut Dış kaynaklara bugünden 90 gün verilir.
+- **E-posta:** `EmailSchema` zod'un e-posta kalıbına ek olarak RFC 5321 sınırlarını uygular (yerel kısım ≤ 64, toplam ≤ 254, her etiket ≤ 63 ve tire ile başlayıp bitmez). Çağrı sisteminin gönderen adresi de aynı şemayı kullanır. Yalnızca ASCII adresler kabul edilir (alıntılı yerel kısım, IDN, IP adresi sabiti kabul edilmez); bilinçli sadeleştirme.
+- **Denetim günlüğü:** CSV yerine gerçek **Excel (.xlsx)** indirilir (tarayıcıda üretilir, kalın sabit başlık, sütun genişliği). Düğme "Excel indir"; filtreli/tüm kayıtlar seçeneği aynı.
+
+## ADR-170 — Atama kuralları: Scrum Master = Proje Yöneticisi
+
+**Durum:** Kabul · **Tarih:** 2026-11-13
+
+- Hali hazırda atanmış bir işin **atananını Product Owner değiştiremez** (`ASSIGNEE_SCRUM_MASTER_ONLY`, 403); bu Scrum Master'ın (ve Super Admin'in) işidir. Aynı kümeyi gönderen güncelleme, atanmamış işe atama ve otomasyon zinciri etkilenmez. PO aynı zamanda SM ise kural uygulanmaz.
+- Projenin **Scrum Master'ı** (`spaces.scrumMasterId`), Proje rolü Proje Üyesi olsa bile `SCRUM_MASTER_EXTRA_PERMISSIONS` (`sprint.plan`, `bug.assign`) alır: Backlog'daki işleri ilgili sprint'e alır ve atama yapar. Guest/Dış kaynak bu ek izni almaz.
+- Proje ayarları → Scrum Master kutusunun altında "Scrum metodolojisinde Scrum Master = Proje Yöneticisi" açıklaması yazar.
+
+## ADR-171 — Yedekler AES-256 ile şifrelenir; anahtarı yalnızca Super Admin yönetir
+
+**Durum:** Kabul · **Tarih:** 2026-11-13 · ADR-105'i genişletir.
+
+- **Şifreleme:** indirilen Proje/Sprint yedeği AES-256-GCM ile şifrelenir (`.zip.enc`); düzen `SEYIRENC1 · tuz · iv · etiket · veri`, anahtar scrypt ile dosyaya özel tuzla türetilir; GCM etiketi değişikliği ve yanlış anahtarı yakalar. Şifresiz eski ZIP'ler yine geri yüklenir.
+- **Anahtar:** workspace başına bir metin (rastgele 256 bit, 8×8 hex; Super Admin isterse ≥ 16 karakterlik kendi anahtarını girer). Sunucu sırrıyla (`SecretBoxService`) mühürlenip `workspaces.backupKeySealed` içinde durur; yalnızca Super Admin (Sahip/Yönetici) `GET backup-key/reveal` ile görür (görüntüleme denetim günlüğüne yazılır), üretir ve değiştirir. Anahtar yokken ilk yedekte otomatik üretilir; böylece her indirme şifrelidir.
+- **Değiştirme:** Sistem Yönetimi → Yedek anahtarı. Var olan anahtarı değiştirmeden önce **önemli uyarı penceresi** açılır ("eski yedekleriniz bu durumdan etkilenebilir"); onay kutusu işaretlenmeden düğme açılmaz ve sunucu da `acknowledgeOldBackups` olmadan reddeder (`BACKUP_KEY_CHANGE_UNCONFIRMED`, 409). Eski anahtarla alınmış yedek yeni anahtarla geri yüklenmez (`BACKUP_KEY_MISMATCH`, 422).
+- **Yeniden yedekleme:** değişiklikten sonra (ya da istendiğinde) Super Admin eski yedek dosyalarını **tarayıcıdan seçer**, eski anahtarı girer (yalnızca o istekte kullanılır, saklanmaz); sunucu hepsini yeni anahtarla şifreleyip tek ZIP olarak döner. Şifresiz ZIP'ler de şifrelenir.
+- **Risk:** anahtar kaybolursa yedekler açılamaz; anahtar sunucu sırrı (`SETTINGS_SECRET`/`.secrets`) değişirse okunamaz — dosya yedeğiyle birlikte taşınmalıdır.
+
+## ADR-172 — Dış kaynak yetkisi kişi ve Proje bazlıdır
+
+**Durum:** Kabul · **Tarih:** 2026-11-13 · ADR-152 ve ADR-169'un Dış kaynak kurallarını değiştirir.
+
+Yönetici: dış kaynak projeye dışarıdan gelen bir kişidir ve yetkisi her Projede farklıdır; bu yüzden yetki **rolden değil, kişiden ve Projeden** gelir.
+
+- **Atama:** Dış kaynağı Projeye yalnızca **Super Admin** atar/çıkarır (Sistem Yönetimi → Dış kaynak; bir kişi birden çok Projeye atanabilir). Proje Yöneticisi atayamaz (`VIEWER_ADMIN_ONLY`, Guest için de geçerli). Hiçbir Projeye atanmayan dış kaynak hiçbir Proje görmez (görünürlük zaten yalnızca üyelikle).
+- **Yetki:** `space_members.outsourceAccess` (JSON): `items`, `comments`, `docs`, `videos`, `reports` alanlarının her biri Yok/Okuma/Yazma. İzinler `outsourceAccessPermissions` ile türer: `items` en az Okuma (`space.view`), Yazma → `workItem.write`, `workItem.status.own`, `estimate.write`, `bug.report`; `comments` Yazma → `comment.write`; `docs`/`videos` Okuma → görüntüleme, Yazma → oluşturma + düzenleme (silme yok); `reports` → `report.view`. **Yönetici izinleri (Proje ayarları, sprint planlama, Bug atama, öğe erişimi) hiçbir ayarla gelmez.** Rol (Proje Üyesi/Yöneticisi) dış kaynak için yetki belirlemez; yalnızca Proje Üyesi olabilir.
+- **Başlangıç:** yeni atanan dış kaynak yalnızca iş öğelerini okur (`DEFAULT_OUTSOURCE_ACCESS`). Geçiş `20261113120000_outsource_access`: mevcut dış kaynak üyeliklerine eski davranışa denk yetki yazılır (öğe+yorum yazma, doküman/video eski içerik erişimine göre, raporlar okuma). Rol GUEST'e geçince varsayılan yazılır, GUEST'ten çıkınca silinir.
+- **Ayarlayan:** Proje ayarları → "Dış kaynak yetkileri" bölümü (`GET/PUT spaces/:spaceId/outsource-access[/:userId]`); yalnızca o Projenin **Scrum Master'ı**, Proje yöneticisi (`space.settings`) ya da Super Admin (`OUTSOURCE_ACCESS_FORBIDDEN`). Her ayar yalnızca o Proje ve o kişi için geçerlidir; değişiklik denetim günlüğüne `space.outsource_access_changed` olarak düşer.
+- **Öğeye özel erişim** (ADR-113) dış kaynağın Proje yetkisini aşamaz (`capToOutsource`).
+- **Süre** (ADR-169) aynen sürer: 90 gün, Super Admin +90 gün uzatır, bitince kilit. Üye başına `contentAccess` artık yalnızca **Guest (VIEWER)** için anlamlıdır. **Guest** ayrı rol olarak kalır (salt okunur, 30 gün, uzatılamaz; ADR-169).
+
+## ADR-173 — Projeyi yedeğe döndürme
+
+**Durum:** Kabul · **Tarih:** 2026-11-13 · ADR-105 ve ADR-171'i genişletir.
+
+Yönetici: Proje ayarlarından yedek dosyası seçilip Proje, yedeğin alındığı ana **eksiksiz ve sorunsuz** dönebilmeli.
+
+- **Uç nokta:** `POST workspaces/:ws/spaces/:spaceId/rollback` (multipart `file` + `confirmKey`). Yalnızca **Super Admin**. Yedek bu Projenin kendi yedeği olmalı (`data.space.id` eşleşir, yoksa `BACKUP_WRONG_SPACE`); yazılan Proje anahtarı Projeyle uyuşmalı (`ROLLBACK_CONFIRM_MISMATCH`). Şifreli yedek geçerli anahtarla açılır (`BACKUP_KEY_MISMATCH`).
+- **Mantık (kimlikler korunur):** yeni Proje açan "yedekten yükle"nin aksine, satır kimlikleri aynı kalır. Her tabloda: yedekte olup var olan → yedekteki değerle **güncellenir**; yedekte olup silinmiş → **geri oluşturulur**; yedekte olmayan (yedekten sonra eklenen) → **silinir** (çocuklar önce). Birleşik anahtarlı tablolarda (atanan, etiket, izleyici, tepki…) kapsam silinip yedektekiler yazılır. Hepsi **tek işlemde**; hata olursa hiçbir şey değişmez. Kimlikler korunduğu için zengin metindeki görsel adresleri, otomasyon/saklı görünüm/webhook gibi yedeğe girmeyen ayarlardaki başvurular ve bağlantılar geçerli kalır; yedeğe girmeyen bağlı veriler (bildirim, otomasyon, form…) silinmeyen satırlarda olduğu gibi durur.
+- **Kapsam (yedek sürümü 2):** durumlar, klasör/liste, etiket, özel alan, sprint, iş öğeleri (+atanan, etiket, kontrol listesi, bağlantı), doküman (+sürüm), yorum, ek (+dosya baytları), sprint öğe olayları ve yeni eklenenler: sprint anlık görüntüleri (burndown), retro maddeleri ve oyları, zaman kayıtları, izleyiciler, doküman↔iş bağları, yorum tepkileri/anmaları, Git bağları. Proje satırı (ad, renk, DoD/DoR, tahmin ölçeği, rol ayarları…) da döner. Eski (sürüm 1) yedekte bulunmayan tablolara dokunulmaz.
+- **Numaralar geri sarılmaz:** `itemCounter = max(şimdiki, yedekteki)`; silinen öğelerin anahtarları yeniden kullanılmaz (ADR-033). Proje anahtarı, sırası, PO/SM ve üyelikler değişmez.
+- **Ek dosyaları:** yedekteki dosyalar yazılır (silinmiş ekin dosyası geri gelir); yedekte olmayan eklerin dosyası işlemden sonra silinir.
+- **Arayüz:** Proje ayarları → Yedek → "Yedeğe geri dön" (yalnızca Super Admin). Önce **uyarı penceresi** ("Bu proje yedeğe dönerse şu anki verileriniz değişecek": sonradan eklenenler silinir, silinen/değişenler eski hâline döner, geri alınamaz; önerilen: şu anki hâlin yedeğini indir), sonra **yedek seçme ekranı** (dosya + Proje anahtarı onayı).
+- **Doğrulama:** entegrasyon testi yedek alır → her türden değişiklik yapar (düzenleme, silme, kalıcı silme, yeni öğe/yorum/ek, etiket silme, ad değişikliği, zaman/retro/doküman) → döner → yeni yedeğin tüm tablolarını eskisiyle birebir karşılaştırır; ek baytlarını, dönüş sonrası liste/backlog/sprint/yeni öğe/yorum/durum/sprint başlatma ve ikinci dönüşü sınar.
+
+## ADR-174 — Yük testi sonrası performans ve ölçekleme önlemleri
+
+**Durum:** Kabul · **Tarih:** 2026-11-16 · Ölçümler: `docs/PERFORMANS-SINIRLARI.md`, ham veri `docs/perf/2026-11/`.
+
+Yük testi (S kademesi: 50 kullanıcı, 20 Proje, ~21 bin iş öğesi) şunları gösterdi: tek Node süreci CPU'da doyuyor, yazma yoğunlaşınca "Unable to start a transaction in the given time" hatası çıkıyor ve bazı sorgular gereksiz sık/pahalı çalışıyor. Ofis sunucusu (6 çekirdek, 12 GB) başka uygulamalarla paylaşıldığından önlemler Seyir'i hem hızlandırır hem de sınırlar.
+
+- **Yazma darboğazı:** Prisma havuzu 10 → `DB_POOL_MAX` (varsayılan 15), `DB_TX_MAX_WAIT_MS` 10 sn, `DB_TX_TIMEOUT_MS` 20 sn. Kök neden: transaction içindeki ilk `WorkItem` sorgusu "gizli kökler" için havuzdan ikinci bağlantı istiyordu; `WorkspaceAccessGuard` yazma isteklerinde bunu transaction öncesi hesaplar (ADR-113 önbelleği).
+- **Çok süreç:** `BACKGROUND_WORKER` (varsayılan `true`). `false` olan süreç zamanlanmış işleri çalıştırmaz, kuyruk işçisi olmaz, gelen kutusunu yoklamaz; yalnızca HTTP'ye bakar. pg-boss havuzu 4/2 bağlantıyla sınırlı. Docker: `api-2` servisi `scale` profilinde, varsayılan **kapalı**; Caddy `API_UPSTREAMS` ile `least_conn` dağıtır.
+- **Kaynak sınırı (paylaşımlı sunucu):** konteynerlere `cpu_shares: 512` (yarışta diğer uygulamalar önceli), API `cpus: 1.5`/`mem_limit: 1g`, Postgres `2g`, `NODE_OPTIONS=--max-old-space-size=768`.
+- **Arayüz sorgulaması:** `lib/idle.ts` — 5 dk etkileşimsiz kalan sekmede periyodik sorgular en az 2 dk'ya seyrekleşir, kullanıcı dönünce hemen tazelenir (gizli sekmede TanStack zaten durur).
+- **Sorgu düzeltmeleri:** mesaj listesinde konuşma başına 2 sorgu (N+1) → 2 toplu sorgu; kurulum durumu `count` yerine `findFirst`; iş yükünde zaman kayıtları `groupBy`; epik ve akış hesaplarında kare tarama kaldırıldı.
+- **Teşhis:** `DB_LOG_SLOW_MS` verilirse yavaş sorgular loglanır (normalde kapalı). `apps/api/scripts/load/{slowsum,explain,scans}.cjs`.
+- **Yapılmadı (ölçüm gerektirmedi):** Backlog/board sanallaştırma (4 bin DOM düğümü, uzun görev yok), yeni indeks (planlar indeksi kullanıyor), SSE.

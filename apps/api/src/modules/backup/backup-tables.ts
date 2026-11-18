@@ -106,6 +106,55 @@ export const TABLES: readonly TableSpec[] = [
     refs: { sprintId: 'sprint', workItemId: 'workItem' },
     users: ['actorId'],
   },
+  // ---- Sonradan eklenenler (ADR-173): Projeye bağlı diğer veriler; eski yedeklerde bulunmaz.
+  { name: 'sprintSnapshot', delegate: 'sprintSnapshot', refs: { sprintId: 'sprint' }, users: [] },
+  {
+    name: 'retroItem',
+    delegate: 'retroItem',
+    refs: { sprintId: 'sprint', taskId: 'workItem' },
+    users: ['authorId'],
+  },
+  {
+    name: 'retroVote',
+    delegate: 'retroVote',
+    refs: { retroItemId: 'retroItem' },
+    users: ['userId'],
+    requiredUsers: ['userId'],
+    noId: true,
+  },
+  { name: 'timeEntry', delegate: 'timeEntry', refs: { workItemId: 'workItem' }, users: ['userId'] },
+  {
+    name: 'workItemWatcher',
+    delegate: 'workItemWatcher',
+    refs: { workItemId: 'workItem' },
+    users: ['userId'],
+    requiredUsers: ['userId'],
+    noId: true,
+  },
+  {
+    name: 'docItemLink',
+    delegate: 'docItemLink',
+    refs: { docId: 'doc', workItemId: 'workItem' },
+    users: ['createdById'],
+    noId: true,
+  },
+  {
+    name: 'commentReaction',
+    delegate: 'commentReaction',
+    refs: { commentId: 'comment' },
+    users: ['userId'],
+    requiredUsers: ['userId'],
+    noId: true,
+  },
+  {
+    name: 'commentMention',
+    delegate: 'commentMention',
+    refs: { commentId: 'comment' },
+    users: ['userId'],
+    requiredUsers: ['userId'],
+    noId: true,
+  },
+  { name: 'gitLink', delegate: 'gitLink', refs: { workItemId: 'workItem' }, users: [] },
 ];
 
 /** Space geri yüklemede atlanmayan; sprint geri yüklemede yalnız bunlar yazılır. */
@@ -123,4 +172,5 @@ export const SPRINT_TABLES: ReadonlySet<string> = new Set([
 ]);
 
 export const BACKUP_FORMAT = 'egebis-seyir-backup';
-export const BACKUP_VERSION = 1;
+/** 2: ADR-173 ile Projeye bağlı ek tablolar (zaman kaydı, retro, izleyici…) eklendi; eski yedekler okunur. */
+export const BACKUP_VERSION = 2;

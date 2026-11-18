@@ -1,12 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { SPACE_PERMISSIONS as S } from '../permissions/permissions';
 import { ALL_SPACE_PERMISSIONS, DEFAULT_SPACE_ROLE_PERMISSIONS } from '../permissions/roles';
-import {
-  checkSpaceRole,
-  outsourcePermissions,
-  spacePermissions,
-  type SpaceAccessInput,
-} from './space-access';
+import { checkSpaceRole, spacePermissions, type SpaceAccessInput } from './space-access';
 
 const MANAGER = DEFAULT_SPACE_ROLE_PERMISSIONS.PROJECT_MANAGER;
 const MEMBER = DEFAULT_SPACE_ROLE_PERMISSIONS.PROJECT_MEMBER;
@@ -32,23 +27,56 @@ describe('spacePermissions (ADR-039, ADR-152)', () => {
     expect(access({ workspaceRole: 'GUEST' })).toBeNull();
   });
 
-  it('dış kaynak: yönetici izinleri yok, içerik varsayılan kapalı', () => {
+  it('dış kaynak: yetki rolden değil kişisel ayardan gelir; varsayılan yalnızca iş öğesi okuma', () => {
     const perms = access({ workspaceRole: 'GUEST', memberPermissions: MANAGER })!;
-    expect(perms).toContain(S.WORK_ITEM_WRITE);
+    expect(perms).toContain(S.SPACE_VIEW);
+    // Rol Proje Yöneticisi bile olsa yazma ve yönetme gelmez (ADR-172).
+    expect(perms).not.toContain(S.WORK_ITEM_WRITE);
     expect(perms).not.toContain(S.SPACE_SETTINGS);
     expect(perms).not.toContain(S.SPRINT_PLAN);
     expect(perms).not.toContain(S.DOC_VIEW);
-    expect(perms).not.toContain(S.VIDEO_VIEW);
   });
 
-  it('dış kaynağın içerik erişimi: VIEW yalnızca görüntüleme, FULL rolünün izinleri', () => {
-    const view = outsourcePermissions(MEMBER, 'VIEW');
-    expect(view).toContain(S.DOC_VIEW);
-    expect(view).toContain(S.VIDEO_VIEW);
-    expect(view).not.toContain(S.DOC_EDIT);
-    const full = outsourcePermissions(MEMBER, 'FULL');
-    expect(full).toContain(S.DOC_EDIT);
-    expect(full).toContain(S.VIDEO_DELETE);
+  it('dış kaynağın alan yetkisi: Okuma görüntüler, Yazma yazar; yönetici izni hiç gelmez', () => {
+    const perms = access({
+      workspaceRole: 'GUEST',
+      memberPermissions: MEMBER,
+      outsourceAccess: {
+        items: 'WRITE',
+        comments: 'WRITE',
+        docs: 'READ',
+        videos: 'WRITE',
+        reports: 'READ',
+      },
+    })!;
+    expect(perms).toContain(S.WORK_ITEM_WRITE);
+    expect(perms).toContain(S.COMMENT_WRITE);
+    expect(perms).toContain(S.DOC_VIEW);
+    expect(perms).not.toContain(S.DOC_EDIT);
+    expect(perms).toContain(S.VIDEO_EDIT);
+    expect(perms).toContain(S.REPORT_VIEW);
+    expect(perms).not.toContain(S.SPACE_SETTINGS);
+    expect(perms).not.toContain(S.SPRINT_PLAN);
+    expect(perms).not.toContain(S.BUG_ASSIGN);
+  });
+
+  it('dış kaynakta iş öğeleri en az Okuma olur (Proje görünür kalır)', () => {
+    const perms = access({
+      workspaceRole: 'GUEST',
+      memberPermissions: MEMBER,
+      outsourceAccess: {
+        items: 'NONE',
+        comments: 'NONE',
+        docs: 'NONE',
+        videos: 'NONE',
+        reports: 'NONE',
+      },
+    })!;
+    expect(perms).toContain(S.SPACE_VIEW);
+  });
+
+  it('Projeye atanmamış dış kaynak hiçbir Proje görmez', () => {
+    expect(access({ workspaceRole: 'GUEST', memberPermissions: null })).toBeNull();
   });
 });
 

@@ -46,13 +46,14 @@ import { NotFoundState } from '@/features/spaces/container-header';
 import { useCan, useCurrentWorkspace } from '@/features/workspace/queries';
 import { apiRequest } from '@/lib/api';
 import { formatShortDate } from '@/lib/format';
+import { pollEvery } from '@/lib/idle';
 import { cn } from '@/lib/utils';
 
 const adminQuery = (workspaceId: string) =>
   queryOptions({
     queryKey: ['workspaces', workspaceId, 'admin', 'overview'],
     queryFn: () => apiRequest(`/workspaces/${workspaceId}/admin/overview`, AdminOverviewSchema),
-    refetchInterval: 60_000,
+    refetchInterval: pollEvery(60_000),
     retry: 2,
   });
 

@@ -1,14 +1,18 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import {
   checkSpaceRole,
+  DEFAULT_OUTSOURCE_ACCESS,
   DEFAULT_SPACE_ROLE_PERMISSIONS,
   ERROR_CODES,
   PROJECT_CONFIGURABLE_PERMISSIONS,
   SPACE_PERMISSIONS as S,
   SPACE_ROLES,
+  normalizeOutsourceAccess,
+  type OutsourceAccessResponse,
   type ProjectRoleOverrides,
   type ProjectRolesResponse,
   type PutBugSendersRequest,
+  type PutOutsourceAccessRequest,
   type PutProjectRoleRequest,
   type PutScrumRolesRequest,
   type SpaceMember,
@@ -22,6 +26,7 @@ import { HandoverService } from '../access/handover.service';
 import { roleTier } from '../access/role-tier';
 import { TenantPrismaService } from '../../infra/prisma/tenant-prisma.service';
 import { ActivityService } from '../activity/activity.service';
+import { isMembershipLocked } from '../access/account-term';
 import { forbidden, notFound } from './space-errors';
 
 /** Space üyeleri ve Scrum rolleri (brief §7.2). */
@@ -60,6 +65,120 @@ export class SpaceMembersService {
     }));
   }
 
+  /** Guest (VIEWER) ve Dış kaynak (GUEST) Projeye yalnızca Super Admin ekler/çıkarır (ADR-169, ADR-172). */
+  private assertViewerAdminOnly(targetTier: string): void {
+    const actor = this.cls.get('workspaceRole');
+    if (
+      (targetTier === 'VIEWER' || targetTier === 'GUEST') &&
+      actor !== 'OWNER' &&
+      actor !== 'ADMIN'
+    ) {
+      throw forbidden(ERROR_CODES.VIEWER_ADMIN_ONLY);
+    }
+  }
+
+  /**
+   * Dış kaynak yetkisini yalnızca Super Admin, Projenin Scrum Master'ı ya da Proje yöneticisi
+   * (`space.settings`) ayarlar (ADR-172).
+   */
+  private assertOutsourceManager(space: { scrumMasterId: string | null }): void {
+    const tier = this.cls.get('workspaceRole');
+    if (tier === 'OWNER' || tier === 'ADMIN') return;
+    if (space.scrumMasterId === this.cls.get('userId')) return;
+    if (this.cls.get('spacePermissions')?.includes(S.SPACE_SETTINGS)) return;
+    throw forbidden(ERROR_CODES.OUTSOURCE_ACCESS_FORBIDDEN);
+  }
+
+  /** Projeye atanmış dış kaynaklar ve bu Projedeki kişisel yetkileri. */
+  async outsourceAccess(spaceId: string): Promise<OutsourceAccessResponse> {
+    const db = this.tenant.db;
+    const space = await db.space.findFirst({
+      where: { id: spaceId, deletedAt: null },
+      select: { scrumMasterId: true },
+    });
+    if (!space) throw notFound();
+    this.assertOutsourceManager(space);
+    const rows = await db.spaceMember.findMany({
+      where: {
+        spaceId,
+        user: { memberships: { some: { role: { scope: RoleScope.WORKSPACE, key: 'GUEST' } } } },
+      },
+      select: {
+        outsourceAccess: true,
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            avatarVersion: true,
+            memberships: { select: { lockedAt: true, expiresAt: true } },
+          },
+        },
+      },
+      orderBy: { user: { name: 'asc' } },
+    });
+    return {
+      people: rows.map((r) => {
+        const m = r.user.memberships[0] ?? { lockedAt: null, expiresAt: null };
+        return {
+          userId: r.user.id,
+          name: r.user.name,
+          email: r.user.email,
+          avatarVersion: r.user.avatarVersion,
+          expiresAt: m.expiresAt?.toISOString() ?? null,
+          locked: isMembershipLocked(m),
+          access: normalizeOutsourceAccess(r.outsourceAccess),
+        };
+      }),
+    };
+  }
+
+  /** Dış kaynağın bu Projedeki alan yetkisini ayarlar. */
+  async putOutsourceAccess(
+    spaceId: string,
+    userId: string,
+    input: PutOutsourceAccessRequest,
+  ): Promise<void> {
+    const workspaceId = this.cls.get('workspaceId')!;
+    const db = this.tenant.db;
+    const space = await db.space.findFirst({
+      where: { id: spaceId, deletedAt: null },
+      select: { scrumMasterId: true },
+    });
+    if (!space) throw notFound();
+    this.assertOutsourceManager(space);
+    const target = await db.spaceMember.findFirst({
+      where: { spaceId, userId },
+      include: {
+        user: {
+          select: { memberships: { select: { role: { select: { key: true, baseKey: true } } } } },
+        },
+      },
+    });
+    if (!target) throw notFound();
+    const tier = target.user.memberships[0] ? roleTier(target.user.memberships[0].role) : null;
+    if (tier !== 'GUEST') throw forbidden(ERROR_CODES.NOT_OUTSOURCE);
+    const access = normalizeOutsourceAccess(input.access);
+    await db.$transaction(async (tx) => {
+      await tx.spaceMember.update({
+        where: { id: target.id },
+        data: { outsourceAccess: access as Prisma.InputJsonValue },
+      });
+      await this.activity.record(tx, {
+        workspaceId,
+        actorId: this.cls.get('userId')!,
+        entityType: 'space',
+        entityId: spaceId,
+        action: 'space.outsource_access_changed',
+        changes: {
+          userId,
+          from: normalizeOutsourceAccess(target.outsourceAccess),
+          to: access,
+        },
+      });
+    });
+  }
+
   /** Üye ekler veya Scrum rolünü değiştirir. */
   async put(spaceId: string, userId: string, role: string): Promise<void> {
     const workspaceId = this.cls.get('workspaceId')!;
@@ -71,8 +190,10 @@ export class SpaceMembersService {
       select: { role: { select: { key: true, baseKey: true } } },
     });
     if (!membership) throw notFound();
-    const check = checkSpaceRole(roleTier(membership.role), role);
+    const targetTier = roleTier(membership.role);
+    const check = checkSpaceRole(targetTier, role);
     if (!check.ok) throw forbidden(check.code);
+    this.assertViewerAdminOnly(targetTier);
 
     const spaceRole = await db.role.findFirst({
       where: { scope: RoleScope.SPACE, key: role },
@@ -89,7 +210,15 @@ export class SpaceMembersService {
         await tx.spaceMember.update({ where: { id: existing.id }, data: { roleId: spaceRole.id } });
       } else {
         await tx.spaceMember.create({
-          data: { workspaceId, spaceId, userId, roleId: spaceRole.id },
+          data: {
+            workspaceId,
+            spaceId,
+            userId,
+            roleId: spaceRole.id,
+            ...(targetTier === 'GUEST'
+              ? { outsourceAccess: DEFAULT_OUTSOURCE_ACCESS as Prisma.InputJsonValue }
+              : {}),
+          },
         });
       }
       await this.activity.record(tx, {
@@ -117,6 +246,11 @@ export class SpaceMembersService {
     const actorId = this.cls.get('userId')!;
     const tier = this.cls.get('workspaceRole');
     await this.ensureSpace(spaceId);
+    const targetMembership = await this.tenant.db.membership.findFirst({
+      where: { userId },
+      select: { role: { select: { key: true, baseKey: true } } },
+    });
+    if (targetMembership) this.assertViewerAdminOnly(roleTier(targetMembership.role));
     await this.tenant.db.$transaction(async (tx) => {
       const existing = await tx.spaceMember.findFirst({
         where: { spaceId, userId },

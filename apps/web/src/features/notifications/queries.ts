@@ -13,6 +13,7 @@ import {
 } from '@tanstack/react-query';
 import { useCurrentWorkspace } from '@/features/workspace/queries';
 import { apiRequest, NoContent } from '@/lib/api';
+import { pollEvery } from '@/lib/idle';
 
 const ws = (id: string) => `/workspaces/${id}/notifications`;
 const root = (id: string) => ['workspaces', id, 'notifications'] as const;
@@ -22,7 +23,7 @@ export const unreadCountQuery = (workspaceId: string) =>
   queryOptions({
     queryKey: [...root(workspaceId), 'unread-count'],
     queryFn: () => apiRequest(`${ws(workspaceId)}/unread-count`, UnreadCountSchema),
-    refetchInterval: 30_000,
+    refetchInterval: pollEvery(30_000),
     refetchOnWindowFocus: true,
   });
 
@@ -47,7 +48,7 @@ export const notificationsQuery = (workspaceId: string, unreadOnly: boolean) =>
       );
     },
     getNextPageParam: (last) => (last.hasMore ? last.items.at(-1)?.at : undefined),
-    refetchInterval: 30_000,
+    refetchInterval: pollEvery(30_000),
   });
 
 export const notificationPreferencesQuery = (workspaceId: string) =>
