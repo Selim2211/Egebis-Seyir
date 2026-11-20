@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { ESTIMATION_SCALES, SPRINT_LENGTH_WEEKS } from '../constants/estimation';
-import { SPACE_ICONS, SPACE_KEY_PATTERN } from '../constants/space';
+import { SPACE_DESCRIPTION_MAX, SPACE_ICONS, SPACE_KEY_PATTERN } from '../constants/space';
 import { STATUS_CATEGORIES } from '../constants/work-item';
 import { PROJECT_CONFIGURABLE_PERMISSIONS, SPACE_ROLES } from '../permissions/roles';
 import { BUG_SENDER_PATTERN } from '../domain/bug-senders';
@@ -13,7 +13,7 @@ export const SpaceKeySchema = z.string().trim().toUpperCase().regex(SPACE_KEY_PA
 
 export const ColorSchema = z.string().regex(/^#[0-9A-Fa-f]{6}$/);
 
-/** DoD/DoR maddeleri: en çok 20, her biri 1–200 karakter, tekrarsız. */
+/** DoD maddeleri: en çok 20, her biri 1–200 karakter, tekrarsız. */
 export const ReadinessItemsSchema = z
   .array(z.string().trim().min(1).max(200))
   .max(20)
@@ -24,13 +24,12 @@ const spaceFields = {
   key: SpaceKeySchema,
   color: ColorSchema,
   icon: z.enum(SPACE_ICONS).nullable(),
-  description: z.string().trim().max(500).nullable(),
+  description: z.string().trim().max(SPACE_DESCRIPTION_MAX).nullable(),
   isPrivate: z.boolean(),
   scrumEnabled: z.boolean(),
   sprintLengthWeeks: z.int().min(SPRINT_LENGTH_WEEKS.min).max(SPRINT_LENGTH_WEEKS.max),
   sprintGoalRequired: z.boolean(),
   dodItems: ReadinessItemsSchema,
-  dorItems: ReadinessItemsSchema,
   dodEnforced: z.boolean(),
   estimationScale: z.enum(ESTIMATION_SCALES),
 };
@@ -51,7 +50,6 @@ export const CreateSpaceRequestSchema = z.object({
   sprintLengthWeeks: spaceFields.sprintLengthWeeks.default(SPRINT_LENGTH_WEEKS.default),
   sprintGoalRequired: spaceFields.sprintGoalRequired.default(true),
   dodItems: spaceFields.dodItems.default([]),
-  dorItems: spaceFields.dorItems.default([]),
   dodEnforced: spaceFields.dodEnforced.default(false),
   estimationScale: spaceFields.estimationScale.default('FIBONACCI'),
   members: z.array(SpaceMemberInputSchema).max(500).default([]),
@@ -80,6 +78,8 @@ const spaceSummary = {
   key: z.string(),
   color: z.string(),
   icon: z.enum(SPACE_ICONS).nullable(),
+  /** Yüklenen ikon resminin sürümü (ADR-176); doluysa hazır ikonun yerine geçer. */
+  iconImage: z.string().nullable().optional(),
   isPrivate: z.boolean(),
   scrumEnabled: z.boolean(),
   /** Kullanıcının bu Space'teki etkin izinleri (ADR-039). */
@@ -95,7 +95,6 @@ export const SpaceDetailSchema = z.object({
   sprintLengthWeeks: z.int(),
   sprintGoalRequired: z.boolean(),
   dodItems: z.array(z.string()),
-  dorItems: z.array(z.string()),
   dodEnforced: z.boolean(),
   estimationScale: z.enum(ESTIMATION_SCALES),
   /** Projenin tek Product Owner'ı ve Scrum Master'ı. */
@@ -312,6 +311,10 @@ export type ArchiveResponse = z.infer<typeof ArchiveResponseSchema>;
 export const WorkspaceSettingsSchema = z.object({
   name: ContainerNameSchema,
   membersCanCreateSpaces: z.boolean(),
+  /** Yapay zekâ ana anahtarı: kapalıyken hiçbir AI özelliği çalışmaz (ADR-175). */
+  aiEnabled: z.boolean(),
+  /** Sprint hedefi öner / kontrol et (ADR-175). */
+  aiSprintGoalEnabled: z.boolean(),
   /** AI ile Story Point önerisi açık mı (ADR-155). */
   aiEstimateEnabled: z.boolean(),
   /** Öneri için açıklamada gereken en az cümle sayısı. */

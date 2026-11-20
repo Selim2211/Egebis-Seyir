@@ -109,6 +109,16 @@ export function checkUpload(input: {
 }
 
 /** Profil fotoğrafı: yalnızca PNG/JPEG/WebP, en çok 2 MB (ADR-059). */
+/** Proje ikon resmi üst sınırı (yönetici 5. tur, ADR-176). */
+export const MAX_SPACE_ICON_BYTES = 1024 * 1024;
+
+/** Proje ikonu: PNG, JPEG ya da (tarayıcının küçülttüğü) WebP, en çok 1 MB. */
+export function checkSpaceIcon(bytes: Uint8Array): { ok: true; mime: string } | { ok: false } {
+  const mime = sniffMime(bytes);
+  const allowed = mime === 'image/png' || mime === 'image/jpeg' || mime === 'image/webp';
+  return allowed && bytes.length <= MAX_SPACE_ICON_BYTES ? { ok: true, mime } : { ok: false };
+}
+
 export function checkAvatar(bytes: Uint8Array): { ok: true; mime: string } | { ok: false } {
   const mime = sniffMime(bytes);
   const allowed = mime === 'image/png' || mime === 'image/jpeg' || mime === 'image/webp';

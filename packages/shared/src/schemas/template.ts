@@ -66,7 +66,6 @@ export const SpaceTemplatePayloadSchema = z.object({
   sprintLengthWeeks: z.int(),
   sprintGoalRequired: z.boolean(),
   dodItems: z.array(z.string()),
-  dorItems: z.array(z.string()),
   dodEnforced: z.boolean(),
   estimationScale: z.enum(ESTIMATION_SCALES),
   color: z.enum(SPACE_COLORS).nullable(),

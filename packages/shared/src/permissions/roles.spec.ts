@@ -12,6 +12,7 @@ import {
   WORKSPACE_ROLES,
   type SpaceRole,
   type WorkspaceRole,
+  normalizeScrumRoles,
   projectRolePermissions,
 } from './roles';
 
@@ -20,31 +21,31 @@ const wsRolesWith = (p: WorkspacePermission) => WORKSPACE_ROLES.filter((r) => WS
 
 describe('Varsayılan Proje rol matrisi (ADR-152)', () => {
   const expected: Array<[SpacePermission, SpaceRole[]]> = [
-    [S.SPACE_VIEW, ['PROJECT_MANAGER', 'PROJECT_MEMBER']],
-    [S.BACKLOG_RANK, ['PROJECT_MANAGER']],
-    [S.WORK_ITEM_WRITE, ['PROJECT_MANAGER', 'PROJECT_MEMBER']],
+    [S.SPACE_VIEW, ['PROJECT_MANAGER', 'PRODUCT_OWNER', 'PROJECT_MEMBER']],
+    [S.BACKLOG_RANK, ['PROJECT_MANAGER', 'PRODUCT_OWNER']],
+    [S.WORK_ITEM_WRITE, ['PROJECT_MANAGER', 'PRODUCT_OWNER', 'PROJECT_MEMBER']],
     [S.SPRINT_PLAN, ['PROJECT_MANAGER']],
     [S.SPRINT_START, ['PROJECT_MANAGER']],
     [S.SPRINT_COMPLETE, ['PROJECT_MANAGER']],
     [S.SPRINT_CANCEL, ['PROJECT_MANAGER']],
-    [S.WORK_ITEM_STATUS_OWN, ['PROJECT_MANAGER', 'PROJECT_MEMBER']],
+    [S.WORK_ITEM_STATUS_OWN, ['PROJECT_MANAGER', 'PRODUCT_OWNER', 'PROJECT_MEMBER']],
     [S.WORK_ITEM_ACCESS, ['PROJECT_MANAGER']],
-    [S.BUG_REPORT, ['PROJECT_MANAGER', 'PROJECT_MEMBER']],
+    [S.BUG_REPORT, ['PROJECT_MANAGER', 'PRODUCT_OWNER', 'PROJECT_MEMBER']],
     [S.BUG_ASSIGN, ['PROJECT_MANAGER']],
-    [S.ESTIMATE_WRITE, ['PROJECT_MANAGER', 'PROJECT_MEMBER']],
+    [S.ESTIMATE_WRITE, ['PROJECT_MANAGER', 'PRODUCT_OWNER', 'PROJECT_MEMBER']],
     [S.ESTIMATE_OVERRIDE, ['PROJECT_MANAGER']],
-    [S.COMMENT_WRITE, ['PROJECT_MANAGER', 'PROJECT_MEMBER']],
-    [S.REPORT_VIEW, ['PROJECT_MANAGER', 'PROJECT_MEMBER']],
+    [S.COMMENT_WRITE, ['PROJECT_MANAGER', 'PRODUCT_OWNER', 'PROJECT_MEMBER']],
+    [S.REPORT_VIEW, ['PROJECT_MANAGER', 'PRODUCT_OWNER', 'PROJECT_MEMBER']],
     [S.SPACE_SETTINGS, ['PROJECT_MANAGER']],
-    [S.LIST_MANAGE, ['PROJECT_MANAGER', 'PROJECT_MEMBER']],
-    [S.DOC_VIEW, ['PROJECT_MANAGER', 'PROJECT_MEMBER']],
-    [S.DOC_CREATE, ['PROJECT_MANAGER', 'PROJECT_MEMBER']],
-    [S.DOC_EDIT, ['PROJECT_MANAGER', 'PROJECT_MEMBER']],
-    [S.DOC_DELETE, ['PROJECT_MANAGER', 'PROJECT_MEMBER']],
-    [S.VIDEO_VIEW, ['PROJECT_MANAGER', 'PROJECT_MEMBER']],
-    [S.VIDEO_CREATE, ['PROJECT_MANAGER', 'PROJECT_MEMBER']],
-    [S.VIDEO_EDIT, ['PROJECT_MANAGER', 'PROJECT_MEMBER']],
-    [S.VIDEO_DELETE, ['PROJECT_MANAGER', 'PROJECT_MEMBER']],
+    [S.LIST_MANAGE, ['PROJECT_MANAGER', 'PRODUCT_OWNER', 'PROJECT_MEMBER']],
+    [S.DOC_VIEW, ['PROJECT_MANAGER', 'PRODUCT_OWNER', 'PROJECT_MEMBER']],
+    [S.DOC_CREATE, ['PROJECT_MANAGER', 'PRODUCT_OWNER', 'PROJECT_MEMBER']],
+    [S.DOC_EDIT, ['PROJECT_MANAGER', 'PRODUCT_OWNER', 'PROJECT_MEMBER']],
+    [S.DOC_DELETE, ['PROJECT_MANAGER', 'PRODUCT_OWNER', 'PROJECT_MEMBER']],
+    [S.VIDEO_VIEW, ['PROJECT_MANAGER', 'PRODUCT_OWNER', 'PROJECT_MEMBER']],
+    [S.VIDEO_CREATE, ['PROJECT_MANAGER', 'PRODUCT_OWNER', 'PROJECT_MEMBER']],
+    [S.VIDEO_EDIT, ['PROJECT_MANAGER', 'PRODUCT_OWNER', 'PROJECT_MEMBER']],
+    [S.VIDEO_DELETE, ['PROJECT_MANAGER', 'PRODUCT_OWNER', 'PROJECT_MEMBER']],
   ];
 
   it.each(expected)('%s → %j', (permission, roles) => {
@@ -99,5 +100,33 @@ describe('Proje bazında rol ayarı (ADR-161)', () => {
     expect(result).not.toContain(S.WORK_ITEM_WRITE);
     // Proje ayarları Proje bazında verilemez.
     expect(result).not.toContain(S.SPACE_SETTINGS);
+  });
+});
+
+describe('tek Scrum Master / tek Product Owner (ADR-176)', () => {
+  it('ilk sahipler kalır, fazlası Team Member olur', () => {
+    const result = normalizeScrumRoles([
+      { userId: 'a', role: 'PROJECT_MANAGER' },
+      { userId: 'b', role: 'PROJECT_MANAGER' },
+      { userId: 'c', role: 'PRODUCT_OWNER' },
+      { userId: 'd', role: 'PRODUCT_OWNER' },
+      { userId: 'e', role: 'PROJECT_MEMBER' },
+    ]);
+    expect(result.scrumMasterId).toBe('a');
+    expect(result.productOwnerId).toBe('c');
+    expect(result.members.map((m) => m.role)).toEqual([
+      'PROJECT_MANAGER',
+      'PROJECT_MEMBER',
+      'PRODUCT_OWNER',
+      'PROJECT_MEMBER',
+      'PROJECT_MEMBER',
+    ]);
+  });
+
+  it('rol yoksa alanlar boştur', () => {
+    expect(normalizeScrumRoles([{ userId: 'a', role: 'PROJECT_MEMBER' }])).toMatchObject({
+      scrumMasterId: null,
+      productOwnerId: null,
+    });
   });
 });

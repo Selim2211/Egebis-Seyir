@@ -69,3 +69,6 @@ export const DEFAULT_LIST_NAME: Record<'tr' | 'en', string> = { tr: 'Görevler',
 
 /** Durum başına WIP limiti aralığı (ADR-080). */
 export const WIP_LIMIT = { min: 1, max: 999 } as const;
+
+/** Proje açıklaması üst sınırı (yönetici 5. tur). */
+export const SPACE_DESCRIPTION_MAX = 1024;

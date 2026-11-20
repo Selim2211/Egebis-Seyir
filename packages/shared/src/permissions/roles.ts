@@ -13,10 +13,12 @@ export const WORKSPACE_ROLES = ['OWNER', 'ADMIN', 'MEMBER', 'GUEST', 'VIEWER'] a
 export type WorkspaceRole = (typeof WORKSPACE_ROLES)[number];
 
 /**
- * Proje (Space) sistem rolleri (ADR-152): Proje Yöneticisi ve Proje Üyesi. Super Admin bir
- * workspace katmanıdır (OWNER/ADMIN) ve her Projede tüm izinlere sahiptir.
+ * Proje (Space) sistem rolleri (ADR-152, ADR-176). Arayüzdeki adları: PROJECT_MANAGER = Scrum Master,
+ * PRODUCT_OWNER = Product Owner, PROJECT_MEMBER = Team Member. Bir Projede en çok bir Scrum Master ve
+ * bir Product Owner olur; anahtarlar geriye uyum için korunur. Super Admin bir workspace katmanıdır
+ * (OWNER/ADMIN) ve her Projede tüm izinlere sahiptir.
  */
-export const SPACE_ROLES = ['PROJECT_MANAGER', 'PROJECT_MEMBER'] as const;
+export const SPACE_ROLES = ['PROJECT_MANAGER', 'PRODUCT_OWNER', 'PROJECT_MEMBER'] as const;
 export type SpaceRole = (typeof SPACE_ROLES)[number];
 
 /**
@@ -84,6 +86,8 @@ export const CONTENT_VIEW_PERMISSIONS: readonly SpacePermission[] = [S.DOC_VIEW,
  */
 export const DEFAULT_SPACE_ROLE_PERMISSIONS: Record<SpaceRole, readonly SpacePermission[]> = {
   PROJECT_MANAGER: [...TEAM_WORK, ...PROJECT_LEAD_PERMISSIONS],
+  // Product Owner Backlog önceliğini yönetir; sprint'i ve atamayı Scrum Master yürütür (ADR-176).
+  PRODUCT_OWNER: [...TEAM_WORK, S.BACKLOG_RANK],
   PROJECT_MEMBER: [...TEAM_WORK],
 };
 
@@ -158,3 +162,28 @@ export const SCRUM_MASTER_EXTRA_PERMISSIONS: readonly SpacePermission[] = [
   S.SPRINT_PLAN,
   S.BUG_ASSIGN,
 ];
+
+/** Projede tek kişiye verilen roller (ADR-176). */
+export const SINGLE_HOLDER_SPACE_ROLES = ['PROJECT_MANAGER', 'PRODUCT_OWNER'] as const;
+
+/**
+ * Üye listesinde en çok bir Scrum Master ve bir Product Owner bırakır (listedeki ilk sahip kalır),
+ * fazlası Team Member olur. Projenin scrumMasterId / productOwnerId alanları buradan türetilir.
+ */
+export function normalizeScrumRoles<T extends { userId: string; role: string }>(
+  members: readonly T[],
+): { members: T[]; scrumMasterId: string | null; productOwnerId: string | null } {
+  let scrumMasterId: string | null = null;
+  let productOwnerId: string | null = null;
+  const out = members.map((m) => {
+    if (m.role === 'PROJECT_MANAGER') {
+      if (scrumMasterId === null) scrumMasterId = m.userId;
+      else return { ...m, role: 'PROJECT_MEMBER' };
+    } else if (m.role === 'PRODUCT_OWNER') {
+      if (productOwnerId === null) productOwnerId = m.userId;
+      else return { ...m, role: 'PROJECT_MEMBER' };
+    }
+    return m;
+  });
+  return { members: out, scrumMasterId, productOwnerId };
+}

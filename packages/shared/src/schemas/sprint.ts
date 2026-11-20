@@ -1,10 +1,21 @@
 import { z } from 'zod';
-import { MAX_SPRINT_MOVE_ITEMS, SPRINT_STATUSES } from '../constants/sprint';
+import {
+  MAX_SPRINT_MOVE_ITEMS,
+  SPRINT_GOAL_MIN_LENGTH,
+  SPRINT_STATUSES,
+} from '../constants/sprint';
 import { checkSprintDates } from '../domain/sprint';
 import { DateOnlySchema, LabelSchema, WorkItemRowSchema } from './work-item';
 
 const SprintName = z.string().trim().min(1).max(80);
-const SprintGoal = z.string().trim().max(500);
+/** Boş bırakılabilir; yazılırsa en az 64 karakter (ADR-175). */
+const SprintGoal = z
+  .string()
+  .trim()
+  .max(500)
+  .refine((v) => v.length === 0 || v.length >= SPRINT_GOAL_MIN_LENGTH, {
+    message: 'SPRINT_GOAL_TOO_SHORT',
+  });
 const CapacityNote = z.string().trim().max(500);
 
 export const SprintStatusSchema = z.enum(SPRINT_STATUSES);
@@ -77,8 +88,6 @@ export const SprintSummarySchema = z.object({
   doneItemCount: z.int(),
   donePoints: z.number(),
   unestimatedCount: z.int(),
-  /** Definition of Ready'ye uymayan Task/Bug sayısı (Space'te DoR maddesi varsa), ADR-065. */
-  notReadyCount: z.int(),
   /** Tamamlanırken donmuş velocity (Done puanı); tamamlanmamış sprint'te null. */
   completedPoints: z.number().nullable(),
   /** Sprint'in puan ağırlıklı toplam tamamlanma yüzdesi, 0–100 (ADR-107). */

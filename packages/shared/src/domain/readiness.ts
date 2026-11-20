@@ -1,6 +1,6 @@
 import type { WorkItemType } from '../constants/work-item';
 
-/** DoD/DoR yalnızca puanla tahmin edilen Task ve Bug için geçerlidir (brief §6.3, ADR-110). */
+/** DoD yalnızca puanla tahmin edilen Task ve Bug için geçerlidir (brief §6.3, ADR-110). */
 export const READINESS_TYPES = ['TASK', 'BUG'] as const;
 
 export const MAX_READINESS_ITEMS = 20;
@@ -28,3 +28,13 @@ export function normalizeChecked(items: readonly string[], checked: readonly str
   const wanted = new Set(checked);
   return items.filter((text) => wanted.has(text));
 }
+
+/**
+ * Atanan zorunlu iş türleri (yönetici 5. tur, ADR-176): kullanıcı bu türleri atanansız oluşturamaz
+ * ve atananı tamamen kaldıramaz. Bug'da kural, Bug atama izni olan kişi için geçerlidir; diğerlerinin
+ * açtığı Bug atanansız Bug kutusuna düşer (ADR-117).
+ */
+export const ASSIGNEE_REQUIRED_TYPES = ['TASK', 'SUBTASK', 'BUG'] as const;
+
+export const requiresAssignee = (type: WorkItemType): boolean =>
+  (ASSIGNEE_REQUIRED_TYPES as readonly string[]).includes(type);

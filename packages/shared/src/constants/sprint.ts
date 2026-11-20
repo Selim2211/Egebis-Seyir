@@ -31,3 +31,6 @@ export const REPORT_TIME_ZONE = 'Europe/Istanbul';
 
 /** Velocity grafiğinde gösterilen en çok sprint sayısı. */
 export const VELOCITY_CHART_SPRINTS = 10;
+
+/** Sprint hedefi yazılırsa en az bu kadar karakter olmalı (yönetici 5. tur, ADR-175). */
+export const SPRINT_GOAL_MIN_LENGTH = 64;

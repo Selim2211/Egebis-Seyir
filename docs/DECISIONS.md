@@ -1593,3 +1593,26 @@ Yük testi (S kademesi: 50 kullanıcı, 20 Proje, ~21 bin iş öğesi) şunları
 - **Sorgu düzeltmeleri:** mesaj listesinde konuşma başına 2 sorgu (N+1) → 2 toplu sorgu; kurulum durumu `count` yerine `findFirst`; iş yükünde zaman kayıtları `groupBy`; epik ve akış hesaplarında kare tarama kaldırıldı.
 - **Teşhis:** `DB_LOG_SLOW_MS` verilirse yavaş sorgular loglanır (normalde kapalı). `apps/api/scripts/load/{slowsum,explain,scans}.cjs`.
 - **Yapılmadı (ölçüm gerektirmedi):** Backlog/board sanallaştırma (4 bin DOM düğümü, uzun görev yok), yeni indeks (planlar indeksi kullanıyor), SSE.
+
+## ADR-175 — Sprint hedefi en az 64 karakter; AI ile öner/kontrol et; AI ana anahtarı
+
+**Durum:** Kabul · **Tarih:** 2026-11-19 · ADR-060 ve AI tahminini (ADR-108 sonrası) genişletir.
+
+Yönetici: sprint hedefi yazılırsa en az 64 karakter olsun; hedef AI ile önerilebilsin ya da kontrol edilebilsin; AI projeyi, Epic'leri ve geçmiş sprintleri bilsin; Super Admin AI'ı açıp kapatabilsin; AI Story Point ölçeği 34 ve 55'i de içersin.
+
+- **Kural:** `SPRINT_GOAL_MIN_LENGTH = 64`. Hedef boş olabilir (zorunluluk Projenin `sprintGoalRequired` ayarına bağlı, ADR-060); yazılırsa kırpılmış uzunluk ≥ 64, değilse `SPRINT_GOAL_TOO_SHORT`. Yalnızca oluşturma/düzenleme isteklerinde denetlenir; eski kısa hedefler, yedekler ve şablonlar etkilenmez.
+- **Proje bağlamı** (`modules/ai/project-context.ts`): Proje adı/anahtarı/açıklaması, DoD, açık Epic'ler, son 6 tamamlanan sprint (hedef, taahhüt/teslim SP, teslim edilen işler), aktif sprint, hedef sprint'in işleri ya da (yeni sprint'te) Backlog'un üstü ve isteğe bağlı ekibin geçmiş tahminleri. ~14 bin karakterle sınırlı; tenant istemcisi gizli öğe kuralını uygular (ADR-113).
+- **Uç nokta:** `POST spaces/:spaceId/ai/sprint-goal` (`sprint.plan`), `mode: SUGGEST | CHECK`. CHECK hedefin projeye ve sprint'in işlerine uygunluğunu `score` (0–100), `verdict` (FITS/PARTIAL/OFF_TRACK), geri bildirim ve iyileştirilmiş hedefle döndürür. Güvenilmeyen metin `<project>`/`<item>`/`<goal>` etiketlerinde verilir.
+- **SP tahmini** aynı bağlamı ve ekibin kalibrasyon örneklerini kullanır; ölçek 1…55.
+- **Anahtarlar:** `workspaces.aiEnabled` (ana) ve `aiSprintGoalEnabled` (özellik başı; mevcut `aiEstimateEnabled` ile birlikte). Ana anahtar kapalıyken tüm AI uçları `AI_TURNED_OFF`, sprint hedefi kapalıyken `AI_SPRINT_GOAL_DISABLED` döner; düğmeler gizlenir.
+
+## ADR-176 — Yönetici 5. tur: roller, arşiv sıkıştırma, ikon, DoR'un kaldırılması, atanan zorunluluğu
+
+**Durum:** Kabul · **Tarih:** 2026-11-19 · ADR-065, ADR-152, ADR-167 ve ADR-173'ü değiştirir.
+
+- **Proje rolleri:** Scrum Master, Product Owner, Team Member. Geriye uyum için anahtarlar korunur: `PROJECT_MANAGER` = Scrum Master, `PROJECT_MEMBER` = Team Member; yeni sistem rolü `PRODUCT_OWNER` = Team Member izinleri + `backlog.rank`. Projede **en çok bir** Scrum Master ve bir Product Owner olur: rol verilince `spaces.scrumMasterId`/`productOwnerId` eşitlenir, önceki sahip Team Member olur (`normalizeScrumRoles`, `SpaceMembersService.syncScrumRoles`). Ayrı "Scrum rolleri" seçicisi kaldırıldı; eski `PUT scrum-roles` ucu rol değişikliğine çevrildi. **Migration:** her workspace'e Product Owner rolü eklenir; Scrum Master'ı olmayan Projede en eski Proje Yöneticisi Scrum Master olur; diğer Proje Yöneticileri Team Member'a iner.
+- **Atanan zorunlu:** kullanıcının `POST lists/:listId/items` ile açtığı Task ve Sub-task atanansız olamaz; Bug'da kural Bug atayabilen kişi için geçerlidir (diğerlerinin Bug'ı Bug kutusuna düşer, ADR-117). Atananı olan Task/Sub-task/Bug'ın atananı tamamen kaldırılamaz (`ASSIGNEE_REQUIRED`). Otomasyon, form, CSV, retro, şablon ve Bug bildirimi gibi iç akışlar muaftır; eski atanansız işler olduğu gibi kalır. Hızlı oluşturma ve Kanban oluşturanı atar; Yeni öğe penceresinde atanan seçilir.
+- **Definition of Ready kaldırıldı** (`dorItems`, `dorChecked` sütunları silindi; Backlog rozeti, sprint başlatma uyarısı ve `PUT items/:id/dor` ucu yok). DoD kalır, tek sütunda.
+- **Arşiv sıkıştırma:** Proje arşivlenince içeriği (yedek kapsamı, ADR-173: sprint, iş öğesi, yorum, doküman, ek kaydı, zaman, retro…) en yüksek kalitede Brotli ile sıkıştırılmış JSON olarak `space_archives` tablosunda tek satıra yazılır ve canlı tablolardan silinir; iskelet (durumlar, klasör/liste, etiket, özel alan) ve üyelikler kalır. Ek dosyaları diskte durur. Arşivden çıkarırken `applySnapshot` (yedeğe dönüşle ortak) aynı kimliklerle geri açar; başarısız olursa Proje arşivde kalır. Yedeğe girmeyen ve öğeye bağlı veriler (bildirim, öğeye özel erişim, favori öğe) arşivlemede silinir.
+- **Proje ikonu resmi:** PNG/JPG, tarayıcıda 128 px kareye küçültülür, sunucu ≤ 1 MB ve türü doğrular (`SPACE_ICON_INVALID`). `spaces.iconImageVersion`; `POST/DELETE/GET spaces/:spaceId/icon`. Resim hazır ikonun yerine geçer.
+- **Diğer:** Proje açıklaması ≤ 1024 karakter; Proje ayarları tıklayınca açılan bölümler (`SettingsSection`, yalnızca Genel açık başlar; kapalı bölümün sorguları çalışmaz); "Sprint hedefleri" sekmesi (`/spaces/:id/goals`: açık sprint'lerin hedefi yazılır, AI ile önerilir/kontrol edilir; biten/iptal sprint salt okunur); "Yedekten geri yükle" adı; "Tahminsiz" etiketi; Yeni öğe penceresinde Liste alanı yok (açık liste ya da Projenin ilk listesi).
