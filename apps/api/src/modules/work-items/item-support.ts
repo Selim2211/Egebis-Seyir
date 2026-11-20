@@ -1,9 +1,7 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
 import {
-  appliesToReadiness,
   type ErrorCode,
   formatItemKey,
-  readinessOf,
   type WorkItemRow,
   type WorkItemSummary,
   weightedPercent,
@@ -134,7 +132,7 @@ export type TenantTx = Pick<
 export const rowInclude = {
   ...summaryInclude,
   space: {
-    select: { id: true, name: true, key: true, color: true, icon: true, dorItems: true },
+    select: { id: true, name: true, key: true, color: true, icon: true },
   },
   list: { select: { id: true, name: true } },
   status: { select: { id: true, name: true, color: true, category: true } },
@@ -143,16 +141,10 @@ export const rowInclude = {
 export type RowRow = Prisma.WorkItemGetPayload<{ include: typeof rowInclude }>;
 
 export function toRow(row: RowRow): WorkItemRow {
-  const { dorItems, ...space } = row.space;
-  const ready =
-    appliesToReadiness(row.type) && dorItems.length > 0
-      ? readinessOf(dorItems, row.dorChecked)
-      : null;
   return {
     ...toSummary(row),
-    space,
+    space: row.space,
     list: row.list,
     status: row.status,
-    dor: ready ? { checked: ready.checked, total: ready.total } : null,
   };
 }

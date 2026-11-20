@@ -213,15 +213,9 @@ export class WorkItemsController {
   @RequireSpacePermission(S.WORK_ITEM_WRITE)
   @ZodResponse({ type: CreatedItemDto, status: HttpStatus.CREATED })
   create(@Uuid('listId') listId: string, @Body() body: CreateWorkItemDto): Promise<CreatedItem> {
+    // Kullanıcının açtığı Task/Sub-task/Bug atanansız olamaz (ADR-176); iç akışlar bu kuraldan muaf.
+    this.items.assertAssigneeGiven(body.type, body.assigneeIds);
     return this.items.create(listId, body);
-  }
-
-  /** DoR işaretleri (Task/Bug). */
-  @Put('items/:itemId/dor')
-  @RequireSpacePermission(S.WORK_ITEM_WRITE)
-  @HttpCode(NO_CONTENT)
-  setDor(@Uuid('itemId') itemId: string, @Body() body: SetReadinessDto): Promise<void> {
-    return this.items.setReadiness(itemId, 'dor', body.checked);
   }
 
   /** DoD işaretleri (Task/Bug). */
@@ -229,7 +223,7 @@ export class WorkItemsController {
   @RequireSpacePermission(S.WORK_ITEM_WRITE)
   @HttpCode(NO_CONTENT)
   setDod(@Uuid('itemId') itemId: string, @Body() body: SetReadinessDto): Promise<void> {
-    return this.items.setReadiness(itemId, 'dod', body.checked);
+    return this.items.setReadiness(itemId, body.checked);
   }
 
   /** Bağlantı eklerken öğe arama; `items/:itemId`'den önce tanımlanmalı. */

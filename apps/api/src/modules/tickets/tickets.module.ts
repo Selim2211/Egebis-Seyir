@@ -26,6 +26,12 @@ import { TicketsService } from './tickets.service';
     BugBoxService,
     SecretBoxService,
   ],
-  exports: [TicketsService, MailboxService, TicketRepliesService, TicketAiService],
+  exports: [
+    TicketsService,
+    MailboxService,
+    TicketRepliesService,
+    TicketAiService,
+    TicketConfigService,
+  ],
 })
 export class TicketsModule {}

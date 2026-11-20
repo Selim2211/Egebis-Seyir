@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import {
   projectRolePermissions,
-  SCRUM_MASTER_EXTRA_PERMISSIONS,
   spacePermissions,
   type ProjectRoleOverrides,
   type WorkspaceRole,
@@ -169,7 +168,6 @@ export class SpaceAccessService {
       select: {
         id: true,
         roleOverrides: true,
-        scrumMasterId: true,
         members: {
           where: { userId },
           select: { outsourceAccess: true, role: { select: { key: true, permissions: true } } },
@@ -187,14 +185,9 @@ export class SpaceAccessService {
             space.roleOverrides as ProjectRoleOverrides | null,
           )
         : null;
-      // Projenin Scrum Master'ı (Proje Üyesi rolündeyse bile) sprint planlar ve atama yapar (ADR-170).
-      const memberPermissions =
-        base &&
-        space.scrumMasterId === userId &&
-        workspaceRole !== 'GUEST' &&
-        workspaceRole !== 'VIEWER'
-          ? [...new Set([...base, ...SCRUM_MASTER_EXTRA_PERMISSIONS])]
-          : base;
+      // Scrum Master artık rolün kendisidir (ADR-176); ek bir yetki yükseltmesi yoktur, böylece
+      // Super Admin'in rol yetkisi ayarı Scrum Master için de aynen geçerli olur.
+      const memberPermissions = base;
       const perms = spacePermissions({
         workspaceRole,
         memberPermissions,

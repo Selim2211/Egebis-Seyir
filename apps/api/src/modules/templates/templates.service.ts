@@ -274,7 +274,6 @@ export class TemplatesService {
       sprintLengthWeeks: s.sprintLengthWeeks,
       sprintGoalRequired: s.sprintGoalRequired,
       dodItems: s.dodItems,
-      dorItems: s.dorItems,
       dodEnforced: s.dodEnforced,
       estimationScale: s.estimationScale,
       color: null,
@@ -513,7 +512,6 @@ export class TemplatesService {
             estimationScale: payload.estimationScale,
           }),
           dodItems: payload.dodItems,
-          dorItems: payload.dorItems,
           dodEnforced: payload.dodEnforced,
         },
       });

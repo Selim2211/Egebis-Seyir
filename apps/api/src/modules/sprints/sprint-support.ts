@@ -2,9 +2,7 @@ import { HttpException, HttpStatus } from '@nestjs/common';
 import {
   ERROR_CODES,
   type ErrorCode,
-  appliesToReadiness,
   isSprintOpen,
-  readinessOf,
   sprintAssigneeBreakdown,
   sprintTotals,
   type SprintSummary,
@@ -65,7 +63,6 @@ export async function summarize(db: TenantClient, sprints: Sprint[]): Promise<Sp
       type: true,
       points: true,
       percentDone: true,
-      dorChecked: true,
       status: { select: { category: true } },
       assignees: { select: { user: { select: { id: true, name: true } } } },
       // Sub-task'ı olan işin yüzdesi alt görevlerden türetilir (ADR-107).
@@ -75,11 +72,6 @@ export async function summarize(db: TenantClient, sprints: Sprint[]): Promise<Sp
       },
     },
   });
-  const spaces = await db.space.findMany({
-    where: { id: { in: [...new Set(sprints.map((s) => s.spaceId))] } },
-    select: { id: true, dorItems: true },
-  });
-  const dorBySpace = new Map(spaces.map((sp) => [sp.id, sp.dorItems]));
   return sprints.map((sprint) => {
     const mine = items.filter((i) => i.sprintId === sprint.id);
     const own = mine.map((i) => ({ type: i.type, points: i.points, category: i.status.category }));
@@ -98,16 +90,6 @@ export async function summarize(db: TenantClient, sprints: Sprint[]): Promise<Sp
             )
           : i.percentDone,
     }));
-    const dorItems = dorBySpace.get(sprint.spaceId) ?? [];
-    const notReadyCount =
-      dorItems.length === 0
-        ? 0
-        : mine.filter(
-            (i) =>
-              appliesToReadiness(i.type) &&
-              i.status.category !== 'DONE' &&
-              readinessOf(dorItems, i.dorChecked).missing.length > 0,
-          ).length;
     return {
       id: sprint.id,
       spaceId: sprint.spaceId,
@@ -123,7 +105,6 @@ export async function summarize(db: TenantClient, sprints: Sprint[]): Promise<Sp
       completedPoints: sprint.completedPoints,
       percentDone: weightedPercent(progress),
       byAssignee: sprintAssigneeBreakdown(progress),
-      notReadyCount,
       ...sprintTotals(own),
     };
   });

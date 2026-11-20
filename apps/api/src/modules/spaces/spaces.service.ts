@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import {
   checkSpaceRole,
+  normalizeScrumRoles,
   compareRank,
   DEFAULT_LIST_NAME,
   DEFAULT_STATUSES,
@@ -75,6 +76,7 @@ export class SpacesService {
       key: s.key,
       color: s.color,
       icon: s.icon as SpaceIcon | null,
+      iconImage: s.iconImageVersion,
       isPrivate: s.isPrivate,
       scrumEnabled: s.scrumEnabled,
       permissions: [...perms.get(s.id)!],
@@ -144,11 +146,12 @@ export class SpacesService {
             sprintLengthWeeks: input.sprintLengthWeeks,
             sprintGoalRequired: input.sprintGoalRequired,
             dodItems: input.dodItems,
-            dorItems: input.dorItems,
             dodEnforced: input.dodEnforced,
             estimationScale: input.estimationScale,
             rank: rankBetween(last?.rank ?? null, null),
             createdById: actorId,
+            scrumMasterId: normalizeScrumRoles(members).scrumMasterId,
+            productOwnerId: normalizeScrumRoles(members).productOwnerId,
           },
         });
         await tx.spaceKey.create({ data: { workspaceId, spaceId: space.id, key: input.key } });
@@ -225,13 +228,13 @@ export class SpacesService {
       key: space.key,
       color: space.color,
       icon: space.icon as SpaceIcon | null,
+      iconImage: space.iconImageVersion,
       description: space.description,
       isPrivate: space.isPrivate,
       scrumEnabled: space.scrumEnabled,
       sprintLengthWeeks: space.sprintLengthWeeks,
       sprintGoalRequired: space.sprintGoalRequired,
       dodItems: space.dodItems,
-      dorItems: space.dorItems,
       dodEnforced: space.dodEnforced,
       estimationScale: space.estimationScale,
       productOwner: space.productOwner,
@@ -306,10 +309,15 @@ export class SpacesService {
 
   // ---------- Yardımcılar ----------
 
+  /**
+   * Oluşturan kişi listede yoksa Scrum Master olarak başa eklenir; ardından tek Scrum Master ve tek
+   * Product Owner kuralı uygulanır (ADR-176).
+   */
   private withCreator(members: SpaceMemberInput[], actorId: string): SpaceMemberInput[] {
     const unique = new Map(members.map((m) => [m.userId, m]));
-    if (!unique.has(actorId)) unique.set(actorId, { userId: actorId, role: 'PROJECT_MANAGER' });
-    return [...unique.values()];
+    const creator = unique.get(actorId) ?? { userId: actorId, role: 'PROJECT_MANAGER' as const };
+    unique.delete(actorId);
+    return normalizeScrumRoles([creator, ...unique.values()]).members;
   }
 
   /** Üyeler workspace üyesi olmalı; dış kaynak yalnızca Proje Üyesi olabilir (ADR-152). */

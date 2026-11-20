@@ -1,13 +1,25 @@
-import { Controller, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  ParseUUIDPipe,
+  Post,
+} from '@nestjs/common';
 import {
   AiEstimateSchema,
   AiSplitSuggestionSchema,
+  AiSprintGoalRequestSchema,
+  AiSprintGoalSchema,
   AiStatusSchema,
   AiStorySuggestionSchema,
   AiSummarySchema,
   SPACE_PERMISSIONS as S,
   type AiEstimate,
   type AiSplitSuggestion,
+  type AiSprintGoal,
   type AiStatus,
   type AiStorySuggestion,
   type AiSummary,
@@ -21,6 +33,8 @@ class SummaryDto extends createZodDto(AiSummarySchema) {}
 class StoryDto extends createZodDto(AiStorySuggestionSchema) {}
 class SplitDto extends createZodDto(AiSplitSuggestionSchema) {}
 class EstimateDto extends createZodDto(AiEstimateSchema) {}
+class SprintGoalRequestDto extends createZodDto(AiSprintGoalRequestSchema) {}
+class SprintGoalDto extends createZodDto(AiSprintGoalSchema) {}
 
 const Uuid = (name: string) => Param(name, ParseUUIDPipe);
 
@@ -57,6 +71,18 @@ export class AiController {
   @ZodResponse({ type: EstimateDto })
   estimate(@Uuid('itemId') itemId: string): Promise<AiEstimate> {
     return this.ai.estimate(itemId);
+  }
+
+  /** Sprint hedefi öner / kontrol et (ADR-175): sprint planlayabilen herkes (Scrum Master dahil). */
+  @Post('spaces/:spaceId/ai/sprint-goal')
+  @HttpCode(HttpStatus.OK)
+  @RequireSpacePermission(S.SPRINT_PLAN)
+  @ZodResponse({ type: SprintGoalDto })
+  sprintGoal(
+    @Uuid('spaceId') spaceId: string,
+    @Body() body: SprintGoalRequestDto,
+  ): Promise<AiSprintGoal> {
+    return this.ai.sprintGoal(spaceId, body);
   }
 
   @Post('items/:itemId/ai/split-epic')

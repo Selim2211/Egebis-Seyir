@@ -7,6 +7,7 @@ import {
   checkTypeInSpace,
   normalizeChecked,
   readinessOf,
+  requiresAssignee,
   type ItemReadiness,
   ERROR_CODES,
   epicProgress,
@@ -70,6 +71,16 @@ export class WorkItemsService {
 
   private get ctx() {
     return { workspaceId: this.cls.get('workspaceId')!, actorId: this.cls.get('userId')! };
+  }
+
+  /**
+   * Atanan zorunluluğu (ADR-176): Task ve Sub-task her zaman, Bug yalnızca Bug atayabilen kişi
+   * açarken atanansız olamaz.
+   */
+  assertAssigneeGiven(type: WorkItemType, assigneeIds: readonly string[]): void {
+    if (assigneeIds.length > 0 || !requiresAssignee(type)) return;
+    if (type === 'BUG' && !this.can(S.BUG_ASSIGN)) return;
+    throw fail(ERROR_CODES.ASSIGNEE_REQUIRED);
   }
 
   private can(permission: string): boolean {
@@ -159,7 +170,7 @@ export class WorkItemsService {
       include: {
         ...summaryInclude,
         reporter: { select: { id: true, name: true, avatarVersion: true } },
-        space: { select: { id: true, dodItems: true, dorItems: true, dodEnforced: true } },
+        space: { select: { id: true, dodItems: true, dodEnforced: true } },
         labels: {
           select: { labelId: true, label: { select: { id: true, name: true, color: true } } },
         },
@@ -208,7 +219,6 @@ export class WorkItemsService {
     const entries = (items: string[], checked: string[]) =>
       applies ? items.map((text) => ({ text, checked: checked.includes(text) })) : [];
     const readiness: ItemReadiness = {
-      dor: entries(row.space.dorItems, row.dorChecked),
       dod: entries(row.space.dodItems, row.dodChecked),
       dodEnforced: row.space.dodEnforced,
     };
@@ -548,6 +558,15 @@ export class WorkItemsService {
     const type = item.type;
 
     this.authorize(item, fields);
+    // Atananı olan Task/Sub-task/Bug'ın atananı tamamen kaldırılamaz (ADR-176).
+    if (
+      fields.assigneeIds?.length === 0 &&
+      requiresAssignee(type) &&
+      item.assignees.length > 0 &&
+      !this.cls.get('automationChain')?.length
+    ) {
+      throw fail(ERROR_CODES.ASSIGNEE_REQUIRED);
+    }
     // Bug'ı yalnızca `bug.assign` izni olan atar (ADR-117).
     if (
       type === 'BUG' &&
@@ -965,19 +984,19 @@ export class WorkItemsService {
       throw fail(ERROR_CODES.DOD_INCOMPLETE, HttpStatus.CONFLICT, { count: missing.length });
   }
 
-  /** DoD/DoR işaretlerini yazar (ADR-065): yalnızca Space maddeleri geçerli, kalan atılır. */
-  async setReadiness(itemId: string, kind: 'dor' | 'dod', checked: string[]): Promise<void> {
+  /** DoD işaretlerini yazar (ADR-065): yalnızca Space maddeleri geçerli, kalan atılır. */
+  async setReadiness(itemId: string, checked: string[]): Promise<void> {
     const { workspaceId, actorId } = this.ctx;
     const db = this.tenant.db;
     const item = await db.workItem.findFirst({
       where: { id: itemId, deletedAt: null, list: { deletedAt: null }, space: { deletedAt: null } },
-      include: { space: { select: { dodItems: true, dorItems: true } } },
+      include: { space: { select: { dodItems: true } } },
     });
     if (!item) throw notFound();
     if (!appliesToReadiness(item.type)) throw fail(ERROR_CODES.READINESS_NOT_APPLICABLE);
 
-    const items = kind === 'dod' ? item.space.dodItems : item.space.dorItems;
-    const current = kind === 'dod' ? item.dodChecked : item.dorChecked;
+    const items = item.space.dodItems;
+    const current = item.dodChecked;
     const next = normalizeChecked(items, checked);
     const before = readinessOf(items, current).checked;
     if (JSON.stringify(normalizeChecked(items, current)) === JSON.stringify(next)) return;
@@ -985,7 +1004,7 @@ export class WorkItemsService {
     await db.$transaction(async (tx) => {
       await tx.workItem.update({
         where: { id: itemId },
-        data: kind === 'dod' ? { dodChecked: next } : { dorChecked: next },
+        data: { dodChecked: next },
       });
       await this.activity.record(tx, {
         workspaceId,
@@ -994,7 +1013,7 @@ export class WorkItemsService {
         entityId: itemId,
         action: 'item.updated',
         changes: asJson({
-          [kind === 'dod' ? 'dodChecked' : 'dorChecked']: { from: before, to: next.length },
+          dodChecked: { from: before, to: next.length },
         }),
       });
     });

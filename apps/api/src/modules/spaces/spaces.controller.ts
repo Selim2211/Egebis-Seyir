@@ -11,7 +11,12 @@ import {
   Post,
   Put,
   Query,
+  Header,
+  StreamableFile,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import {
   ArchiveResponseSchema,
   CreatedSchema,
@@ -48,6 +53,7 @@ import {
   OutsourceAccessResponseSchema,
   PutOutsourceAccessRequestSchema,
   type OutsourceAccessResponse,
+  MAX_SPACE_ICON_BYTES,
 } from '@scrum/shared';
 import { createZodDto, ZodResponse, ZodValidationPipe } from 'nestjs-zod';
 import { RequirePermission, RequireSpacePermission } from '../auth/decorators';
@@ -55,6 +61,8 @@ import { FavoritesService } from './favorites.service';
 import { LifecycleService } from './lifecycle.service';
 import { SpaceMembersService } from './space-members.service';
 import { SpacesService } from './spaces.service';
+import { SpaceIconService } from './space-icon.service';
+import { BackupService } from '../backup/backup.service';
 import { StatusesService } from './statuses.service';
 import { StructureService } from './structure.service';
 import { parseRemoveBody } from '../access/remove-body';
@@ -132,6 +140,8 @@ export class SpacesController {
     private readonly structure: StructureService,
     private readonly lifecycle: LifecycleService,
     private readonly statuses: StatusesService,
+    private readonly icons: SpaceIconService,
+    private readonly backup: BackupService,
   ) {}
 
   @Post()
@@ -155,6 +165,37 @@ export class SpacesController {
     await this.spaces.update(spaceId, body);
   }
 
+  /** Proje ikonu resmi (ADR-176): PNG/JPEG/WebP, en çok 1 MB; yeni sürüm döner. */
+  @Post(':spaceId/icon')
+  @RequireSpacePermission(S.SPACE_SETTINGS)
+  @UseInterceptors(
+    FileInterceptor('file', { limits: { fileSize: MAX_SPACE_ICON_BYTES, files: 1 } }),
+  )
+  @HttpCode(HttpStatus.OK)
+  async uploadIcon(
+    @Uuid('spaceId') spaceId: string,
+    @UploadedFile() file: Express.Multer.File | undefined,
+  ): Promise<{ version: string }> {
+    return { version: await this.icons.set(spaceId, file) };
+  }
+
+  @Delete(':spaceId/icon')
+  @RequireSpacePermission(S.SPACE_SETTINGS)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async removeIcon(@Uuid('spaceId') spaceId: string): Promise<void> {
+    await this.icons.clear(spaceId);
+  }
+
+  /** Sürüm adreste olduğu için tarayıcı uzun süre önbelleğe alabilir. */
+  @Get(':spaceId/icon')
+  @RequireSpacePermission(S.SPACE_VIEW)
+  @Header('X-Content-Type-Options', 'nosniff')
+  @Header('Content-Security-Policy', "default-src 'none'; sandbox")
+  @Header('Cache-Control', 'private, max-age=86400')
+  icon(@Uuid('spaceId') spaceId: string): Promise<StreamableFile> {
+    return this.icons.open(spaceId);
+  }
+
   /** Space'lerin ortak sırası yalnızca Owner/Admin tarafından değişir (ADR-040). */
   @Post(':spaceId/move')
   @RequirePermission(W.WORKSPACE_SETTINGS)
@@ -168,12 +209,16 @@ export class SpacesController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async archive(@Uuid('spaceId') spaceId: string): Promise<void> {
     await this.lifecycle.change('SPACE', spaceId, 'archive');
+    // İçerik sıkıştırılıp canlı tablolardan kalkar (ADR-176).
+    await this.backup.freezeSpace(spaceId);
   }
 
   @Post(':spaceId/unarchive')
   @RequireSpacePermission(S.SPACE_SETTINGS)
   @HttpCode(HttpStatus.NO_CONTENT)
   async unarchive(@Uuid('spaceId') spaceId: string): Promise<void> {
+    // Önce içerik geri açılır; başarısız olursa Proje arşivde kalır (ADR-176).
+    await this.backup.thawSpace(spaceId);
     await this.lifecycle.change('SPACE', spaceId, 'unarchive');
   }
 

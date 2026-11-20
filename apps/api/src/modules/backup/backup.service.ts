@@ -24,6 +24,7 @@ import {
   TABLES,
   type TableSpec,
 } from './backup-tables';
+import { brotliCompressSync, brotliDecompressSync, constants as zlibConstants } from 'node:zlib';
 
 type Row = Record<string, unknown>;
 type Delegate = {
@@ -204,12 +205,10 @@ export class BackupService {
     return { name: `${sprint.name}-yedek`, file };
   }
 
-  private async pack(
-    kind: 'space' | 'sprint',
-    source: { name: string; key: string; sprintName?: string },
-    space: Row | null,
+  /** Kapsamdaki satırlar ve içlerinde geçen kullanıcıların e-postaları (kimlik → e-posta). */
+  private async collect(
     wheres: Record<string, object>,
-  ): Promise<Buffer> {
+  ): Promise<{ tables: Record<string, Row[]>; users: Record<string, string> }> {
     const db = this.tenant.db;
     const tables: Record<string, Row[]> = {};
     for (const spec of TABLES) {
@@ -217,8 +216,6 @@ export class BackupService {
       if (!where) continue;
       tables[spec.name] = await this.delegate(db, spec).findMany({ where });
     }
-
-    // Kullanıcı kimlikleri e-postaya çevrilebilsin diye haritalanır.
     const userIds = new Set<string>();
     for (const spec of TABLES) {
       for (const row of tables[spec.name] ?? []) {
@@ -235,6 +232,16 @@ export class BackupService {
         })
       ).map((u) => [u.id, u.email]),
     );
+    return { tables, users };
+  }
+
+  private async pack(
+    kind: 'space' | 'sprint',
+    source: { name: string; key: string; sprintName?: string },
+    space: Row | null,
+    wheres: Record<string, object>,
+  ): Promise<Buffer> {
+    const { tables, users } = await this.collect(wheres);
 
     const files: Record<string, Uint8Array> = {};
     let total = 0;
@@ -417,7 +424,6 @@ export class BackupService {
               sprintLengthWeeks: Number(src.sprintLengthWeeks ?? 2),
               sprintGoalRequired: Boolean(src.sprintGoalRequired),
               dodItems: (src.dodItems as string[]) ?? [],
-              dorItems: (src.dorItems as string[]) ?? [],
               dodEnforced: Boolean(src.dodEnforced),
               estimationScale: src.estimationScale as 'FIBONACCI' | 'TSHIRT' | 'NUMBER',
               roleOverrides: (src.roleOverrides as Prisma.InputJsonValue | null) ?? Prisma.DbNull,
@@ -723,7 +729,6 @@ export class BackupService {
   ): Promise<RestoreResult> {
     const tier = this.cls.get('workspaceRole');
     if (tier !== 'OWNER' && tier !== 'ADMIN') throw forbidden(ERROR_CODES.FORBIDDEN);
-    const { workspaceId, actorId } = this.ctx;
     const db = this.tenant.db;
     const space = await db.space.findFirst({ where: { id: spaceId, deletedAt: null } });
     if (!space) throw notFound();
@@ -734,6 +739,36 @@ export class BackupService {
     if (manifest.kind !== 'space' || !data.space) throw fail(ERROR_CODES.BACKUP_INVALID);
     if (String(data.space.id) !== spaceId) throw fail(ERROR_CODES.BACKUP_WRONG_SPACE);
 
+    const current = await db.attachment.findMany({
+      where: this.spaceWheres(spaceId).attachment,
+      select: { id: true, storageKey: true },
+    });
+    const kept = new Set((data.tables.attachment ?? []).map((r) => String(r.id)));
+    const removedFiles = current.filter((a) => !kept.has(a.id)).map((a) => a.storageKey);
+    const result = await this.applySnapshot(space, manifest, data, files, {
+      existingKeys: new Map(current.map((a) => [a.id, a.storageKey])),
+      action: 'space.rolled_back',
+    });
+    // Yedekte olmayan eklerin dosyası silinir.
+    for (const key of removedFiles) await this.storage.remove(key).catch(() => undefined);
+    return result;
+  }
+
+  /**
+   * Projenin içeriğini bir anlık görüntüye döndürür (ADR-173; arşivden çıkarma da kullanır, ADR-176).
+   * Kimlikler korunur: görüntüdeki satırlar var olanın üzerine yazılır, görüntüde olmayanlar silinir,
+   * görüntüde olup silinenler geri gelir. Hepsi tek işlemde yapılır, hata olursa hiçbir şey değişmez.
+   */
+  private async applySnapshot(
+    space: { id: string; key: string; itemCounter: number },
+    manifest: Manifest,
+    data: BackupData,
+    files: Record<string, Uint8Array>,
+    options: { existingKeys: Map<string, string>; action: string },
+  ): Promise<RestoreResult> {
+    const { workspaceId, actorId } = this.ctx;
+    const db = this.tenant.db;
+    const spaceId = space.id;
     const users = await this.memberIds(Object.values(manifest.users));
     const wheres = this.spaceWheres(spaceId);
     // Kimlikler olduğu gibi korunur: eşleme "kendisi → kendisi".
@@ -745,15 +780,7 @@ export class BackupService {
         new Map((data.tables[spec.name] ?? []).map((r) => [String(r.id), String(r.id)])),
       );
     }
-    const keptAttachments = new Set((data.tables.attachment ?? []).map((r) => String(r.id)));
-    const currentAttachments = await db.attachment.findMany({
-      where: wheres.attachment,
-      select: { id: true, storageKey: true },
-    });
-    const existingKeys = new Map(currentAttachments.map((a) => [a.id, a.storageKey]));
-    const removedFiles = currentAttachments
-      .filter((a) => !keptAttachments.has(a.id))
-      .map((a) => a.storageKey);
+    const existingKeys = options.existingKeys;
     const skipped: Record<string, number> = {};
 
     try {
@@ -772,7 +799,6 @@ export class BackupService {
               sprintLengthWeeks: Number(src.sprintLengthWeeks ?? 2),
               sprintGoalRequired: Boolean(src.sprintGoalRequired),
               dodItems: (src.dodItems as string[]) ?? [],
-              dorItems: (src.dorItems as string[]) ?? [],
               dodEnforced: Boolean(src.dodEnforced),
               estimationScale: src.estimationScale as 'FIBONACCI' | 'TSHIRT' | 'NUMBER',
               roleOverrides: (src.roleOverrides as Prisma.InputJsonValue | null) ?? Prisma.DbNull,
@@ -831,7 +857,7 @@ export class BackupService {
             actorId,
             entityType: 'space',
             entityId: spaceId,
-            action: 'space.rolled_back',
+            action: options.action,
             changes: asJson({ backupCreatedAt: manifest.createdAt, counts: manifest.counts }),
           });
         },
@@ -840,10 +866,120 @@ export class BackupService {
     } catch (error) {
       throw this.restoreError(error);
     }
-    // Ek dosyaları: yedektekiler yazılır; yedekte olmayanların dosyası silinir.
+    // Ek dosyaları: yedektekiler yazılır (arşivde dosyalar diskte kalır, yazılacak bir şey yoktur).
     await this.restoreFiles(maps, files);
-    for (const key of removedFiles) await this.storage.remove(key).catch(() => undefined);
     return { spaceId, sprintId: null, counts: manifest.counts, skipped };
+  }
+
+  // ---------- Arşiv (ADR-176) ----------
+
+  /** Arşivde canlı kalan iskelet: Projenin durumları, klasör/listeleri, etiketleri ve alanları. */
+  private static readonly ARCHIVE_KEEPS: ReadonlySet<string> = new Set([
+    'status',
+    'folder',
+    'list',
+    'label',
+    'customField',
+  ]);
+
+  /**
+   * Arşivlenen Projenin içeriğini sıkıştırıp tek satıra yazar ve canlı tablolardan siler; böylece
+   * arşivdeki Projeler sorgulara, aramaya ve raporlara yük olmaz. Ek dosyaları diskte kalır.
+   * Zaten sıkıştırılmışsa bir şey yapmaz.
+   */
+  async freezeSpace(spaceId: string): Promise<{ rawBytes: number; storedBytes: number } | null> {
+    const { workspaceId } = this.ctx;
+    const db = this.tenant.db;
+    const space = await db.space.findFirst({ where: { id: spaceId } });
+    if (!space) throw notFound();
+    if (
+      await this.prisma.spaceArchive.findUnique({ where: { spaceId }, select: { spaceId: true } })
+    )
+      return null;
+    const wheres = this.spaceWheres(spaceId);
+    const { tables, users } = await this.collect(wheres);
+    const manifest: Manifest = {
+      format: BACKUP_FORMAT,
+      version: BACKUP_VERSION,
+      kind: 'space',
+      createdAt: new Date().toISOString(),
+      source: { spaceName: space.name, spaceKey: space.key },
+      users,
+      counts: Object.fromEntries(Object.entries(tables).map(([name, rows]) => [name, rows.length])),
+    };
+    const raw = Buffer.from(JSON.stringify({ manifest, data: { space, tables } }));
+    // "Sıkıştırabildiğin kadar": Brotli en yüksek kalite, büyük pencere.
+    const packed = brotliCompressSync(raw, {
+      params: {
+        [zlibConstants.BROTLI_PARAM_MODE]: zlibConstants.BROTLI_MODE_TEXT,
+        [zlibConstants.BROTLI_PARAM_QUALITY]: zlibConstants.BROTLI_MAX_QUALITY,
+        [zlibConstants.BROTLI_PARAM_LGWIN]: zlibConstants.BROTLI_LARGE_MAX_WINDOW_BITS,
+        [zlibConstants.BROTLI_PARAM_LARGE_WINDOW]: 1,
+        [zlibConstants.BROTLI_PARAM_SIZE_HINT]: raw.length,
+      },
+    });
+    await db.$transaction(
+      async (tx) => {
+        await (tx as unknown as typeof this.prisma).spaceArchive.create({
+          data: {
+            spaceId,
+            workspaceId,
+            data: packed,
+            rawBytes: raw.length,
+            storedBytes: packed.length,
+          },
+        });
+        // Çocuk tablolar önce silinir; iskelet tablolar kalır.
+        for (const spec of [...TABLES].reverse()) {
+          if (BackupService.ARCHIVE_KEEPS.has(spec.name)) continue;
+          const where = wheres[spec.name];
+          if (where) await this.delegate(tx, spec).deleteMany({ where });
+        }
+        await this.activity.record(tx, {
+          workspaceId,
+          actorId: this.ctx.actorId,
+          entityType: 'space',
+          entityId: spaceId,
+          action: 'space.archive_compressed',
+          changes: asJson({
+            rawBytes: raw.length,
+            storedBytes: packed.length,
+            counts: manifest.counts,
+          }),
+        });
+      },
+      { timeout: 300_000, maxWait: 10_000 },
+    );
+    return { rawBytes: raw.length, storedBytes: packed.length };
+  }
+
+  /** Arşivden çıkarırken sıkıştırılmış içeriği aynı kimliklerle geri açar; arşiv satırı silinir. */
+  async thawSpace(spaceId: string): Promise<void> {
+    const db = this.tenant.db;
+    const space = await db.space.findFirst({ where: { id: spaceId } });
+    if (!space) throw notFound();
+    const archive = await this.prisma.spaceArchive.findUnique({ where: { spaceId } });
+    if (!archive || archive.workspaceId !== this.ctx.workspaceId) return;
+    const { manifest, data } = JSON.parse(
+      brotliDecompressSync(archive.data, {
+        params: { [zlibConstants.BROTLI_DECODER_PARAM_LARGE_WINDOW]: 1 },
+      }).toString('utf8'),
+    ) as { manifest: Manifest; data: BackupData };
+    // Ek dosyaları diskte durduğu için kayıtlar eski depolama anahtarlarıyla geri gelir.
+    const existingKeys = new Map(
+      (data.tables.attachment ?? []).map((r) => [String(r.id), String(r.storageKey)]),
+    );
+    await this.applySnapshot(
+      space,
+      manifest,
+      data,
+      {},
+      {
+        existingKeys,
+        action: 'space.archive_restored',
+      },
+    );
+    await this.prisma.spaceArchive.delete({ where: { spaceId } });
   }
 
   private restoreError(error: unknown): unknown {

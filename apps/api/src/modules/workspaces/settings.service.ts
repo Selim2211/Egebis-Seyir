@@ -22,6 +22,14 @@ import { ActivityService } from '../activity/activity.service';
 import type { AuthUser } from '../auth/auth.constants';
 
 /** Workspace genel ayarları (brief §5.20). */
+/** Workspace satırında duran AI ayarları (ADR-155, ADR-175). */
+const AI_SETTING_KEYS = [
+  'aiEnabled',
+  'aiSprintGoalEnabled',
+  'aiEstimateEnabled',
+  'aiEstimateMinSentences',
+] as const;
+
 @Injectable()
 export class WorkspaceSettingsService {
   constructor(
@@ -111,13 +119,21 @@ export class WorkspaceSettingsService {
     const [workspace, member] = await Promise.all([
       this.tenant.db.workspace.findUniqueOrThrow({
         where: { id: this.cls.get('workspaceId')! },
-        select: { name: true, aiEstimateEnabled: true, aiEstimateMinSentences: true },
+        select: {
+          name: true,
+          aiEnabled: true,
+          aiSprintGoalEnabled: true,
+          aiEstimateEnabled: true,
+          aiEstimateMinSentences: true,
+        },
       }),
       this.memberRole(),
     ]);
     return {
       name: workspace.name,
       membersCanCreateSpaces: member.permissions.includes(W.SPACE_CREATE),
+      aiEnabled: workspace.aiEnabled,
+      aiSprintGoalEnabled: workspace.aiSprintGoalEnabled,
       aiEstimateEnabled: workspace.aiEstimateEnabled,
       aiEstimateMinSentences: workspace.aiEstimateMinSentences,
     };
@@ -142,7 +158,7 @@ export class WorkspaceSettingsService {
         to: input.membersCanCreateSpaces,
       };
     }
-    for (const key of ['aiEstimateEnabled', 'aiEstimateMinSentences'] as const) {
+    for (const key of AI_SETTING_KEYS) {
       if (input[key] !== undefined && input[key] !== current[key]) {
         changes[key] = { from: current[key], to: input[key] };
       }
@@ -151,16 +167,13 @@ export class WorkspaceSettingsService {
 
     const member = await this.memberRole();
     await this.tenant.db.$transaction(async (tx) => {
-      if (changes.name || changes.aiEstimateEnabled || changes.aiEstimateMinSentences) {
+      const aiData = Object.fromEntries(
+        AI_SETTING_KEYS.filter((key) => changes[key]).map((key) => [key, input[key]]),
+      );
+      if (changes.name || Object.keys(aiData).length > 0) {
         await tx.workspace.update({
           where: { id: workspaceId },
-          data: {
-            ...(changes.name && { name: input.name }),
-            ...(changes.aiEstimateEnabled && { aiEstimateEnabled: input.aiEstimateEnabled }),
-            ...(changes.aiEstimateMinSentences && {
-              aiEstimateMinSentences: input.aiEstimateMinSentences,
-            }),
-          },
+          data: { ...(changes.name && { name: input.name }), ...aiData },
         });
       }
       if (changes.membersCanCreateSpaces) {

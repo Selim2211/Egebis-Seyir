@@ -28,6 +28,10 @@ import { TenantPrismaService } from '../../infra/prisma/tenant-prisma.service';
 import { ActivityService } from '../activity/activity.service';
 import { isMembershipLocked } from '../access/account-term';
 import { forbidden, notFound } from './space-errors';
+import type { TenantClient } from '../../infra/prisma/tenant-prisma.service';
+
+/** Rol eşitlemesinin transaction içinde kullandığı tablolar. */
+type MembersTx = Pick<TenantClient, 'space' | 'spaceMember' | 'role' | 'activityEvent'>;
 
 /** Space üyeleri ve Scrum rolleri (brief §7.2). */
 @Injectable()
@@ -205,30 +209,93 @@ export class SpaceMembersService {
         where: { spaceId, userId },
         include: { role: { select: { key: true } } },
       });
-      if (existing?.role.key === role) return;
-      if (existing) {
-        await tx.spaceMember.update({ where: { id: existing.id }, data: { roleId: spaceRole.id } });
-      } else {
-        await tx.spaceMember.create({
-          data: {
-            workspaceId,
-            spaceId,
-            userId,
-            roleId: spaceRole.id,
-            ...(targetTier === 'GUEST'
-              ? { outsourceAccess: DEFAULT_OUTSOURCE_ACCESS as Prisma.InputJsonValue }
-              : {}),
-          },
+      if (existing?.role.key !== role) {
+        if (existing) {
+          await tx.spaceMember.update({
+            where: { id: existing.id },
+            data: { roleId: spaceRole.id },
+          });
+        } else {
+          await tx.spaceMember.create({
+            data: {
+              workspaceId,
+              spaceId,
+              userId,
+              roleId: spaceRole.id,
+              ...(targetTier === 'GUEST'
+                ? { outsourceAccess: DEFAULT_OUTSOURCE_ACCESS as Prisma.InputJsonValue }
+                : {}),
+            },
+          });
+        }
+        await this.activity.record(tx, {
+          workspaceId,
+          actorId: this.cls.get('userId')!,
+          entityType: 'space',
+          entityId: spaceId,
+          action: existing ? 'space.member_role_changed' : 'space.member_added',
+          changes: { userId, role: { from: existing?.role.key ?? null, to: role } },
         });
       }
-      await this.activity.record(tx, {
-        workspaceId,
-        actorId: this.cls.get('userId')!,
-        entityType: 'space',
-        entityId: spaceId,
-        action: existing ? 'space.member_role_changed' : 'space.member_added',
-        changes: { userId, role: { from: existing?.role.key ?? null, to: role } },
-      });
+      await this.syncScrumRoles(tx, spaceId, userId, role);
+    });
+  }
+
+  /**
+   * Tek Scrum Master / tek Product Owner kuralı (ADR-176): rolü alan kişi Projenin scrumMasterId /
+   * productOwnerId alanına yazılır, önceki sahibi Team Member olur; rolü bırakan kişinin alanı boşalır.
+   */
+  private async syncScrumRoles(
+    tx: MembersTx,
+    spaceId: string,
+    userId: string,
+    role: string,
+  ): Promise<void> {
+    const space = await tx.space.findFirstOrThrow({
+      where: { id: spaceId },
+      select: { scrumMasterId: true, productOwnerId: true },
+    });
+    const slots = [
+      { role: 'PROJECT_MANAGER', field: 'scrumMasterId', holder: space.scrumMasterId },
+      { role: 'PRODUCT_OWNER', field: 'productOwnerId', holder: space.productOwnerId },
+    ] as const;
+    const data: { scrumMasterId?: string | null; productOwnerId?: string | null } = {};
+    for (const slot of slots) {
+      if (slot.role === role) {
+        if (slot.holder === userId) continue;
+        if (slot.holder) await this.demoteToTeamMember(tx, spaceId, slot.holder, slot.role);
+        data[slot.field] = userId;
+      } else if (slot.holder === userId) {
+        data[slot.field] = null;
+      }
+    }
+    if (Object.keys(data).length > 0) await tx.space.update({ where: { id: spaceId }, data });
+  }
+
+  private async demoteToTeamMember(
+    tx: MembersTx,
+    spaceId: string,
+    userId: string,
+    fromRole: string,
+  ): Promise<void> {
+    const member = await tx.spaceMember.findFirst({
+      where: { spaceId, userId, role: { key: fromRole } },
+      select: { id: true },
+    });
+    if (!member) return;
+    const teamMember = await tx.role.findFirst({
+      where: { scope: RoleScope.SPACE, key: 'PROJECT_MEMBER' },
+      select: { id: true },
+    });
+    if (!teamMember) throw new NotFoundException({ code: ERROR_CODES.ROLE_NOT_FOUND });
+    await tx.spaceMember.update({ where: { id: member.id }, data: { roleId: teamMember.id } });
+    await this.activity.record(tx, {
+      workspaceId: this.cls.get('workspaceId'),
+      actorId: this.cls.get('userId')!,
+      entityType: 'space',
+      entityId: spaceId,
+      action: 'space.member_role_changed',
+      changes: { userId, role: { from: fromRole, to: 'PROJECT_MEMBER' } },
     });
   }
 
@@ -369,37 +436,30 @@ export class SpaceMembersService {
     });
   }
 
-  /** Projenin tek Product Owner'ı ve Scrum Master'ı; ikisi de Projenin üyesi olmalı. */
+  /**
+   * Eski Scrum rolleri ucu (ADR-167): artık üyenin rolünü değiştirir (ADR-176). Kişi Projenin
+   * üyesi olmalı; boş bırakılan görevin sahibi Team Member olur.
+   */
   async putScrumRoles(spaceId: string, input: PutScrumRolesRequest): Promise<void> {
-    const workspaceId = this.cls.get('workspaceId')!;
-    const actorId = this.cls.get('userId')!;
-    await this.tenant.db.$transaction(async (tx) => {
-      const space = await tx.space.findFirst({
-        where: { id: spaceId, deletedAt: null },
-        select: { productOwnerId: true, scrumMasterId: true },
-      });
-      if (!space) throw notFound();
-      for (const userId of [input.productOwnerId, input.scrumMasterId]) {
-        if (userId && !(await tx.spaceMember.findFirst({ where: { spaceId, userId } }))) {
-          throw forbidden(ERROR_CODES.SCRUM_ROLE_NOT_MEMBER);
-        }
-      }
-      await tx.space.update({
-        where: { id: spaceId },
-        data: { productOwnerId: input.productOwnerId, scrumMasterId: input.scrumMasterId },
-      });
-      await this.activity.record(tx, {
-        workspaceId,
-        actorId,
-        entityType: 'space',
-        entityId: spaceId,
-        action: 'space.scrum_roles_changed',
-        changes: {
-          productOwner: { from: space.productOwnerId, to: input.productOwnerId },
-          scrumMaster: { from: space.scrumMasterId, to: input.scrumMasterId },
-        },
-      });
+    const space = await this.tenant.db.space.findFirst({
+      where: { id: spaceId, deletedAt: null },
+      select: { productOwnerId: true, scrumMasterId: true },
     });
+    if (!space) throw notFound();
+    for (const userId of [input.productOwnerId, input.scrumMasterId]) {
+      if (userId && !(await this.tenant.db.spaceMember.findFirst({ where: { spaceId, userId } }))) {
+        throw forbidden(ERROR_CODES.SCRUM_ROLE_NOT_MEMBER);
+      }
+    }
+    const changes: Array<[string | null, string | null, string]> = [
+      [space.scrumMasterId, input.scrumMasterId, 'PROJECT_MANAGER'],
+      [space.productOwnerId, input.productOwnerId, 'PRODUCT_OWNER'],
+    ];
+    for (const [from, to, role] of changes) {
+      if (from === to) continue;
+      if (to) await this.put(spaceId, to, role);
+      else if (from) await this.put(spaceId, from, 'PROJECT_MEMBER');
+    }
   }
 
   /** Bu Projeye Bug gönderebilecek gelen e-posta kalıpları (isim kısmında * ve ?). */
