@@ -35,6 +35,7 @@ import {
   useDeleteAutomation,
   useUpdateAutomation,
 } from './queries';
+import { SettingsSection } from '@/components/settings-section';
 
 type Draft = CreateAutomationRequest;
 type DraftAction = Draft['actions'][number];
@@ -59,17 +60,16 @@ export function AutomationsSection({ space }: { space: SpaceDetail }) {
   const automations = data?.automations ?? [];
 
   return (
-    <section className="bg-card mb-5 rounded-lg border">
-      <div className="flex items-start gap-2 border-b px-4 py-3">
-        <div className="min-w-0 flex-1">
-          <h2 className="text-sm font-semibold">{t('automations.title')}</h2>
-          <p className="text-muted-foreground mt-0.5 text-xs">{t('automations.help')}</p>
-        </div>
+    <SettingsSection
+      title={t('automations.title')}
+      description={t('automations.help')}
+      actions={
         <Button size="sm" variant="secondary" onClick={() => setEditing('new')}>
           <Plus />
           {t('automations.add')}
         </Button>
-      </div>
+      }
+    >
       {automations.length === 0 && (
         <p className="text-muted-foreground px-4 py-3 text-sm">{t('automations.none')}</p>
       )}
@@ -112,7 +112,7 @@ export function AutomationsSection({ space }: { space: SpaceDetail }) {
             .catch((error: unknown) => toast.error(errorMessage(error)));
         }}
       />
-    </section>
+    </SettingsSection>
   );
 }
 

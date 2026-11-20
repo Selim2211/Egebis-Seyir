@@ -22,6 +22,7 @@ import {
   useMoveCustomField,
   useUpdateCustomField,
 } from './queries';
+import { SettingsSection } from '@/components/settings-section';
 
 const hasOptions = (type: CustomFieldType) => OPTION_FIELD_TYPES.includes(type);
 
@@ -32,11 +33,7 @@ export function CustomFieldsSection({ spaceId, canEdit }: { spaceId: string; can
   const [deleting, setDeleting] = useState<CustomField | null>(null);
 
   return (
-    <section className="bg-card mb-5 rounded-lg border">
-      <div className="border-b px-4 py-3">
-        <h2 className="text-sm font-semibold">{t('customFields.title')}</h2>
-        <p className="text-muted-foreground mt-0.5 text-xs">{t('customFields.help')}</p>
-      </div>
+    <SettingsSection title={t('customFields.title')} description={t('customFields.help')}>
       {fields.length === 0 && (
         <p className="text-muted-foreground px-4 py-3 text-sm">{t('customFields.none')}</p>
       )}
@@ -56,7 +53,7 @@ export function CustomFieldsSection({ spaceId, canEdit }: { spaceId: string; can
       </ol>
       {canEdit && <AddField spaceId={spaceId} count={fields.length} />}
       <DeleteField spaceId={spaceId} field={deleting} onClose={() => setDeleting(null)} />
-    </section>
+    </SettingsSection>
   );
 }
 

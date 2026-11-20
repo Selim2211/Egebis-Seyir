@@ -1,5 +1,9 @@
-import { listName } from '@/lib/default-names';
-import { SPACE_PERMISSIONS as S, type TreeSpace, type WorkItemType } from '@scrum/shared';
+import {
+  requiresAssignee,
+  SPACE_PERMISSIONS as S,
+  type TreeSpace,
+  type WorkItemType,
+} from '@scrum/shared';
 import { useNavigate, useRouterState } from '@tanstack/react-router';
 import {
   Bug,
@@ -35,7 +39,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { SprintDialog } from '@/features/sprints/sprint-dialog';
 import { sprintsQuery } from '@/features/sprints/queries';
-import { spaceQuery, useHierarchy } from '@/features/spaces/queries';
+import { spaceQuery, useHierarchy, useSpaceMembers } from '@/features/spaces/queries';
+import { useMe } from '@/features/auth/queries';
 import { useCurrentWorkspace } from '@/features/workspace/queries';
 import { creatableTypes } from '@/features/work-items/item-tree';
 import { useCreateItem, useUploadAttachment } from '@/features/work-items/queries';
@@ -285,7 +290,8 @@ function NewItemForm({
     listId: open?.[1] === 'lists' ? open[2] : undefined,
     spaceKey: itemKey,
   };
-  // Açık olan Space/List varsayılan hedeftir; yoksa ilk Space.
+  // Açık olan Space/List varsayılan hedeftir; yoksa ilk Space. Liste seçimi gösterilmez
+  // (yönetici 5. tur): açık listeye, yoksa Projenin ilk listesine eklenir.
   const current =
     targets.find(
       (target) =>
@@ -302,14 +308,33 @@ function NewItemForm({
   const [error, setError] = useState<unknown>(null);
   const allowed = creatableTypes(entry.space.scrumEnabled, null);
   const effectiveType = allowed.includes(type) ? type : (allowed[0] ?? type);
+  // Atanan (ADR-176): Task/Sub-task/Bug için zorunlu; varsayılan oluşturan kişi (Projenin üyesiyse).
+  const me = useMe();
+  const members = useSpaceMembers(entry.space.id).data?.members ?? [];
+  const [assigneeChoice, setAssigneeChoice] = useState<string | null>(null);
+  const assigneeId =
+    assigneeChoice !== null && members.some((m) => m.userId === assigneeChoice)
+      ? assigneeChoice
+      : members.some((m) => m.userId === me.user.id)
+        ? me.user.id
+        : '';
+  const needsAssignee = requiresAssignee(effectiveType) && effectiveType !== 'BUG';
 
   const submit = (e: FormEvent) => {
     e.preventDefault();
     const value = title.trim();
-    if (!value) return;
+    if (!value || (needsAssignee && !assigneeId)) return;
     setError(null);
     create.mutate(
-      { listId, body: { type: effectiveType, title: value, parentId: null } },
+      {
+        listId,
+        body: {
+          type: effectiveType,
+          title: value,
+          parentId: null,
+          assigneeIds: assigneeId ? [assigneeId] : [],
+        },
+      },
       {
         onSuccess: ({ id, key }) => {
           void (async () => {
@@ -363,17 +388,26 @@ function NewItemForm({
               </option>
             ))}
           </SelectField>
-          <SelectField
-            label={t('newMenu.list')}
-            value={listId}
-            onChange={(e) => setListId(e.target.value)}
-          >
-            {entry.lists.map((list) => (
-              <option key={list.id} value={list.id}>
-                {listName(list.name)}
-              </option>
-            ))}
-          </SelectField>
+          {requiresAssignee(effectiveType) && (
+            <SelectField
+              label={t('newMenu.assignee')}
+              value={assigneeId}
+              onChange={(e) => setAssigneeChoice(e.target.value)}
+              required={needsAssignee}
+            >
+              {!needsAssignee && <option value="">{t('newMenu.unassigned')}</option>}
+              {needsAssignee && !assigneeId && (
+                <option value="" disabled>
+                  {t('newMenu.chooseAssignee')}
+                </option>
+              )}
+              {members.map((m) => (
+                <option key={m.userId} value={m.userId}>
+                  {m.name}
+                </option>
+              ))}
+            </SelectField>
+          )}
         </div>
         <div className="flex flex-col gap-2">
           <input
@@ -425,7 +459,9 @@ function NewItemForm({
         <Button
           type="submit"
           size="lg"
-          disabled={create.isPending || upload.isPending || !title.trim()}
+          disabled={
+            create.isPending || upload.isPending || !title.trim() || (needsAssignee && !assigneeId)
+          }
         >
           <Plus aria-hidden /> {t('newMenu.create')}
         </Button>

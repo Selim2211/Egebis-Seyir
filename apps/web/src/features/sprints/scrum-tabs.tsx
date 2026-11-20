@@ -9,6 +9,7 @@ const TABS = [
   { key: 'planning', to: '/spaces/$spaceId/planning', label: 'planning.title' },
   { key: 'board', to: '/spaces/$spaceId/board', label: 'board.title' },
   { key: 'history', to: '/spaces/$spaceId/sprints', label: 'history.title' },
+  { key: 'goals', to: '/spaces/$spaceId/goals', label: 'sprintGoals.title' },
   { key: 'epics', to: '/spaces/$spaceId/epics', label: 'epics.title' },
   { key: 'roadmap', to: '/spaces/$spaceId/roadmap', label: 'roadmap.title' },
   { key: 'map', to: '/spaces/$spaceId/map', label: 'projectMap.title' },

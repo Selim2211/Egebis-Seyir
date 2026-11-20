@@ -14,6 +14,7 @@ import { UserAvatar } from '@/components/user-avatar';
 import { useCurrentWorkspace } from '@/features/workspace/queries';
 import { apiRequest, NoContent } from '@/lib/api';
 import { useErrorMessage } from '@/lib/use-error-message';
+import { SettingsSection } from '@/components/settings-section';
 
 /** Her alanda seçilebilecek düzeyler: Okuma/Yazma/Yok anlamlı olduğu yerlerde (ADR-172). */
 const LEVELS: Record<OutsourceArea, readonly AccessLevel[]> = {
@@ -69,11 +70,11 @@ export function OutsourceAccessSection({ spaceId }: { spaceId: string }) {
   const people = data?.people ?? [];
 
   return (
-    <section className="bg-card mb-5 rounded-lg border" data-testid="outsource-access">
-      <div className="border-b px-4 py-3">
-        <h2 className="text-sm font-semibold">{t('outsourceAccess.title')}</h2>
-        <p className="text-muted-foreground mt-0.5 text-xs">{t('outsourceAccess.description')}</p>
-      </div>
+    <SettingsSection
+      title={t('outsourceAccess.title')}
+      description={t('outsourceAccess.description')}
+      testId="outsource-access"
+    >
       <div className="flex flex-col gap-4 p-4">
         {isPending ? (
           <p className="text-muted-foreground text-sm">{t('common.loading')}</p>
@@ -133,6 +134,6 @@ export function OutsourceAccessSection({ spaceId }: { spaceId: string }) {
           ))
         )}
       </div>
-    </section>
+    </SettingsSection>
   );
 }

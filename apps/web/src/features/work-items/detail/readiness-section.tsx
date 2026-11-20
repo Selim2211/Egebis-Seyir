@@ -7,8 +7,8 @@ import { useErrorMessage } from '@/lib/use-error-message';
 import { useSetReadiness } from '../queries';
 
 /**
- * Definition of Ready / Done maddeleri (brief §6.3, ADR-065): Space'in maddeleri, öğede işaretlenir.
- * Yalnızca Story ve Bug'da, Space'te madde tanımlıysa görünür.
+ * Definition of Done maddeleri (brief §6.3, ADR-065; Ready kaldırıldı, ADR-176): Space'in
+ * maddeleri, öğede işaretlenir. Yalnızca Task ve Bug'da, Space'te madde tanımlıysa görünür.
  */
 export function ReadinessSection({
   itemId,
@@ -19,31 +19,25 @@ export function ReadinessSection({
   readiness: ItemReadiness;
   canWrite: boolean;
 }) {
-  if (readiness.dor.length === 0 && readiness.dod.length === 0) return null;
+  if (readiness.dod.length === 0) return null;
   return (
-    <div className="grid gap-4 sm:grid-cols-2">
-      <Block kind="dor" itemId={itemId} entries={readiness.dor} canWrite={canWrite} />
-      <Block
-        kind="dod"
-        itemId={itemId}
-        entries={readiness.dod}
-        canWrite={canWrite}
-        enforced={readiness.dodEnforced}
-      />
-    </div>
+    <Block
+      itemId={itemId}
+      entries={readiness.dod}
+      canWrite={canWrite}
+      enforced={readiness.dodEnforced}
+    />
   );
 }
 
 function Block({
-  kind,
   itemId,
   entries,
   canWrite,
   enforced,
 }: {
-  kind: 'dor' | 'dod';
   itemId: string;
-  entries: ItemReadiness['dor'];
+  entries: ItemReadiness['dod'];
   canWrite: boolean;
   enforced?: boolean;
 }) {
@@ -62,7 +56,7 @@ function Block({
     const next = entries.filter((e) => (e.text === text ? on : isChecked(e))).map((e) => e.text);
     setOptimistic(new Set(next));
     set.mutate(
-      { itemId, kind, checked: next },
+      { itemId, checked: next },
       {
         onError: (error) => toast.error(errorMessage(error)),
         onSettled: () => setOptimistic(null),
@@ -71,16 +65,16 @@ function Block({
   };
 
   return (
-    <section aria-labelledby={`readiness-${kind}`} className="rounded-md border p-3">
-      <h3 id={`readiness-${kind}`} className="flex items-center gap-2 text-sm font-semibold">
-        {t(`readiness.${kind}`)}
+    <section aria-labelledby="readiness-dod" className="rounded-md border p-3">
+      <h3 id="readiness-dod" className="flex items-center gap-2 text-sm font-semibold">
+        {t('readiness.dod')}
         <span className="text-muted-foreground text-xs font-normal tabular-nums">
           {checked}/{entries.length}
         </span>
         {complete && (
           <CircleCheck className="size-4 text-emerald-600" aria-label={t('readiness.complete')} />
         )}
-        {kind === 'dod' && enforced && (
+        {enforced && (
           <span className="text-muted-foreground ml-auto text-xs font-normal">
             {t('readiness.enforced')}
           </span>

@@ -21,6 +21,7 @@ import { Input } from '@/components/ui/input';
 import { useTreeSpace } from '@/features/spaces/queries';
 import { useCurrentWorkspace } from '@/features/workspace/queries';
 import { apiRequest } from '@/lib/api';
+import { SettingsSection } from '@/components/settings-section';
 
 /** Tarayıcıdan ZIP indirme bağlantısı (oturum çerezi aynı kökenli GET ile gider). */
 export const spaceBackupUrl = (workspaceId: string, spaceId: string) =>
@@ -35,11 +36,7 @@ export function BackupSection({ spaceId, spaceKey }: { spaceId: string; spaceKey
   const [rollingBack, setRollingBack] = useState(false);
   const superAdmin = role === 'OWNER' || role === 'ADMIN';
   return (
-    <section className="bg-card mb-5 rounded-lg border">
-      <div className="border-b px-4 py-3">
-        <h2 className="text-sm font-semibold">{t('backup.title')}</h2>
-        <p className="text-muted-foreground mt-0.5 text-xs">{t('backup.description')}</p>
-      </div>
+    <SettingsSection title={t('backup.title')} description={t('backup.description')}>
       <div className="flex flex-wrap gap-2 p-4">
         <Button asChild variant="outline" size="sm">
           <a href={spaceBackupUrl(workspaceId, spaceId)} download>
@@ -61,7 +58,7 @@ export function BackupSection({ spaceId, spaceKey }: { spaceId: string; spaceKey
           onClose={() => setRollingBack(false)}
         />
       )}
-    </section>
+    </SettingsSection>
   );
 }
 

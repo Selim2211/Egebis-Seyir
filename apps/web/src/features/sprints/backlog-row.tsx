@@ -100,14 +100,6 @@ export function BacklogRow({
           {epicTitle}
         </span>
       )}
-      {item.dor && item.dor.checked < item.dor.total && (
-        <span
-          title={t('readiness.notReady')}
-          className="shrink-0 rounded bg-amber-100 px-1.5 py-0.5 text-xs font-medium text-amber-800 tabular-nums dark:bg-amber-500/20 dark:text-amber-300"
-        >
-          {t('readiness.dorBadge', { checked: item.dor.checked, total: item.dor.total })}
-        </span>
-      )}
       {item.percentDone !== null && item.percentDone > 0 && item.percentDone < 100 && (
         <span
           title={t('detail.percentDone')}

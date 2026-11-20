@@ -20,7 +20,7 @@ import {
 } from '@/features/spaces/queries';
 import { ProjectRolesSection } from '@/features/spaces/project-roles-section';
 import { OutsourceAccessSection } from '@/features/spaces/outsource-access-section';
-import { BugSendersSection, ScrumRolesSection } from '@/features/spaces/scrum-roles-section';
+import { BugSendersSection } from '@/features/spaces/scrum-roles-section';
 import { SpaceAvatar } from '@/features/spaces/space-avatar';
 import { ReadinessFields } from '@/features/spaces/readiness-fields';
 import { BackupSection } from '@/features/backup/backup';
@@ -39,6 +39,8 @@ import {
 import { useMe } from '@/features/auth/queries';
 import { useCurrentWorkspace, useMembers } from '@/features/workspace/queries';
 import { useErrorMessage } from '@/lib/use-error-message';
+import { SettingsSection } from '@/components/settings-section';
+import { SpaceIconUpload } from '@/features/spaces/space-icon-upload';
 
 export const Route = createFileRoute('/_app/spaces/$spaceId/settings')({
   component: SpaceSettingsPage,
@@ -78,7 +80,6 @@ function SpaceSettingsPage() {
 
       {canEdit ? <GeneralForm space={space} /> : <GeneralSummary space={space} />}
       <MembersSection spaceId={spaceId} canEdit={canEdit} />
-      <ScrumRolesSection space={space} canEdit={canEdit} />
       {(canEdit || space.scrumMaster?.id === me.user.id) && (
         <OutsourceAccessSection spaceId={spaceId} />
       )}
@@ -98,20 +99,18 @@ function SpaceSettingsPage() {
 function Section({
   title,
   description,
+  defaultOpen,
   children,
 }: {
   title: string;
   description?: string;
+  defaultOpen?: boolean;
   children: React.ReactNode;
 }) {
   return (
-    <section className="bg-card mb-5 rounded-lg border">
-      <div className="border-b px-4 py-3">
-        <h2 className="text-sm font-semibold">{title}</h2>
-        {description && <p className="text-muted-foreground mt-0.5 text-xs">{description}</p>}
-      </div>
+    <SettingsSection title={title} description={description} defaultOpen={defaultOpen}>
       <div className="flex flex-col gap-4 p-4">{children}</div>
-    </section>
+    </SettingsSection>
   );
 }
 
@@ -129,7 +128,6 @@ function GeneralForm({ space }: { space: SpaceDetail }) {
     sprintLengthWeeks: space.sprintLengthWeeks,
     sprintGoalRequired: space.sprintGoalRequired,
     dodItems: space.dodItems,
-    dorItems: space.dorItems,
     dodEnforced: space.dodEnforced,
     estimationScale: space.estimationScale,
   };
@@ -150,7 +148,8 @@ function GeneralForm({ space }: { space: SpaceDetail }) {
 
   return (
     <form onSubmit={submit} noValidate>
-      <Section title={t('spaceSettings.general')}>
+      <Section title={t('spaceSettings.general')} defaultOpen>
+        <SpaceIconUpload space={space} />
         <SpaceFields
           values={values}
           errors={errors}
@@ -190,7 +189,7 @@ function GeneralSummary({ space }: { space: SpaceDetail }) {
     );
   }
   return (
-    <Section title={t('spaceSettings.general')}>
+    <Section title={t('spaceSettings.general')} defaultOpen>
       <dl className="grid gap-x-6 gap-y-2 text-sm sm:grid-cols-[10rem_1fr]">
         {rows.map(([label, value]) => (
           <div key={label} className="contents">

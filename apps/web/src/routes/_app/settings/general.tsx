@@ -50,6 +50,8 @@ function SettingsForm({ initial }: { initial: WorkspaceSettings }) {
   const [membersCanCreateSpaces, setMembersCanCreateSpaces] = useState(
     initial.membersCanCreateSpaces,
   );
+  const [aiMaster, setAiMaster] = useState(initial.aiEnabled);
+  const [aiGoal, setAiGoal] = useState(initial.aiSprintGoalEnabled);
   const [aiEnabled, setAiEnabled] = useState(initial.aiEstimateEnabled);
   const [aiMin, setAiMin] = useState(String(initial.aiEstimateMinSentences));
   const aiMinValue = Number(aiMin);
@@ -61,6 +63,8 @@ function SettingsForm({ initial }: { initial: WorkspaceSettings }) {
   const dirty =
     name.trim() !== initial.name ||
     membersCanCreateSpaces !== initial.membersCanCreateSpaces ||
+    aiMaster !== initial.aiEnabled ||
+    aiGoal !== initial.aiSprintGoalEnabled ||
     aiEnabled !== initial.aiEstimateEnabled ||
     aiMinValue !== initial.aiEstimateMinSentences;
 
@@ -71,6 +75,8 @@ function SettingsForm({ initial }: { initial: WorkspaceSettings }) {
       {
         name: name.trim(),
         membersCanCreateSpaces,
+        aiEnabled: aiMaster,
+        aiSprintGoalEnabled: aiGoal,
         aiEstimateEnabled: aiEnabled,
         aiEstimateMinSentences: aiMinValue,
       },
@@ -110,11 +116,46 @@ function SettingsForm({ initial }: { initial: WorkspaceSettings }) {
         </div>
       </div>
       <fieldset className="flex flex-col gap-3 border-t pt-4">
+        <legend className="mb-2 text-sm font-semibold">{t('generalSettings.ai')}</legend>
+        <div className="flex items-start gap-3">
+          <Switch
+            id="ai-master"
+            checked={aiMaster}
+            onCheckedChange={setAiMaster}
+            aria-describedby="ai-master-help"
+            className="mt-0.5"
+          />
+          <div>
+            <Label htmlFor="ai-master">{t('generalSettings.aiEnabled')}</Label>
+            <p id="ai-master-help" className="text-muted-foreground mt-0.5 text-xs">
+              {t('generalSettings.aiEnabledHelp')} {t('generalSettings.aiDataNote')}
+            </p>
+          </div>
+        </div>
+        <div className="flex items-start gap-3">
+          <Switch
+            id="ai-sprint-goal"
+            checked={aiGoal}
+            disabled={!aiMaster}
+            onCheckedChange={setAiGoal}
+            aria-describedby="ai-sprint-goal-help"
+            className="mt-0.5"
+          />
+          <div>
+            <Label htmlFor="ai-sprint-goal">{t('generalSettings.aiSprintGoal')}</Label>
+            <p id="ai-sprint-goal-help" className="text-muted-foreground mt-0.5 text-xs">
+              {t('generalSettings.aiSprintGoalHelp')}
+            </p>
+          </div>
+        </div>
+      </fieldset>
+      <fieldset className="flex flex-col gap-3 border-t pt-4" disabled={!aiMaster}>
         <legend className="mb-2 text-sm font-semibold">{t('generalSettings.aiEstimate')}</legend>
         <div className="flex items-start gap-3">
           <Switch
             id="ai-estimate"
             checked={aiEnabled}
+            disabled={!aiMaster}
             onCheckedChange={setAiEnabled}
             aria-describedby="ai-estimate-help"
             className="mt-0.5"
@@ -135,7 +176,7 @@ function SettingsForm({ initial }: { initial: WorkspaceSettings }) {
             min={AI_ESTIMATE_MIN_SENTENCES.min}
             max={AI_ESTIMATE_MIN_SENTENCES.max}
             className="w-28"
-            disabled={!aiEnabled}
+            disabled={!aiMaster || !aiEnabled}
             value={aiMin}
             aria-invalid={aiMinInvalid || undefined}
             onChange={(e) => setAiMin(e.target.value)}

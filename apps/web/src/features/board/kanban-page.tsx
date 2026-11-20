@@ -52,6 +52,7 @@ export function KanbanPage({
   const board = useQuery(kanbanQuery(workspaceId, spaceId));
   const hierarchy = useQuery(hierarchyQuery(workspaceId));
   const create = useCreateItem();
+  const me = useMe();
   const [typing, setTyping] = useState(search.q ?? '');
 
   const statuses = useMemo(() => (space.data ? toBoardStatuses(space.data) : []), [space.data]);
@@ -99,7 +100,10 @@ export function KanbanPage({
   const addCard = (statusId: string, title: string) => {
     if (!targetList) return;
     create.mutate(
-      { listId: targetList, body: { type: 'TASK', title, statusId, parentId: null } },
+      {
+        listId: targetList,
+        body: { type: 'TASK', title, statusId, parentId: null, assigneeIds: [me.user.id] },
+      },
       {
         onSuccess: ({ key }) => toast.success(t('items.created', { key })),
         onError: (error) => toast.error(errorMessage(error)),

@@ -1,4 +1,4 @@
-import { checkSprintDates, type SprintDatesError } from '@scrum/shared';
+import { checkSprintDates, SPRINT_GOAL_MIN_LENGTH, type SprintDatesError } from '@scrum/shared';
 
 export interface SprintFormValues {
   name: string;
@@ -9,7 +9,8 @@ export interface SprintFormValues {
 }
 
 export type SprintFormErrors = Partial<
-  Record<'name' | 'startDate' | 'endDate', 'required' | SprintDatesError>
+  Record<'name' | 'startDate' | 'endDate', 'required' | SprintDatesError> &
+    Record<'goal', 'SPRINT_GOAL_TOO_SHORT'>
 >;
 
 const DAY_MS = 86_400_000;
@@ -43,6 +44,10 @@ export function suggestSprint(
 export function validateSprint(values: SprintFormValues): SprintFormErrors {
   const errors: SprintFormErrors = {};
   if (!values.name.trim()) errors.name = 'required';
+  // Hedef boş bırakılabilir; yazılırsa en az 64 karakter (ADR-175).
+  const goal = values.goal.trim();
+  if (goal.length > 0 && goal.length < SPRINT_GOAL_MIN_LENGTH)
+    errors.goal = 'SPRINT_GOAL_TOO_SHORT';
   if (!values.startDate) errors.startDate = 'required';
   if (!values.endDate) errors.endDate = 'required';
   if (values.startDate && values.endDate) {

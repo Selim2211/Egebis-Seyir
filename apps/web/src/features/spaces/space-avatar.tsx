@@ -1,4 +1,5 @@
 import type { SpaceIcon } from '@scrum/shared';
+import { useCurrentWorkspace } from '@/features/workspace/queries';
 import { cn } from '@/lib/utils';
 import { SPACE_ICON_COMPONENTS } from './space-icons';
 
@@ -8,10 +9,29 @@ export function SpaceAvatar({
   size = 20,
   className,
 }: {
-  space: { name: string; color: string; icon: SpaceIcon | null };
+  space: {
+    id?: string;
+    name: string;
+    color: string;
+    icon: SpaceIcon | null;
+    /** Yüklenen ikon resminin sürümü (ADR-176). */
+    iconImage?: string | null;
+  };
   size?: number;
   className?: string;
 }) {
+  const workspaceId = useCurrentWorkspace().id;
+  if (space.id && space.iconImage) {
+    return (
+      <img
+        aria-hidden
+        alt=""
+        src={`/api/workspaces/${workspaceId}/spaces/${space.id}/icon?v=${space.iconImage}`}
+        className={cn('shrink-0 object-cover', className)}
+        style={{ width: size, height: size, borderRadius: Math.round(size / 4) }}
+      />
+    );
+  }
   const Icon = space.icon ? SPACE_ICON_COMPONENTS[space.icon] : null;
   return (
     <span

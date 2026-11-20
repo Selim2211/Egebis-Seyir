@@ -19,7 +19,6 @@ export interface SpaceFormValues {
   sprintLengthWeeks: number;
   sprintGoalRequired: boolean;
   dodItems: string[];
-  dorItems: string[];
   dodEnforced: boolean;
   estimationScale: EstimationScale;
 }
@@ -35,7 +34,6 @@ export const EMPTY_SPACE: SpaceFormValues = {
   sprintLengthWeeks: SPRINT_LENGTH_WEEKS.default,
   sprintGoalRequired: true,
   dodItems: [],
-  dorItems: [],
   dodEnforced: false,
   estimationScale: 'FIBONACCI',
 };

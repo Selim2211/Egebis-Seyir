@@ -182,11 +182,6 @@ function StartDialog({
           {blocked && <Notice tone="error">{t('sprints.goalRequired')}</Notice>}
           {noGoal && !goalRequired && <Notice tone="warn">{t('sprints.goalMissingWarn')}</Notice>}
           {sprint.itemCount === 0 && <Notice tone="warn">{t('sprints.emptyWarn')}</Notice>}
-          {sprint.notReadyCount > 0 && (
-            <Notice tone="warn">
-              {t('sprints.notReadyWarn', { count: sprint.notReadyCount })}
-            </Notice>
-          )}
           {sprint.unestimatedCount > 0 && (
             <Notice tone="warn">
               {t('sprints.unestimatedWarn', { count: sprint.unestimatedCount })}

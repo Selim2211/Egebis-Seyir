@@ -25,6 +25,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { useErrorMessage } from '@/lib/use-error-message';
 import { useCreateStatus, useDeleteStatus, useMoveStatus, useUpdateStatus } from './queries';
+import { SettingsSection } from '@/components/settings-section';
 
 type StatusItem = SpaceDetail['statuses'][number];
 
@@ -37,11 +38,7 @@ export function StatusesSection({ space, canEdit }: { space: SpaceDetail; canEdi
   const { statuses } = space;
 
   return (
-    <section className="bg-card mb-5 rounded-lg border">
-      <div className="border-b px-4 py-3">
-        <h2 className="text-sm font-semibold">{t('spaceSettings.statuses')}</h2>
-        <p className="text-muted-foreground mt-0.5 text-xs">{t('statusEditor.help')}</p>
-      </div>
+    <SettingsSection title={t('spaceSettings.statuses')} description={t('statusEditor.help')}>
       <ol className="divide-y px-4 pb-1">
         {statuses.map((status, index) => (
           <StatusRow
@@ -65,7 +62,7 @@ export function StatusesSection({ space, canEdit }: { space: SpaceDetail; canEdi
           onClose={() => setDeleting(null)}
         />
       )}
-    </section>
+    </SettingsSection>
   );
 }
 

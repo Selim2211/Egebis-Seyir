@@ -79,7 +79,13 @@ export function useAssignableWorkspaceRoles(): string[] {
 export function useSpaceRoleKeys(): string[] {
   const { data } = useRoles();
   const fromApi = (data?.roles ?? []).filter((r) => r.scope === 'SPACE').map((r) => r.key);
-  return fromApi.length > 0 ? fromApi : [...SPACE_ROLES];
+  if (fromApi.length === 0) return [...SPACE_ROLES];
+  // Sistem rolleri sabit sırada (Scrum Master, Product Owner, Team Member), ardından özel roller.
+  const order = (key: string) => {
+    const index = (SPACE_ROLES as readonly string[]).indexOf(key);
+    return index === -1 ? SPACE_ROLES.length : index;
+  };
+  return [...fromApi].sort((a, b) => order(a) - order(b));
 }
 
 /**

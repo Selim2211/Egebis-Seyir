@@ -74,7 +74,10 @@
       "SUBTASK": "New Sub-Task"
     },
     "attach": "Attach files",
-    "removeFile": "Remove {{name}}"
+    "removeFile": "Remove {{name}}",
+    "assignee": "Assignee",
+    "unassigned": "Unassigned",
+    "chooseAssignee": "Choose an assignee"
   },
   "topbar": {
     "search": "Search tasks, docs or people…",
@@ -116,8 +119,8 @@
   "roleHelp": {
     "OWNER": "Manages everything; sees every project and can delete the workspace.",
     "ADMIN": "Sees every project; manages people, roles, doc/video permissions and settings.",
-    "MEMBER": "Sees only the projects they belong to; their project role (Project Manager / Project Member) sets what they can do.",
-    "GUEST": "External person: sees only the projects they are added to and cannot be a Project Manager; docs and videos stay closed until a Super Admin allows them.",
+    "MEMBER": "Sees only the projects they belong to; their project role (Scrum Master / Product Owner / Team Member) sets what they can do.",
+    "GUEST": "External person: sees only the projects they are added to and cannot be a Scrum Master or Product Owner; docs and videos stay closed until a Super Admin allows them.",
     "custom": "Custom roles follow the permissions set in Settings → Roles.",
     "VIEWER": "Read-only person: sees only the projects a Super Admin adds them to, cannot write or manage; the account lasts 30 days and cannot be extended."
   },
@@ -245,8 +248,8 @@
     "roleChanged": "Role updated.",
     "invalidEmails": "Invalid email: {{emails}}",
     "guestSpaces": "Projects",
-    "guestSpacesHint": "Outsource people only see the selected projects and work there as Project Member.",
-    "memberSpacesHint": "The person joins the selected projects as Project Member and cannot see other projects. You can add more later from project settings.",
+    "guestSpacesHint": "Outsource people only see the selected projects and work there as Team Member.",
+    "memberSpacesHint": "The person joins the selected projects as Team Member and cannot see other projects. You can add more later from project settings.",
     "guestSpacesRequired": "Choose at least one project for an outsource person.",
     "noSpacesToShare": "Create a Project first.",
     "createTitle": "Create account",
@@ -363,9 +366,9 @@
     "WORK_ITEM_PARENT_REQUIRED": "A sub-task must have a parent item.",
     "WORK_ITEM_PARENT_NOT_ALLOWED": "This item can't be placed under the selected parent.",
     "SPACE_KEY_TAKEN": "This key has been used before; choose another.",
-    "OUTSOURCE_NOT_MANAGER": "Outsource people can only join a project as Project Member.",
+    "OUTSOURCE_NOT_MANAGER": "Outsource people can only join a project as Team Member.",
     "HANDOVER_TARGET_REQUIRED": "Choose who takes over the open work.",
-    "MANAGER_REMOVAL_SUPER_ADMIN": "Only a Super Admin can remove a Project Manager.",
+    "MANAGER_REMOVAL_SUPER_ADMIN": "Only a Super Admin can remove a Scrum Master.",
     "GUEST_SPACES_REQUIRED": "Pick at least one project for an outsource person.",
     "CONTAINER_ARCHIVED": "You cannot add to an archived item.",
     "WORK_ITEM_PARENT_SPACE": "The parent must be in the same Project.",
@@ -400,7 +403,7 @@
     "SPRINT_NEXT_INVALID": "The carry-over sprint must be planned and in the same Project.",
     "DOD_INCOMPLETE": "The Definition of Done is incomplete.",
     "DOD_ENFORCED": "The Definition of Done is required in this Project; check every item before moving to Done.",
-    "READINESS_NOT_APPLICABLE": "Definition of Ready/Done only applies to Tasks and Bugs.",
+    "READINESS_NOT_APPLICABLE": "Definition of Done only applies to Tasks and Bugs.",
     "DOC_CONFLICT": "This page was changed elsewhere. Your text was not overwritten; reload the page and continue.",
     "DOC_PARENT_INVALID": "The page cannot be moved under this parent (cycle or too deep).",
     "DOC_DELETED": "The page is in the trash; restore it first.",
@@ -482,7 +485,7 @@
     "TICKET_COMPANY_EXISTS": "A company with this name already exists.",
     "TICKET_COMPANY_CYCLE": "That parent company would create a cycle.",
     "TICKET_SPACE_INVALID": "The selected project is not valid (deleted, archived or the inbox).",
-    "POINTS_LOCKED": "Only the Project Manager can change Story Points once set.",
+    "POINTS_LOCKED": "Only the Scrum Master can change Story Points once set.",
     "SPRINT_SUSPENDED": "This sprint is suspended; nothing can be changed until it is resumed.",
     "SPRINT_SCRUM_MASTER_ONLY": "Only a Super Admin or the Project's Scrum Master can delete or suspend a sprint.",
     "SPRINT_NOT_SUSPENDED": "This sprint is not suspended.",
@@ -499,11 +502,17 @@
     "OUTSOURCE_ACCESS_FORBIDDEN": "Only the project’s Scrum Master, a project manager or a Super Admin can set outsource access.",
     "NOT_OUTSOURCE": "This person is not an outsource account; access is only set for outsource people.",
     "ROLLBACK_CONFIRM_MISMATCH": "The project key you typed does not match this project.",
-    "BACKUP_WRONG_SPACE": "This backup belongs to another project; a project can only be rolled back to its own backup."
+    "BACKUP_WRONG_SPACE": "This backup belongs to another project; a project can only be rolled back to its own backup.",
+    "AI_TURNED_OFF": "AI has been turned off in System Administration.",
+    "AI_SPRINT_GOAL_DISABLED": "AI for sprint goals has been turned off in System Administration.",
+    "SPRINT_GOAL_TOO_SHORT": "The sprint goal must be at least 64 characters.",
+    "ASSIGNEE_REQUIRED": "Tasks, sub-tasks and bugs need an assignee.",
+    "SPACE_ICON_INVALID": "The icon must be a PNG or JPG of at most 1 MB."
   },
   "spaceRoles": {
-    "PROJECT_MANAGER": "Project Manager",
-    "PROJECT_MEMBER": "Project Member"
+    "PROJECT_MANAGER": "Scrum Master",
+    "PRODUCT_OWNER": "Product Owner",
+    "PROJECT_MEMBER": "Team Member"
   },
   "estimationScale": {
     "FIBONACCI": "Fibonacci · 1, 2, 3, 5, 8, 13, 21",
@@ -636,7 +645,13 @@
     "aiEstimateHelp": "The \"Estimate with AI\" button in task details suggests Fibonacci points from the description; points are written only when the user applies them.",
     "aiEstimateMin": "Minimum sentences in the description",
     "aiEstimateMinHelp": "The suggestion is unavailable until the description has this many sentences ({{min}}–{{max}}).",
-    "saved": "Settings saved."
+    "saved": "Settings saved.",
+    "ai": "AI",
+    "aiEnabled": "AI features enabled",
+    "aiEnabledHelp": "When off, the summary, story suggestion, epic split, Story Point estimate and sprint goal AI buttons are hidden and disabled for everyone.",
+    "aiSprintGoal": "Sprint goal: suggest / check with AI",
+    "aiSprintGoalHelp": "In the sprint dialog, AI reads the project description, its epics, the goals of past sprints and what they delivered, then suggests a goal or rates how well the written goal fits the project and the sprint items. The goal is only filled in when the user clicks \"Use\".",
+    "aiDataNote": "When AI is used, the project texts involved (item titles, descriptions, sprint goals) are sent to the AI provider."
   },
   "archive": {
     "title": "Archive and trash",
@@ -768,7 +783,7 @@
     "epicTotals": "Totals",
     "linkedDocs": "Docs",
     "pointsFromSubtasks": "Sum of the sub-tasks; changes with them.",
-    "pointsFixed": "Story Points are set; only the Project Manager can change them.",
+    "pointsFixed": "Story Points are set; only the Scrum Master can change them.",
     "percentDone": "Completion",
     "percentFromSubtasks": "Calculated from the sub-tasks."
   },
@@ -1037,7 +1052,7 @@
     "select": "Select {{key}}",
     "moveToSprint": "Move to {{name}}",
     "moveToBacklog": "Move back to Backlog",
-    "unestimated": "Not estimated",
+    "unestimated": "Unestimated",
     "points": "Story Points",
     "hours": "{{count}} h",
     "movedToSprint": "{{count}} items moved to {{name}}.",
@@ -1103,7 +1118,8 @@
     "errors": {
       "required": "This field is required.",
       "END_BEFORE_START": "The end cannot be before the start.",
-      "TOO_LONG": "A sprint can last at most 8 weeks."
+      "TOO_LONG": "A sprint can last at most 8 weeks.",
+      "SPRINT_GOAL_TOO_SHORT": "The sprint goal must be at least {{min}} characters."
     },
     "start": "Start",
     "complete": "Complete",
@@ -1131,12 +1147,13 @@
     "scopeChangeAdd": "{{name}} is active; adding {{count}} items counts as a scope change and shows in reports.",
     "scopeChangeRemove": "{{name}} is active; removing {{count}} items counts as a scope change and shows in reports.",
     "scopeChangeConfirm": "Continue",
-    "notReadyWarn": "{{count}} items do not meet the Definition of Ready.",
     "treeEmpty": "No sprints yet",
     "suspend": "Suspend",
     "resume": "Resume",
     "suspended": "{{name}} suspended.",
-    "resumed": "{{name}} resumed."
+    "resumed": "{{name}} resumed.",
+    "goalCount": "{{count}} / {{min}} characters",
+    "goalHint": "If written, at least {{min}} characters."
   },
   "board": {
     "title": "Sprint board",
@@ -1190,15 +1207,10 @@
     "progress": "{{done}} / {{total}} items done"
   },
   "readiness": {
-    "dor": "Definition of Ready",
     "dod": "Definition of Done",
     "complete": "Complete",
     "enforced": "Required for Done",
-    "notReady": "Definition of Ready is incomplete",
-    "dorBadge": "DoR {{checked}}/{{total}}",
-    "dorSetting": "Definition of Ready items",
     "dodSetting": "Definition of Done items",
-    "dorPlaceholder": "Acceptance criteria written\nEstimated\nDependencies resolved",
     "dodPlaceholder": "Code reviewed\nTests passing\nDocumentation updated",
     "help": "One item per line, at most {{max}}. Editing an item resets its checkmarks.",
     "dodEnforced": "Required for Done",
@@ -2176,9 +2188,9 @@
     "description": "Download this whole Project (work items, sprints, docs, comments, attachments, statuses, labels) as a single ZIP file.",
     "download": "Download Project backup (ZIP)",
     "sprintDownload": "Download sprint backup (ZIP)",
-    "restoreSpaceTitle": "Restore a Project from backup",
+    "restoreSpaceTitle": "Restore from backup",
     "restoreSpaceHint": "Creates a new Project from a backup you made earlier. Nothing existing is overwritten.",
-    "restoreSpace": "Restore Project from backup…",
+    "restoreSpace": "Restore from backup…",
     "restoreSpaceBody": "The backup is opened as a new Project. Assignees are matched by e-mail; people who are not in this workspace stay unassigned.",
     "restoreSprint": "Restore sprint from backup…",
     "restoreSprintBody": "The sprint backup is added to this Project as a new sprint. Items are created in the list you choose.",
@@ -3278,11 +3290,11 @@
     "nothing": "No open work to hand over.",
     "openItems_one": "{{count}} open item",
     "openItems_other": "{{count}} open items",
-    "isManager": "Project Manager",
+    "isManager": "Scrum Master",
     "to": "Takes over in {{project}}",
     "choose": "Choose who takes over",
     "noCandidates": "Nobody in the project can take over",
-    "managerOf": "Project Manager of: {{projects}}. Remember to assign a new manager there.",
+    "managerOf": "Scrum Master of: {{projects}}. Remember to assign a new manager there.",
     "confirm": "Hand over and remove"
   },
   "outsource": {
@@ -3395,11 +3407,11 @@
   },
   "projectRoles": {
     "title": "Role permissions",
-    "description": "What the Project Manager and Project Members can do in this Project. Changes affect this Project only.",
+    "description": "What the Scrum Master, Product Owner and Team Members can do in this Project. Changes affect this Project only.",
     "permission": "Permission",
     "reset": "Reset to default",
     "saved": "Role permission saved.",
-    "managerOnlySuperAdmin": "Only a Super Admin can change Project Manager permissions."
+    "managerOnlySuperAdmin": "Only a Super Admin can change Scrum Master and Product Owner permissions."
   },
   "effort": {
     "subtitle": "Story Points per sprint: who committed how much and how much they finished. Finished points count on the day they were completed.",
@@ -3506,5 +3518,43 @@
       "READ": "Read",
       "WRITE": "Read + Write"
     }
+  },
+  "aiSprintGoal": {
+    "suggest": "Suggest with AI",
+    "check": "Check with AI",
+    "working": "Reading the project and past sprints…",
+    "suggestion": "Suggested goal",
+    "improved": "Improved goal",
+    "score": "Fit: {{score}} / 100",
+    "verdict": {
+      "FITS": "Fits the project and items",
+      "PARTIAL": "Partly fits",
+      "OFF_TRACK": "Does not fit the project/items"
+    },
+    "tooShort": "The suggestion is shorter than {{min}} characters; complete it before using.",
+    "use": "Use",
+    "dismiss": "Close",
+    "needGoal": "Write a goal first to check it.",
+    "disclaimer": "AI suggestion; review it before saving."
+  },
+  "sprintGoals": {
+    "title": "Sprint goals",
+    "help": "The latest sprint opens here; search to pick another. A goal may be left empty; if written it must be at least {{min}} characters. Goals of completed and cancelled sprints cannot be changed.",
+    "empty": "No sprints yet.",
+    "none": "No goal written.",
+    "goalFor": "{{name}} goal",
+    "saveFor": "Save {{name}} goal",
+    "saved": "{{name}} goal saved.",
+    "search": "Search sprints",
+    "searchPlaceholder": "Search sprints (showing {{name}})…",
+    "noMatch": "No matching sprint."
+  },
+  "spaceIcon": {
+    "upload": "Upload image (PNG/JPG)",
+    "change": "Change image",
+    "remove": "Remove image",
+    "help": "Non-square images are cropped to the centre and resized; up to 1 MB. Without an image the icon below is used.",
+    "saved": "Project icon updated.",
+    "removed": "Project icon removed."
   }
 }

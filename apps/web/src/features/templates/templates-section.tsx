@@ -21,6 +21,7 @@ import {
   useSpaceTemplates,
   useTemplates,
 } from './queries';
+import { SettingsSection } from '@/components/settings-section';
 
 type SourceKind = 'LIST' | 'SPRINT' | 'DOC';
 const SOURCE_KINDS: SourceKind[] = ['LIST', 'SPRINT', 'DOC'];
@@ -35,13 +36,9 @@ function Block({
   children: React.ReactNode;
 }) {
   return (
-    <section className="bg-card mb-5 rounded-lg border">
-      <div className="border-b px-4 py-3">
-        <h2 className="text-sm font-semibold">{title}</h2>
-        {help && <p className="text-muted-foreground mt-0.5 text-xs">{help}</p>}
-      </div>
+    <SettingsSection title={title} description={help}>
       {children}
-    </section>
+    </SettingsSection>
   );
 }
 

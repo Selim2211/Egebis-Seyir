@@ -74,7 +74,10 @@
       "SUBTASK": "New Sub-Task"
     },
     "attach": "Dosya ekle",
-    "removeFile": "{{name}} kaldır"
+    "removeFile": "{{name}} kaldır",
+    "assignee": "Atanan",
+    "unassigned": "Atanmamış",
+    "chooseAssignee": "Atanan seçin"
   },
   "topbar": {
     "search": "Görev, doküman veya kişi ara…",
@@ -116,8 +119,8 @@
   "roleHelp": {
     "OWNER": "Her şeyi yönetir; tüm Projeleri görür, workspace'i silebilir.",
     "ADMIN": "Tüm Projeleri görür; kişileri, rolleri, doküman/video izinlerini ve ayarları yönetir.",
-    "MEMBER": "Yalnızca üyesi olduğu Projeleri görür; Projedeki rolü (Proje Yöneticisi / Proje Üyesi) yetkisini belirler.",
-    "GUEST": "Şirket dışı kişi: yalnızca eklendiği Projeleri görür, Proje Yöneticisi olamaz; doküman ve videolar Super Admin izin verene kadar kapalıdır.",
+    "MEMBER": "Yalnızca üyesi olduğu Projeleri görür; Projedeki rolü (Scrum Master / Product Owner / Team Member) yetkisini belirler.",
+    "GUEST": "Şirket dışı kişi: yalnızca eklendiği Projeleri görür, Scrum Master ya da Product Owner olamaz; doküman ve videolar Super Admin izin verene kadar kapalıdır.",
     "custom": "Özel roller, Ayarlar → Roles içinde belirlenen izinleri izler.",
     "VIEWER": "Salt okunur kişi: yalnızca Super Admin'in eklediği Projeleri görür, yazamaz ve yönetemez; hesap 30 gün sürer ve uzatılamaz."
   },
@@ -245,8 +248,8 @@
     "roleChanged": "Rol güncellendi.",
     "invalidEmails": "Geçersiz e-posta: {{emails}}",
     "guestSpaces": "Projeler",
-    "guestSpacesHint": "Dış kaynak yalnızca seçilen Projeleri görür ve orada Proje Üyesi olarak çalışır.",
-    "memberSpacesHint": "Kişi seçilen Projelere Proje Üyesi olarak eklenir; üyesi olmadığı Projeleri göremez. Sonradan Proje ayarlarından eklenebilir.",
+    "guestSpacesHint": "Dış kaynak yalnızca seçilen Projeleri görür ve orada Team Member olarak çalışır.",
+    "memberSpacesHint": "Kişi seçilen Projelere Team Member olarak eklenir; üyesi olmadığı Projeleri göremez. Sonradan Proje ayarlarından eklenebilir.",
     "guestSpacesRequired": "Dış kaynak için en az bir Proje seç.",
     "noSpacesToShare": "Önce bir Proje oluştur.",
     "createTitle": "Hesap oluştur",
@@ -363,9 +366,9 @@
     "WORK_ITEM_PARENT_REQUIRED": "Sub-task bir üst öğeye bağlı olmalı.",
     "WORK_ITEM_PARENT_NOT_ALLOWED": "Bu öğe seçilen üst öğeye bağlanamaz.",
     "SPACE_KEY_TAKEN": "Bu anahtar daha önce kullanılmış; başka bir anahtar seç.",
-    "OUTSOURCE_NOT_MANAGER": "Dış kaynak bir Projeye yalnızca Proje Üyesi olarak eklenebilir.",
+    "OUTSOURCE_NOT_MANAGER": "Dış kaynak bir Projeye yalnızca Team Member olarak eklenebilir.",
     "HANDOVER_TARGET_REQUIRED": "Açık işleri devralacak kişiyi seç.",
-    "MANAGER_REMOVAL_SUPER_ADMIN": "Proje Yöneticisini yalnızca Super Admin çıkarabilir.",
+    "MANAGER_REMOVAL_SUPER_ADMIN": "Scrum Master’ı yalnızca Super Admin çıkarabilir.",
     "GUEST_SPACES_REQUIRED": "Dış kaynak için en az bir Proje seç.",
     "CONTAINER_ARCHIVED": "Arşivdeki bir öğeye ekleme yapılamaz.",
     "WORK_ITEM_PARENT_SPACE": "Üst öğe aynı Projede olmalı.",
@@ -400,7 +403,7 @@
     "SPRINT_NEXT_INVALID": "Devredilecek sprint planlı ve aynı Projede olmalı.",
     "DOD_INCOMPLETE": "Definition of Done maddeleri tamamlanmamış.",
     "DOD_ENFORCED": "Bu Projede Definition of Done zorunlu; tüm maddeleri işaretlemeden Done'a geçilemez.",
-    "READINESS_NOT_APPLICABLE": "Definition of Ready/Done yalnızca Task ve Bug için geçerli.",
+    "READINESS_NOT_APPLICABLE": "Definition of Done yalnızca Task ve Bug için geçerli.",
     "DOC_CONFLICT": "Bu sayfa başka bir yerde değiştirildi. Yazdıkların üzerine yazılmadı; sayfayı yenileyip devam et.",
     "DOC_PARENT_INVALID": "Sayfa bu üst sayfanın altına taşınamaz (döngü ya da çok derin).",
     "DOC_DELETED": "Sayfa çöp kutusunda; önce geri getir.",
@@ -482,7 +485,7 @@
     "TICKET_COMPANY_EXISTS": "Bu adla bir firma zaten var.",
     "TICKET_COMPANY_CYCLE": "Üst firma seçimi döngü oluşturuyor.",
     "TICKET_SPACE_INVALID": "Seçilen proje geçerli değil (silinmiş, arşivde ya da gelen kutusu).",
-    "POINTS_LOCKED": "Belirlenmiş Story Point'i yalnızca Proje Yöneticisi değiştirebilir.",
+    "POINTS_LOCKED": "Belirlenmiş Story Point'i yalnızca Scrum Master değiştirebilir.",
     "SPRINT_SUSPENDED": "Bu sprint askıya alınmış; geri açılana kadar hiçbir işlem yapılamaz.",
     "SPRINT_SCRUM_MASTER_ONLY": "Sprint silme ve askıya alma yalnızca Super Admin ve Projenin Scrum Master'ı tarafından yapılabilir.",
     "SPRINT_NOT_SUSPENDED": "Bu sprint askıda değil.",
@@ -499,11 +502,17 @@
     "OUTSOURCE_ACCESS_FORBIDDEN": "Dış kaynak yetkisini yalnızca Projenin Scrum Master’ı, yöneticisi ya da Super Admin ayarlar.",
     "NOT_OUTSOURCE": "Bu kişi bir dış kaynak değil; yetki yalnızca dış kaynaklar için ayarlanır.",
     "ROLLBACK_CONFIRM_MISMATCH": "Yazılan Proje anahtarı bu Projeyle uyuşmuyor.",
-    "BACKUP_WRONG_SPACE": "Bu yedek başka bir Projeye ait; yalnızca bu Projenin kendi yedeğine dönülebilir."
+    "BACKUP_WRONG_SPACE": "Bu yedek başka bir Projeye ait; yalnızca bu Projenin kendi yedeğine dönülebilir.",
+    "AI_TURNED_OFF": "Yapay zekâ Sistem Yönetimi'nden kapatılmış.",
+    "AI_SPRINT_GOAL_DISABLED": "Sprint hedefi için AI Sistem Yönetimi'nden kapatılmış.",
+    "SPRINT_GOAL_TOO_SHORT": "Sprint hedefi en az 64 karakter olmalı.",
+    "ASSIGNEE_REQUIRED": "Task, Sub-task ve Bug için atanan zorunlu.",
+    "SPACE_ICON_INVALID": "İkon PNG ya da JPG olmalı ve 1 MB’ı geçmemeli."
   },
   "spaceRoles": {
-    "PROJECT_MANAGER": "Proje Yöneticisi",
-    "PROJECT_MEMBER": "Proje Üyesi"
+    "PROJECT_MANAGER": "Scrum Master",
+    "PRODUCT_OWNER": "Product Owner",
+    "PROJECT_MEMBER": "Team Member"
   },
   "estimationScale": {
     "FIBONACCI": "Fibonacci · 1, 2, 3, 5, 8, 13, 21",
@@ -636,7 +645,13 @@
     "aiEstimateHelp": "Görev detayında \"AI ile tahmin et\" düğmesi açıklamaya bakarak Fibonacci puan önerir; puan yalnızca kullanıcı uygularsa yazılır.",
     "aiEstimateMin": "Açıklamada en az cümle",
     "aiEstimateMinHelp": "Açıklama bu kadar cümle içermiyorsa öneri kullanılamaz ({{min}}–{{max}}).",
-    "saved": "Ayarlar kaydedildi."
+    "saved": "Ayarlar kaydedildi.",
+    "ai": "Yapay zekâ",
+    "aiEnabled": "Yapay zekâ özellikleri açık",
+    "aiEnabledHelp": "Kapatılırsa özet, hikâye önerisi, Epic bölme, Story Point tahmini ve sprint hedefi AI düğmeleri hiçbir kullanıcıda görünmez ve çalışmaz.",
+    "aiSprintGoal": "Sprint hedefi: AI ile öner / kontrol et",
+    "aiSprintGoalHelp": "Sprint penceresinde AI, projenin açıklamasını, Epic'lerini, geçmiş sprint'lerin hedeflerini ve bitirdiklerini okuyarak hedef önerir ya da yazılan hedefin projeye ve sprint'in işlerine uyumunu değerlendirir. Hedef yalnızca kullanıcı \"Kullan\" derse forma yazılır.",
+    "aiDataNote": "AI kullanılınca ilgili projenin metinleri (iş başlıkları, açıklamalar, sprint hedefleri) yapay zekâ sağlayıcısına gönderilir."
   },
   "archive": {
     "title": "Arşiv ve çöp kutusu",
@@ -768,7 +783,7 @@
     "epicTotals": "Toplam",
     "linkedDocs": "Dokümanlar",
     "pointsFromSubtasks": "Alt görevlerin toplamı; alt görevlerden değişir.",
-    "pointsFixed": "Story Point belirlendi; yalnızca Proje Yöneticisi değiştirebilir.",
+    "pointsFixed": "Story Point belirlendi; yalnızca Scrum Master değiştirebilir.",
     "percentDone": "Tamamlanma",
     "percentFromSubtasks": "Alt görevlerden hesaplanır."
   },
@@ -1037,7 +1052,7 @@
     "select": "{{key}} öğesini seç",
     "moveToSprint": "{{name}} sprint'ine taşı",
     "moveToBacklog": "Backlog'a geri al",
-    "unestimated": "Tahmin girilmemiş",
+    "unestimated": "Tahminsiz",
     "points": "Story Point",
     "hours": "{{count}} sa",
     "movedToSprint": "{{count}} öğe {{name}} sprint'ine taşındı.",
@@ -1102,7 +1117,8 @@
     "errors": {
       "required": "Bu alan zorunlu.",
       "END_BEFORE_START": "Bitiş, başlangıçtan önce olamaz.",
-      "TOO_LONG": "Sprint en çok 8 hafta sürebilir."
+      "TOO_LONG": "Sprint en çok 8 hafta sürebilir.",
+      "SPRINT_GOAL_TOO_SHORT": "Sprint hedefi en az {{min}} karakter olmalı."
     },
     "start": "Başlat",
     "complete": "Tamamla",
@@ -1130,12 +1146,13 @@
     "scopeChangeAdd": "{{name}} aktif; {{count}} öğe eklemek kapsam değişikliği sayılır ve raporlarda görünür.",
     "scopeChangeRemove": "{{name}} aktif; {{count}} öğeyi çıkarmak kapsam değişikliği sayılır ve raporlarda görünür.",
     "scopeChangeConfirm": "Devam et",
-    "notReadyWarn": "{{count}} öğe Definition of Ready'ye uymuyor.",
     "treeEmpty": "Henüz sprint yok",
     "suspend": "Askıya al",
     "resume": "Geri aç",
     "suspended": "{{name}} askıya alındı.",
-    "resumed": "{{name}} yeniden açıldı."
+    "resumed": "{{name}} yeniden açıldı.",
+    "goalCount": "{{count}} / {{min}} karakter",
+    "goalHint": "Yazılırsa en az {{min}} karakter."
   },
   "board": {
     "title": "Sprint panosu",
@@ -1189,15 +1206,10 @@
     "progress": "{{done}} / {{total}} öğe bitti"
   },
   "readiness": {
-    "dor": "Definition of Ready",
     "dod": "Definition of Done",
     "complete": "Tamamlandı",
     "enforced": "Done için zorunlu",
-    "notReady": "Definition of Ready tamamlanmamış",
-    "dorBadge": "DoR {{checked}}/{{total}}",
-    "dorSetting": "Definition of Ready maddeleri",
     "dodSetting": "Definition of Done maddeleri",
-    "dorPlaceholder": "Kabul kriteri yazıldı\nTahmin yapıldı\nBağımlılık çözüldü",
     "dodPlaceholder": "Kod gözden geçirildi\nTestler geçti\nDokümantasyon güncellendi",
     "help": "Her satır bir madde, en çok {{max}}. Maddeyi değiştirirsen işaretleri sıfırlanır.",
     "dodEnforced": "Done için zorunlu",
@@ -1322,7 +1334,7 @@
     "progressOf": "{{key}} ilerlemesi",
     "points": "{{done}} / {{total}} puan",
     "items": "{{done}} / {{total}} öğe",
-    "unestimated": "{{count}} öğenin tahmini yok"
+    "unestimated": "{{count}} öğe tahminsiz"
   },
   "docs": {
     "link": "Dokümanlar",
@@ -2175,9 +2187,9 @@
     "description": "Bu Projenin tamamını (iş öğeleri, sprint’ler, dokümanlar, yorumlar, ekler, durumlar, etiketler) tek bir ZIP dosyasında indir.",
     "download": "Proje yedeğini indir (ZIP)",
     "sprintDownload": "Sprint yedeğini indir (ZIP)",
-    "restoreSpaceTitle": "Yedekten Proje geri yükle",
+    "restoreSpaceTitle": "Yedekten geri yükle",
     "restoreSpaceHint": "Daha önce aldığın bir Proje yedeğinden yeni bir Proje açar. Mevcut hiçbir şeyin üzerine yazılmaz.",
-    "restoreSpace": "Yedekten Proje yükle…",
+    "restoreSpace": "Yedekten geri yükle…",
     "restoreSpaceBody": "Yedek, yeni bir Proje olarak açılır. Atananlar e-posta adresiyle eşleşir; bu workspace’te olmayan kişiler atanmamış kalır.",
     "restoreSprint": "Yedekten sprint yükle…",
     "restoreSprintBody": "Sprint yedeği bu Projeye yeni bir sprint olarak eklenir. Öğeler seçtiğin listede açılır.",
@@ -3277,7 +3289,7 @@
     "nothing": "Açık işi yok; devredilecek bir şey bulunmuyor.",
     "openItems_one": "{{count}} açık iş",
     "openItems_other": "{{count}} açık iş",
-    "isManager": "Proje Yöneticisi",
+    "isManager": "Scrum Master",
     "to": "{{project}} için devralan",
     "choose": "Devralacak kişiyi seç",
     "noCandidates": "Projede devralabilecek kimse yok",
@@ -3394,11 +3406,11 @@
   },
   "projectRoles": {
     "title": "Rol yetkileri",
-    "description": "Bu Projede Proje Yöneticisi ve Proje Üyesinin neler yapabileceği. Değişiklik yalnızca bu Projeyi etkiler.",
+    "description": "Bu Projede Scrum Master, Product Owner ve Team Member’ın neler yapabileceği. Değişiklik yalnızca bu Projeyi etkiler.",
     "permission": "Yetki",
     "reset": "Varsayılana dön",
     "saved": "Rol yetkisi kaydedildi.",
-    "managerOnlySuperAdmin": "Proje Yöneticisi yetkilerini yalnızca Super Admin değiştirebilir."
+    "managerOnlySuperAdmin": "Scrum Master ve Product Owner yetkilerini yalnızca Super Admin değiştirebilir."
   },
   "effort": {
     "subtitle": "Sprint bazında Story Point: kim ne kadar üstlendi, ne kadarını bitirdi. Biten puan bittiği güne yazılır.",
@@ -3505,5 +3517,43 @@
       "READ": "Okuma",
       "WRITE": "Okuma + Yazma"
     }
+  },
+  "aiSprintGoal": {
+    "suggest": "AI ile öner",
+    "check": "AI ile kontrol et",
+    "working": "Proje ve geçmiş sprint'ler okunuyor…",
+    "suggestion": "Önerilen hedef",
+    "improved": "İyileştirilmiş hedef",
+    "score": "Uyum: {{score}} / 100",
+    "verdict": {
+      "FITS": "Projeye ve işlere uygun",
+      "PARTIAL": "Kısmen uygun",
+      "OFF_TRACK": "Projeyle/işlerle uyumsuz"
+    },
+    "tooShort": "Öneri {{min}} karakterden kısa; kullanmadan önce tamamla.",
+    "use": "Kullan",
+    "dismiss": "Kapat",
+    "needGoal": "Kontrol için önce bir hedef yaz.",
+    "disclaimer": "AI önerisidir; kaydetmeden önce gözden geçir."
+  },
+  "sprintGoals": {
+    "title": "Sprint hedefleri",
+    "help": "Son sprint’in hedefi burada açılır; diğer sprint’leri aratarak seçin. Hedef boş bırakılabilir; yazılırsa en az {{min}} karakter olmalı. Biten ve iptal edilen sprint’lerin hedefi değiştirilemez.",
+    "empty": "Henüz sprint yok.",
+    "none": "Hedef yazılmamış.",
+    "goalFor": "{{name}} hedefi",
+    "saveFor": "{{name}} hedefini kaydet",
+    "saved": "{{name}} hedefi kaydedildi.",
+    "search": "Sprint ara",
+    "searchPlaceholder": "Sprint ara (şu an: {{name}})…",
+    "noMatch": "Eşleşen sprint yok."
+  },
+  "spaceIcon": {
+    "upload": "Resim yükle (PNG/JPG)",
+    "change": "Resmi değiştir",
+    "remove": "Resmi kaldır",
+    "help": "Kare olmayan resim ortadan kırpılır ve küçültülür; en fazla 1 MB. Resim yoksa aşağıdaki hazır ikon kullanılır.",
+    "saved": "Proje ikonu güncellendi.",
+    "removed": "Proje ikonu kaldırıldı."
   }
 }

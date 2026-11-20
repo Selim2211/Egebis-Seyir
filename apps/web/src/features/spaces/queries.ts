@@ -235,6 +235,10 @@ export function useUpdateWorkspaceSettings() {
       mutation.mutate(body, {
         onSuccess: () => {
           void qc.invalidateQueries({ queryKey: meQuery.queryKey });
+          // AI anahtarları değişmiş olabilir (ADR-175): AI düğmeleri hemen güncellensin.
+          void qc.invalidateQueries({
+            predicate: (q) => q.queryKey[0] === 'workspaces' && q.queryKey[2] === 'ai-status',
+          });
           options?.onSuccess?.();
         },
       }),

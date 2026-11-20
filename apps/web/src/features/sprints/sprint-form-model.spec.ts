@@ -50,6 +50,17 @@ describe('validateSprint', () => {
     });
     expect(validateSprint({ ...ok, endDate: '2027-01-01' })).toEqual({ endDate: 'TOO_LONG' });
   });
+
+  it('hedef boş olabilir; yazılırsa en az 64 karakter (boşluklar sayılmaz)', () => {
+    expect(validateSprint({ ...ok, goal: '   ' })).toEqual({});
+    expect(validateSprint({ ...ok, goal: 'Giriş ekranı' })).toEqual({
+      goal: 'SPRINT_GOAL_TOO_SHORT',
+    });
+    expect(validateSprint({ ...ok, goal: ` ${'a'.repeat(63)} ` })).toEqual({
+      goal: 'SPRINT_GOAL_TOO_SHORT',
+    });
+    expect(validateSprint({ ...ok, goal: 'a'.repeat(64) })).toEqual({});
+  });
 });
 
 describe('toSprintBody', () => {

@@ -1,4 +1,4 @@
-import type { SprintSummary } from '@scrum/shared';
+import { SPRINT_GOAL_MIN_LENGTH, type SprintSummary } from '@scrum/shared';
 import { type FormEvent, useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -15,6 +15,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { AiSprintGoal } from '@/features/ai/ai-sprint-goal';
 import { todayDay } from '@/lib/format';
 import { useCreateSprint, useUpdateSprint } from './queries';
 import {
@@ -24,6 +25,7 @@ import {
   toSprintBody,
   validateSprint,
 } from './sprint-form-model';
+import { GoalCount } from './goal-count';
 
 interface Props {
   open: boolean;
@@ -108,7 +110,7 @@ function SprintForm({
 
   const message = (field: keyof SprintFormErrors) => {
     const code = errors[field];
-    return code ? t(`sprints.errors.${code}`) : undefined;
+    return code ? t(`sprints.errors.${code}`, { min: SPRINT_GOAL_MIN_LENGTH }) : undefined;
   };
 
   return (
@@ -135,9 +137,31 @@ function SprintForm({
             id={`${ids}-goal`}
             value={values.goal}
             maxLength={500}
-            rows={2}
+            rows={3}
             placeholder={t('sprints.goalPlaceholder')}
+            aria-invalid={errors.goal ? true : undefined}
+            aria-describedby={`${ids}-goal-help`}
             onChange={(e) => change({ goal: e.target.value })}
+          />
+          <div id={`${ids}-goal-help`} className="flex flex-wrap justify-between gap-2 text-xs">
+            {message('goal') ? (
+              <span className="text-destructive">{message('goal')}</span>
+            ) : (
+              <span className="text-muted-foreground">
+                {t('sprints.goalHint', { min: SPRINT_GOAL_MIN_LENGTH })}
+              </span>
+            )}
+            <GoalCount length={values.goal.trim().length} />
+          </div>
+          <AiSprintGoal
+            spaceId={spaceId}
+            sprintId={editing?.id}
+            name={values.name}
+            goal={values.goal}
+            onUse={(goal) => {
+              change({ goal });
+              setErrors((e) => ({ ...e, goal: undefined }));
+            }}
           />
         </div>
         <div className="grid grid-cols-2 gap-3">

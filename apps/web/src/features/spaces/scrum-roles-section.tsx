@@ -3,12 +3,11 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { NativeSelect } from '@/components/form';
 import { Button } from '@/components/ui/button';
-import { useSpaceMembers } from '@/features/spaces/queries';
 import { useCurrentWorkspace } from '@/features/workspace/queries';
 import { apiRequest, NoContent } from '@/lib/api';
 import { useErrorMessage } from '@/lib/use-error-message';
+import { SettingsSection } from '@/components/settings-section';
 
 function Card({
   title,
@@ -22,13 +21,9 @@ function Card({
   testId: string;
 }) {
   return (
-    <section className="bg-card mb-5 rounded-lg border" data-testid={testId}>
-      <div className="border-b px-4 py-3">
-        <h2 className="text-sm font-semibold">{title}</h2>
-        <p className="text-muted-foreground mt-0.5 text-xs">{description}</p>
-      </div>
+    <SettingsSection title={title} description={description} testId={testId}>
       <div className="flex flex-col gap-3 p-4">{children}</div>
-    </section>
+    </SettingsSection>
   );
 }
 
@@ -48,86 +43,6 @@ function useSpacePut<T>(spaceId: string, suffix: string, doneKey: string) {
     onSettled: () => qc.invalidateQueries({ queryKey: ['workspaces', workspaceId] }),
   });
 }
-
-/**
- * Projenin tek Product Owner'ı ve Scrum Master'ı. Bir kişi birden çok Projede bu görevi
- * üstlenebilir, ama bir Projede her görev için yalnızca bir kişi vardır. Backlog'a açılan Epik
- * ve Task'ların sahibi otomatik Product Owner olur; sprint silme/askıya alma Scrum Master'dadır.
- */
-export function ScrumRolesSection({ space, canEdit }: { space: SpaceDetail; canEdit: boolean }) {
-  const { t } = useTranslation();
-  const { data } = useSpaceMembers(space.id);
-  const save = useSpacePut<{ productOwnerId: string | null; scrumMasterId: string | null }>(
-    space.id,
-    'scrum-roles',
-    'scrumRoles.saved',
-  );
-  const members = data?.members ?? [];
-  const po = space.productOwner?.id ?? '';
-  const sm = space.scrumMaster?.id ?? '';
-  const change = (next: { po?: string; sm?: string }) =>
-    save.mutate({
-      productOwnerId: (next.po ?? po) || null,
-      scrumMasterId: (next.sm ?? sm) || null,
-    });
-
-  const field = (
-    id: string,
-    label: string,
-    value: string,
-    current: SpaceDetail['productOwner'],
-    onChange: (v: string) => void,
-    hint?: string,
-  ) => (
-    <div className="flex flex-col gap-1.5">
-      <label htmlFor={id} className="text-sm font-medium">
-        {label}
-      </label>
-      {canEdit ? (
-        <NativeSelect
-          id={id}
-          value={value}
-          disabled={save.isPending}
-          onChange={(e) => onChange(e.target.value)}
-          className="h-9"
-        >
-          <option value="">{t('scrumRoles.none')}</option>
-          {members.map((m) => (
-            <option key={m.userId} value={m.userId}>
-              {m.name}
-            </option>
-          ))}
-        </NativeSelect>
-      ) : (
-        <p className="text-sm">{current?.name ?? t('scrumRoles.none')}</p>
-      )}
-      {hint && <p className="text-muted-foreground text-xs">{hint}</p>}
-    </div>
-  );
-
-  return (
-    <Card
-      title={t('scrumRoles.title')}
-      description={t('scrumRoles.description')}
-      testId="scrum-roles"
-    >
-      <div className="grid gap-3 sm:grid-cols-2">
-        {field('scrum-po', t('scrumRoles.productOwner'), po, space.productOwner, (v) =>
-          change({ po: v }),
-        )}
-        {field(
-          'scrum-sm',
-          t('scrumRoles.scrumMaster'),
-          sm,
-          space.scrumMaster,
-          (v) => change({ sm: v }),
-          t('scrumRoles.scrumMasterHint'),
-        )}
-      </div>
-    </Card>
-  );
-}
-
 /**
  * Bu Projeye e-postayla Bug gönderebilecek adresler. Her satır bir adres; isim kısmında `*`
  * (her uzunlukta) ve `?` (tek karakter) kullanılabilir. Liste boşsa kısıtlama yoktur.

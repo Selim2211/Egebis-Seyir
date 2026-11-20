@@ -456,8 +456,8 @@ export const recentActivityQuery = (workspaceId: string) =>
 
 /** DoD/DoR işaretleri (ADR-065): işaretli madde metinlerinin tamamı gönderilir. */
 export const useSetReadiness = () =>
-  useWorkspaceMutation((id, input: { itemId: string; kind: 'dor' | 'dod'; checked: string[] }) =>
-    apiRequest(`${ws(id)}/items/${input.itemId}/${input.kind}`, NoContent, {
+  useWorkspaceMutation((id, input: { itemId: string; checked: string[] }) =>
+    apiRequest(`${ws(id)}/items/${input.itemId}/dod`, NoContent, {
       method: 'PUT',
       body: { checked: input.checked },
     }),

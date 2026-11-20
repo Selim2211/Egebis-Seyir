@@ -14,6 +14,7 @@ import { useRoleLabel } from '@/features/roles/queries';
 import { useCurrentWorkspace } from '@/features/workspace/queries';
 import { apiRequest, NoContent } from '@/lib/api';
 import { useErrorMessage } from '@/lib/use-error-message';
+import { SettingsSection } from '@/components/settings-section';
 
 /**
  * Proje ayarları → Rol yetkileri (ADR-161). Proje Yöneticisi ve Proje Üyesi için Proje bazında
@@ -52,11 +53,11 @@ export function ProjectRolesSection({ spaceId }: { spaceId: string }) {
     });
 
   return (
-    <section className="bg-card mb-5 rounded-lg border" data-testid="project-roles">
-      <div className="border-b px-4 py-3">
-        <h2 className="text-sm font-semibold">{t('projectRoles.title')}</h2>
-        <p className="text-muted-foreground mt-0.5 text-xs">{t('projectRoles.description')}</p>
-      </div>
+    <SettingsSection
+      title={t('projectRoles.title')}
+      description={t('projectRoles.description')}
+      testId="project-roles"
+    >
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
@@ -112,7 +113,7 @@ export function ProjectRolesSection({ spaceId }: { spaceId: string }) {
           {t('projectRoles.managerOnlySuperAdmin')}
         </p>
       )}
-    </section>
+    </SettingsSection>
   );
 }
 

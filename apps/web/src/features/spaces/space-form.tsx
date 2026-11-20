@@ -3,6 +3,7 @@ import {
   type EstimationScale,
   SPACE_COLORS,
   SPACE_ICONS,
+  SPACE_DESCRIPTION_MAX,
   SPRINT_LENGTH_WEEKS,
 } from '@scrum/shared';
 import { useId } from 'react';
@@ -127,7 +128,7 @@ export function SpaceFields({
         <Textarea
           id={descriptionId}
           rows={2}
-          maxLength={500}
+          maxLength={SPACE_DESCRIPTION_MAX}
           value={values.description}
           placeholder={t('spaceForm.descriptionPlaceholder')}
           onChange={(e) => onChange({ description: e.target.value })}

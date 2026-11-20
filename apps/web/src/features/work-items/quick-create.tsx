@@ -1,4 +1,4 @@
-import type { WorkItemType } from '@scrum/shared';
+import { requiresAssignee, type WorkItemType } from '@scrum/shared';
 import { Plus } from 'lucide-react';
 import { type FormEvent, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -9,6 +9,7 @@ import { useErrorMessage } from '@/lib/use-error-message';
 import { creatableTypes } from './item-tree';
 import { useCreateItem } from './queries';
 import { QUICK_CREATE_INPUT_ID } from './quick-create-id';
+import { useMe } from '@/features/auth/queries';
 
 /**
  * Satır içi hızlı oluşturma (brief §5.4): tip seç, başlığı yaz, Enter. Başlık alanı odakta
@@ -30,6 +31,7 @@ export function QuickCreate({
   const { t } = useTranslation();
   const errorMessage = useErrorMessage();
   const create = useCreateItem();
+  const me = useMe();
   // Bug'lar Sprint panosundaki Bugs ekranından açılır (ADR-117).
   const types: WorkItemType[] = creatableTypes(scrumEnabled, parent?.type ?? null).filter(
     (type) => type !== 'BUG',
@@ -44,7 +46,16 @@ export function QuickCreate({
     const value = title.trim();
     if (!value) return;
     create.mutate(
-      { listId, body: { type: selected, title: value, parentId: parent?.id ?? null } },
+      {
+        listId,
+        body: {
+          type: selected,
+          title: value,
+          parentId: parent?.id ?? null,
+          // Atanan zorunlu türlerde oluşturan kişi atanır (ADR-176); sonradan değiştirilebilir.
+          assigneeIds: requiresAssignee(selected) ? [me.user.id] : [],
+        },
+      },
       {
         onSuccess: ({ key }) => {
           setTitle('');

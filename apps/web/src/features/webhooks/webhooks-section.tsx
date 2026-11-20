@@ -23,6 +23,7 @@ import {
   useUpdateWebhook,
   useWebhooks,
 } from './queries';
+import { SettingsSection } from '@/components/settings-section';
 
 /** Space ayarlarında giden webhook'lar ve sohbet bildirimleri (brief §5.18, ADR-087/088). */
 export function WebhooksSection({ spaceId }: { spaceId: string }) {
@@ -36,11 +37,7 @@ export function WebhooksSection({ spaceId }: { spaceId: string }) {
   const webhooks = data?.webhooks ?? [];
 
   return (
-    <section className="bg-card mb-5 rounded-lg border">
-      <div className="border-b px-4 py-3">
-        <h2 className="text-sm font-semibold">{t('webhooks.title')}</h2>
-        <p className="text-muted-foreground mt-0.5 text-xs">{t('webhooks.help')}</p>
-      </div>
+    <SettingsSection title={t('webhooks.title')} description={t('webhooks.help')}>
       {webhooks.length === 0 && (
         <p className="text-muted-foreground px-4 py-3 text-sm">{t('webhooks.none')}</p>
       )}
@@ -106,7 +103,7 @@ export function WebhooksSection({ spaceId }: { spaceId: string }) {
             .catch((error: unknown) => toast.error(errorMessage(error)));
         }}
       />
-    </section>
+    </SettingsSection>
   );
 }
 

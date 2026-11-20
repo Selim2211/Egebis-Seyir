@@ -23,6 +23,7 @@ import { useCreateItem, useChecklist, useUpdateItemFields } from '@/features/wor
 import { useCurrentWorkspace } from '@/features/workspace/queries';
 import { apiRequest } from '@/lib/api';
 import { useErrorMessage } from '@/lib/use-error-message';
+import { useMe } from '@/features/auth/queries';
 
 /** Düz metni satır satır Tiptap belgesine çevirir. */
 function paragraphs(text: string) {
@@ -220,6 +221,7 @@ function SplitResult({ item, data }: { item: WorkItemDetail; data: AiSplitSugges
   const { t } = useTranslation();
   const errorMessage = useErrorMessage();
   const create = useCreateItem();
+  const me = useMe();
   const update = useUpdateItemFields();
   const [created, setCreated] = useState<Set<number>>(new Set());
 
@@ -228,7 +230,7 @@ function SplitResult({ item, data }: { item: WorkItemDetail; data: AiSplitSugges
     try {
       const made = await create.mutateAsync({
         listId: item.listId,
-        body: { type: 'TASK', title: story.title, parentId: item.id },
+        body: { type: 'TASK', title: story.title, parentId: item.id, assigneeIds: [me.user.id] },
       });
       if (story.description.trim()) {
         await update.mutateAsync({
