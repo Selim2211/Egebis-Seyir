@@ -43,7 +43,11 @@ describe('Epic detayı ve Epic listesi (gerçek veritabanı)', () => {
 
   async function seed() {
     const s = await space();
-    const epic = await item(s.listId, { type: 'EPIC', title: 'Giriş yenileme', goal: 'SSO hazır' });
+    const epic = await item(s.listId, {
+      type: 'EPIC',
+      title: 'Giriş yenileme',
+      goal: 'SSO hazır — ekip bu sprintte kapsamı uçtan uca teslim edip demoya hazır hale getirecek',
+    });
     const child = (type: string, points: number | null, categoryName: 'DONE' | 'ACTIVE' | null) =>
       item(s.listId, { type, title: `${type} ${points}`, parentId: epic.id, points }).then(
         async (created) => {
@@ -86,7 +90,11 @@ describe('Epic detayı ve Epic listesi (gerçek veritabanı)', () => {
 
     const before = await epics(s.id);
     expect(before.epics.map((e) => e.title)).toEqual(['Giriş yenileme', 'Boş Epic']);
-    expect(before.epics[0]).toMatchObject({ id: epic.id, goal: 'SSO hazır', progress: 50 });
+    expect(before.epics[0]).toMatchObject({
+      id: epic.id,
+      goal: 'SSO hazır — ekip bu sprintte kapsamı uçtan uca teslim edip demoya hazır hale getirecek',
+      progress: 50,
+    });
     expect(before.epics[1]).toMatchObject({ progress: 0 });
     expect(before.epics[1]!.stats.itemCount).toBe(0);
 

@@ -75,12 +75,17 @@ describe('Analiz: öngörü ve risk (gerçek veritabanı)', { timeout: 60_000 },
         .expect(201)
     ).body as { id: string };
 
+    // Kişi yavaşlaması yalnızca "Eski" işlerle ölçülür: diğerleri atanansız kalır.
+    await ctx.prisma.workItemAssignee.deleteMany({
+      where: { workItem: { title: { not: { startsWith: 'Eski' } } } },
+    });
+
     const iso = (d: Date) => d.toISOString().slice(0, 10);
     const sprint = (
       await owner
         .post(api(`/spaces/${spaceId}/sprints`), {
           name: 'Sprint X',
-          goal: 'Hedef',
+          goal: 'Hedef — ekip bu sprintte kapsamı uçtan uca teslim edip demoya hazır hale getirecek',
           startDate: iso(new Date()),
           endDate: iso(new Date(Date.now() + 13 * DAY)),
         })

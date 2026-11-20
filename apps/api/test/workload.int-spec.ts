@@ -70,7 +70,8 @@ describe('Kişi bazlı iş yükü (gerçek veritabanı)', () => {
     });
     await owner.patch(api(`/items/${finished.id}`), { statusId: done }).expect(204);
     await item(s.listId, { type: 'EPIC', title: 'Epic', assigneeIds: [ownerId] });
-    await item(s.listId, { type: 'TASK', title: 'Sahipsiz', estimateHours: 3 });
+    const loose = await item(s.listId, { type: 'TASK', title: 'Sahipsiz', estimateHours: 3 });
+    await ctx.prisma.workItemAssignee.deleteMany({ where: { workItemId: loose.id } });
 
     const data = await workload(s.id);
     expect(data.sprint).toBeNull();
@@ -141,7 +142,7 @@ describe('Kişi bazlı iş yükü (gerçek veritabanı)', () => {
       await owner
         .post(api(`/spaces/${s.id}/sprints`), {
           name: 'Sprint 1',
-          goal: 'g',
+          goal: 'g — ekip bu sprintte kapsamı uçtan uca teslim edip demoya hazır hale getirecek',
           startDate: TODAY,
           endDate: addDays(TODAY, 9),
         })

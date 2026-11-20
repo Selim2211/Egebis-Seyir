@@ -81,6 +81,8 @@ describe('PO / Scrum Master atama kuralları', () => {
     const created = (
       await owner.post(api(`/lists/${listId}/items`), { type: 'TASK', title: 'Boşta' }).expect(201)
     ).body as CreatedItem;
+    // Atanansız iş (eski atanansız kayıtları temsil eder).
+    await ctx.prisma.workItemAssignee.deleteMany({ where: { workItemId: created.id } });
     await po.patch(api(`/items/${created.id}`), { assigneeIds: [dev1] }).expect(204);
     // Atananı değiştirmeyen güncelleme (aynı küme) PO için serbesttir.
     await po
@@ -107,7 +109,7 @@ describe('PO / Scrum Master atama kuralları', () => {
       await owner
         .post(api(`/spaces/${spaceId}/sprints`), {
           name: 'Sprint 1',
-          goal: 'Hedef',
+          goal: 'Hedef — ekip bu sprintte kapsamı uçtan uca teslim edip demoya hazır hale getirecek',
           startDate: new Date().toISOString().slice(0, 10),
           endDate: new Date(Date.now() + 9 * 86_400_000).toISOString().slice(0, 10),
         })

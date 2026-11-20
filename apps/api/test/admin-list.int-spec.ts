@@ -148,7 +148,7 @@ describe(
       expect(res.bugs.aging.reduce((n, a) => n + a.count, 0)).toBe(res.bugs.open);
       expect(res.bugs.oldestOpen).not.toBeNull();
       expect(res.totals.unassignedOpen).toBeGreaterThanOrEqual(1);
-      expect(res.workload[0]).toMatchObject({ userId: me.user.id, open: 1, overdue: 1 });
+      expect(res.workload[0]).toMatchObject({ userId: me.user.id, open: 3, overdue: 1 });
       expect(res.velocity).toEqual([]);
 
       // Kutucuk sayısı = liste sayısı.
@@ -178,7 +178,7 @@ describe(
         ['bugs-route', 'company', res.bugs.routing.company],
         ['bugs-route', 'none', res.bugs.routing.unrouted],
         ['bugs-age', 'D1', res.bugs.aging.find((a) => a.bucket === 'D1')!.count],
-        ['person', me.user.id, 1],
+        ['person', me.user.id, 3],
         ['project', spaceId, res.projects.find((p) => p.key === 'MOB')!.openItems],
       ];
       for (const [kind, value, expected] of pairs) {
@@ -196,7 +196,9 @@ describe(
       });
       const mine = await list('person', me.user.id);
       expect(mine.valueLabel).toBeTruthy();
-      expect(mine.items[0]).toMatchObject({ title: 'Geciken', assignees: [{ id: me.user.id }] });
+      expect(mine.items.find((i) => i.title === 'Geciken')).toMatchObject({
+        assignees: [{ id: me.user.id }],
+      });
 
       // Geçersiz değer boş liste verir, hata atmaz.
       expect((await list('bugs-severity', 'YOK')).total).toBe(0);

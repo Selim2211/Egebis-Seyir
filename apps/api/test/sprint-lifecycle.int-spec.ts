@@ -42,7 +42,7 @@ describe('Sprint yaşam döngüsü (gerçek veritabanı)', () => {
       await owner
         .post(api(`/spaces/${spaceId}/sprints`), {
           name: 'Sprint 1',
-          goal: 'Giriş akışı',
+          goal: 'Giriş akışı — ekip bu sprintte kapsamı uçtan uca teslim edip demoya hazır hale getirecek',
           startDate: '2026-10-05',
           endDate: '2026-10-16',
           ...body,

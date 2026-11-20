@@ -115,7 +115,7 @@ describe('İş öğeleri (gerçek veritabanı)', () => {
       const epic = await create(s.listId, {
         type: 'EPIC',
         title: 'E',
-        goal: 'Hedef',
+        goal: 'Hedef — ekip bu sprintte kapsamı uçtan uca teslim edip demoya hazır hale getirecek',
         tshirtSize: 'L',
       });
       const task = await create(s.listId, { type: 'TASK', title: 'T', parentId: epic.id });
@@ -170,6 +170,7 @@ describe('İş öğeleri (gerçek veritabanı)', () => {
       await create(s.listId, {
         type: 'BUG',
         title: 'Çökme',
+        assigneeIds: [owner.userId!],
         severity: 'CRITICAL',
         stepsToReproduce: '1. Aç',
         points: 3,
@@ -292,8 +293,11 @@ describe('İş öğeleri (gerçek veritabanı)', () => {
         assignees: [{ id: elifId, name: 'Elif Demir' }],
         labels: [{ id: label, name: 'ön yüz' }],
       });
-      await owner.patch(api(`/items/${t.id}`), { assigneeIds: [], labelIds: [] }).expect(204);
-      expect(await item(t.id)).toMatchObject({ assignees: [], labels: [] });
+      // Atanan tamamen kaldırılamaz (ADR-176); etiketler kaldırılabilir.
+      const removed = await owner.patch(api(`/items/${t.id}`), { assigneeIds: [] }).expect(422);
+      expect(removed.body).toEqual({ code: 'ASSIGNEE_REQUIRED' });
+      await owner.patch(api(`/items/${t.id}`), { labelIds: [] }).expect(204);
+      expect(await item(t.id)).toMatchObject({ assignees: [{ id: elifId }], labels: [] });
 
       const stranger = '019a0000-0000-7000-8000-000000000000';
       await owner.patch(api(`/items/${t.id}`), { assigneeIds: [stranger] }).expect(404);
@@ -548,9 +552,9 @@ describe('İş öğeleri (gerçek veritabanı)', () => {
         expect(await item(id)).toMatchObject({
           priority: 'URGENT',
           statusId: done.id,
-          assignees: [{ id: elifId }],
           labels: [{ id: label }],
         });
+        expect((await item(id)).assignees.map((x) => x.id)).toContain(elifId);
         expect((await item(id)).completedAt).not.toBeNull();
       }
       await owner
@@ -559,7 +563,10 @@ describe('İş öğeleri (gerçek veritabanı)', () => {
           patch: { removeAssigneeIds: [elifId], removeLabelIds: [label] },
         })
         .expect(204);
-      expect(await item(a.id)).toMatchObject({ assignees: [], labels: [] });
+      expect(await item(a.id)).toMatchObject({
+        assignees: [expect.objectContaining({ name: 'Zeynep Kaya' })],
+        labels: [],
+      });
 
       await owner
         .post(api(`/spaces/${s.id}/items/bulk`), {

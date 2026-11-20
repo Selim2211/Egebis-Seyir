@@ -119,7 +119,7 @@ describe('Projeyi yedeğe döndürme (gerçek veritabanı)', () => {
       await owner
         .post(api(`/spaces/${created.id}/sprints`), {
           name: 'Sprint 1',
-          goal: 'Ödeme',
+          goal: 'Ödeme — ekip bu sprintte kapsamı uçtan uca teslim edip demoya hazır hale getirecek',
           startDate: '2026-10-05',
           endDate: '2026-10-16',
         })
@@ -180,9 +180,9 @@ describe('Projeyi yedeğe döndürme (gerçek veritabanı)', () => {
 
   /** Yedekten sonra Projede her türden değişiklik yapar. */
   async function mutate(s: Awaited<ReturnType<typeof seed>>) {
-    await owner
-      .patch(api(`/items/${s.story.id}`), { title: 'DEĞİŞTİ', assigneeIds: [] })
-      .expect(204);
+    await owner.patch(api(`/items/${s.story.id}`), { title: 'DEĞİŞTİ' }).expect(204);
+    // Atananlar kaldırılır (API atananı tamamen kaldırmaya izin vermez, ADR-176).
+    await ctx.prisma.workItemAssignee.deleteMany({ where: { workItemId: s.story.id } });
     await ctx.prisma.workItem.update({ where: { id: s.story.id }, data: { points: 13 } });
     await owner.delete(api(`/items/${s.sub.id}`)).expect(204);
     await ctx.prisma.workItem.deleteMany({ where: { id: s.other.id } }); // kalıcı silinmiş öğe

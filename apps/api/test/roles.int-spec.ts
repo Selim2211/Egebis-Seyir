@@ -63,7 +63,7 @@ describe('Özel roller ve izin matrisi (ADR-112)', () => {
         .filter((r) => r.scope === 'SPACE' && r.isSystem)
         .map((r) => r.key)
         .sort(),
-    ).toEqual(['PROJECT_MANAGER', 'PROJECT_MEMBER']);
+    ).toEqual(['PRODUCT_OWNER', 'PROJECT_MANAGER', 'PROJECT_MEMBER']);
     // Sistem dışı tek rol, test yardımcısının salt okuma rolüdür (helpers.setupOwner).
     expect(list.filter((r) => !r.isSystem).map((r) => r.key)).toEqual(['VIEWER']);
     expect((await byKey('OWNER')).memberCount).toBe(1);

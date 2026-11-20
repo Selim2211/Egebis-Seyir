@@ -55,6 +55,8 @@ describe('Yönetici paneli (gerçek veritabanı)', { timeout: 30_000 }, () => {
 
     const bugOpen = await item({ type: 'BUG', title: 'Açık hata', severity: 'CRITICAL' });
     const bugDone = await item({ type: 'BUG', title: 'Çözülen hata', severity: 'MINOR' });
+    // Hatalar atanansız kalmalı ("açık atanmamış" sayacı); API atanansız Bug'a izin vermediği için temizlenir.
+    await ctx.prisma.workItemAssignee.deleteMany({ where: { workItem: { type: 'BUG' } } });
     await owner.patch(api(`/items/${bugDone.id}`), { statusId: done.id }).expect(204);
     const taskOverdue = await item({
       type: 'TASK',
@@ -70,7 +72,7 @@ describe('Yönetici paneli (gerçek veritabanı)', { timeout: 30_000 }, () => {
       await owner
         .post(api(`/spaces/${spaceId}/sprints`), {
           name: 'Sprint 1',
-          goal: 'Hedef',
+          goal: 'Hedef — ekip bu sprintte kapsamı uçtan uca teslim edip demoya hazır hale getirecek',
           startDate: new Date().toISOString().slice(0, 10),
           endDate: new Date(Date.now() + 9 * 86_400_000).toISOString().slice(0, 10),
         })
@@ -116,7 +118,7 @@ describe('Yönetici paneli (gerçek veritabanı)', { timeout: 30_000 }, () => {
     expect(project.sprint).toMatchObject({ name: 'Sprint 1', totalItems: 3, doneItems: 1 });
     expect(project.sprint!.daysLeft).toBeGreaterThan(0);
     expect(res.workload).toEqual([
-      expect.objectContaining({ userId: me.user.id, open: 1, overdue: 1 }),
+      expect.objectContaining({ userId: me.user.id, open: 2, overdue: 1 }),
     ]);
     expect(res.throughput.at(-1)!.completed).toBe(2);
     expect(bugOpen.key).toBeTruthy();

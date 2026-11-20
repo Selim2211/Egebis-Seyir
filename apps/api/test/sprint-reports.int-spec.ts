@@ -42,7 +42,7 @@ describe('Sprint raporları: burndown ve velocity (gerçek veritabanı)', () => 
       await owner
         .post(api(`/spaces/${spaceId}/sprints`), {
           name,
-          goal: 'Hedef',
+          goal: 'Hedef — ekip bu sprintte kapsamı uçtan uca teslim edip demoya hazır hale getirecek',
           startDate: TODAY,
           endDate: addDays(TODAY, 9),
         })

@@ -95,11 +95,12 @@ describe('Yönetici 3. tur', () => {
       .put(api(`/spaces/${spaceId}/scrum-roles`), { productOwnerId: canId, scrumMasterId: null })
       .expect(403);
     await owner
-      .put(api(`/spaces/${spaceId}/scrum-roles`), { productOwnerId: elifId, scrumMasterId: elifId })
+      .put(api(`/spaces/${spaceId}/scrum-roles`), { productOwnerId: elifId, scrumMasterId: null })
       .expect(204);
     const detail = (await owner.get(api(`/spaces/${spaceId}`)).expect(200)).body as SpaceDetail;
     expect(detail.productOwner?.id).toBe(elifId);
-    expect(detail.scrumMaster?.id).toBe(elifId);
+    // Bir kişi tek rol taşır (ADR-176): Elif PO oldu, boşaltılan Scrum Master görevi boştur.
+    expect(detail.scrumMaster).toBeNull();
 
     const make = async (type: string, extra: object = {}) =>
       (

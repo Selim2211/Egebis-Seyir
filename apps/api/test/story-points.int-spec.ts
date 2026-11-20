@@ -163,6 +163,8 @@ describe('Story Point, alt görev toplamı ve yüzde (ADR-107)', () => {
       assigneeIds: [elif.id],
     });
     const b = await create(s.listId, { type: 'TASK', title: 'B', points: 2 });
+    // B atanansız kalmalı (kişi dağılımında "atanmamış" satırı).
+    await ctx.prisma.workItemAssignee.deleteMany({ where: { workItemId: b.id } });
     await owner.patch(api(`/items/${a.id}`), { percentDone: 50 }).expect(204);
     await owner
       .post(api(`/spaces/${s.id}/backlog/move`), { itemIds: [a.id, b.id], sprintId: sp.id })

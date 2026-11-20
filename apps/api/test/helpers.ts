@@ -37,6 +37,8 @@ export async function resetState(ctx: TestContext): Promise<void> {
 export class Client {
   private readonly agent: ReturnType<typeof request.agent>;
   private csrf = '';
+  /** Oturum sahibinin kimliği; Task/Sub-task açarken atanan verilmezse atanır (ADR-176). */
+  userId: string | null = null;
 
   private constructor(app: INestApplication) {
     this.agent = request.agent(app.getHttpServer() as Parameters<typeof request.agent>[0]);
@@ -55,7 +57,25 @@ export class Client {
     return this.agent.get(path);
   }
   post(path: string, body?: object) {
-    return this.agent.post(path).set('x-csrf-token', this.csrf).send(body);
+    return this.agent.post(path).set('x-csrf-token', this.csrf).send(this.withAssignee(path, body));
+  }
+
+  /**
+   * Task ve Sub-task atanansız açılamaz (ADR-176). Eski testler atananı hiç vermediği için
+   * `assigneeIds` hiç verilmemişse oturum sahibi eklenir; kuralı sınayan testler `[]` gönderir.
+   */
+  private withAssignee(path: string, body?: object): object | undefined {
+    const b = body as { type?: string; assigneeIds?: unknown } | undefined;
+    if (
+      this.userId &&
+      b &&
+      /\/lists\/[^/]+\/items$/.test(path) &&
+      (b.type === 'TASK' || b.type === 'SUBTASK' || b.type === 'BUG') &&
+      b.assigneeIds === undefined
+    ) {
+      return { ...b, assigneeIds: [this.userId] };
+    }
+    return body;
   }
   patch(path: string, body?: object) {
     return this.agent.patch(path).set('x-csrf-token', this.csrf).send(body);
@@ -123,6 +143,7 @@ export async function setupOwner(
     })
     .expect(201);
   const me = res.body as MeResponse;
+  owner.userId = me.user.id;
   const workspaceId = me.workspaces[0]!.id;
   // Salt okuma senaryoları için testlere özel Proje rolü (eski Stakeholder karşılığı, ADR-152).
   await ctx.prisma.role.create({
@@ -195,6 +216,7 @@ export async function inviteAndAccept(
       locale: 'tr',
     })
     .expect(200);
+  client.userId = (await ctx.prisma.user.findUniqueOrThrow({ where: { email: person.email } })).id;
   if (role === 'ADMIN' || role === 'OWNER') {
     const promoted = await ctx.prisma.role.findFirstOrThrow({
       where: { workspaceId, scope: 'WORKSPACE', key: role },

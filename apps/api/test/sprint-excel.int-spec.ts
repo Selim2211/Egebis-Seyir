@@ -82,7 +82,7 @@ describe('Sprint Excel dışa/içe aktarma (gerçek veritabanı)', () => {
       await owner
         .post(api(`/spaces/${mob.id}/sprints`), {
           name: 'Sprint 1',
-          goal: 'Ödeme akışı',
+          goal: 'Ödeme akışı — ekip bu sprintte kapsamı uçtan uca teslim edip demoya hazır hale getirecek',
           startDate: '2026-10-05',
           endDate: '2026-10-16',
         })
@@ -107,7 +107,7 @@ describe('Sprint Excel dışa/içe aktarma (gerçek veritabanı)', () => {
     );
     expect(info).toMatchObject({
       Name: 'Sprint 1',
-      Goal: 'Ödeme akışı',
+      Goal: 'Ödeme akışı — ekip bu sprintte kapsamı uçtan uca teslim edip demoya hazır hale getirecek',
       'Start date': '2026-10-05',
       'End date': '2026-10-16',
     });
@@ -141,7 +141,11 @@ describe('Sprint Excel dışa/içe aktarma (gerçek veritabanı)', () => {
 
     const detail = (await owner.get(api(`/sprints/${done.sprintId}`)).expect(200))
       .body as SprintDetail;
-    expect(detail.sprint).toMatchObject({ name: 'Sprint 1', goal: 'Ödeme akışı', itemCount: 2 });
+    expect(detail.sprint).toMatchObject({
+      name: 'Sprint 1',
+      goal: 'Ödeme akışı — ekip bu sprintte kapsamı uçtan uca teslim edip demoya hazır hale getirecek',
+      itemCount: 2,
+    });
     const titles = detail.items.map((i) => i.title).sort();
     expect(titles).toEqual(['Kartla ödeme', 'Servis']);
     const story = detail.items.find((i) => i.title === 'Kartla ödeme')!;

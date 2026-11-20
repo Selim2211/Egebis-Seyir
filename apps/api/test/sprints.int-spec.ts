@@ -42,7 +42,7 @@ describe('Sprint ve Product Backlog (gerçek veritabanı)', () => {
       await owner
         .post(api(`/spaces/${spaceId}/sprints`), {
           name: 'Sprint 1',
-          goal: 'Giriş akışı',
+          goal: 'Giriş akışı — ekip bu sprintte kapsamı uçtan uca teslim edip demoya hazır hale getirecek',
           startDate: '2026-10-05',
           endDate: '2026-10-16',
           ...body,
@@ -78,7 +78,7 @@ describe('Sprint ve Product Backlog (gerçek veritabanı)', () => {
       expect(list.sprints).toHaveLength(1);
       expect(list.sprints[0]).toMatchObject({
         name: 'Sprint 1',
-        goal: 'Giriş akışı',
+        goal: 'Giriş akışı — ekip bu sprintte kapsamı uçtan uca teslim edip demoya hazır hale getirecek',
         status: 'PLANNED',
         capacityNote: '2 kişi, 1 izinli',
         startDate: '2026-10-05',
@@ -170,7 +170,11 @@ describe('Sprint ve Product Backlog (gerçek veritabanı)', () => {
 
       const dates = await owner.patch(api(`/sprints/${id}`), { endDate: '2026-10-30' }).expect(409);
       expect(dates.body).toEqual({ code: 'SPRINT_DATES_LOCKED' });
-      await owner.patch(api(`/sprints/${id}`), { goal: 'Yeni hedef' }).expect(204);
+      await owner
+        .patch(api(`/sprints/${id}`), {
+          goal: 'Yeni hedef — ekip bu sprintte kapsamı uçtan uca teslim edip demoya hazır hale getirecek',
+        })
+        .expect(204);
     });
 
     it('Space başına tek aktif sprint veritabanında garanti edilir (brief §6.1.1)', async () => {

@@ -98,7 +98,7 @@ describe('Otomasyonlar (gerçek veritabanı)', () => {
     await owner.patch(api(`/items/${id}`), { statusId: s.statuses['İncelemede'] }).expect(204);
     const after = await item(id);
     expect(after.priority).toBe('HIGH');
-    expect(after.assignees.map((a) => a.userId)).toEqual([elifId]);
+    expect(after.assignees.map((a) => a.userId)).toContain(elifId);
     expect(after.children.map((c) => c.title)).toEqual(['Kod incelemesi yap']);
 
     const log = (await runs(s.id, created.id)).runs;

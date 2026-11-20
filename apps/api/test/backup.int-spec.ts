@@ -110,7 +110,7 @@ describe('Space/Sprint yedek ve geri yükleme (gerçek veritabanı)', () => {
       await owner
         .post(api(`/spaces/${mob.id}/sprints`), {
           name: 'Sprint 1',
-          goal: 'Ödeme',
+          goal: 'Ödeme — ekip bu sprintte kapsamı uçtan uca teslim edip demoya hazır hale getirecek',
           startDate: '2026-10-05',
           endDate: '2026-10-16',
         })
@@ -258,7 +258,11 @@ describe('Space/Sprint yedek ve geri yükleme (gerçek veritabanı)', () => {
     expect(res.sprintId).not.toBeNull();
     const restored = (await owner.get(api(`/sprints/${res.sprintId}`)).expect(200))
       .body as SprintDetail;
-    expect(restored.sprint).toMatchObject({ name: 'Sprint 1', goal: 'Ödeme', status: 'PLANNED' });
+    expect(restored.sprint).toMatchObject({
+      name: 'Sprint 1',
+      goal: 'Ödeme — ekip bu sprintte kapsamı uçtan uca teslim edip demoya hazır hale getirecek',
+      status: 'PLANNED',
+    });
     expect(restored.items.map((i) => [i.key.startsWith('IOS-'), i.title])).toEqual([
       [true, 'Kartla ödeme'],
     ]);

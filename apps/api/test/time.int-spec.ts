@@ -211,7 +211,8 @@ describe('Zaman takibi (gerçek veritabanı)', () => {
       await elif.get(api(`/spaces/${hidden.id}/timesheet`)).expect(404);
 
       await owner.post(api(`/spaces/${hidden.id}/archive`), {}).expect(204);
-      await log(task.id, { day: TODAY, minutes: 10 }).expect(409);
+      // Arşivde iş öğeleri canlı tablolardan kalkar (ADR-176).
+      await log(task.id, { day: TODAY, minutes: 10 }).expect(404);
     });
   });
 });

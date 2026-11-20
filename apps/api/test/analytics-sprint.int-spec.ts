@@ -55,7 +55,7 @@ describe('Analiz: sprint derinliği (gerçek veritabanı)', { timeout: 60_000 },
         await owner
           .post(api(`/spaces/${spaceId}/sprints`), {
             name,
-            goal: 'Hedef',
+            goal: 'Hedef — ekip bu sprintte kapsamı uçtan uca teslim edip demoya hazır hale getirecek',
             startDate: new Date(Date.now() + from * 86_400_000).toISOString().slice(0, 10),
             endDate: new Date(Date.now() + to * 86_400_000).toISOString().slice(0, 10),
           })

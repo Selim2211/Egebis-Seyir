@@ -60,13 +60,12 @@ describe('DoD/DoR ve Sprint Review (gerçek veritabanı)', () => {
   describe('Definition of Done (brief §6.3, ADR-065)', () => {
     it('Space maddeleri ayarlanır; Task detayında işaretsiz görünür, Epic için boştur', async () => {
       const s = await space();
-      await owner.patch(api(`/spaces/${s.id}`), { dodItems: DOD, dorItems: DOR }).expect(204);
+      await owner.patch(api(`/spaces/${s.id}`), { dodItems: DOD }).expect(204);
       const story = await item(s.listId, { type: 'TASK', title: 'A' });
       const task = await item(s.listId, { type: 'EPIC', title: 'B' });
 
       expect((await detail(story.id)).readiness).toEqual({
         dod: DOD.map((text) => ({ text, checked: false })),
-        dor: DOR.map((text) => ({ text, checked: false })),
         dodEnforced: false,
       });
       expect((await detail(task.id)).readiness.dod).toEqual([]);
@@ -76,7 +75,7 @@ describe('DoD/DoR ve Sprint Review (gerçek veritabanı)', () => {
       const s = await space();
       await owner.patch(api(`/spaces/${s.id}`), { dodItems: ['a', 'a'] }).expect(400);
       await owner.patch(api(`/spaces/${s.id}`), { dodItems: [' '] }).expect(400);
-      await owner.patch(api(`/spaces/${s.id}`), { dorItems: ['x'.repeat(201)] }).expect(400);
+      await owner.patch(api(`/spaces/${s.id}`), { dodItems: ['x'.repeat(201)] }).expect(400);
       await owner
         .patch(api(`/spaces/${s.id}`), { dodItems: Array.from({ length: 21 }, (_, i) => `m${i}`) })
         .expect(400);
@@ -156,53 +155,19 @@ describe('DoD/DoR ve Sprint Review (gerçek veritabanı)', () => {
     });
   });
 
-  describe('Definition of Ready (brief §6.3)', () => {
-    it('Backlog satırları DoR durumunu taşır; madde yoksa null', async () => {
+  describe('Definition of Ready kaldırıldı (ADR-176)', () => {
+    it('DoR alanı yok sayılır, işaret ucu yoktur; Backlog satırı ve sprint özeti DoR taşımaz', async () => {
       const s = await space();
       const a = await item(s.listId, { type: 'TASK', title: 'A' });
-      const t = await item(s.listId, { type: 'TASK', title: 'T' });
-      // Bug'lar Backlog'da listelenmez (ADR-135); kendi sekmelerinde yönetilir.
-      const bug = await item(s.listId, { type: 'BUG', title: 'Hata' });
-      const first = (await backlog(s.id)).items;
-      expect(first.map((i) => i.dor)).toEqual([null, null]);
-      expect(first.some((i) => i.id === bug.id)).toBe(false);
-
       await owner.patch(api(`/spaces/${s.id}`), { dorItems: DOR }).expect(204);
-      await owner.put(api(`/items/${a.id}/dor`), { checked: [DOR[0]!, DOR[1]!] }).expect(204);
-      const rows = (await backlog(s.id)).items;
-      expect(rows.find((r) => r.id === a.id)!.dor).toEqual({ checked: 2, total: 3 });
-      expect(rows.find((r) => r.id === t.id)!.dor).toEqual({ checked: 0, total: 3 });
-    });
-  });
-
-  describe('sprint özeti (DoR)', () => {
-    it('hazır olmayan Task sayısını verir', async () => {
-      const s = await space();
-      await owner.patch(api(`/spaces/${s.id}`), { dorItems: DOR }).expect(204);
-      const a = await item(s.listId, { type: 'TASK', title: 'A' });
-      const b = await item(s.listId, { type: 'TASK', title: 'B' });
-      const { id } = (
-        await owner
-          .post(api(`/spaces/${s.id}/sprints`), {
-            name: 'Sprint 1',
-            startDate: '2026-10-05',
-            endDate: '2026-10-16',
-          })
-          .expect(201)
-      ).body as Created;
-      await owner
-        .post(api(`/spaces/${s.id}/backlog/move`), { itemIds: [a.id, b.id], sprintId: id })
-        .expect(204);
-      const count = async () =>
-        (
-          (await owner.get(api(`/spaces/${s.id}/sprints`)).expect(200)).body as {
-            sprints: Array<{ notReadyCount: number }>;
-          }
-        ).sprints[0]!.notReadyCount;
-
-      expect(await count()).toBe(2);
-      await owner.put(api(`/items/${a.id}/dor`), { checked: DOR }).expect(204);
-      expect(await count()).toBe(1);
+      await owner.put(api(`/items/${a.id}/dor`), { checked: DOR }).expect(404);
+      const row = (await backlog(s.id)).items.find((r) => r.id === a.id)!;
+      expect('dor' in row).toBe(false);
+      expect('dor' in (await detail(a.id)).readiness).toBe(false);
+      const { sprints } = (await owner.get(api(`/spaces/${s.id}/sprints`)).expect(200)).body as {
+        sprints: object[];
+      };
+      for (const sprint of sprints) expect('notReadyCount' in sprint).toBe(false);
     });
   });
 
@@ -216,7 +181,7 @@ describe('DoD/DoR ve Sprint Review (gerçek veritabanı)', () => {
         await owner
           .post(api(`/spaces/${s.id}/sprints`), {
             name: 'Sprint 1',
-            goal: 'Hedef',
+            goal: 'Hedef — ekip bu sprintte kapsamı uçtan uca teslim edip demoya hazır hale getirecek',
             startDate: '2026-10-05',
             endDate: '2026-10-16',
           })

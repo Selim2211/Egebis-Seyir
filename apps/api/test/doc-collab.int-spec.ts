@@ -227,8 +227,9 @@ describe('Doküman bağlantıları ve yorumları (gerçek veritabanı)', () => {
       const s = await space();
       const d = await doc(s.id);
       await owner.post(api(`/spaces/${s.id}/archive`), {}).expect(204);
-      await owner.post(api(`/docs/${d.id}/comments`), { body: text('x') }).expect(409);
-      await owner.get(api(`/docs/${d.id}/comments`)).expect(200);
+      // Arşivlenen Projenin içeriği sıkıştırılıp canlı tablolardan kalkar (ADR-176): sayfa yoktur.
+      await owner.post(api(`/docs/${d.id}/comments`), { body: text('x') }).expect(404);
+      await owner.get(api(`/docs/${d.id}/comments`)).expect(404);
     });
   });
 });

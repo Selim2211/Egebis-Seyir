@@ -372,7 +372,8 @@ describe('Doküman sayfaları (gerçek veritabanı)', () => {
       const { id } = await doc(s.id, { title: 'Not' });
       await owner.post(api(`/spaces/${s.id}/archive`), {}).expect(204);
       await owner.post(api(`/spaces/${s.id}/docs`), { title: 'Y' }).expect(409);
-      await save(id, { revision: 1, title: 'X' }).expect(409);
+      // Arşivde sayfalar canlı tablolardan kalkar (ADR-176).
+      await save(id, { revision: 1, title: 'X' }).expect(404);
       await owner.get(api(`/spaces/${s.id}/docs`)).expect(200);
     });
   });

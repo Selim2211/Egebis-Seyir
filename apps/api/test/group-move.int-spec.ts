@@ -131,7 +131,10 @@ describe("Gruplama, Epic'e dönüştürme ve Space'ler arası taşıma", () => {
   it('uygun olmayan öğe varsa hiçbiri taşınmaz; Epic olmayan hedef ve başka Space reddedilir', async () => {
     const s = await space('MOB');
     const other = await space('OTH');
-    const epic = await item(s.listId, { type: 'EPIC', title: 'Hedef' });
+    const epic = await item(s.listId, {
+      type: 'EPIC',
+      title: 'Hedef — ekip bu sprintte kapsamı uçtan uca teslim edip demoya hazır hale getirecek',
+    });
     const task = await item(s.listId, { type: 'TASK', title: 'İş' });
     const parent = await item(s.listId, { type: 'TASK', title: 'Üst' });
     const sub = await item(s.listId, { type: 'SUBTASK', title: 'Alt', parentId: parent.id });
@@ -147,7 +150,10 @@ describe("Gruplama, Epic'e dönüştürme ve Space'ler arası taşıma", () => {
 
   it('yazma yetkisi olmayan kullanıcı gruplayamaz', async () => {
     const s = await space('MOB');
-    const epic = await item(s.listId, { type: 'EPIC', title: 'Hedef' });
+    const epic = await item(s.listId, {
+      type: 'EPIC',
+      title: 'Hedef — ekip bu sprintte kapsamı uçtan uca teslim edip demoya hazır hale getirecek',
+    });
     const task = await item(s.listId, { type: 'TASK', title: 'İş' });
     const elif = await inviteAndAccept(ctx, owner, ws, ELIF);
     await group(s.id, [task.id], epic.id, elif).expect(403);
@@ -212,7 +218,10 @@ describe("Gruplama, Epic'e dönüştürme ve Space'ler arası taşıma", () => {
     const b = await space('WEB');
     const s1 = await sprint(a.id, 'Sprint 1');
     const s2 = await sprint(a.id, 'Sprint 2');
-    const epic = await item(a.listId, { type: 'EPIC', title: 'Hedef' });
+    const epic = await item(a.listId, {
+      type: 'EPIC',
+      title: 'Hedef — ekip bu sprintte kapsamı uçtan uca teslim edip demoya hazır hale getirecek',
+    });
     const t1 = await item(a.listId, { type: 'TASK', title: 'T1', parentId: epic.id });
     const t2 = await item(a.listId, { type: 'TASK', title: 'T2', parentId: epic.id });
     await toSprint(a.id, [t1.id], s1.id);
@@ -232,14 +241,17 @@ describe("Gruplama, Epic'e dönüştürme ve Space'ler arası taşıma", () => {
       await owner
         .post(api(`/spaces/${b.id}/sprints`), {
           name: 'Hedef Aktif',
-          goal: 'Hedef',
+          goal: 'Hedef — ekip bu sprintte kapsamı uçtan uca teslim edip demoya hazır hale getirecek',
           startDate: '2026-10-05',
           endDate: '2026-10-16',
         })
         .expect(201)
     ).body as Created;
     await owner.post(api(`/sprints/${active.id}/start`), {}).expect(204);
-    const epic = await item(a.listId, { type: 'EPIC', title: 'Hedef' });
+    const epic = await item(a.listId, {
+      type: 'EPIC',
+      title: 'Hedef — ekip bu sprintte kapsamı uçtan uca teslim edip demoya hazır hale getirecek',
+    });
     const t1 = await item(a.listId, { type: 'TASK', title: 'T1', parentId: epic.id });
     const t2 = await item(a.listId, { type: 'TASK', title: 'T2', parentId: epic.id });
     await toSprint(a.id, [t1.id, t2.id], s1.id);

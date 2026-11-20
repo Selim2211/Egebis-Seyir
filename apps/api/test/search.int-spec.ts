@@ -169,6 +169,8 @@ describe('Global arama ve Benim işlerim (gerçek veritabanı)', () => {
       const noDue = await create(s.listId, { type: 'TASK', title: 'Tarihsiz' });
       await owner.patch(api(`/items/${noDue.id}`), { dueDate: null }).expect(204);
 
+      // Owner'a otomatik atananlar kaldırılır: "atanan" listesi yalnızca başkasına atananı sınar.
+      await ctx.prisma.workItemAssignee.deleteMany({ where: { userId: owner.userId! } });
       // Oluşturduklarım: owner'ın açtıkları (tamamlanan hariç), bitiş tarihi yakın olan önce.
       expect(await myWork('created')).toEqual([mine.key, 'MOB-4', 'MOB-2']);
       expect(await myWork('created', owner, true)).toContain('MOB-3');

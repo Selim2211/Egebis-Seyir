@@ -151,7 +151,7 @@ describe('Şablonlar (gerçek veritabanı)', () => {
       await owner
         .post(api(`/spaces/${s.id}/sprints`), {
           name: 'Sprint 1',
-          goal: 'Ödeme akışı',
+          goal: 'Ödeme akışı — ekip bu sprintte kapsamı uçtan uca teslim edip demoya hazır hale getirecek',
           startDate: '2026-11-02',
           endDate: '2026-11-15',
         })
@@ -167,7 +167,9 @@ describe('Şablonlar (gerçek veritabanı)', () => {
     ).body as Created;
     const row = await ctx.prisma.sprint.findUniqueOrThrow({ where: { id: made.id } });
     expect(row.name).toBe('Sprint 2');
-    expect(row.goal).toBe('Ödeme akışı');
+    expect(row.goal).toBe(
+      'Ödeme akışı — ekip bu sprintte kapsamı uçtan uca teslim edip demoya hazır hale getirecek',
+    );
     expect(row.startDate.toISOString().slice(0, 10)).toBe('2026-11-16');
     expect(row.endDate.toISOString().slice(0, 10)).toBe('2026-11-29');
     await apply(s.id, tpl.id, { title: 'Sprint 3' }).expect(422);

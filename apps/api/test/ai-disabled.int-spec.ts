@@ -1,5 +1,6 @@
 import type { Created } from '@scrum/shared';
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
+import { TicketConfigService } from '../src/modules/tickets/ticket-config.service';
 import { Client, createTestApp, resetState, setupOwner, type TestContext } from './helpers';
 
 describe('Yapay zekâ kapalıyken (anahtar yok)', () => {
@@ -9,6 +10,13 @@ describe('Yapay zekâ kapalıyken (anahtar yok)', () => {
 
   beforeAll(async () => {
     ctx = await createTestApp();
+    // Geliştirici .env'indeki yedek sağlayıcı (Groq) bu testi etkilemesin: anahtar yok sayılır.
+    const cfg = ctx.app.get(TicketConfigService);
+    const real = cfg.effective.bind(cfg);
+    vi.spyOn(cfg, 'effective').mockImplementation(async (workspaceId) => {
+      const runtime = await real(workspaceId);
+      return { ...runtime, ai: { ...runtime.ai, key: null } };
+    });
     await resetState(ctx);
     ({ owner, workspaceId: ws } = await setupOwner(ctx));
   });
@@ -21,6 +29,7 @@ describe('Yapay zekâ kapalıyken (anahtar yok)', () => {
     expect((await owner.get(api('/ai/status')).expect(200)).body).toEqual({
       enabled: false,
       estimate: { enabled: true, minSentences: 5 },
+      sprintGoal: { enabled: true },
     });
     const space = (
       await owner.post(api('/spaces'), { name: 'Mobil', key: 'MOB', color: '#7C3AED' }).expect(201)

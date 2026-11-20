@@ -37,12 +37,39 @@ describe('Üye çıkarmada iş devri (ADR-153) ve yükleme sınırları (ADR-154
   };
   const join = (spaceId: string, userId: string, role: string) =>
     owner.put(api(`/spaces/${spaceId}/members/${userId}`), { role }).expect(204);
-  const task = async (listId: string, assigneeIds: string[], title = 'İş') =>
-    (
+  const task = async (listId: string, assigneeIds: string[], title = 'İş') => {
+    // Atanansız Task API ile açılamaz (ADR-176): önce atanır, sonra atananlar kaldırılır.
+    const made = (
       await owner
-        .post(api(`/lists/${listId}/items`), { type: 'TASK', title, assigneeIds })
+        .post(api(`/lists/${listId}/items`), {
+          type: 'TASK',
+          title,
+          ...(assigneeIds.length > 0 ? { assigneeIds } : {}),
+        })
         .expect(201)
     ).body as CreatedItem;
+    if (assigneeIds.length === 0) {
+      await ctx.prisma.workItemAssignee.deleteMany({ where: { workItemId: made.id } });
+    }
+    return made;
+  };
+  /** space.settings yetkili ama Scrum Master olmayan özel Proje rolü (Proje Yöneticisi eşdeğeri). */
+  const leadRole = async () => {
+    const workspaceId = ws;
+    await ctx.prisma.role.upsert({
+      where: { workspaceId_scope_key: { workspaceId, scope: 'SPACE', key: 'LEAD2' } },
+      update: {},
+      create: {
+        workspaceId,
+        scope: 'SPACE',
+        key: 'LEAD2',
+        name: 'Yardımcı yönetici',
+        isSystem: false,
+        permissions: ['space.view', 'space.settings'],
+      },
+    });
+    return 'LEAD2';
+  };
   const assignees = async (itemId: string) =>
     (await ctx.prisma.workItemAssignee.findMany({ where: { workItemId: itemId } })).map(
       (a) => a.userId,
@@ -120,8 +147,9 @@ describe('Üye çıkarmada iş devri (ADR-153) ve yükleme sınırları (ADR-154
       await inviteAndAccept(ctx, owner, ws, MEHMET, 'MEMBER', []);
       const elif = await idOf(ELIF.email);
       const mehmet = await idOf(MEHMET.email);
+      // Projede tek Scrum Master olur (ADR-176): Elif SM, Mehmet ayarlar yetkili özel rolde.
       await join(s.id, elif, 'PROJECT_MANAGER');
-      await join(s.id, mehmet, 'PROJECT_MANAGER');
+      await join(s.id, mehmet, await leadRole());
 
       const res = await elifClient.delete(api(`/spaces/${s.id}/members/${mehmet}`)).expect(403);
       expect(res.body).toEqual({ code: 'MANAGER_REMOVAL_SUPER_ADMIN' });
@@ -134,7 +162,8 @@ describe('Üye çıkarmada iş devri (ADR-153) ve yükleme sınırları (ADR-154
       await inviteAndAccept(ctx, owner, ws, MEHMET, 'MEMBER', []);
       const elif = await idOf(ELIF.email);
       const mehmet = await idOf(MEHMET.email);
-      await join(s.id, elif, 'PROJECT_MANAGER');
+      // Owner projeyi açan ilk Scrum Master'dır; Elif ayarlar yetkili özel rolde.
+      await join(s.id, elif, await leadRole());
       await join(s.id, mehmet, 'PROJECT_MEMBER');
       const open = await task(s.listId, [mehmet]);
 
