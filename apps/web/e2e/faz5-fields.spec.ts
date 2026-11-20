@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { ensureOwner, login, OWNER } from './accounts';
+import { openSection } from './settings-sections';
 
 /** Faz 5.4: özel alanlar: tanımla, işte değer gir, Table'da sütun olarak göster. */
 test.describe.serial('Özel alanlar', () => {
@@ -33,6 +34,7 @@ test.describe.serial('Özel alanlar', () => {
 
     // Alanları tanımla: bir metin, bir liste.
     await page.goto(`/spaces/${spaceId}/settings`);
+    await openSection(page, 'Özel alanlar');
     await page.getByRole('textbox', { name: 'Yeni alan adı' }).fill('Müşteri');
     await page.getByRole('button', { name: 'Alan ekle' }).click();
     await expect(page.getByRole('textbox', { name: /^“Müşteri” alan adı$/ })).toBeVisible();

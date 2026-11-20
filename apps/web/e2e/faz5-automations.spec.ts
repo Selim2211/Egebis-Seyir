@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { ensureOwner, login, OWNER } from './accounts';
+import { openSection } from './settings-sections';
 
 /** Faz 5.6: otomasyonlar: kural tanımla, olay tetikler, çalışma günlüğü görünür. */
 test.describe.serial('Otomasyonlar', () => {
@@ -33,6 +34,7 @@ test.describe.serial('Otomasyonlar', () => {
 
     // Kural: "İncelemede" durumuna geçince öncelik Yüksek olsun.
     await page.goto(`/spaces/${spaceId}/settings`);
+    await openSection(page, 'Otomasyonlar');
     await page.getByRole('button', { name: 'Otomasyon ekle' }).click();
     const form = page.getByRole('dialog', { name: 'Yeni otomasyon' });
     await form.getByLabel('Ad', { exact: true }).fill('İnceleme önceliği');
@@ -53,6 +55,7 @@ test.describe.serial('Otomasyonlar', () => {
 
     // Çalışma günlüğü.
     await page.goto(`/spaces/${spaceId}/settings`);
+    await openSection(page, 'Otomasyonlar');
     await page.getByRole('button', { name: '“İnceleme önceliği” çalışma günlüğü' }).click();
     await expect(page.getByText('Çalıştı')).toBeVisible();
     await expect(page.getByText('OTM-1', { exact: true })).toBeVisible();

@@ -1,6 +1,7 @@
 import { createServer, type Server } from 'node:http';
 import { expect, test } from '@playwright/test';
 import { ensureOwner, login, OWNER } from './accounts';
+import { openSection } from './settings-sections';
 
 /** Faz 6.2/6.3: webhook ekle, test gönder, teslimat günlüğünde gör. */
 test.describe.serial('Webhook’lar', () => {
@@ -43,6 +44,7 @@ test.describe.serial('Webhook’lar', () => {
     const spaceId = /spaces\/([^/?]+)/.exec(page.url())![1]!;
 
     await page.goto(`/spaces/${spaceId}/settings`);
+    await openSection(page, 'Webhook’lar ve sohbet bildirimleri');
     await page.getByLabel('Webhook adı').fill('Ekip kanalı');
     await page.getByLabel('Webhook adresi').fill(url);
     await page.getByRole('button', { name: 'Webhook ekle' }).click();

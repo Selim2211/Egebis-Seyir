@@ -57,7 +57,11 @@ test.describe.serial('Backlog ve sprint', () => {
     await page.getByRole('button', { name: 'Sprint oluştur' }).click();
     const dialog = page.getByRole('dialog', { name: 'Yeni sprint' });
     await expect(dialog.getByLabel('Ad')).toHaveValue('Sprint 1');
-    await dialog.getByLabel('Sprint hedefi').fill('Giriş akışı tamamlansın');
+    await dialog
+      .getByLabel('Sprint hedefi')
+      .fill(
+        'Giriş akışı tamamlansın — kullanıcılar uçtan uca akışı sorunsuz tamamlayabilsin ve geri bildirim versin',
+      );
     await dialog.getByRole('button', { name: 'Sprint oluştur' }).click();
 
     const sprint = page.getByRole('region', { name: 'Sprint 1' });

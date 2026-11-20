@@ -62,7 +62,11 @@ test.describe.serial('New menüsü', () => {
 
     const dialog = page.getByRole('dialog', { name: 'Yeni sprint' });
     await expect(dialog.getByLabel('Ad')).toHaveValue('Sprint 1');
-    await dialog.getByLabel('Sprint hedefi').fill('Menüden açıldı');
+    await dialog
+      .getByLabel('Sprint hedefi')
+      .fill(
+        'Menüden açıldı — kullanıcılar uçtan uca akışı sorunsuz tamamlayabilsin ve geri bildirim versin',
+      );
     await dialog.getByRole('button', { name: 'Sprint oluştur' }).click();
 
     await expect(page).toHaveURL(/\/backlog/);

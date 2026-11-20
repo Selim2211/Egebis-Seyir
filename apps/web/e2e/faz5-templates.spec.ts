@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { ensureOwner, login, OWNER } from './accounts';
+import { openSection } from './settings-sections';
 
 /** Faz 5.5: şablonlar: iş şablonundan iş, Space şablonundan Space. */
 test.describe.serial('Şablonlar', () => {
@@ -40,6 +41,7 @@ test.describe.serial('Şablonlar', () => {
 
     // Ayarlarda listelenir.
     await page.goto(`/spaces/${spaceId}/settings`);
+    await openSection(page, 'Şablonlar');
     await expect(page.getByText('Sürüm şablonu')).toBeVisible();
 
     // List sayfasında şablondan iş eklenir.
@@ -55,6 +57,7 @@ test.describe.serial('Şablonlar', () => {
     await login(page, OWNER.email, OWNER.password);
     await page.getByRole('complementary').getByRole('link', { name: 'Şablon Testi' }).click();
     await page.getByRole('link', { name: 'Proje ayarları' }).click();
+    await openSection(page, 'Proje şablonları');
     await page.getByRole('textbox', { name: 'Proje şablonu adı' }).fill('Ekip şablonu');
     await page.getByRole('button', { name: 'Bu Projeyi şablon yap' }).click();
     await expect(page.getByText('Şablon kaydedildi.')).toBeVisible();

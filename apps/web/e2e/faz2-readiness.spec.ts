@@ -1,8 +1,8 @@
 import { expect, type Page, test } from '@playwright/test';
 import { ensureOwner, login, OWNER } from './accounts';
 
-/** Faz 2.4 akışı: DoD/DoR maddeleri, Done uyarısı/zorunluluğu, Sprint Review ve demo notları. */
-test.describe.serial('DoD, DoR ve Sprint Review', () => {
+/** Faz 2.4 akışı: DoD maddeleri (DoR kaldırıldı, ADR-176), Done uyarısı/zorunluluğu, Sprint Review ve demo notları. */
+test.describe.serial('DoD ve Sprint Review', () => {
   test.beforeAll(async ({ request }) => {
     await ensureOwner(request);
   });
@@ -24,7 +24,7 @@ test.describe.serial('DoD, DoR ve Sprint Review', () => {
     await page.getByRole('link', { name: 'Görevler' }).first().click();
   }
 
-  test('Proje, DoD/DoR maddeleri ve üç Task hazırlanır', async ({ page }) => {
+  test('Proje, DoD maddeleri ve üç Task hazırlanır', async ({ page }) => {
     await sidebar(page).getByRole('button', { name: 'Proje oluştur' }).first().click();
     const dialog = page.getByRole('dialog', { name: 'Yeni Proje oluştur' });
     await dialog.getByLabel('Ad', { exact: true }).fill('Hazırlık Testi');
@@ -33,9 +33,6 @@ test.describe.serial('DoD, DoR ve Sprint Review', () => {
     await expect(page.getByRole('heading', { name: 'Hazırlık Testi' })).toBeVisible();
 
     await page.getByRole('link', { name: 'Proje ayarları' }).click();
-    await page
-      .getByLabel('Definition of Ready maddeleri')
-      .fill('Kabul kriteri yazıldı\nTahmin yapıldı');
     await page
       .getByLabel('Definition of Done maddeleri')
       .fill('Kod gözden geçirildi\nTestler geçti');
@@ -50,25 +47,6 @@ test.describe.serial('DoD, DoR ve Sprint Review', () => {
       await quick.press('Enter');
       await expect(page.getByText(`HZR-${index + 1} oluşturuldu.`)).toBeVisible();
     }
-  });
-
-  test('öğede DoR işaretlenir; Backlog rozeti güncellenir', async ({ page }) => {
-    await openSpace(page);
-    await page.getByRole('link', { name: "Backlog ve sprint'ler" }).first().click();
-    const backlog = page.getByRole('region', { name: 'Backlog', exact: true });
-    await expect(backlog.getByText('DoR 0/2')).toHaveCount(3);
-
-    await backlog.getByRole('link', { name: 'Ödeme' }).click();
-    await page.getByRole('checkbox', { name: 'Kabul kriteri yazıldı' }).check();
-    await page.getByRole('checkbox', { name: 'Tahmin yapıldı' }).check();
-    await expect(page.getByText('2/2').first()).toBeVisible();
-
-    await page.goto(page.url().replace(/\/items\/.*/, '') || '/');
-    await openSpace(page);
-    await page.getByRole('link', { name: "Backlog ve sprint'ler" }).first().click();
-    await expect(
-      page.getByRole('region', { name: 'Backlog', exact: true }).getByText('DoR 0/2'),
-    ).toHaveCount(2);
   });
 
   test('eksik DoD ile Done uyarır; DoD tamamlanınca uyarı çıkmaz', async ({ page }) => {
@@ -118,7 +96,9 @@ test.describe.serial('DoD, DoR ve Sprint Review', () => {
     await page.getByRole('link', { name: "Backlog ve sprint'ler" }).first().click();
     await page.getByRole('button', { name: 'Sprint oluştur' }).click();
     const create = page.getByRole('dialog', { name: 'Yeni sprint' });
-    await create.getByLabel('Sprint hedefi').fill('Ödeme akışı');
+    await create
+      .getByLabel('Sprint hedefi')
+      .fill('Ödeme akışını uçtan uca tamamlayıp kargo takibini müşteriye açık hale getirmek');
     await create.getByRole('button', { name: 'Sprint oluştur' }).click();
 
     const backlog = page.getByRole('region', { name: 'Backlog', exact: true });
@@ -130,7 +110,6 @@ test.describe.serial('DoD, DoR ve Sprint Review', () => {
 
     await sprint.getByRole('button', { name: 'Başlat' }).click();
     const start = page.getByRole('dialog', { name: /Sprint 1 başlatılsın mı/ });
-    await expect(start).toContainText("1 öğe Definition of Ready'ye uymuyor.");
     await start.getByRole('button', { name: 'Başlat' }).click();
     await expect(page.getByText('Sprint 1 başladı.')).toBeVisible();
 

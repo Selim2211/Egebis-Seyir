@@ -1,5 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import { ensureOwner, login, OWNER } from './accounts';
+import { openSection } from './settings-sections';
 
 /** Faz 8.5: Space yedeği şifreli alınır, yeni Space olarak geri yüklenir ya da Proje yedeğe döndürülür (ADR-173). */
 test.describe.serial('Proje yedek ve geri yükleme', () => {
@@ -39,6 +40,7 @@ test.describe.serial('Proje yedek ve geri yükleme', () => {
     await page.goto('/');
     await page.getByRole('link', { name: 'Yedek Kaynak' }).first().click();
     await page.getByRole('link', { name: 'Proje ayarları' }).click();
+    await openSection(page, 'Yedek');
     const download = page.waitForEvent('download');
     await page.getByRole('link', { name: 'Proje yedeğini indir (ZIP)' }).click();
     const file = await download;
@@ -50,8 +52,8 @@ test.describe.serial('Proje yedek ve geri yükleme', () => {
 
   test('yedekten yeni Proje geri yüklenir', async ({ page }) => {
     await page.goto('/settings/general');
-    await page.getByRole('button', { name: 'Yedekten Proje yükle…' }).click();
-    const dialog = page.getByRole('dialog', { name: 'Yedekten Proje yükle…' });
+    await page.getByRole('button', { name: 'Yedekten geri yükle…' }).click();
+    const dialog = page.getByRole('dialog', { name: 'Yedekten geri yükle…' });
     await dialog.getByLabel('Yedek dosyası (.zip)').setInputFiles(backupFile);
     await dialog.getByLabel('Yeni Proje anahtarı').fill('BKP2');
     await dialog.getByLabel(/Yeni Proje adı/).fill('Yedek Kopya');
@@ -67,8 +69,8 @@ test.describe.serial('Proje yedek ve geri yükleme', () => {
 
   test('kullanılmış anahtar anlaşılır hatayla reddedilir', async ({ page }) => {
     await page.goto('/settings/general');
-    await page.getByRole('button', { name: 'Yedekten Proje yükle…' }).click();
-    const dialog = page.getByRole('dialog', { name: 'Yedekten Proje yükle…' });
+    await page.getByRole('button', { name: 'Yedekten geri yükle…' }).click();
+    const dialog = page.getByRole('dialog', { name: 'Yedekten geri yükle…' });
     await dialog.getByLabel('Yedek dosyası (.zip)').setInputFiles(backupFile);
     await dialog.getByLabel('Yeni Proje anahtarı').fill('BKP');
     await dialog.getByRole('button', { name: 'Geri yükle' }).click();
@@ -91,6 +93,7 @@ test.describe.serial('Proje yedek ve geri yükleme', () => {
     await page.goto('/');
     await page.getByRole('link', { name: 'Yedek Kaynak' }).first().click();
     await page.getByRole('link', { name: 'Proje ayarları' }).click();
+    await openSection(page, 'Yedek');
     await page.getByRole('button', { name: 'Yedeğe geri dön' }).click();
 
     // 1) Önemli uyarı penceresi.

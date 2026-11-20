@@ -48,7 +48,7 @@ test.describe.serial('Backlog alt öğeleri', () => {
     const day = (n: number) => new Date(Date.now() + n * 864e5).toISOString().slice(0, 10);
     await call(page, 'POST', `/workspaces/${ws}/spaces/${space.id}/sprints`, {
       name: 'Sprint X',
-      goal: 'Hedef',
+      goal: 'Hedef — ekip bu sprintte kapsamı uçtan uca teslim edip demoya hazır hale getirecek',
       startDate: day(20),
       endDate: day(30),
     });

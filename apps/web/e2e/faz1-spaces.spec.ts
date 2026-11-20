@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { ensureOwner, login, OWNER } from './accounts';
+import { openSection } from './settings-sections';
 
 /** Faz 1.2 akışı: Space oluştur → Folder/List → favori → arşiv/çöp → geri getir (taslak 1, 7). */
 test.describe.serial('Proje / Folder / List', () => {
@@ -29,6 +30,7 @@ test.describe.serial('Proje / Folder / List', () => {
     await expect(page.getByRole('link', { name: 'Görevler' }).first()).toBeVisible();
 
     await page.getByRole('link', { name: 'Proje ayarları' }).click();
+    await openSection(page, 'Durumlar');
     for (const status of ['Backlog', 'Yapılacak', 'Devam ediyor', 'İncelemede', 'Tamamlandı']) {
       await expect(page.getByRole('textbox', { name: `“${status}” adı` })).toBeVisible();
     }

@@ -26,7 +26,11 @@ test.describe.serial('Retrospektif', () => {
     await page.getByRole('button', { name: 'Sprint oluştur' }).click();
     const create = page.getByRole('dialog', { name: 'Yeni sprint' });
     await create.getByLabel('Ad').fill('Sprint 1');
-    await create.getByLabel('Sprint hedefi').fill('Hedef');
+    await create
+      .getByLabel('Sprint hedefi')
+      .fill(
+        'Hedef — kullanıcılar uçtan uca akışı sorunsuz tamamlayabilsin ve geri bildirim versin',
+      );
     await create.getByRole('button', { name: 'Sprint oluştur' }).click();
     const sprint = page.getByRole('region', { name: 'Sprint 1' });
     await sprint.getByRole('button', { name: 'Başlat' }).click();

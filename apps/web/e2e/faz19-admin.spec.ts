@@ -79,7 +79,7 @@ test.describe.serial('Yönetici paneli', () => {
       `/workspaces/${ws}/spaces/${space.id}/sprints`,
       {
         name: 'Sprint Panel',
-        goal: 'Hedef',
+        goal: 'Hedef — ekip bu sprintte kapsamı uçtan uca teslim edip demoya hazır hale getirecek',
         startDate: new Date().toISOString().slice(0, 10),
         endDate: new Date(Date.now() + 9 * 86_400_000).toISOString().slice(0, 10),
       },

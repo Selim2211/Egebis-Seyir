@@ -161,7 +161,12 @@ test.describe.serial('Yönetici notları: 9 madde', () => {
       page,
       'POST',
       `/workspaces/${ws}/spaces/${ids.ALFA}/sprints`,
-      { name: 'Silinecek Sprint', goal: 'deneme', startDate: '2026-11-03', endDate: '2026-11-17' },
+      {
+        name: 'Silinecek Sprint',
+        goal: 'deneme — ekip bu sprintte kapsamı uçtan uca teslim edip demoya hazır hale getirecek',
+        startDate: '2026-11-03',
+        endDate: '2026-11-17',
+      },
     );
     expect(sp.status, JSON.stringify(sp.body)).toBe(201);
     const t = await api<{ id: string }>(

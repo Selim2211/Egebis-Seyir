@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { ensureOwner, login, OWNER } from './accounts';
+import { openSection } from './settings-sections';
 
 /** Faz 5.3: özel durum akışı: durum ekle, yeniden adlandır, sırala, sil (işler taşınır). */
 test.describe.serial('Özel durum akışı', () => {
@@ -32,6 +33,7 @@ test.describe.serial('Özel durum akışı', () => {
 
     // Yeni durum ekle: "Test" (Devam ediyor), son açık durumun arkasına girer.
     await page.goto(`/spaces/${spaceId}/settings`);
+    await openSection(page, 'Durumlar');
     await page.getByRole('textbox', { name: 'Yeni durum adı' }).fill('Test');
     await page.getByRole('button', { name: 'Durum ekle' }).click();
     const name = page.getByRole('textbox', { name: /^“Test” adı$/ });
@@ -53,6 +55,7 @@ test.describe.serial('Özel durum akışı', () => {
 
     // Backlog durumunu sil: iş "Yapılacak"a taşınır.
     await page.goto(`/spaces/${spaceId}/settings`);
+    await openSection(page, 'Durumlar');
     await page.getByRole('button', { name: '“Backlog” durumunu sil' }).click();
     const confirm = page.getByRole('alertdialog');
     await confirm.getByLabel('İşlerin taşınacağı durum').selectOption({ label: 'Yapılacak' });

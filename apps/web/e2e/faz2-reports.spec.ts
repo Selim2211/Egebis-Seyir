@@ -72,7 +72,11 @@ test.describe.skip('Raporlar', () => {
     await page.getByRole('button', { name: 'Sprint oluştur' }).click();
     const create = page.getByRole('dialog', { name: 'Yeni sprint' });
     await create.getByLabel('Ad').fill('Sprint 1');
-    await create.getByLabel('Sprint hedefi').fill('Giriş akışı');
+    await create
+      .getByLabel('Sprint hedefi')
+      .fill(
+        'Giriş akışı — kullanıcılar uçtan uca akışı sorunsuz tamamlayabilsin ve geri bildirim versin',
+      );
     await create.getByRole('button', { name: 'Sprint oluştur' }).click();
     const sprint = page.getByRole('region', { name: 'Sprint 1' });
     await expect(sprint).toBeVisible();

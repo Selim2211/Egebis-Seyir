@@ -22,7 +22,11 @@ test.describe.serial('Sprint yaşam döngüsü', () => {
     await page.getByRole('button', { name: 'Sprint oluştur' }).click();
     const dialog = page.getByRole('dialog', { name: 'Yeni sprint' });
     await dialog.getByLabel('Ad').fill(name);
-    await dialog.getByLabel('Sprint hedefi').fill(goal);
+    await dialog
+      .getByLabel('Sprint hedefi')
+      .fill(
+        `${goal} — kullanıcılar uçtan uca akışı sorunsuz tamamlayabilsin ve geri bildirim versin`,
+      );
     await dialog.getByRole('button', { name: 'Sprint oluştur' }).click();
     await expect(page.getByRole('region', { name })).toBeVisible();
   }

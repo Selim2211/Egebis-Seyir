@@ -1,5 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import { ensureOwner, login, OWNER } from './accounts';
+import { openSection } from './settings-sections';
 
 /** Yönetici 3. tur notları (ADR-168) uçtan uca: kurulum API ile, doğrulama arayüzden. */
 const PASS = 'ucuncu-tur-pass-123';
@@ -100,7 +101,7 @@ test.describe.serial('Yönetici 3. tur', () => {
     await expect(row.getByText('Kilitli', { exact: true })).toHaveCount(0);
   });
 
-  test('10, 11, 12) Proje ayarı: Product Owner/Scrum Master, gönderen listesi, silme', async ({
+  test('10, 11, 12) Proje ayarı: Product Owner/Scrum Master rolü, gönderen listesi, silme', async ({
     page,
   }) => {
     await page.goto('/login');
@@ -108,11 +109,15 @@ test.describe.serial('Yönetici 3. tur', () => {
     await expect(page.getByRole('heading', { name: /Hoş geldin/ })).toBeVisible();
     await page.goto(`/spaces/${spaceId}/settings`);
 
-    const roles = page.getByTestId('scrum-roles');
-    await roles.getByLabel('Product Owner').selectOption({ label: MEM.name });
-    await expect(page.getByText('Kaydedildi.').first()).toBeVisible();
-    await roles.getByLabel('Scrum Master').selectOption({ label: MEM.name });
+    // Roller artık üyenin rolüdür (ADR-176): Product Owner → Scrum Master.
+    await openSection(page, 'Üyeler ve Scrum rolleri');
+    const role = page.getByRole('combobox', { name: `${MEM.name} için Scrum rolü` });
+    await role.selectOption({ label: 'Product Owner' });
+    await expect(role).toHaveValue('PRODUCT_OWNER');
+    await role.selectOption({ label: 'Scrum Master' });
+    await expect(role).toHaveValue('PROJECT_MANAGER');
 
+    await openSection(page, 'Bug gönderebilecek e-posta adresleri');
     const senders = page.getByTestId('bug-senders');
     await senders.getByRole('textbox').fill('destek*@firma.com\nrapor?@firma.com\nbozuk');
     await expect(senders.getByText(/Geçersiz adres: bozuk/)).toBeVisible();
@@ -122,6 +127,7 @@ test.describe.serial('Yönetici 3. tur', () => {
     await expect(page.getByText('Gönderen listesi kaydedildi.')).toBeVisible();
 
     // Yedek yokken silme sunucuda reddedilir (uyarı toast'ı).
+    await openSection(page, 'Arşiv ve silme');
     await page.getByRole('button', { name: 'Projeyi sil' }).click();
     await expect(page.getByRole('alertdialog')).toContainText('Son 7 gün içinde yedeği alınmamış');
     await page.getByRole('alertdialog').getByRole('button', { name: 'Sil' }).click();

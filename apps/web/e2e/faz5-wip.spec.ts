@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { ensureOwner, login, OWNER } from './accounts';
+import { openSection } from './settings-sections';
 
 /** Faz 5.2: WIP limiti. Ayarlardan konur, Board sütununda sayaç olarak görünür; engellemez. */
 test.describe.serial('WIP limiti', () => {
@@ -34,6 +35,7 @@ test.describe.serial('WIP limiti', () => {
     const listUrl = page.url().split('?')[0]!;
 
     await page.goto(`/spaces/${spaceId}/settings`);
+    await openSection(page, 'Durumlar');
     const limit = page.getByRole('spinbutton', { name: '“Backlog” WIP limiti' });
     await limit.fill('1');
     await limit.press('Enter');

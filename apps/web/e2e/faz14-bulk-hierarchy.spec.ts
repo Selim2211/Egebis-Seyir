@@ -171,7 +171,7 @@ test.describe.serial('Backlog toplu hiyerarşi', () => {
     const sprint = (name: string, from: number) =>
       call<{ id: string }>(page, 'POST', `/workspaces/${ws}/spaces/${space.id}/sprints`, {
         name,
-        goal: 'Hedef',
+        goal: 'Hedef — ekip bu sprintte kapsamı uçtan uca teslim edip demoya hazır hale getirecek',
         startDate: day(from),
         endDate: day(from + 10),
       });
@@ -232,7 +232,7 @@ test.describe.serial('Backlog toplu hiyerarşi', () => {
     const sprint = (spaceId: string, name: string, from: number) =>
       call<{ id: string }>(page, 'POST', `/workspaces/${ws}/spaces/${spaceId}/sprints`, {
         name,
-        goal: 'Hedef',
+        goal: 'Hedef — ekip bu sprintte kapsamı uçtan uca teslim edip demoya hazır hale getirecek',
         startDate: day(from),
         endDate: day(from + 10),
       });
