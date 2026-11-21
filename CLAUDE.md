@@ -2,6 +2,8 @@
 
 Her oturumda önce şunları oku:
 
+- `docs/DURUM.md`: Şu anki durum, doğrulanmamış işler, ortamlar, öğrenilmiş dersler (devir notu). Her iş bitince güncelle.
+
 - `PROJECT_BRIEF.md`: NE yapıyoruz (tek doğruluk kaynağı). Kurallar §0, iş kuralları §6, fazlar §14, "bitti" tanımı §15.
 - `docs/DECISIONS.md`: NASIL yapıyoruz (ADR'ler). Yeni önemli karar = yeni ADR, kullanıcı onayıyla.
 - `docs/ARCHITECTURE.md`: Modül haritası, istek akışı, kesişen konular.
